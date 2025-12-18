@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blog.mapper.VisitStatisticsMapper">
+    <select id="selectByTypeIdAndDate" resultType="com.blog.model.entity.VisitStatistics">
+        SELECT * FROM visit_statistics
+        WHERE page_type = #{pageType}
+        <if test="pageId != null">
+            AND page_id = #{pageId}
+        </if>
+        <if test="pageId == null">
+            AND page_id IS NULL
+        </if>
+        AND DATE(statistics_date) = DATE(#{statisticsDate})
+        AND deleted = 0
+        LIMIT 1
+    </select>
+</mapper>
+
