@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blog.mapper.ArticleMapper">
+    <select id="selectHotArticles" resultType="com.blog.model.entity.Article">
+        SELECT * FROM article
+        WHERE deleted = 0 AND status = 1
+        ORDER BY view_count DESC, like_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectLatestArticles" resultType="com.blog.model.entity.Article">
+        SELECT * FROM article
+        WHERE deleted = 0 AND status = 1
+        ORDER BY published_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectByYearAndMonth" resultType="com.blog.model.entity.Article">
+        SELECT * FROM article
+        WHERE deleted = 0 AND status = 1
+        <if test="year != null">
+            AND YEAR(published_at) = #{year}
+        </if>
+        <if test="month != null">
+            AND MONTH(published_at) = #{month}
+        </if>
+        ORDER BY published_at DESC
+    </select>
+</mapper>
+
