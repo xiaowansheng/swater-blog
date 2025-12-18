@@ -1,0 +1,28 @@
+import request from './request'
+import { Role } from '@/types'
+
+export interface RoleDTO {
+  name: string
+  code: string
+}
+
+export const getRoleList = (): Promise<Role[]> => {
+  return request.get('/admin/role/list')
+}
+
+export const createRole = (data: RoleDTO): Promise<number> => {
+  return request.post('/admin/role', data)
+}
+
+export const updateRole = (id: number, data: RoleDTO): Promise<void> => {
+  return request.put(`/admin/role/${id}`, data)
+}
+
+export const deleteRole = (id: number): Promise<void> => {
+  return request.delete(`/admin/role/${id}`)
+}
+
+export const assignApis = (id: number, apiIds: number[]): Promise<void> => {
+  return request.post(`/admin/role/${id}/apis`, apiIds)
+}
+

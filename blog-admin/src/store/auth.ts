@@ -1,0 +1,48 @@
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import { User } from '@/types'
+import * as authApi from '@/api/auth'
+import { getToken, setToken, removeToken } from '@/utils/storage'
+
+interface AuthState {
+  user: User | null
+  token: string | null
+  login: (username: string, password: string) => Promise<void>
+  logout: () => Promise<void>
+  getCurrentUser: () => Promise<void>
+  isAuthenticated: () => boolean
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      token: getToken(),
+      login: async (username: string, password: string) => {
+        const { token, user } = await authApi.login({ username, password })
+        setToken(token)
+        set({ token, user })
+      },
+      logout: async () => {
+        try {
+          await authApi.logout()
+        } finally {
+          removeToken()
+          set({ token: null, user: null })
+        }
+      },
+      getCurrentUser: async () => {
+        const user = await authApi.getCurrentUser()
+        set({ user })
+      },
+      isAuthenticated: () => {
+        return !!get().token
+      },
+    }),
+    {
+      name: 'auth-storage',
+      partialize: (state) => ({ token: state.token }),
+    }
+  )
+)
+
