@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blog.mapper.FileReferenceMapper">
+    <select id="selectByFileId" resultType="com.blog.model.entity.FileReference">
+        SELECT * FROM file_reference
+        WHERE file_id = #{fileId}
+    </select>
+
+    <delete id="deleteByFileId">
+        DELETE FROM file_reference WHERE file_id = #{fileId}
+    </delete>
+
+    <delete id="deleteByRefTypeAndRefId">
+        DELETE FROM file_reference WHERE ref_type = #{refType} AND ref_id = #{refId}
+    </delete>
+</mapper>
+
