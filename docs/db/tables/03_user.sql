@@ -14,7 +14,7 @@ CREATE TABLE `user` (
   `website` VARCHAR(100) DEFAULT NULL COMMENT '个人网站',
   `introduction` VARCHAR(500) DEFAULT NULL COMMENT '个人简介',
   `role` VARCHAR(20) DEFAULT 'user' COMMENT '角色',
-  `status` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '',
+  `status` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '状态（0-禁用，1-启用）',
   `disabled` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否禁用',
   `last_login_time` DATETIME DEFAULT NULL COMMENT '最后登录时间',
   `last_login_ip` VARCHAR(50) DEFAULT NULL COMMENT '最后登录IP',

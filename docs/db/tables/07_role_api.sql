@@ -1,11 +1,9 @@
 -- 角色接口权限表
 DROP TABLE IF EXISTS `role_api`;
 CREATE TABLE `role_api` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '角色资源ID',
   `role_id` BIGINT NOT NULL COMMENT '角色ID',
   `api_id` BIGINT NOT NULL COMMENT '资源ID',
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`id`),
   UNIQUE KEY `uk_role_api` (`role_id`,`api_id`),
   KEY `idx_role_id` (`role_id`),
   KEY `idx_api_id` (`api_id`),
