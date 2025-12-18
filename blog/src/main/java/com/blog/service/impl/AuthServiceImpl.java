@@ -11,8 +11,11 @@ import com.blog.model.vo.LoginVO;
 import com.blog.model.vo.RoleVO;
 import com.blog.model.vo.UserVO;
 import com.blog.service.AuthService;
+import com.blog.service.LoginLogService;
 import com.blog.util.BeanUtil;
 import com.blog.util.PasswordUtil;
+import com.blog.util.RequestUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -29,6 +32,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private com.blog.service.RoleService roleService;
+
+    @Autowired
+    private LoginLogService loginLogService;
 
     @Override
     public LoginVO login(LoginDTO dto) {
@@ -57,6 +63,34 @@ public class AuthServiceImpl implements AuthService {
         
         user.setLastLoginTime(LocalDateTime.now());
         userMapper.updateById(user);
+        
+        try {
+            HttpServletRequest request = RequestUtil.getRequest();
+            if (request != null) {
+                String ip = RequestUtil.getClientIp(request);
+                String userAgent = RequestUtil.getUserAgent(request);
+                String device = parseDevice(userAgent);
+                String browser = parseBrowser(userAgent);
+                
+                loginLogService.recordLogin(
+                    user.getId(),
+                    ip,
+                    ip,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    userAgent,
+                    device,
+                    browser,
+                    null,
+                    null
+                );
+            }
+        } catch (Exception e) {
+        }
         
         UserVO userVO = convertToVO(user);
         
@@ -102,6 +136,49 @@ public class AuthServiceImpl implements AuthService {
             vo.setRoles(roles);
         }
         return vo;
+    }
+
+    private String parseDevice(String userAgent) {
+        if (userAgent == null || userAgent.isEmpty()) {
+            return "未知设备";
+        }
+        String ua = userAgent.toLowerCase();
+        if (ua.contains("mobile") || ua.contains("android") || ua.contains("iphone") || ua.contains("ipad")) {
+            return "移动设备";
+        }
+        if (ua.contains("windows")) {
+            return "Windows";
+        }
+        if (ua.contains("mac")) {
+            return "Mac";
+        }
+        if (ua.contains("linux")) {
+            return "Linux";
+        }
+        return "未知设备";
+    }
+
+    private String parseBrowser(String userAgent) {
+        if (userAgent == null || userAgent.isEmpty()) {
+            return "未知浏览器";
+        }
+        String ua = userAgent.toLowerCase();
+        if (ua.contains("chrome") && !ua.contains("edg")) {
+            return "Chrome";
+        }
+        if (ua.contains("firefox")) {
+            return "Firefox";
+        }
+        if (ua.contains("safari") && !ua.contains("chrome")) {
+            return "Safari";
+        }
+        if (ua.contains("edg")) {
+            return "Edge";
+        }
+        if (ua.contains("opera")) {
+            return "Opera";
+        }
+        return "未知浏览器";
     }
 }
 
