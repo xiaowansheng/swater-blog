@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blog.mapper.PageViewMapper">
+    <update id="incrementCount">
+        UPDATE page_view
+        SET count = count + 1, update_time = NOW()
+        WHERE view_type = #{viewType}
+        <if test="viewId != null">
+            AND view_id = #{viewId}
+        </if>
+        <if test="viewId == null">
+            AND view_id IS NULL
+        </if>
+        AND deleted = 0
+    </update>
+
+    <select id="selectByTypeAndId" resultType="com.blog.model.entity.PageView">
+        SELECT * FROM page_view
+        WHERE view_type = #{viewType}
+        <if test="viewId != null">
+            AND view_id = #{viewId}
+        </if>
+        <if test="viewId == null">
+            AND view_id IS NULL
+        </if>
+        AND deleted = 0
+        LIMIT 1
+    </select>
+</mapper>
+
