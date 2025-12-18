@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.blog.mapper.RoleApiMapper">
+    <select id="selectApiIdsByRoleId" resultType="java.lang.Long">
+        SELECT api_id FROM role_api
+        WHERE role_id = #{roleId}
+    </select>
+
+    <delete id="deleteByRoleId">
+        DELETE FROM role_api WHERE role_id = #{roleId}
+    </delete>
+</mapper>
+

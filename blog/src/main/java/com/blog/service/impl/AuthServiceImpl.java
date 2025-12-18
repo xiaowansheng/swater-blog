@@ -1,0 +1,107 @@
+package com.blog.service.impl;
+
+import cn.dev33.satoken.stp.StpUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.blog.exception.BusinessException;
+import com.blog.mapper.UserMapper;
+import com.blog.mapper.UserRoleMapper;
+import com.blog.model.dto.LoginDTO;
+import com.blog.model.entity.User;
+import com.blog.model.vo.LoginVO;
+import com.blog.model.vo.RoleVO;
+import com.blog.model.vo.UserVO;
+import com.blog.service.AuthService;
+import com.blog.util.BeanUtil;
+import com.blog.util.PasswordUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class AuthServiceImpl implements AuthService {
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private UserRoleMapper userRoleMapper;
+
+    @Autowired
+    private com.blog.service.RoleService roleService;
+
+    @Override
+    public LoginVO login(LoginDTO dto) {
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getUsername, dto.getUsername())
+                .eq(User::getDeleted, 0));
+        
+        if (user == null) {
+            throw new BusinessException("用户名或密码错误");
+        }
+        
+        if (user.getStatus() != null && user.getStatus() == 0) {
+            throw new BusinessException("用户已被禁用");
+        }
+        
+        if (user.getDisabled() != null && user.getDisabled() == 1) {
+            throw new BusinessException("用户已被禁用");
+        }
+        
+        if (!PasswordUtil.matches(dto.getPassword(), user.getPassword())) {
+            throw new BusinessException("用户名或密码错误");
+        }
+        
+        StpUtil.login(user.getId());
+        String token = StpUtil.getTokenValue();
+        
+        user.setLastLoginTime(LocalDateTime.now());
+        userMapper.updateById(user);
+        
+        UserVO userVO = convertToVO(user);
+        
+        LoginVO loginVO = new LoginVO();
+        loginVO.setToken(token);
+        loginVO.setUser(userVO);
+        
+        return loginVO;
+    }
+
+    @Override
+    public void logout() {
+        StpUtil.logout();
+    }
+
+    @Override
+    public UserVO getCurrentUser() {
+        if (!StpUtil.isLogin()) {
+            throw new BusinessException("未登录");
+        }
+        Long userId = StpUtil.getLoginIdAsLong();
+        User user = userMapper.selectById(userId);
+        if (user == null || user.getDeleted() == 1) {
+            throw new BusinessException("用户不存在");
+        }
+        return convertToVO(user);
+    }
+
+    @Override
+    public String refreshToken() {
+        if (!StpUtil.isLogin()) {
+            throw new BusinessException("未登录");
+        }
+        StpUtil.renewTimeout(2592000);
+        return StpUtil.getTokenValue();
+    }
+
+    private UserVO convertToVO(User user) {
+        UserVO vo = BeanUtil.copyProperties(user, UserVO.class);
+        List<Long> roleIds = userRoleMapper.selectRoleIdsByUserId(user.getId());
+        if (roleIds != null && !roleIds.isEmpty()) {
+            List<RoleVO> roles = roleService.getByIds(roleIds);
+            vo.setRoles(roles);
+        }
+        return vo;
+    }
+}
+
