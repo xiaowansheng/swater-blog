@@ -1,0 +1,18 @@
+-- 角色表
+DROP TABLE IF EXISTS `role`;
+CREATE TABLE `role` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '用户角色ID',
+  `name` VARCHAR(50) NOT NULL COMMENT '角色名称',
+  `code` VARCHAR(50) DEFAULT NULL COMMENT '角色代码',
+  `role_key` VARCHAR(50) DEFAULT NULL COMMENT '角色标签',
+  `description` VARCHAR(255) DEFAULT NULL COMMENT '角色详情介绍',
+  `status` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '状态（0-禁用，1-启用）',
+  `disabled` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否禁用',
+  `deleted` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否已删除',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_code` (`code`),
+  UNIQUE KEY `uk_role_key` (`role_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户角色表';
+

@@ -3,6 +3,7 @@
 -- Host: localhost    Database: blog
 -- ------------------------------------------------------
 -- Server version	8.4.7
+-- 完善版本：统一字符集、字段类型、添加缺失字段和索引
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;

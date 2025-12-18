@@ -1,0 +1,38 @@
+-- 留言簿表
+DROP TABLE IF EXISTS `guestbook`;
+CREATE TABLE `guestbook` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '留言ID',
+  `guestbook_key` VARCHAR(50) NOT NULL COMMENT '留言唯一标识',
+  `content` VARCHAR(1024) NOT NULL COMMENT '留言内容',
+  `images` VARCHAR(2048) DEFAULT '[]' COMMENT '图片（JSON数组）',
+  `user_id` BIGINT DEFAULT NULL COMMENT '用户ID',
+  `type` VARCHAR(20) NOT NULL COMMENT '留言类型(1登录留言2游客留言3匿名留言)',
+  `nickname` VARCHAR(30) DEFAULT NULL COMMENT '游客别名',
+  `email` VARCHAR(100) DEFAULT NULL COMMENT '游客邮箱',
+  `qq` VARCHAR(15) DEFAULT NULL COMMENT '游客QQ号',
+  `ip` VARCHAR(50) NOT NULL COMMENT 'IP地址',
+  `ip_address` VARCHAR(255) NOT NULL COMMENT 'IP地址信息',
+  `country` VARCHAR(50) DEFAULT NULL COMMENT '国家',
+  `province` VARCHAR(50) DEFAULT NULL COMMENT '省份',
+  `city` VARCHAR(50) DEFAULT NULL COMMENT '城市',
+  `latitude` DECIMAL(10,7) DEFAULT NULL COMMENT '纬度',
+  `longitude` DECIMAL(10,7) DEFAULT NULL COMMENT '经度',
+  `location_detail` VARCHAR(255) DEFAULT NULL COMMENT '详细地址',
+  `device_info` VARCHAR(255) DEFAULT NULL COMMENT '设备信息',
+  `device` VARCHAR(50) NOT NULL DEFAULT '未知设备' COMMENT '使用设备',
+  `browser` VARCHAR(50) NOT NULL DEFAULT '未知浏览器' COMMENT '使用的浏览器',
+  `point` POINT DEFAULT NULL COMMENT '坐标点',
+  `location` VARCHAR(100) DEFAULT NULL COMMENT '位置',
+  `is_visible` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否隐藏留言',
+  `review_status` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '审核状态',
+  `deleted` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否已删除',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_guestbook_key` (`guestbook_key`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_review_status` (`review_status`),
+  KEY `idx_deleted` (`deleted`),
+  CONSTRAINT `fk_guestbook_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='留言簿表';
+

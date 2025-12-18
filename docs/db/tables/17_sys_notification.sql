@@ -1,0 +1,37 @@
+-- 通知表
+DROP TABLE IF EXISTS `sys_notification`;
+CREATE TABLE `sys_notification` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '通知ID',
+  `user_id` BIGINT NOT NULL COMMENT '用户ID',
+  `type` VARCHAR(50) NOT NULL COMMENT '通知类型',
+  `title` VARCHAR(255) NOT NULL COMMENT '通知标题',
+  `content` TEXT DEFAULT NULL COMMENT '通知内容',
+  `is_read` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否已读',
+  `notice_type` VARCHAR(50) DEFAULT NULL COMMENT '通知类型（兼容字段）',
+  `channel` VARCHAR(20) DEFAULT NULL COMMENT '发送渠道',
+  `recipient` VARCHAR(255) DEFAULT NULL COMMENT '接收者标识',
+  `template_id` VARCHAR(64) DEFAULT NULL COMMENT '通知模板ID',
+  `template_params` JSON DEFAULT NULL COMMENT '模板参数',
+  `status` VARCHAR(20) DEFAULT 'PENDING' COMMENT '通知状态',
+  `send_count` INT DEFAULT '0' COMMENT '发送次数',
+  `max_retry_count` INT DEFAULT '3' COMMENT '最大重试次数',
+  `next_retry_time` DATETIME DEFAULT NULL COMMENT '下次重试时间',
+  `sent_time` DATETIME DEFAULT NULL COMMENT '发送时间',
+  `expire_time` DATETIME DEFAULT NULL COMMENT '过期时间',
+  `business_id` VARCHAR(64) DEFAULT NULL COMMENT '业务关联ID',
+  `business_type` VARCHAR(50) DEFAULT NULL COMMENT '业务类型',
+  `priority` INT DEFAULT '5' COMMENT '优先级',
+  `immediate` TINYINT(1) DEFAULT '0' COMMENT '是否立即发送',
+  `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+  `deleted` TINYINT(1) DEFAULT '0' COMMENT '逻辑删除标识',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_is_read` (`is_read`),
+  KEY `idx_type` (`type`),
+  KEY `idx_status` (`status`),
+  KEY `idx_create_time` (`create_time`),
+  CONSTRAINT `fk_notification_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统通知表';
+

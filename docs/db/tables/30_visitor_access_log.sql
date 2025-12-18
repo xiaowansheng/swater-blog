@@ -1,0 +1,38 @@
+-- 访客访问记录表
+DROP TABLE IF EXISTS `visitor_access_log`;
+CREATE TABLE `visitor_access_log` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '访问记录ID',
+  `visitor_id` BIGINT NOT NULL COMMENT '访客ID',
+  `visitor_uuid` VARCHAR(64) NOT NULL COMMENT '访客唯一标识',
+  `ip_address` VARCHAR(128) NOT NULL COMMENT 'IP地址',
+  `page_type` VARCHAR(20) NOT NULL COMMENT '页面类型',
+  `page_id` VARCHAR(64) DEFAULT NULL COMMENT '页面ID',
+  `page_url` VARCHAR(500) DEFAULT NULL COMMENT '页面URL',
+  `referer` VARCHAR(500) DEFAULT NULL COMMENT '来源页面URL',
+  `session_id` VARCHAR(64) DEFAULT NULL COMMENT '会话ID',
+  `is_new_visitor` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否为新访客',
+  `is_page_view` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '是否为页面浏览',
+  `access_time` DATETIME NOT NULL COMMENT '访问时间',
+  `traffic_source` VARCHAR(20) DEFAULT 'UNKNOWN' COMMENT '流量来源分类',
+  `referer_url` VARCHAR(500) DEFAULT NULL COMMENT '来源页面URL',
+  `search_engine` VARCHAR(50) DEFAULT NULL COMMENT '搜索引擎名称',
+  `search_keywords` VARCHAR(200) DEFAULT NULL COMMENT '搜索关键词',
+  `utm_source` VARCHAR(100) DEFAULT NULL COMMENT 'UTM来源参数',
+  `utm_medium` VARCHAR(100) DEFAULT NULL COMMENT 'UTM媒介参数',
+  `utm_campaign` VARCHAR(100) DEFAULT NULL COMMENT 'UTM活动参数',
+  `deleted` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否已删除',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_visitor_id` (`visitor_id`),
+  KEY `idx_visitor_uuid` (`visitor_uuid`),
+  KEY `idx_ip_address` (`ip_address`),
+  KEY `idx_page_type` (`page_type`),
+  KEY `idx_page_id` (`page_id`),
+  KEY `idx_access_time` (`access_time`),
+  KEY `idx_create_time` (`create_time`),
+  KEY `idx_traffic_source` (`traffic_source`),
+  KEY `idx_traffic_date` (`traffic_source`,`access_time`),
+  KEY `idx_deleted` (`deleted`),
+  CONSTRAINT `fk_access_log_visitor_id` FOREIGN KEY (`visitor_id`) REFERENCES `visitor` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='访客访问记录表';
+

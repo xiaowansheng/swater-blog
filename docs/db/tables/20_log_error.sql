@@ -1,0 +1,35 @@
+-- 异常日志表
+DROP TABLE IF EXISTS `log_error`;
+CREATE TABLE `log_error` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '异常日志ID',
+  `user_id` BIGINT DEFAULT NULL COMMENT '操作用户ID',
+  `username` VARCHAR(50) DEFAULT NULL COMMENT '用户名',
+  `exception_type` VARCHAR(255) DEFAULT NULL COMMENT '异常类型',
+  `exception_msg` TEXT DEFAULT NULL COMMENT '异常信息',
+  `stack_trace` LONGTEXT DEFAULT NULL COMMENT '堆栈信息',
+  `method` VARCHAR(10) DEFAULT NULL COMMENT '请求方法',
+  `path` VARCHAR(255) DEFAULT NULL COMMENT '请求路径',
+  `params` TEXT DEFAULT NULL COMMENT '请求参数',
+  `ip` VARCHAR(50) DEFAULT NULL COMMENT 'IP地址',
+  `ip_address` VARCHAR(255) DEFAULT NULL COMMENT 'IP地址信息',
+  `version` VARCHAR(128) DEFAULT NULL COMMENT '系统版本',
+  `request_url` VARCHAR(255) DEFAULT NULL COMMENT '请求地址',
+  `request_method` VARCHAR(10) DEFAULT NULL COMMENT '请求方法',
+  `request_param` LONGTEXT DEFAULT NULL COMMENT '请求参数',
+  `module` VARCHAR(50) DEFAULT NULL COMMENT '模块',
+  `calling_method` VARCHAR(255) DEFAULT NULL COMMENT '调用方法',
+  `error_name` VARCHAR(255) DEFAULT NULL COMMENT '异常名称',
+  `error_message` TEXT DEFAULT NULL COMMENT '异常信息',
+  `ip_source` VARCHAR(150) DEFAULT NULL COMMENT 'ip所在地',
+  `device` VARCHAR(50) DEFAULT NULL COMMENT '设备',
+  `browser` VARCHAR(50) DEFAULT NULL COMMENT '浏览器',
+  `deleted` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否已删除',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_create_time` (`create_time`),
+  KEY `idx_exception_type` (`exception_type`),
+  KEY `idx_deleted` (`deleted`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统异常错误日志表';
+
