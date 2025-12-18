@@ -1,0 +1,71 @@
+package com.blog.model.vo;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import java.math.BigDecimal;
+import java.util.List;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class CommentVO extends BaseVO {
+    private String commentKey;
+
+    private String content;
+
+    private List<String> images;
+
+    private Long postId;
+
+    private Long momentId;
+
+    private Long userId;
+
+    private String userName;
+
+    private String userNickname;
+
+    private String userAvatar;
+
+    private Long parentId;
+
+    private Long rootId;
+
+    private String type;
+
+    private String nickname;
+
+    private String email;
+
+    private String qq;
+
+    private Integer status;
+
+    private Integer isVisible;
+
+    private String ip;
+
+    private String ipAddress;
+
+    private String country;
+
+    private String province;
+
+    private String city;
+
+    private BigDecimal latitude;
+
+    private BigDecimal longitude;
+
+    private String locationDetail;
+
+    private String deviceInfo;
+
+    private String device;
+
+    private String browser;
+
+    private String location;
+
+    private List<CommentVO> replies;
+}
+
