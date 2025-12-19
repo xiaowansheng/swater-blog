@@ -33,8 +33,13 @@ export default async function CategoryPage({
     return (
       <>
         <Header />
-        <main className="container mx-auto px-4 py-8 flex-1">
-          <h1 className="text-4xl font-bold mb-8">{category.name}</h1>
+        <main className="container mx-auto px-4 py-12 flex-1">
+          <div className="mb-10">
+            <h1 className="text-5xl font-bold mb-4 gradient-text">{category.name}</h1>
+            {category.description && (
+              <p className="text-muted text-lg">{category.description}</p>
+            )}
+          </div>
           <ArticleList articles={articleList.records} />
           <Pagination
             current={articleList.current}

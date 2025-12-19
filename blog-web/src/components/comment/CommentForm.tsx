@@ -55,8 +55,18 @@ export default function CommentForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+    <form onSubmit={handleSubmit} className="space-y-5 modern-card p-8 relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-30"></div>
+      {error && (
+        <div className="p-4 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border border-red-200 dark:border-red-800 rounded-xl shadow-sm">
+          <p className="text-red-600 dark:text-red-400 text-sm font-medium flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {error}
+          </p>
+        </div>
+      )}
       <div>
         <input
           type="text"
@@ -64,7 +74,7 @@ export default function CommentForm({
           onChange={(e) => setNickname(e.target.value)}
           placeholder={t('namePlaceholder')}
           required
-          className="w-full px-4 py-2 border rounded-lg bg-background"
+          className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
         />
       </div>
       <div>
@@ -73,7 +83,7 @@ export default function CommentForm({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('emailPlaceholder')}
-          className="w-full px-4 py-2 border rounded-lg bg-background"
+          className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
         />
       </div>
       <div>
@@ -83,22 +93,25 @@ export default function CommentForm({
           placeholder={t('placeholder')}
           required
           rows={4}
-          className="w-full px-4 py-2 border rounded-lg bg-background"
+          className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none shadow-sm focus:shadow-md"
         />
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
+          className="px-8 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 disabled:opacity-50 transition-all font-medium relative overflow-hidden group"
         >
-          {loading ? t('loading') || 'Loading...' : t('submit')}
+          <span className="relative z-10">{loading ? t('loading') || 'Loading...' : t('submit')}</span>
+          {!loading && (
+            <span className="absolute inset-0 bg-gradient-to-r from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
+          )}
         </button>
         {parentId && (
           <button
             type="button"
             onClick={onSuccess}
-            className="px-4 py-2 border rounded-lg hover:bg-foreground/10"
+            className="px-6 py-3 border border-border rounded-xl hover:bg-gradient-to-r hover:from-secondary hover:to-secondary/50 transition-all font-medium"
           >
             {t('cancel')}
           </button>

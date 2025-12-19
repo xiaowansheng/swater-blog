@@ -20,19 +20,22 @@ export default async function TagListPage({
     return (
       <>
         <Header />
-        <main className="container mx-auto px-4 py-8 flex-1">
-          <h1 className="text-4xl font-bold mb-8">{t('tags')}</h1>
+        <main className="container mx-auto px-4 py-12 flex-1">
+          <div className="mb-10">
+            <h1 className="text-5xl font-bold mb-4 gradient-text">{t('tags')}</h1>
+            <p className="text-muted text-lg">所有标签</p>
+          </div>
           <div className="flex flex-wrap gap-3">
             {tags.map((tag) => (
               <Link
                 key={tag.id}
                 href={`/tag/${tag.id}`}
-                className="px-4 py-2 bg-card border rounded-lg hover:shadow-lg transition-shadow"
+                className="group px-5 py-3 bg-card border border-border rounded-xl hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1"
               >
-                <span className="font-medium">{tag.name}</span>
+                <span className="font-medium group-hover:text-primary transition-colors">{tag.name}</span>
                 {tag.articleCount !== undefined && (
-                  <span className="ml-2 text-sm text-foreground/60">
-                    ({tag.articleCount})
+                  <span className="ml-2 px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                    {tag.articleCount}
                   </span>
                 )}
               </Link>

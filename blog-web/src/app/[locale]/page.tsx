@@ -45,18 +45,33 @@ export default async function HomePage() {
   return (
     <>
       <Header />
-      <main className="container mx-auto px-4 py-8 flex-1">
+      <main className="container mx-auto px-4 py-16 flex-1 relative z-10">
         <div className="flex gap-8">
           <div className="flex-1">
-            <h1 className="text-4xl font-bold mb-8">{t('home')}</h1>
+            <div className="mb-12 relative">
+              <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/10 rounded-full blur-3xl opacity-50"></div>
+              <h1 className="text-6xl font-extrabold mb-6 gradient-text relative z-10">{t('home')}</h1>
+              <p className="text-muted text-xl relative z-10 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-accent animate-pulse"></span>
+                分享技术，记录生活
+              </p>
+            </div>
             {articleList.records.length > 0 ? (
               <ArticleList articles={articleList.records} />
             ) : (
-              <div className="bg-card border rounded-lg p-8 text-center">
-                <p className="text-foreground/70 mb-4">{t('noData')}</p>
-                <p className="text-sm text-foreground/50">
-                  {process.env.NODE_ENV === 'development' && 'API服务器未连接，请确保后端服务正在运行'}
-                </p>
+              <div className="modern-card p-16 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5"></div>
+                <div className="relative z-10">
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                    <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <p className="text-foreground/70 mb-2 text-xl font-semibold">{t('noData')}</p>
+                  <p className="text-sm text-muted">
+                    {process.env.NODE_ENV === 'development' && 'API服务器未连接，请确保后端服务正在运行'}
+                  </p>
+                </div>
               </div>
             )}
           </div>

@@ -26,8 +26,11 @@ export default async function PostListPage({
     return (
       <>
         <Header />
-        <main className="container mx-auto px-4 py-8 flex-1">
-          <h1 className="text-4xl font-bold mb-8">{t('article.list')}</h1>
+        <main className="container mx-auto px-4 py-12 flex-1">
+          <div className="mb-10">
+            <h1 className="text-5xl font-bold mb-4 gradient-text">{t('article.list')}</h1>
+            <p className="text-muted text-lg">所有文章</p>
+          </div>
           <ArticleList articles={articleList.records} />
           <Pagination
             current={articleList.current}

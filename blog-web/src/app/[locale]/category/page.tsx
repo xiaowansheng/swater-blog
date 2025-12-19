@@ -20,23 +20,28 @@ export default async function CategoryListPage({
     return (
       <>
         <Header />
-        <main className="container mx-auto px-4 py-8 flex-1">
-          <h1 className="text-4xl font-bold mb-8">{t('categories')}</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <main className="container mx-auto px-4 py-12 flex-1">
+          <div className="mb-10">
+            <h1 className="text-5xl font-bold mb-4 gradient-text">{t('categories')}</h1>
+            <p className="text-muted text-lg">文章分类</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((category) => (
               <Link
                 key={category.id}
                 href={`/category/${category.id}`}
-                className="bg-card border rounded-lg p-6 hover:shadow-lg transition-shadow"
+                className="group bg-card border border-border rounded-xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1"
               >
-                <h2 className="text-xl font-bold mb-2">{category.name}</h2>
+                <div className="flex items-start justify-between mb-3">
+                  <h2 className="text-xl font-bold group-hover:text-primary transition-colors">{category.name}</h2>
+                  {category.articleCount !== undefined && (
+                    <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                      {category.articleCount}
+                    </span>
+                  )}
+                </div>
                 {category.description && (
-                  <p className="text-foreground/70 mb-2">{category.description}</p>
-                )}
-                {category.articleCount !== undefined && (
-                  <p className="text-sm text-foreground/60">
-                    {category.articleCount} {t('article.title')}
-                  </p>
+                  <p className="text-foreground/70 mb-2 line-clamp-2">{category.description}</p>
                 )}
               </Link>
             ))}

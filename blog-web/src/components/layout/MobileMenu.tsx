@@ -39,24 +39,51 @@ export default function MobileMenu({ open, onClose }: MobileMenuProps) {
               leaveFrom="translate-x-0"
               leaveTo="translate-x-full"
             >
-              <Dialog.Panel className="w-full max-w-sm transform overflow-hidden rounded-lg bg-background p-6 shadow-xl transition-all">
-                <nav className="flex flex-col gap-4">
-                  <Link href="/" onClick={onClose} className="text-lg">
+              <Dialog.Panel className="w-full max-w-sm transform overflow-hidden rounded-l-2xl bg-card border-l border-border p-6 shadow-2xl transition-all">
+                <div className="mb-6 pb-4 border-b border-border">
+                  <h2 className="text-xl font-bold gradient-text">菜单</h2>
+                </div>
+                <nav className="flex flex-col gap-2">
+                  <Link
+                    href="/"
+                    onClick={onClose}
+                    className="px-4 py-3 rounded-lg hover:bg-secondary transition-colors text-lg font-medium"
+                  >
                     {t('home')}
                   </Link>
-                  <Link href="/post" onClick={onClose} className="text-lg">
+                  <Link
+                    href="/post"
+                    onClick={onClose}
+                    className="px-4 py-3 rounded-lg hover:bg-secondary transition-colors text-lg font-medium"
+                  >
                     {t('posts')}
                   </Link>
-                  <Link href="/category" onClick={onClose} className="text-lg">
+                  <Link
+                    href="/category"
+                    onClick={onClose}
+                    className="px-4 py-3 rounded-lg hover:bg-secondary transition-colors text-lg font-medium"
+                  >
                     {t('categories')}
                   </Link>
-                  <Link href="/tag" onClick={onClose} className="text-lg">
+                  <Link
+                    href="/tag"
+                    onClick={onClose}
+                    className="px-4 py-3 rounded-lg hover:bg-secondary transition-colors text-lg font-medium"
+                  >
                     {t('tags')}
                   </Link>
-                  <Link href="/archive" onClick={onClose} className="text-lg">
+                  <Link
+                    href="/archive"
+                    onClick={onClose}
+                    className="px-4 py-3 rounded-lg hover:bg-secondary transition-colors text-lg font-medium"
+                  >
                     {t('archives')}
                   </Link>
-                  <Link href="/about" onClick={onClose} className="text-lg">
+                  <Link
+                    href="/about"
+                    onClick={onClose}
+                    className="px-4 py-3 rounded-lg hover:bg-secondary transition-colors text-lg font-medium"
+                  >
                     {t('about')}
                   </Link>
                 </nav>

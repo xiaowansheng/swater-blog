@@ -22,9 +22,12 @@ export default async function GuestbookPage({
     return (
       <>
         <Header />
-        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
-          <h1 className="text-4xl font-bold mb-8">{t('guestbook')}</h1>
-          <div className="mb-8">
+        <main className="container mx-auto px-4 py-12 flex-1 max-w-4xl">
+          <div className="mb-10">
+            <h1 className="text-5xl font-bold mb-4 gradient-text">{t('guestbook')}</h1>
+            <p className="text-muted text-lg">留下你的足迹</p>
+          </div>
+          <div className="mb-10">
             <CommentForm />
           </div>
           <CommentList comments={guestbook.records} />
