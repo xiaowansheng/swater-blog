@@ -1,0 +1,73 @@
+{
+  "common": {
+    "home": "Home",
+    "about": "About",
+    "archives": "Archives",
+    "categories": "Categories",
+    "tags": "Tags",
+    "search": "Search",
+    "guestbook": "Guestbook",
+    "friendLinks": "Friend Links",
+    "moments": "Moments",
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "readMore": "Read More",
+    "backToTop": "Back to Top",
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode",
+    "publishedAt": "Published at",
+    "updatedAt": "Updated at",
+    "viewCount": "Views",
+    "likeCount": "Likes",
+    "commentCount": "Comments",
+    "prev": "Previous",
+    "next": "Next",
+    "related": "Related Articles",
+    "noMore": "No more",
+    "noData": "No data",
+    "author": "Author"
+  },
+  "nav": {
+    "home": "Home",
+    "posts": "Posts",
+    "categories": "Categories",
+    "tags": "Tags",
+    "archives": "Archives",
+    "about": "About",
+    "guestbook": "Guestbook",
+    "friendLinks": "Friend Links"
+  },
+  "article": {
+    "title": "Articles",
+    "list": "Article List",
+    "detail": "Article Detail",
+    "category": "Category",
+    "tag": "Tag",
+    "author": "Author",
+    "readTime": "Read time",
+    "minutes": "minutes",
+    "toc": "Table of Contents"
+  },
+  "comment": {
+    "title": "Comments",
+    "submit": "Submit Comment",
+    "reply": "Reply",
+    "cancel": "Cancel",
+    "name": "Name",
+    "email": "Email",
+    "content": "Content",
+    "placeholder": "Write your comment...",
+    "namePlaceholder": "Enter your name",
+    "emailPlaceholder": "Enter your email (optional)",
+    "success": "Comment submitted successfully, awaiting review",
+    "error": "Failed to submit comment, please try again"
+  },
+  "search": {
+    "placeholder": "Search articles, tags...",
+    "results": "Search Results",
+    "noResults": "No results found",
+    "history": "Search History"
+  }
+}
+
