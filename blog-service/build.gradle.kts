@@ -32,7 +32,7 @@ dependencies {
     
     implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
     
-    implementation("org.quartz-scheduler:quartz:2.3.3")
+    implementation("org.springframework.boot:spring-boot-starter-quartz")
     
     implementation("io.springfox:springfox-boot-starter:3.0.0")
     
