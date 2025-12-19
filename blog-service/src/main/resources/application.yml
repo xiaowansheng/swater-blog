@@ -1,23 +1,18 @@
 server:
-  port: 8080
   servlet:
     context-path: /
 
 spring:
   application:
     name: blog
+  profiles:
+    active: dev
   
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/blog?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-    username: root
-    password: root
   
   data:
     redis:
-      host: localhost
-      port: 6379
-      database: 0
       timeout: 3000ms
       lettuce:
         pool:
@@ -26,8 +21,6 @@ spring:
           min-idle: 0
   
   rabbitmq:
-    host: localhost
-    port: 5672
     username: guest
     password: guest
     virtual-host: /
@@ -43,11 +36,6 @@ spring:
           auth: true
           starttls:
             enable: true
-  
-  elasticsearch:
-    uris: http://localhost:9200
-    username: 
-    password: 
 
 mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml
@@ -73,9 +61,6 @@ sa-token:
   jwt-secret-key: blog-secret-key-change-in-production
 
 logging:
-  level:
-    com.blog: debug
-    org.springframework: info
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
 

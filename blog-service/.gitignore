@@ -39,3 +39,6 @@ out/
 ### Mac ###
 .DS_Store
 
+### Config ###
+**/application-test.yml
+
