@@ -44,6 +44,12 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.17.0")
     implementation("cn.hutool:hutool-all:5.8.28")
     
+    implementation("com.aliyun.oss:aliyun-sdk-oss:3.17.4")
+    implementation("com.qiniu:qiniu-java-sdk:7.13.1")
+    implementation("com.ip2location:ip2location-java:8.10.0")
+    
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 

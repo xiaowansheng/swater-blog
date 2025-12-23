@@ -43,6 +43,53 @@ spring:
           starttls:
             enable: true
 
+file:
+  storage:
+    type: local
+    local:
+      path: uploads
+      url-prefix: /uploads
+    oss:
+      endpoint: 
+      access-key-id: 
+      access-key-secret: 
+      bucket-name: 
+      domain: 
+    qiniu:
+      access-key: 
+      secret-key: 
+      bucket: 
+      domain: 
+
+notification:
+  channels: 
+    - websocket
+    - email
+  email:
+    enabled: false
+  websocket:
+    enabled: true
+
+email:
+  provider:
+    type: spring-mail
+  from: your-email@qq.com
+  from-name: Swater Blog
+  templates:
+    path: classpath:templates/email/
+
+location:
+  provider:
+    type: amap
+  amap:
+    key: 
+    api-url: https://restapi.amap.com/v3/ip
+  baidu:
+    ak: 
+    api-url: https://api.map.baidu.com/location/ip
+  ip2location:
+    db-path: 
+
 mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml
   type-aliases-package: com.blog.model.entity

@@ -1,15 +1,16 @@
 package com.blog.listener;
 
 import com.blog.model.message.LoginNotificationMessage;
+import com.blog.plugin.notification.NotificationChannelFactory;
+import com.blog.plugin.notification.NotificationChannelPlugin;
 import com.blog.service.NotificationService;
-import com.blog.websocket.NotificationWebSocketHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -19,7 +20,7 @@ public class LoginNotificationConsumer {
     private NotificationService notificationService;
 
     @Autowired
-    private NotificationWebSocketHandler webSocketHandler;
+    private NotificationChannelFactory channelFactory;
 
     @RabbitHandler
     public void handle(LoginNotificationMessage message) {
@@ -39,8 +40,14 @@ public class LoginNotificationConsumer {
                         content
                 );
                 
-                webSocketHandler.sendNotification(message.getUserId(),
-                        Map.of("type", "login", "title", title, "content", content));
+                List<NotificationChannelPlugin> channels = channelFactory.getEnabledChannels();
+                for (NotificationChannelPlugin channel : channels) {
+                    try {
+                        channel.send(message.getUserId(), "login", title, content);
+                    } catch (Exception e) {
+                        log.error("通知渠道 {} 发送失败", channel.getName(), e);
+                    }
+                }
             }
         } catch (Exception e) {
             log.error("处理登录通知失败", e);

@@ -13,16 +13,16 @@ import com.blog.model.entity.FileMeta;
 import com.blog.model.entity.FileReference;
 import com.blog.model.entity.User;
 import com.blog.model.vo.FileVO;
+import com.blog.plugin.storage.StoragePlugin;
+import com.blog.plugin.storage.StoragePluginFactory;
 import com.blog.service.FileService;
 import com.blog.util.BeanUtil;
-import com.blog.util.FileStorageUtil;
 import com.blog.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +37,9 @@ public class FileServiceImpl implements FileService {
 
     @Autowired
     private UserMapper userMapper;
+    
+    @Autowired
+    private StoragePluginFactory storagePluginFactory;
 
     @Override
     @Transactional
@@ -46,7 +49,8 @@ public class FileServiceImpl implements FileService {
         }
 
         try {
-            String fileHash = FileStorageUtil.calculateHash(file);
+            StoragePlugin storagePlugin = storagePluginFactory.getPlugin();
+            String fileHash = storagePlugin.calculateHash(file);
             FileMeta existingFile = fileMetaMapper.selectOne(new LambdaQueryWrapper<FileMeta>()
                     .eq(FileMeta::getFileHash, fileHash)
                     .eq(FileMeta::getDeleted, 0));
@@ -57,15 +61,15 @@ public class FileServiceImpl implements FileService {
                 fileMeta.setRefCount((fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0) + 1);
                 fileMetaMapper.updateById(fileMeta);
             } else {
-                String filePath = FileStorageUtil.generateFilePath(file.getOriginalFilename());
-                FileStorageUtil.saveFile(file, filePath);
+                String filePath = storagePlugin.generateFilePath(file.getOriginalFilename());
+                storagePlugin.upload(file, filePath);
 
                 fileMeta = new FileMeta();
                 fileMeta.setFileHash(fileHash);
                 fileMeta.setOriginalName(file.getOriginalFilename());
                 fileMeta.setFileType(getFileType(file.getOriginalFilename()));
                 fileMeta.setFilePath(filePath);
-                fileMeta.setUrl(FileStorageUtil.getFileUrl(filePath));
+                fileMeta.setUrl(storagePlugin.getUrl(filePath));
                 fileMeta.setFileSize(file.getSize());
                 fileMeta.setMimeType(file.getContentType());
                 
@@ -87,7 +91,7 @@ public class FileServiceImpl implements FileService {
             }
 
             return convertToVO(fileMeta);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new BusinessException("文件上传失败: " + e.getMessage());
         }
     }
@@ -122,9 +126,14 @@ public class FileServiceImpl implements FileService {
         fileMeta.setRefCount((fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0) - 1);
         
         if (fileMeta.getRefCount() <= 0) {
+            try {
+                StoragePlugin storagePlugin = storagePluginFactory.getPlugin();
+                storagePlugin.delete(fileMeta.getFilePath());
+            } catch (Exception e) {
+                throw new BusinessException("文件删除失败: " + e.getMessage());
+            }
             fileMetaMapper.deleteById(id);
             fileReferenceMapper.deleteByFileId(id);
-            FileStorageUtil.deleteFile(fileMeta.getFilePath());
         } else {
             fileMetaMapper.updateById(fileMeta);
         }
