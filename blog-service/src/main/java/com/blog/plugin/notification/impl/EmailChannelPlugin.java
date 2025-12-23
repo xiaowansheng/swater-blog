@@ -51,7 +51,7 @@ public class EmailChannelPlugin implements NotificationChannelPlugin, Plugin {
             return;
         }
         
-        String templateName = "notification_" + type;
+        String templateName = "email/notification_" + type;
         try {
             provider.sendEmailWithTemplate(user.getEmail(), title, templateName, 
                     Map.of("title", title, "content", content, "user", user));
