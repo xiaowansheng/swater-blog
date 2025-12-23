@@ -11,6 +11,12 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
   
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      continue-on-error: false
+  
   data:
     redis:
       timeout: 3000ms
