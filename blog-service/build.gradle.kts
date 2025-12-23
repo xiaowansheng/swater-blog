@@ -50,6 +50,8 @@ dependencies {
     
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     
+    implementation("com.rometools:rome:2.1.0")
+    
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
