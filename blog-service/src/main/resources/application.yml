@@ -88,7 +88,32 @@ location:
     ak: 
     api-url: https://api.map.baidu.com/location/ip
   ip2location:
-    db-path: 
+    db-path:
+
+# 搜索引擎插件配置
+search:
+  provider:
+    type: elasticsearch  # elasticsearch/mysql-fulltext/solr
+
+# 消息队列插件配置
+mq:
+  provider:
+    type: rabbitmq  # rabbitmq/kafka/rocketmq
+
+# 定时任务插件配置
+scheduler:
+  provider:
+    type: spring  # spring/quartz
+
+# 评论系统插件配置
+comment:
+  provider:
+    type: builtin  # builtin/gitalk/disqus
+
+# 日志存储插件配置
+log:
+  storage:
+    type: mysql  # mysql/file/elk/loki 
 
 mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml
