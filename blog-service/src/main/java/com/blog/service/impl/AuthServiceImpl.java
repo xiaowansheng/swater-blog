@@ -10,18 +10,23 @@ import com.blog.model.entity.User;
 import com.blog.model.vo.LoginVO;
 import com.blog.model.vo.RoleVO;
 import com.blog.model.vo.UserVO;
+import com.blog.plugin.location.LocationInfo;
+import com.blog.plugin.location.LocationProviderFactory;
+import com.blog.plugin.location.LocationProviderPlugin;
 import com.blog.service.AuthService;
 import com.blog.service.LoginLogService;
 import com.blog.util.BeanUtil;
 import com.blog.util.PasswordUtil;
 import com.blog.util.RequestUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class AuthServiceImpl implements AuthService {
     @Autowired
@@ -35,6 +40,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private LoginLogService loginLogService;
+    
+    @Autowired(required = false)
+    private LocationProviderFactory locationProviderFactory;
 
     @Override
     public LoginVO login(LoginDTO dto) {
@@ -72,24 +80,55 @@ public class AuthServiceImpl implements AuthService {
                 String device = parseDevice(userAgent);
                 String browser = parseBrowser(userAgent);
                 
+                String country = null;
+                String province = null;
+                String city = null;
+                java.math.BigDecimal latitude = null;
+                java.math.BigDecimal longitude = null;
+                String locationDetail = null;
+                String ipAddress = ip;
+                
+                if (locationProviderFactory != null) {
+                    try {
+                        LocationProviderPlugin locationProvider = locationProviderFactory.getProvider();
+                        if (locationProvider != null) {
+                            LocationInfo locationInfo = locationProvider.getLocationInfo(ip);
+                            if (locationInfo != null) {
+                                country = locationInfo.getCountry();
+                                province = locationInfo.getProvince();
+                                city = locationInfo.getCity();
+                                latitude = locationInfo.getLatitude();
+                                longitude = locationInfo.getLongitude();
+                                locationDetail = locationInfo.getLocationDetail();
+                                if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
+                                    ipAddress = locationInfo.getIpAddress();
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.warn("IP定位失败，IP: {}", ip, e);
+                    }
+                }
+                
                 loginLogService.recordLogin(
                     user.getId(),
                     ip,
-                    ip,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
+                    ipAddress,
+                    country,
+                    province,
+                    city,
+                    latitude,
+                    longitude,
+                    locationDetail,
                     userAgent,
                     device,
                     browser,
-                    null,
-                    null
+                    locationDetail,
+                    province != null && city != null ? province + city : null
                 );
             }
         } catch (Exception e) {
+            log.error("记录登录日志失败", e);
         }
         
         UserVO userVO = convertToVO(user);

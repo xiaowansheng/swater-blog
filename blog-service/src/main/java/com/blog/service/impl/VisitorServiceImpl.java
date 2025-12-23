@@ -10,9 +10,13 @@ import com.blog.model.entity.Visitor;
 import com.blog.model.entity.VisitorAccessLog;
 import com.blog.model.vo.VisitorStatisticsVO;
 import com.blog.model.vo.VisitorVO;
+import com.blog.plugin.location.LocationInfo;
+import com.blog.plugin.location.LocationProviderFactory;
+import com.blog.plugin.location.LocationProviderPlugin;
 import com.blog.service.VisitorService;
 import com.blog.util.BeanUtil;
 import com.blog.util.PageUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +29,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class VisitorServiceImpl implements VisitorService {
     @Autowired
@@ -32,6 +37,9 @@ public class VisitorServiceImpl implements VisitorService {
 
     @Autowired
     private VisitorAccessLogMapper visitorAccessLogMapper;
+    
+    @Autowired(required = false)
+    private LocationProviderFactory locationProviderFactory;
 
     @Override
     @Transactional
@@ -60,10 +68,68 @@ public class VisitorServiceImpl implements VisitorService {
             visitor.setFirstVisitTime(now);
             visitor.setVisitCount(1);
             visitor.setStatus("ACTIVE");
+            
+            if (locationProviderFactory != null) {
+                try {
+                    LocationProviderPlugin locationProvider = locationProviderFactory.getProvider();
+                    if (locationProvider != null) {
+                        LocationInfo locationInfo = locationProvider.getLocationInfo(dto.getIp());
+                        if (locationInfo != null) {
+                            visitor.setCountry(locationInfo.getCountry());
+                            visitor.setProvince(locationInfo.getProvince());
+                            visitor.setCity(locationInfo.getCity());
+                            visitor.setDistrict(locationInfo.getDistrict());
+                            visitor.setLatitude(locationInfo.getLatitude());
+                            visitor.setLongitude(locationInfo.getLongitude());
+                            visitor.setLocationDetail(locationInfo.getLocationDetail());
+                            visitor.setIsp(locationInfo.getIsp());
+                            visitor.setTimezone(locationInfo.getTimezone());
+                            if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
+                                visitor.setIpAddress(locationInfo.getIpAddress());
+                            } else {
+                                visitor.setIpAddress(dto.getIp());
+                            }
+                        } else {
+                            visitor.setIpAddress(dto.getIp());
+                        }
+                    } else {
+                        visitor.setIpAddress(dto.getIp());
+                    }
+                } catch (Exception e) {
+                    log.warn("IP定位失败，IP: {}", dto.getIp(), e);
+                    visitor.setIpAddress(dto.getIp());
+                }
+            } else {
+                visitor.setIpAddress(dto.getIp());
+            }
+            
             visitorMapper.insert(visitor);
         } else {
             visitor.setVisitCount((visitor.getVisitCount() != null ? visitor.getVisitCount() : 0) + 1);
             visitor.setLastVisitTime(now);
+            
+            if (visitor.getCountry() == null && locationProviderFactory != null) {
+                try {
+                    LocationProviderPlugin locationProvider = locationProviderFactory.getProvider();
+                    if (locationProvider != null) {
+                        LocationInfo locationInfo = locationProvider.getLocationInfo(dto.getIp());
+                        if (locationInfo != null) {
+                            visitor.setCountry(locationInfo.getCountry());
+                            visitor.setProvince(locationInfo.getProvince());
+                            visitor.setCity(locationInfo.getCity());
+                            visitor.setDistrict(locationInfo.getDistrict());
+                            visitor.setLatitude(locationInfo.getLatitude());
+                            visitor.setLongitude(locationInfo.getLongitude());
+                            visitor.setLocationDetail(locationInfo.getLocationDetail());
+                            visitor.setIsp(locationInfo.getIsp());
+                            visitor.setTimezone(locationInfo.getTimezone());
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("IP定位失败，IP: {}", dto.getIp(), e);
+                }
+            }
+            
             visitorMapper.updateById(visitor);
         }
         
