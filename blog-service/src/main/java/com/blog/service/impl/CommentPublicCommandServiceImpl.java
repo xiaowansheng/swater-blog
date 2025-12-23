@@ -13,14 +13,23 @@ import com.blog.model.entity.Comment;
 import com.blog.model.entity.Talk;
 import com.blog.model.entity.User;
 import com.blog.model.vo.CommentVO;
+import com.blog.plugin.location.LocationInfo;
+import com.blog.plugin.location.LocationProviderFactory;
+import com.blog.plugin.location.LocationProviderPlugin;
 import com.blog.service.CommentPublicCommandService;
 import com.blog.util.BeanUtil;
 import com.blog.util.JsonUtil;
 import com.blog.util.KeyUtil;
+import com.blog.util.RequestUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
 @Service
 public class CommentPublicCommandServiceImpl implements CommentPublicCommandService {
     @Autowired
@@ -34,6 +43,9 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
 
     @Autowired
     private UserMapper userMapper;
+    
+    @Autowired(required = false)
+    private LocationProviderFactory locationProviderFactory;
 
     @Override
     @Transactional
@@ -62,6 +74,43 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
         
         Comment comment = BeanUtil.copyProperties(dto, Comment.class);
         comment.setCommentKey(KeyUtil.generateKey("comment"));
+        
+        String ip = RequestUtil.getClientIp();
+        comment.setIp(ip != null ? ip : "");
+        
+        if (locationProviderFactory != null && ip != null) {
+            try {
+                LocationProviderPlugin locationProvider = locationProviderFactory.getProvider();
+                if (locationProvider != null) {
+                    LocationInfo locationInfo = locationProvider.getLocationInfo(ip);
+                    if (locationInfo != null) {
+                        comment.setCountry(locationInfo.getCountry());
+                        comment.setProvince(locationInfo.getProvince());
+                        comment.setCity(locationInfo.getCity());
+                        comment.setLatitude(locationInfo.getLatitude());
+                        comment.setLongitude(locationInfo.getLongitude());
+                        comment.setLocationDetail(locationInfo.getLocationDetail());
+                        if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
+                            comment.setIpAddress(locationInfo.getIpAddress());
+                        } else {
+                            comment.setIpAddress(ip);
+                        }
+                        comment.setLocation(locationInfo.getLocationDetail() != null ? locationInfo.getLocationDetail() : 
+                                (locationInfo.getProvince() != null && locationInfo.getCity() != null ? 
+                                        locationInfo.getProvince() + locationInfo.getCity() : null));
+                    } else {
+                        comment.setIpAddress(ip);
+                    }
+                } else {
+                    comment.setIpAddress(ip);
+                }
+            } catch (Exception e) {
+                log.warn("IP定位失败，IP: {}", ip, e);
+                comment.setIpAddress(ip);
+            }
+        } else {
+            comment.setIpAddress(ip != null ? ip : "");
+        }
         
         if (StpUtil.isLogin()) {
             Long userId = StpUtil.getLoginIdAsLong();

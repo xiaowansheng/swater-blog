@@ -5,10 +5,14 @@ import com.blog.mapper.GuestbookMapper;
 import com.blog.model.dto.GuestbookDTO;
 import com.blog.model.entity.Guestbook;
 import com.blog.model.vo.GuestbookVO;
+import com.blog.plugin.location.LocationInfo;
+import com.blog.plugin.location.LocationProviderFactory;
+import com.blog.plugin.location.LocationProviderPlugin;
 import com.blog.service.GuestbookPublicCommandService;
 import com.blog.util.BeanUtil;
 import com.blog.util.JsonUtil;
 import com.blog.util.KeyUtil;
+import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,10 +22,14 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommandService {
     @Autowired
     private GuestbookMapper guestbookMapper;
+    
+    @Autowired(required = false)
+    private LocationProviderFactory locationProviderFactory;
 
     @Override
     @Transactional
@@ -32,6 +40,40 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String ip = getClientIp(request);
         guestbook.setIp(ip);
+        
+        if (locationProviderFactory != null && ip != null) {
+            try {
+                LocationProviderPlugin locationProvider = locationProviderFactory.getProvider();
+                if (locationProvider != null) {
+                    LocationInfo locationInfo = locationProvider.getLocationInfo(ip);
+                    if (locationInfo != null) {
+                        guestbook.setCountry(locationInfo.getCountry());
+                        guestbook.setProvince(locationInfo.getProvince());
+                        guestbook.setCity(locationInfo.getCity());
+                        guestbook.setLatitude(locationInfo.getLatitude());
+                        guestbook.setLongitude(locationInfo.getLongitude());
+                        guestbook.setLocationDetail(locationInfo.getLocationDetail());
+                        if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
+                            guestbook.setIpAddress(locationInfo.getIpAddress());
+                        } else {
+                            guestbook.setIpAddress(ip);
+                        }
+                        guestbook.setLocation(locationInfo.getLocationDetail() != null ? locationInfo.getLocationDetail() : 
+                                (locationInfo.getProvince() != null && locationInfo.getCity() != null ? 
+                                        locationInfo.getProvince() + locationInfo.getCity() : null));
+                    } else {
+                        guestbook.setIpAddress(ip);
+                    }
+                } else {
+                    guestbook.setIpAddress(ip);
+                }
+            } catch (Exception e) {
+                log.warn("IP定位失败，IP: {}", ip, e);
+                guestbook.setIpAddress(ip);
+            }
+        } else {
+            guestbook.setIpAddress(ip);
+        }
 
         boolean isLogin = StpUtil.isLogin();
         if (isLogin) {
