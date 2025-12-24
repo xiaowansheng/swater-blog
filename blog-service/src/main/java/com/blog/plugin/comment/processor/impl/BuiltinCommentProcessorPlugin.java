@@ -4,28 +4,16 @@ import com.blog.model.dto.CommentDTO;
 import com.blog.plugin.comment.processor.CommentProcessorPlugin;
 import com.blog.plugin.core.Plugin;
 import com.blog.plugin.core.ProcessResult;
+import com.blog.plugin.core.TextProcessor;
 import com.blog.util.RequestUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
-import org.jsoup.safety.Safelist;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "comment.processor.type", havingValue = "builtin", matchIfMissing = true)
 public class BuiltinCommentProcessorPlugin implements CommentProcessorPlugin, Plugin {
-    
-    private static final List<String> DEFAULT_SENSITIVE_WORDS = new ArrayList<>();
-    private static final Pattern URL_PATTERN = Pattern.compile("https?://[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=%]+", Pattern.CASE_INSENSITIVE);
-    private static final int MAX_URL_COUNT = 3;
-    private static final int MIN_CONTENT_LENGTH = 5;
     
     @Override
     public String getName() {
@@ -39,44 +27,12 @@ public class BuiltinCommentProcessorPlugin implements CommentProcessorPlugin, Pl
     
     @Override
     public String processContent(String content) {
-        if (content == null || content.trim().isEmpty()) {
-            return content;
-        }
-        
-        String processed = content.trim();
-        
-        processed = Jsoup.clean(processed, Safelist.none());
-        
-        processed = filterSensitiveWords(processed);
-        
-        return processed;
+        return TextProcessor.cleanContent(content);
     }
     
     @Override
     public boolean isSpam(String content, String ip, Long userId) {
-        if (content == null || content.trim().isEmpty()) {
-            return false;
-        }
-        
-        int urlCount = 0;
-        java.util.regex.Matcher matcher = URL_PATTERN.matcher(content);
-        while (matcher.find()) {
-            urlCount++;
-        }
-        if (urlCount > MAX_URL_COUNT) {
-            return true;
-        }
-        
-        if (content.length() < MIN_CONTENT_LENGTH) {
-            return true;
-        }
-        
-        String spamPattern = "(?i)(广告|推广|加微信|加qq|点击|链接|www\\.|http)";
-        if (Pattern.compile(spamPattern).matcher(content).find()) {
-            return true;
-        }
-        
-        return false;
+        return TextProcessor.isSpam(content, ip, userId);
     }
     
     @Override
@@ -119,21 +75,6 @@ public class BuiltinCommentProcessorPlugin implements CommentProcessorPlugin, Pl
         result.addMetadata("originalLength", dto.getContent().length());
         result.addMetadata("processedLength", processedContent.length());
         result.addMetadata("ip", ip);
-        
-        return result;
-    }
-    
-    private String filterSensitiveWords(String content) {
-        if (content == null || content.isEmpty()) {
-            return content;
-        }
-        
-        String result = content;
-        for (String word : DEFAULT_SENSITIVE_WORDS) {
-            if (word != null && !word.trim().isEmpty()) {
-                result = result.replaceAll("(?i)" + Pattern.quote(word), "***");
-            }
-        }
         
         return result;
     }
