@@ -10,7 +10,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
 
 @Slf4j
 @Component
@@ -28,10 +27,8 @@ public class CacheEvictEventListener {
         try {
             String key = "article:" + event.getArticleId();
             redisTemplate.delete(key);
-            Set<String> keys = redisTemplate.keys("article:*");
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
-            }
+            redisTemplate.delete("article:list:*");
+            redisTemplate.delete("article:page:*");
         } catch (Exception e) {
             log.error("清除文章缓存失败，文章ID: {}", event.getArticleId(), e);
         }
@@ -46,10 +43,8 @@ public class CacheEvictEventListener {
         try {
             String key = "article:" + event.getArticleId();
             redisTemplate.delete(key);
-            Set<String> keys = redisTemplate.keys("article:*");
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
-            }
+            redisTemplate.delete("article:list:*");
+            redisTemplate.delete("article:page:*");
         } catch (Exception e) {
             log.error("清除文章缓存失败，文章ID: {}", event.getArticleId(), e);
         }
@@ -62,10 +57,10 @@ public class CacheEvictEventListener {
             return;
         }
         try {
-            Set<String> keys = redisTemplate.keys("article:*");
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
-            }
+            String key = "article:" + event.getArticleId();
+            redisTemplate.delete(key);
+            redisTemplate.delete("article:list:*");
+            redisTemplate.delete("article:page:*");
         } catch (Exception e) {
             log.error("清除文章缓存失败，文章ID: {}", event.getArticleId(), e);
         }
@@ -80,10 +75,8 @@ public class CacheEvictEventListener {
         try {
             String key = "article:" + event.getArticleId();
             redisTemplate.delete(key);
-            Set<String> keys = redisTemplate.keys("article:*");
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
-            }
+            redisTemplate.delete("article:list:*");
+            redisTemplate.delete("article:page:*");
         } catch (Exception e) {
             log.error("清除文章缓存失败，文章ID: {}", event.getArticleId(), e);
         }
@@ -98,10 +91,8 @@ public class CacheEvictEventListener {
         try {
             String key = "talk:" + event.getTalkId();
             redisTemplate.delete(key);
-            Set<String> keys = redisTemplate.keys("talk:*");
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
-            }
+            redisTemplate.delete("talk:list:*");
+            redisTemplate.delete("talk:page:*");
         } catch (Exception e) {
             log.error("清除说说缓存失败，说说ID: {}", event.getTalkId(), e);
         }
@@ -116,10 +107,8 @@ public class CacheEvictEventListener {
         try {
             String key = "talk:" + event.getTalkId();
             redisTemplate.delete(key);
-            Set<String> keys = redisTemplate.keys("talk:*");
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
-            }
+            redisTemplate.delete("talk:list:*");
+            redisTemplate.delete("talk:page:*");
         } catch (Exception e) {
             log.error("清除说说缓存失败，说说ID: {}", event.getTalkId(), e);
         }
@@ -134,10 +123,6 @@ public class CacheEvictEventListener {
         try {
             String key = "user:" + event.getUserId();
             redisTemplate.delete(key);
-            Set<String> keys = redisTemplate.keys("user:*");
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
-            }
         } catch (Exception e) {
             log.error("清除用户缓存失败，用户ID: {}", event.getUserId(), e);
         }
@@ -152,10 +137,6 @@ public class CacheEvictEventListener {
         try {
             String key = "user:" + event.getUserId();
             redisTemplate.delete(key);
-            Set<String> keys = redisTemplate.keys("user:*");
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
-            }
         } catch (Exception e) {
             log.error("清除用户缓存失败，用户ID: {}", event.getUserId(), e);
         }
@@ -184,10 +165,6 @@ public class CacheEvictEventListener {
         try {
             String key = "user:" + event.getUserId();
             redisTemplate.delete(key);
-            Set<String> keys = redisTemplate.keys("user:*");
-            if (keys != null && !keys.isEmpty()) {
-                redisTemplate.delete(keys);
-            }
         } catch (Exception e) {
             log.error("清除用户缓存失败，用户ID: {}", event.getUserId(), e);
         }

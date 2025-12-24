@@ -20,6 +20,7 @@ public class MemoryMQPlugin implements MessageQueuePlugin, Plugin {
     
     private final ConcurrentHashMap<String, BlockingQueue<Object>> queues = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<MessageListener>> listeners = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Future<?>> consumerFutures = new ConcurrentHashMap<>();
     private final ExecutorService executorService = Executors.newCachedThreadPool(r -> {
         Thread t = new Thread(r, "memory-mq-consumer");
         t.setDaemon(true);
@@ -35,6 +36,11 @@ public class MemoryMQPlugin implements MessageQueuePlugin, Plugin {
     @PreDestroy
     public void destroy() {
         running.set(false);
+        consumerFutures.values().forEach(future -> {
+            if (future != null && !future.isDone()) {
+                future.cancel(true);
+            }
+        });
         executorService.shutdown();
         try {
             if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
@@ -62,14 +68,12 @@ public class MemoryMQPlugin implements MessageQueuePlugin, Plugin {
         String queueKey = exchange + "." + routingKey;
         BlockingQueue<Object> queue = queues.computeIfAbsent(queueKey, k -> new LinkedBlockingQueue<>());
         queue.offer(message);
-        notifyListeners(queueKey, message);
     }
     
     @Override
     public void sendToQueue(String queue, Object message) throws Exception {
         BlockingQueue<Object> queueInstance = queues.computeIfAbsent(queue, k -> new LinkedBlockingQueue<>());
         queueInstance.offer(message);
-        notifyListeners(queue, message);
     }
     
     @Override
@@ -85,43 +89,39 @@ public class MemoryMQPlugin implements MessageQueuePlugin, Plugin {
     }
     
     public void addListener(String queue, MessageListener listener) {
-        listeners.computeIfAbsent(queue, k -> new CopyOnWriteArrayList<>()).add(listener);
-        startConsumer(queue);
+        CopyOnWriteArrayList<MessageListener> queueListeners = listeners.computeIfAbsent(queue, k -> new CopyOnWriteArrayList<>());
+        synchronized (queueListeners) {
+            if (queueListeners.isEmpty()) {
+                startConsumer(queue);
+            }
+            queueListeners.add(listener);
+        }
     }
     
     public BlockingQueue<Object> getQueue(String queue) {
         return queues.computeIfAbsent(queue, k -> new LinkedBlockingQueue<>());
     }
     
-    private void notifyListeners(String queueKey, Object message) {
-        CopyOnWriteArrayList<MessageListener> queueListeners = listeners.get(queueKey);
-        if (queueListeners != null && !queueListeners.isEmpty()) {
-            for (MessageListener listener : queueListeners) {
-                executorService.submit(() -> {
-                    try {
-                        listener.onMessage(message);
-                    } catch (Exception e) {
-                        log.error("消息监听器处理失败", e);
-                    }
-                });
-            }
-        }
-    }
+    private final ConcurrentHashMap<String, AtomicBoolean> consumerStarted = new ConcurrentHashMap<>();
     
     private void startConsumer(String queueKey) {
-        executorService.submit(() -> {
+        if (consumerStarted.putIfAbsent(queueKey, new AtomicBoolean(true)) != null) {
+            return;
+        }
+        Future<?> future = executorService.submit(() -> {
+            Thread.currentThread().setName("memory-mq-consumer-" + queueKey);
             BlockingQueue<Object> queue = queues.computeIfAbsent(queueKey, k -> new LinkedBlockingQueue<>());
-            while (running.get()) {
+            while (running.get() && !Thread.currentThread().isInterrupted()) {
                 try {
                     Object message = queue.poll(1, TimeUnit.SECONDS);
                     if (message != null) {
                         CopyOnWriteArrayList<MessageListener> queueListeners = listeners.get(queueKey);
-                        if (queueListeners != null) {
+                        if (queueListeners != null && !queueListeners.isEmpty()) {
                             for (MessageListener listener : queueListeners) {
                                 try {
                                     listener.onMessage(message);
                                 } catch (Exception e) {
-                                    log.error("消息监听器处理失败", e);
+                                    log.error("消息监听器处理失败，队列: {}", queueKey, e);
                                 }
                             }
                         }
@@ -130,10 +130,11 @@ public class MemoryMQPlugin implements MessageQueuePlugin, Plugin {
                     Thread.currentThread().interrupt();
                     break;
                 } catch (Exception e) {
-                    log.error("消息消费失败", e);
+                    log.error("消息消费失败，队列: {}", queueKey, e);
                 }
             }
         });
+        consumerFutures.put(queueKey, future);
     }
     
     public interface MessageListener {

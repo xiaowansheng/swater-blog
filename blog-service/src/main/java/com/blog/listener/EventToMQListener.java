@@ -59,11 +59,14 @@ public class EventToMQListener {
                 return;
             }
             
-            String commenterName = comment.getNickname() != null ? comment.getNickname() : "游客";
-            if (comment.getUserId() != null) {
+            String commenterName = "游客";
+            if (comment.getNickname() != null && !comment.getNickname().isEmpty()) {
+                commenterName = comment.getNickname();
+            } else if (comment.getUserId() != null) {
                 UserVO commenter = userService.getById(comment.getUserId());
                 if (commenter != null) {
-                    commenterName = commenter.getNickname() != null ? commenter.getNickname() : commenter.getUsername();
+                    commenterName = commenter.getNickname() != null && !commenter.getNickname().isEmpty() 
+                        ? commenter.getNickname() : commenter.getUsername();
                 }
             }
             
@@ -85,7 +88,8 @@ public class EventToMQListener {
             
             mqService.sendNotification(message);
         } catch (Exception e) {
-            log.error("发送评论创建事件到MQ失败，评论ID: {}", event.getCommentId(), e);
+            log.error("发送评论创建事件到MQ失败，评论ID: {}, 文章ID: {}", 
+                event.getCommentId(), event.getComment() != null ? event.getComment().getPostId() : null, e);
         }
     }
     
@@ -103,12 +107,6 @@ public class EventToMQListener {
             }
             
             Long userId = comment.getUserId();
-            String email = comment.getEmail();
-            
-            if (userId == null && (email == null || email.isEmpty())) {
-                return;
-            }
-            
             if (userId == null) {
                 return;
             }
@@ -138,7 +136,8 @@ public class EventToMQListener {
             
             mqService.sendNotification(message);
         } catch (Exception e) {
-            log.error("发送评论审核通过事件到MQ失败，评论ID: {}", event.getCommentId(), e);
+            log.error("发送评论审核通过事件到MQ失败，评论ID: {}, 用户ID: {}", 
+                event.getCommentId(), event.getComment() != null ? event.getComment().getUserId() : null, e);
         }
     }
     
@@ -210,7 +209,8 @@ public class EventToMQListener {
             
             mqService.sendNotification(message);
         } catch (Exception e) {
-            log.error("发送留言审核通过事件到MQ失败，留言ID: {}", event.getGuestbookId(), e);
+            log.error("发送留言审核通过事件到MQ失败，留言ID: {}, 用户ID: {}", 
+                event.getGuestbookId(), event.getGuestbook() != null ? event.getGuestbook().getUserId() : null, e);
         }
     }
     
@@ -222,8 +222,13 @@ public class EventToMQListener {
         }
         
         try {
-            UserVO user = userService.getById(event.getUserId());
+            com.blog.model.entity.User user = event.getUser();
             if (user == null || user.getEmail() == null || user.getEmail().isEmpty()) {
+                return;
+            }
+            
+            UserVO userVO = userService.getById(event.getUserId());
+            if (userVO == null) {
                 return;
             }
             
@@ -235,12 +240,13 @@ public class EventToMQListener {
             message.setTimestamp(LocalDateTime.now());
             
             Map<String, Object> data = new HashMap<>();
-            data.put("user", user);
+            data.put("user", userVO);
             message.setData(data);
             
             mqService.sendNotification(message);
         } catch (Exception e) {
-            log.error("发送用户创建事件到MQ失败，用户ID: {}", event.getUserId(), e);
+            log.error("发送用户创建事件到MQ失败，用户ID: {}, 邮箱: {}", 
+                event.getUserId(), event.getUser() != null ? event.getUser().getEmail() : null, e);
         }
     }
     
@@ -271,7 +277,8 @@ public class EventToMQListener {
             
             mqService.sendNotification(message);
         } catch (Exception e) {
-            log.error("发送角色分配事件到MQ失败，用户ID: {}", event.getUserId(), e);
+            log.error("发送角色分配事件到MQ失败，用户ID: {}, 角色IDs: {}", 
+                event.getUserId(), event.getRoleIds(), e);
         }
     }
     
@@ -302,7 +309,7 @@ public class EventToMQListener {
             
             mqService.sendNotification(message);
         } catch (Exception e) {
-            log.error("发送登录事件到MQ失败，用户ID: {}", event.getUserId(), e);
+            log.error("发送登录事件到MQ失败，用户ID: {}, IP: {}", event.getUserId(), event.getIp(), e);
         }
     }
 }

@@ -30,12 +30,21 @@ public class MQService {
             return;
         }
         
-        MessageQueuePlugin plugin = plugins.get(0);
+        MessageQueuePlugin plugin = plugins.stream()
+                .filter(MessageQueuePlugin::isEnabled)
+                .findFirst()
+                .orElse(null);
+        
+        if (plugin == null) {
+            log.warn("没有启用的MQ插件，跳过消息发送");
+            return;
+        }
+        
         try {
             String routingKey = getRoutingKey(message.getType());
             plugin.send(ExchangeConstant.NOTIFICATION_EXCHANGE, routingKey, message);
         } catch (Exception e) {
-            log.error("发送通知消息到MQ失败", e);
+            log.error("发送通知消息到MQ失败，插件: {}", plugin.getName(), e);
         }
     }
     
