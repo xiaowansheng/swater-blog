@@ -3,9 +3,11 @@ package com.blog.model.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("visitor_access_log")
 public class VisitorAccessLog extends BaseEntity {
     @TableField("visitor_id")
