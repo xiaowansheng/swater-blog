@@ -151,9 +151,7 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <div className={scrolled ? '' : '[&_select]:text-white [&_select]:border-white/20 [&_select]:bg-white/10'}>
-            <LanguageSwitcher />
-          </div>
+          <LanguageSwitcher scrolled={scrolled} />
           {mounted && (
           <button
             onClick={toggleTheme}
