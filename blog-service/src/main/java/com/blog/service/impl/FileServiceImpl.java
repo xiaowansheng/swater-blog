@@ -13,14 +13,19 @@ import com.blog.model.entity.FileMeta;
 import com.blog.model.entity.FileReference;
 import com.blog.model.entity.User;
 import com.blog.model.vo.FileVO;
+import com.blog.event.file.FileDeletedEvent;
+import com.blog.event.file.FileUploadedEvent;
 import com.blog.plugin.storage.StoragePlugin;
 import com.blog.plugin.storage.StoragePluginFactory;
 import com.blog.service.FileService;
 import com.blog.util.BeanUtil;
 import com.blog.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -40,6 +45,9 @@ public class FileServiceImpl implements FileService {
     
     @Autowired
     private StoragePluginFactory storagePluginFactory;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -83,6 +91,9 @@ public class FileServiceImpl implements FileService {
                 fileMeta.setRefCount(1);
                 
                 fileMetaMapper.insert(fileMeta);
+                
+                FileMeta savedFileMeta = fileMetaMapper.selectById(fileMeta.getId());
+                publishEventAfterCommit(() -> eventPublisher.publishEvent(new FileUploadedEvent(this, fileMeta.getId(), savedFileMeta)));
             }
 
             if (dto.getRefType() != null && dto.getRefId() != null) {
@@ -140,6 +151,8 @@ public class FileServiceImpl implements FileService {
             }
             fileMetaMapper.deleteById(id);
             fileReferenceMapper.deleteByFileId(id);
+            
+            publishEventAfterCommit(() -> eventPublisher.publishEvent(new FileDeletedEvent(this, id)));
         } else {
             fileMetaMapper.updateById(fileMeta);
         }
@@ -172,6 +185,19 @@ public class FileServiceImpl implements FileService {
             }
         }
         return vo;
+    }
+
+    private void publishEventAfterCommit(Runnable runnable) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    runnable.run();
+                }
+            });
+        } else {
+            runnable.run();
+        }
     }
 }
 

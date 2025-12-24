@@ -1,6 +1,7 @@
 package com.blog.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.blog.event.article.*;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.ArticleMapper;
 import com.blog.mapper.ArticleTagMapper;
@@ -11,8 +12,11 @@ import com.blog.service.ArticleAdminCommandService;
 import com.blog.util.BeanUtil;
 import com.blog.util.KeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +28,9 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
 
     @Autowired
     private ArticleTagMapper articleTagMapper;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -51,6 +58,9 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
         if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
             saveArticleTags(article.getId(), dto.getTagIds());
         }
+        
+        Article savedArticle = articleMapper.selectById(article.getId());
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleCreatedEvent(this, article.getId(), savedArticle)));
         
         return article.getId();
     }
@@ -87,6 +97,9 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
         if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
             saveArticleTags(id, dto.getTagIds());
         }
+        
+        Article updatedArticle = articleMapper.selectById(id);
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUpdatedEvent(this, id, updatedArticle)));
     }
 
     @Override
@@ -98,6 +111,8 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
         }
         articleMapper.deleteById(id);
         articleTagMapper.deleteByArticleId(id);
+        
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleDeletedEvent(this, id)));
     }
 
     @Override
@@ -120,6 +135,9 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
             article.setPublishedAt(LocalDateTime.now());
         }
         articleMapper.updateById(article);
+        
+        Article publishedArticle = articleMapper.selectById(id);
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticlePublishedEvent(this, id, publishedArticle)));
     }
 
     @Override
@@ -131,6 +149,9 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
         }
         article.setStatus(0);
         articleMapper.updateById(article);
+        
+        Article unpublishedArticle = articleMapper.selectById(id);
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUnpublishedEvent(this, id, unpublishedArticle)));
     }
 
     private void saveArticleTags(Long articleId, List<Long> tagIds) {
@@ -144,6 +165,19 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
                 .collect(Collectors.toList());
         for (ArticleTag articleTag : articleTags) {
             articleTagMapper.insert(articleTag);
+        }
+    }
+
+    private void publishEventAfterCommit(Runnable runnable) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    runnable.run();
+                }
+            });
+        } else {
+            runnable.run();
         }
     }
 }

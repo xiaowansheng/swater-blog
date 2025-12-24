@@ -1,0 +1,17 @@
+package com.blog.event.article;
+
+import com.blog.event.BaseEvent;
+
+public class ArticleDeletedEvent extends BaseEvent {
+    private final Long articleId;
+
+    public ArticleDeletedEvent(Object source, Long articleId) {
+        super(source, "ARTICLE_DELETED");
+        this.articleId = articleId;
+    }
+
+    public Long getArticleId() {
+        return articleId;
+    }
+}
+

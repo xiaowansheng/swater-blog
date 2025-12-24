@@ -2,6 +2,7 @@ package com.blog.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.blog.event.talk.*;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.TalkMapper;
 import com.blog.model.dto.TalkDTO;
@@ -10,12 +11,19 @@ import com.blog.service.TalkAdminCommandService;
 import com.blog.util.BeanUtil;
 import com.blog.util.JsonUtil;
 import com.blog.util.KeyUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
     private final TalkMapper talkMapper;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     public TalkAdminCommandServiceImpl(TalkMapper talkMapper) {
         this.talkMapper = talkMapper;
@@ -45,6 +53,10 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
         }
         
         talkMapper.insert(talk);
+        
+        Talk savedTalk = talkMapper.selectById(talk.getId());
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new TalkCreatedEvent(this, talk.getId(), savedTalk)));
+        
         return talk.getId();
     }
 
@@ -79,6 +91,8 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
             throw new BusinessException("说说不存在");
         }
         talkMapper.deleteById(id);
+        
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new TalkDeletedEvent(this, id)));
     }
 
     @Override
@@ -101,6 +115,19 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
         }
         talk.setIsTop(0);
         talkMapper.updateById(talk);
+    }
+
+    private void publishEventAfterCommit(Runnable runnable) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    runnable.run();
+                }
+            });
+        } else {
+            runnable.run();
+        }
     }
 }
 

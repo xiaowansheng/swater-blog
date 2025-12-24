@@ -8,6 +8,7 @@ import com.blog.model.vo.GuestbookVO;
 import com.blog.plugin.location.LocationInfo;
 import com.blog.plugin.location.LocationProviderFactory;
 import com.blog.plugin.location.LocationProviderPlugin;
+import com.blog.event.guestbook.GuestbookCreatedEvent;
 import com.blog.service.GuestbookPublicCommandService;
 import com.blog.util.BeanUtil;
 import com.blog.util.JsonUtil;
@@ -15,8 +16,11 @@ import com.blog.util.KeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -30,6 +34,9 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
     
     @Autowired(required = false)
     private LocationProviderFactory locationProviderFactory;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -104,6 +111,9 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
 
         guestbookMapper.insert(guestbook);
 
+        Guestbook savedGuestbook = guestbookMapper.selectById(guestbook.getId());
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new GuestbookCreatedEvent(this, guestbook.getId(), savedGuestbook)));
+
         GuestbookVO vo = BeanUtil.copyProperties(guestbook, GuestbookVO.class);
         if (dto.getImages() != null && !dto.getImages().isEmpty()) {
             vo.setImages(dto.getImages());
@@ -132,6 +142,19 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
             ip = ip.split(",")[0].trim();
         }
         return ip;
+    }
+
+    private void publishEventAfterCommit(Runnable runnable) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    runnable.run();
+                }
+            });
+        } else {
+            runnable.run();
+        }
     }
 }
 

@@ -13,6 +13,8 @@ import com.blog.model.vo.UserVO;
 import com.blog.plugin.location.LocationInfo;
 import com.blog.plugin.location.LocationProviderFactory;
 import com.blog.plugin.location.LocationProviderPlugin;
+import com.blog.event.user.UserLoggedInEvent;
+import com.blog.event.user.UserLoggedOutEvent;
 import com.blog.service.AuthService;
 import com.blog.service.LoginLogService;
 import com.blog.util.BeanUtil;
@@ -21,6 +23,7 @@ import com.blog.util.RequestUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,6 +46,9 @@ public class AuthServiceImpl implements AuthService {
     
     @Autowired(required = false)
     private LocationProviderFactory locationProviderFactory;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public LoginVO login(LoginDTO dto) {
@@ -142,12 +148,22 @@ public class AuthServiceImpl implements AuthService {
         loginVO.setToken(token);
         loginVO.setUser(userVO);
         
+        String ip = RequestUtil.getClientIp();
+        eventPublisher.publishEvent(new UserLoggedInEvent(this, user.getId(), ip != null ? ip : ""));
+        
         return loginVO;
     }
 
     @Override
     public void logout() {
+        Long userId = null;
+        if (StpUtil.isLogin()) {
+            userId = StpUtil.getLoginIdAsLong();
+        }
         StpUtil.logout();
+        if (userId != null) {
+            eventPublisher.publishEvent(new UserLoggedOutEvent(this, userId));
+        }
     }
 
     @Override

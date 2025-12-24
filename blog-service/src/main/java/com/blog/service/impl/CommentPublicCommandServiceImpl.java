@@ -16,6 +16,7 @@ import com.blog.model.vo.CommentVO;
 import com.blog.plugin.location.LocationInfo;
 import com.blog.plugin.location.LocationProviderFactory;
 import com.blog.plugin.location.LocationProviderPlugin;
+import com.blog.event.comment.CommentCreatedEvent;
 import com.blog.service.CommentPublicCommandService;
 import com.blog.util.BeanUtil;
 import com.blog.util.JsonUtil;
@@ -23,8 +24,11 @@ import com.blog.util.KeyUtil;
 import com.blog.util.RequestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +50,9 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
     
     @Autowired(required = false)
     private LocationProviderFactory locationProviderFactory;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -146,19 +153,9 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
         
         commentMapper.insert(comment);
         
-        if (dto.getPostId() != null) {
-            Article article = articleMapper.selectById(dto.getPostId());
-            article.setCommentCount((article.getCommentCount() != null ? article.getCommentCount() : 0) + 1);
-            articleMapper.updateById(article);
-        }
-        
-        if (dto.getMomentId() != null) {
-            Talk talk = talkMapper.selectById(dto.getMomentId());
-            talk.setCommentCount((talk.getCommentCount() != null ? talk.getCommentCount() : 0) + 1);
-            talkMapper.updateById(talk);
-        }
-        
         Comment savedComment = commentMapper.selectById(comment.getId());
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentCreatedEvent(this, comment.getId(), savedComment)));
+        
         return convertToVO(savedComment);
     }
 
@@ -181,6 +178,19 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
             }
         }
         return vo;
+    }
+
+    private void publishEventAfterCommit(Runnable runnable) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    runnable.run();
+                }
+            });
+        } else {
+            runnable.run();
+        }
     }
 }
 

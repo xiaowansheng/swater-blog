@@ -1,6 +1,8 @@
 package com.blog.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.blog.event.comment.CommentApprovedEvent;
+import com.blog.event.comment.CommentDeletedEvent;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.ArticleMapper;
 import com.blog.mapper.CommentMapper;
@@ -10,8 +12,11 @@ import com.blog.model.entity.Comment;
 import com.blog.model.entity.Talk;
 import com.blog.service.CommentAdminCommandService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 public class CommentAdminCommandServiceImpl implements CommentAdminCommandService {
@@ -24,6 +29,9 @@ public class CommentAdminCommandServiceImpl implements CommentAdminCommandServic
     @Autowired
     private TalkMapper talkMapper;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @Override
     @Transactional
     public void approve(Long id) {
@@ -33,6 +41,9 @@ public class CommentAdminCommandServiceImpl implements CommentAdminCommandServic
         }
         comment.setStatus(1);
         commentMapper.updateById(comment);
+        
+        Comment approvedComment = commentMapper.selectById(id);
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentApprovedEvent(this, id, approvedComment)));
     }
 
     @Override
@@ -56,21 +67,7 @@ public class CommentAdminCommandServiceImpl implements CommentAdminCommandServic
         
         commentMapper.deleteById(id);
         
-        if (comment.getPostId() != null) {
-            Article article = articleMapper.selectById(comment.getPostId());
-            if (article != null) {
-                article.setCommentCount(Math.max(0, (article.getCommentCount() != null ? article.getCommentCount() : 0) - 1));
-                articleMapper.updateById(article);
-            }
-        }
-        
-        if (comment.getMomentId() != null) {
-            Talk talk = talkMapper.selectById(comment.getMomentId());
-            if (talk != null) {
-                talk.setCommentCount(Math.max(0, (talk.getCommentCount() != null ? talk.getCommentCount() : 0) - 1));
-                talkMapper.updateById(talk);
-            }
-        }
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentDeletedEvent(this, id, comment)));
     }
 
     @Override
@@ -93,6 +90,19 @@ public class CommentAdminCommandServiceImpl implements CommentAdminCommandServic
         }
         comment.setIsVisible(1);
         commentMapper.updateById(comment);
+    }
+
+    private void publishEventAfterCommit(Runnable runnable) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    runnable.run();
+                }
+            });
+        } else {
+            runnable.run();
+        }
     }
 }
 

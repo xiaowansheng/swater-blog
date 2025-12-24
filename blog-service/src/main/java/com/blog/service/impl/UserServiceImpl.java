@@ -3,6 +3,7 @@ package com.blog.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.common.PageResult;
+import com.blog.event.user.*;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.UserMapper;
 import com.blog.mapper.UserRoleMapper;
@@ -18,8 +19,11 @@ import com.blog.util.BeanUtil;
 import com.blog.util.PageUtil;
 import com.blog.util.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,6 +38,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public PageResult<UserVO> list(Long page, Long size, String keyword) {
@@ -102,6 +109,9 @@ public class UserServiceImpl implements UserService {
             saveUserRoles(user.getId(), dto.getRoleIds());
         }
         
+        User savedUser = userMapper.selectById(user.getId());
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserCreatedEvent(this, user.getId(), savedUser)));
+        
         return user.getId();
     }
 
@@ -150,6 +160,9 @@ public class UserServiceImpl implements UserService {
                 saveUserRoles(id, dto.getRoleIds());
             }
         }
+        
+        User updatedUser = userMapper.selectById(id);
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserUpdatedEvent(this, id, updatedUser)));
     }
 
     @Override
@@ -161,6 +174,8 @@ public class UserServiceImpl implements UserService {
         }
         userMapper.deleteById(id);
         userRoleMapper.deleteByUserId(id);
+        
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserDeletedEvent(this, id)));
     }
 
     @Override
@@ -172,6 +187,8 @@ public class UserServiceImpl implements UserService {
         }
         user.setPassword(PasswordUtil.encode(dto.getPassword()));
         userMapper.updateById(user);
+        
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserPasswordResetEvent(this, id)));
     }
 
     @Override
@@ -185,6 +202,8 @@ public class UserServiceImpl implements UserService {
         if (roleIds != null && !roleIds.isEmpty()) {
             saveUserRoles(id, roleIds);
         }
+        
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserRolesAssignedEvent(this, id, roleIds)));
     }
 
     private void saveUserRoles(Long userId, List<Long> roleIds) {
@@ -205,6 +224,19 @@ public class UserServiceImpl implements UserService {
             vo.setRoles(roles);
         }
         return vo;
+    }
+
+    private void publishEventAfterCommit(Runnable runnable) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    runnable.run();
+                }
+            });
+        } else {
+            runnable.run();
+        }
     }
 }
 
