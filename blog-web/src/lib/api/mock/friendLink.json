@@ -1,0 +1,37 @@
+{
+  "list": [
+    {
+      "id": 1,
+      "name": "技术博客A",
+      "url": "https://example.com/blog-a",
+      "avatar": "https://via.placeholder.com/80",
+      "description": "专注于前端技术分享",
+      "category": "技术"
+    },
+    {
+      "id": 2,
+      "name": "个人博客B",
+      "url": "https://example.com/blog-b",
+      "avatar": "https://via.placeholder.com/80",
+      "description": "记录生活和技术",
+      "category": "综合"
+    },
+    {
+      "id": 3,
+      "name": "开发笔记C",
+      "url": "https://example.com/blog-c",
+      "avatar": "https://via.placeholder.com/80",
+      "description": "后端开发经验分享",
+      "category": "技术"
+    },
+    {
+      "id": 4,
+      "name": "设计博客D",
+      "url": "https://example.com/blog-d",
+      "avatar": "https://via.placeholder.com/80",
+      "description": "UI/UX设计相关",
+      "category": "设计"
+    }
+  ]
+}
+

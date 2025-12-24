@@ -1,0 +1,177 @@
+{
+  "list": [
+    {
+      "id": 1,
+      "title": "欢迎来到我的博客",
+      "slug": "welcome-to-my-blog",
+      "content": "# 欢迎\n\n这是我的第一篇博客文章。\n\n## 关于我\n\n我是一名开发者，喜欢分享技术心得。",
+      "excerpt": "这是我的第一篇博客文章",
+      "cover": "https://via.placeholder.com/800x400",
+      "authorId": 1,
+      "authorName": "博主",
+      "authorAvatar": "https://via.placeholder.com/100",
+      "categoryId": 1,
+      "categoryName": "技术",
+      "tagIds": [1, 2],
+      "tags": [
+        { "id": 1, "name": "前端", "color": "#3b82f6" },
+        { "id": 2, "name": "Next.js", "color": "#000000" }
+      ],
+      "status": 1,
+      "isTop": true,
+      "viewCount": 1234,
+      "likeCount": 56,
+      "commentCount": 12,
+      "publishedAt": "2024-01-15T10:00:00Z",
+      "createTime": "2024-01-15T10:00:00Z",
+      "updateTime": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "title": "Next.js 16 新特性解析",
+      "slug": "nextjs-16-features",
+      "content": "# Next.js 16 新特性\n\nNext.js 16 带来了许多令人兴奋的新特性...",
+      "excerpt": "深入解析 Next.js 16 的新特性和改进",
+      "cover": "https://via.placeholder.com/800x400",
+      "authorId": 1,
+      "authorName": "博主",
+      "authorAvatar": "https://via.placeholder.com/100",
+      "categoryId": 1,
+      "categoryName": "技术",
+      "tagIds": [2, 3],
+      "tags": [
+        { "id": 2, "name": "Next.js", "color": "#000000" },
+        { "id": 3, "name": "React", "color": "#61dafb" }
+      ],
+      "status": 1,
+      "isTop": false,
+      "viewCount": 856,
+      "likeCount": 42,
+      "commentCount": 8,
+      "publishedAt": "2024-01-20T14:30:00Z",
+      "createTime": "2024-01-20T14:30:00Z",
+      "updateTime": "2024-01-20T14:30:00Z"
+    },
+    {
+      "id": 3,
+      "title": "TypeScript 最佳实践",
+      "slug": "typescript-best-practices",
+      "content": "# TypeScript 最佳实践\n\n分享一些 TypeScript 开发中的最佳实践...",
+      "excerpt": "TypeScript 开发中的最佳实践和技巧",
+      "cover": "https://via.placeholder.com/800x400",
+      "authorId": 1,
+      "authorName": "博主",
+      "authorAvatar": "https://via.placeholder.com/100",
+      "categoryId": 1,
+      "categoryName": "技术",
+      "tagIds": [1, 4],
+      "tags": [
+        { "id": 1, "name": "前端", "color": "#3b82f6" },
+        { "id": 4, "name": "TypeScript", "color": "#3178c6" }
+      ],
+      "status": 1,
+      "isTop": false,
+      "viewCount": 642,
+      "likeCount": 38,
+      "commentCount": 5,
+      "publishedAt": "2024-02-01T09:15:00Z",
+      "createTime": "2024-02-01T09:15:00Z",
+      "updateTime": "2024-02-01T09:15:00Z"
+    },
+    {
+      "id": 4,
+      "title": "生活随笔：春天的故事",
+      "slug": "spring-story",
+      "content": "# 春天的故事\n\n春天来了，万物复苏...",
+      "excerpt": "记录春天的美好时光",
+      "cover": "https://via.placeholder.com/800x400",
+      "authorId": 1,
+      "authorName": "博主",
+      "authorAvatar": "https://via.placeholder.com/100",
+      "categoryId": 2,
+      "categoryName": "生活",
+      "tagIds": [5],
+      "tags": [
+        { "id": 5, "name": "随笔", "color": "#10b981" }
+      ],
+      "status": 1,
+      "isTop": false,
+      "viewCount": 321,
+      "likeCount": 18,
+      "commentCount": 3,
+      "publishedAt": "2024-02-15T16:20:00Z",
+      "createTime": "2024-02-15T16:20:00Z",
+      "updateTime": "2024-02-15T16:20:00Z"
+    },
+    {
+      "id": 5,
+      "title": "Tailwind CSS 使用心得",
+      "slug": "tailwind-css-experience",
+      "content": "# Tailwind CSS 使用心得\n\n使用 Tailwind CSS 开发的一些心得体会...",
+      "excerpt": "分享 Tailwind CSS 的使用经验和技巧",
+      "cover": "https://via.placeholder.com/800x400",
+      "authorId": 1,
+      "authorName": "博主",
+      "authorAvatar": "https://via.placeholder.com/100",
+      "categoryId": 1,
+      "categoryName": "技术",
+      "tagIds": [1, 6],
+      "tags": [
+        { "id": 1, "name": "前端", "color": "#3b82f6" },
+        { "id": 6, "name": "CSS", "color": "#38bdf8" }
+      ],
+      "status": 1,
+      "isTop": false,
+      "viewCount": 789,
+      "likeCount": 45,
+      "commentCount": 7,
+      "publishedAt": "2024-02-20T11:00:00Z",
+      "createTime": "2024-02-20T11:00:00Z",
+      "updateTime": "2024-02-20T11:00:00Z"
+    }
+  ],
+  "hot": [
+    {
+      "id": 1,
+      "title": "欢迎来到我的博客",
+      "slug": "welcome-to-my-blog",
+      "viewCount": 1234,
+      "likeCount": 56
+    },
+    {
+      "id": 2,
+      "title": "Next.js 16 新特性解析",
+      "slug": "nextjs-16-features",
+      "viewCount": 856,
+      "likeCount": 42
+    },
+    {
+      "id": 5,
+      "title": "Tailwind CSS 使用心得",
+      "slug": "tailwind-css-experience",
+      "viewCount": 789,
+      "likeCount": 45
+    }
+  ],
+  "latest": [
+    {
+      "id": 5,
+      "title": "Tailwind CSS 使用心得",
+      "slug": "tailwind-css-experience",
+      "publishedAt": "2024-02-20T11:00:00Z"
+    },
+    {
+      "id": 4,
+      "title": "生活随笔：春天的故事",
+      "slug": "spring-story",
+      "publishedAt": "2024-02-15T16:20:00Z"
+    },
+    {
+      "id": 3,
+      "title": "TypeScript 最佳实践",
+      "slug": "typescript-best-practices",
+      "publishedAt": "2024-02-01T09:15:00Z"
+    }
+  ]
+}
+

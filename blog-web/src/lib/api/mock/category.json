@@ -1,0 +1,29 @@
+{
+  "list": [
+    {
+      "id": 1,
+      "name": "技术",
+      "description": "技术相关的文章",
+      "articleCount": 4
+    },
+    {
+      "id": 2,
+      "name": "生活",
+      "description": "生活随笔和感悟",
+      "articleCount": 1
+    },
+    {
+      "id": 3,
+      "name": "读书",
+      "description": "读书笔记和读后感",
+      "articleCount": 0
+    },
+    {
+      "id": 4,
+      "name": "旅行",
+      "description": "旅行见闻和攻略",
+      "articleCount": 0
+    }
+  ]
+}
+

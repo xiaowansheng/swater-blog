@@ -1,0 +1,58 @@
+{
+  "list": [
+    {
+      "id": 1,
+      "postId": 1,
+      "nickname": "张三",
+      "email": "zhangsan@example.com",
+      "avatar": "https://via.placeholder.com/50",
+      "content": "写得很好，学到了很多！",
+      "status": 1,
+      "createTime": "2024-01-16T10:30:00Z",
+      "children": [
+        {
+          "id": 2,
+          "postId": 1,
+          "parentId": 1,
+          "nickname": "博主",
+          "email": "admin@example.com",
+          "avatar": "https://via.placeholder.com/50",
+          "content": "谢谢支持！",
+          "status": 1,
+          "createTime": "2024-01-16T11:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "postId": 1,
+      "nickname": "李四",
+      "email": "lisi@example.com",
+      "avatar": "https://via.placeholder.com/50",
+      "content": "期待更多技术分享",
+      "status": 1,
+      "createTime": "2024-01-17T14:20:00Z"
+    },
+    {
+      "id": 4,
+      "postId": 2,
+      "nickname": "王五",
+      "email": "wangwu@example.com",
+      "avatar": "https://via.placeholder.com/50",
+      "content": "Next.js 16 确实很棒！",
+      "status": 1,
+      "createTime": "2024-01-21T09:15:00Z"
+    },
+    {
+      "id": 5,
+      "momentId": 1,
+      "nickname": "赵六",
+      "email": "zhaoliu@example.com",
+      "avatar": "https://via.placeholder.com/50",
+      "content": "这个动态很有意思",
+      "status": 1,
+      "createTime": "2024-02-10T16:45:00Z"
+    }
+  ]
+}
+

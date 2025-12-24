@@ -1,4 +1,5 @@
 import type { ApiResponse } from '@/types';
+import { getMockResponse, createMockResponse } from './mock';
 
 const API_BASE_URL = typeof window !== 'undefined' 
   ? process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'
@@ -8,6 +9,11 @@ export async function fetchClient<T>(
   url: string,
   options?: RequestInit
 ): Promise<T> {
+  const mockData = getMockResponse<T>(url, options);
+  if (mockData !== null) {
+    return mockData;
+  }
+
   const response = await fetch(`${API_BASE_URL}${url}`, {
     ...options,
     headers: {
