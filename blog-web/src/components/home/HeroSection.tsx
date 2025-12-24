@@ -10,12 +10,33 @@ interface HeroSectionProps {
 
 export default function HeroSection({ articleCount, tagCount, categoryCount }: HeroSectionProps) {
   const [scrollY, setScrollY] = useState(0);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      
+      setScrollY(currentScrollY);
+      
+      if (!isScrolling && currentScrollY < viewportHeight) {
+        if (currentScrollY > lastScrollY && currentScrollY > 50) {
+          setIsScrolling(true);
+          const articlesElement = document.getElementById('articles');
+          if (articlesElement) {
+            articlesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => setIsScrolling(false), 1000);
+          }
+        }
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [lastScrollY, isScrolling]);
 
   return (
     <section className="flex overflow-hidden relative justify-center items-center min-h-screen">
