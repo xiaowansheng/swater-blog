@@ -71,29 +71,28 @@ export default function Header() {
     <header 
       className={`fixed top-0 z-50 w-full transition-all duration-500 ${
         scrolled 
-          ? 'glass-effect border-b border-border/30 shadow-xl backdrop-blur-xl' 
+          ? 'border-b shadow-xl backdrop-blur-xl glass-effect border-border/30' 
           : 'bg-transparent border-b border-transparent'
       } ${
         visible ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
       <div className={`absolute inset-0 transition-opacity duration-500 ${
-        scrolled ? 'opacity-100 bg-gradient-to-r from-primary/5 via-transparent to-accent/5' : 'opacity-0'
+        scrolled ? 'bg-gradient-to-r via-transparent opacity-100 from-primary/5 to-accent/5' : 'opacity-0'
       }`}></div>
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 relative z-10">
-        <Link href="/" className={`text-xl font-bold transition-all hover:scale-110 relative group ${
-          scrolled ? 'gradient-text' : 'text-white drop-shadow-lg'
+      <div className="container flex relative z-10 justify-between items-center px-4 mx-auto h-16">
+        <Link href="/" className={`text-base sm:text-lg md:text-xl font-bold transition-all hover:scale-110 relative group ${
+          scrolled ? 'text-foreground' : 'text-white drop-shadow-lg'
         }`}>
-          <span className="relative z-10 flex items-center gap-2">
+          <span className="flex relative z-10 gap-2 items-center">
             <span className={`w-2 h-2 rounded-full bg-gradient-to-r from-primary to-accent animate-pulse ${
-              scrolled ? '' : 'bg-white'
-            }`}></span>
-            Swater Blog
+              scrolled ? '':'bg-white'}`}></span>
+            <span className="whitespace-nowrap">Swater Blog</span>
           </span>
-          <span className="absolute inset-0 blur-2xl opacity-0 group-hover:opacity-60 bg-gradient-to-r from-primary to-accent transition-opacity duration-300"></span>
+          <span className="absolute inset-0 bg-gradient-to-r opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-60 from-primary to-accent"></span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden gap-1 items-center md:flex">
           <Link href="/" className={`px-4 py-2 text-sm font-medium transition-all relative group rounded-xl backdrop-blur-sm ${
             scrolled 
               ? 'text-foreground/70 hover:text-primary hover:bg-primary/10' 
@@ -101,7 +100,7 @@ export default function Header() {
           }`}>
             {t('home')}
             <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all group-hover:w-3/4 rounded-full"></span>
-            <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/0 via-primary/5 to-accent/0 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+            <span className="absolute inset-0 bg-gradient-to-r rounded-xl opacity-0 transition-opacity from-primary/0 via-primary/5 to-accent/0 group-hover:opacity-100"></span>
           </Link>
           <Link href="/post" className={`px-4 py-2 text-sm font-medium transition-all relative group rounded-xl backdrop-blur-sm ${
             scrolled 
@@ -110,7 +109,7 @@ export default function Header() {
           }`}>
             {t('posts')}
             <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all group-hover:w-3/4 rounded-full"></span>
-            <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/0 via-primary/5 to-accent/0 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+            <span className="absolute inset-0 bg-gradient-to-r rounded-xl opacity-0 transition-opacity from-primary/0 via-primary/5 to-accent/0 group-hover:opacity-100"></span>
           </Link>
           <Link href="/category" className={`px-4 py-2 text-sm font-medium transition-all relative group rounded-xl backdrop-blur-sm ${
             scrolled 
@@ -119,7 +118,7 @@ export default function Header() {
           }`}>
             {t('categories')}
             <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all group-hover:w-3/4 rounded-full"></span>
-            <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/0 via-primary/5 to-accent/0 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+            <span className="absolute inset-0 bg-gradient-to-r rounded-xl opacity-0 transition-opacity from-primary/0 via-primary/5 to-accent/0 group-hover:opacity-100"></span>
           </Link>
           <Link href="/tag" className={`px-4 py-2 text-sm font-medium transition-all relative group rounded-xl backdrop-blur-sm ${
             scrolled 
@@ -128,7 +127,7 @@ export default function Header() {
           }`}>
             {t('tags')}
             <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all group-hover:w-3/4 rounded-full"></span>
-            <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/0 via-primary/5 to-accent/0 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+            <span className="absolute inset-0 bg-gradient-to-r rounded-xl opacity-0 transition-opacity from-primary/0 via-primary/5 to-accent/0 group-hover:opacity-100"></span>
           </Link>
           <Link href="/archive" className={`px-4 py-2 text-sm font-medium transition-all relative group rounded-xl backdrop-blur-sm ${
             scrolled 
@@ -137,7 +136,7 @@ export default function Header() {
           }`}>
             {t('archives')}
             <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all group-hover:w-3/4 rounded-full"></span>
-            <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/0 via-primary/5 to-accent/0 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+            <span className="absolute inset-0 bg-gradient-to-r rounded-xl opacity-0 transition-opacity from-primary/0 via-primary/5 to-accent/0 group-hover:opacity-100"></span>
           </Link>
           <Link href="/about" className={`px-4 py-2 text-sm font-medium transition-all relative group rounded-xl backdrop-blur-sm ${
             scrolled 
@@ -146,11 +145,11 @@ export default function Header() {
           }`}>
             {t('about')}
             <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all group-hover:w-3/4 rounded-full"></span>
-            <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/0 via-primary/5 to-accent/0 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+            <span className="absolute inset-0 bg-gradient-to-r rounded-xl opacity-0 transition-opacity from-primary/0 via-primary/5 to-accent/0 group-hover:opacity-100"></span>
           </Link>
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex gap-2 items-center">
           <LanguageSwitcher scrolled={scrolled} />
           {mounted && (
           <button
@@ -163,7 +162,7 @@ export default function Header() {
             aria-label="Toggle theme"
           >
             <span className="relative z-10 text-lg">{theme === 'dark' ? '☀️' : '🌙'}</span>
-            <span className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+            <span className="absolute inset-0 bg-gradient-to-r opacity-0 transition-opacity from-primary/20 to-accent/20 group-hover:opacity-100"></span>
           </button>
           )}
           <button
