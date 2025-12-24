@@ -81,6 +81,9 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
         }
         
         talkMapper.updateById(talk);
+        
+        Talk updatedTalk = talkMapper.selectById(id);
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new TalkUpdatedEvent(this, id, updatedTalk)));
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.blog.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.event.comment.CommentApprovedEvent;
 import com.blog.event.comment.CommentDeletedEvent;
+import com.blog.event.comment.CommentUpdatedEvent;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.ArticleMapper;
 import com.blog.mapper.CommentMapper;
@@ -55,6 +56,9 @@ public class CommentAdminCommandServiceImpl implements CommentAdminCommandServic
         }
         comment.setStatus(0);
         commentMapper.updateById(comment);
+        
+        Comment updatedComment = commentMapper.selectById(id);
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
     }
 
     @Override
@@ -79,6 +83,9 @@ public class CommentAdminCommandServiceImpl implements CommentAdminCommandServic
         }
         comment.setIsVisible(0);
         commentMapper.updateById(comment);
+        
+        Comment updatedComment = commentMapper.selectById(id);
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
     }
 
     @Override
@@ -90,6 +97,9 @@ public class CommentAdminCommandServiceImpl implements CommentAdminCommandServic
         }
         comment.setIsVisible(1);
         commentMapper.updateById(comment);
+        
+        Comment updatedComment = commentMapper.selectById(id);
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
     }
 
     private void publishEventAfterCommit(Runnable runnable) {
