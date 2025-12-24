@@ -105,16 +105,15 @@ public class AuthServiceImpl implements AuthService {
                             }
                         }
                         if (locationInfo != null) {
-                            if (locationInfo != null) {
-                                country = locationInfo.getCountry();
-                                province = locationInfo.getProvince();
-                                city = locationInfo.getCity();
-                                latitude = locationInfo.getLatitude();
-                                longitude = locationInfo.getLongitude();
-                                locationDetail = locationInfo.getLocationDetail();
-                                if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
-                                    ipAddress = locationInfo.getIpAddress();
-                                }
+                            country = locationInfo.getCountry();
+                            province = locationInfo.getProvince();
+                            city = locationInfo.getCity();
+                            latitude = locationInfo.getLatitude();
+                            longitude = locationInfo.getLongitude();
+                            locationDetail = locationInfo.getLocationDetail();
+                            if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
+                                ipAddress = locationInfo.getIpAddress();
+                            }
                         }
                     } catch (Exception e) {
                         log.warn("IP定位失败，IP: {}", ip, e);

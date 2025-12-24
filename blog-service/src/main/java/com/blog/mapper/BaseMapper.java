@@ -1,7 +1,5 @@
 package com.blog.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper as MPBaseMapper;
-
-public interface BaseMapper<T> extends MPBaseMapper<T> {
+public interface BaseMapper<T> extends com.baomidou.mybatisplus.core.mapper.BaseMapper<T> {
 }
 

@@ -59,24 +59,23 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
                     }
                 }
                 if (locationInfo != null) {
-                    if (locationInfo != null) {
-                        guestbook.setCountry(locationInfo.getCountry());
-                        guestbook.setProvince(locationInfo.getProvince());
-                        guestbook.setCity(locationInfo.getCity());
-                        guestbook.setLatitude(locationInfo.getLatitude());
-                        guestbook.setLongitude(locationInfo.getLongitude());
-                        guestbook.setLocationDetail(locationInfo.getLocationDetail());
-                        if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
-                            guestbook.setIpAddress(locationInfo.getIpAddress());
-                        } else {
-                            guestbook.setIpAddress(ip);
-                        }
-                        guestbook.setLocation(locationInfo.getLocationDetail() != null ? locationInfo.getLocationDetail() : 
-                                (locationInfo.getProvince() != null && locationInfo.getCity() != null ? 
-                                        locationInfo.getProvince() + locationInfo.getCity() : null));
+                    guestbook.setCountry(locationInfo.getCountry());
+                    guestbook.setProvince(locationInfo.getProvince());
+                    guestbook.setCity(locationInfo.getCity());
+                    guestbook.setLatitude(locationInfo.getLatitude());
+                    guestbook.setLongitude(locationInfo.getLongitude());
+                    guestbook.setLocationDetail(locationInfo.getLocationDetail());
+                    if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
+                        guestbook.setIpAddress(locationInfo.getIpAddress());
                     } else {
                         guestbook.setIpAddress(ip);
                     }
+                    guestbook.setLocation(locationInfo.getLocationDetail() != null ? locationInfo.getLocationDetail() : 
+                            (locationInfo.getProvince() != null && locationInfo.getCity() != null ? 
+                                    locationInfo.getProvince() + locationInfo.getCity() : null));
+                } else {
+                    guestbook.setIpAddress(ip);
+                }
             } catch (Exception e) {
                 log.warn("IP定位失败，IP: {}", ip, e);
                 guestbook.setIpAddress(ip);

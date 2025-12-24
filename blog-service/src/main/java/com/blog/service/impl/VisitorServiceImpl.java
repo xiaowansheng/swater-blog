@@ -80,24 +80,23 @@ public class VisitorServiceImpl implements VisitorService {
                         }
                     }
                     if (locationInfo != null) {
-                        if (locationInfo != null) {
-                            visitor.setCountry(locationInfo.getCountry());
-                            visitor.setProvince(locationInfo.getProvince());
-                            visitor.setCity(locationInfo.getCity());
-                            visitor.setDistrict(locationInfo.getDistrict());
-                            visitor.setLatitude(locationInfo.getLatitude());
-                            visitor.setLongitude(locationInfo.getLongitude());
-                            visitor.setLocationDetail(locationInfo.getLocationDetail());
-                            visitor.setIsp(locationInfo.getIsp());
-                            visitor.setTimezone(locationInfo.getTimezone());
-                            if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
-                                visitor.setIpAddress(locationInfo.getIpAddress());
-                            } else {
-                                visitor.setIpAddress(dto.getIp());
-                            }
+                        visitor.setCountry(locationInfo.getCountry());
+                        visitor.setProvince(locationInfo.getProvince());
+                        visitor.setCity(locationInfo.getCity());
+                        visitor.setDistrict(locationInfo.getDistrict());
+                        visitor.setLatitude(locationInfo.getLatitude());
+                        visitor.setLongitude(locationInfo.getLongitude());
+                        visitor.setLocationDetail(locationInfo.getLocationDetail());
+                        visitor.setIsp(locationInfo.getIsp());
+                        visitor.setTimezone(locationInfo.getTimezone());
+                        if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
+                            visitor.setIpAddress(locationInfo.getIpAddress());
                         } else {
                             visitor.setIpAddress(dto.getIp());
                         }
+                    } else {
+                        visitor.setIpAddress(dto.getIp());
+                    }
                 } catch (Exception e) {
                     log.warn("IP定位失败，IP: {}", dto.getIp(), e);
                     visitor.setIpAddress(dto.getIp());

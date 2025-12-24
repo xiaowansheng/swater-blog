@@ -13,6 +13,10 @@ java {
 }
 
 repositories {
+    // 添加国内镜像仓库
+    maven { url = uri("https://maven.aliyun.com/repository/public") }
+    maven { url = uri("https://maven.aliyun.com/repository/spring") }
+    maven { url = uri("https://maven.aliyun.com/repository/central") }
     mavenCentral()
 }
 
@@ -60,4 +64,3 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
-

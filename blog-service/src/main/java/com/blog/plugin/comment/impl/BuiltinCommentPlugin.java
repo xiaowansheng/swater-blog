@@ -130,24 +130,23 @@ public class BuiltinCommentPlugin implements CommentProviderPlugin, Plugin {
                     }
                 }
                 if (locationInfo != null) {
-                    if (locationInfo != null) {
-                        comment.setCountry(locationInfo.getCountry());
-                        comment.setProvince(locationInfo.getProvince());
-                        comment.setCity(locationInfo.getCity());
-                        comment.setLatitude(locationInfo.getLatitude());
-                        comment.setLongitude(locationInfo.getLongitude());
-                        comment.setLocationDetail(locationInfo.getLocationDetail());
-                        if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
-                            comment.setIpAddress(locationInfo.getIpAddress());
-                        } else {
-                            comment.setIpAddress(ip);
-                        }
-                        comment.setLocation(locationInfo.getLocationDetail() != null ? locationInfo.getLocationDetail() : 
-                                (locationInfo.getProvince() != null && locationInfo.getCity() != null ? 
-                                        locationInfo.getProvince() + locationInfo.getCity() : null));
+                    comment.setCountry(locationInfo.getCountry());
+                    comment.setProvince(locationInfo.getProvince());
+                    comment.setCity(locationInfo.getCity());
+                    comment.setLatitude(locationInfo.getLatitude());
+                    comment.setLongitude(locationInfo.getLongitude());
+                    comment.setLocationDetail(locationInfo.getLocationDetail());
+                    if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
+                        comment.setIpAddress(locationInfo.getIpAddress());
                     } else {
                         comment.setIpAddress(ip);
                     }
+                    comment.setLocation(locationInfo.getLocationDetail() != null ? locationInfo.getLocationDetail() : 
+                            (locationInfo.getProvince() != null && locationInfo.getCity() != null ? 
+                                    locationInfo.getProvince() + locationInfo.getCity() : null));
+                } else {
+                    comment.setIpAddress(ip);
+                }
             } catch (Exception e) {
                 log.warn("IP定位失败，IP: {}", ip, e);
                 comment.setIpAddress(ip);
