@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import PageHeader from '@/components/layout/PageHeader';
 import { friendLinkApi } from '@/lib/api/friendLink';
 import { ISR_REVALIDATE } from '@/lib/constants';
 import Image from 'next/image';
@@ -20,6 +21,7 @@ export default async function FriendLinkPage({
     return (
       <>
         <Header />
+        <PageHeader title={t('friendLinks')} description="友情链接" />
         <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="mb-10">
             <h1 className="mb-4 text-5xl font-bold gradient-text">{t('friendLinks')}</h1>
@@ -71,6 +73,7 @@ export default async function FriendLinkPage({
     return (
       <>
         <Header />
+        <PageHeader title={t('friendLinks')} description="友情链接" />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>

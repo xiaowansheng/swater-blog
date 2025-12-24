@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import PageHeader from '@/components/layout/PageHeader';
 import ArticleList from '@/components/article/ArticleList';
 import Pagination from '@/components/common/Pagination';
 import { articleApi } from '@/lib/api/article';
@@ -17,7 +18,8 @@ export default async function PostListPage({
 }) {
   const { locale } = await params;
   const { page = '1' } = await searchParams;
-  const t = await getTranslations('common');
+  const t = await getTranslations('article');
+  const tCommon = await getTranslations('common');
 
   try {
     const currentPage = parseInt(page, 10) || 1;
@@ -26,11 +28,8 @@ export default async function PostListPage({
     return (
       <>
         <Header />
-        <main className="container mx-auto px-4 py-12 flex-1">
-          <div className="mb-10">
-            <h1 className="text-5xl font-bold mb-4 gradient-text">{t('article.list')}</h1>
-            <p className="text-muted text-lg">所有文章</p>
-          </div>
+        <PageHeader title={t('list')} description="所有文章" />
+        <main className="container flex-1 px-4 py-12 mx-auto">
           <ArticleList articles={articleList.records} />
           <Pagination
             current={articleList.current}
@@ -46,8 +45,9 @@ export default async function PostListPage({
     return (
       <>
         <Header />
-        <main className="container mx-auto px-4 py-8 flex-1">
-          <p>{t('noData')}</p>
+        <PageHeader title={t('list')} description="所有文章" />
+        <main className="container flex-1 px-4 py-8 mx-auto">
+          <p>{tCommon('noData')}</p>
         </main>
         <Footer />
       </>

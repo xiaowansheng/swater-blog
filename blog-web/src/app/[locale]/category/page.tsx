@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import PageHeader from '@/components/layout/PageHeader';
 import { categoryApi } from '@/lib/api/category';
 import { Link } from '@/lib/i18n/routing';
 import { ISR_REVALIDATE } from '@/lib/constants';
@@ -20,11 +21,8 @@ export default async function CategoryListPage({
     return (
       <>
         <Header />
-        <main className="container mx-auto px-4 py-12 flex-1">
-          <div className="mb-10">
-            <h1 className="text-5xl font-bold mb-4 gradient-text">{t('categories')}</h1>
-            <p className="text-muted text-lg">文章分类</p>
-          </div>
+        <PageHeader title={t('categories')} description="文章分类" />
+        <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((category) => (
               <Link
@@ -55,7 +53,8 @@ export default async function CategoryListPage({
     return (
       <>
         <Header />
-        <main className="container mx-auto px-4 py-8 flex-1">
+        <PageHeader title={t('categories')} description="文章分类" />
+        <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>
         <Footer />

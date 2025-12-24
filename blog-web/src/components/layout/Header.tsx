@@ -38,7 +38,7 @@ export default function Header() {
               setVisible(true);
             }
           } else {
-            setScrolled(true);
+            setScrolled(currentScrollY > 50);
             
             if (currentScrollY < 50) {
               setVisible(true);
@@ -56,13 +56,7 @@ export default function Header() {
       }
     };
 
-    if (isHomePage) {
-      handleScroll();
-    } else {
-      setScrolled(true);
-      setVisible(true);
-    }
-
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isHomePage, lastScrollY]);

@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import PageHeader from '@/components/layout/PageHeader';
 import { archiveApi } from '@/lib/api/archive';
 import { Link } from '@/lib/i18n/routing';
 import { ISR_REVALIDATE } from '@/lib/constants';
@@ -20,11 +21,8 @@ export default async function ArchiveListPage({
     return (
       <>
         <Header />
-        <main className="container mx-auto px-4 py-12 flex-1">
-          <div className="mb-10">
-            <h1 className="text-5xl font-bold mb-4 gradient-text">{t('archives')}</h1>
-            <p className="text-muted text-lg">文章归档</p>
-          </div>
+        <PageHeader title={t('archives')} description="文章归档" />
+        <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="space-y-4">
             {archives.map((archive) => (
               <Link
@@ -60,7 +58,8 @@ export default async function ArchiveListPage({
     return (
       <>
         <Header />
-        <main className="container mx-auto px-4 py-8 flex-1">
+        <PageHeader title={t('archives')} description="文章归档" />
+        <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>
         <Footer />

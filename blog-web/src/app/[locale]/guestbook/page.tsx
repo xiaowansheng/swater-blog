@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import PageHeader from '@/components/layout/PageHeader';
 import CommentList from '@/components/comment/CommentList';
 import CommentForm from '@/components/comment/CommentForm';
 import { guestbookApi } from '@/lib/api/guestbook';
@@ -22,10 +23,11 @@ export default async function GuestbookPage({
     return (
       <>
         <Header />
-        <main className="container mx-auto px-4 py-12 flex-1">
+        <PageHeader title={t('guestbook')} description="留下你的足迹" />
+        <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="mb-10">
-            <h1 className="text-5xl font-bold mb-4 gradient-text">{t('guestbook')}</h1>
-            <p className="text-muted text-lg">留下你的足迹</p>
+            <h1 className="mb-4 text-5xl font-bold gradient-text">{t('guestbook')}</h1>
+            <p className="text-lg text-muted">留下你的足迹</p>
           </div>
           <div className="mb-10">
             <CommentForm />
@@ -40,7 +42,8 @@ export default async function GuestbookPage({
     return (
       <>
         <Header />
-        <main className="container mx-auto px-4 py-8 flex-1">
+        <PageHeader title={t('guestbook')} description="留下你的足迹" />
+        <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>
         <Footer />
