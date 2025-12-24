@@ -96,11 +96,20 @@ export default function HeroSection({ articleCount, tagCount, categoryCount }: H
             </div>
           </div>
           <div className="mt-12 animate-bounce">
-            <a href="#articles" className="inline-block">
+            <button
+              onClick={() => {
+                const articlesElement = document.getElementById('articles');
+                if (articlesElement) {
+                  articlesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+              className="inline-block cursor-pointer"
+              aria-label="滚动到内容"
+            >
               <svg className="mx-auto w-6 h-6 transition-colors text-primary/60 hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
-            </a>
+            </button>
           </div>
         </div>
       </div>
