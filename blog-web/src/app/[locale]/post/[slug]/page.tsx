@@ -49,7 +49,7 @@ export default async function PostDetailPage({
         <ReadingProgress />
         <FloatingToolbar />
         <Header />
-        <main className="container mx-auto px-4 py-12 flex-1 max-w-4xl">
+        <main className="container mx-auto px-4 py-12 flex-1">
           <article className="bg-card border border-border rounded-2xl p-8 md:p-12 shadow-sm">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">{article.title}</h1>
             <ArticleMeta article={article} />

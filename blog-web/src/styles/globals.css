@@ -307,3 +307,7 @@ body::after {
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   border-color: rgba(129, 140, 248, 0.4);
 }
+
+.container {
+  max-width: 1280px;
+}
