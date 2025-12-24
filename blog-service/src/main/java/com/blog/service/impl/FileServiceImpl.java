@@ -49,7 +49,11 @@ public class FileServiceImpl implements FileService {
         }
 
         try {
-            StoragePlugin storagePlugin = storagePluginFactory.getPlugin();
+            List<StoragePlugin> plugins = storagePluginFactory.getPlugins();
+            if (plugins.isEmpty()) {
+                throw new BusinessException("未找到可用的存储插件");
+            }
+            StoragePlugin storagePlugin = plugins.get(0);
             String fileHash = storagePlugin.calculateHash(file);
             FileMeta existingFile = fileMetaMapper.selectOne(new LambdaQueryWrapper<FileMeta>()
                     .eq(FileMeta::getFileHash, fileHash)
@@ -127,8 +131,10 @@ public class FileServiceImpl implements FileService {
         
         if (fileMeta.getRefCount() <= 0) {
             try {
-                StoragePlugin storagePlugin = storagePluginFactory.getPlugin();
-                storagePlugin.delete(fileMeta.getFilePath());
+                List<StoragePlugin> plugins = storagePluginFactory.getPlugins();
+                if (!plugins.isEmpty()) {
+                    plugins.get(0).delete(fileMeta.getFilePath());
+                }
             } catch (Exception e) {
                 throw new BusinessException("文件删除失败: " + e.getMessage());
             }

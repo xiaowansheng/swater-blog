@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class MessageQueuePluginFactory {
@@ -11,12 +12,11 @@ public class MessageQueuePluginFactory {
     @Autowired
     private List<MessageQueuePlugin> messageQueuePlugins;
     
-    public MessageQueuePlugin getPlugin() {
+    public List<MessageQueuePlugin> getPlugins() {
         return messageQueuePlugins.stream()
                 .filter(plugin -> plugin instanceof com.blog.plugin.core.Plugin)
                 .filter(plugin -> ((com.blog.plugin.core.Plugin) plugin).isEnabled())
-                .findFirst()
-                .orElse(null);
+                .collect(Collectors.toList());
     }
 }
 

@@ -90,9 +90,15 @@ public class AuthServiceImpl implements AuthService {
                 
                 if (locationProviderFactory != null) {
                     try {
-                        LocationProviderPlugin locationProvider = locationProviderFactory.getProvider();
-                        if (locationProvider != null) {
-                            LocationInfo locationInfo = locationProvider.getLocationInfo(ip);
+                        List<LocationProviderPlugin> providers = locationProviderFactory.getProviders();
+                        LocationInfo locationInfo = null;
+                        for (LocationProviderPlugin locationProvider : providers) {
+                            locationInfo = locationProvider.getLocationInfo(ip);
+                            if (locationInfo != null) {
+                                break;
+                            }
+                        }
+                        if (locationInfo != null) {
                             if (locationInfo != null) {
                                 country = locationInfo.getCountry();
                                 province = locationInfo.getProvince();
@@ -103,7 +109,6 @@ public class AuthServiceImpl implements AuthService {
                                 if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
                                     ipAddress = locationInfo.getIpAddress();
                                 }
-                            }
                         }
                     } catch (Exception e) {
                         log.warn("IP定位失败，IP: {}", ip, e);

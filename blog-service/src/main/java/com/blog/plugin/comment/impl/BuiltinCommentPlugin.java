@@ -98,11 +98,14 @@ public class BuiltinCommentPlugin implements CommentProviderPlugin, Plugin {
         ProcessResult processResult = null;
         if (commentProcessorFactory != null) {
             try {
-                CommentProcessorPlugin processor = commentProcessorFactory.getProcessor();
-                if (processor != null) {
+                List<CommentProcessorPlugin> processors = commentProcessorFactory.getProcessors();
+                for (CommentProcessorPlugin processor : processors) {
                     processResult = processor.process(dto);
                     if (processResult != null && processResult.getProcessedContent() != null) {
                         dto.setContent(processResult.getProcessedContent());
+                    }
+                    if (processResult != null && (processResult.isSpam() || !processResult.isApproved())) {
+                        break;
                     }
                 }
             } catch (Exception e) {
@@ -118,9 +121,15 @@ public class BuiltinCommentPlugin implements CommentProviderPlugin, Plugin {
         
         if (locationProviderFactory != null && ip != null) {
             try {
-                LocationProviderPlugin locationProvider = locationProviderFactory.getProvider();
-                if (locationProvider != null) {
-                    LocationInfo locationInfo = locationProvider.getLocationInfo(ip);
+                List<LocationProviderPlugin> providers = locationProviderFactory.getProviders();
+                LocationInfo locationInfo = null;
+                for (LocationProviderPlugin locationProvider : providers) {
+                    locationInfo = locationProvider.getLocationInfo(ip);
+                    if (locationInfo != null) {
+                        break;
+                    }
+                }
+                if (locationInfo != null) {
                     if (locationInfo != null) {
                         comment.setCountry(locationInfo.getCountry());
                         comment.setProvince(locationInfo.getProvince());
@@ -139,9 +148,6 @@ public class BuiltinCommentPlugin implements CommentProviderPlugin, Plugin {
                     } else {
                         comment.setIpAddress(ip);
                     }
-                } else {
-                    comment.setIpAddress(ip);
-                }
             } catch (Exception e) {
                 log.warn("IP定位失败，IP: {}", ip, e);
                 comment.setIpAddress(ip);

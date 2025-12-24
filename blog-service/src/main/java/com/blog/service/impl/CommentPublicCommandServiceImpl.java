@@ -80,9 +80,15 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
         
         if (locationProviderFactory != null && ip != null) {
             try {
-                LocationProviderPlugin locationProvider = locationProviderFactory.getProvider();
-                if (locationProvider != null) {
-                    LocationInfo locationInfo = locationProvider.getLocationInfo(ip);
+                List<LocationProviderPlugin> providers = locationProviderFactory.getProviders();
+                LocationInfo locationInfo = null;
+                for (LocationProviderPlugin locationProvider : providers) {
+                    locationInfo = locationProvider.getLocationInfo(ip);
+                    if (locationInfo != null) {
+                        break;
+                    }
+                }
+                if (locationInfo != null) {
                     if (locationInfo != null) {
                         comment.setCountry(locationInfo.getCountry());
                         comment.setProvince(locationInfo.getProvince());
@@ -101,9 +107,6 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
                     } else {
                         comment.setIpAddress(ip);
                     }
-                } else {
-                    comment.setIpAddress(ip);
-                }
             } catch (Exception e) {
                 log.warn("IP定位失败，IP: {}", ip, e);
                 comment.setIpAddress(ip);

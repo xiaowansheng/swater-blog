@@ -71,9 +71,15 @@ public class VisitorServiceImpl implements VisitorService {
             
             if (locationProviderFactory != null) {
                 try {
-                    LocationProviderPlugin locationProvider = locationProviderFactory.getProvider();
-                    if (locationProvider != null) {
-                        LocationInfo locationInfo = locationProvider.getLocationInfo(dto.getIp());
+                    List<LocationProviderPlugin> providers = locationProviderFactory.getProviders();
+                    LocationInfo locationInfo = null;
+                    for (LocationProviderPlugin locationProvider : providers) {
+                        locationInfo = locationProvider.getLocationInfo(dto.getIp());
+                        if (locationInfo != null) {
+                            break;
+                        }
+                    }
+                    if (locationInfo != null) {
                         if (locationInfo != null) {
                             visitor.setCountry(locationInfo.getCountry());
                             visitor.setProvince(locationInfo.getProvince());
@@ -92,9 +98,6 @@ public class VisitorServiceImpl implements VisitorService {
                         } else {
                             visitor.setIpAddress(dto.getIp());
                         }
-                    } else {
-                        visitor.setIpAddress(dto.getIp());
-                    }
                 } catch (Exception e) {
                     log.warn("IP定位失败，IP: {}", dto.getIp(), e);
                     visitor.setIpAddress(dto.getIp());
@@ -110,9 +113,15 @@ public class VisitorServiceImpl implements VisitorService {
             
             if (visitor.getCountry() == null && locationProviderFactory != null) {
                 try {
-                    LocationProviderPlugin locationProvider = locationProviderFactory.getProvider();
-                    if (locationProvider != null) {
-                        LocationInfo locationInfo = locationProvider.getLocationInfo(dto.getIp());
+                    List<LocationProviderPlugin> providers = locationProviderFactory.getProviders();
+                    LocationInfo locationInfo = null;
+                    for (LocationProviderPlugin locationProvider : providers) {
+                        locationInfo = locationProvider.getLocationInfo(dto.getIp());
+                        if (locationInfo != null) {
+                            break;
+                        }
+                    }
+                    if (locationInfo != null) {
                         if (locationInfo != null) {
                             visitor.setCountry(locationInfo.getCountry());
                             visitor.setProvince(locationInfo.getProvince());

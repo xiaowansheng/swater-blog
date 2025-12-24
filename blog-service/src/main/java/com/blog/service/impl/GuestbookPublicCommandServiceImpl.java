@@ -43,9 +43,15 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
         
         if (locationProviderFactory != null && ip != null) {
             try {
-                LocationProviderPlugin locationProvider = locationProviderFactory.getProvider();
-                if (locationProvider != null) {
-                    LocationInfo locationInfo = locationProvider.getLocationInfo(ip);
+                List<LocationProviderPlugin> providers = locationProviderFactory.getProviders();
+                LocationInfo locationInfo = null;
+                for (LocationProviderPlugin locationProvider : providers) {
+                    locationInfo = locationProvider.getLocationInfo(ip);
+                    if (locationInfo != null) {
+                        break;
+                    }
+                }
+                if (locationInfo != null) {
                     if (locationInfo != null) {
                         guestbook.setCountry(locationInfo.getCountry());
                         guestbook.setProvince(locationInfo.getProvince());
@@ -64,9 +70,6 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
                     } else {
                         guestbook.setIpAddress(ip);
                     }
-                } else {
-                    guestbook.setIpAddress(ip);
-                }
             } catch (Exception e) {
                 log.warn("IP定位失败，IP: {}", ip, e);
                 guestbook.setIpAddress(ip);

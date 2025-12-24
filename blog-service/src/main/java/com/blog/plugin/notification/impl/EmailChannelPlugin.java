@@ -32,16 +32,17 @@ public class EmailChannelPlugin implements NotificationChannelPlugin, Plugin {
     
     @Override
     public boolean isEnabled() {
-        EmailProviderPlugin provider = emailProviderFactory.getProvider();
-        return provider != null;
+        List<EmailProviderPlugin> providers = emailProviderFactory.getProviders();
+        return !providers.isEmpty();
     }
     
     @Override
     public void send(Long userId, String type, String title, String content) throws Exception {
-        EmailProviderPlugin provider = emailProviderFactory.getProvider();
-        if (provider == null) {
+        List<EmailProviderPlugin> providers = emailProviderFactory.getProviders();
+        if (providers.isEmpty()) {
             throw new IllegalStateException("邮件服务提供者未配置");
         }
+        EmailProviderPlugin provider = providers.get(0);
         
         User user = userMapper.selectOne(new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<User>()
                 .eq(User::getId, userId)

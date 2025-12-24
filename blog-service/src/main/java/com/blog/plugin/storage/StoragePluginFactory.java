@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class StoragePluginFactory {
@@ -11,11 +12,10 @@ public class StoragePluginFactory {
     @Autowired
     private List<StoragePlugin> storagePlugins;
     
-    public StoragePlugin getPlugin() {
+    public List<StoragePlugin> getPlugins() {
         return storagePlugins.stream()
                 .filter(plugin -> plugin instanceof com.blog.plugin.core.Plugin)
                 .filter(plugin -> ((com.blog.plugin.core.Plugin) plugin).isEnabled())
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("未找到可用的存储插件"));
+                .collect(Collectors.toList());
     }
 }
