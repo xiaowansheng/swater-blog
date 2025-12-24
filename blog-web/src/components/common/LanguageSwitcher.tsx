@@ -2,6 +2,7 @@
 
 import { usePathname } from '@/lib/i18n/routing';
 import { useRouter } from '@/lib/i18n/routing';
+import { useTheme } from '@/lib/utils/theme';
 
 const locales = [
   { code: 'zh', name: '中文' },
@@ -15,9 +16,27 @@ interface LanguageSwitcherProps {
 export default function LanguageSwitcher({ scrolled = true }: LanguageSwitcherProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { theme, mounted } = useTheme();
 
   const handleChange = (locale: string) => {
     router.replace(pathname, { locale });
+  };
+
+  const getOptionStyle = () => {
+    if (!scrolled && mounted) {
+      if (theme === 'dark') {
+        return {
+          backgroundColor: 'rgba(50, 50, 50, 0.95)',
+          color: 'white'
+        };
+      } else {
+        return {
+          backgroundColor: 'rgba(240, 240, 240, 0.95)',
+          color: 'black'
+        };
+      }
+    }
+    return {};
   };
 
   return (
@@ -36,10 +55,7 @@ export default function LanguageSwitcher({ scrolled = true }: LanguageSwitcherPr
         <option 
           key={locale.code} 
           value={locale.code}
-          style={!scrolled ? {
-            backgroundColor: 'rgba(100, 100, 100, 0)',
-            color: 'black'
-          } : {}}
+          style={getOptionStyle()}
         >
           {locale.name}
         </option>
