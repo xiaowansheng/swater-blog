@@ -3,6 +3,7 @@ package com.blog.service;
 import com.blog.constant.ExchangeConstant;
 import com.blog.constant.QueueConstant;
 import com.blog.model.message.NotificationMessage;
+import com.blog.plugin.core.Plugin;
 import com.blog.plugin.mq.MessageQueuePlugin;
 import com.blog.plugin.mq.MessageQueuePluginFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,7 @@ public class MQService {
         }
         
         MessageQueuePlugin plugin = plugins.stream()
-                .filter(MessageQueuePlugin::isEnabled)
+                .filter(p -> p instanceof Plugin && ((Plugin) p).isEnabled())
                 .findFirst()
                 .orElse(null);
         
@@ -44,7 +45,8 @@ public class MQService {
             String routingKey = getRoutingKey(message.getType());
             plugin.send(ExchangeConstant.NOTIFICATION_EXCHANGE, routingKey, message);
         } catch (Exception e) {
-            log.error("发送通知消息到MQ失败，插件: {}", plugin.getName(), e);
+            String pluginName = plugin instanceof Plugin ? ((Plugin) plugin).getName() : "unknown";
+            log.error("发送通知消息到MQ失败，插件: {}", pluginName, e);
         }
     }
     
