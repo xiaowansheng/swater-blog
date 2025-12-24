@@ -12,7 +12,10 @@ import com.blog.model.entity.Talk;
 import com.blog.model.entity.User;
 import com.blog.model.vo.CommentVO;
 import com.blog.plugin.comment.CommentProviderPlugin;
+import com.blog.plugin.comment.processor.CommentProcessorFactory;
+import com.blog.plugin.comment.processor.CommentProcessorPlugin;
 import com.blog.plugin.core.Plugin;
+import com.blog.plugin.core.ProcessResult;
 import com.blog.plugin.location.LocationInfo;
 import com.blog.plugin.location.LocationProviderFactory;
 import com.blog.plugin.location.LocationProviderPlugin;
@@ -54,6 +57,9 @@ public class BuiltinCommentPlugin implements CommentProviderPlugin, Plugin {
     @Autowired(required = false)
     private LocationProviderFactory locationProviderFactory;
     
+    @Autowired(required = false)
+    private CommentProcessorFactory commentProcessorFactory;
+    
     @Override
     public String getName() {
         return "builtin";
@@ -86,6 +92,21 @@ public class BuiltinCommentPlugin implements CommentProviderPlugin, Plugin {
             Talk talk = talkMapper.selectById(dto.getMomentId());
             if (talk == null || talk.getDeleted() == 1) {
                 throw new IllegalArgumentException("说说不存在");
+            }
+        }
+        
+        ProcessResult processResult = null;
+        if (commentProcessorFactory != null) {
+            try {
+                CommentProcessorPlugin processor = commentProcessorFactory.getProcessor();
+                if (processor != null) {
+                    processResult = processor.process(dto);
+                    if (processResult != null && processResult.getProcessedContent() != null) {
+                        dto.setContent(processResult.getProcessedContent());
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("评论处理失败", e);
             }
         }
         
@@ -155,7 +176,15 @@ public class BuiltinCommentPlugin implements CommentProviderPlugin, Plugin {
             comment.setImages("[]");
         }
         
-        comment.setStatus(0);
+        if (processResult != null) {
+            if (processResult.isSpam() || !processResult.isApproved()) {
+                comment.setStatus(0);
+            } else {
+                comment.setStatus(1);
+            }
+        } else {
+            comment.setStatus(0);
+        }
         comment.setIsVisible(0);
         
         commentMapper.insert(comment);

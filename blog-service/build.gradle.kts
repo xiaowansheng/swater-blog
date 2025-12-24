@@ -52,6 +52,8 @@ dependencies {
     
     implementation("com.rometools:rome:2.1.0")
     
+    implementation("org.jsoup:jsoup:1.17.2")
+    
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
