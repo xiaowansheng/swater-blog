@@ -12,6 +12,7 @@ import com.blog.service.ArticleAdminCommandService;
 import com.blog.util.BeanUtil;
 import com.blog.util.KeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,6 +68,7 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
 
     @Override
     @Transactional
+    @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public void update(Long id, ArticleDTO dto) {
         Article article = articleMapper.selectById(id);
         if (article == null || article.getDeleted() == 1) {
@@ -104,6 +106,7 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
 
     @Override
     @Transactional
+    @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public void delete(Long id) {
         Article article = articleMapper.selectById(id);
         if (article == null || article.getDeleted() == 1) {
@@ -125,6 +128,7 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
 
     @Override
     @Transactional
+    @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public void publish(Long id) {
         Article article = articleMapper.selectById(id);
         if (article == null || article.getDeleted() == 1) {
@@ -142,6 +146,7 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
 
     @Override
     @Transactional
+    @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public void unpublish(Long id) {
         Article article = articleMapper.selectById(id);
         if (article == null || article.getDeleted() == 1) {

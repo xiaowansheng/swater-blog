@@ -19,6 +19,8 @@ import com.blog.util.BeanUtil;
 import com.blog.util.PageUtil;
 import com.blog.util.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +66,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "user", key = "#id")
     public UserVO getById(Long id) {
         User user = userMapper.selectById(id);
         if (user == null || user.getDeleted() == 1) {
@@ -117,6 +120,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "user", key = "#id")
     public void update(Long id, UserDTO dto) {
         User user = userMapper.selectById(id);
         if (user == null || user.getDeleted() == 1) {
@@ -167,6 +171,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "user", key = "#id")
     public void delete(Long id) {
         User user = userMapper.selectById(id);
         if (user == null || user.getDeleted() == 1) {
@@ -180,6 +185,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "user", key = "#id")
     public void resetPassword(Long id, ResetPasswordDTO dto) {
         User user = userMapper.selectById(id);
         if (user == null || user.getDeleted() == 1) {
@@ -193,6 +199,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "user", key = "#id")
     public void assignRoles(Long id, List<Long> roleIds) {
         User user = userMapper.selectById(id);
         if (user == null || user.getDeleted() == 1) {

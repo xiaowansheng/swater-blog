@@ -17,6 +17,7 @@ import com.blog.service.PageViewService;
 import com.blog.util.BeanUtil;
 import com.blog.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,6 +40,7 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
     private PageViewService pageViewService;
 
     @Override
+    @Cacheable(value = "article:list", key = "#page + ':' + #size + ':' + (#categoryId != null ? #categoryId : 'null') + ':' + (#tagId != null ? #tagId : 'null') + ':' + (#keyword != null ? #keyword : 'null')")
     public PageResult<ArticleVO> list(Long page, Long size, Long categoryId, Long tagId, String keyword) {
         Page<Article> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
@@ -73,6 +75,7 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
     }
 
     @Override
+    @Cacheable(value = "article", key = "#id")
     public ArticleVO getById(Long id) {
         Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
                 .eq(Article::getId, id)
@@ -89,6 +92,7 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
     }
 
     @Override
+    @Cacheable(value = "article:slug", key = "#slug")
     public ArticleVO getBySlug(String slug) {
         Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
                 .eq(Article::getSlug, slug)
@@ -105,6 +109,7 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
     }
 
     @Override
+    @Cacheable(value = "article:hot", key = "#limit != null ? #limit : 10")
     public List<ArticleVO> getHotArticles(Integer limit) {
         List<Article> articles = articleMapper.selectHotArticles(limit != null ? limit : 10);
         return articles.stream()
@@ -113,6 +118,7 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
     }
 
     @Override
+    @Cacheable(value = "article:latest", key = "#limit != null ? #limit : 10")
     public List<ArticleVO> getLatestArticles(Integer limit) {
         List<Article> articles = articleMapper.selectLatestArticles(limit != null ? limit : 10);
         return articles.stream()

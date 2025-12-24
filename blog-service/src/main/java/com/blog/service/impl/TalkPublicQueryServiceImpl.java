@@ -15,6 +15,7 @@ import com.blog.util.BeanUtil;
 import com.blog.util.JsonUtil;
 import com.blog.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ public class TalkPublicQueryServiceImpl implements TalkPublicQueryService {
     private PageViewService pageViewService;
 
     @Override
+    @Cacheable(value = "talk:list", key = "#page + ':' + #size")
     public PageResult<TalkVO> list(Long page, Long size) {
         Page<Talk> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Talk> wrapper = new LambdaQueryWrapper<>();
@@ -48,6 +50,7 @@ public class TalkPublicQueryServiceImpl implements TalkPublicQueryService {
     }
 
     @Override
+    @Cacheable(value = "talk", key = "#id")
     public TalkVO getById(Long id) {
         Talk talk = talkMapper.selectOne(new LambdaQueryWrapper<Talk>()
                 .eq(Talk::getId, id)

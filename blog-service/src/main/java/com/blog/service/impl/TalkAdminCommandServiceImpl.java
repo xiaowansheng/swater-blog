@@ -12,6 +12,7 @@ import com.blog.util.BeanUtil;
 import com.blog.util.JsonUtil;
 import com.blog.util.KeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +63,7 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public void update(Long id, TalkDTO dto) {
         Talk talk = talkMapper.selectById(id);
         if (talk == null || talk.getDeleted() == 1) {
@@ -88,6 +90,7 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public void delete(Long id) {
         Talk talk = talkMapper.selectById(id);
         if (talk == null || talk.getDeleted() == 1) {
@@ -100,6 +103,7 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public void setTop(Long id) {
         Talk talk = talkMapper.selectById(id);
         if (talk == null || talk.getDeleted() == 1) {
@@ -111,6 +115,7 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public void cancelTop(Long id) {
         Talk talk = talkMapper.selectById(id);
         if (talk == null || talk.getDeleted() == 1) {
