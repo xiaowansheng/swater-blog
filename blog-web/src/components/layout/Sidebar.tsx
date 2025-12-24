@@ -15,14 +15,15 @@ export default async function Sidebar({ categories = [], tags = [], hotArticles 
     <aside className="w-full md:w-64 space-y-6">
       {categories.length > 0 && (
         <div className="modern-card p-6 relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-20"></div>
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-accent to-primary opacity-30"></div>
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-accent to-transparent opacity-20"></div>
           <h3 className="font-bold mb-5 text-lg flex items-center gap-2.5 relative">
-            <span className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
+            <span className="p-2 rounded-lg bg-gradient-to-br from-primary/25 to-accent/25 shadow-sm shadow-primary/20">
               <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </span>
-            {t('categories')}
+            <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">{t('categories')}</span>
           </h3>
           <ul className="space-y-1.5">
             {categories.slice(0, 10).map((category) => (
@@ -49,14 +50,15 @@ export default async function Sidebar({ categories = [], tags = [], hotArticles 
 
       {tags.length > 0 && (
         <div className="modern-card p-6 relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-20"></div>
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-accent to-primary opacity-30"></div>
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-accent to-transparent opacity-20"></div>
           <h3 className="font-bold mb-5 text-lg flex items-center gap-2.5 relative">
-            <span className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
+            <span className="p-2 rounded-lg bg-gradient-to-br from-primary/25 to-accent/25 shadow-sm shadow-primary/20">
               <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
               </svg>
             </span>
-            {t('tags')}
+            <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">{t('tags')}</span>
           </h3>
           <div className="flex flex-wrap gap-2">
             {tags.slice(0, 20).map((tag) => (
@@ -75,19 +77,20 @@ export default async function Sidebar({ categories = [], tags = [], hotArticles 
 
       {hotArticles.length > 0 && (
         <div className="modern-card p-6 relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-20"></div>
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-accent to-primary opacity-30"></div>
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-accent to-transparent opacity-20"></div>
           <h3 className="font-bold mb-5 text-lg flex items-center gap-2.5 relative">
-            <span className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
+            <span className="p-2 rounded-lg bg-gradient-to-br from-primary/25 to-accent/25 shadow-sm shadow-primary/20">
               <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </span>
-            热门文章
+            <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">热门文章</span>
           </h3>
           <ul className="space-y-3">
             {hotArticles.map((article, index) => (
               <li key={article.id} className="flex items-start gap-3 group">
-                <span className="flex-shrink-0 w-7 h-7 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 text-primary text-xs font-bold flex items-center justify-center mt-0.5 shadow-sm group-hover:scale-110 transition-transform">
+                <span className="flex-shrink-0 w-7 h-7 rounded-lg bg-gradient-to-br from-primary/25 to-accent/25 text-primary text-xs font-bold flex items-center justify-center mt-0.5 shadow-sm shadow-primary/20 group-hover:scale-110 group-hover:shadow-md group-hover:shadow-primary/30 transition-all">
                   {index + 1}
                 </span>
                 <Link

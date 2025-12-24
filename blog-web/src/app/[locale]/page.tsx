@@ -3,6 +3,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Sidebar from '@/components/layout/Sidebar';
 import ArticleList from '@/components/article/ArticleList';
+import HeroSection from '@/components/home/HeroSection';
 import { articleApi } from '@/lib/api/article';
 import { categoryApi } from '@/lib/api/category';
 import { tagApi } from '@/lib/api/tag';
@@ -45,17 +46,14 @@ export default async function HomePage() {
   return (
     <>
       <Header />
-      <main className="container mx-auto px-4 py-16 flex-1 relative z-10">
+      <HeroSection 
+        articleCount={articleList.total || 0}
+        tagCount={tags.length}
+        categoryCount={categories.length}
+      />
+      <main id="articles" className="container mx-auto px-4 py-16 flex-1 relative z-10">
         <div className="flex gap-8">
           <div className="flex-1">
-            <div className="mb-12 relative">
-              <div className="absolute -top-4 -left-4 w-32 h-32 bg-primary/10 rounded-full blur-3xl opacity-50"></div>
-              <h1 className="text-6xl font-extrabold mb-6 gradient-text relative z-10">{t('home')}</h1>
-              <p className="text-muted text-xl relative z-10 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-accent animate-pulse"></span>
-                分享技术，记录生活
-              </p>
-            </div>
             {articleList.records.length > 0 ? (
               <ArticleList articles={articleList.records} />
             ) : (
@@ -75,7 +73,7 @@ export default async function HomePage() {
               </div>
             )}
           </div>
-            <Sidebar categories={categories} tags={tags} hotArticles={hotArticles} />
+          <Sidebar categories={categories} tags={tags} hotArticles={hotArticles} />
         </div>
       </main>
       <Footer />

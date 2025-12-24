@@ -20,7 +20,7 @@ export default function LanguageSwitcher() {
   return (
     <select
       onChange={(e) => handleChange(e.target.value)}
-      className="px-3 py-1 border rounded bg-background"
+      className="px-3 py-1.5 border rounded-lg bg-background/80 backdrop-blur-sm text-sm font-medium transition-all hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
     >
       {locales.map((locale) => (
         <option key={locale.code} value={locale.code}>

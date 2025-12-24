@@ -44,8 +44,11 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
             </div>
           </div>
           <div className="p-6 relative">
-            <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <h2 className="text-2xl font-bold mb-3 line-clamp-2 group-hover:text-primary transition-all duration-300 bg-gradient-to-r from-foreground to-foreground bg-[length:200%_100%] group-hover:bg-[length:100%_100%] bg-clip-text">{article.title}</h2>
+            <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <h2 className="text-2xl font-bold mb-3 line-clamp-2 group-hover:text-primary transition-all duration-300 bg-gradient-to-r from-foreground via-foreground/90 to-foreground bg-[length:200%_100%] group-hover:bg-[length:100%_100%] bg-clip-text relative">
+              {article.title}
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent group-hover:w-full transition-all duration-500 rounded-full"></span>
+            </h2>
             {article.excerpt && (
               <p className="text-foreground/70 mb-4 line-clamp-2 leading-relaxed">{article.excerpt}</p>
             )}
@@ -78,8 +81,11 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
       className="group modern-card p-6 relative"
     >
       <Link href={`/post/${article.slug}`}>
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <h2 className="text-2xl font-bold mb-3 group-hover:text-primary transition-all duration-300 bg-gradient-to-r from-foreground to-foreground bg-[length:200%_100%] group-hover:bg-[length:100%_100%] bg-clip-text">{article.title}</h2>
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <h2 className="text-2xl font-bold mb-3 group-hover:text-primary transition-all duration-300 bg-gradient-to-r from-foreground via-foreground/90 to-foreground bg-[length:200%_100%] group-hover:bg-[length:100%_100%] bg-clip-text relative">
+          {article.title}
+          <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent group-hover:w-full transition-all duration-500 rounded-full"></span>
+        </h2>
         {article.excerpt && (
           <p className="text-foreground/70 mb-4 line-clamp-2 leading-relaxed">{article.excerpt}</p>
         )}
