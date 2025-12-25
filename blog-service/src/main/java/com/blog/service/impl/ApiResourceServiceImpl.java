@@ -8,6 +8,7 @@ import com.blog.model.vo.ApiResourceVO;
 import com.blog.service.ApiResourceService;
 import com.blog.util.ApiResourceScanner;
 import com.blog.util.BeanUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +53,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
         if (api == null || api.getDeleted() == 1) {
             return;
         }
-        BeanUtil.copyProperties(dto, api);
+        BeanUtils.copyProperties(dto, api);
         sysApiMapper.updateById(api);
     }
 

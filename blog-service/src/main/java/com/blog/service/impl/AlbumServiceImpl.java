@@ -16,6 +16,7 @@ import com.blog.service.AlbumService;
 import com.blog.util.BeanUtil;
 import com.blog.util.KeyUtil;
 import com.blog.util.PageUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,7 +93,7 @@ public class AlbumServiceImpl implements AlbumService {
             throw new BusinessException("相册不存在");
         }
 
-        BeanUtil.copyProperties(dto, album);
+        BeanUtils.copyProperties(dto, album);
         albumMapper.updateById(album);
     }
 

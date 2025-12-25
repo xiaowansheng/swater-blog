@@ -11,6 +11,7 @@ import com.blog.model.vo.MenuVO;
 import com.blog.service.MenuService;
 import com.blog.util.BeanUtil;
 import com.blog.util.KeyUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,7 +109,7 @@ public class MenuServiceImpl implements MenuService {
             }
         }
 
-        BeanUtil.copyProperties(dto, menu);
+        BeanUtils.copyProperties(dto, menu);
         sysMenuMapper.updateById(menu);
 
         if (dto.getRoleIds() != null) {

@@ -10,6 +10,7 @@ import com.blog.model.vo.FriendLinkVO;
 import com.blog.service.FriendLinkService;
 import com.blog.util.BeanUtil;
 import com.blog.util.PageUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,7 +72,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
         if (friendLink == null || friendLink.getDeleted() == 1) {
             return;
         }
-        BeanUtil.copyProperties(dto, friendLink);
+        BeanUtils.copyProperties(dto, friendLink);
         friendLinkMapper.updateById(friendLink);
     }
 

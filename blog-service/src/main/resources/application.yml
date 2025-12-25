@@ -93,7 +93,7 @@ location:
 # 搜索引擎插件配置
 search:
   provider:
-    type: elasticsearch  # elasticsearch/mysql-fulltext/solr
+    type: database  # database/elasticsearch/mysql-fulltext/solr
 
 # 消息队列插件配置
 mq:

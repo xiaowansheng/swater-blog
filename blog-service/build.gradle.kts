@@ -22,6 +22,7 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
@@ -35,7 +36,8 @@ dependencies {
     implementation("cn.dev33:sa-token-redis-jackson:1.38.0")
     
     implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
-    
+    implementation("co.elastic.clients:elasticsearch-java")
+
     implementation("org.springframework.boot:spring-boot-starter-quartz")
     
     implementation("io.springfox:springfox-boot-starter:3.0.0")
