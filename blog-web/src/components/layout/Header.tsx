@@ -141,6 +141,24 @@ export default function Header() {
             <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all group-hover:w-3/4 rounded-full"></span>
             <span className="absolute inset-0 bg-gradient-to-r rounded-xl opacity-0 transition-opacity from-primary/0 via-primary/5 to-accent/0 group-hover:opacity-100"></span>
           </Link>
+          <Link href="/friend-link" className={`px-4 py-2 text-sm font-medium transition-all relative group rounded-xl backdrop-blur-sm ${
+            scrolled 
+              ? 'text-foreground/70 hover:text-primary hover:bg-primary/10' 
+              : 'text-white/90 hover:text-white hover:bg-white/10'
+          }`}>
+            {t('friendLinks')}
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all group-hover:w-3/4 rounded-full"></span>
+            <span className="absolute inset-0 bg-gradient-to-r rounded-xl opacity-0 transition-opacity from-primary/0 via-primary/5 to-accent/0 group-hover:opacity-100"></span>
+          </Link>
+          <Link href="/moment" className={`px-4 py-2 text-sm font-medium transition-all relative group rounded-xl backdrop-blur-sm ${
+            scrolled 
+              ? 'text-foreground/70 hover:text-primary hover:bg-primary/10' 
+              : 'text-white/90 hover:text-white hover:bg-white/10'
+          }`}>
+            {t('moments')}
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all group-hover:w-3/4 rounded-full"></span>
+            <span className="absolute inset-0 bg-gradient-to-r rounded-xl opacity-0 transition-opacity from-primary/0 via-primary/5 to-accent/0 group-hover:opacity-100"></span>
+          </Link>
         </nav>
 
         <div className="flex gap-2 items-center">

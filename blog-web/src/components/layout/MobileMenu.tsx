@@ -86,6 +86,20 @@ export default function MobileMenu({ open, onClose }: MobileMenuProps) {
                   >
                     {t('about')}
                   </Link>
+                  <Link
+                    href="/friend-link"
+                    onClick={onClose}
+                    className="px-4 py-3 rounded-lg hover:bg-secondary transition-colors text-lg font-medium"
+                  >
+                    {t('friendLinks')}
+                  </Link>
+                  <Link
+                    href="/moment"
+                    onClick={onClose}
+                    className="px-4 py-3 rounded-lg hover:bg-secondary transition-colors text-lg font-medium"
+                  >
+                    {t('moments')}
+                  </Link>
                 </nav>
               </Dialog.Panel>
             </Transition.Child>
