@@ -1,6 +1,8 @@
 'use client';
 
+import { useRef, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { MomentVO } from '@/types';
 import { formatDate } from '@/lib/utils/format';
@@ -9,11 +11,30 @@ interface MomentItemProps {
   moment: MomentVO;
 }
 
+const MAX_HEIGHT = 120;
+
 export default function MomentItem({ moment }: MomentItemProps) {
   const t = useTranslations('common');
+  const router = useRouter();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [shouldTruncate, setShouldTruncate] = useState(false);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      const height = contentRef.current.scrollHeight;
+      setShouldTruncate(height > MAX_HEIGHT);
+    }
+  }, [moment.content]);
+
+  const handleClick = () => {
+    router.push(`/moment/${moment.id}`);
+  };
 
   return (
-    <article className="p-6 rounded-2xl bg-card border border-border hover:shadow-lg transition-all">
+    <article 
+      className="p-6 rounded-2xl bg-card border border-border hover:shadow-lg transition-all cursor-pointer"
+      onClick={handleClick}
+    >
       <div className="flex gap-4 items-start mb-4">
         {moment.authorAvatar && (
           <Image
@@ -31,9 +52,16 @@ export default function MomentItem({ moment }: MomentItemProps) {
               {formatDate(moment.createTime)}
             </span>
           </div>
-          <div className="prose prose-sm max-w-none dark:prose-invert">
-            <p className="whitespace-pre-wrap break-words">{moment.content}</p>
-          </div>
+          <div 
+            ref={contentRef}
+            className="prose prose-sm max-w-none dark:prose-invert overflow-hidden relative"
+            style={shouldTruncate ? { 
+              maxHeight: `${MAX_HEIGHT}px`,
+              maskImage: 'linear-gradient(to bottom, black calc(100% - 20px), transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 20px), transparent 100%)'
+            } : {}}
+            dangerouslySetInnerHTML={{ __html: moment.content }}
+          />
         </div>
       </div>
 
