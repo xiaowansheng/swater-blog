@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MomentImages from '@/components/moment/MomentImages';
 import { momentApi } from '@/lib/api/moment';
 import { formatDate } from '@/lib/utils/format';
 import { ISR_REVALIDATE } from '@/lib/constants';
@@ -72,24 +73,10 @@ export default async function MomentDetailPage({
             />
 
             {moment.images && moment.images.length > 0 && (
-              <div className={`grid gap-4 mt-6 ${
-                moment.images.length === 1 
-                  ? 'grid-cols-1 max-w-md' 
-                  : moment.images.length === 2 
-                  ? 'grid-cols-2 max-w-2xl'
-                  : 'grid-cols-3 max-w-3xl'
-              }`}>
-                {moment.images.map((img, idx) => (
-                  <div key={idx} className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                    <Image
-                      src={img}
-                      alt={`${moment.content.substring(0, 20)}...`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
+              <MomentImages 
+                images={moment.images} 
+                alt={moment.content.substring(0, 20)}
+              />
             )}
 
             <div className="flex gap-6 items-center pt-6 mt-6 border-t border-border text-sm text-muted-foreground">

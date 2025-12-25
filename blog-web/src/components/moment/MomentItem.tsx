@@ -135,6 +135,7 @@ export default function MomentItem({ moment }: MomentItemProps) {
                 alt={`${moment.content.substring(0, 20)}...`}
                 fill
                 className="object-cover"
+                loading="lazy"
               />
             </div>
           ))}
