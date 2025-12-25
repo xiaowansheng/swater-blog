@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { MomentVO } from '@/types';
 import { formatDate } from '@/lib/utils/format';
+import ImagePreview from '@/components/ImagePreview';
 
 interface MomentItemProps {
   moment: MomentVO;
@@ -23,6 +24,8 @@ export default function MomentItem({ moment }: MomentItemProps) {
   const [shouldTruncate, setShouldTruncate] = useState(false);
   const [imagesPerRow, setImagesPerRow] = useState(3);
   const [displayCount, setDisplayCount] = useState(0);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState(0);
 
   useEffect(() => {
     if (contentRef.current) {
@@ -62,13 +65,14 @@ export default function MomentItem({ moment }: MomentItemProps) {
     return () => resizeObserver.disconnect();
   }, [moment.images]);
 
-  const handleClick = () => {
+  const handleContentClick = () => {
     router.push(`/moment/${moment.id}`);
   };
 
-  const handleImageClick = (e: React.MouseEvent) => {
+  const handleImageClick = (e: React.MouseEvent, index: number) => {
     e.stopPropagation();
-    router.push(`/moment/${moment.id}`);
+    setPreviewIndex(index);
+    setPreviewOpen(true);
   };
 
   const totalImages = moment.images?.length || 0;
@@ -77,8 +81,7 @@ export default function MomentItem({ moment }: MomentItemProps) {
 
   return (
     <article 
-      className="p-6 transition-all border cursor-pointer rounded-2xl bg-card border-border hover:shadow-lg"
-      onClick={handleClick}
+      className="p-6 transition-all border rounded-2xl bg-card border-border hover:shadow-lg"
     >
       <div className="flex items-start gap-4 mb-4">
         {moment.authorAvatar && (
@@ -99,12 +102,13 @@ export default function MomentItem({ moment }: MomentItemProps) {
           </div>
           <div 
             ref={contentRef}
-            className="relative overflow-hidden prose-sm prose max-w-none dark:prose-invert"
+            className="relative overflow-hidden prose-sm prose cursor-pointer max-w-none dark:prose-invert"
             style={shouldTruncate ? { 
               maxHeight: `${MAX_HEIGHT}px`,
               maskImage: 'linear-gradient(to bottom, black calc(100% - 20px), transparent 100%)',
               WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 20px), transparent 100%)'
             } : {}}
+            onClick={handleContentClick}
             dangerouslySetInnerHTML={{ __html: moment.content }}
           />
         </div>
@@ -115,16 +119,16 @@ export default function MomentItem({ moment }: MomentItemProps) {
           ref={imageContainerRef}
           className="grid gap-2 mb-4"
           style={{ gridTemplateColumns: `repeat(${imagesPerRow}, 1fr)` }}
-          onClick={handleImageClick}
         >
           {displayImages.map((img, idx) => (
             <div 
               key={idx} 
-              className="relative overflow-hidden rounded-lg aspect-video bg-muted"
+              className="relative overflow-hidden rounded-lg cursor-pointer aspect-video bg-muted hover:opacity-90"
               style={{
                 minWidth: `${MIN_IMAGE_WIDTH}px`,
                 maxWidth: `${MAX_IMAGE_WIDTH}px`
               }}
+              onClick={(e) => handleImageClick(e, idx)}
             >
               <Image
                 src={img}
@@ -140,6 +144,10 @@ export default function MomentItem({ moment }: MomentItemProps) {
               style={{
                 minWidth: `${MIN_IMAGE_WIDTH}px`,
                 maxWidth: `${MAX_IMAGE_WIDTH}px`
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleContentClick();
               }}
             >
               <div className="text-center">
@@ -163,6 +171,15 @@ export default function MomentItem({ moment }: MomentItemProps) {
           <span>{moment.commentCount || 0}</span>
         </div>
       </div>
+
+      {moment.images && moment.images.length > 0 && (
+        <ImagePreview
+          images={moment.images}
+          open={previewOpen}
+          onOpenChange={setPreviewOpen}
+          initialIndex={previewIndex}
+        />
+      )}
     </article>
   );
 }
