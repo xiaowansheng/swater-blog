@@ -59,20 +59,6 @@ export default function MobileMenu({ open, onClose }: MobileMenuProps) {
                     {t('posts')}
                   </Link>
                   <Link
-                    href="/category"
-                    onClick={onClose}
-                    className="px-4 py-3 rounded-lg hover:bg-secondary transition-colors text-lg font-medium"
-                  >
-                    {t('categories')}
-                  </Link>
-                  <Link
-                    href="/tag"
-                    onClick={onClose}
-                    className="px-4 py-3 rounded-lg hover:bg-secondary transition-colors text-lg font-medium"
-                  >
-                    {t('tags')}
-                  </Link>
-                  <Link
                     href="/archive"
                     onClick={onClose}
                     className="px-4 py-3 rounded-lg hover:bg-secondary transition-colors text-lg font-medium"
@@ -80,11 +66,11 @@ export default function MobileMenu({ open, onClose }: MobileMenuProps) {
                     {t('archives')}
                   </Link>
                   <Link
-                    href="/about"
+                    href="/moment"
                     onClick={onClose}
                     className="px-4 py-3 rounded-lg hover:bg-secondary transition-colors text-lg font-medium"
                   >
-                    {t('about')}
+                    {t('moments')}
                   </Link>
                   <Link
                     href="/friend-link"
@@ -94,11 +80,11 @@ export default function MobileMenu({ open, onClose }: MobileMenuProps) {
                     {t('friendLinks')}
                   </Link>
                   <Link
-                    href="/moment"
+                    href="/about"
                     onClick={onClose}
                     className="px-4 py-3 rounded-lg hover:bg-secondary transition-colors text-lg font-medium"
                   >
-                    {t('moments')}
+                    {t('about')}
                   </Link>
                 </nav>
               </Dialog.Panel>
