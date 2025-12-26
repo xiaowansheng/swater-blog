@@ -27,8 +27,6 @@ server:
 spring:
   application:
     name: blog-dev
-  profiles:
-    active: dev
     
   # 开发环境数据源配置
   datasource:
