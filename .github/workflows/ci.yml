@@ -1,0 +1,196 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: blog_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+    
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    
+    - name: Grant execute permission for gradlew
+      run: chmod +x blog-service/gradlew
+      
+    - name: Run tests
+      run: |
+        cd blog-service
+        ./gradlew test --info
+      env:
+        SPRING_PROFILES_ACTIVE: test
+        DB_HOST: localhost
+        DB_PORT: 3306
+        DB_NAME: blog_test
+        DB_USER: root
+        DB_PASSWORD: root
+        REDIS_HOST: localhost
+        REDIS_PORT: 6379
+    
+    - name: Generate test report
+      uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: Backend Tests
+        path: blog-service/build/test-results/test/*.xml
+        reporter: java-junit
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: blog-service/build/reports/jacoco/test/jacocoTestReport.xml
+        flags: backend
+
+  test-frontend-admin:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: blog-admin/package-lock.json
+    
+    - name: Install dependencies
+      run: |
+        cd blog-admin
+        npm ci
+    
+    - name: Run linting
+      run: |
+        cd blog-admin
+        npm run lint
+    
+    - name: Run tests
+      run: |
+        cd blog-admin
+        npm test -- --coverage --watchAll=false
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: blog-admin/coverage/lcov.info
+        flags: frontend-admin
+
+  build-backend:
+    runs-on: ubuntu-latest
+    needs: test-backend
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+    
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    
+    - name: Build with Gradle
+      run: |
+        cd blog-service
+        chmod +x gradlew
+        ./gradlew clean build -x test
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: backend-jar
+        path: blog-service/build/libs/*.jar
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    needs: test-frontend-admin
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: blog-admin/package-lock.json
+    
+    - name: Build admin frontend
+      run: |
+        cd blog-admin
+        npm ci
+        npm run build
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-admin-dist
+        path: blog-admin/dist/
+
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'

@@ -1,0 +1,206 @@
+# ========================================
+# Swater Blog 完整部署方案
+# 包含前端、后端和所有依赖服务
+# ========================================
+
+version: '3.8'
+
+services:
+  # MySQL数据库
+  mysql:
+    image: mysql:8.0
+    container_name: swater-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root123456}
+      MYSQL_DATABASE: ${DB_NAME:-blog}
+      MYSQL_USER: ${DB_USER:-blog}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-blog123456}
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./blog-service/docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-time-zone='+08:00'
+      --innodb-buffer-pool-size=256M
+      --max-connections=200
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis缓存
+  redis:
+    image: redis:7-alpine
+    container_name: swater-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # RabbitMQ消息队列
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: swater-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-admin123}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Elasticsearch搜索引擎
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: swater-elasticsearch
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 后端服务
+  blog-service:
+    build:
+      context: ./blog-service
+      dockerfile: Dockerfile
+    container_name: swater-blog-service
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-blog}
+      DB_USER: ${DB_USER:-blog}
+      DB_PASSWORD: ${DB_PASSWORD:-blog123456}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin123}
+      ES_URIS: http://elasticsearch:9200
+      JAVA_OPTS: "-Xms512m -Xmx1024m -XX:+UseG1GC"
+    volumes:
+      - blog_logs:/app/logs
+      - blog_uploads:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # 管理后台前端
+  blog-admin:
+    build:
+      context: ./blog-admin
+      dockerfile: Dockerfile
+    container_name: swater-blog-admin
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    environment:
+      REACT_APP_API_BASE_URL: http://localhost:8080/api
+    depends_on:
+      - blog-service
+    networks:
+      - blog-network
+
+  # 博客前端
+  blog-web:
+    build:
+      context: ./blog-web
+      dockerfile: Dockerfile
+    container_name: swater-blog-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8080/api
+    depends_on:
+      - blog-service
+    networks:
+      - blog-network
+
+  # Nginx反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: swater-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - blog_uploads:/var/www/uploads:ro
+    depends_on:
+      - blog-service
+      - blog-admin
+      - blog-web
+    networks:
+      - blog-network
+
+# 数据卷
+volumes:
+  mysql_data:
+  redis_data:
+  rabbitmq_data:
+  elasticsearch_data:
+  blog_logs:
+  blog_uploads:
+
+# 网络
+networks:
+  blog-network:
+    driver: bridge
