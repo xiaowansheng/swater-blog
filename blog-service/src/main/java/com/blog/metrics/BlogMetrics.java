@@ -57,83 +57,85 @@ public class BlogMetrics {
             .register(meterRegistry);
             
         // 活跃用户数量
-        this.activeUsersGauge = Gauge.builder("blog.users.active")
+        this.activeUsersGauge = Gauge.builder("blog.users.active", activeUsers, AtomicLong::doubleValue)
             .description("当前活跃用户数")
-            .register(meterRegistry, activeUsers, AtomicLong::get);
+            .register(meterRegistry);
             
         // 文章总数
-        this.articleTotalGauge = Gauge.builder("blog.articles.total")
+        this.articleTotalGauge = Gauge.builder("blog.articles.total", totalArticles, AtomicLong::doubleValue)
             .description("文章总数")
-            .register(meterRegistry, totalArticles, AtomicLong::get);
+            .register(meterRegistry);
     }
     
     /**
      * 记录文章创建
      */
     public void incrementArticleCreated(String category, String type) {
-        articleCreatedCounter.increment(
-            Tags.of(
-                "category", category != null ? category : "unknown",
-                "type", type != null ? type : "original"
-            )
-        );
+        Counter.builder("blog.article.created")
+            .description("文章创建总数")
+            .tag("category", category != null ? category : "unknown")
+            .tag("type", type != null ? type : "original")
+            .register(Metrics.globalRegistry)
+            .increment();
     }
     
     /**
      * 记录文章浏览
      */
     public void incrementArticleView(String category, Long articleId) {
-        articleViewCounter.increment(
-            Tags.of(
-                "category", category != null ? category : "unknown",
-                "article_id", String.valueOf(articleId)
-            )
-        );
+        Counter.builder("blog.article.views")
+            .description("文章浏览总数")
+            .tag("category", category != null ? category : "unknown")
+            .tag("article_id", String.valueOf(articleId))
+            .register(Metrics.globalRegistry)
+            .increment();
     }
     
     /**
      * 记录评论创建
      */
     public void incrementCommentCreated(String type, String status) {
-        commentCreatedCounter.increment(
-            Tags.of(
-                "type", type != null ? type : "article",
-                "status", status != null ? status : "pending"
-            )
-        );
+        Counter.builder("blog.comment.created")
+            .description("评论创建总数")
+            .tag("type", type != null ? type : "article")
+            .tag("status", status != null ? status : "pending")
+            .register(Metrics.globalRegistry)
+            .increment();
     }
     
     /**
      * 记录用户登录
      */
     public void incrementUserLogin(String loginType, boolean success) {
-        userLoginCounter.increment(
-            Tags.of(
-                "type", loginType != null ? loginType : "password",
-                "success", String.valueOf(success)
-            )
-        );
+        Counter.builder("blog.user.login")
+            .description("用户登录总数")
+            .tag("type", loginType != null ? loginType : "password")
+            .tag("success", String.valueOf(success))
+            .register(Metrics.globalRegistry)
+            .increment();
     }
     
     /**
      * 记录文章查询耗时
      */
     public void recordArticleQuery(Duration duration, String queryType) {
-        articleQueryTimer.record(duration, 
-            Tags.of("type", queryType != null ? queryType : "list")
-        );
+        Timer.builder("blog.article.query")
+            .description("文章查询耗时")
+            .tag("type", queryType != null ? queryType : "list")
+            .register(Metrics.globalRegistry)
+            .record(duration);
     }
     
     /**
      * 记录数据库查询耗时
      */
     public void recordDatabaseQuery(Duration duration, String operation, String table) {
-        databaseQueryTimer.record(duration,
-            Tags.of(
-                "operation", operation != null ? operation : "select",
-                "table", table != null ? table : "unknown"
-            )
-        );
+        Timer.builder("blog.database.query")
+            .description("数据库查询耗时")
+            .tag("operation", operation != null ? operation : "select")
+            .tag("table", table != null ? table : "unknown")
+            .register(Metrics.globalRegistry)
+            .record(duration);
     }
     
     /**

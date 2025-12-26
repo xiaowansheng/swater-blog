@@ -14,11 +14,19 @@ java {
 }
 
 repositories {
-    // 添加国内镜像仓库
+    // 优先使用 Maven Central，确保依赖完整性
+    mavenCentral()
+    // 添加国内镜像仓库作为备选
     maven { url = uri("https://maven.aliyun.com/repository/public") }
     maven { url = uri("https://maven.aliyun.com/repository/spring") }
     maven { url = uri("https://maven.aliyun.com/repository/central") }
-    mavenCentral()
+}
+
+// 依赖管理，强制指定版本
+dependencyManagement {
+    dependencies {
+        dependency("org.yaml:snakeyaml:2.2")
+    }
 }
 
 dependencies {
@@ -29,6 +37,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
+    
+    // Jakarta Servlet API for Spring Boot 3.x
+    implementation("jakarta.servlet:jakarta.servlet-api")
     
     implementation("com.baomidou:mybatis-plus-boot-starter:3.5.7")
     implementation("com.baomidou:mybatis-plus-generator:3.5.7")
@@ -41,12 +52,13 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-quartz")
     
-    // API文档 - 升级到SpringDoc OpenAPI 3.0
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
-    implementation("org.springdoc:springdoc-openapi-starter-common:2.2.0")
-    
-    // 移除旧的Springfox依赖
-    // implementation("io.springfox:springfox-boot-starter:3.0.0")
+    // API文档 - 升级到SpringDoc OpenAPI 3.0，排除 snakeyaml
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0") {
+        exclude(group = "org.yaml", module = "snakeyaml")
+    }
+    implementation("org.springdoc:springdoc-openapi-starter-common:2.2.0") {
+        exclude(group = "org.yaml", module = "snakeyaml")
+    }
     
     implementation("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
@@ -71,7 +83,12 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.github.mweirauch:micrometer-jvm-extras:0.2.2")
     
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    // 使用稳定版本的 snakeyaml
+    implementation("org.yaml:snakeyaml:1.30")
+    
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude(group = "org.yaml", module = "snakeyaml")
+    }
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     
     // TestContainers - 集成测试
@@ -83,8 +100,8 @@ dependencies {
     // 内存数据库 - 单元测试
     testImplementation("com.h2database:h2")
     
-    // 测试工具
-    testImplementation("com.github.javafaker:javafaker:1.0.2")
+    // 测试工具 - 替换 javafaker，避免 snakeyaml 冲突
+    testImplementation("net.datafaker:datafaker:2.0.2")
     testImplementation("org.assertj:assertj-core")
 }
 

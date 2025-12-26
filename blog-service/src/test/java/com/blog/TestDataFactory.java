@@ -4,7 +4,7 @@ import com.blog.model.entity.Article;
 import com.blog.model.entity.Category;
 import com.blog.model.entity.Comment;
 import com.blog.model.entity.User;
-import com.github.javafaker.Faker;
+import net.datafaker.Faker;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;

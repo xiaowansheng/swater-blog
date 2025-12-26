@@ -73,7 +73,7 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
             
             // 记录监控指标
             blogMetrics.incrementArticleCreated(
-                dto.getCategoryName() != null ? dto.getCategoryName() : "unknown",
+                dto.getCategoryId() != null ? String.valueOf(dto.getCategoryId()) : "unknown",
                 dto.getType() != null ? dto.getType() : "original"
             );
             
