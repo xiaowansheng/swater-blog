@@ -6,8 +6,8 @@ import com.blog.model.message.NotificationMessage;
 import com.blog.plugin.mq.impl.MemoryMQPlugin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.core.ExchangeTypes;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -83,19 +83,31 @@ public class MQNotificationConsumer {
         return "comment.notification";
     }
     
-    @RabbitListener(queues = QueueConstant.COMMENT_NOTIFICATION_QUEUE)
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(value = QueueConstant.COMMENT_NOTIFICATION_QUEUE, durable = "true"),
+            exchange = @Exchange(value = ExchangeConstant.NOTIFICATION_EXCHANGE, type = ExchangeTypes.TOPIC),
+            key = QueueConstant.COMMENT_NOTIFICATION_ROUTING_KEY
+    ))
     @ConditionalOnBean(RabbitTemplate.class)
     public void handleCommentNotification(NotificationMessage message) {
         notificationMessageHandler.handle(message);
     }
     
-    @RabbitListener(queues = QueueConstant.GUESTBOOK_NOTIFICATION_QUEUE)
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(value = QueueConstant.GUESTBOOK_NOTIFICATION_QUEUE, durable = "true"),
+            exchange = @Exchange(value = ExchangeConstant.NOTIFICATION_EXCHANGE, type = ExchangeTypes.TOPIC),
+            key = QueueConstant.GUESTBOOK_NOTIFICATION_ROUTING_KEY
+    ))
     @ConditionalOnBean(RabbitTemplate.class)
     public void handleGuestbookNotification(NotificationMessage message) {
         notificationMessageHandler.handle(message);
     }
     
-    @RabbitListener(queues = QueueConstant.LOGIN_NOTIFICATION_QUEUE)
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(value = QueueConstant.LOGIN_NOTIFICATION_QUEUE, durable = "true"),
+            exchange = @Exchange(value = ExchangeConstant.NOTIFICATION_EXCHANGE, type = ExchangeTypes.TOPIC),
+            key = QueueConstant.LOGIN_NOTIFICATION_ROUTING_KEY
+    ))
     @ConditionalOnBean(RabbitTemplate.class)
     public void handleLoginNotification(NotificationMessage message) {
         notificationMessageHandler.handle(message);
