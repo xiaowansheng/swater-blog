@@ -1,0 +1,101 @@
+spring:
+  profiles:
+    active: integration-test
+  
+  # 数据库配置 - 由TestContainers动态配置
+  datasource:
+    # 这些值会被TestContainers动态覆盖
+    url: jdbc:mysql://localhost:3306/blog_test
+    username: test
+    password: test
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: validate # 使用SQL脚本初始化，不自动创建表
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+  
+  # Redis配置 - 由TestContainers动态配置
+  redis:
+    host: localhost
+    port: 6379
+    database: 0
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+  
+  # RabbitMQ配置 - 由TestContainers动态配置
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: test
+    password: test
+    virtual-host: /
+    
+  # Elasticsearch配置 - 由TestContainers动态配置
+  elasticsearch:
+    uris: http://localhost:9200
+    
+  # 邮件配置 - 集成测试时禁用
+  mail:
+    host: localhost
+    port: 25
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+# MyBatis Plus配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl # 集成测试时关闭SQL日志
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# Sa-Token配置
+sa-token:
+  token-name: Authorization
+  timeout: 2592000
+  activity-timeout: -1
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+  is-log: false
+
+# 日志配置
+logging:
+  level:
+    com.blog: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.mybatis: WARN
+    org.testcontainers: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# 集成测试专用配置
+test:
+  # 启用异步处理
+  async:
+    enabled: true
+  # 启用定时任务
+  scheduler:
+    enabled: false # 集成测试时仍然禁用定时任务
+  # 启用事件发布
+  event:
+    enabled: true

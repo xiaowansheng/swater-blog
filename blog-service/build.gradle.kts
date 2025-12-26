@@ -61,8 +61,57 @@ dependencies {
     implementation("org.jsoup:jsoup:1.17.2")
     
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    
+    // TestContainers - 集成测试
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:mysql")
+    testImplementation("org.testcontainers:elasticsearch")
+    testImplementation("org.testcontainers:rabbitmq")
+    
+    // 内存数据库 - 单元测试
+    testImplementation("com.h2database:h2")
+    
+    // 测试工具
+    testImplementation("com.github.javafaker:javafaker:1.0.2")
+    testImplementation("org.assertj:assertj-core")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    
+    // 测试报告配置
+    testLogging {
+        events("passed", "skipped", "failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
+    
+    // JVM参数
+    jvmArgs("-XX:+EnableDynamicAgentLoading")
+    
+    // 测试结果报告
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+// 代码覆盖率
+apply(plugin = "jacoco")
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+    
+    executionData.setFrom(fileTree(layout.buildDirectory.dir("jacoco")).include("**/*.exec"))
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
 }
