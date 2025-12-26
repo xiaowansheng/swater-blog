@@ -3,6 +3,7 @@ plugins {
     kotlin("jvm") version "2.0.21"
     id("org.springframework.boot") version "3.4.0"
     id("io.spring.dependency-management") version "1.1.6"
+    jacoco
 }
 
 group = "com.blog"
@@ -103,16 +104,13 @@ tasks.withType<Test> {
     finalizedBy(tasks.jacocoTestReport)
 }
 
-// 代码覆盖率
-apply(plugin = "jacoco")
-
+// JaCoCo代码覆盖率配置
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
     reports {
         xml.required.set(true)
         html.required.set(true)
     }
-    
     executionData.setFrom(fileTree(layout.buildDirectory.dir("jacoco")).include("**/*.exec"))
 }
 
