@@ -30,9 +30,9 @@ spring:
     
   # 开发环境数据源配置
   datasource:
-    url: jdbc:mysql://localhost:3306/blog_dev?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: 123456
+    url: jdbc:mysql://localhost:3306/${DB_NAME:blog}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${DB_USER:blog}
+    password: ${DB_PASSWORD:blog123456}
     driver-class-name: com.mysql.cj.jdbc.Driver
     
     # 开发环境连接池配置
@@ -82,10 +82,10 @@ spring:
   # 开发环境Redis配置
   data:
     redis:
-      host: localhost
-      port: 6379
-      database: 0
-      password: 
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: ${REDIS_DATABASE:0}
+      password: ${REDIS_PASSWORD:}
       timeout: 3000ms
       lettuce:
         pool:
@@ -97,10 +97,10 @@ spring:
   
   # 开发环境RabbitMQ配置
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:admin}
+    password: ${RABBITMQ_PASSWORD:admin123}
     virtual-host: /
     connection-timeout: 15000
     publisher-confirm-type: correlated

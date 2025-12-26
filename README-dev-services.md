@@ -48,24 +48,46 @@ docker-compose -f docker-compose.dev.yml down
 
 ### MySQL
 - **地址**: `localhost:3306`
-- **数据库**: `blog`
-- **用户名**: `blog`
-- **密码**: `blog123456`
-- **Root密码**: `root123456`
+- **数据库**: `${DB_NAME:-blog}`
+- **用户名**: `${DB_USER:-blog}`
+- **密码**: `${DB_PASSWORD:-blog123456}`
 
 ### Redis
 - **地址**: `localhost:6379`
-- **密码**: 无
+- **密码**: `${REDIS_PASSWORD:-无}`
 
 ### RabbitMQ
 - **AMQP地址**: `localhost:5672`
 - **管理界面**: http://localhost:15672
-- **用户名**: `admin`
-- **密码**: `admin123`
+- **用户名**: `${RABBITMQ_USER:-admin}`
+- **密码**: `${RABBITMQ_PASSWORD:-admin123}`
 
 ### Elasticsearch
 - **REST API**: http://localhost:9200
 - **集群健康检查**: http://localhost:9200/_cluster/health
+
+## 环境变量配置
+
+服务密码可以通过环境变量进行配置。在项目根目录的 `.env` 文件中设置：
+
+```bash
+# 数据库配置
+DB_NAME=blog
+DB_USER=blog
+DB_PASSWORD=your_mysql_password
+
+# Redis 配置
+REDIS_PASSWORD=your_redis_password
+
+# RabbitMQ 配置
+RABBITMQ_USER=admin
+RABBITMQ_PASSWORD=your_rabbitmq_password
+```
+
+如果不设置环境变量，将使用默认值：
+- MySQL: 用户 `blog`，密码 `blog123456`
+- Redis: 无密码
+- RabbitMQ: 用户 `admin`，密码 `admin123`
 
 ## 常用操作
 

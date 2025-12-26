@@ -22,20 +22,19 @@ echo 服务访问信息
 echo ========================================
 echo MySQL:
 echo   - 地址: localhost:3306
-echo   - 数据库: blog
-echo   - 用户名: blog
-echo   - 密码: blog123456
-echo   - Root密码: root123456
+echo   - 数据库: %DB_NAME% (默认: blog)
+echo   - 用户名: %DB_USER% (默认: blog)
+echo   - 密码: %DB_PASSWORD% (默认: blog123456)
 echo.
 echo Redis:
 echo   - 地址: localhost:6379
-echo   - 无密码
+echo   - 密码: %REDIS_PASSWORD% (默认: 无)
 echo.
 echo RabbitMQ:
 echo   - AMQP地址: localhost:5672
 echo   - 管理界面: http://localhost:15672
-echo   - 用户名: admin
-echo   - 密码: admin123
+echo   - 用户名: %RABBITMQ_USER% (默认: admin)
+echo   - 密码: %RABBITMQ_PASSWORD% (默认: admin123)
 echo.
 echo Elasticsearch:
 echo   - 地址: http://localhost:9200
