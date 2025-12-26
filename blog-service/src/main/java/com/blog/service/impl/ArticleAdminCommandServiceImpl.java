@@ -5,12 +5,14 @@ import com.blog.event.article.*;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.ArticleMapper;
 import com.blog.mapper.ArticleTagMapper;
+import com.blog.metrics.BlogMetrics;
 import com.blog.model.dto.ArticleDTO;
 import com.blog.model.entity.Article;
 import com.blog.model.entity.ArticleTag;
 import com.blog.service.ArticleAdminCommandService;
 import com.blog.util.BeanUtil;
 import com.blog.util.KeyUtil;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
@@ -32,38 +34,56 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+    
+    @Autowired
+    private BlogMetrics blogMetrics;
 
     @Override
     @Transactional
     public Long create(ArticleDTO dto) {
-        Article article = BeanUtil.copyProperties(dto, Article.class);
-        article.setArticleKey(KeyUtil.generateKey("article"));
-        article.setViewCount(0);
-        article.setLikeCount(0);
-        article.setCommentCount(0);
-        if (dto.getStatus() == null) {
-            article.setStatus(0);
-        }
-        if (dto.getIsTop() == null) {
-            article.setIsTop(0);
-        }
-        if (dto.getType() == null) {
-            article.setType("1");
-        }
-        if (article.getStatus() == 1) {
-            article.setPublishedAt(LocalDateTime.now());
-        }
+        Timer.Sample sample = blogMetrics.startTimer();
         
-        articleMapper.insert(article);
-        
-        if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
-            saveArticleTags(article.getId(), dto.getTagIds());
+        try {
+            Article article = BeanUtil.copyProperties(dto, Article.class);
+            article.setArticleKey(KeyUtil.generateKey("article"));
+            article.setViewCount(0);
+            article.setLikeCount(0);
+            article.setCommentCount(0);
+            if (dto.getStatus() == null) {
+                article.setStatus(0);
+            }
+            if (dto.getIsTop() == null) {
+                article.setIsTop(0);
+            }
+            if (dto.getType() == null) {
+                article.setType("1");
+            }
+            if (article.getStatus() == 1) {
+                article.setPublishedAt(LocalDateTime.now());
+            }
+            
+            articleMapper.insert(article);
+            
+            if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
+                saveArticleTags(article.getId(), dto.getTagIds());
+            }
+            
+            Article savedArticle = articleMapper.selectById(article.getId());
+            publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleCreatedEvent(this, article.getId(), savedArticle)));
+            
+            // 记录监控指标
+            blogMetrics.incrementArticleCreated(
+                dto.getCategoryName() != null ? dto.getCategoryName() : "unknown",
+                dto.getType() != null ? dto.getType() : "original"
+            );
+            
+            return article.getId();
+            
+        } finally {
+            sample.stop(Timer.builder("blog.article.create.duration")
+                .description("文章创建耗时")
+                .register(io.micrometer.core.instrument.Metrics.globalRegistry));
         }
-        
-        Article savedArticle = articleMapper.selectById(article.getId());
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleCreatedEvent(this, article.getId(), savedArticle)));
-        
-        return article.getId();
     }
 
     @Override

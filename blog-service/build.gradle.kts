@@ -60,6 +60,11 @@ dependencies {
     
     implementation("org.jsoup:jsoup:1.17.2")
     
+    // 性能监控
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+    implementation("io.github.mweirauch:micrometer-jvm-extras:0.2.2")
+    
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     
