@@ -1,25 +1,439 @@
+# ========================================
+# 开发环境Spring Boot配置
+# 针对本地开发优化，包含调试和热重载功能
+# ========================================
+
 server:
-  address: 0.0.0.0
   port: 8080
+  servlet:
+    context-path: /
+  tomcat:
+    # 开发环境连接器配置
+    threads:
+      max: 50
+      min-spare: 5
+    connection-timeout: 20000
+    max-connections: 200
+    accept-count: 50
+    # 开发环境访问日志
+    accesslog:
+      enabled: true
+      directory: logs
+      pattern: '%h %l %u %t "%r" %s %b %D'
+      file-date-format: .yyyy-MM-dd
+      prefix: access_log
+      suffix: .log
 
 spring:
+  application:
+    name: blog-dev
+  profiles:
+    active: dev
+    
+  # 开发环境数据源配置
   datasource:
-    url: jdbc:mysql://localhost:3306/blog_dev?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/blog_dev?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
-    password: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+    # 开发环境连接池配置
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      validation-timeout: 5000
+      leak-detection-threshold: 60000
+      connection-test-query: SELECT 1
+      auto-commit: true
+      
+      # 开发环境连接参数
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+  
+  # JPA配置 - 开发环境
+  jpa:
+    hibernate:
+      ddl-auto: update  # 开发时自动更新表结构
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  
+  # SQL初始化
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-dev.sql
+      data-locations: classpath:data-dev.sql
+      continue-on-error: true  # 开发时忽略错误
+  
+  # 开发环境Redis配置
   data:
     redis:
       host: localhost
       port: 6379
       database: 0
+      password: 
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: 3000ms
+        shutdown-timeout: 100ms
+  
+  # 开发环境RabbitMQ配置
   rabbitmq:
     host: localhost
     port: 5672
-  elasticsearch:
-    uris: http://localhost:9200
+    username: guest
+    password: guest
+    virtual-host: /
+    connection-timeout: 15000
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    listener:
+      simple:
+        acknowledge-mode: manual
+        concurrency: 1
+        max-concurrency: 3
+        prefetch: 1
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          max-interval: 10000
+          multiplier: 1.0
+  
+  # 开发环境邮件配置
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: your-dev-email@qq.com
+    password: your-dev-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          timeout: 25000
+          connection-timeout: 25000
+          write-timeout: 25000
+  
+  # 开发工具配置
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+      exclude: static/**,public/**
+    livereload:
+      enabled: true
+      port: 35729
+    add-properties: true
 
+# 文件存储配置 - 开发环境
+file:
+  storage:
+    type: local
+    local:
+      path: uploads
+      url-prefix: /uploads
+    oss:
+      endpoint: 
+      access-key-id: 
+      access-key-secret: 
+      bucket-name: 
+      domain: 
+
+# 通知配置 - 开发环境
+notification:
+  channels: 
+    - websocket
+    - email
+  email:
+    enabled: true
+  websocket:
+    enabled: true
+
+# 邮件配置
+email:
+  provider:
+    type: spring-mail
+  from: your-dev-email@qq.com
+  from-name: Swater Blog Dev
+  templates:
+    path: classpath:templates/email/
+
+# 位置服务配置 - 开发环境
+location:
+  provider:
+    type: amap
+  amap:
+    key: your-amap-key
+    api-url: https://restapi.amap.com/v3/ip
+
+# 搜索引擎配置
+search:
+  provider:
+    type: database  # 开发时使用数据库搜索
+
+# 消息队列配置
+mq:
+  provider:
+    type: rabbitmq
+
+# 定时任务配置
+scheduler:
+  provider:
+    type: spring
+
+# 评论系统配置
+comment:
+  provider:
+    type: builtin
+
+# 日志存储配置
+log:
+  storage:
+    type: mysql
+
+# MyBatis Plus配置 - 开发环境
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.blog.model.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 开发时显示SQL
+    cache-enabled: true
+    lazy-loading-enabled: true
+    aggressive-lazy-loading: false
+    multiple-result-sets-enabled: true
+    use-column-label: true
+    use-generated-keys: true
+    auto-mapping-behavior: partial
+    auto-mapping-unknown-column-behavior: warning
+    default-executor-type: reuse
+    default-statement-timeout: 25
+    default-fetch-size: 100
+    safe-row-bounds-enabled: false
+    local-cache-scope: session
+    jdbc-type-for-null: other
+    lazy-load-trigger-methods: equals,clone,hashCode,toString
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      select-strategy: not_empty
+      insert-strategy: not_null
+      update-strategy: not_null
+
+# Sa-Token配置 - 开发环境
+sa-token:
+  token-name: Authorization
+  timeout: 86400  # 24小时，开发时较长
+  activity-timeout: -1
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+  is-log: true  # 开发时启用日志
+  jwt-secret-key: dev-secret-key-change-in-production
+
+# 日志配置 - 开发环境详细日志
 logging:
   level:
-    com.blog: debug
-    org.springframework: info
+    root: INFO
+    com.blog: DEBUG
+    org.springframework.web: INFO
+    org.mybatis: DEBUG
+    com.zaxxer.hikari: INFO
+    org.springframework.security: DEBUG
+    org.springframework.transaction: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/application-dev.log
+    max-size: 50MB
+    max-history: 7
+    total-size-cap: 500MB
 
+# 监控配置 - 开发环境
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'  # 开发时暴露所有端点
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+    shutdown:
+      enabled: true  # 开发时允许远程关闭
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.9, 0.95, 0.99
+    tags:
+      application: ${spring.application.name}
+      environment: ${spring.profiles.active}
+  health:
+    redis:
+      enabled: true
+    db:
+      enabled: true
+    rabbit:
+      enabled: true
+    diskspace:
+      enabled: true
+      threshold: 1GB
+
+# 安全配置 - 开发环境宽松配置
+security:
+  rate-limit:
+    enabled: false  # 开发时禁用限流
+    default-window: 60
+    default-limit: 1000  # 开发时较高限制
+  sql-injection:
+    enabled: true
+    log-attacks: true
+  xss-protection:
+    enabled: true
+    sanitize-input: true
+  file-upload:
+    max-size: 50MB  # 开发时较大
+    allowed-extensions:
+      - jpg
+      - jpeg
+      - png
+      - gif
+      - pdf
+      - doc
+      - docx
+      - txt
+      - md
+    blocked-extensions:
+      - exe
+      - bat
+      - cmd
+      - sh
+      - jsp
+      - php
+  ip-blacklist:
+    enabled: false  # 开发时禁用
+    ips: []
+  data-masking:
+    enabled: false  # 开发时禁用脱敏，便于调试
+
+# SpringDoc OpenAPI配置 - 开发环境
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    display-request-duration: true
+    display-operation-id: true
+    default-models-expand-depth: 2
+    default-model-expand-depth: 2
+    doc-expansion: list  # 开发时展开所有接口
+    filter: true
+    show-extensions: true
+    show-common-extensions: true
+    try-it-out-enabled: true  # 开发时启用在线测试
+  group-configs:
+    - group: 'public'
+      display-name: '公开接口'
+      paths-to-match: '/api/public/**'
+    - group: 'admin'
+      display-name: '管理接口'
+      paths-to-match: '/api/admin/**'
+    - group: 'auth'
+      display-name: '认证接口'
+      paths-to-match: '/api/auth/**'
+    - group: 'monitoring'
+      display-name: '监控接口'
+      paths-to-match: '/api/monitoring/**'
+  show-actuator: true
+
+# 自定义健康检查配置
+health:
+  custom:
+    enabled: true
+
+# 开发环境专用配置
+dev:
+  # 热重载配置
+  hot-reload:
+    enabled: true
+    watch-paths:
+      - src/main/java
+      - src/main/resources
+  
+  # 调试配置
+  debug:
+    sql-log: true
+    request-log: true
+    response-log: true
+    performance-log: true
+  
+  # 模拟数据
+  mock:
+    enabled: true
+    users: 100
+    articles: 500
+    comments: 1000
+  
+  # 开发工具
+  tools:
+    h2-console: true
+    swagger-ui: true
+    actuator: true
+    devtools: true
+  
+  # 跨域配置
+  cors:
+    enabled: true
+    allowed-origins: 
+      - http://localhost:3000
+      - http://localhost:8080
+      - http://127.0.0.1:3000
+      - http://127.0.0.1:8080
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    allowed-headers: '*'
+    allow-credentials: true

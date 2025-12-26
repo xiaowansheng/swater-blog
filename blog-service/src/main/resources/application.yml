@@ -6,7 +6,7 @@ spring:
   application:
     name: blog
   profiles:
-    active: test
+    active: dev
   
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
