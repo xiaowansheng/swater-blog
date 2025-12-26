@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 @Mapper
-public interface RoleApiMapper extends BaseMapper<RoleApi> {
+public interface RoleApiMapper extends com.blog.mapper.BaseMapper<RoleApi> {
     List<Long> selectApiIdsByRoleId(@Param("roleId") Long roleId);
 
     void deleteByRoleId(@Param("roleId") Long roleId);

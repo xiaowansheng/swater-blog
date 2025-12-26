@@ -4,6 +4,6 @@ import com.blog.model.entity.Talk;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface TalkMapper extends BaseMapper<Talk> {
+public interface TalkMapper extends com.blog.mapper.BaseMapper<Talk> {
 }
 

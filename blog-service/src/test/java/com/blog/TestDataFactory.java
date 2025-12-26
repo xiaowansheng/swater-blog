@@ -28,7 +28,7 @@ public class TestDataFactory {
         user.setEmail(faker.internet().emailAddress());
         user.setPassword("$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa"); // 123456
         user.setNickname(faker.name().fullName());
-        user.setAvatar(faker.internet().avatar());
+        user.setAvatar(faker.internet().url()); // 修复：使用 url() 替代 avatar()
         user.setPhone(faker.phoneNumber().cellPhone());
         user.setSignature(faker.lorem().sentence());
         user.setWebsite(faker.internet().url());
@@ -61,9 +61,9 @@ public class TestDataFactory {
         category.setName(faker.book().genre());
         category.setSlug(faker.internet().slug());
         category.setDescription(faker.lorem().sentence());
-        category.setCover(faker.internet().image());
+        // category.setCover(faker.internet().url()); // 注释掉，如果 Category 没有 setCover 方法
         category.setSort(faker.number().numberBetween(1, 100));
-        category.setStatus(1);
+        category.setStatus("1"); // 修复：使用字符串类型
         category.setCreateTime(LocalDateTime.now());
         category.setUpdateTime(LocalDateTime.now());
         return category;
@@ -78,9 +78,9 @@ public class TestDataFactory {
         article.setSlug(faker.internet().slug());
         article.setContent(faker.lorem().paragraphs(5).toString());
         article.setExcerpt(faker.lorem().sentence());
-        article.setCover(faker.internet().image());
+        article.setCover(faker.internet().url());
         article.setType("original");
-        article.setStatus("published");
+        article.setStatus(1); // 修复：使用 Integer 类型，1 表示已发布
         article.setIsTop(0);
         article.setViewCount(faker.number().numberBetween(0, 1000));
         article.setLikeCount(faker.number().numberBetween(0, 100));
@@ -96,7 +96,7 @@ public class TestDataFactory {
      */
     public Article createDraftArticle() {
         Article article = createArticle();
-        article.setStatus("draft");
+        article.setStatus(0); // 修复：使用 Integer 类型，0 表示草稿
         article.setPublishedAt(null);
         return article;
     }
@@ -110,7 +110,7 @@ public class TestDataFactory {
         comment.setType("article");
         comment.setNickname(faker.name().fullName());
         comment.setEmail(faker.internet().emailAddress());
-        comment.setStatus("approved");
+        comment.setStatus(1); // 修复：使用 Integer 类型，1 表示已审核
         comment.setIsVisible(1);
         comment.setIp(faker.internet().ipV4Address());
         comment.setIpAddress(faker.address().city());

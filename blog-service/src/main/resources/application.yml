@@ -161,7 +161,6 @@ mybatis-plus:
     default-statement-timeout: 25          # 默认语句超时时间
     default-fetch-size: 100                # 默认获取大小
     safe-row-bounds-enabled: false         # 安全行边界
-    map-underscore-to-camel-case: true     # 下划线转驼峰
     local-cache-scope: session             # 本地缓存作用域
     jdbc-type-for-null: other              # NULL值的JDBC类型
     lazy-load-trigger-methods: equals,clone,hashCode,toString  # 延迟加载触发方法

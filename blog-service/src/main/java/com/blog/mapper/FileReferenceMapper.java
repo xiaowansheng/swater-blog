@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 @Mapper
-public interface FileReferenceMapper extends BaseMapper<FileReference> {
+public interface FileReferenceMapper extends com.blog.mapper.BaseMapper<FileReference> {
     List<FileReference> selectByFileId(@Param("fileId") Long fileId);
 
     void deleteByFileId(@Param("fileId") Long fileId);

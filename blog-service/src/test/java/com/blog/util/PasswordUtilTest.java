@@ -115,7 +115,7 @@ class PasswordUtilTest {
         "P@ssw0rd123",
         "中文密码123",
         "!@#$%^&*()",
-        "a".repeat(100) // 长密码
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" // 长密码
     })
     @DisplayName("各种密码格式测试")
     void encode_VariousPasswordFormats_Success(String password) {

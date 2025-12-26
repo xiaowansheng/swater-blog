@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 @Mapper
-public interface ArticleTagMapper extends BaseMapper<ArticleTag> {
+public interface ArticleTagMapper extends com.blog.mapper.BaseMapper<ArticleTag> {
     List<Long> selectTagIdsByArticleId(@Param("articleId") Long articleId);
 
     List<Long> selectArticleIdsByTagId(@Param("tagId") Long tagId);
