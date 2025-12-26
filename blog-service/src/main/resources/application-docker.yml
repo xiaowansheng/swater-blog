@@ -1,6 +1,6 @@
 # ========================================
 # Docker环境Spring Boot配置
-# 针对容器化部署优化的配置
+# 针对容器化部署优化
 # ========================================
 
 server:
@@ -8,14 +8,14 @@ server:
   servlet:
     context-path: /
   tomcat:
-    # 连接器优化
+    # Docker环境连接器配置
     threads:
-      max: 200
+      max: 100
       min-spare: 10
     connection-timeout: 20000
-    max-connections: 8192
+    max-connections: 500
     accept-count: 100
-    # 访问日志
+    # Docker环境访问日志
     accesslog:
       enabled: true
       directory: /app/logs
@@ -26,18 +26,18 @@ server:
 
 spring:
   application:
-    name: blog
+    name: blog-docker
   profiles:
     active: docker
-    
-  # 数据源配置
+
+  # Docker环境数据源配置 - 使用环境变量
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/blog?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
-    username: ${SPRING_DATASOURCE_USERNAME:blog}
-    password: ${SPRING_DATASOURCE_PASSWORD:blog123456}
+    url: jdbc:mysql://${DB_HOST:mysql}:${DB_PORT:3306}/${DB_NAME:blog}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${DB_USER:blog}
+    password: ${DB_PASSWORD:blog123456}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    
-    # HikariCP连接池配置（容器环境优化）
+
+    # Docker环境连接池配置
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
@@ -48,8 +48,8 @@ spring:
       leak-detection-threshold: 60000
       connection-test-query: SELECT 1
       auto-commit: true
-      
-      # 容器环境连接参数优化
+
+      # Docker环境连接参数
       data-source-properties:
         cachePrepStmts: true
         prepStmtCacheSize: 250
@@ -61,48 +61,54 @@ spring:
         cacheServerConfiguration: true
         elideSetAutoCommits: true
         maintainTimeStats: false
-        # 容器网络优化
-        tcpKeepAlive: true
-        tcpNoDelay: true
-        socketTimeout: 30000
-        connectTimeout: 10000
-  
-  # Redis配置
+
+  # JPA配置 - Docker环境
+  jpa:
+    hibernate:
+      ddl-auto: validate  # 生产环境不自动更新表结构
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  # SQL初始化
+  sql:
+    init:
+      mode: never  # Docker环境不执行初始化脚本
+      continue-on-error: false
+
+  # Docker环境Redis配置 - 使用环境变量
   data:
     redis:
-      host: ${SPRING_REDIS_HOST:redis}
-      port: ${SPRING_REDIS_PORT:6379}
-      database: ${SPRING_REDIS_DATABASE:0}
-      password: ${SPRING_REDIS_PASSWORD:}
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      database: ${REDIS_DATABASE:0}
+      password: ${REDIS_PASSWORD:}
       timeout: 3000ms
       lettuce:
         pool:
-          max-active: 8
+          max-active: 16
           max-idle: 8
           min-idle: 2
           max-wait: 3000ms
         shutdown-timeout: 100ms
-      # 集群配置（如果使用Redis集群）
-      # cluster:
-      #   nodes: redis-1:6379,redis-2:6379,redis-3:6379
-      #   max-redirects: 3
-  
-  # RabbitMQ配置
+
+  # Docker环境RabbitMQ配置 - 使用环境变量
   rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST:rabbitmq}
-    port: ${SPRING_RABBITMQ_PORT:5672}
-    username: ${SPRING_RABBITMQ_USERNAME:blog}
-    password: ${SPRING_RABBITMQ_PASSWORD:blog123456}
-    virtual-host: ${SPRING_RABBITMQ_VIRTUAL_HOST:/}
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:admin}
+    password: ${RABBITMQ_PASSWORD:admin123}
+    virtual-host: /
     connection-timeout: 15000
-    # 生产者配置
     publisher-confirm-type: correlated
     publisher-returns: true
-    # 消费者配置
     listener:
       simple:
         acknowledge-mode: manual
-        concurrency: 1
+        concurrency: 2
         max-concurrency: 5
         prefetch: 1
         retry:
@@ -111,22 +117,13 @@ spring:
           max-attempts: 3
           max-interval: 10000
           multiplier: 1.0
-  
-  # Elasticsearch配置
-  elasticsearch:
-    uris: ${SPRING_ELASTICSEARCH_URIS:http://elasticsearch:9200}
-    connection-timeout: 10s
-    socket-timeout: 30s
-    # 认证配置（如果启用安全）
-    # username: ${SPRING_ELASTICSEARCH_USERNAME:}
-    # password: ${SPRING_ELASTICSEARCH_PASSWORD:}
-  
-  # 邮件配置
+
+  # Docker环境邮件配置 - 使用环境变量
   mail:
-    host: ${SPRING_MAIL_HOST:smtp.qq.com}
-    port: ${SPRING_MAIL_PORT:587}
-    username: ${SPRING_MAIL_USERNAME:}
-    password: ${SPRING_MAIL_PASSWORD:}
+    host: ${MAIL_HOST:smtp.qq.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -137,55 +134,85 @@ spring:
           connection-timeout: 25000
           write-timeout: 25000
 
-# 文件存储配置
+  # Elasticsearch配置 - 使用环境变量
+  elasticsearch:
+    uris: ${ES_URIS:http://elasticsearch:9200}
+    username: ${ES_USERNAME:}
+    password: ${ES_PASSWORD:}
+
+# 文件存储配置 - Docker环境
 file:
   storage:
     type: ${FILE_STORAGE_TYPE:local}
     local:
-      path: ${FILE_LOCAL_PATH:/app/uploads}
-      url-prefix: ${FILE_LOCAL_URL_PREFIX:/uploads}
+      path: /app/uploads
+      url-prefix: /uploads
     oss:
-      endpoint: ${FILE_OSS_ENDPOINT:}
-      access-key-id: ${FILE_OSS_ACCESS_KEY_ID:}
-      access-key-secret: ${FILE_OSS_ACCESS_KEY_SECRET:}
-      bucket-name: ${FILE_OSS_BUCKET_NAME:}
-      domain: ${FILE_OSS_DOMAIN:}
+      endpoint: ${OSS_ENDPOINT:}
+      access-key-id: ${OSS_ACCESS_KEY_ID:}
+      access-key-secret: ${OSS_ACCESS_KEY_SECRET:}
+      bucket-name: ${OSS_BUCKET_NAME:}
+      domain: ${OSS_DOMAIN:}
 
-# 通知配置
+# 通知配置 - Docker环境
 notification:
   channels: 
     - websocket
     - email
   email:
-    enabled: ${NOTIFICATION_EMAIL_ENABLED:true}
+    enabled: true
   websocket:
-    enabled: ${NOTIFICATION_WEBSOCKET_ENABLED:true}
+    enabled: true
 
-# 位置服务配置
+# 邮件配置
+email:
+  provider:
+    type: spring-mail
+  from: ${MAIL_USERNAME:}
+  from-name: Swater Blog
+  templates:
+    path: classpath:templates/email/
+
+# 位置服务配置 - Docker环境
 location:
   provider:
-    type: ${LOCATION_PROVIDER_TYPE:amap}
+    type: amap
   amap:
-    key: ${LOCATION_AMAP_KEY:}
+    key: ${AMAP_KEY:}
     api-url: https://restapi.amap.com/v3/ip
 
 # 搜索引擎配置
 search:
   provider:
-    type: ${SEARCH_PROVIDER_TYPE:elasticsearch}
+    type: elasticsearch  # Docker环境使用Elasticsearch
 
 # 消息队列配置
 mq:
   provider:
-    type: ${MQ_PROVIDER_TYPE:rabbitmq}
+    type: rabbitmq
 
-# MyBatis Plus配置
+# 定时任务配置
+scheduler:
+  provider:
+    type: spring
+
+# 评论系统配置
+comment:
+  provider:
+    type: builtin
+
+# 日志存储配置
+log:
+  storage:
+    type: mysql
+
+# MyBatis Plus配置 - Docker环境
 mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml
   type-aliases-package: com.blog.model.entity
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl  # 生产环境不输出SQL
     cache-enabled: true
     lazy-loading-enabled: true
     aggressive-lazy-loading: false
@@ -211,49 +238,53 @@ mybatis-plus:
       insert-strategy: not_null
       update-strategy: not_null
 
-# Sa-Token配置
+# Sa-Token配置 - Docker环境
 sa-token:
   token-name: Authorization
-  timeout: 2592000
+  timeout: 2592000  # 30天
   activity-timeout: -1
   is-concurrent: true
   is-share: true
   token-style: uuid
-  is-log: false
-  jwt-secret-key: ${SA_TOKEN_JWT_SECRET:blog-secret-key-change-in-production}
+  is-log: false  # 生产环境关闭日志
+  jwt-secret-key: ${JWT_SECRET_KEY:swater_blog_jwt_secret_key_2024}
 
-# 日志配置
+# 日志配置 - Docker环境
 logging:
   level:
-    root: ${LOGGING_LEVEL_ROOT:INFO}
-    com.blog: ${LOGGING_LEVEL_COM_BLOG:INFO}
-    org.springframework.web: ${LOGGING_LEVEL_SPRING_WEB:INFO}
-    org.mybatis: ${LOGGING_LEVEL_MYBATIS:INFO}
-    com.zaxxer.hikari: ${LOGGING_LEVEL_HIKARI:INFO}
+    root: INFO
+    com.blog: INFO
+    org.springframework.web: WARN
+    org.mybatis: WARN
+    com.zaxxer.hikari: WARN
+    org.springframework.security: WARN
+    org.springframework.transaction: WARN
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{50}] - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{50}] - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
   file:
-    name: ${LOGGING_FILE_NAME:/app/logs/application.log}
-    max-size: ${LOGGING_FILE_MAX_SIZE:100MB}
-    max-history: ${LOGGING_FILE_MAX_HISTORY:30}
-    total-size-cap: ${LOGGING_FILE_TOTAL_SIZE_CAP:1GB}
+    name: /app/logs/application.log
+    max-size: 100MB
+    max-history: 30
+    total-size-cap: 3GB
 
-# 监控配置
+# 监控配置 - Docker环境
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus,loggers,env,configprops
+        include: health,info,metrics,prometheus
       base-path: /actuator
   endpoint:
     health:
-      show-details: always
-      show-components: always
+      show-details: when-authorized
+      show-components: when-authorized
     metrics:
       enabled: true
     prometheus:
       enabled: true
+    shutdown:
+      enabled: false  # 生产环境禁用远程关闭
   metrics:
     export:
       prometheus:
@@ -266,8 +297,6 @@ management:
     tags:
       application: ${spring.application.name}
       environment: ${spring.profiles.active}
-      version: ${APP_VERSION:1.0.0}
-      instance: ${HOSTNAME:unknown}
   health:
     redis:
       enabled: true
@@ -275,13 +304,11 @@ management:
       enabled: true
     rabbit:
       enabled: true
-    elasticsearch:
-      enabled: true
     diskspace:
       enabled: true
-      threshold: 10GB
+      threshold: 1GB
 
-# 安全配置
+# 安全配置 - Docker环境
 security:
   rate-limit:
     enabled: true
@@ -294,7 +321,7 @@ security:
     enabled: true
     sanitize-input: true
   file-upload:
-    max-size: ${SECURITY_FILE_UPLOAD_MAX_SIZE:10MB}
+    max-size: 10MB
     allowed-extensions:
       - jpg
       - jpeg
@@ -311,30 +338,31 @@ security:
       - jsp
       - php
   ip-blacklist:
-    enabled: ${SECURITY_IP_BLACKLIST_ENABLED:false}
+    enabled: false
     ips: []
   data-masking:
     enabled: true
     log-sensitive-data: false
 
-# SpringDoc OpenAPI配置
+# SpringDoc OpenAPI配置 - Docker环境
 springdoc:
   api-docs:
     enabled: true
     path: /v3/api-docs
   swagger-ui:
-    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED:true}
+    enabled: true
     path: /swagger-ui.html
     tags-sorter: alpha
     operations-sorter: alpha
     display-request-duration: true
     display-operation-id: true
-    default-models-expand-depth: 2
-    default-model-expand-depth: 2
+    default-models-expand-depth: 1
+    default-model-expand-depth: 1
     doc-expansion: none
     filter: true
     show-extensions: true
     show-common-extensions: true
+    try-it-out-enabled: true
   group-configs:
     - group: 'public'
       display-name: '公开接口'
