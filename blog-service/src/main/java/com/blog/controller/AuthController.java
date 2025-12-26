@@ -1,6 +1,7 @@
 package com.blog.controller;
 
 import com.blog.annotation.ApiResource;
+import com.blog.annotation.RateLimit;
 import com.blog.common.Result;
 import com.blog.model.dto.LoginDTO;
 import com.blog.model.vo.LoginVO;
@@ -18,12 +19,24 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
+    @RateLimit(
+        type = RateLimit.Type.SLIDING_WINDOW,
+        dimension = RateLimit.Dimension.IP,
+        window = 300,  // 5分钟窗口
+        limit = 5,     // 最多5次登录尝试
+        message = "登录尝试过于频繁，请5分钟后再试"
+    )
     public Result<LoginVO> login(@Valid @RequestBody LoginDTO dto) {
         LoginVO loginVO = authService.login(dto);
         return Result.success(loginVO);
     }
 
     @PostMapping("/logout")
+    @RateLimit(
+        dimension = RateLimit.Dimension.USER,
+        window = 60,
+        limit = 10
+    )
     public Result<Void> logout() {
         authService.logout();
         return Result.success();

@@ -230,3 +230,50 @@ health:
   custom:
     enabled: true
 
+# 安全配置
+security:
+  # 限流配置
+  rate-limit:
+    enabled: true
+    default-window: 60      # 默认时间窗口（秒）
+    default-limit: 100      # 默认限制次数
+    
+  # SQL注入防护
+  sql-injection:
+    enabled: true
+    log-attacks: true       # 记录攻击日志
+    
+  # XSS防护
+  xss-protection:
+    enabled: true
+    sanitize-input: true    # 自动清理输入
+    
+  # 文件上传安全
+  file-upload:
+    max-size: 10MB          # 最大文件大小
+    allowed-extensions:     # 允许的文件扩展名
+      - jpg
+      - jpeg
+      - png
+      - gif
+      - pdf
+      - doc
+      - docx
+    blocked-extensions:     # 禁止的文件扩展名
+      - exe
+      - bat
+      - cmd
+      - sh
+      - jsp
+      - php
+      
+  # IP黑名单（示例）
+  ip-blacklist:
+    enabled: false
+    ips: []
+    
+  # 数据脱敏
+  data-masking:
+    enabled: true
+    log-sensitive-data: false  # 是否在日志中脱敏敏感数据
+
