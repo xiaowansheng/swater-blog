@@ -93,6 +93,11 @@ services:
       test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
       interval: 30s
       timeout: 10s
+    command: >
+      bash -c "
+        elasticsearch-plugin list | grep -q analysis-ik || elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v8.11.0/elasticsearch-analysis-ik-8.11.0.zip --batch;
+        /usr/local/bin/docker-entrypoint.sh
+      "
       retries: 3
 
 # 数据卷

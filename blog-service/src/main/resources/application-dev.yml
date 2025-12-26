@@ -247,7 +247,7 @@ mybatis-plus:
 sa-token:
   token-name: Authorization
   timeout: 86400  # 24小时，开发时较长
-  activity-timeout: -1
+  active-timeout: -1
   is-concurrent: true
   is-share: true
   token-style: uuid
