@@ -40,7 +40,12 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-quartz")
     
-    implementation("io.springfox:springfox-boot-starter:3.0.0")
+    // API文档 - 升级到SpringDoc OpenAPI 3.0
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
+    implementation("org.springdoc:springdoc-openapi-starter-common:2.2.0")
+    
+    // 移除旧的Springfox依赖
+    // implementation("io.springfox:springfox-boot-starter:3.0.0")
     
     implementation("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

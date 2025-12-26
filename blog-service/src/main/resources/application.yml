@@ -277,3 +277,36 @@ security:
     enabled: true
     log-sensitive-data: false  # 是否在日志中脱敏敏感数据
 
+# SpringDoc OpenAPI 配置
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    display-request-duration: true
+    display-operation-id: true
+    default-models-expand-depth: 2
+    default-model-expand-depth: 2
+    doc-expansion: none
+    filter: true
+    show-extensions: true
+    show-common-extensions: true
+  group-configs:
+    - group: 'public'
+      display-name: '公开接口'
+      paths-to-match: '/api/public/**'
+    - group: 'admin'
+      display-name: '管理接口'
+      paths-to-match: '/api/admin/**'
+    - group: 'auth'
+      display-name: '认证接口'
+      paths-to-match: '/api/auth/**'
+    - group: 'monitoring'
+      display-name: '监控接口'
+      paths-to-match: '/api/monitoring/**'
+  show-actuator: true
+
