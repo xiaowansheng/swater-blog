@@ -30,7 +30,12 @@ configurations.all {
     }
 }
 
+
+
 dependencies {
+    // --- 1. 在 dependencies 顶部建议加上 BOM 管理 ---
+    implementation(platform("com.baomidou:mybatis-plus-bom:3.5.10.1"))
+
     // --- Spring Boot Starters (版本由插件自动管理) ---
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-aop")
@@ -45,8 +50,10 @@ dependencies {
 
     // --- 数据库与 ORM (Spring Boot 3 专版) ---
     implementation("com.mysql:mysql-connector-j:9.1.0")
-    implementation("com.baomidou:mybatis-plus-spring-boot3-starter:3.5.10.1")
-    implementation("com.baomidou:mybatis-plus-generator:3.5.10.1")
+    implementation("com.baomidou:mybatis-plus-spring-boot3-starter")
+    // --- MyBatis-Plus 分页解析扩展  ---
+    implementation("com.baomidou:mybatis-plus-jsqlparser")
+    implementation("com.baomidou:mybatis-plus-generator")
 
     // --- 安全认证 (Sa-Token 最新版) ---
     implementation("cn.dev33:sa-token-spring-boot3-starter:1.39.0")
