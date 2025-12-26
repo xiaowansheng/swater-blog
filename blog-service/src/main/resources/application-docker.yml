@@ -1,0 +1,356 @@
+# ========================================
+# Docker环境Spring Boot配置
+# 针对容器化部署优化的配置
+# ========================================
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  tomcat:
+    # 连接器优化
+    threads:
+      max: 200
+      min-spare: 10
+    connection-timeout: 20000
+    max-connections: 8192
+    accept-count: 100
+    # 访问日志
+    accesslog:
+      enabled: true
+      directory: /app/logs
+      pattern: '%h %l %u %t "%r" %s %b %D'
+      file-date-format: .yyyy-MM-dd
+      prefix: access_log
+      suffix: .log
+
+spring:
+  application:
+    name: blog
+  profiles:
+    active: docker
+    
+  # 数据源配置
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/blog?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:blog}
+    password: ${SPRING_DATASOURCE_PASSWORD:blog123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+    # HikariCP连接池配置（容器环境优化）
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      validation-timeout: 5000
+      leak-detection-threshold: 60000
+      connection-test-query: SELECT 1
+      auto-commit: true
+      
+      # 容器环境连接参数优化
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+        # 容器网络优化
+        tcpKeepAlive: true
+        tcpNoDelay: true
+        socketTimeout: 30000
+        connectTimeout: 10000
+  
+  # Redis配置
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:redis}
+      port: ${SPRING_REDIS_PORT:6379}
+      database: ${SPRING_REDIS_DATABASE:0}
+      password: ${SPRING_REDIS_PASSWORD:}
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: 3000ms
+        shutdown-timeout: 100ms
+      # 集群配置（如果使用Redis集群）
+      # cluster:
+      #   nodes: redis-1:6379,redis-2:6379,redis-3:6379
+      #   max-redirects: 3
+  
+  # RabbitMQ配置
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:rabbitmq}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:blog}
+    password: ${SPRING_RABBITMQ_PASSWORD:blog123456}
+    virtual-host: ${SPRING_RABBITMQ_VIRTUAL_HOST:/}
+    connection-timeout: 15000
+    # 生产者配置
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    # 消费者配置
+    listener:
+      simple:
+        acknowledge-mode: manual
+        concurrency: 1
+        max-concurrency: 5
+        prefetch: 1
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          max-interval: 10000
+          multiplier: 1.0
+  
+  # Elasticsearch配置
+  elasticsearch:
+    uris: ${SPRING_ELASTICSEARCH_URIS:http://elasticsearch:9200}
+    connection-timeout: 10s
+    socket-timeout: 30s
+    # 认证配置（如果启用安全）
+    # username: ${SPRING_ELASTICSEARCH_USERNAME:}
+    # password: ${SPRING_ELASTICSEARCH_PASSWORD:}
+  
+  # 邮件配置
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.qq.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          timeout: 25000
+          connection-timeout: 25000
+          write-timeout: 25000
+
+# 文件存储配置
+file:
+  storage:
+    type: ${FILE_STORAGE_TYPE:local}
+    local:
+      path: ${FILE_LOCAL_PATH:/app/uploads}
+      url-prefix: ${FILE_LOCAL_URL_PREFIX:/uploads}
+    oss:
+      endpoint: ${FILE_OSS_ENDPOINT:}
+      access-key-id: ${FILE_OSS_ACCESS_KEY_ID:}
+      access-key-secret: ${FILE_OSS_ACCESS_KEY_SECRET:}
+      bucket-name: ${FILE_OSS_BUCKET_NAME:}
+      domain: ${FILE_OSS_DOMAIN:}
+
+# 通知配置
+notification:
+  channels: 
+    - websocket
+    - email
+  email:
+    enabled: ${NOTIFICATION_EMAIL_ENABLED:true}
+  websocket:
+    enabled: ${NOTIFICATION_WEBSOCKET_ENABLED:true}
+
+# 位置服务配置
+location:
+  provider:
+    type: ${LOCATION_PROVIDER_TYPE:amap}
+  amap:
+    key: ${LOCATION_AMAP_KEY:}
+    api-url: https://restapi.amap.com/v3/ip
+
+# 搜索引擎配置
+search:
+  provider:
+    type: ${SEARCH_PROVIDER_TYPE:elasticsearch}
+
+# 消息队列配置
+mq:
+  provider:
+    type: ${MQ_PROVIDER_TYPE:rabbitmq}
+
+# MyBatis Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.blog.model.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+    cache-enabled: true
+    lazy-loading-enabled: true
+    aggressive-lazy-loading: false
+    multiple-result-sets-enabled: true
+    use-column-label: true
+    use-generated-keys: true
+    auto-mapping-behavior: partial
+    auto-mapping-unknown-column-behavior: warning
+    default-executor-type: reuse
+    default-statement-timeout: 25
+    default-fetch-size: 100
+    safe-row-bounds-enabled: false
+    local-cache-scope: session
+    jdbc-type-for-null: other
+    lazy-load-trigger-methods: equals,clone,hashCode,toString
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      select-strategy: not_empty
+      insert-strategy: not_null
+      update-strategy: not_null
+
+# Sa-Token配置
+sa-token:
+  token-name: Authorization
+  timeout: 2592000
+  activity-timeout: -1
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+  is-log: false
+  jwt-secret-key: ${SA_TOKEN_JWT_SECRET:blog-secret-key-change-in-production}
+
+# 日志配置
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT:INFO}
+    com.blog: ${LOGGING_LEVEL_COM_BLOG:INFO}
+    org.springframework.web: ${LOGGING_LEVEL_SPRING_WEB:INFO}
+    org.mybatis: ${LOGGING_LEVEL_MYBATIS:INFO}
+    com.zaxxer.hikari: ${LOGGING_LEVEL_HIKARI:INFO}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{50}] - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{50}] - %msg%n"
+  file:
+    name: ${LOGGING_FILE_NAME:/app/logs/application.log}
+    max-size: ${LOGGING_FILE_MAX_SIZE:100MB}
+    max-history: ${LOGGING_FILE_MAX_HISTORY:30}
+    total-size-cap: ${LOGGING_FILE_TOTAL_SIZE_CAP:1GB}
+
+# 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers,env,configprops
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.9, 0.95, 0.99
+    tags:
+      application: ${spring.application.name}
+      environment: ${spring.profiles.active}
+      version: ${APP_VERSION:1.0.0}
+      instance: ${HOSTNAME:unknown}
+  health:
+    redis:
+      enabled: true
+    db:
+      enabled: true
+    rabbit:
+      enabled: true
+    elasticsearch:
+      enabled: true
+    diskspace:
+      enabled: true
+      threshold: 10GB
+
+# 安全配置
+security:
+  rate-limit:
+    enabled: true
+    default-window: 60
+    default-limit: 100
+  sql-injection:
+    enabled: true
+    log-attacks: true
+  xss-protection:
+    enabled: true
+    sanitize-input: true
+  file-upload:
+    max-size: ${SECURITY_FILE_UPLOAD_MAX_SIZE:10MB}
+    allowed-extensions:
+      - jpg
+      - jpeg
+      - png
+      - gif
+      - pdf
+      - doc
+      - docx
+    blocked-extensions:
+      - exe
+      - bat
+      - cmd
+      - sh
+      - jsp
+      - php
+  ip-blacklist:
+    enabled: ${SECURITY_IP_BLACKLIST_ENABLED:false}
+    ips: []
+  data-masking:
+    enabled: true
+    log-sensitive-data: false
+
+# SpringDoc OpenAPI配置
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED:true}
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    display-request-duration: true
+    display-operation-id: true
+    default-models-expand-depth: 2
+    default-model-expand-depth: 2
+    doc-expansion: none
+    filter: true
+    show-extensions: true
+    show-common-extensions: true
+  group-configs:
+    - group: 'public'
+      display-name: '公开接口'
+      paths-to-match: '/api/public/**'
+    - group: 'admin'
+      display-name: '管理接口'
+      paths-to-match: '/api/admin/**'
+    - group: 'auth'
+      display-name: '认证接口'
+      paths-to-match: '/api/auth/**'
+    - group: 'monitoring'
+      display-name: '监控接口'
+      paths-to-match: '/api/monitoring/**'
+  show-actuator: true
+
+# 自定义健康检查配置
+health:
+  custom:
+    enabled: true
