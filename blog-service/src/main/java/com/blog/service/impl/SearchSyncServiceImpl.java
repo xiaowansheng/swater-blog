@@ -196,8 +196,8 @@ public class SearchSyncServiceImpl implements SearchSyncService {
         CommentDocument doc = new CommentDocument();
         doc.setId(comment.getId());
         doc.setContent(comment.getContent());
-        doc.setPostId(comment.getPostId());
-        doc.setMomentId(comment.getMomentId());
+        doc.setTargetId(comment.getTargetId());
+        doc.setTargetType(comment.getTargetType());
         doc.setUserId(comment.getUserId());
         doc.setParentId(comment.getParentId());
         doc.setStatus(comment.getStatus());

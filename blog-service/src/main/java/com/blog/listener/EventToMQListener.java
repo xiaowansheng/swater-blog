@@ -44,11 +44,15 @@ public class EventToMQListener {
         
         try {
             com.blog.model.entity.Comment comment = event.getComment();
-            if (comment == null || comment.getPostId() == null) {
+            if (comment == null || comment.getTargetId() == null) {
                 return;
             }
             
-            Article article = articleMapper.selectById(comment.getPostId());
+            if (!"ARTICLE".equalsIgnoreCase(comment.getTargetType())) {
+                return;
+            }
+
+            Article article = articleMapper.selectById(comment.getTargetId());
             if (article == null || article.getAuthorId() == null) {
                 return;
             }

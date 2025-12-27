@@ -25,15 +25,16 @@ public class StatisticsUpdateEventListener {
     @EventListener
     public void handleCommentCreated(CommentCreatedEvent event) {
         try {
-            if (event.getComment().getPostId() != null) {
-                Article article = articleMapper.selectById(event.getComment().getPostId());
+            com.blog.model.entity.Comment comment = event.getComment();
+            if (comment.getTargetId() != null && "ARTICLE".equalsIgnoreCase(comment.getTargetType())) {
+                Article article = articleMapper.selectById(comment.getTargetId());
                 if (article != null && article.getDeleted() == 0) {
                     article.setCommentCount((article.getCommentCount() != null ? article.getCommentCount() : 0) + 1);
                     articleMapper.updateById(article);
                 }
             }
-            if (event.getComment().getMomentId() != null) {
-                Talk talk = talkMapper.selectById(event.getComment().getMomentId());
+            if (comment.getTargetId() != null && "TALK".equalsIgnoreCase(comment.getTargetType())) {
+                Talk talk = talkMapper.selectById(comment.getTargetId());
                 if (talk != null && talk.getDeleted() == 0) {
                     talk.setCommentCount((talk.getCommentCount() != null ? talk.getCommentCount() : 0) + 1);
                     talkMapper.updateById(talk);
@@ -48,15 +49,16 @@ public class StatisticsUpdateEventListener {
     @EventListener
     public void handleCommentDeleted(CommentDeletedEvent event) {
         try {
-            if (event.getComment().getPostId() != null) {
-                Article article = articleMapper.selectById(event.getComment().getPostId());
+            com.blog.model.entity.Comment comment = event.getComment();
+            if (comment.getTargetId() != null && "ARTICLE".equalsIgnoreCase(comment.getTargetType())) {
+                Article article = articleMapper.selectById(comment.getTargetId());
                 if (article != null && article.getDeleted() == 0) {
                     article.setCommentCount(Math.max(0, (article.getCommentCount() != null ? article.getCommentCount() : 0) - 1));
                     articleMapper.updateById(article);
                 }
             }
-            if (event.getComment().getMomentId() != null) {
-                Talk talk = talkMapper.selectById(event.getComment().getMomentId());
+            if (comment.getTargetId() != null && "TALK".equalsIgnoreCase(comment.getTargetType())) {
+                Talk talk = talkMapper.selectById(comment.getTargetId());
                 if (talk != null && talk.getDeleted() == 0) {
                     talk.setCommentCount(Math.max(0, (talk.getCommentCount() != null ? talk.getCommentCount() : 0) - 1));
                     talkMapper.updateById(talk);
