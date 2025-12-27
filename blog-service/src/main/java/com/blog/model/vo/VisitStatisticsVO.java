@@ -18,8 +18,6 @@ public class VisitStatisticsVO extends BaseVO {
 
     private Long uniqueVisitorCount;
 
-    private Long pageViewCount;
-
     private Map<String, Object> geoStatistics;
 
     private Map<String, Object> deviceStatistics;

@@ -7,7 +7,6 @@ CREATE TABLE `visit_statistics` (
   `statistics_date` DATETIME NOT NULL COMMENT '统计日期',
   `visit_count` BIGINT NOT NULL DEFAULT '0' COMMENT '访问量',
   `unique_visitor_count` BIGINT NOT NULL DEFAULT '0' COMMENT '独立访客数',
-  `page_view_count` BIGINT NOT NULL DEFAULT '0' COMMENT '页面浏览量',
   `geo_statistics` TEXT DEFAULT NULL COMMENT '地理位置统计(JSON)',
   `device_statistics` TEXT DEFAULT NULL COMMENT '设备统计(JSON)',
   `browser_statistics` TEXT DEFAULT NULL COMMENT '浏览器统计(JSON)',

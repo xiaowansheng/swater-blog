@@ -31,14 +31,12 @@
 ### 扩展表
 21. `21_sys_menu.sql` - 菜单表 (`sys_menu`)
 22. `22_role_menu.sql` - 角色菜单关联表 (`role_menu`)
-23. `23_login_log.sql` - 登录日志表 (`login_log`)
-24. `24_guestbook.sql` - 留言簿表 (`guestbook`)
-25. `25_page_view.sql` - 访问量表 (`page_view`)
-26. `26_album.sql` - 相册表 (`album`)
-27. `27_picture.sql` - 图片表 (`picture`)
-28. `28_share_category.sql` - 分享分类表 (`share_category`)
-29. `29_visit_statistics.sql` - 访问统计表 (`visit_statistics`)
-30. `30_visitor_access_log.sql` - 访客访问记录表 (`visitor_access_log`)
+23. `24_guestbook.sql` - 留言簿表 (`guestbook`)
+24. `26_album.sql` - 相册表 (`album`)
+25. `27_picture.sql` - 图片表 (`picture`)
+26. `28_share_category.sql` - 分享分类表 (`share_category`)
+27. `29_visit_statistics.sql` - 访问统计表 (`visit_statistics`)
+28. `30_visitor_access_log.sql` - 访客访问记录表 (`visitor_access_log`)
 31. `31_visitor_old.sql` - 旧版访客信息表 (`visitor_old`)
 
 ## 使用说明

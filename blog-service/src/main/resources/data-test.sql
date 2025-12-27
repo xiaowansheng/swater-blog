@@ -10,18 +10,10 @@ INSERT INTO `t_role` (`id`, `name`, `role_key`, `description`) VALUES
 (3, 'AUTHOR', 'author', '作者');
 
 -- 插入测试用户
-INSERT INTO `t_user` (`id`, `username`, `email`, `password`, `nickname`, `disabled`, `ip_address_signup`, `ip_source_signup`) VALUES
-(1, 'admin', 'admin@test.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '管理员', 0, '127.0.0.1', '本地'),
-(2, 'testuser', 'user@test.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '测试用户', 0, '127.0.0.1', '本地'),
-(3, 'author', 'author@test.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '测试作者', 0, '127.0.0.1', '本地');
-
--- 插入用户角色关联
-INSERT INTO `t_user_role` (`user_id`, `role_id`) VALUES
-(1, 1), -- admin -> ADMIN
-(1, 3), -- admin -> AUTHOR
-(2, 2), -- testuser -> USER
-(3, 2), -- author -> USER
-(3, 3); -- author -> AUTHOR
+INSERT INTO `t_user` (`id`, `username`, `email`, `password`, `nickname`, `role`, `disabled`, `ip_address_signup`, `ip_source_signup`) VALUES
+(1, 'admin', 'admin@test.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '管理员', 'admin', 0, '127.0.0.1', '本地'),
+(2, 'testuser', 'user@test.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '测试用户', 'user', 0, '127.0.0.1', '本地'),
+(3, 'author', 'author@test.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '测试作者', 'author', 0, '127.0.0.1', '本地');
 
 -- 插入测试分类
 INSERT INTO `t_category` (`id`, `category_key`, `name`, `description`, `status`) VALUES

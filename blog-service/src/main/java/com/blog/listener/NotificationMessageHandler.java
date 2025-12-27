@@ -3,11 +3,9 @@ package com.blog.listener;
 import com.blog.mapper.ArticleMapper;
 import com.blog.mapper.RoleMapper;
 import com.blog.mapper.UserMapper;
-import com.blog.mapper.UserRoleMapper;
 import com.blog.model.entity.Article;
 import com.blog.model.entity.Role;
 import com.blog.model.entity.User;
-import com.blog.model.entity.UserRole;
 import com.blog.model.message.NotificationMessage;
 import com.blog.model.vo.UserVO;
 import com.blog.plugin.core.Plugin;
@@ -45,9 +43,6 @@ public class NotificationMessageHandler {
     
     @Autowired
     private RoleMapper roleMapper;
-    
-    @Autowired
-    private UserRoleMapper userRoleMapper;
     
     @Autowired(required = false)
     private NotificationService notificationService;
@@ -261,19 +256,9 @@ public class NotificationMessageHandler {
             return List.of();
         }
         
-        LambdaQueryWrapper<UserRole> userRoleWrapper = new LambdaQueryWrapper<>();
-        userRoleWrapper.eq(UserRole::getRoleId, adminRole.getId());
-        List<UserRole> userRoles = userRoleMapper.selectList(userRoleWrapper);
-        if (userRoles.isEmpty()) {
-            return List.of();
-        }
-        
-        List<Long> adminUserIds = userRoles.stream()
-                .map(UserRole::getUserId)
-                .collect(Collectors.toList());
-        
+        // 直接根据角色名称查找用户
         LambdaQueryWrapper<User> userWrapper = new LambdaQueryWrapper<>();
-        userWrapper.in(User::getId, adminUserIds)
+        userWrapper.eq(User::getRole, adminRole.getRoleKey())
                 .eq(User::getDeleted, 0)
                 .eq(User::getStatus, 1);
         return userMapper.selectList(userWrapper);

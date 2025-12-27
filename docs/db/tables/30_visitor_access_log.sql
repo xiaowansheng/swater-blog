@@ -11,7 +11,6 @@ CREATE TABLE `visitor_access_log` (
   `referer` VARCHAR(500) DEFAULT NULL COMMENT '来源页面URL',
   `session_id` VARCHAR(64) DEFAULT NULL COMMENT '会话ID',
   `is_new_visitor` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否为新访客',
-  `is_page_view` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '是否为页面浏览',
   `access_time` DATETIME NOT NULL COMMENT '访问时间',
   `traffic_source` VARCHAR(20) DEFAULT 'UNKNOWN' COMMENT '流量来源分类',
   `referer_url` VARCHAR(500) DEFAULT NULL COMMENT '来源页面URL',

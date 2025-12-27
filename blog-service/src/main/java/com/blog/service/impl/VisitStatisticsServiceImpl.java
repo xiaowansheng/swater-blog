@@ -114,9 +114,6 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
                     .filter(Objects::nonNull)
                     .distinct()
                     .count();
-            long pageViewCount = groupLogs.stream()
-                    .filter(log -> log.getIsPageView() != null && log.getIsPageView() == 1)
-                    .count();
 
             Set<Long> visitorIds = groupLogs.stream()
                     .map(VisitorAccessLog::getVisitorId)
@@ -185,7 +182,6 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
             statistics.setStatisticsDate(statisticsDate);
             statistics.setVisitCount(visitCount);
             statistics.setUniqueVisitorCount(uniqueVisitorCount);
-            statistics.setPageViewCount(pageViewCount);
             statistics.setGeoStatistics(JsonUtil.toJson(geoStatistics));
             statistics.setDeviceStatistics(JsonUtil.toJson(deviceStatistics));
             statistics.setBrowserStatistics(JsonUtil.toJson(browserStatistics));

@@ -34,13 +34,6 @@ INSERT INTO `role` (
     ('用户', 'USER', 'user', '普通用户，可以评论和互动', 1, 0, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `update_time` = NOW();
 
--- 分配用户角色
-INSERT INTO `user_role` (`user_id`, `role_id`, `create_time`)
-SELECT u.id, r.id, NOW()
-FROM `user` u, `role` r 
-WHERE u.username = 'admin' AND r.code = 'ADMIN'
-ON DUPLICATE KEY UPDATE `create_time` = NOW();
-
 -- 创建默认分类
 INSERT INTO `category` (
     `category_key`, `name`, `slug`, `description`, 

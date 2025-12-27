@@ -6,11 +6,9 @@ import com.blog.common.PageResult;
 import com.blog.event.user.*;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.UserMapper;
-import com.blog.mapper.UserRoleMapper;
 import com.blog.model.dto.ResetPasswordDTO;
 import com.blog.model.dto.UserDTO;
 import com.blog.model.entity.User;
-import com.blog.model.entity.UserRole;
 import com.blog.model.vo.RoleVO;
 import com.blog.model.vo.UserVO;
 import com.blog.service.RoleService;
@@ -34,9 +32,6 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper userMapper;
-
-    @Autowired
-    private UserRoleMapper userRoleMapper;
 
     @Autowired
     private RoleService roleService;
@@ -108,10 +103,6 @@ public class UserServiceImpl implements UserService {
         
         userMapper.insert(user);
         
-        if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
-            saveUserRoles(user.getId(), dto.getRoleIds());
-        }
-        
         User savedUser = userMapper.selectById(user.getId());
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserCreatedEvent(this, user.getId(), savedUser)));
         
@@ -158,13 +149,6 @@ public class UserServiceImpl implements UserService {
         
         userMapper.updateById(user);
         
-        if (dto.getRoleIds() != null) {
-            userRoleMapper.deleteByUserId(id);
-            if (!dto.getRoleIds().isEmpty()) {
-                saveUserRoles(id, dto.getRoleIds());
-            }
-        }
-        
         User updatedUser = userMapper.selectById(id);
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserUpdatedEvent(this, id, updatedUser)));
     }
@@ -178,7 +162,6 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("用户不存在");
         }
         userMapper.deleteById(id);
-        userRoleMapper.deleteByUserId(id);
         
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserDeletedEvent(this, id)));
     }
@@ -197,38 +180,14 @@ public class UserServiceImpl implements UserService {
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserPasswordResetEvent(this, id)));
     }
 
-    @Override
-    @Transactional
-    @CacheEvict(value = "user", key = "#id")
-    public void assignRoles(Long id, List<Long> roleIds) {
-        User user = userMapper.selectById(id);
-        if (user == null || user.getDeleted() == 1) {
-            throw new BusinessException("用户不存在");
-        }
-        userRoleMapper.deleteByUserId(id);
-        if (roleIds != null && !roleIds.isEmpty()) {
-            saveUserRoles(id, roleIds);
-        }
-        
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserRolesAssignedEvent(this, id, roleIds)));
-    }
-
-    private void saveUserRoles(Long userId, List<Long> roleIds) {
-        for (Long roleId : roleIds) {
-            UserRole userRole = new UserRole();
-            userRole.setUserId(userId);
-            userRole.setRoleId(roleId);
-            userRole.setCreateTime(LocalDateTime.now());
-            userRoleMapper.insert(userRole);
-        }
-    }
-
     private UserVO convertToVO(User user) {
         UserVO vo = BeanUtil.copyProperties(user, UserVO.class);
-        List<Long> roleIds = userRoleMapper.selectRoleIdsByUserId(user.getId());
-        if (roleIds != null && !roleIds.isEmpty()) {
-            List<RoleVO> roles = roleService.getByIds(roleIds);
-            vo.setRoles(roles);
+        if (user.getRole() != null && !user.getRole().isEmpty()) {
+            // 根据用户的role字段获取角色信息
+            RoleVO role = roleService.getByName(user.getRole());
+            if (role != null) {
+                vo.setRoles(List.of(role));
+            }
         }
         return vo;
     }

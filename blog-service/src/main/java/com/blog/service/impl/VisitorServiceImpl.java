@@ -151,7 +151,6 @@ public class VisitorServiceImpl implements VisitorService {
         log.setReferer(dto.getReferer());
         log.setSessionId(dto.getSessionId());
         log.setIsNewVisitor(isNewVisitor ? 1 : 0);
-        log.setIsPageView(1);
         log.setAccessTime(now);
         log.setTrafficSource("UNKNOWN");
         visitorAccessLogMapper.insert(log);

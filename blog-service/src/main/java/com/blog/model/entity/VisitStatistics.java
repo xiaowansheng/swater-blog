@@ -25,9 +25,6 @@ public class VisitStatistics extends BaseEntity {
     @TableField("unique_visitor_count")
     private Long uniqueVisitorCount;
 
-    @TableField("page_view_count")
-    private Long pageViewCount;
-
     @TableField("geo_statistics")
     private String geoStatistics;
 

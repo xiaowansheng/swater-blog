@@ -13,7 +13,6 @@ SOURCE 02_file_reference.sql;
 -- ============================================
 SOURCE 03_user.sql;
 SOURCE 04_role.sql;
-SOURCE 05_user_role.sql;
 SOURCE 06_sys_api.sql;
 SOURCE 07_role_api.sql;
 SOURCE 21_sys_menu.sql;
@@ -42,8 +41,6 @@ SOURCE 17_sys_notification.sql;
 -- 5. 访客统计相关表
 -- ============================================
 SOURCE 18_visitor.sql;
-SOURCE 23_login_log.sql;
-SOURCE 25_page_view.sql;
 SOURCE 29_visit_statistics.sql;
 SOURCE 30_visitor_access_log.sql;
 SOURCE 31_visitor_old.sql;

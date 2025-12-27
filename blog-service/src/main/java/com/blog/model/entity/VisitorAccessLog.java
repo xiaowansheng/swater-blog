@@ -36,9 +36,6 @@ public class VisitorAccessLog extends BaseEntity {
     @TableField("is_new_visitor")
     private Integer isNewVisitor;
 
-    @TableField("is_page_view")
-    private Integer isPageView;
-
     @TableField("access_time")
     private LocalDateTime accessTime;
 

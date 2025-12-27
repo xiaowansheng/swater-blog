@@ -4,10 +4,12 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.mapper.RoleMenuMapper;
 import com.blog.mapper.SysMenuMapper;
-import com.blog.mapper.UserRoleMapper;
+import com.blog.mapper.UserMapper;
 import com.blog.model.entity.SysMenu;
+import com.blog.model.entity.User;
 import com.blog.model.vo.MenuVO;
 import com.blog.service.MenuPublicService;
+import com.blog.service.RoleService;
 import com.blog.util.BeanUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +28,10 @@ public class MenuPublicServiceImpl implements MenuPublicService {
     private RoleMenuMapper roleMenuMapper;
 
     @Autowired
-    private UserRoleMapper userRoleMapper;
+    private UserMapper userMapper;
+
+    @Autowired
+    private RoleService roleService;
 
     @Override
     public List<MenuVO> getCurrentUserMenus() {
@@ -35,13 +40,18 @@ public class MenuPublicServiceImpl implements MenuPublicService {
         }
 
         Long userId = StpUtil.getLoginIdAsLong();
-        List<Long> roleIds = userRoleMapper.selectRoleIdsByUserId(userId);
-
-        if (roleIds == null || roleIds.isEmpty()) {
+        User user = userMapper.selectById(userId);
+        if (user == null || user.getRole() == null || user.getRole().isEmpty()) {
             return List.of();
         }
 
-        List<Long> menuIds = roleMenuMapper.selectMenuIdsByRoleIds(roleIds);
+        // 根据用户角色名称获取角色ID
+        var role = roleService.getByName(user.getRole());
+        if (role == null) {
+            return List.of();
+        }
+
+        List<Long> menuIds = roleMenuMapper.selectMenuIdsByRoleIds(List.of(role.getId()));
         if (menuIds == null || menuIds.isEmpty()) {
             return List.of();
         }

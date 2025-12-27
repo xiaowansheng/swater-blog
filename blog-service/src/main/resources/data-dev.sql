@@ -12,18 +12,11 @@ INSERT INTO `t_role` (`id`, `name`, `role_key`, `description`) VALUES
 (5, '普通用户', 'user', '普通注册用户');
 
 -- 插入用户数据
-INSERT INTO `t_user` (`id`, `username`, `email`, `password`, `nickname`, `disabled`, `ip_address_signup`, `ip_source_signup`) VALUES
-(1, 'admin', 'admin@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '超级管理员', 0, '127.0.0.1', '本地'),
-(2, 'editor', 'editor@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '编辑', 0, '127.0.0.1', '本地'),
-(3, 'author', 'author@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '作者', 0, '127.0.0.1', '本地'),
-(4, 'user', 'user@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '普通用户', 0, '127.0.0.1', '本地');
-
--- 插入用户角色关联
-INSERT INTO `t_user_role` (`user_id`, `role_id`) VALUES
-(1, 1), -- admin -> 超级管理员
-(2, 3), -- editor -> 编辑
-(3, 4), -- author -> 作者
-(4, 5); -- user -> 普通用户
+INSERT INTO `t_user` (`id`, `username`, `email`, `password`, `nickname`, `role`, `disabled`, `ip_address_signup`, `ip_source_signup`) VALUES
+(1, 'admin', 'admin@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '超级管理员', 'admin', 0, '127.0.0.1', '本地'),
+(2, 'editor', 'editor@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '编辑', 'editor', 0, '127.0.0.1', '本地'),
+(3, 'author', 'author@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '作者', 'author', 0, '127.0.0.1', '本地'),
+(4, 'user', 'user@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '普通用户', 'user', 0, '127.0.0.1', '本地');
 
 -- 插入分类数据
 INSERT INTO `t_category` (`id`, `category_key`, `name`, `description`, `status`) VALUES
@@ -102,14 +95,6 @@ INSERT INTO `user` (`id`, `username`, `email`, `password`, `nickname`, `avatar`,
 (3, 'author1', 'author1@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '技术作者', '/uploads/avatar/author1.jpg', '13800138002', 1, '专注于技术文章写作', 1),
 (4, 'author2', 'author2@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '生活博主', '/uploads/avatar/author2.jpg', '13800138003', 2, '分享生活点滴和感悟', 1),
 (5, 'testuser', 'test@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '测试用户', '/uploads/avatar/test.jpg', '13800138004', 0, '用于测试的普通用户账号', 1);
-
--- 插入用户角色关联
-INSERT INTO `user_role` (`user_id`, `role_id`) VALUES
-(1, 1), -- admin -> 超级管理员
-(2, 3), -- editor -> 编辑
-(3, 4), -- author1 -> 作者
-(4, 4), -- author2 -> 作者
-(5, 5); -- testuser -> 普通用户
 
 -- 插入分类数据
 INSERT INTO `category` (`id`, `name`, `slug`, `description`, `cover_image`, `parent_id`, `sort_order`, `article_count`) VALUES

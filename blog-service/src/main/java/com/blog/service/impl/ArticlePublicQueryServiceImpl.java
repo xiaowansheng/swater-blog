@@ -13,7 +13,6 @@ import com.blog.model.entity.Tag;
 import com.blog.model.vo.ArticleVO;
 import com.blog.model.vo.TagVO;
 import com.blog.service.ArticlePublicQueryService;
-import com.blog.service.PageViewService;
 import com.blog.util.BeanUtil;
 import com.blog.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +34,6 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
 
     @Autowired
     private ArticleTagMapper articleTagMapper;
-
-    @Autowired
-    private PageViewService pageViewService;
 
     @Override
     @Cacheable(value = "article:list", key = "#page + ':' + #size + ':' + (#categoryId != null ? #categoryId : 'null') + ':' + (#tagId != null ? #tagId : 'null') + ':' + (#keyword != null ? #keyword : 'null')")
@@ -84,10 +80,6 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
         if (article == null) {
             return null;
         }
-        try {
-            pageViewService.incrementView("2", id);
-        } catch (Exception e) {
-        }
         return convertToVO(article);
     }
 
@@ -100,10 +92,6 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
                 .eq(Article::getDeleted, 0));
         if (article == null) {
             return null;
-        }
-        try {
-            pageViewService.incrementView("2", article.getId());
-        } catch (Exception e) {
         }
         return convertToVO(article);
     }

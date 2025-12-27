@@ -78,46 +78,7 @@ PARTITION BY RANGE (YEAR(create_time) * 100 + MONTH(create_time)) (
     PARTITION p_future VALUES LESS THAN MAXVALUE
 );
 
--- 3. 登录日志表分区
-CREATE TABLE IF NOT EXISTS `login_log_partitioned` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '登录日志ID',
-  `user_id` BIGINT DEFAULT NULL COMMENT '用户ID',
-  `username` VARCHAR(50) DEFAULT NULL COMMENT '用户名',
-  `login_type` VARCHAR(20) NOT NULL DEFAULT 'password' COMMENT '登录类型',
-  `ip` VARCHAR(50) NOT NULL COMMENT '登录IP',
-  `ip_address` VARCHAR(255) DEFAULT NULL COMMENT 'IP地址信息',
-  `country` VARCHAR(50) DEFAULT NULL COMMENT '国家',
-  `province` VARCHAR(50) DEFAULT NULL COMMENT '省份',
-  `city` VARCHAR(50) DEFAULT NULL COMMENT '城市',
-  `device` VARCHAR(50) DEFAULT NULL COMMENT '设备类型',
-  `browser` VARCHAR(50) DEFAULT NULL COMMENT '浏览器',
-  `os` VARCHAR(50) DEFAULT NULL COMMENT '操作系统',
-  `user_agent` VARCHAR(500) DEFAULT NULL COMMENT '用户代理',
-  `status` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '登录状态(1成功0失败)',
-  `failure_reason` VARCHAR(255) DEFAULT NULL COMMENT '失败原因',
-  `login_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登录时间',
-  PRIMARY KEY (`id`, `login_time`),
-  KEY `idx_user_time` (`user_id`, `login_time`),
-  KEY `idx_ip_time` (`ip`, `login_time`),
-  KEY `idx_status_time` (`status`, `login_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='登录日志表(分区版)'
-PARTITION BY RANGE (YEAR(login_time) * 100 + MONTH(login_time)) (
-    PARTITION p202401 VALUES LESS THAN (202402),
-    PARTITION p202402 VALUES LESS THAN (202403),
-    PARTITION p202403 VALUES LESS THAN (202404),
-    PARTITION p202404 VALUES LESS THAN (202405),
-    PARTITION p202405 VALUES LESS THAN (202406),
-    PARTITION p202406 VALUES LESS THAN (202407),
-    PARTITION p202407 VALUES LESS THAN (202408),
-    PARTITION p202408 VALUES LESS THAN (202409),
-    PARTITION p202409 VALUES LESS THAN (202410),
-    PARTITION p202410 VALUES LESS THAN (202411),
-    PARTITION p202411 VALUES LESS THAN (202412),
-    PARTITION p202412 VALUES LESS THAN (202501),
-    PARTITION p_future VALUES LESS THAN MAXVALUE
-);
-
--- 4. 访问统计表分区（按日分区，适合高频访问统计）
+-- 3. 访问统计表分区（按日分区，适合高频访问统计）
 CREATE TABLE IF NOT EXISTS `visit_statistics_partitioned` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '统计ID',
   `date` DATE NOT NULL COMMENT '统计日期',
@@ -226,12 +187,10 @@ BEGIN
     -- 为日志表添加未来3个月的分区
     CALL AddMonthlyPartition('log_operation_partitioned', 3);
     CALL AddMonthlyPartition('log_error_partitioned', 3);
-    CALL AddMonthlyPartition('login_log_partitioned', 3);
     
     -- 删除12个月前的旧分区（保留12个月数据）
     CALL DropOldPartitions('log_operation_partitioned', 12);
     CALL DropOldPartitions('log_error_partitioned', 12);
-    CALL DropOldPartitions('login_log_partitioned', 12);
 END;
 
 -- ========================================

@@ -94,20 +94,6 @@ CREATE TABLE IF NOT EXISTS `role` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户角色表';
 
 
--- 用户角色关联表
-
-CREATE TABLE IF NOT EXISTS `user_role` (
-  `user_id` BIGINT NOT NULL COMMENT '用户账号ID',
-  `role_id` BIGINT NOT NULL COMMENT '角色ID',
-  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  UNIQUE KEY `uk_user_role` (`user_id`,`role_id`),
-  KEY `idx_user_id` (`user_id`),
-  KEY `idx_role_id` (`role_id`),
-  CONSTRAINT `fk_user_role_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_user_role_role_id` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户账号对应角色表';
-
-
 -- 接口资源表
 
 CREATE TABLE IF NOT EXISTS `sys_api` (
@@ -600,36 +586,6 @@ CREATE TABLE IF NOT EXISTS `role_menu` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色菜单关联表';
 
 
--- 登录日志表
-
-CREATE TABLE IF NOT EXISTS `login_log` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '登录日志ID',
-  `user_id` BIGINT NOT NULL COMMENT '用户账号ID',
-  `ip` VARCHAR(50) NOT NULL COMMENT 'IP地址',
-  `ip_address` VARCHAR(255) NOT NULL COMMENT 'IP地址信息',
-  `country` VARCHAR(50) DEFAULT NULL COMMENT '国家',
-  `province` VARCHAR(50) DEFAULT NULL COMMENT '省份',
-  `city` VARCHAR(50) DEFAULT NULL COMMENT '城市',
-  `latitude` DECIMAL(10,7) DEFAULT NULL COMMENT '纬度',
-  `longitude` DECIMAL(10,7) DEFAULT NULL COMMENT '经度',
-  `location_detail` VARCHAR(255) DEFAULT NULL COMMENT '详细地址',
-  `device_info` VARCHAR(255) DEFAULT NULL COMMENT '设备信息',
-  `device` VARCHAR(50) NOT NULL DEFAULT '未知设备' COMMENT '设备名称',
-  `browser` VARCHAR(50) NOT NULL DEFAULT '未知浏览器' COMMENT '浏览器信息',
-  `point` POINT DEFAULT NULL COMMENT '坐标',
-  `location` VARCHAR(100) DEFAULT NULL COMMENT '位置',
-  `ip_source` VARCHAR(100) DEFAULT NULL COMMENT 'ip来源',
-  `deleted` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否删除',
-  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_user_id` (`user_id`),
-  KEY `idx_create_time` (`create_time`),
-  KEY `idx_deleted` (`deleted`),
-  CONSTRAINT `fk_login_log_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='登录日志表';
-
-
 -- 留言簿表
 
 CREATE TABLE IF NOT EXISTS `guestbook` (
@@ -667,23 +623,6 @@ CREATE TABLE IF NOT EXISTS `guestbook` (
   KEY `idx_deleted` (`deleted`),
   CONSTRAINT `fk_guestbook_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='留言簿表';
-
-
--- 访问量表
-
-CREATE TABLE IF NOT EXISTS `page_view` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '访问量ID',
-  `count` BIGINT NOT NULL DEFAULT '0' COMMENT '访问量',
-  `view_type` VARCHAR(20) NOT NULL COMMENT '访问量类型（1网站访问量2博客文章访问量3说说访问量4写作文章访问量5相册访问量6友链访问量）',
-  `view_id` BIGINT DEFAULT NULL COMMENT '不同访问类型的对应表ID',
-  `deleted` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否已删除',
-  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_view_type` (`view_type`),
-  KEY `idx_view_id` (`view_id`),
-  KEY `idx_deleted` (`deleted`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='访问量表';
 
 
 -- 相册表
@@ -756,7 +695,6 @@ CREATE TABLE IF NOT EXISTS `visit_statistics` (
   `statistics_date` DATETIME NOT NULL COMMENT '统计日期',
   `visit_count` BIGINT NOT NULL DEFAULT '0' COMMENT '访问量',
   `unique_visitor_count` BIGINT NOT NULL DEFAULT '0' COMMENT '独立访客数',
-  `page_view_count` BIGINT NOT NULL DEFAULT '0' COMMENT '页面浏览量',
   `geo_statistics` TEXT DEFAULT NULL COMMENT '地理位置统计(JSON)',
   `device_statistics` TEXT DEFAULT NULL COMMENT '设备统计(JSON)',
   `browser_statistics` TEXT DEFAULT NULL COMMENT '浏览器统计(JSON)',
@@ -785,7 +723,6 @@ CREATE TABLE IF NOT EXISTS `visitor_access_log` (
   `referer` VARCHAR(500) DEFAULT NULL COMMENT '来源页面URL',
   `session_id` VARCHAR(64) DEFAULT NULL COMMENT '会话ID',
   `is_new_visitor` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否为新访客',
-  `is_page_view` TINYINT(1) NOT NULL DEFAULT '1' COMMENT '是否为页面浏览',
   `access_time` DATETIME NOT NULL COMMENT '访问时间',
   `traffic_source` VARCHAR(20) DEFAULT 'UNKNOWN' COMMENT '流量来源分类',
   `referer_url` VARCHAR(500) DEFAULT NULL COMMENT '来源页面URL',

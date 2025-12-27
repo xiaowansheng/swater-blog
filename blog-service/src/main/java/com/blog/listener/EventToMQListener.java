@@ -6,7 +6,6 @@ import com.blog.event.guestbook.GuestbookApprovedEvent;
 import com.blog.event.guestbook.GuestbookCreatedEvent;
 import com.blog.event.user.UserCreatedEvent;
 import com.blog.event.user.UserLoggedInEvent;
-import com.blog.event.user.UserRolesAssignedEvent;
 import com.blog.mapper.ArticleMapper;
 import com.blog.model.entity.Article;
 import com.blog.model.message.NotificationMessage;
@@ -247,38 +246,6 @@ public class EventToMQListener {
         } catch (Exception e) {
             log.error("发送用户创建事件到MQ失败，用户ID: {}, 邮箱: {}", 
                 event.getUserId(), event.getUser() != null ? event.getUser().getEmail() : null, e);
-        }
-    }
-    
-    @Async("eventTaskExecutor")
-    @EventListener
-    public void handleUserRolesAssigned(UserRolesAssignedEvent event) {
-        if (mqService == null) {
-            return;
-        }
-        
-        try {
-            UserVO user = userService.getById(event.getUserId());
-            if (user == null || user.getEmail() == null || user.getEmail().isEmpty()) {
-                return;
-            }
-            
-            NotificationMessage message = new NotificationMessage();
-            message.setType("user");
-            message.setUserId(user.getId());
-            message.setTitle("角色分配通知");
-            message.setContent("您的账号已被分配新的角色");
-            message.setTimestamp(LocalDateTime.now());
-            
-            Map<String, Object> data = new HashMap<>();
-            data.put("user", user);
-            data.put("roleIds", event.getRoleIds());
-            message.setData(data);
-            
-            mqService.sendNotification(message);
-        } catch (Exception e) {
-            log.error("发送角色分配事件到MQ失败，用户ID: {}, 角色IDs: {}", 
-                event.getUserId(), event.getRoleIds(), e);
         }
     }
     

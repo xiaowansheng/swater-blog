@@ -10,7 +10,6 @@ import com.blog.model.entity.Talk;
 import com.blog.model.entity.User;
 import com.blog.model.vo.TalkVO;
 import com.blog.service.TalkPublicQueryService;
-import com.blog.service.PageViewService;
 import com.blog.util.BeanUtil;
 import com.blog.util.JsonUtil;
 import com.blog.util.PageUtil;
@@ -27,9 +26,6 @@ public class TalkPublicQueryServiceImpl implements TalkPublicQueryService {
 
     @Autowired
     private UserMapper userMapper;
-
-    @Autowired
-    private PageViewService pageViewService;
 
     @Override
     @Cacheable(value = "talk:list", key = "#page + ':' + #size")
@@ -58,10 +54,6 @@ public class TalkPublicQueryServiceImpl implements TalkPublicQueryService {
                 .eq(Talk::getDeleted, 0));
         if (talk == null) {
             return null;
-        }
-        try {
-            pageViewService.incrementView("3", id);
-        } catch (Exception e) {
         }
         return convertToVO(talk);
     }

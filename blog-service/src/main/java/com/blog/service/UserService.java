@@ -17,7 +17,5 @@ public interface UserService {
     void delete(Long id);
 
     void resetPassword(Long id, ResetPasswordDTO dto);
-
-    void assignRoles(Long id, java.util.List<Long> roleIds);
 }
 

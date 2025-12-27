@@ -81,10 +81,6 @@ ALTER TABLE `sys_api` ADD INDEX `idx_parent_sort` (`parent_id`, `sort` ASC);
 -- 错误日志查询优化
 -- ALTER TABLE `log_error` ADD INDEX `idx_level_time` (`level`, `create_time` DESC);
 
--- 登录日志查询优化
--- ALTER TABLE `login_log` ADD INDEX `idx_user_time` (`user_id`, `login_time` DESC);
--- ALTER TABLE `login_log` ADD INDEX `idx_ip_time` (`ip`, `login_time` DESC);
-
 -- ========================================
 -- 索引使用情况检查
 -- ========================================

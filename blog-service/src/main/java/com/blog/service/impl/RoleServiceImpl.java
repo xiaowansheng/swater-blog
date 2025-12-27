@@ -53,6 +53,20 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public RoleVO getByName(String roleName) {
+        if (roleName == null || roleName.isEmpty()) {
+            return null;
+        }
+        LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Role::getRoleKey, roleName).eq(Role::getDeleted, 0);
+        Role role = roleMapper.selectOne(wrapper);
+        if (role == null) {
+            return null;
+        }
+        return BeanUtil.copyProperties(role, RoleVO.class);
+    }
+
+    @Override
     @Transactional
     public Long create(RoleDTO dto) {
         LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
