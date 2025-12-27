@@ -39,23 +39,31 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginVO login(LoginDTO dto) {
+        log.info("用户尝试登录: {}", dto.getUsername());
+        
+        // 支持用户名或邮箱登录
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
-                .eq(User::getUsername, dto.getUsername())
+                .and(w -> w.eq(User::getUsername, dto.getUsername())
+                        .or().eq(User::getEmail, dto.getUsername()))
                 .eq(User::getDeleted, 0));
         
         if (user == null) {
+            log.warn("登录失败: 用户 {} 不存在", dto.getUsername());
             throw new BusinessException("用户名或密码错误");
         }
         
         if (user.getStatus() != null && user.getStatus() == 0) {
+            log.warn("登录失败: 用户 {} 已被禁用", dto.getUsername());
             throw new BusinessException("用户已被禁用");
         }
         
         if (user.getDisabled() != null && user.getDisabled() == 1) {
+            log.warn("登录失败: 用户 {} 已被禁用", dto.getUsername());
             throw new BusinessException("用户已被禁用");
         }
         
         if (!PasswordUtil.matches(dto.getPassword(), user.getPassword())) {
+            log.warn("登录失败: 用户 {} 密码不匹配", dto.getUsername());
             throw new BusinessException("用户名或密码错误");
         }
         

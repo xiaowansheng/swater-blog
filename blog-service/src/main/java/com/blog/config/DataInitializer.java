@@ -49,18 +49,39 @@ public class DataInitializer implements ApplicationRunner {
     private void initAdminUser() {
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getUsername, "admin").eq(User::getDeleted, 0);
-        if (userMapper.selectCount(wrapper) == 0) {
-            User admin = new User();
+        User admin = userMapper.selectOne(wrapper);
+        if (admin == null) {
+            admin = new User();
             admin.setUsername("admin");
             admin.setPassword(PasswordUtil.encode("123456"));
             admin.setNickname("管理员");
             admin.setEmail("admin@blog.com");
             admin.setIpAddressSignup("127.0.0.1");
             admin.setIpSourceSignup("本地");
-            admin.setRole("admin"); // 直接设置角色名称
+            admin.setRole("admin");
+            admin.setStatus(1);
+            admin.setDisabled(0);
             userMapper.insert(admin);
             log.info("初始化管理员账号成功，用户名: admin，密码: 123456，用户ID: {}", admin.getId());
         } else {
+            // // 确保管理员账号是启用状态且密码正确（可选，这里仅确保状态）
+            // boolean updated = false;
+            // if (admin.getStatus() == null || admin.getStatus() == 0) {
+            //     admin.setStatus(1);
+            //     updated = true;
+            // }
+            // if (admin.getDisabled() == null || admin.getDisabled() == 1) {
+            //     admin.setDisabled(0);
+            //     updated = true;
+            // }
+            // // 强制重置管理员密码为 123456 以解决登录问题
+            //  admin.setPassword(PasswordUtil.encode("123456"));
+            //  updated = true;
+             
+            //  if (updated) {
+            //     userMapper.updateById(admin);
+            //     log.info("更新管理员账号状态成功");
+            // }
             log.debug("管理员账号已存在，跳过初始化");
         }
     }
