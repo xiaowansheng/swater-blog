@@ -42,7 +42,12 @@ public class SecurityFilter implements Filter {
         "accept", "accept-encoding", "accept-language", "authorization", 
         "cache-control", "connection", "content-type", "content-length",
         "host", "origin", "referer", "user-agent", "x-requested-with",
-        "x-forwarded-for", "x-real-ip", "pragma", "upgrade-insecure-requests"
+        "x-forwarded-for", "x-real-ip", "pragma", "upgrade-insecure-requests",
+        // 浏览器 Client Hints 标准请求头
+        "sec-ch-ua", "sec-ch-ua-mobile", "sec-ch-ua-platform", "sec-ch-ua-arch",
+        "sec-ch-ua-bitness", "sec-ch-ua-full-version", "sec-ch-ua-full-version-list",
+        "sec-ch-ua-model", "sec-ch-ua-platform-version", "sec-ch-ua-wow64",
+        "sec-fetch-dest", "sec-fetch-mode", "sec-fetch-site", "sec-fetch-user"
     };
     
     @Override
