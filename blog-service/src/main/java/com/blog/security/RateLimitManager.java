@@ -1,5 +1,7 @@
 package com.blog.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -15,6 +17,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class RateLimitManager {
+    
+    private static final Logger logger = LoggerFactory.getLogger(RateLimitManager.class);
     
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -79,18 +83,22 @@ public class RateLimitManager {
      * @return 是否允许通过
      */
     public RateLimitResult slidingWindowRateLimit(String key, int windowSeconds, int limit) {
-        DefaultRedisScript<Object> script = new DefaultRedisScript<>(SLIDING_WINDOW_SCRIPT, Object.class);
+        DefaultRedisScript<java.util.List> script = new DefaultRedisScript<>(SLIDING_WINDOW_SCRIPT, java.util.List.class);
         
-        Object result = redisTemplate.execute(script, 
-            Collections.singletonList(key), 
-            windowSeconds, limit, System.currentTimeMillis());
-        
-        if (result instanceof java.util.List) {
-            @SuppressWarnings("unchecked")
-            java.util.List<Long> list = (java.util.List<Long>) result;
-            boolean allowed = list.get(0) == 1L;
-            long remaining = list.get(1);
-            return new RateLimitResult(allowed, remaining, windowSeconds);
+        try {
+            java.util.List<Long> result = redisTemplate.execute(script, 
+                Collections.singletonList(key), 
+                windowSeconds, limit, System.currentTimeMillis());
+            
+            if (result != null && result.size() >= 2) {
+                boolean allowed = result.get(0) == 1L;
+                long remaining = result.get(1);
+                return new RateLimitResult(allowed, remaining, windowSeconds);
+            }
+        } catch (Exception e) {
+            // Redis异常时，使用降级策略：允许通过但记录日志
+            logger.warn("Redis限流执行异常，使用降级策略: {}", e.getMessage());
+            return new RateLimitResult(true, limit, windowSeconds);
         }
         
         return new RateLimitResult(false, 0, windowSeconds);
@@ -104,19 +112,23 @@ public class RateLimitManager {
      * @return 是否允许通过
      */
     public RateLimitResult tokenBucketRateLimit(String key, int capacity, double refillRate) {
-        DefaultRedisScript<Object> script = new DefaultRedisScript<>(TOKEN_BUCKET_SCRIPT, Object.class);
+        DefaultRedisScript<java.util.List> script = new DefaultRedisScript<>(TOKEN_BUCKET_SCRIPT, java.util.List.class);
         
-        long intervalMs = (long) (1000.0 / refillRate);
-        Object result = redisTemplate.execute(script,
-            Collections.singletonList(key),
-            capacity, 1, intervalMs, System.currentTimeMillis());
-        
-        if (result instanceof java.util.List) {
-            @SuppressWarnings("unchecked")
-            java.util.List<Long> list = (java.util.List<Long>) result;
-            boolean allowed = list.get(0) == 1L;
-            long remaining = list.get(1);
-            return new RateLimitResult(allowed, remaining, 60); // 1分钟窗口
+        try {
+            long intervalMs = (long) (1000.0 / refillRate);
+            java.util.List<Long> result = redisTemplate.execute(script,
+                Collections.singletonList(key),
+                capacity, 1, intervalMs, System.currentTimeMillis());
+            
+            if (result != null && result.size() >= 2) {
+                boolean allowed = result.get(0) == 1L;
+                long remaining = result.get(1);
+                return new RateLimitResult(allowed, remaining, 60); // 1分钟窗口
+            }
+        } catch (Exception e) {
+            // Redis异常时，使用降级策略：允许通过但记录日志
+            logger.warn("Redis限流执行异常，使用降级策略: {}", e.getMessage());
+            return new RateLimitResult(true, capacity, 60);
         }
         
         return new RateLimitResult(false, 0, 60);
@@ -130,18 +142,24 @@ public class RateLimitManager {
      * @return 是否允许通过
      */
     public RateLimitResult fixedWindowRateLimit(String key, int windowSeconds, int limit) {
-        long window = System.currentTimeMillis() / (windowSeconds * 1000);
-        String windowKey = key + ":" + window;
-        
-        Long current = redisTemplate.opsForValue().increment(windowKey);
-        if (current == 1) {
-            redisTemplate.expire(windowKey, Duration.ofSeconds(windowSeconds));
+        try {
+            long window = System.currentTimeMillis() / (windowSeconds * 1000);
+            String windowKey = key + ":" + window;
+            
+            Long current = redisTemplate.opsForValue().increment(windowKey);
+            if (current == 1) {
+                redisTemplate.expire(windowKey, Duration.ofSeconds(windowSeconds));
+            }
+            
+            boolean allowed = current <= limit;
+            long remaining = Math.max(0, limit - current);
+            
+            return new RateLimitResult(allowed, remaining, windowSeconds);
+        } catch (Exception e) {
+            // Redis异常时，使用降级策略：允许通过但记录日志
+            logger.warn("Redis固定窗口限流执行异常，使用降级策略: {}", e.getMessage());
+            return new RateLimitResult(true, limit, windowSeconds);
         }
-        
-        boolean allowed = current <= limit;
-        long remaining = Math.max(0, limit - current);
-        
-        return new RateLimitResult(allowed, remaining, windowSeconds);
     }
     
     /**

@@ -38,15 +38,12 @@ public class DataInitializer implements ApplicationRunner {
 
     private void initAdminRole() {
         LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Role::getCode, "admin").eq(Role::getDeleted, 0);
+        wrapper.eq(Role::getRoleKey, "admin").eq(Role::getDeleted, 0);
         if (roleMapper.selectCount(wrapper) == 0) {
             Role adminRole = new Role();
             adminRole.setName("管理员");
-            adminRole.setCode("admin");
             adminRole.setRoleKey("admin");
             adminRole.setDescription("系统管理员");
-            adminRole.setStatus(1);
-            adminRole.setDisabled(0);
             roleMapper.insert(adminRole);
             log.info("初始化管理员角色成功，角色ID: {}", adminRole.getId());
         } else {
@@ -63,14 +60,13 @@ public class DataInitializer implements ApplicationRunner {
             admin.setPassword(PasswordUtil.encode("admin123"));
             admin.setNickname("管理员");
             admin.setEmail("admin@example.com");
-            admin.setRole("admin");
-            admin.setStatus(1);
-            admin.setDisabled(0);
+            admin.setIpAddressSignup("127.0.0.1");
+            admin.setIpSourceSignup("本地");
             userMapper.insert(admin);
             log.info("初始化管理员账号成功，用户名: admin，密码: admin123，用户ID: {}", admin.getId());
 
             LambdaQueryWrapper<Role> roleWrapper = new LambdaQueryWrapper<>();
-            roleWrapper.eq(Role::getCode, "admin").eq(Role::getDeleted, 0);
+            roleWrapper.eq(Role::getRoleKey, "admin").eq(Role::getDeleted, 0);
             Role adminRole = roleMapper.selectOne(roleWrapper);
             if (adminRole != null) {
                 UserRole userRole = new UserRole();

@@ -37,6 +37,14 @@ public class SecurityFilter implements Filter {
         "/actuator/", "/swagger-", "/v3/api-docs", "/favicon.ico"
     };
     
+    // 标准HTTP请求头（这些请求头通常包含安全的值）
+    private static final String[] STANDARD_HTTP_HEADERS = {
+        "accept", "accept-encoding", "accept-language", "authorization", 
+        "cache-control", "connection", "content-type", "content-length",
+        "host", "origin", "referer", "user-agent", "x-requested-with",
+        "x-forwarded-for", "x-real-ip", "pragma", "upgrade-insecure-requests"
+    };
+    
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -113,23 +121,86 @@ public class SecurityFilter implements Filter {
             String headerValue = request.getHeader(headerName);
             
             if (StringUtils.hasText(headerValue)) {
-                // 检查SQL注入
-                if (sqlInjectionProtector.containsSqlInjection(headerValue)) {
-                    logger.warn("检测到请求头SQL注入攻击, Header: {}, Value: {}, IP: {}", 
-                        headerName, headerValue, IpUtil.getClientIp(request));
-                    return false;
-                }
-                
-                // 检查XSS
-                if (sqlInjectionProtector.containsXss(headerValue)) {
-                    logger.warn("检测到请求头XSS攻击, Header: {}, Value: {}, IP: {}", 
-                        headerName, headerValue, IpUtil.getClientIp(request));
-                    return false;
+                // 对于标准HTTP请求头，使用更宽松的检查
+                if (isStandardHttpHeader(headerName)) {
+                    // 只检查明显的恶意内容，跳过常见的HTTP值
+                    if (containsObviousMaliciousContent(headerValue)) {
+                        logger.warn("检测到请求头恶意内容, Header: {}, Value: {}, IP: {}", 
+                            headerName, headerValue, IpUtil.getClientIp(request));
+                        return false;
+                    }
+                } else {
+                    // 对于自定义请求头，进行完整的安全检查
+                    if (sqlInjectionProtector.containsSqlInjection(headerValue)) {
+                        logger.warn("检测到请求头SQL注入攻击, Header: {}, Value: {}, IP: {}", 
+                            headerName, headerValue, IpUtil.getClientIp(request));
+                        return false;
+                    }
+                    
+                    if (sqlInjectionProtector.containsXss(headerValue)) {
+                        logger.warn("检测到请求头XSS攻击, Header: {}, Value: {}, IP: {}", 
+                            headerName, headerValue, IpUtil.getClientIp(request));
+                        return false;
+                    }
                 }
             }
         }
         
         return true;
+    }
+    
+    /**
+     * 检查是否为标准HTTP请求头
+     */
+    private boolean isStandardHttpHeader(String headerName) {
+        if (!StringUtils.hasText(headerName)) {
+            return false;
+        }
+        
+        String lowerHeaderName = headerName.toLowerCase();
+        for (String standardHeader : STANDARD_HTTP_HEADERS) {
+            if (lowerHeaderName.equals(standardHeader)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * 检查是否包含明显的恶意内容（用于标准HTTP请求头的宽松检查）
+     */
+    private boolean containsObviousMaliciousContent(String value) {
+        if (!StringUtils.hasText(value)) {
+            return false;
+        }
+        
+        String lowerValue = value.toLowerCase();
+        
+        // 检查明显的SQL注入关键词
+        String[] obviousSqlKeywords = {
+            "union select", "drop table", "delete from", "insert into",
+            "update set", "exec(", "execute(", "sp_", "xp_"
+        };
+        
+        for (String keyword : obviousSqlKeywords) {
+            if (lowerValue.contains(keyword)) {
+                return true;
+            }
+        }
+        
+        // 检查明显的XSS攻击
+        String[] obviousXssPatterns = {
+            "<script", "javascript:", "vbscript:", "onload=", "onerror=",
+            "eval(", "alert(", "document.cookie"
+        };
+        
+        for (String pattern : obviousXssPatterns) {
+            if (lowerValue.contains(pattern)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     /**
@@ -207,15 +278,48 @@ public class SecurityFilter implements Filter {
             return true;
         }
         
+        // 开发环境允许跨域访问
+        if (isDevEnvironment(referer, host)) {
+            return true;
+        }
+        
         // 检查Referer是否来自同一域名
         if (StringUtils.hasText(host) && !referer.contains(host)) {
             logger.warn("检测到可能的CSRF攻击, Referer: {}, Host: {}, IP: {}", 
                 referer, host, IpUtil.getClientIp(request));
-            // 这里可以根据需要决定是否阻止请求
+            // 在生产环境中可以启用这个检查
             // return false;
         }
         
         return true;
+    }
+    
+    /**
+     * 检查是否为开发环境的合法请求
+     */
+    private boolean isDevEnvironment(String referer, String host) {
+        if (!StringUtils.hasText(referer) || !StringUtils.hasText(host)) {
+            return false;
+        }
+        
+        // 允许的开发环境域名组合
+        String[][] allowedDevCombinations = {
+            {"localhost:3000", "localhost:8080"},  // 前端开发服务器 -> 后端开发服务器
+            {"127.0.0.1:3000", "127.0.0.1:8080"}, // 本地IP访问
+            {"localhost:3000", "127.0.0.1:8080"},  // 混合访问
+            {"127.0.0.1:3000", "localhost:8080"}   // 混合访问
+        };
+        
+        for (String[] combination : allowedDevCombinations) {
+            String allowedRefererHost = combination[0];
+            String allowedTargetHost = combination[1];
+            
+            if (referer.contains(allowedRefererHost) && host.equals(allowedTargetHost)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     /**
