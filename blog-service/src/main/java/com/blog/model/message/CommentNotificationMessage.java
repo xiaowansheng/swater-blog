@@ -10,8 +10,8 @@ public class CommentNotificationMessage implements Serializable {
     
     private String type;
     private Long commentId;
-    private Long postId;
-    private Long momentId;
+    private Long targetId;
+    private String targetType;
     private Long commenterId;
     private String commenterName;
     private String commentContent;

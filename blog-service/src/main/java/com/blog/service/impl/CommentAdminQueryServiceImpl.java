@@ -27,7 +27,7 @@ public class CommentAdminQueryServiceImpl implements CommentAdminQueryService {
     private UserMapper userMapper;
 
     @Override
-    public PageResult<CommentVO> list(Long page, Long size, Integer status, Long postId, Long momentId) {
+    public PageResult<CommentVO> list(Long page, Long size, Integer status, Long targetId, String targetType) {
         Page<Comment> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Comment::getDeleted, 0);
@@ -35,11 +35,11 @@ public class CommentAdminQueryServiceImpl implements CommentAdminQueryService {
         if (status != null) {
             wrapper.eq(Comment::getStatus, status);
         }
-        if (postId != null) {
-            wrapper.eq(Comment::getPostId, postId);
+        if (targetId != null) {
+            wrapper.eq(Comment::getTargetId, targetId);
         }
-        if (momentId != null) {
-            wrapper.eq(Comment::getMomentId, momentId);
+        if (targetType != null) {
+            wrapper.eq(Comment::getTargetType, targetType);
         }
         wrapper.orderByDesc(Comment::getCreateTime);
         

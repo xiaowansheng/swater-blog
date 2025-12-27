@@ -194,14 +194,12 @@ public class BuiltinCommentPlugin implements CommentProviderPlugin, Plugin {
         
         commentMapper.insert(comment);
         
-        if (dto.getPostId() != null) {
-            Article article = articleMapper.selectById(dto.getPostId());
+        if ("ARTICLE".equalsIgnoreCase(dto.getTargetType())) {
+            Article article = articleMapper.selectById(dto.getTargetId());
             article.setCommentCount((article.getCommentCount() != null ? article.getCommentCount() : 0) + 1);
             articleMapper.updateById(article);
-        }
-        
-        if (dto.getMomentId() != null) {
-            Talk talk = talkMapper.selectById(dto.getMomentId());
+        } else if ("TALK".equalsIgnoreCase(dto.getTargetType())) {
+            Talk talk = talkMapper.selectById(dto.getTargetId());
             talk.setCommentCount((talk.getCommentCount() != null ? talk.getCommentCount() : 0) + 1);
             talkMapper.updateById(talk);
         }
@@ -211,18 +209,18 @@ public class BuiltinCommentPlugin implements CommentProviderPlugin, Plugin {
     }
     
     @Override
-    public PageResult<CommentVO> getComments(Long postId, Long momentId, Long page, Long size) throws Exception {
+    public PageResult<CommentVO> getComments(Long targetId, String targetType, Long page, Long size) throws Exception {
         Page<Comment> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Comment::getDeleted, 0);
         wrapper.eq(Comment::getStatus, 1);
         wrapper.eq(Comment::getIsVisible, 0);
         
-        if (postId != null) {
-            wrapper.eq(Comment::getPostId, postId);
+        if (targetId != null) {
+            wrapper.eq(Comment::getTargetId, targetId);
         }
-        if (momentId != null) {
-            wrapper.eq(Comment::getMomentId, momentId);
+        if (targetType != null) {
+            wrapper.eq(Comment::getTargetType, targetType);
         }
         wrapper.isNull(Comment::getParentId).or().eq(Comment::getParentId, 0);
         wrapper.orderByDesc(Comment::getCreateTime);

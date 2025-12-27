@@ -27,18 +27,18 @@ public class CommentPublicQueryServiceImpl implements CommentPublicQueryService 
     private UserMapper userMapper;
 
     @Override
-    public PageResult<CommentVO> list(Long postId, Long momentId, Long page, Long size) {
+    public PageResult<CommentVO> list(Long targetId, String targetType, Long page, Long size) {
         Page<Comment> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Comment::getDeleted, 0);
         wrapper.eq(Comment::getStatus, 1);
         wrapper.eq(Comment::getIsVisible, 0);
         
-        if (postId != null) {
-            wrapper.eq(Comment::getPostId, postId);
+        if (targetId != null) {
+            wrapper.eq(Comment::getTargetId, targetId);
         }
-        if (momentId != null) {
-            wrapper.eq(Comment::getMomentId, momentId);
+        if (targetType != null) {
+            wrapper.eq(Comment::getTargetType, targetType);
         }
         wrapper.isNull(Comment::getParentId).or().eq(Comment::getParentId, 0);
         wrapper.orderByDesc(Comment::getCreateTime);

@@ -23,11 +23,11 @@ public class CommentPublicController {
 
     @GetMapping("/list")
     public Result<PageResult<CommentVO>> list(
-            @RequestParam(required = false) Long postId,
-            @RequestParam(required = false) Long momentId,
+            @RequestParam(required = false) Long targetId,
+            @RequestParam(required = false) String targetType,
             @RequestParam(required = false) Long page,
             @RequestParam(required = false) Long size) {
-        PageResult<CommentVO> result = commentPublicQueryService.list(postId, momentId, page, size);
+        PageResult<CommentVO> result = commentPublicQueryService.list(targetId, targetType, page, size);
         return Result.success(result);
     }
 

@@ -17,11 +17,11 @@ public class Comment extends BaseEntity {
 
     private String images;
 
-    @TableField("post_id")
-    private Long postId;
+    @TableField("target_id")
+    private Long targetId;
 
-    @TableField("moment_id")
-    private Long momentId;
+    @TableField("target_type")
+    private String targetType;
 
     @TableField("user_id")
     private Long userId;

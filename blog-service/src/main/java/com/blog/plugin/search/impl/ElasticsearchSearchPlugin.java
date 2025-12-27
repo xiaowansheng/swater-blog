@@ -276,8 +276,8 @@
 //        vo.setId(doc.getId());
 //        vo.setContent(doc.getContent());
 //        vo.setHighlights(hit.getHighlightFields());
-//        vo.setPostId(doc.getPostId());
-//        vo.setMomentId(doc.getMomentId());
+//        vo.setTargetId(doc.getTargetId());
+//        vo.setTargetType(doc.getTargetType());
 //        vo.setUserId(doc.getUserId());
 //        if (doc.getCreateTime() != null) {
 //            vo.setCreateTime(doc.getCreateTime().toString());

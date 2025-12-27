@@ -18,8 +18,8 @@ public class SearchVO {
     private String categoryName;
     private List<Long> tagIds;
     private List<String> tagNames;
-    private Long postId;
-    private Long momentId;
+    private Long targetId;
+    private String targetType;
     private Long userId;
     private Integer viewCount;
     private Integer likeCount;

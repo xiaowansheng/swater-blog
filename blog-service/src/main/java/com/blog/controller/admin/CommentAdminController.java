@@ -24,9 +24,9 @@ public class CommentAdminController {
             @RequestParam(required = false) Long page,
             @RequestParam(required = false) Long size,
             @RequestParam(required = false) Integer status,
-            @RequestParam(required = false) Long postId,
-            @RequestParam(required = false) Long momentId) {
-        PageResult<CommentVO> result = commentAdminQueryService.list(page, size, status, postId, momentId);
+            @RequestParam(required = false) Long targetId,
+            @RequestParam(required = false) String targetType) {
+        PageResult<CommentVO> result = commentAdminQueryService.list(page, size, status, targetId, targetType);
         return Result.success(result);
     }
 

@@ -14,9 +14,9 @@ public class CommentVO extends BaseVO {
 
     private List<String> images;
 
-    private Long postId;
+    private Long targetId;
 
-    private Long momentId;
+    private String targetType;
 
     private Long userId;
 

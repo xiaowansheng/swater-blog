@@ -141,6 +141,8 @@ public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
                     vo.setType("comment");
                     vo.setId(comment.getId());
                     vo.setContent(comment.getContent());
+                    vo.setTargetId(comment.getTargetId());
+                    vo.setTargetType(comment.getTargetType());
                     if (comment.getCreateTime() != null) {
                         vo.setCreateTime(comment.getCreateTime().toString());
                     }
@@ -163,4 +165,5 @@ public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
     public void bulkIndexDocuments(String indexType, List<Map<String, Object>> documents) throws Exception {
     }
 }
+
 

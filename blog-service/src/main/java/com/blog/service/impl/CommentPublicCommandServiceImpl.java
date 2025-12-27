@@ -57,26 +57,22 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
     @Override
     @Transactional
     public CommentVO create(CommentDTO dto) {
-        if (dto.getPostId() == null && dto.getMomentId() == null) {
-            throw new BusinessException("文章ID或说说ID不能同时为空");
+        if (dto.getTargetId() == null || dto.getTargetType() == null) {
+            throw new BusinessException("目标ID和目标类型不能为空");
         }
         
-        if (dto.getPostId() != null && dto.getMomentId() != null) {
-            throw new BusinessException("文章ID和说说ID不能同时存在");
-        }
-        
-        if (dto.getPostId() != null) {
-            Article article = articleMapper.selectById(dto.getPostId());
+        if ("ARTICLE".equalsIgnoreCase(dto.getTargetType())) {
+            Article article = articleMapper.selectById(dto.getTargetId());
             if (article == null || article.getDeleted() == 1) {
                 throw new BusinessException("文章不存在");
             }
-        }
-        
-        if (dto.getMomentId() != null) {
-            Talk talk = talkMapper.selectById(dto.getMomentId());
+        } else if ("TALK".equalsIgnoreCase(dto.getTargetType())) {
+            Talk talk = talkMapper.selectById(dto.getTargetId());
             if (talk == null || talk.getDeleted() == 1) {
                 throw new BusinessException("说说不存在");
             }
+        } else {
+            throw new BusinessException("不支持的目标类型: " + dto.getTargetType());
         }
         
         Comment comment = BeanUtil.copyProperties(dto, Comment.class);

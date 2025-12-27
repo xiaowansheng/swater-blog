@@ -13,9 +13,9 @@ public class CommentDTO extends BaseDTO {
 
     private List<String> images;
 
-    private Long postId;
+    private Long targetId;
 
-    private Long momentId;
+    private String targetType;
 
     private Long parentId;
 

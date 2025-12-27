@@ -17,13 +17,14 @@ public interface CommentProviderPlugin {
     
     /**
      * 获取评论列表
-     * @param postId 文章ID
-     * @param momentId 说说ID
+     * @param targetId 目标ID
+     * @param targetType 目标类型
      * @param page 页码
      * @param size 每页大小
      * @return 评论列表
+     * @throws Exception 异常
      */
-    PageResult<CommentVO> getComments(Long postId, Long momentId, Long page, Long size) throws Exception;
+    PageResult<CommentVO> getComments(Long targetId, String targetType, Long page, Long size) throws Exception;
     
     /**
      * 根据ID获取评论

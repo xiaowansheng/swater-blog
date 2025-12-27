@@ -78,8 +78,9 @@ public class EventToMQListener {
             
             Map<String, Object> data = new HashMap<>();
             data.put("commentId", comment.getId());
-            data.put("postId", article.getId());
-            data.put("postTitle", article.getTitle());
+            data.put("targetId", article.getId());
+            data.put("targetType", "ARTICLE");
+            data.put("targetTitle", article.getTitle());
             data.put("commenterName", commenterName);
             data.put("comment", comment);
             data.put("article", article);
@@ -87,8 +88,8 @@ public class EventToMQListener {
             
             mqService.sendNotification(message);
         } catch (Exception e) {
-            log.error("发送评论创建事件到MQ失败，评论ID: {}, 文章ID: {}", 
-                event.getCommentId(), event.getComment() != null ? event.getComment().getPostId() : null, e);
+            log.error("发送评论创建事件到MQ失败，评论ID: {}, 目标ID: {}", 
+                event.getCommentId(), event.getComment() != null ? event.getComment().getTargetId() : null, e);
         }
     }
     
@@ -125,8 +126,8 @@ public class EventToMQListener {
             Map<String, Object> data = new HashMap<>();
             data.put("commentId", comment.getId());
             data.put("comment", comment);
-            if (comment.getPostId() != null) {
-                Article article = articleMapper.selectById(comment.getPostId());
+            if (comment.getTargetId() != null && "ARTICLE".equalsIgnoreCase(comment.getTargetType())) {
+                Article article = articleMapper.selectById(comment.getTargetId());
                 if (article != null) {
                     data.put("article", article);
                 }

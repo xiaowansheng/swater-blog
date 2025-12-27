@@ -124,6 +124,8 @@ public class DatabaseSearchServiceImpl implements SearchService {
                     vo.setType("comment");
                     vo.setId(comment.getId());
                     vo.setContent(comment.getContent());
+                    vo.setTargetId(comment.getTargetId());
+                    vo.setTargetType(comment.getTargetType());
                     if (comment.getCreateTime() != null) {
                         vo.setCreateTime(comment.getCreateTime().toString());
                     }
@@ -134,4 +136,5 @@ public class DatabaseSearchServiceImpl implements SearchService {
         return new PageResult<>(voList, result.getTotal(), size, page);
     }
 }
+
 

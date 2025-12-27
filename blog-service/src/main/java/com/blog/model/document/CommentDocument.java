@@ -18,10 +18,10 @@ public class CommentDocument {
     private String content;
 
     @Field(type = FieldType.Long)
-    private Long postId;
+    private Long targetId;
 
-    @Field(type = FieldType.Long)
-    private Long momentId;
+    @Field(type = FieldType.Keyword)
+    private String targetType;
 
     @Field(type = FieldType.Long)
     private Long userId;
