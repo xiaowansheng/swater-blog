@@ -52,14 +52,14 @@ public class DataInitializer implements ApplicationRunner {
         if (userMapper.selectCount(wrapper) == 0) {
             User admin = new User();
             admin.setUsername("admin");
-            admin.setPassword(PasswordUtil.encode("admin123"));
+            admin.setPassword(PasswordUtil.encode("123456"));
             admin.setNickname("管理员");
-            admin.setEmail("admin@example.com");
+            admin.setEmail("admin@blog.com");
             admin.setIpAddressSignup("127.0.0.1");
             admin.setIpSourceSignup("本地");
             admin.setRole("admin"); // 直接设置角色名称
             userMapper.insert(admin);
-            log.info("初始化管理员账号成功，用户名: admin，密码: admin123，用户ID: {}", admin.getId());
+            log.info("初始化管理员账号成功，用户名: admin，密码: 123456，用户ID: {}", admin.getId());
         } else {
             log.debug("管理员账号已存在，跳过初始化");
         }
