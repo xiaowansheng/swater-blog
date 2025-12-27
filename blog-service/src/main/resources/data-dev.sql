@@ -4,50 +4,77 @@
 -- ========================================
 
 -- 插入角色数据
-INSERT INTO `role` (`id`, `name`, `code`, `description`, `sort_order`) VALUES
-(1, '超级管理员', 'SUPER_ADMIN', '系统超级管理员，拥有所有权限', 1),
-(2, '管理员', 'ADMIN', '系统管理员，拥有大部分权限', 2),
-(3, '编辑', 'EDITOR', '内容编辑，可以管理文章和评论', 3),
-(4, '作者', 'AUTHOR', '文章作者，可以发布和管理自己的文章', 4),
-(5, '普通用户', 'USER', '普通注册用户', 5);
+INSERT INTO `t_role` (`id`, `name`, `role_key`, `description`) VALUES
+(1, '超级管理员', 'super_admin', '系统超级管理员，拥有所有权限'),
+(2, '管理员', 'admin', '系统管理员，拥有大部分权限'),
+(3, '编辑', 'editor', '内容编辑，可以管理文章和评论'),
+(4, '作者', 'author', '文章作者，可以发布和管理自己的文章'),
+(5, '普通用户', 'user', '普通注册用户');
 
--- 插入权限数据
-INSERT INTO `permission` (`id`, `name`, `code`, `type`, `parent_id`, `path`, `icon`, `sort_order`) VALUES
--- 系统管理
-(1, '系统管理', 'system', 1, 0, '/system', 'system', 1),
-(2, '用户管理', 'system:user', 1, 1, '/system/user', 'user', 1),
-(3, '角色管理', 'system:role', 1, 1, '/system/role', 'role', 2),
-(4, '权限管理', 'system:permission', 1, 1, '/system/permission', 'permission', 3),
-(5, '系统配置', 'system:config', 1, 1, '/system/config', 'config', 4),
+-- 插入用户数据
+INSERT INTO `t_user` (`id`, `username`, `email`, `password`, `nickname`, `disabled`, `ip_address_signup`, `ip_source_signup`) VALUES
+(1, 'admin', 'admin@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '超级管理员', 0, '127.0.0.1', '本地'),
+(2, 'editor', 'editor@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '编辑', 0, '127.0.0.1', '本地'),
+(3, 'author', 'author@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '作者', 0, '127.0.0.1', '本地'),
+(4, 'user', 'user@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '普通用户', 0, '127.0.0.1', '本地');
 
--- 内容管理
-(10, '内容管理', 'content', 1, 0, '/content', 'content', 2),
-(11, '文章管理', 'content:article', 1, 10, '/content/article', 'article', 1),
-(12, '分类管理', 'content:category', 1, 10, '/content/category', 'category', 2),
-(13, '标签管理', 'content:tag', 1, 10, '/content/tag', 'tag', 3),
-(14, '评论管理', 'content:comment', 1, 10, '/content/comment', 'comment', 4),
+-- 插入用户角色关联
+INSERT INTO `t_user_role` (`user_id`, `role_id`) VALUES
+(1, 1), -- admin -> 超级管理员
+(2, 3), -- editor -> 编辑
+(3, 4), -- author -> 作者
+(4, 5); -- user -> 普通用户
 
--- 媒体管理
-(20, '媒体管理', 'media', 1, 0, '/media', 'media', 3),
-(21, '相册管理', 'media:album', 1, 20, '/media/album', 'album', 1),
-(22, '照片管理', 'media:photo', 1, 20, '/media/photo', 'photo', 2),
+-- 插入分类数据
+INSERT INTO `t_category` (`id`, `category_key`, `name`, `description`, `status`) VALUES
+(1, 'tech', '技术分享', '技术相关的文章分享', '1'),
+(2, 'java', 'Java', 'Java编程语言相关', '1'),
+(3, 'spring', 'Spring', 'Spring框架相关', '1'),
+(4, 'database', '数据库', '数据库技术相关', '1'),
+(5, 'frontend', '前端技术', '前端开发技术', '1'),
+(6, 'life', '生活随笔', '生活感悟和随笔', '1'),
+(7, 'tutorial', '教程指南', '各种教程和指南', '1'),
+(8, 'news', '资讯动态', '行业资讯和动态', '1');
 
--- 按钮权限
-(100, '用户新增', 'system:user:add', 2, 2, '', '', 1),
-(101, '用户编辑', 'system:user:edit', 2, 2, '', '', 2),
-(102, '用户删除', 'system:user:delete', 2, 2, '', '', 3),
-(103, '用户查看', 'system:user:view', 2, 2, '', '', 4),
+-- 插入标签数据
+INSERT INTO `t_tag` (`id`, `tag_key`, `name`, `status`) VALUES
+(1, 'java', 'Java', '1'),
+(2, 'spring-boot', 'Spring Boot', '1'),
+(3, 'mysql', 'MySQL', '1'),
+(4, 'redis', 'Redis', '1'),
+(5, 'docker', 'Docker', '1'),
+(6, 'vue', 'Vue.js', '1'),
+(7, 'react', 'React', '1'),
+(8, 'javascript', 'JavaScript', '1'),
+(9, 'typescript', 'TypeScript', '1'),
+(10, 'tutorial', '教程', '1');
 
-(110, '文章新增', 'content:article:add', 2, 11, '', '', 1),
-(111, '文章编辑', 'content:article:edit', 2, 11, '', '', 2),
-(112, '文章删除', 'content:article:delete', 2, 11, '', '', 3),
-(113, '文章查看', 'content:article:view', 2, 11, '', '', 4),
-(114, '文章发布', 'content:article:publish', 2, 11, '', '', 5);
+-- 插入系统配置
+INSERT INTO `sys_config` (`config_key`, `name`, `value`, `description`) VALUES
+('site.name', '网站名称', 'Swater Blog', '网站名称'),
+('site.description', '网站描述', '一个基于Spring Boot的个人博客系统', '网站描述'),
+('site.keywords', '网站关键词', 'blog,spring boot,java,vue', '网站关键词'),
+('site.author', '网站作者', 'Swater', '网站作者'),
+('site.icp', 'ICP备案号', '', 'ICP备案号'),
+('comment.audit', '评论审核', 'true', '是否开启评论审核'),
+('comment.anonymous', '匿名评论', 'true', '是否允许匿名评论'),
+('upload.max_size', '上传文件大小限制', '10485760', '上传文件大小限制(字节)'),
+('upload.allowed_types', '允许上传的文件类型', 'jpg,jpeg,png,gif,pdf,doc,docx', '允许上传的文件类型');
 
--- 插入角色权限关联
-INSERT INTO `role_permission` (`role_id`, `permission_id`) VALUES
--- 超级管理员拥有所有权限
-(1, 1), (1, 2), (1, 3), (1, 4), (1, 5),
+-- 插入示例文章
+INSERT INTO `t_article` (`id`, `article_key`, `title`, `content`, `user_id`, `category_id`, `type`, `status`) VALUES
+(1, 'welcome-to-blog', '欢迎使用Swater Blog', '# 欢迎使用Swater Blog\n\n这是一个基于Spring Boot开发的现代化博客系统。\n\n## 主要特性\n\n- 用户管理和权限控制\n- 文章发布和管理\n- 评论系统\n- 文件上传\n- 响应式设计\n\n开始你的博客之旅吧！', 1, 1, '1', '1'),
+(2, 'spring-boot-tutorial', 'Spring Boot 入门教程', '# Spring Boot 入门教程\n\nSpring Boot是一个基于Spring框架的快速开发框架...\n\n## 什么是Spring Boot\n\nSpring Boot简化了Spring应用的创建和部署过程。', 3, 3, '1', '1'),
+(3, 'mysql-optimization', 'MySQL性能优化指南', '# MySQL性能优化指南\n\n本文将介绍MySQL数据库的性能优化技巧...\n\n## 索引优化\n\n合理使用索引是提升查询性能的关键。', 3, 4, '1', '1');
+
+-- 插入文章标签关联
+INSERT INTO `t_article_tag` (`article_id`, `tag_id`) VALUES
+(1, 2), -- 欢迎文章 -> Spring Boot
+(2, 1), -- Spring Boot教程 -> Java
+(2, 2), -- Spring Boot教程 -> Spring Boot
+(2, 10), -- Spring Boot教程 -> 教程
+(3, 3), -- MySQL优化 -> MySQL
+(3, 10); -- MySQL优化 -> 教程
 (1, 10), (1, 11), (1, 12), (1, 13), (1, 14),
 (1, 20), (1, 21), (1, 22),
 (1, 100), (1, 101), (1, 102), (1, 103),

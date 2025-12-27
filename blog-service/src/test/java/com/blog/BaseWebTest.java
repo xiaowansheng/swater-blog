@@ -30,7 +30,7 @@ public abstract class BaseWebTest {
     protected MockMvc mockMvc;
     
     @BeforeEach
-    void setUp() {
+    protected void setUp() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(webApplicationContext)
                 .build();

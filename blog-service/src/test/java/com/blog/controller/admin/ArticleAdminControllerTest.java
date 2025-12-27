@@ -47,7 +47,7 @@ class ArticleAdminControllerTest extends BaseWebTest {
     private String authToken = "test-token"; // 模拟认证token
     
     @BeforeEach
-    void setUp() {
+    protected void setUp() {
         super.setUp();
         
         // 创建测试用户
