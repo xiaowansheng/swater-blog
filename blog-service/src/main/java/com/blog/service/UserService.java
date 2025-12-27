@@ -4,6 +4,7 @@ import com.blog.common.PageResult;
 import com.blog.model.dto.ResetPasswordDTO;
 import com.blog.model.dto.UserDTO;
 import com.blog.model.vo.UserVO;
+import java.util.List;
 
 public interface UserService {
     PageResult<UserVO> list(Long page, Long size, String keyword);
@@ -17,5 +18,7 @@ public interface UserService {
     void delete(Long id);
 
     void resetPassword(Long id, ResetPasswordDTO dto);
+
+    void assignRoles(Long id, List<Long> roleIds);
 }
 

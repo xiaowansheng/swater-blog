@@ -180,6 +180,35 @@ public class UserServiceImpl implements UserService {
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserPasswordResetEvent(this, id)));
     }
 
+    @Override
+    @Transactional
+    @CacheEvict(value = "user", key = "#id")
+    public void assignRoles(Long id, List<Long> roleIds) {
+        User user = userMapper.selectById(id);
+        if (user == null || user.getDeleted() == 1) {
+            throw new BusinessException("用户不存在");
+        }
+        
+        // 由于用户表只有一个role字段，这里只分配第一个角色
+        if (roleIds != null && !roleIds.isEmpty()) {
+            Long roleId = roleIds.get(0);
+            RoleVO role = roleService.getById(roleId);
+            if (role != null) {
+                user.setRole(role.getRoleKey());
+                userMapper.updateById(user);
+            } else {
+                throw new BusinessException("角色不存在");
+            }
+        } else {
+            // 如果没有提供角色，设置为默认用户角色
+            user.setRole("user");
+            userMapper.updateById(user);
+        }
+        
+        User updatedUser = userMapper.selectById(id);
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserUpdatedEvent(this, id, updatedUser)));
+    }
+
     private UserVO convertToVO(User user) {
         UserVO vo = BeanUtil.copyProperties(user, UserVO.class);
         if (user.getRole() != null && !user.getRole().isEmpty()) {
