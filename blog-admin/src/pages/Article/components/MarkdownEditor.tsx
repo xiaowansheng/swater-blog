@@ -16,8 +16,8 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({ value, onChange }) => {
   }
 
   return (
-    <div data-color-mode="light">
-      <MDEditor value={content} onChange={handleChange} height={500} />
+    <div data-color-mode="light" className="w-full">
+      <MDEditor value={content} onChange={handleChange} height={600} />
     </div>
   )
 }

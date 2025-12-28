@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Form, Input, Button, Select, message, Switch, Card, Row, Col, Space, Breadcrumb } from 'antd'
+import { Form, Input, Button, Select, message, Switch, Card, Row, Col, Space, Breadcrumb, Modal } from 'antd'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ArrowLeftOutlined, SaveOutlined, SendOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, SaveOutlined, SendOutlined, SettingOutlined, PlusOutlined } from '@ant-design/icons'
 import { getArticleById, createArticle, updateArticle } from '@/api/article'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
@@ -15,6 +15,7 @@ const ArticleEdit: React.FC = () => {
   const { id } = useParams()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<Tag[]>([])
   const [articleStatus, setArticleStatus] = useState<number>(0)
@@ -122,7 +123,7 @@ const ArticleEdit: React.FC = () => {
   }
 
   return (
-    <div className="page-container fade-in">
+    <div className="page-container fade-in px-4">
       <div className="mb-4">
         <Breadcrumb items={[
           { title: <Link to="/">首页</Link> },
@@ -147,16 +148,10 @@ const ArticleEdit: React.FC = () => {
         </div>
         <Space>
           <Button 
-            onClick={() => navigate('/article')}
-            disabled={loading}
-          >
-            取消
-          </Button>
-          <Button 
             icon={<SaveOutlined />}
             loading={loading}
             onClick={() => {
-              form.validateFields().then(values => onFinish(values, 0))
+              form.validateFields(['title', 'content']).then(values => onFinish({ ...form.getFieldsValue(), ...values }, 0))
             }}
           >
             保存草稿
@@ -166,10 +161,10 @@ const ArticleEdit: React.FC = () => {
             icon={<SendOutlined />}
             loading={loading}
             onClick={() => {
-              form.validateFields().then(values => onFinish(values, 1))
+              form.validateFields(['title', 'content']).then(() => setIsModalOpen(true))
             }}
           >
-            {id ? '保存修改' : '发布文章'}
+            发布配置
           </Button>
         </Space>
       </div>
@@ -179,88 +174,122 @@ const ArticleEdit: React.FC = () => {
         layout="vertical" 
         initialValues={{ isTop: 0 }}
       >
-        <Row gutter={24}>
-          <Col xs={24} lg={17}>
-            <Card className="shadow-sm mb-6" bordered={false}>
-              <Form.Item 
-                  name="title" 
-                  label={<span className="font-medium text-gray-700">文章标题</span>} 
-                  rules={[{ required: true, message: '请输入文章标题' }]}
-                >
-                  <Input placeholder="请输入文章标题" size="large" className="rounded-md font-bold text-lg" />
-                </Form.Item>
-
-                <Form.Item 
-                  name="slug" 
-                  label={<span className="font-medium text-gray-700">访问路径 (Slug)</span>}
-                  extra="如果不填写，将根据标题自动生成。仅支持字母、数字和连字符。"
-                >
-                  <Input placeholder="example-article-slug" className="rounded-md" />
-                </Form.Item>
-                
-                <Form.Item 
-                  name="content" 
-                  label={<span className="font-medium text-gray-700">文章正文</span>} 
-                  rules={[{ required: true, message: '请输入文章内容' }]}
-                >
-                  <MarkdownEditor />
-                </Form.Item>
-            </Card>
-
-            <Card className="shadow-sm" bordered={false} title={<span className="font-medium">文章摘要</span>}>
-              <Form.Item name="summary" noStyle>
-                <Input.TextArea 
-                  rows={4} 
-                  placeholder="如果不填写，将自动截取正文前 100 个字符" 
-                  className="rounded-md"
-                  showCount
-                  maxLength={200}
+        <div className="w-full">
+          <Card className="shadow-sm mb-6" bordered={false}>
+            <Form.Item 
+                name="title" 
+                rules={[{ required: true, message: '请输入文章标题' }]}
+              >
+                <Input 
+                  placeholder="文章标题" 
+                  size="large" 
+                  bordered={false}
+                  className="text-3xl font-bold border-none px-0 focus:shadow-none hover:bg-transparent" 
                 />
               </Form.Item>
-            </Card>
-          </Col>
 
-          <Col xs={24} lg={7}>
-            <Card className="shadow-sm mb-6" bordered={false} title={<span className="font-medium">基本设置</span>}>
               <Form.Item 
-                name="categoryId" 
-                label="文章分类" 
-                rules={[{ required: true, message: '请选择或输入文章分类' }]}
+                name="slug" 
+                className="mb-4"
               >
-                <CategorySelector categories={categories} />
-              </Form.Item>
-
-              <Form.Item name="tagIds" label="文章标签">
-                <TagSelector tags={tags} />
-              </Form.Item>
-
-              <Form.Item name="isTop" label="是否置顶" valuePropName="checked">
-                <Switch />
-              </Form.Item>
-            </Card>
-
-            <Card className="shadow-sm" bordered={false} title={<span className="font-medium">文章封面</span>}>
-              <Form.Item name="cover" noStyle>
-                <Input placeholder="输入封面图片 URL" className="mb-4" />
-              </Form.Item>
-              {cover && (
-                <div className="mt-4 rounded-lg overflow-hidden border border-gray-100">
-                  <img 
-                    src={cover} 
-                    alt="封面预览" 
-                    className="w-full h-auto object-cover max-h-48"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x200?text=Invalid+Image+URL'
-                    }}
+                <div className="flex items-center text-gray-400 text-sm">
+                  <span className="mr-2">访问路径:</span>
+                  <Input 
+                    placeholder="example-article-slug" 
+                    bordered={false}
+                    className="p-0 text-sm w-fit focus:shadow-none" 
                   />
                 </div>
-              )}
-              <div className="text-xs text-gray-400 mt-2">
-                建议尺寸: 800x450 (16:9)
-              </div>
-            </Card>
-          </Col>
-        </Row>
+              </Form.Item>
+              
+              <Form.Item 
+                name="content" 
+                rules={[{ required: true, message: '请输入文章内容' }]}
+              >
+                <MarkdownEditor />
+              </Form.Item>
+          </Card>
+        </div>
+
+        <Modal
+          title="发布文章配置"
+          open={isModalOpen}
+          onCancel={() => setIsModalOpen(false)}
+          width={700}
+          footer={[
+            <Button key="back" onClick={() => setIsModalOpen(false)}>
+              返回编辑
+            </Button>,
+            <Button 
+              key="submit" 
+              type="primary" 
+              icon={<SendOutlined />}
+              loading={loading}
+              onClick={() => {
+                form.validateFields().then(values => {
+                  onFinish(values, 1);
+                  setIsModalOpen(false);
+                })
+              }}
+            >
+              确认发布
+            </Button>,
+          ]}
+        >
+          <div className="py-4">
+            <Row gutter={24}>
+              <Col span={12}>
+                <Form.Item 
+                  name="categoryId" 
+                  label="文章分类" 
+                  rules={[{ required: true, message: '请选择或输入文章分类' }]}
+                >
+                  <CategorySelector categories={categories} />
+                </Form.Item>
+
+                <Form.Item name="tagIds" label="文章标签">
+                  <TagSelector tags={tags} />
+                </Form.Item>
+
+                <Form.Item name="isTop" label="是否置顶" valuePropName="checked">
+                  <Switch />
+                </Form.Item>
+
+                <Form.Item name="summary" label="文章摘要">
+                  <Input.TextArea 
+                    rows={4} 
+                    placeholder="如果不填写，将自动截取正文前 100 个字符" 
+                    className="rounded-md"
+                    showCount
+                    maxLength={200}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item name="cover" label="文章封面">
+                  <Input placeholder="输入封面图片 URL" className="mb-4" />
+                  {cover ? (
+                    <div className="rounded-lg overflow-hidden border border-gray-100 bg-gray-50 aspect-video flex items-center justify-center">
+                      <img 
+                        src={cover} 
+                        alt="封面预览" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x225?text=Invalid+Image+URL'
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 aspect-video flex flex-col items-center justify-center text-gray-400">
+                      <PlusOutlined style={{ fontSize: 24 }} />
+                      <div className="mt-2 text-xs">建议尺寸: 800x450 (16:9)</div>
+                    </div>
+                  )}
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
+        </Modal>
       </Form>
     </div>
   )
