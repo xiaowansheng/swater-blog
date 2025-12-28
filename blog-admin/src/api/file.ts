@@ -1,16 +1,20 @@
 import request from './request'
-import { PageResult } from '@/types'
+import { FileMeta, PageResult } from '@/types'
 
-export interface File {
-  id: number
-  name: string
-  url: string
-  size: number
-  type: string
-  createTime: string
+export const getFileList = (params: {
+  page?: number
+  size?: number
+  keyword?: string
+  fileType?: string
+}): Promise<PageResult<FileMeta>> => {
+  return request.get('/admin/file/list', { params })
 }
 
-export const uploadFile = (file: File): Promise<File> => {
+export const getFileById = (id: number): Promise<FileMeta> => {
+  return request.get(`/admin/file/${id}`)
+}
+
+export const uploadFile = (file: File): Promise<FileMeta> => {
   const formData = new FormData()
   formData.append('file', file)
   return request.post('/admin/file/upload', formData, {
@@ -20,15 +24,10 @@ export const uploadFile = (file: File): Promise<File> => {
   })
 }
 
-export const getFileList = (params: {
-  page?: number
-  size?: number
-  type?: string
-}): Promise<PageResult<File>> => {
-  return request.get('/admin/file/list', { params })
-}
-
 export const deleteFile = (id: number): Promise<void> => {
   return request.delete(`/admin/file/${id}`)
 }
 
+export const deleteBatchFile = (ids: number[]): Promise<void> => {
+  return request.delete('/admin/file/batch', { data: ids })
+}

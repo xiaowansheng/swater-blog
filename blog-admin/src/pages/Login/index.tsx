@@ -1,4 +1,4 @@
-import { Form, Input, Button, Card, message } from 'antd'
+import { Form, Input, Button, message, Checkbox } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth'
@@ -23,25 +23,30 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-100">
-      <Card className="w-96">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold">博客管理后台</h1>
-          <p className="text-gray-500 mt-2">请登录您的账户</p>
+    <div className="login-page">
+      <div className="login-card">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
+            <span className="text-white text-2xl font-bold">B</span>
+          </div>
+          <h1 className="login-title">博客管理后台</h1>
+          <p className="login-subtitle">欢迎回来，请登录您的账户</p>
         </div>
         <Form
           name="login"
           onFinish={onFinish}
           autoComplete="off"
           size="large"
+          initialValues={{ remember: true }}
         >
           <Form.Item
             name="username"
             rules={[{ required: true, message: '请输入用户名' }]}
           >
             <Input
-              prefix={<UserOutlined />}
+              prefix={<UserOutlined className="text-gray-400" />}
               placeholder="用户名"
+              className="rounded-lg h-12"
             />
           </Form.Item>
           <Form.Item
@@ -49,20 +54,39 @@ const Login: React.FC = () => {
             rules={[{ required: true, message: '请输入密码' }]}
           >
             <Input.Password
-              prefix={<LockOutlined />}
+              prefix={<LockOutlined className="text-gray-400" />}
               placeholder="密码"
+              className="rounded-lg h-12"
             />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" block loading={loading}>
+            <div className="flex justify-between items-center">
+              <Form.Item name="remember" valuePropName="checked" noStyle>
+                <Checkbox>记住我</Checkbox>
+              </Form.Item>
+              <a className="text-blue-500 hover:text-blue-600" href="#">
+                忘记密码？
+              </a>
+            </div>
+          </Form.Item>
+          <Form.Item>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              block 
+              loading={loading}
+              className="h-12 rounded-lg text-base font-medium bg-gradient-to-r from-blue-500 to-purple-600 border-none hover:opacity-90"
+            >
               登录
             </Button>
           </Form.Item>
         </Form>
-      </Card>
+        <div className="text-center text-gray-400 text-sm">
+          © 2024 Blog Admin. All rights reserved.
+        </div>
+      </div>
     </div>
   )
 }
 
 export default Login
-

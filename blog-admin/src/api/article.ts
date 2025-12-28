@@ -1,14 +1,20 @@
 import request from './request'
-import { Article, PageResult } from '@/types'
+import { Article, PageResult, ArticleStatistics } from '@/types'
 
 export interface ArticleDTO {
   title: string
   content: string
-  summary: string
-  cover: string
+  excerpt?: string
+  cover?: string
   categoryId: number
-  tagIds: number[]
-  isTop: boolean
+  tagIds?: number[]
+  isTop?: number
+  status?: number
+  type?: string
+  originalAuthor?: string
+  originalTitle?: string
+  originalUrl?: string
+  note?: string
 }
 
 export const getArticleList = (params: {
@@ -49,7 +55,6 @@ export const unpublishArticle = (id: number): Promise<void> => {
   return request.post(`/admin/post/${id}/unpublish`)
 }
 
-export const getArticleStatistics = (): Promise<any> => {
+export const getArticleStatistics = (): Promise<ArticleStatistics> => {
   return request.get('/admin/post/statistics')
 }
-

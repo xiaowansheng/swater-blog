@@ -13,8 +13,8 @@ export const markAsRead = (id: number): Promise<void> => {
   return request.put(`/admin/notification/${id}/read`)
 }
 
-export const markAllAsRead = (userId: number): Promise<void> => {
-  return request.put('/admin/notification/read-all', { params: { userId } })
+export const markAllAsRead = (): Promise<void> => {
+  return request.put('/admin/notification/read-all')
 }
 
 export const deleteNotification = (id: number): Promise<void> => {

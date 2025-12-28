@@ -1,10 +1,12 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { lazy, Suspense, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { Spin } from 'antd'
 import { useAuthStore } from '@/store/auth'
 import { useTabsStore } from '@/store/tabs'
 import BasicLayout from '@/layout/BasicLayout'
 
+// 懒加载页面组件
 const Login = lazy(() => import('@/pages/Login'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const ArticleList = lazy(() => import('@/pages/Article/List'))
@@ -23,8 +25,12 @@ const LogOperation = lazy(() => import('@/pages/Log/Operation'))
 const LogError = lazy(() => import('@/pages/Log/Error'))
 const FriendLink = lazy(() => import('@/pages/FriendLink'))
 const Notification = lazy(() => import('@/pages/Notification'))
+const Album = lazy(() => import('@/pages/Album'))
+const Guestbook = lazy(() => import('@/pages/Guestbook'))
+const About = lazy(() => import('@/pages/About'))
 const NotFound = lazy(() => import('@/pages/404'))
 
+// 路由配置
 const routeConfig = [
   { path: '/dashboard', component: Dashboard, title: '仪表盘', keepAlive: true },
   { path: '/article', component: ArticleList, title: '文章管理', keepAlive: true },
@@ -39,13 +45,24 @@ const routeConfig = [
   { path: '/menu', component: Menu, title: '菜单管理', keepAlive: true },
   { path: '/config', component: Config, title: '系统配置', keepAlive: true },
   { path: '/file', component: File, title: '文件管理', keepAlive: true },
-  { path: '/visitor', component: Visitor, title: '访客管理', keepAlive: true },
+  { path: '/visitor', component: Visitor, title: '访客统计', keepAlive: true },
   { path: '/log/operation', component: LogOperation, title: '操作日志', keepAlive: true },
   { path: '/log/error', component: LogError, title: '异常日志', keepAlive: true },
   { path: '/friend-link', component: FriendLink, title: '友链管理', keepAlive: true },
   { path: '/notification', component: Notification, title: '通知管理', keepAlive: true },
+  { path: '/album', component: Album, title: '相册管理', keepAlive: true },
+  { path: '/guestbook', component: Guestbook, title: '留言管理', keepAlive: true },
+  { path: '/about', component: About, title: '关于页面', keepAlive: true },
 ]
 
+// 加载中组件
+const PageLoading: React.FC = () => (
+  <div className="flex items-center justify-center h-full min-h-[200px]">
+    <Spin size="large" />
+  </div>
+)
+
+// 路由守卫
 const RouteGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation()
   const { isAuthenticated } = useAuthStore()
@@ -91,165 +108,36 @@ const RouteGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>
 }
 
+// 路由组件
 const Router: React.FC = () => {
   return (
     <RouteGuard>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Suspense fallback={<PageLoading />}><Login /></Suspense>} />
         <Route path="/" element={<BasicLayout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route
-            path="dashboard"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <Dashboard />
-              </Suspense>
-            }
-          />
-          <Route
-            path="article"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <ArticleList />
-              </Suspense>
-            }
-          />
-          <Route
-            path="article/edit/:id"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <ArticleEdit />
-              </Suspense>
-            }
-          />
-          <Route
-            path="article/create"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <ArticleEdit />
-              </Suspense>
-            }
-          />
-          <Route
-            path="category"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <Category />
-              </Suspense>
-            }
-          />
-          <Route
-            path="tag"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <Tag />
-              </Suspense>
-            }
-          />
-          <Route
-            path="comment"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <Comment />
-              </Suspense>
-            }
-          />
-          <Route
-            path="talk"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <Talk />
-              </Suspense>
-            }
-          />
-          <Route
-            path="user"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <User />
-              </Suspense>
-            }
-          />
-          <Route
-            path="role"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <Role />
-              </Suspense>
-            }
-          />
-          <Route
-            path="menu"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <Menu />
-              </Suspense>
-            }
-          />
-          <Route
-            path="config"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <Config />
-              </Suspense>
-            }
-          />
-          <Route
-            path="file"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <File />
-              </Suspense>
-            }
-          />
-          <Route
-            path="visitor"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <Visitor />
-              </Suspense>
-            }
-          />
-          <Route
-            path="log/operation"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <LogOperation />
-              </Suspense>
-            }
-          />
-          <Route
-            path="log/error"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <LogError />
-              </Suspense>
-            }
-          />
-          <Route
-            path="friend-link"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <FriendLink />
-              </Suspense>
-            }
-          />
-          <Route
-            path="notification"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <Notification />
-              </Suspense>
-            }
-          />
-          <Route
-            path="*"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <NotFound />
-              </Suspense>
-            }
-          />
+          <Route path="dashboard" element={<Suspense fallback={<PageLoading />}><Dashboard /></Suspense>} />
+          <Route path="article" element={<Suspense fallback={<PageLoading />}><ArticleList /></Suspense>} />
+          <Route path="article/edit/:id" element={<Suspense fallback={<PageLoading />}><ArticleEdit /></Suspense>} />
+          <Route path="article/create" element={<Suspense fallback={<PageLoading />}><ArticleEdit /></Suspense>} />
+          <Route path="category" element={<Suspense fallback={<PageLoading />}><Category /></Suspense>} />
+          <Route path="tag" element={<Suspense fallback={<PageLoading />}><Tag /></Suspense>} />
+          <Route path="comment" element={<Suspense fallback={<PageLoading />}><Comment /></Suspense>} />
+          <Route path="talk" element={<Suspense fallback={<PageLoading />}><Talk /></Suspense>} />
+          <Route path="user" element={<Suspense fallback={<PageLoading />}><User /></Suspense>} />
+          <Route path="role" element={<Suspense fallback={<PageLoading />}><Role /></Suspense>} />
+          <Route path="menu" element={<Suspense fallback={<PageLoading />}><Menu /></Suspense>} />
+          <Route path="config" element={<Suspense fallback={<PageLoading />}><Config /></Suspense>} />
+          <Route path="file" element={<Suspense fallback={<PageLoading />}><File /></Suspense>} />
+          <Route path="visitor" element={<Suspense fallback={<PageLoading />}><Visitor /></Suspense>} />
+          <Route path="log/operation" element={<Suspense fallback={<PageLoading />}><LogOperation /></Suspense>} />
+          <Route path="log/error" element={<Suspense fallback={<PageLoading />}><LogError /></Suspense>} />
+          <Route path="friend-link" element={<Suspense fallback={<PageLoading />}><FriendLink /></Suspense>} />
+          <Route path="notification" element={<Suspense fallback={<PageLoading />}><Notification /></Suspense>} />
+          <Route path="album" element={<Suspense fallback={<PageLoading />}><Album /></Suspense>} />
+          <Route path="guestbook" element={<Suspense fallback={<PageLoading />}><Guestbook /></Suspense>} />
+          <Route path="about" element={<Suspense fallback={<PageLoading />}><About /></Suspense>} />
+          <Route path="*" element={<Suspense fallback={<PageLoading />}><NotFound /></Suspense>} />
         </Route>
       </Routes>
     </RouteGuard>
@@ -257,4 +145,3 @@ const Router: React.FC = () => {
 }
 
 export default Router
-

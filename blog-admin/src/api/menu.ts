@@ -1,15 +1,23 @@
 import request from './request'
-import { MenuItem } from '@/types'
+import { Menu } from '@/types'
 
 export interface MenuDTO {
   name: string
   path: string
+  component?: string
   icon?: string
   parentId?: number
+  sort?: number
+  visible?: number
+  status?: number
 }
 
-export const getMenuList = (): Promise<MenuItem[]> => {
+export const getMenuList = (): Promise<Menu[]> => {
   return request.get('/admin/menu/list')
+}
+
+export const getMenuById = (id: number): Promise<Menu> => {
+  return request.get(`/admin/menu/${id}`)
 }
 
 export const createMenu = (data: MenuDTO): Promise<number> => {
@@ -24,7 +32,6 @@ export const deleteMenu = (id: number): Promise<void> => {
   return request.delete(`/admin/menu/${id}`)
 }
 
-export const assignMenus = (roleId: number, menuIds: number[]): Promise<void> => {
-  return request.post(`/admin/menu/role/${roleId}/menus`, menuIds)
+export const getMenuTree = (): Promise<Menu[]> => {
+  return request.get('/admin/menu/tree')
 }
-

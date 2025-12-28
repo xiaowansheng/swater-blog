@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Modal, Form, Input } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag as AntTag, ColorPicker } from 'antd'
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { getTagList, createTag, updateTag, deleteTag } from '@/api/tag'
 import { Tag } from '@/types'
 
@@ -67,28 +67,46 @@ const TagPage: React.FC = () => {
   }
 
   const columns = [
-    { title: '名称', dataIndex: 'name', key: 'name' },
     {
-      title: '颜色',
-      dataIndex: 'color',
-      key: 'color',
-      render: (color: string) => (
-        <span style={{ color, fontWeight: 'bold' }}>{color}</span>
+      title: '标签名称',
+      dataIndex: 'name',
+      key: 'name',
+      render: (name: string, record: Tag) => (
+        <AntTag color={record.color || 'blue'}>{name}</AntTag>
       ),
     },
-    { title: '文章数', dataIndex: 'articleCount', key: 'articleCount' },
+    {
+      title: '描述',
+      dataIndex: 'description',
+      key: 'description',
+      ellipsis: true,
+      render: (desc: string) => desc || <span className="text-gray-400">暂无描述</span>,
+    },
+    {
+      title: '文章数',
+      dataIndex: 'articleCount',
+      key: 'articleCount',
+      width: 100,
+      render: (count: number) => (
+        <span className="text-gray-600">{count || 0} 篇</span>
+      ),
+    },
     {
       title: '操作',
       key: 'action',
+      width: 150,
       render: (_: any, record: Tag) => (
         <Space>
-          <Button type="link" onClick={() => handleEdit(record)}>
-            编辑
-          </Button>
-          <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(record.id)}>
-            <Button type="link" danger>
-              删除
-            </Button>
+          <Button
+            type="text"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+          />
+          <Popconfirm
+            title="确定删除这个标签吗？"
+            onConfirm={() => handleDelete(record.id)}
+          >
+            <Button type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       ),
@@ -96,25 +114,44 @@ const TagPage: React.FC = () => {
   ]
 
   return (
-    <div>
-      <div className="mb-4">
+    <div className="page-container">
+      <div className="search-bar flex justify-between items-center">
+        <h2 className="text-lg font-medium">标签管理</h2>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
           新建标签
         </Button>
       </div>
-      <Table columns={columns} dataSource={tags} rowKey="id" loading={loading} />
+
+      <div className="table-container">
+        <Table
+          columns={columns}
+          dataSource={tags}
+          rowKey="id"
+          loading={loading}
+          pagination={false}
+        />
+      </div>
+
       <Modal
         title={editingTag ? '编辑标签' : '新建标签'}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
+        width={500}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="name" label="名称" rules={[{ required: true, message: '请输入名称' }]}>
-            <Input />
+          <Form.Item
+            name="name"
+            label="标签名称"
+            rules={[{ required: true, message: '请输入标签名称' }]}
+          >
+            <Input placeholder="请输入标签名称" />
           </Form.Item>
-          <Form.Item name="color" label="颜色" rules={[{ required: true, message: '请输入颜色' }]}>
-            <Input placeholder="#1890ff" />
+          <Form.Item name="color" label="标签颜色">
+            <Input placeholder="请输入颜色值，如 #1890ff" />
+          </Form.Item>
+          <Form.Item name="description" label="标签描述">
+            <Input.TextArea rows={3} placeholder="请输入标签描述" />
           </Form.Item>
         </Form>
       </Modal>
@@ -123,4 +160,3 @@ const TagPage: React.FC = () => {
 }
 
 export default TagPage
-

@@ -1,42 +1,44 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Select, Tag, Avatar, Tooltip, Input } from 'antd'
+import { Table, Button, Space, Popconfirm, message, Select, Tag, Avatar, Tooltip } from 'antd'
 import {
   CheckOutlined,
   CloseOutlined,
   DeleteOutlined,
   UserOutlined,
-  SearchOutlined,
 } from '@ant-design/icons'
-import { getCommentList, approveComment, rejectComment, deleteComment } from '@/api/comment'
-import { Comment } from '@/types'
+import {
+  getGuestbookList,
+  approveGuestbook,
+  rejectGuestbook,
+  deleteGuestbook,
+  deleteBatchGuestbook,
+} from '@/api/guestbook'
+import { Guestbook } from '@/types'
 import { formatDate } from '@/utils/format'
 
-const CommentPage: React.FC = () => {
-  const [comments, setComments] = useState<Comment[]>([])
+const GuestbookPage: React.FC = () => {
+  const [guestbooks, setGuestbooks] = useState<Guestbook[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
-  const [filters, setFilters] = useState<{ status: number | undefined; keyword: string }>({
-    status: undefined,
-    keyword: '',
-  })
+  const [filters, setFilters] = useState<{ status: number | undefined }>({ status: undefined })
 
   useEffect(() => {
-    loadComments()
-  }, [pagination.current, pagination.pageSize, filters.status])
+    loadGuestbooks()
+  }, [pagination.current, pagination.pageSize, filters])
 
-  const loadComments = async () => {
+  const loadGuestbooks = async () => {
     setLoading(true)
     try {
-      const result = await getCommentList({
+      const result = await getGuestbookList({
         page: pagination.current,
         size: pagination.pageSize,
-        status: filters.status,
+        ...filters,
       })
-      setComments(result.records)
+      setGuestbooks(result.records)
       setPagination((prev) => ({ ...prev, total: result.total }))
     } catch (error) {
-      console.error('加载评论失败', error)
+      console.error('加载留言失败', error)
     } finally {
       setLoading(false)
     }
@@ -44,9 +46,9 @@ const CommentPage: React.FC = () => {
 
   const handleApprove = async (id: number) => {
     try {
-      await approveComment(id)
+      await approveGuestbook(id)
       message.success('审核通过')
-      loadComments()
+      loadGuestbooks()
     } catch (error) {
       message.error('操作失败')
     }
@@ -54,9 +56,9 @@ const CommentPage: React.FC = () => {
 
   const handleReject = async (id: number) => {
     try {
-      await rejectComment(id)
+      await rejectGuestbook(id)
       message.success('已拒绝')
-      loadComments()
+      loadGuestbooks()
     } catch (error) {
       message.error('操作失败')
     }
@@ -64,11 +66,22 @@ const CommentPage: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      await deleteComment(id)
+      await deleteGuestbook(id)
       message.success('删除成功')
-      loadComments()
+      loadGuestbooks()
     } catch (error) {
       message.error('删除失败')
+    }
+  }
+
+  const handleBatchDelete = async () => {
+    try {
+      await deleteBatchGuestbook(selectedRowKeys as number[])
+      message.success('批量删除成功')
+      setSelectedRowKeys([])
+      loadGuestbooks()
+    } catch (error) {
+      message.error('批量删除失败')
     }
   }
 
@@ -84,34 +97,31 @@ const CommentPage: React.FC = () => {
 
   const columns = [
     {
-      title: '评论者',
-      key: 'author',
-      width: 180,
-      render: (_: any, record: Comment) => (
-        <div className="flex items-center gap-2">
-          <Avatar src={record.authorAvatar} icon={<UserOutlined />} size={32} />
+      title: '访客信息',
+      key: 'visitor',
+      width: 200,
+      render: (_: any, record: Guestbook) => (
+        <div className="flex items-center gap-3">
+          <Avatar src={record.avatar} icon={<UserOutlined />} />
           <div>
-            <div className="font-medium text-sm">{record.authorName}</div>
-            <div className="text-xs text-gray-400">{record.authorEmail}</div>
+            <div className="font-medium">{record.nickname}</div>
+            <div className="text-xs text-gray-400">{record.email}</div>
           </div>
         </div>
       ),
     },
     {
-      title: '评论内容',
+      title: '留言内容',
       dataIndex: 'content',
       key: 'content',
       ellipsis: true,
     },
     {
-      title: '评论文章',
-      dataIndex: 'postTitle',
-      key: 'postTitle',
-      width: 200,
-      ellipsis: true,
-      render: (title: string) => (
-        <span className="text-blue-500 cursor-pointer hover:underline">{title}</span>
-      ),
+      title: '位置',
+      dataIndex: 'location',
+      key: 'location',
+      width: 120,
+      render: (location: string) => location || '-',
     },
     {
       title: '状态',
@@ -121,7 +131,7 @@ const CommentPage: React.FC = () => {
       render: getStatusTag,
     },
     {
-      title: '评论时间',
+      title: '留言时间',
       dataIndex: 'createTime',
       key: 'createTime',
       width: 160,
@@ -131,7 +141,7 @@ const CommentPage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 180,
-      render: (_: any, record: Comment) => (
+      render: (_: any, record: Guestbook) => (
         <Space>
           {record.status === 0 && (
             <>
@@ -153,7 +163,7 @@ const CommentPage: React.FC = () => {
               </Tooltip>
             </>
           )}
-          <Popconfirm title="确定删除这条评论吗？" onConfirm={() => handleDelete(record.id)}>
+          <Popconfirm title="确定删除这条留言吗？" onConfirm={() => handleDelete(record.id)}>
             <Tooltip title="删除">
               <Button type="text" danger icon={<DeleteOutlined />} />
             </Tooltip>
@@ -167,16 +177,8 @@ const CommentPage: React.FC = () => {
     <div className="page-container">
       <div className="search-bar">
         <div className="flex items-center gap-4">
-          <Input
-            placeholder="搜索评论内容"
-            prefix={<SearchOutlined className="text-gray-400" />}
-            value={filters.keyword}
-            onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
-            style={{ width: 240 }}
-            allowClear
-          />
           <Select
-            placeholder="评论状态"
+            placeholder="留言状态"
             value={filters.status}
             onChange={(value) => setFilters({ ...filters, status: value })}
             style={{ width: 140 }}
@@ -186,16 +188,22 @@ const CommentPage: React.FC = () => {
             <Select.Option value={1}>已通过</Select.Option>
             <Select.Option value={2}>已拒绝</Select.Option>
           </Select>
-          <Button type="primary" icon={<SearchOutlined />} onClick={loadComments}>
-            搜索
-          </Button>
+          <div className="flex-1" />
+          {selectedRowKeys.length > 0 && (
+            <Popconfirm
+              title={`确定删除选中的 ${selectedRowKeys.length} 条留言吗？`}
+              onConfirm={handleBatchDelete}
+            >
+              <Button danger>批量删除 ({selectedRowKeys.length})</Button>
+            </Popconfirm>
+          )}
         </div>
       </div>
 
       <div className="table-container">
         <Table
           columns={columns}
-          dataSource={comments}
+          dataSource={guestbooks}
           rowKey="id"
           loading={loading}
           rowSelection={{
@@ -208,7 +216,7 @@ const CommentPage: React.FC = () => {
             total: pagination.total,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条评论`,
+            showTotal: (total) => `共 ${total} 条留言`,
             onChange: (page, pageSize) =>
               setPagination({ ...pagination, current: page, pageSize }),
           }}
@@ -218,4 +226,4 @@ const CommentPage: React.FC = () => {
   )
 }
 
-export default CommentPage
+export default GuestbookPage

@@ -1,54 +1,43 @@
 import request from './request'
-import { PageResult } from '@/types'
-
-export interface OperationLog {
-  id: number
-  userId: number
-  operation: string
-  method: string
-  params: string
-  ip: string
-  location: string
-  duration: number
-  createTime: string
-}
-
-export interface ErrorLog {
-  id: number
-  userId: number
-  method: string
-  url: string
-  error: string
-  stack: string
-  ip: string
-  createTime: string
-}
+import { LogOperation, LogError, PageResult } from '@/types'
 
 export const getOperationLogList = (params: {
   page?: number
   size?: number
-  userId?: number
-  startDate?: string
-  endDate?: string
-}): Promise<PageResult<OperationLog>> => {
+  module?: string
+  keyword?: string
+}): Promise<PageResult<LogOperation>> => {
   return request.get('/admin/log/operation/list', { params })
 }
 
 export const getErrorLogList = (params: {
   page?: number
   size?: number
-  userId?: number
-  startDate?: string
-  endDate?: string
-}): Promise<PageResult<ErrorLog>> => {
-  return request.get('/admin/log/exception/list', { params })
+  keyword?: string
+}): Promise<PageResult<LogError>> => {
+  return request.get('/admin/log/error/list', { params })
 }
 
-export const deleteLog = (type: string, id: number): Promise<void> => {
-  return request.delete(`/admin/log/${type}/${id}`)
+export const getOperationLogById = (id: number): Promise<LogOperation> => {
+  return request.get(`/admin/log/operation/${id}`)
 }
 
-export const cleanupLogs = (): Promise<void> => {
-  return request.post('/admin/log/cleanup')
+export const getErrorLogById = (id: number): Promise<LogError> => {
+  return request.get(`/admin/log/error/${id}`)
 }
 
+export const deleteOperationLog = (id: number): Promise<void> => {
+  return request.delete(`/admin/log/operation/${id}`)
+}
+
+export const deleteErrorLog = (id: number): Promise<void> => {
+  return request.delete(`/admin/log/error/${id}`)
+}
+
+export const clearOperationLogs = (): Promise<void> => {
+  return request.delete('/admin/log/operation/clear')
+}
+
+export const clearErrorLogs = (): Promise<void> => {
+  return request.delete('/admin/log/error/clear')
+}

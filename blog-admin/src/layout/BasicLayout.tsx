@@ -1,5 +1,5 @@
 import { Layout } from 'antd'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import { useEffect } from 'react'
 import Header from './components/Header'
 import Sidebar from './components/Sidebar'
@@ -10,7 +10,6 @@ import { useWebSocket } from '@/hooks/useWebSocket'
 const { Content } = Layout
 
 const BasicLayout: React.FC = () => {
-  const location = useLocation()
   const { getCurrentUser, isAuthenticated } = useAuthStore()
 
   useEffect(() => {
@@ -24,10 +23,10 @@ const BasicLayout: React.FC = () => {
   return (
     <Layout className="h-screen">
       <Sidebar />
-      <Layout>
+      <Layout className="flex flex-col">
         <Header />
         <Tabs />
-        <Content className="p-4 overflow-auto">
+        <Content className="flex-1 overflow-auto bg-gray-50">
           <Outlet />
         </Content>
       </Layout>
@@ -36,4 +35,3 @@ const BasicLayout: React.FC = () => {
 }
 
 export default BasicLayout
-

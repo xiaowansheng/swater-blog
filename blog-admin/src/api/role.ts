@@ -4,10 +4,15 @@ import { Role } from '@/types'
 export interface RoleDTO {
   name: string
   code: string
+  description?: string
 }
 
 export const getRoleList = (): Promise<Role[]> => {
   return request.get('/admin/role/list')
+}
+
+export const getRoleById = (id: number): Promise<Role> => {
+  return request.get(`/admin/role/${id}`)
 }
 
 export const createRole = (data: RoleDTO): Promise<number> => {
@@ -22,7 +27,10 @@ export const deleteRole = (id: number): Promise<void> => {
   return request.delete(`/admin/role/${id}`)
 }
 
-export const assignApis = (id: number, apiIds: number[]): Promise<void> => {
-  return request.post(`/admin/role/${id}/apis`, apiIds)
+export const assignMenus = (roleId: number, menuIds: number[]): Promise<void> => {
+  return request.post(`/admin/role/${roleId}/menus`, menuIds)
 }
 
+export const assignApis = (roleId: number, apiIds: number[]): Promise<void> => {
+  return request.post(`/admin/role/${roleId}/apis`, apiIds)
+}

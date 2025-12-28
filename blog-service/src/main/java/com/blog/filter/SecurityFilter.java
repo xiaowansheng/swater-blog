@@ -60,6 +60,12 @@ public class SecurityFilter implements Filter {
         String requestUri = httpRequest.getRequestURI();
         String clientIp = IpUtil.getClientIp(httpRequest);
         
+        // 0. 放行 OPTIONS 请求 (CORS 预检)
+        if ("OPTIONS".equalsIgnoreCase(httpRequest.getMethod())) {
+            chain.doFilter(request, response);
+            return;
+        }
+        
         // 跳过特定路径
         if (shouldSkipSecurity(requestUri)) {
             chain.doFilter(request, response);

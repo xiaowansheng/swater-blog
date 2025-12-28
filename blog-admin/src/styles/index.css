@@ -8,12 +8,25 @@
   box-sizing: border-box;
 }
 
+:root {
+  --primary-color: #1890ff;
+  --success-color: #52c41a;
+  --warning-color: #faad14;
+  --error-color: #ff4d4f;
+  --heading-color: rgba(0, 0, 0, 0.85);
+  --text-color: rgba(0, 0, 0, 0.65);
+  --text-color-secondary: rgba(0, 0, 0, 0.45);
+  --border-color: #f0f0f0;
+  --bg-color: #f5f7fa;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-color);
 }
 
 #root {
@@ -21,3 +34,240 @@ body {
   height: 100vh;
 }
 
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 统计卡片样式 */
+.stat-card {
+  @apply bg-white rounded-lg p-6 transition-all duration-300;
+  box-shadow: var(--card-shadow);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card .stat-icon {
+  @apply w-12 h-12 rounded-lg flex items-center justify-center text-white text-xl;
+}
+
+.stat-card .stat-value {
+  @apply text-3xl font-semibold mt-3;
+  color: var(--heading-color);
+}
+
+.stat-card .stat-label {
+  @apply text-sm mt-1;
+  color: var(--text-color-secondary);
+}
+
+.stat-card .stat-trend {
+  @apply text-xs mt-2 flex items-center gap-1;
+}
+
+.stat-card .stat-trend.up {
+  color: var(--success-color);
+}
+
+.stat-card .stat-trend.down {
+  color: var(--error-color);
+}
+
+/* 图表卡片样式 */
+.chart-card {
+  @apply bg-white rounded-lg transition-all duration-300;
+  box-shadow: var(--card-shadow);
+}
+
+.chart-card .ant-card-head {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.chart-card .ant-card-head-title {
+  @apply font-medium;
+  color: var(--heading-color);
+}
+
+/* 页面容器 */
+.page-container {
+  @apply p-6;
+  min-height: calc(100vh - 112px);
+}
+
+/* 搜索栏样式 */
+.search-bar {
+  @apply bg-white rounded-lg p-4 mb-4;
+  box-shadow: var(--card-shadow);
+}
+
+/* 表格容器 */
+.table-container {
+  @apply bg-white rounded-lg;
+  box-shadow: var(--card-shadow);
+}
+
+.table-container .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+/* 表单弹窗 */
+.form-modal .ant-modal-header {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.form-modal .ant-modal-footer {
+  border-top: 1px solid var(--border-color);
+}
+
+/* 状态标签 */
+.status-tag {
+  @apply px-2 py-1 rounded text-xs font-medium;
+}
+
+.status-tag.success {
+  @apply bg-green-100 text-green-700;
+}
+
+.status-tag.warning {
+  @apply bg-yellow-100 text-yellow-700;
+}
+
+.status-tag.error {
+  @apply bg-red-100 text-red-700;
+}
+
+.status-tag.default {
+  @apply bg-gray-100 text-gray-700;
+}
+
+/* 操作按钮组 */
+.action-buttons {
+  @apply flex items-center gap-2;
+}
+
+/* 空状态 */
+.empty-state {
+  @apply py-12 text-center;
+  color: var(--text-color-secondary);
+}
+
+/* 加载状态 */
+.loading-container {
+  @apply flex items-center justify-center py-12;
+}
+
+/* 侧边栏样式优化 */
+.ant-layout-sider {
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.ant-layout-sider .ant-menu-dark {
+  background: #001529;
+}
+
+.ant-layout-sider .ant-menu-dark .ant-menu-item-selected {
+  background: var(--primary-color);
+}
+
+/* 头部样式优化 */
+.ant-layout-header {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* 标签页样式 */
+.tabs-container {
+  @apply bg-white px-4 border-b;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.tabs-container .ant-tabs-nav {
+  margin-bottom: 0;
+}
+
+/* 登录页面样式 */
+.login-page {
+  @apply min-h-screen flex items-center justify-center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-card {
+  @apply w-96 bg-white rounded-xl p-8;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.login-card .login-title {
+  @apply text-2xl font-bold text-center mb-2;
+  color: var(--heading-color);
+}
+
+.login-card .login-subtitle {
+  @apply text-center mb-8;
+  color: var(--text-color-secondary);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .page-container {
+    @apply p-4;
+  }
+  
+  .stat-card {
+    @apply p-4;
+  }
+  
+  .stat-card .stat-value {
+    @apply text-2xl;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Markdown编辑器样式 */
+.w-md-editor {
+  @apply rounded-lg overflow-hidden;
+  box-shadow: var(--card-shadow);
+}
+
+/* 通知铃铛动画 */
+@keyframes bell-ring {
+  0%, 100% { transform: rotate(0); }
+  10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+  20%, 40%, 60%, 80% { transform: rotate(10deg); }
+}
+
+.bell-ring {
+  animation: bell-ring 0.5s ease-in-out;
+}

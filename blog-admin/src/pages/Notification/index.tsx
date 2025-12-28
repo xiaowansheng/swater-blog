@@ -1,21 +1,28 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, message } from 'antd'
+import { Table, Button, Space, message, Tag, Popconfirm, Tooltip, Select, Empty } from 'antd'
+import {
+  CheckOutlined,
+  DeleteOutlined,
+  BellOutlined,
+  CommentOutlined,
+  HeartOutlined,
+  FileTextOutlined,
+} from '@ant-design/icons'
 import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from '@/api/notification'
 import { useNotificationStore } from '@/store/notification'
-import { useAuthStore } from '@/store/auth'
 import { Notification } from '@/types'
 import { formatDate } from '@/utils/format'
 
 const NotificationPage: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(false)
-  const { user } = useAuthStore()
-  const { setNotifications: setStoreNotifications, markAsRead: markStoreAsRead } = useNotificationStore()
+  const { setNotifications: setStoreNotifications, markAsRead: markStoreAsRead, markAllAsRead: markStoreAllAsRead } = useNotificationStore()
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
+  const [filters, setFilters] = useState<{ isRead?: number }>({})
 
   useEffect(() => {
     loadNotifications()
-  }, [pagination.current, pagination.pageSize])
+  }, [pagination.current, pagination.pageSize, filters])
 
   const loadNotifications = async () => {
     setLoading(true)
@@ -23,10 +30,11 @@ const NotificationPage: React.FC = () => {
       const result = await getNotifications({
         page: pagination.current,
         size: pagination.pageSize,
+        ...filters,
       })
       setNotifications(result.records)
       setStoreNotifications(result.records)
-      setPagination({ ...pagination, total: result.total })
+      setPagination((prev) => ({ ...prev, total: result.total }))
     } catch (error) {
       console.error('加载通知失败', error)
     } finally {
@@ -38,17 +46,21 @@ const NotificationPage: React.FC = () => {
     try {
       await markAsRead(id)
       markStoreAsRead(id)
-      loadNotifications()
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, isRead: 1 } : n))
+      )
+      message.success('已标记为已读')
     } catch (error) {
       message.error('操作失败')
     }
   }
 
   const handleMarkAllAsRead = async () => {
-    if (!user) return
     try {
-      await markAllAsRead(user.id)
-      loadNotifications()
+      await markAllAsRead()
+      markStoreAllAsRead()
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: 1 })))
+      message.success('已全部标记为已读')
     } catch (error) {
       message.error('操作失败')
     }
@@ -64,54 +76,145 @@ const NotificationPage: React.FC = () => {
     }
   }
 
+  const getTypeIcon = (type: string) => {
+    const iconMap: Record<string, React.ReactNode> = {
+      comment: <CommentOutlined className="text-blue-500" />,
+      like: <HeartOutlined className="text-red-500" />,
+      article: <FileTextOutlined className="text-green-500" />,
+      system: <BellOutlined className="text-orange-500" />,
+    }
+    return iconMap[type] || <BellOutlined className="text-gray-500" />
+  }
+
+  const getTypeTag = (type: string) => {
+    const typeMap: Record<string, { color: string; text: string }> = {
+      comment: { color: 'blue', text: '评论' },
+      like: { color: 'red', text: '点赞' },
+      article: { color: 'green', text: '文章' },
+      system: { color: 'orange', text: '系统' },
+    }
+    const { color, text } = typeMap[type] || { color: 'default', text: '其他' }
+    return <Tag color={color}>{text}</Tag>
+  }
+
   const columns = [
-    { title: '标题', dataIndex: 'title', key: 'title' },
-    { title: '内容', dataIndex: 'content', key: 'content' },
+    {
+      title: '类型',
+      dataIndex: 'type',
+      key: 'type',
+      width: 100,
+      render: getTypeTag,
+    },
+    {
+      title: '通知内容',
+      key: 'content',
+      render: (_: any, record: Notification) => (
+        <div className={`${record.isRead === 0 ? 'font-medium' : 'text-gray-500'}`}>
+          <div className="flex items-center gap-2">
+            {getTypeIcon(record.type)}
+            <span>{record.title}</span>
+            {record.isRead === 0 && (
+              <span className="w-2 h-2 bg-blue-500 rounded-full" />
+            )}
+          </div>
+          <div className="text-sm text-gray-400 mt-1">{record.content}</div>
+        </div>
+      ),
+    },
     {
       title: '状态',
       dataIndex: 'isRead',
       key: 'isRead',
-      render: (isRead: number) => (isRead === 1 ? '已读' : '未读'),
+      width: 100,
+      render: (isRead: number) => (
+        <Tag color={isRead === 1 ? 'default' : 'blue'}>
+          {isRead === 1 ? '已读' : '未读'}
+        </Tag>
+      ),
     },
-    { title: '创建时间', dataIndex: 'createTime', key: 'createTime', render: formatDate },
+    {
+      title: '时间',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      width: 160,
+      render: formatDate,
+    },
     {
       title: '操作',
       key: 'action',
+      width: 150,
       render: (_: any, record: Notification) => (
         <Space>
           {record.isRead === 0 && (
-            <Button type="link" onClick={() => handleMarkAsRead(record.id)}>
-              标记已读
-            </Button>
+            <Tooltip title="标记已读">
+              <Button
+                type="text"
+                icon={<CheckOutlined />}
+                onClick={() => handleMarkAsRead(record.id)}
+              />
+            </Tooltip>
           )}
-          <Button type="link" danger onClick={() => handleDelete(record.id)}>
-            删除
-          </Button>
+          <Popconfirm
+            title="确定删除这条通知吗？"
+            onConfirm={() => handleDelete(record.id)}
+          >
+            <Tooltip title="删除">
+              <Button type="text" danger icon={<DeleteOutlined />} />
+            </Tooltip>
+          </Popconfirm>
         </Space>
       ),
     },
   ]
 
+  const unreadCount = notifications.filter((n) => n.isRead === 0).length
+
   return (
-    <div>
-      <div className="mb-4">
-        <Button onClick={handleMarkAllAsRead}>全部标记已读</Button>
+    <div className="page-container">
+      <div className="search-bar">
+        <div className="flex items-center gap-4">
+          <Select
+            placeholder="阅读状态"
+            value={filters.isRead}
+            onChange={(value) => setFilters({ ...filters, isRead: value })}
+            style={{ width: 140 }}
+            allowClear
+          >
+            <Select.Option value={0}>未读</Select.Option>
+            <Select.Option value={1}>已读</Select.Option>
+          </Select>
+          <div className="flex-1" />
+          {unreadCount > 0 && (
+            <Button icon={<CheckOutlined />} onClick={handleMarkAllAsRead}>
+              全部标记已读 ({unreadCount})
+            </Button>
+          )}
+        </div>
       </div>
-      <Table
-        columns={columns}
-        dataSource={notifications}
-        rowKey="id"
-        loading={loading}
-        pagination={{
-          current: pagination.current,
-          pageSize: pagination.pageSize,
-          total: pagination.total,
-          onChange: (page, pageSize) => setPagination({ ...pagination, current: page, pageSize }),
-        }}
-      />
+
+      <div className="table-container">
+        <Table
+          columns={columns}
+          dataSource={notifications}
+          rowKey="id"
+          loading={loading}
+          locale={{
+            emptyText: <Empty description="暂无通知" image={Empty.PRESENTED_IMAGE_SIMPLE} />,
+          }}
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: pagination.total,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total) => `共 ${total} 条通知`,
+            onChange: (page, pageSize) =>
+              setPagination({ ...pagination, current: page, pageSize }),
+          }}
+        />
+      </div>
     </div>
   )
 }
 
 export default NotificationPage
-

@@ -1,14 +1,5 @@
 import request from './request'
-import { PageResult } from '@/types'
-
-export interface Visitor {
-  id: number
-  ip: string
-  location: string
-  device: string
-  browser: string
-  visitTime: string
-}
+import { Visitor, PageResult, VisitorStatistics } from '@/types'
 
 export const getVisitorList = (params: {
   page?: number
@@ -18,10 +9,9 @@ export const getVisitorList = (params: {
   return request.get('/admin/visitor/list', { params })
 }
 
-export const getVisitorStatistics = (params: {
+export const getVisitorStatistics = (params?: {
   startDate?: string
   endDate?: string
-}): Promise<any> => {
+}): Promise<VisitorStatistics> => {
   return request.get('/admin/visitor/statistics', { params })
 }
-

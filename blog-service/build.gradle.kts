@@ -47,6 +47,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-quartz")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     // --- 数据库与 ORM (Spring Boot 3 专版) ---
     implementation("com.mysql:mysql-connector-j:9.1.0")

@@ -1,46 +1,38 @@
 import { Tabs as AntTabs } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTabsStore } from '@/store/tabs'
-import { useEffect, useRef } from 'react'
-import type { TabItem } from '@/types'
+import { useEffect } from 'react'
 
 const Tabs: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { tabs, activeKey, setActiveTab, removeTab, closeOtherTabs, closeAllTabs, refreshTab } =
-    useTabsStore()
-  const containerRef = useRef<HTMLDivElement>(null)
+  const { tabs, activeKey, setActiveTab, removeTab } = useTabsStore()
 
   useEffect(() => {
-    if (activeKey && activeKey !== location.pathname) {
-      navigate(activeKey)
-    }
-  }, [activeKey, navigate, location.pathname])
+    setActiveTab(location.pathname)
+  }, [location.pathname, setActiveTab])
 
-  const handleTabChange = (key: string) => {
-    setActiveTab(key)
+  const handleChange = (key: string) => {
     navigate(key)
   }
 
-  const handleTabEdit = (targetKey: string, action: 'add' | 'remove') => {
-    if (action === 'remove') {
+  const handleEdit = (
+    targetKey: React.MouseEvent | React.KeyboardEvent | string,
+    action: 'add' | 'remove'
+  ) => {
+    if (action === 'remove' && typeof targetKey === 'string') {
+      const currentIndex = tabs.findIndex((tab) => tab.key === targetKey)
       removeTab(targetKey)
-      if (targetKey === location.pathname) {
-        const index = tabs.findIndex((t) => t.key === targetKey)
-        if (index > 0) {
-          navigate(tabs[index - 1].key)
-        } else if (tabs.length > 1) {
-          navigate(tabs[index + 1].key)
-        } else {
-          navigate('/dashboard')
+      
+      // 如果关闭的是当前标签，跳转到相邻标签
+      if (targetKey === activeKey && tabs.length > 1) {
+        const newIndex = currentIndex === 0 ? 1 : currentIndex - 1
+        const newTab = tabs[newIndex]
+        if (newTab) {
+          navigate(newTab.path)
         }
       }
     }
-  }
-
-  const handleContextMenu = (e: React.MouseEvent, tab: TabItem) => {
-    e.preventDefault()
-    refreshTab(tab.key)
   }
 
   if (tabs.length === 0) {
@@ -48,25 +40,26 @@ const Tabs: React.FC = () => {
   }
 
   return (
-    <div ref={containerRef} className="bg-white border-b">
+    <div className="tabs-container">
       <AntTabs
         type="editable-card"
         hideAdd
         activeKey={activeKey}
-        onChange={handleTabChange}
-        onEdit={handleTabEdit}
+        onChange={handleChange}
+        onEdit={handleEdit}
         items={tabs.map((tab) => ({
           key: tab.key,
-          label: (
-            <span onContextMenu={(e) => handleContextMenu(e, tab)}>{tab.label}</span>
-          ),
-          closable: tab.closable !== false,
+          label: tab.label,
+          closable: tab.closable !== false && tabs.length > 1,
         }))}
         size="small"
+        tabBarStyle={{
+          marginBottom: 0,
+          height: 40,
+        }}
       />
     </div>
   )
 }
 
 export default Tabs
-
