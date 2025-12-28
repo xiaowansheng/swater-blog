@@ -177,15 +177,35 @@ const ArticleList: React.FC = () => {
       ),
     },
     {
+      title: '类型',
+      dataIndex: 'type',
+      key: 'type',
+      width: 80,
+      render: (type: string) => {
+        const typeMap: Record<string, { color: string; label: string }> = {
+          '1': { color: 'blue', label: '原创' },
+          '2': { color: 'orange', label: '转载' },
+          '3': { color: 'purple', label: '翻译' },
+          '4': { color: 'cyan', label: '引用' },
+        }
+        const t = typeMap[type] || typeMap['1']
+        return <Tag color={t.color}>{t.label}</Tag>
+      },
+    },
+    {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
       width: 100,
-      render: (status: number) => (
-        <Tag color={status === 1 ? 'success' : 'default'}>
-          {status === 1 ? '已发布' : '草稿'}
-        </Tag>
-      ),
+      render: (status: number) => {
+        const statusMap: Record<number, { color: string; label: string }> = {
+          0: { color: 'default', label: '草稿' },
+          1: { color: 'success', label: '已发布' },
+          2: { color: 'warning', label: '私密' },
+        }
+        const s = statusMap[status] || statusMap[0]
+        return <Tag color={s.color}>{s.label}</Tag>
+      },
     },
     {
       title: '创建时间',
@@ -265,6 +285,7 @@ const ArticleList: React.FC = () => {
           >
             <Select.Option value={1}>已发布</Select.Option>
             <Select.Option value={0}>草稿</Select.Option>
+            <Select.Option value={2}>私密</Select.Option>
           </Select>
           <Select
             placeholder="选择分类"

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Form, Input, Button, Select, message, Switch, Card, Row, Col, Space, Breadcrumb, Modal } from 'antd'
+import { Form, Input, Button, Select, message, Switch, Card, Row, Col, Space, Breadcrumb, Modal, Radio } from 'antd'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ArrowLeftOutlined, SaveOutlined, SendOutlined, SettingOutlined, PlusOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, SaveOutlined, SendOutlined } from '@ant-design/icons'
 import { getArticleById, createArticle, updateArticle } from '@/api/article'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
@@ -21,6 +21,21 @@ const ArticleEdit: React.FC = () => {
   const [tags, setTags] = useState<Tag[]>([])
   const [articleStatus, setArticleStatus] = useState<number>(0)
   const cover = Form.useWatch('cover', form)
+  const type = Form.useWatch('type', form)
+
+  // 文章类型选项
+  const articleTypeOptions = [
+    { value: '1', label: '原创' },
+    { value: '2', label: '转载' },
+    { value: '3', label: '翻译' },
+    { value: '4', label: '引用' },
+  ]
+
+  // 文章状态选项
+  const articleStatusOptions = [
+    { value: 1, label: '公开发布' },
+    { value: 2, label: '私密' },
+  ]
 
   useEffect(() => {
     loadCategories()
@@ -54,6 +69,8 @@ const ArticleEdit: React.FC = () => {
       setArticleStatus(article.status)
       form.setFieldsValue({
         ...article,
+        type: article.type || '1',
+        publishStatus: article.status === 0 ? 1 : article.status,
         categoryId: article.categoryId,
         tagIds: article.tags.map((t) => t.id),
       })
@@ -79,6 +96,9 @@ const ArticleEdit: React.FC = () => {
         })
       }
 
+      // 如果是发布，使用 publishStatus 字段的值
+      const finalStatus = status === 0 ? 0 : (values.publishStatus || 1)
+
       let categoryId = undefined
       let categoryName = undefined
       const categoryValue = values.categoryId
@@ -90,7 +110,7 @@ const ArticleEdit: React.FC = () => {
 
       const payload = {
         ...values,
-        status,
+        status: finalStatus,
         tagIds,
         tagNames,
         categoryId,
@@ -100,12 +120,12 @@ const ArticleEdit: React.FC = () => {
 
       if (id) {
         await updateArticle(Number(id), payload)
-        message.success(status === 0 ? '草稿保存成功' : '更新成功')
+        message.success(finalStatus === 0 ? '草稿保存成功' : '更新成功')
       } else {
         await createArticle(payload)
-        message.success(status === 0 ? '草稿保存成功' : '发布成功')
+        message.success(finalStatus === 0 ? '草稿保存成功' : '发布成功')
       }
-      setArticleStatus(status)
+      setArticleStatus(finalStatus)
       navigate('/article')
     } catch (error) {
       message.error(id ? '更新失败' : '发布失败')
@@ -116,9 +136,15 @@ const ArticleEdit: React.FC = () => {
 
   const getStatusTag = () => {
     if (!id) return null
+    const statusMap: Record<number, { bg: string; text: string; label: string }> = {
+      0: { bg: 'bg-orange-100', text: 'text-orange-600', label: '草稿' },
+      1: { bg: 'bg-green-100', text: 'text-green-600', label: '已发布' },
+      2: { bg: 'bg-gray-100', text: 'text-gray-600', label: '私密' },
+    }
+    const status = statusMap[articleStatus] || statusMap[0]
     return (
-      <span className={`px-2 py-1 rounded text-xs ${articleStatus === 1 ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>
-        {articleStatus === 1 ? '已发布' : '草稿'}
+      <span className={`px-2 py-1 rounded text-xs ${status.bg} ${status.text}`}>
+        {status.label}
       </span>
     )
   }
@@ -252,6 +278,14 @@ const ArticleEdit: React.FC = () => {
                   <TagSelector tags={tags} />
                 </Form.Item>
 
+                <Form.Item name="type" label="文章类型" initialValue="1">
+                  <Radio.Group options={articleTypeOptions} optionType="button" buttonStyle="solid" />
+                </Form.Item>
+
+                <Form.Item name="publishStatus" label="发布状态" initialValue={1}>
+                  <Radio.Group options={articleStatusOptions} optionType="button" buttonStyle="solid" />
+                </Form.Item>
+
                 <Form.Item name="isTop" label="是否置顶" valuePropName="checked">
                   <Switch />
                 </Form.Item>
@@ -265,6 +299,20 @@ const ArticleEdit: React.FC = () => {
                     maxLength={200}
                   />
                 </Form.Item>
+
+                {(type === '2' || type === '3' || type === '4') && (
+                  <>
+                    <Form.Item name="originalAuthor" label="原文作者">
+                      <Input placeholder="请输入原文作者" />
+                    </Form.Item>
+                    <Form.Item name="originalTitle" label="原文标题">
+                      <Input placeholder="请输入原文标题" />
+                    </Form.Item>
+                    <Form.Item name="originalUrl" label="原文链接">
+                      <Input placeholder="请输入原文链接" />
+                    </Form.Item>
+                  </>
+                )}
               </Col>
               <Col span={12}>
                 <Form.Item name="cover" label="文章封面">

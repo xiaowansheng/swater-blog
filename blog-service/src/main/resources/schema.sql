@@ -197,7 +197,7 @@ CREATE TABLE IF NOT EXISTS `article` (
   `original_title` VARCHAR(50) DEFAULT NULL COMMENT '原文标题',
   `original_url` VARCHAR(512) DEFAULT NULL COMMENT '原文链接',
   `note` VARCHAR(300) DEFAULT NULL COMMENT '文章备注信息',
-  `status` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '文章状态（0-草稿，1-已发布）',
+  `status` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '文章状态（0-草稿，1-已发布，2-私密）',
   `is_top` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '文章是否置顶显示',
   `view_count` INT NOT NULL DEFAULT '0' COMMENT '浏览量',
   `like_count` INT NOT NULL DEFAULT '0' COMMENT '点赞数',
