@@ -1,19 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Vditor from 'vditor'
 import 'vditor/dist/index.css'
+import { uploadFile } from '@/api/file'
+import { getFullUrl } from '@/utils/format'
+import { message } from 'antd'
 
 interface MarkdownEditorProps {
   value?: string
   onChange?: (value: string) => void
   height?: number
   placeholder?: string
+  category?: string
 }
 
 const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   value = '',
   onChange,
   height = 600,
-  placeholder = '开始写作吧...'
+  placeholder = '开始写作吧...',
+  category = 'article_image'
 }) => {
   const editorRef = useRef<HTMLDivElement>(null)
   const vditorInstance = useRef<Vditor | null>(null)
@@ -41,6 +46,24 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       counter: {
         enable: true,
         type: 'markdown',
+      },
+      upload: {
+        accept: 'image/*',
+        multiple: false,
+        handler: async (files: File[]) => {
+          if (files.length === 0) return null
+          try {
+            const res = await uploadFile(files[0], category)
+            const url = getFullUrl(res.fileUrl)
+            const name = res.fileName || files[0].name
+            // 插入图片到编辑器
+            vditor.insertValue(`![${name}](${url})`)
+          } catch (error) {
+            console.error('上传图片失败:', error)
+            message.error('上传图片失败')
+          }
+          return null
+        }
       },
       input: (val) => {
         onChange?.(val)

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react'
 import '@wangeditor/editor/dist/css/style.css'
 import { Editor, Toolbar } from '@wangeditor/editor-for-react'
 import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
+import { uploadFile } from '@/api/file'
+import { getFullUrl } from '@/utils/format'
+import { message } from 'antd'
 
 interface RichTextEditorProps {
   value?: string
@@ -9,6 +12,7 @@ interface RichTextEditorProps {
   placeholder?: string
   height?: number
   className?: string
+  category?: string
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
@@ -16,7 +20,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onChange,
   placeholder = '请输入内容...',
   height = 300,
-  className = ''
+  className = '',
+  category = 'talk_image'
 }) => {
   // editor 实例
   const [editor, setEditor] = useState<IDomEditor | null>(null)
@@ -41,16 +46,16 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     placeholder,
     MENU_CONF: {
       uploadImage: {
-        // 自定义上传逻辑，后续可以对接项目的上传接口
+        // 自定义上传逻辑
         async customUpload(file: File, insertFn: any) {
-          // 这里可以调用项目已有的上传 api
-          // 暂时先使用 base64 或者提示用户
-          const reader = new FileReader()
-          reader.onload = (e) => {
-            const base64 = e.target?.result as string
-            insertFn(base64, '', '')
+          try {
+            const res = await uploadFile(file, category)
+            const url = getFullUrl(res.fileUrl)
+            insertFn(url, res.fileName, url)
+          } catch (error) {
+            console.error('上传图片失败:', error)
+            message.error('上传图片失败')
           }
-          reader.readAsDataURL(file)
         }
       }
     }
