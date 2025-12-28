@@ -9,6 +9,7 @@ import {
 } from '@ant-design/icons'
 import { getTalkList, createTalk, updateTalk, deleteTalk, setTalkTop, cancelTalkTop } from '@/api/talk'
 import { Talk } from '@/types'
+import RichTextEditor from '@/components/common/RichTextEditor'
 
 const TalkPage: React.FC = () => {
   const [talks, setTalks] = useState<Talk[]>([])
@@ -106,15 +107,19 @@ const TalkPage: React.FC = () => {
       title: '内容',
       dataIndex: 'content',
       key: 'content',
-      ellipsis: true,
       render: (content: string, record: Talk) => (
-        <div>
-          {record.isTop === 1 && (
-            <Tag color="red" className="mr-2">
-              <VerticalAlignTopOutlined /> 置顶
-            </Tag>
-          )}
-          <span>{content}</span>
+        <div className="flex flex-col gap-1 max-w-[400px]">
+          <div className="flex items-center">
+            {record.isTop === 1 && (
+              <Tag color="red" className="mr-2">
+                <VerticalAlignTopOutlined /> 置顶
+              </Tag>
+            )}
+          </div>
+          <div 
+            className="rich-text-content line-clamp-2 text-sm text-gray-600"
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
         </div>
       ),
     },
@@ -254,8 +259,10 @@ const TalkPage: React.FC = () => {
             name="content"
             label="说说内容"
             rules={[{ required: true, message: '请输入说说内容' }]}
+            trigger="onChange"
+            validateTrigger="onBlur"
           >
-            <Input.TextArea rows={4} placeholder="分享你的想法..." showCount maxLength={500} />
+            <RichTextEditor height={200} placeholder="分享你的想法..." />
           </Form.Item>
           <Form.Item name="images" label="图片" extra="每行一个图片URL">
             <Input.TextArea rows={3} placeholder="请输入图片URL，每行一个" />

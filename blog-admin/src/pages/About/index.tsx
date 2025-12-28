@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { Card, Button, message, Spin, Input, Breadcrumb, Space } from 'antd'
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, Link } from 'react-router-dom'
-import MDEditor from '@uiw/react-md-editor'
 import { getAbout, updateAbout } from '@/api/about'
+import MarkdownEditor from '@/components/common/MarkdownEditor'
 
 const AboutPage: React.FC = () => {
   const navigate = useNavigate()
@@ -103,18 +103,15 @@ const AboutPage: React.FC = () => {
             className="rounded-md"
           />
         </div>
-        <div>
+        <div className="mb-6">
           <label className="block text-base font-medium text-gray-700 mb-2">
             页面内容
           </label>
-          <div data-color-mode="light" className="border rounded-md overflow-hidden">
-            <MDEditor
-              value={content}
-              onChange={(val) => setContent(val || '')}
-              height={600}
-              preview="live"
-            />
-          </div>
+          <MarkdownEditor
+            value={content}
+            onChange={(val) => setContent(val || '')}
+            height={500}
+          />
         </div>
       </Card>
     </div>
