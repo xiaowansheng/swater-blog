@@ -14,9 +14,12 @@ export const getFileById = (id: number): Promise<FileMeta> => {
   return request.get(`/admin/file/${id}`)
 }
 
-export const uploadFile = (file: File): Promise<FileMeta> => {
+export const uploadFile = (file: File, category?: string): Promise<FileMeta> => {
   const formData = new FormData()
   formData.append('file', file)
+  if (category) {
+    formData.append('category', category)
+  }
   return request.post('/admin/file/upload', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',

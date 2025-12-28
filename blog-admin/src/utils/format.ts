@@ -19,3 +19,32 @@ export const formatFileSize = (bytes: number): string => {
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
 }
 
+/**
+ * 转换文件路径为完整可访问 URL
+ * @param path 相对路径或绝对路径
+ * @returns 完整 URL
+ */
+export const getFullUrl = (path: string | undefined): string => {
+  if (!path) return ''
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    return path
+  }
+  
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api'
+  const prefix = '/uploads'
+  
+  // 如果路径已经包含了 baseUrl + prefix，则直接返回
+  if (path.startsWith(`${baseUrl}${prefix}`)) {
+    return path
+  }
+  
+  // 如果路径以 prefix 开头但没有 baseUrl，补全 baseUrl
+  if (path.startsWith(prefix)) {
+    return `${baseUrl}${path}`
+  }
+
+  // 否则视为纯相对路径（如 article_cover/xxx.jpg），进行拼接
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  return `${baseUrl}${prefix}${normalizedPath}`
+}
+

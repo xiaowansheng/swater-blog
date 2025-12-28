@@ -34,7 +34,7 @@ public class SecurityFilter implements Filter {
     
     // 需要跳过安全检查的路径
     private static final String[] SKIP_PATHS = {
-        "/actuator/", "/swagger-", "/v3/api-docs", "/favicon.ico"
+        "/actuator/", "/swagger-", "/v3/api-docs", "/favicon.ico", "/api/uploads/"
     };
     
     // 标准HTTP请求头（这些请求头通常包含安全的值）

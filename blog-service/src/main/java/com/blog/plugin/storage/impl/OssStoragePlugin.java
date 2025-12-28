@@ -109,10 +109,16 @@ public class OssStoragePlugin implements StoragePlugin, Plugin {
     
     @Override
     public String generateFilePath(String originalFilename) {
+        return generateFilePath(originalFilename, "default");
+    }
+
+    @Override
+    public String generateFilePath(String originalFilename, String category) {
+        String dir = StrUtil.isBlank(category) ? "default" : category;
         String dateDir = LocalDate.now().format(DATE_FORMATTER);
         String extension = FileUtil.extName(originalFilename);
         String filename = UUID.randomUUID().toString().replace("-", "") + "." + extension;
-        return dateDir + "/" + filename;
+        return dir + "/" + dateDir + "/" + filename;
     }
     
     @Override

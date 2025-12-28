@@ -43,27 +43,25 @@ public class LocalStoragePlugin implements StoragePlugin, Plugin {
     
     @Override
     public String upload(MultipartFile file, String filePath) throws Exception {
-        Path uploadPath = Paths.get(uploadDir, filePath);
+        Path uploadPath = Paths.get(uploadDir).toAbsolutePath().resolve(filePath);
         Files.createDirectories(uploadPath.getParent());
-        file.transferTo(uploadPath.toFile());
+        Files.copy(file.getInputStream(), uploadPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
         return filePath;
     }
     
     @Override
     public String upload(InputStream inputStream, String filePath, long contentLength, String contentType) throws Exception {
-        Path uploadPath = Paths.get(uploadDir, filePath);
+        Path uploadPath = Paths.get(uploadDir).toAbsolutePath().resolve(filePath);
         Files.createDirectories(uploadPath.getParent());
-        Files.copy(inputStream, uploadPath);
+        Files.copy(inputStream, uploadPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
         return filePath;
     }
     
     @Override
     public void delete(String filePath) throws Exception {
         if (StrUtil.isNotBlank(filePath)) {
-            File file = new File(uploadDir, filePath);
-            if (file.exists()) {
-                Files.deleteIfExists(file.toPath());
-            }
+            Path path = Paths.get(uploadDir).toAbsolutePath().resolve(filePath);
+            Files.deleteIfExists(path);
         }
     }
     
@@ -81,10 +79,16 @@ public class LocalStoragePlugin implements StoragePlugin, Plugin {
     
     @Override
     public String generateFilePath(String originalFilename) {
+        return generateFilePath(originalFilename, "default");
+    }
+
+    @Override
+    public String generateFilePath(String originalFilename, String category) {
+        String dir = StrUtil.isBlank(category) ? "default" : category;
         String dateDir = LocalDate.now().format(DATE_FORMATTER);
         String extension = FileUtil.extName(originalFilename);
         String filename = UUID.randomUUID().toString().replace("-", "") + "." + extension;
-        return dateDir + "/" + filename;
+        return dir + "/" + dateDir + "/" + filename;
     }
     
     @Override
@@ -94,7 +98,7 @@ public class LocalStoragePlugin implements StoragePlugin, Plugin {
     
     @Override
     public boolean exists(String filePath) throws Exception {
-        File file = new File(uploadDir, filePath);
-        return file.exists();
+        Path path = Paths.get(uploadDir).toAbsolutePath().resolve(filePath);
+        return Files.exists(path);
     }
 }

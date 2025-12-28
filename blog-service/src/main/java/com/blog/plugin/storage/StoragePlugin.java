@@ -14,6 +14,8 @@ public interface StoragePlugin {
     String getUrl(String filePath);
     
     String generateFilePath(String originalFilename);
+
+    String generateFilePath(String originalFilename, String category);
     
     String calculateHash(MultipartFile file) throws Exception;
     

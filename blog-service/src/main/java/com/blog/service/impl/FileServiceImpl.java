@@ -73,7 +73,7 @@ public class FileServiceImpl implements FileService {
                 fileMeta.setRefCount((fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0) + 1);
                 fileMetaMapper.updateById(fileMeta);
             } else {
-                String filePath = storagePlugin.generateFilePath(file.getOriginalFilename());
+                String filePath = storagePlugin.generateFilePath(file.getOriginalFilename(), dto.getCategory());
                 storagePlugin.upload(file, filePath);
 
                 fileMeta = new FileMeta();

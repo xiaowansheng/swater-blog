@@ -21,10 +21,12 @@ public class FileController {
     public Result<FileVO> upload(
             @RequestParam("file") MultipartFile file,
             @RequestParam(required = false) String refType,
-            @RequestParam(required = false) Long refId) {
+            @RequestParam(required = false) Long refId,
+            @RequestParam(required = false) String category) {
         FileUploadDTO dto = new FileUploadDTO();
         dto.setRefType(refType);
         dto.setRefId(refId);
+        dto.setCategory(category);
         FileVO vo = fileService.upload(file, dto);
         return Result.success(vo);
     }
