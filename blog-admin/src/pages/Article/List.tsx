@@ -20,7 +20,6 @@ import {
 } from '@/api/article'
 import { getCategoryList } from '@/api/category'
 import { Article, Category } from '@/types'
-import { formatDate } from '@/utils/format'
 
 const ArticleList: React.FC = () => {
   const navigate = useNavigate()
@@ -193,7 +192,6 @@ const ArticleList: React.FC = () => {
       dataIndex: 'createTime',
       key: 'createTime',
       width: 160,
-      render: formatDate,
     },
     {
       title: '操作',

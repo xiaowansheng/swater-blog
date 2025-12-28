@@ -9,7 +9,6 @@ import {
 } from '@ant-design/icons'
 import { getTalkList, createTalk, updateTalk, deleteTalk, setTalkTop, cancelTalkTop } from '@/api/talk'
 import { Talk } from '@/types'
-import { formatDate } from '@/utils/format'
 
 const TalkPage: React.FC = () => {
   const [talks, setTalks] = useState<Talk[]>([])
@@ -188,7 +187,6 @@ const TalkPage: React.FC = () => {
       dataIndex: 'createTime',
       key: 'createTime',
       width: 160,
-      render: formatDate,
     },
     {
       title: '操作',

@@ -15,7 +15,7 @@ import {
 } from '@ant-design/icons'
 import { getFileList, uploadFile, deleteFile } from '@/api/file'
 import { FileMeta } from '@/types'
-import { formatFileSize, formatDate } from '@/utils/format'
+import { formatFileSize } from '@/utils/format'
 
 const FilePage: React.FC = () => {
   const [files, setFiles] = useState<FileMeta[]>([])
@@ -148,7 +148,6 @@ const FilePage: React.FC = () => {
       dataIndex: 'createTime',
       key: 'createTime',
       width: 160,
-      render: formatDate,
     },
     {
       title: '操作',

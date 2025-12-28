@@ -11,7 +11,6 @@ import {
 import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from '@/api/notification'
 import { useNotificationStore } from '@/store/notification'
 import { Notification } from '@/types'
-import { formatDate } from '@/utils/format'
 
 const NotificationPage: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -137,7 +136,6 @@ const NotificationPage: React.FC = () => {
       dataIndex: 'createTime',
       key: 'createTime',
       width: 160,
-      render: formatDate,
     },
     {
       title: '操作',

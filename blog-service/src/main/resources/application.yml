@@ -8,6 +8,12 @@ server:
 spring:
   application:
     name: blog
+  # Jackson 日期格式化配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-dates-as-timestamps: false
   # 配置多部分上传限制
   servlet:
     multipart:

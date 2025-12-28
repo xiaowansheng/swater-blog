@@ -3,7 +3,6 @@ import { Table, Tag, Input, Select, Button, DatePicker, Space } from 'antd'
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { getOperationLogList } from '@/api/log'
 import { LogOperation } from '@/types'
-import { formatDate } from '@/utils/format'
 
 const { RangePicker } = DatePicker
 
@@ -126,7 +125,6 @@ const LogOperationPage: React.FC = () => {
       dataIndex: 'createTime',
       key: 'createTime',
       width: 160,
-      render: formatDate,
     },
   ]
 

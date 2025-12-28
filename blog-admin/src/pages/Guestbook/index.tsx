@@ -14,7 +14,6 @@ import {
   deleteBatchGuestbook,
 } from '@/api/guestbook'
 import { Guestbook } from '@/types'
-import { formatDate } from '@/utils/format'
 
 const GuestbookPage: React.FC = () => {
   const [guestbooks, setGuestbooks] = useState<Guestbook[]>([])
@@ -135,7 +134,6 @@ const GuestbookPage: React.FC = () => {
       dataIndex: 'createTime',
       key: 'createTime',
       width: 160,
-      render: formatDate,
     },
     {
       title: '操作',

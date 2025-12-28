@@ -9,7 +9,6 @@ import {
 } from '@ant-design/icons'
 import { getCommentList, approveComment, rejectComment, deleteComment } from '@/api/comment'
 import { Comment } from '@/types'
-import { formatDate } from '@/utils/format'
 
 const CommentPage: React.FC = () => {
   const [comments, setComments] = useState<Comment[]>([])
@@ -125,7 +124,6 @@ const CommentPage: React.FC = () => {
       dataIndex: 'createTime',
       key: 'createTime',
       width: 160,
-      render: formatDate,
     },
     {
       title: '操作',

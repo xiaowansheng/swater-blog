@@ -8,7 +8,6 @@ import {
 } from '@ant-design/icons'
 import { getVisitorList, getVisitorStatistics } from '@/api/visitor'
 import { Visitor, VisitorStatistics } from '@/types'
-import { formatDate } from '@/utils/format'
 import PieChart from '@/components/Chart/PieChart'
 import BarChart from '@/components/Chart/BarChart'
 
@@ -107,14 +106,12 @@ const VisitorPage: React.FC = () => {
       dataIndex: 'firstVisitTime',
       key: 'firstVisitTime',
       width: 160,
-      render: formatDate,
     },
     {
       title: '最后访问',
       dataIndex: 'lastVisitTime',
       key: 'lastVisitTime',
       width: 160,
-      render: formatDate,
     },
   ]
 

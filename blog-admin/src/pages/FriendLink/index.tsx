@@ -3,7 +3,6 @@ import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Ava
 import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined } from '@ant-design/icons'
 import { getFriendLinkList, createFriendLink, updateFriendLink, deleteFriendLink } from '@/api/friendLink'
 import { FriendLink } from '@/types'
-import { formatDate } from '@/utils/format'
 
 const FriendLinkPage: React.FC = () => {
   const [links, setLinks] = useState<FriendLink[]>([])
@@ -117,7 +116,6 @@ const FriendLinkPage: React.FC = () => {
       dataIndex: 'createTime',
       key: 'createTime',
       width: 160,
-      render: formatDate,
     },
     {
       title: '操作',
