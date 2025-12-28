@@ -206,9 +206,6 @@ management:
     prometheus:
       enabled: true
   metrics:
-    export:
-      prometheus:
-        enabled: true
     distribution:
       percentiles-histogram:
         http.server.requests: true
@@ -224,6 +221,10 @@ management:
       enabled: true
     rabbit:
       enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 # 自定义健康检查配置
 health:

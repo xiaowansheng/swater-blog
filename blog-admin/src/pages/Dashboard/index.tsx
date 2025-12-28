@@ -121,12 +121,12 @@ const Dashboard: React.FC = () => {
       {/* 图表区域 */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
-          <Card title="访问量趋势" className="chart-card" bordered={false}>
+          <Card title="访问量趋势" className="chart-card" variant="borderless">
             <LineChart data={statistics?.visitTrend || []} />
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="文章发布趋势" className="chart-card" bordered={false}>
+          <Card title="文章发布趋势" className="chart-card" variant="borderless">
             <BarChart data={statistics?.articleTrend || []} />
           </Card>
         </Col>
@@ -134,12 +134,12 @@ const Dashboard: React.FC = () => {
 
       <Row gutter={[16, 16]} className="mt-4">
         <Col xs={24} lg={12}>
-          <Card title="设备分布" className="chart-card" bordered={false}>
+          <Card title="设备分布" className="chart-card" variant="borderless">
             <PieChart data={statistics?.categoryDistribution || []} />
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="浏览器统计" className="chart-card" bordered={false}>
+          <Card title="浏览器统计" className="chart-card" variant="borderless">
             <BarChart data={statistics?.tagStatistics || []} />
           </Card>
         </Col>
