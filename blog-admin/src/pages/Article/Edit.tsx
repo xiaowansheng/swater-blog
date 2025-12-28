@@ -7,6 +7,8 @@ import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
 import { Article, Category, Tag } from '@/types'
 import MarkdownEditor from './components/MarkdownEditor'
+import CategorySelector from './components/CategorySelector'
+import TagSelector from './components/TagSelector'
 
 const ArticleEdit: React.FC = () => {
   const navigate = useNavigate()
@@ -50,7 +52,7 @@ const ArticleEdit: React.FC = () => {
       setArticleStatus(article.status)
       form.setFieldsValue({
         ...article,
-        categoryId: article.categoryId ? [article.categoryId] : [],
+        categoryId: article.categoryId,
         tagIds: article.tags.map((t) => t.id),
       })
     } catch (error) {
@@ -77,7 +79,7 @@ const ArticleEdit: React.FC = () => {
 
       let categoryId = undefined
       let categoryName = undefined
-      const categoryValue = Array.isArray(values.categoryId) ? values.categoryId[0] : values.categoryId
+      const categoryValue = values.categoryId
       if (typeof categoryValue === 'number') {
         categoryId = categoryValue
       } else if (categoryValue) {
@@ -225,33 +227,11 @@ const ArticleEdit: React.FC = () => {
                 label="文章分类" 
                 rules={[{ required: true, message: '请选择或输入文章分类' }]}
               >
-                <Select 
-                  placeholder="请选择或输入分类" 
-                  className="w-full"
-                  mode="tags"
-                  maxCount={1}
-                >
-                  {categories.map((cat) => (
-                    <Select.Option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </Select.Option>
-                  ))}
-                </Select>
+                <CategorySelector categories={categories} />
               </Form.Item>
 
               <Form.Item name="tagIds" label="文章标签">
-                <Select 
-                  mode="tags" 
-                  placeholder="请选择或输入标签" 
-                  className="w-full"
-                  allowClear
-                >
-                  {tags.map((tag) => (
-                    <Select.Option key={tag.id} value={tag.id}>
-                      {tag.name}
-                    </Select.Option>
-                  ))}
-                </Select>
+                <TagSelector tags={tags} />
               </Form.Item>
 
               <Form.Item name="isTop" label="是否置顶" valuePropName="checked">
