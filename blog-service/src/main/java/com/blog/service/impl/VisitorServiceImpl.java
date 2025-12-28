@@ -55,7 +55,7 @@ public class VisitorServiceImpl implements VisitorService {
         
         if (visitor == null) {
             visitor = visitorMapper.selectOne(new LambdaQueryWrapper<Visitor>()
-                    .eq(Visitor::getIp, dto.getIp())
+                    .eq(Visitor::getIpAddress, dto.getIp())
                     .eq(Visitor::getDeleted, 0));
         }
         
@@ -64,7 +64,7 @@ public class VisitorServiceImpl implements VisitorService {
             isNewVisitor = true;
             visitor = new Visitor();
             visitor.setVisitorUuid(UUID.randomUUID().toString().replace("-", ""));
-            visitor.setIp(dto.getIp());
+            visitor.setIpAddress(dto.getIp());
             visitor.setFirstVisitTime(now);
             visitor.setVisitCount(1);
             visitor.setStatus("ACTIVE");
@@ -163,7 +163,7 @@ public class VisitorServiceImpl implements VisitorService {
         wrapper.eq(Visitor::getDeleted, 0);
         
         if (keyword != null && !keyword.isEmpty()) {
-            wrapper.and(w -> w.like(Visitor::getIp, keyword)
+            wrapper.and(w -> w.like(Visitor::getIpAddress, keyword)
                     .or().like(Visitor::getCountry, keyword)
                     .or().like(Visitor::getCity, keyword)
                     .or().like(Visitor::getVisitorUuid, keyword));
@@ -213,26 +213,28 @@ public class VisitorServiceImpl implements VisitorService {
         Map<String, Long> byBrowser = new HashMap<>();
         Map<String, Long> byOs = new HashMap<>();
         
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        for (Visitor visitor : visitors) {
-            if (visitor.getFirstVisitTime() != null) {
-                String date = visitor.getFirstVisitTime().format(formatter);
-                byDate.put(date, byDate.getOrDefault(date, 0L) + 1);
-            }
-            if (visitor.getCountry() != null) {
-                byCountry.put(visitor.getCountry(), byCountry.getOrDefault(visitor.getCountry(), 0L) + 1);
-            }
-            if (visitor.getCity() != null) {
-                byCity.put(visitor.getCity(), byCity.getOrDefault(visitor.getCity(), 0L) + 1);
-            }
-            if (visitor.getDeviceType() != null) {
-                byDevice.put(visitor.getDeviceType(), byDevice.getOrDefault(visitor.getDeviceType(), 0L) + 1);
-            }
-            if (visitor.getBrowserName() != null) {
-                byBrowser.put(visitor.getBrowserName(), byBrowser.getOrDefault(visitor.getBrowserName(), 0L) + 1);
-            }
-            if (visitor.getOsName() != null) {
-                byOs.put(visitor.getOsName(), byOs.getOrDefault(visitor.getOsName(), 0L) + 1);
+        if (visitors != null && !visitors.isEmpty()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            for (Visitor visitor : visitors) {
+                if (visitor.getFirstVisitTime() != null) {
+                    String date = visitor.getFirstVisitTime().format(formatter);
+                    byDate.put(date, byDate.getOrDefault(date, 0L) + 1);
+                }
+                if (visitor.getCountry() != null) {
+                    byCountry.put(visitor.getCountry(), byCountry.getOrDefault(visitor.getCountry(), 0L) + 1);
+                }
+                if (visitor.getCity() != null) {
+                    byCity.put(visitor.getCity(), byCity.getOrDefault(visitor.getCity(), 0L) + 1);
+                }
+                if (visitor.getDeviceType() != null) {
+                    byDevice.put(visitor.getDeviceType(), byDevice.getOrDefault(visitor.getDeviceType(), 0L) + 1);
+                }
+                if (visitor.getBrowserName() != null) {
+                    byBrowser.put(visitor.getBrowserName(), byBrowser.getOrDefault(visitor.getBrowserName(), 0L) + 1);
+                }
+                if (visitor.getOsName() != null) {
+                    byOs.put(visitor.getOsName(), byOs.getOrDefault(visitor.getOsName(), 0L) + 1);
+                }
             }
         }
         

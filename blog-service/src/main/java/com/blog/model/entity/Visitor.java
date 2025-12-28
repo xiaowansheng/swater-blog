@@ -14,8 +14,6 @@ public class Visitor extends BaseEntity {
     @TableField("visitor_uuid")
     private String visitorUuid;
 
-    private String ip;
-
     @TableField("ip_address")
     private String ipAddress;
 

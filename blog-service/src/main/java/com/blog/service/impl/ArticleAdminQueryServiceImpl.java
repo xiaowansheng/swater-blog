@@ -91,9 +91,15 @@ public class ArticleAdminQueryServiceImpl implements ArticleAdminQueryService {
         LambdaQueryWrapper<Article> allWrapper = new LambdaQueryWrapper<>();
         allWrapper.eq(Article::getDeleted, 0);
         List<Article> articles = articleMapper.selectList(allWrapper);
-        long totalViewCount = articles.stream().mapToLong(a -> a.getViewCount() != null ? a.getViewCount() : 0L).sum();
-        long totalLikeCount = articles.stream().mapToLong(a -> a.getLikeCount() != null ? a.getLikeCount() : 0L).sum();
-        long totalCommentCount = articles.stream().mapToLong(a -> a.getCommentCount() != null ? a.getCommentCount() : 0L).sum();
+        long totalViewCount = 0;
+        long totalLikeCount = 0;
+        long totalCommentCount = 0;
+        
+        if (articles != null && !articles.isEmpty()) {
+            totalViewCount = articles.stream().mapToLong(a -> a.getViewCount() != null ? a.getViewCount() : 0L).sum();
+            totalLikeCount = articles.stream().mapToLong(a -> a.getLikeCount() != null ? a.getLikeCount() : 0L).sum();
+            totalCommentCount = articles.stream().mapToLong(a -> a.getCommentCount() != null ? a.getCommentCount() : 0L).sum();
+        }
         
         statistics.setTotalViewCount(totalViewCount);
         statistics.setTotalLikeCount(totalLikeCount);
