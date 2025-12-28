@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Input, Select, Tag, Avatar, Tooltip, Card } from 'antd'
+import { Table, Button, Space, Popconfirm, message, Input, Select, Tag, Avatar, Tooltip, Card, Breadcrumb } from 'antd'
 import {
   PlusOutlined,
   EditOutlined,
@@ -10,7 +10,7 @@ import {
   CommentOutlined,
   VerticalAlignTopOutlined,
 } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import {
   getArticleList,
   deleteArticle,
@@ -239,7 +239,13 @@ const ArticleList: React.FC = () => {
   ]
 
   return (
-    <div className="page-container">
+    <div className="page-container fade-in">
+      <div className="mb-4">
+        <Breadcrumb items={[
+          { title: <Link to="/">首页</Link> },
+          { title: '文章管理' },
+        ]} />
+      </div>
       {/* 搜索栏 */}
       <div className="search-bar">
         <div className="flex flex-wrap items-center gap-4">

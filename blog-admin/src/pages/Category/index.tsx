@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag } from 'antd'
+import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Breadcrumb } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { useNavigate, Link } from 'react-router-dom'
 import { getCategoryList, createCategory, updateCategory, deleteCategory } from '@/api/category'
 import { Category } from '@/types'
 
 const CategoryPage: React.FC = () => {
+  const navigate = useNavigate()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
@@ -112,7 +114,13 @@ const CategoryPage: React.FC = () => {
   ]
 
   return (
-    <div className="page-container">
+    <div className="page-container fade-in">
+      <div className="mb-4">
+        <Breadcrumb items={[
+          { title: <Link to="/">首页</Link> },
+          { title: '分类管理' },
+        ]} />
+      </div>
       <div className="search-bar flex justify-between items-center">
         <h2 className="text-lg font-medium">分类管理</h2>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>

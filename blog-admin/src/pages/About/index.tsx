@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Card, Button, message, Spin, Input } from 'antd'
-import { SaveOutlined } from '@ant-design/icons'
+import { Card, Button, message, Spin, Input, Breadcrumb, Space } from 'antd'
+import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons'
+import { useNavigate, Link } from 'react-router-dom'
 import MDEditor from '@uiw/react-md-editor'
 import { getAbout, updateAbout } from '@/api/about'
 
 const AboutPage: React.FC = () => {
+  const navigate = useNavigate()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
@@ -50,7 +52,7 @@ const AboutPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="page-container">
+      <div className="page-container fade-in">
         <div className="loading-container">
           <Spin size="large" />
         </div>
@@ -59,23 +61,38 @@ const AboutPage: React.FC = () => {
   }
 
   return (
-    <div className="page-container">
-      <Card
-        title="关于页面"
-        extra={
-          <Button
-            type="primary"
-            icon={<SaveOutlined />}
-            loading={saving}
-            onClick={handleSave}
+    <div className="page-container fade-in">
+      <div className="mb-4">
+        <Breadcrumb items={[
+          { title: <Link to="/">首页</Link> },
+          { title: '关于管理' },
+        ]} />
+      </div>
+
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-4">
+          <Button 
+            icon={<ArrowLeftOutlined />} 
+            onClick={() => navigate('/')}
           >
-            保存
+            返回首页
           </Button>
-        }
-        className="chart-card"
-      >
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <h2 className="text-2xl font-bold m-0">关于页面设置</h2>
+        </div>
+        <Button
+          type="primary"
+          icon={<SaveOutlined />}
+          loading={saving}
+          onClick={handleSave}
+          size="large"
+        >
+          保存设置
+        </Button>
+      </div>
+
+      <Card className="shadow-sm" bordered={false}>
+        <div className="mb-6">
+          <label className="block text-base font-medium text-gray-700 mb-2">
             页面标题
           </label>
           <Input
@@ -83,17 +100,18 @@ const AboutPage: React.FC = () => {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="请输入页面标题"
             size="large"
+            className="rounded-md"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-base font-medium text-gray-700 mb-2">
             页面内容
           </label>
-          <div data-color-mode="light">
+          <div data-color-mode="light" className="border rounded-md overflow-hidden">
             <MDEditor
               value={content}
               onChange={(val) => setContent(val || '')}
-              height={500}
+              height={600}
               preview="live"
             />
           </div>
@@ -104,3 +122,4 @@ const AboutPage: React.FC = () => {
 }
 
 export default AboutPage
+
