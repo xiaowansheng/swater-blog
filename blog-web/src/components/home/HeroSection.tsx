@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSiteConfig } from '@/lib/context/SiteConfigContext';
 
 interface HeroSectionProps {
   articleCount: number;
@@ -9,6 +10,7 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ articleCount, tagCount, categoryCount }: HeroSectionProps) {
+  const { site, author, cover } = useSiteConfig();
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -38,10 +40,24 @@ export default function HeroSection({ articleCount, tagCount, categoryCount }: H
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY, isScrolling]);
 
+  // 首页封面背景样式
+  const heroStyle = cover.home ? {
+    backgroundImage: `url(${cover.home})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  } : {};
+
   return (
-    <section className="flex overflow-hidden relative justify-center items-center min-h-screen">
-      <div className="absolute inset-0 z-0 bg-gradient-to-br from-background via-background to-primary/5"></div>
-      <div className="absolute inset-0 z-0 bg-gradient-to-b to-transparent pointer-events-none from-black/15 via-black/5 dark:from-black/30 dark:via-black/10"></div>
+    <section className="flex overflow-hidden relative justify-center items-center min-h-screen" style={heroStyle}>
+      {/* 背景遮罩 */}
+      {cover.home ? (
+        <div className="absolute inset-0 z-0 bg-black/40"></div>
+      ) : (
+        <>
+          <div className="absolute inset-0 z-0 bg-gradient-to-br from-background via-background to-primary/5"></div>
+          <div className="absolute inset-0 z-0 bg-gradient-to-b to-transparent pointer-events-none from-black/15 via-black/5 dark:from-black/30 dark:via-black/10"></div>
+        </>
+      )}
       <div className="absolute inset-0 z-0">
         <div 
           className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse bg-primary/20"
@@ -62,17 +78,17 @@ export default function HeroSection({ articleCount, tagCount, categoryCount }: H
             <div className="inline-block px-4 py-2 mb-4 rounded-full border backdrop-blur-sm transition-all bg-primary/10 border-primary/20 hover:bg-primary/20">
               <span className="flex gap-2 items-center text-sm font-medium text-primary">
                 <span className="w-2 h-2 rounded-full animate-pulse bg-primary"></span>
-                欢迎来到我的博客
+                {site.notice || '欢迎来到我的博客'}
               </span>
             </div>
           </div>
           <h1 className="relative mb-6 text-6xl font-black md:text-8xl gradient-text animate-fadeIn" style={{ animationDelay: '0.2s' }}>
-            Swater Blog
+            {site.name || 'Blog'}
             <span className="absolute -bottom-4 left-1/2 w-32 h-1 bg-gradient-to-r rounded-full opacity-60 -translate-x-1/2 from-primary via-accent to-primary"></span>
           </h1>
           <p className="mb-8 text-xl leading-relaxed md:text-2xl text-muted animate-fadeIn" style={{ animationDelay: '0.4s' }}>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground via-foreground/90 to-foreground/70">
-              分享技术，记录生活
+              {author.signature || site.description || '分享技术，记录生活'}
             </span>
           </p>
           <div className="flex flex-wrap gap-4 justify-center text-sm text-muted animate-fadeIn" style={{ animationDelay: '0.6s' }}>

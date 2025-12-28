@@ -1,9 +1,11 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useSiteConfig } from '@/lib/context/SiteConfigContext';
 
 export default function Footer() {
   const t = useTranslations('common');
+  const { site } = useSiteConfig();
 
   return (
     <footer className="border-t border-border/40 py-12 mt-auto bg-card/50 backdrop-blur-xl relative overflow-hidden">
@@ -13,10 +15,16 @@ export default function Footer() {
           <div className="flex justify-center items-center gap-2 mb-2">
             <div className="w-1 h-1 rounded-full bg-primary animate-pulse"></div>
             <p className="text-sm text-muted">
-              © {new Date().getFullYear()} Swater Blog. All rights reserved.
+              {site.copyright || `© ${new Date().getFullYear()} ${site.name || 'Blog'}. All rights reserved.`}
             </p>
             <div className="w-1 h-1 rounded-full bg-accent animate-pulse" style={{ animationDelay: '0.5s' }}></div>
           </div>
+          {(site.icp || site.police) && (
+            <div className="flex justify-center gap-4 text-xs text-muted">
+              {site.icp && <span>{site.icp}</span>}
+              {site.police && <span>{site.police}</span>}
+            </div>
+          )}
           <div className="flex justify-center gap-8 text-sm">
             <a href="/about" className="text-muted hover:text-primary transition-all hover:scale-110 relative group">
               关于

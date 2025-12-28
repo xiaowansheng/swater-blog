@@ -5,6 +5,8 @@ import { routing } from '@/lib/i18n/routing';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import '@/styles/globals.css';
+import { SiteConfigProvider } from '@/lib/context/SiteConfigContext';
+import { getPublicConfig } from '@/lib/api/config';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -25,10 +27,20 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const { locale } = await params;
+  let siteName = 'Blog';
+  let siteDescription = 'A modern blog platform';
+  
+  try {
+    const config = await getPublicConfig();
+    siteName = config.site?.name || siteName;
+    siteDescription = config.site?.description || siteDescription;
+  } catch (error) {
+    console.warn('Failed to load site config for metadata');
+  }
+  
   return {
-    title: 'Swater Blog',
-    description: 'A modern blog platform',
+    title: siteName,
+    description: siteDescription,
     alternates: {
       languages: {
         'zh': '/zh',
@@ -52,6 +64,14 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages();
+  
+  // 获取配置数据
+  let initialConfig = undefined;
+  try {
+    initialConfig = await getPublicConfig();
+  } catch (error) {
+    console.warn('Failed to load site config');
+  }
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -59,9 +79,11 @@ export default async function LocaleLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
-          <div className="flex min-h-screen flex-col">
-            {children}
-          </div>
+          <SiteConfigProvider initialConfig={initialConfig}>
+            <div className="flex min-h-screen flex-col">
+              {children}
+            </div>
+          </SiteConfigProvider>
         </NextIntlClientProvider>
       </body>
     </html>

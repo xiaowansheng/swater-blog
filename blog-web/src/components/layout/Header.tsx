@@ -7,9 +7,11 @@ import { useState, useEffect } from 'react';
 import { usePathname } from '@/lib/i18n/routing';
 import MobileMenu from './MobileMenu';
 import LanguageSwitcher from '../common/LanguageSwitcher';
+import { useSiteConfig } from '@/lib/context/SiteConfigContext';
 
 export default function Header() {
   const t = useTranslations('nav');
+  const { site } = useSiteConfig();
   const { theme, toggleTheme, mounted } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -81,7 +83,7 @@ export default function Header() {
           <span className="flex relative z-10 gap-2 items-center">
             <span className={`w-2 h-2 rounded-full bg-gradient-to-r from-primary to-accent animate-pulse ${
               scrolled ? '':'bg-white'}`}></span>
-            <span className="whitespace-nowrap">Swater Blog</span>
+            <span className="whitespace-nowrap">{site.name || 'Blog'}</span>
           </span>
           <span className="absolute inset-0 bg-gradient-to-r opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-60 from-primary to-accent"></span>
         </Link>
