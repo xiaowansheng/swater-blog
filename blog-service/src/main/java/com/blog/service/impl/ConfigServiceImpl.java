@@ -28,11 +28,28 @@ public class ConfigServiceImpl implements ConfigService {
         if (groupName != null && !groupName.isEmpty()) {
             wrapper.eq(SysConfig::getGroupName, groupName);
         }
+        wrapper.orderByAsc(SysConfig::getGroupName);
         wrapper.orderByAsc(SysConfig::getSort);
         
         List<SysConfig> configs = sysConfigMapper.selectList(wrapper);
         return configs.stream()
                 .map(config -> BeanUtil.copyProperties(config, ConfigVO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getGroups() {
+        LambdaQueryWrapper<SysConfig> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysConfig::getDeleted, 0);
+        wrapper.select(SysConfig::getGroupName);
+        wrapper.groupBy(SysConfig::getGroupName);
+        wrapper.orderByAsc(SysConfig::getGroupName);
+        
+        List<SysConfig> configs = sysConfigMapper.selectList(wrapper);
+        return configs.stream()
+                .map(SysConfig::getGroupName)
+                .filter(g -> g != null && !g.isEmpty())
+                .distinct()
                 .collect(Collectors.toList());
     }
 

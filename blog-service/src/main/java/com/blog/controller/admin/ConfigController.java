@@ -23,6 +23,12 @@ public class ConfigController {
         return Result.success(configs);
     }
 
+    @GetMapping("/groups")
+    public Result<List<String>> getGroups() {
+        List<String> groups = configService.getGroups();
+        return Result.success(groups);
+    }
+
     @GetMapping("/{key}")
     public Result<ConfigVO> getByKey(@PathVariable String key) {
         ConfigVO vo = configService.getByKey(key);

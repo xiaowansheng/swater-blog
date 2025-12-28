@@ -62,17 +62,118 @@ INSERT INTO `article_tag` (`article_id`, `tag_id`) VALUES
 (2, 4), (2, 13),
 (3, 6), (3, 15);
 
--- 7. 插入系统配置
+-- 7. 插入系统配置（使用JSON聚合存储）
+-- 网站信息配置（前台可见）
 INSERT INTO `sys_config` (`config_key`, `name`, `value`, `type`, `description`, `group_name`, `sort`) VALUES
-('site.name', '网站名称', 'Swater Blog', 'string', '网站名称', '基础设置', 1),
-('site.description', '网站描述', '一个基于Spring Boot的个人博客系统', 'string', '网站描述', '基础设置', 2),
-('site.keywords', '网站关键词', 'blog,spring boot,java,vue', 'string', '网站关键词', '基础设置', 3),
-('site.author', '网站作者', 'Swater', 'string', '网站作者', '基础设置', 4),
-('site.icp', 'ICP备案号', '', 'string', 'ICP备案号', '基础设置', 5),
-('comment.audit', '评论审核', 'true', 'boolean', '是否开启评论审核', '评论设置', 1),
-('comment.anonymous', '匿名评论', 'true', 'boolean', '是否允许匿名评论', '评论设置', 2),
-('upload.max_size', '上传文件大小限制', '10485760', 'int', '上传文件大小限制(字节)', '上传设置', 1),
-('upload.allowed_types', '允许上传的文件类型', 'jpg,jpeg,png,gif,pdf,doc,docx', 'string', '允许上传的文件类型', '上传设置', 2);
+('site', '网站信息', '{
+  "name": "Swater Blog",
+  "description": "一个基于Spring Boot的个人博客系统",
+  "keywords": "blog,spring boot,java,vue,技术博客",
+  "logo": "",
+  "favicon": "",
+  "createTime": "2024-01-01",
+  "icp": "",
+  "police": "",
+  "copyright": "© 2024 Swater Blog. All rights reserved.",
+  "notice": ""
+}', 'json', '网站基础信息配置', '网站设置', 1);
+
+-- 作者信息配置（前台部分可见，qq/wechat/email等联系方式可选择性展示）
+INSERT INTO `sys_config` (`config_key`, `name`, `value`, `type`, `description`, `group_name`, `sort`) VALUES
+('author', '作者信息', '{
+  "name": "Swater",
+  "avatar": "",
+  "signature": "热爱技术，热爱生活",
+  "introduction": "一名热爱技术的全栈开发者，专注于Java和前端技术。",
+  "email": "",
+  "qq": "",
+  "wechat": "",
+  "github": "",
+  "gitee": "",
+  "weibo": "",
+  "zhihu": "",
+  "bilibili": "",
+  "showEmail": false,
+  "showQq": false,
+  "showWechat": false
+}', 'json', '作者/博主信息配置', '网站设置', 2);
+
+-- 封面配置（前台可见）
+INSERT INTO `sys_config` (`config_key`, `name`, `value`, `type`, `description`, `group_name`, `sort`) VALUES
+('cover', '页面封面', '{
+  "home": "",
+  "article": "",
+  "archive": "",
+  "category": "",
+  "tag": "",
+  "talk": "",
+  "album": "",
+  "link": "",
+  "about": "",
+  "message": "",
+  "default": ""
+}', 'json', '各页面顶部封面图配置', '网站设置', 3);
+
+-- 社交链接配置（前台可见）
+INSERT INTO `sys_config` (`config_key`, `name`, `value`, `type`, `description`, `group_name`, `sort`) VALUES
+('social', '社交链接', '{
+  "github": "",
+  "gitee": "",
+  "weibo": "",
+  "zhihu": "",
+  "bilibili": "",
+  "twitter": "",
+  "facebook": ""
+}', 'json', '社交媒体链接配置', '网站设置', 4);
+
+-- 隐私配置（前台需要读取来决定显示什么）
+INSERT INTO `sys_config` (`config_key`, `name`, `value`, `type`, `description`, `group_name`, `sort`) VALUES
+('privacy', '隐私设置', '{
+  "showIp": false,
+  "showLocation": true,
+  "showDevice": false,
+  "showBrowser": false
+}', 'json', '前台隐私信息显示配置', '功能设置', 1);
+
+-- 评论设置（前台需要读取部分配置）
+INSERT INTO `sys_config` (`config_key`, `name`, `value`, `type`, `description`, `group_name`, `sort`) VALUES
+('comment', '评论设置', '{
+  "enableAudit": true,
+  "allowAnonymous": false,
+  "allowGuest": true,
+  "showEmail": false,
+  "pageSize": 10
+}', 'json', '评论功能配置', '功能设置', 2);
+
+-- 通知配置（仅后台使用，前台不可见）
+INSERT INTO `sys_config` (`config_key`, `name`, `value`, `type`, `description`, `group_name`, `sort`) VALUES
+('notify', '通知设置', '{
+  "loginEmail": false,
+  "commentEmail": true,
+  "replyEmail": true,
+  "guestbookEmail": true,
+  "friendLinkEmail": true
+}', 'json', '系统通知配置', '功能设置', 3);
+
+-- 上传设置（仅后台使用）
+INSERT INTO `sys_config` (`config_key`, `name`, `value`, `type`, `description`, `group_name`, `sort`) VALUES
+('upload', '上传设置', '{
+  "maxSize": 10485760,
+  "allowedTypes": "jpg,jpeg,png,gif,webp,pdf,doc,docx,zip",
+  "imageCompress": true,
+  "imageQuality": 85
+}', 'json', '文件上传配置', '功能设置', 4);
+
+-- 邮件配置（仅后台使用，包含敏感信息）
+INSERT INTO `sys_config` (`config_key`, `name`, `value`, `type`, `description`, `group_name`, `sort`) VALUES
+('email', '邮件设置', '{
+  "enable": false,
+  "host": "smtp.qq.com",
+  "port": 465,
+  "username": "",
+  "password": "",
+  "fromName": "Swater Blog"
+}', 'json', 'SMTP邮件服务配置', '功能设置', 5);
 
 -- 8. 插入友链数据
 INSERT INTO `friend_link` (`id`, `name`, `url`, `logo`, `description`, `status`, `sort`) VALUES

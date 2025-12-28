@@ -2,8 +2,7 @@ package com.blog.controller.pub;
 
 import com.blog.annotation.ApiResource;
 import com.blog.common.Result;
-import com.blog.model.vo.ConfigVO;
-import com.blog.service.ConfigPublicService;
+import com.blog.service.SiteConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,21 +12,17 @@ import java.util.Map;
 @RequestMapping("/api/public/config")
 @ApiResource(name = "配置公开接口", isOpen = true)
 public class ConfigPublicController {
+    
     @Autowired
-    private ConfigPublicService configPublicService;
+    private SiteConfigService siteConfigService;
 
-    @GetMapping("/{key}")
-    public Result<ConfigVO> getByKey(@PathVariable String key) {
-        ConfigVO vo = configPublicService.getByKey(key);
-        if (vo == null) {
-            return Result.error(404, "配置不存在");
-        }
-        return Result.success(vo);
-    }
-
-    @GetMapping("/group/{groupName}")
-    public Result<Map<String, Object>> getByGroup(@PathVariable String groupName) {
-        Map<String, Object> configs = configPublicService.getByGroup(groupName);
+    /**
+     * 获取前台所有需要的配置（已过滤敏感信息）
+     * 包含：网站信息、作者信息、封面配置、社交链接、隐私设置、评论设置
+     */
+    @GetMapping
+    public Result<Map<String, Object>> getPublicConfig() {
+        Map<String, Object> configs = siteConfigService.getPublicConfig();
         return Result.success(configs);
     }
 }

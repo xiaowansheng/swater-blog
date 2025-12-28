@@ -13,6 +13,85 @@ export interface PageResult<T> {
   pages: number;
 }
 
+// 网站配置相关类型
+export interface SiteInfo {
+  name: string;
+  description: string;
+  keywords: string;
+  logo: string;
+  favicon: string;
+  createTime: string;
+  icp: string;
+  police: string;
+  copyright: string;
+  notice: string;
+}
+
+export interface AuthorInfo {
+  name: string;
+  avatar: string;
+  signature: string;
+  introduction: string;
+  // 以下字段根据后台配置决定是否返回
+  email?: string;
+  qq?: string;
+  wechat?: string;
+  github?: string;
+  gitee?: string;
+  weibo?: string;
+  zhihu?: string;
+  bilibili?: string;
+}
+
+export interface CoverConfig {
+  home: string;
+  article: string;
+  archive: string;
+  category: string;
+  tag: string;
+  talk: string;
+  album: string;
+  link: string;
+  about: string;
+  message: string;
+  default: string;
+}
+
+export interface SocialConfig {
+  github?: string;
+  gitee?: string;
+  weibo?: string;
+  zhihu?: string;
+  bilibili?: string;
+  twitter?: string;
+  facebook?: string;
+}
+
+export interface PrivacyConfig {
+  showIp: boolean;
+  showLocation: boolean;
+  showDevice: boolean;
+  showBrowser: boolean;
+}
+
+export interface CommentConfig {
+  allowAnonymous: boolean;
+  allowGuest: boolean;
+  pageSize: number;
+}
+
+/**
+ * 前台公开配置（已过滤敏感信息）
+ */
+export interface PublicConfigVO {
+  site: SiteInfo;
+  author: AuthorInfo;
+  cover: CoverConfig;
+  social: SocialConfig;
+  privacy: PrivacyConfig;
+  comment: CommentConfig;
+}
+
 export interface PostVO {
   id: number;
   title: string;

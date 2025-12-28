@@ -8,6 +8,8 @@ import java.util.Map;
 public interface ConfigService {
     List<ConfigVO> list(String groupName);
 
+    List<String> getGroups();
+
     ConfigVO getByKey(String key);
 
     void updateByKey(String key, String value);

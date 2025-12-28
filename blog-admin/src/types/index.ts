@@ -275,11 +275,22 @@ export interface Menu {
 export interface SysConfig {
   id: number
   configKey: string
-  configValue: string
-  configType: string
+  name: string
+  value: string
+  type: string // string, text, number, boolean, image, password
   description?: string
+  groupName: string
+  sort?: number
   createTime?: string
   updateTime?: string
+}
+
+// 配置分组
+export interface ConfigGroup {
+  name: string
+  label: string
+  icon?: string
+  configs: SysConfig[]
 }
 
 // 相册相关
