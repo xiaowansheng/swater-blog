@@ -9,6 +9,7 @@ import { Article, Category, Tag } from '@/types'
 import MarkdownEditor from './components/MarkdownEditor'
 import CategorySelector from './components/CategorySelector'
 import TagSelector from './components/TagSelector'
+import ImageUpload from './components/ImageUpload'
 
 const ArticleEdit: React.FC = () => {
   const navigate = useNavigate()
@@ -267,24 +268,7 @@ const ArticleEdit: React.FC = () => {
               </Col>
               <Col span={12}>
                 <Form.Item name="cover" label="文章封面">
-                  <Input placeholder="输入封面图片 URL" className="mb-4" />
-                  {cover ? (
-                    <div className="rounded-lg overflow-hidden border border-gray-100 bg-gray-50 aspect-video flex items-center justify-center">
-                      <img 
-                        src={cover} 
-                        alt="封面预览" 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x225?text=Invalid+Image+URL'
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 aspect-video flex flex-col items-center justify-center text-gray-400">
-                      <PlusOutlined style={{ fontSize: 24 }} />
-                      <div className="mt-2 text-xs">建议尺寸: 800x450 (16:9)</div>
-                    </div>
-                  )}
+                  <ImageUpload placeholder="点击或拖拽上传文章封面" />
                 </Form.Item>
               </Col>
             </Row>
