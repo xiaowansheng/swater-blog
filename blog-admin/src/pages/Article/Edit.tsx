@@ -9,7 +9,7 @@ import { Article, Category, Tag } from '@/types'
 import MarkdownEditor from './components/MarkdownEditor'
 import CategorySelector from './components/CategorySelector'
 import TagSelector from './components/TagSelector'
-import ImageUpload from './components/ImageUpload'
+import ImageUpload from '@/components/common/ImageUpload'
 
 const ArticleEdit: React.FC = () => {
   const navigate = useNavigate()
@@ -176,7 +176,7 @@ const ArticleEdit: React.FC = () => {
         initialValues={{ isTop: 0 }}
       >
         <div className="w-full">
-          <Card className="shadow-sm mb-6" bordered={false}>
+          <Card className="shadow-sm mb-6" variant="borderless">
             <Form.Item 
                 name="title" 
                 rules={[{ required: true, message: '请输入文章标题' }]}
@@ -184,7 +184,7 @@ const ArticleEdit: React.FC = () => {
                 <Input 
                   placeholder="文章标题" 
                   size="large" 
-                  bordered={false}
+                  variant="borderless"
                   className="text-3xl font-bold border-none px-0 focus:shadow-none hover:bg-transparent" 
                 />
               </Form.Item>
@@ -197,7 +197,7 @@ const ArticleEdit: React.FC = () => {
                   <span className="mr-2">访问路径:</span>
                   <Input 
                     placeholder="example-article-slug" 
-                    bordered={false}
+                    variant="borderless"
                     className="p-0 text-sm w-fit focus:shadow-none" 
                   />
                 </div>

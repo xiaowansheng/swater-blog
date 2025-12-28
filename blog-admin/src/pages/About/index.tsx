@@ -90,7 +90,7 @@ const AboutPage: React.FC = () => {
         </Button>
       </div>
 
-      <Card className="shadow-sm" bordered={false}>
+      <Card className="shadow-sm" variant="borderless">
         <div className="mb-6">
           <label className="block text-base font-medium text-gray-700 mb-2">
             页面标题

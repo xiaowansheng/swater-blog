@@ -26,7 +26,7 @@ const BasicLayout: React.FC = () => {
       <Layout className="flex flex-col">
         <Header />
         <Tabs />
-        <Content className="flex-1 overflow-auto bg-gray-50">
+        <Content className="overflow-auto flex-1 bg-gray-50">
           <Outlet />
         </Content>
       </Layout>
