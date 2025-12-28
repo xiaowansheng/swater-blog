@@ -1,4 +1,10 @@
-﻿-- 文件元数据表
+﻿-- ========================================
+-- 博客系统数据库表结构
+-- 注意：所有外键关系通过应用层代码维护，不使用数据库外键约束
+-- 优点：更好的性能、更灵活的数据管理、避免级联删除问题
+-- ========================================
+
+-- 文件元数据表
 
 CREATE TABLE IF NOT EXISTS `file_meta` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
@@ -37,8 +43,7 @@ CREATE TABLE IF NOT EXISTS `file_reference` (
   PRIMARY KEY (`id`),
   KEY `idx_file_id` (`file_id`),
   KEY `idx_ref_type_ref_id` (`ref_type`,`ref_id`),
-  KEY `idx_create_time` (`create_time`),
-  CONSTRAINT `fk_file_reference_file_id` FOREIGN KEY (`file_id`) REFERENCES `file_meta` (`id`) ON DELETE CASCADE
+  KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文件引用关系表';
 
 
@@ -127,9 +132,7 @@ CREATE TABLE IF NOT EXISTS `role_api` (
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   UNIQUE KEY `uk_role_api` (`role_id`,`api_id`),
   KEY `idx_role_id` (`role_id`),
-  KEY `idx_api_id` (`api_id`),
-  CONSTRAINT `fk_role_api_role_id` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_role_api_api_id` FOREIGN KEY (`api_id`) REFERENCES `sys_api` (`id`) ON DELETE CASCADE
+  KEY `idx_api_id` (`api_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色接口权限表';
 
 
@@ -211,9 +214,7 @@ CREATE TABLE IF NOT EXISTS `article` (
   KEY `idx_status` (`status`),
   KEY `idx_is_top` (`is_top`),
   KEY `idx_published_at` (`published_at`),
-  KEY `idx_deleted` (`deleted`),
-  CONSTRAINT `fk_article_author_id` FOREIGN KEY (`author_id`) REFERENCES `user` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_article_category_id` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE SET NULL
+  KEY `idx_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='博客文章表';
 
 
@@ -227,9 +228,7 @@ CREATE TABLE IF NOT EXISTS `article_tag` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_article_tag` (`article_id`,`tag_id`),
   KEY `idx_article_id` (`article_id`),
-  KEY `idx_tag_id` (`tag_id`),
-  CONSTRAINT `fk_article_tag_article_id` FOREIGN KEY (`article_id`) REFERENCES `article` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_article_tag_tag_id` FOREIGN KEY (`tag_id`) REFERENCES `tag` (`id`) ON DELETE CASCADE
+  KEY `idx_tag_id` (`tag_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文章对应标签表';
 
 
@@ -280,8 +279,7 @@ CREATE TABLE IF NOT EXISTS `talk` (
   KEY `idx_author_id` (`author_id`),
   KEY `idx_status` (`status`),
   KEY `idx_is_top` (`is_top`),
-  KEY `idx_deleted` (`deleted`),
-  CONSTRAINT `fk_talk_author_id` FOREIGN KEY (`author_id`) REFERENCES `user` (`id`) ON DELETE SET NULL
+  KEY `idx_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='说说表';
 
 
@@ -327,10 +325,7 @@ CREATE TABLE IF NOT EXISTS `comment` (
   KEY `idx_parent_id` (`parent_id`),
   KEY `idx_root_id` (`root_id`),
   KEY `idx_status` (`status`),
-  KEY `idx_deleted` (`deleted`),
-  CONSTRAINT `fk_comment_post_id` FOREIGN KEY (`post_id`) REFERENCES `article` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_comment_moment_id` FOREIGN KEY (`moment_id`) REFERENCES `talk` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_comment_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL
+  KEY `idx_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='评论信息表';
 
 
@@ -412,8 +407,7 @@ CREATE TABLE IF NOT EXISTS `sys_notification` (
   KEY `idx_is_read` (`is_read`),
   KEY `idx_type` (`type`),
   KEY `idx_status` (`status`),
-  KEY `idx_create_time` (`create_time`),
-  CONSTRAINT `fk_notification_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+  KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统通知表';
 
 
@@ -580,9 +574,7 @@ CREATE TABLE IF NOT EXISTS `role_menu` (
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   UNIQUE KEY `uk_role_menu` (`role_id`,`menu_id`),
   KEY `idx_role_id` (`role_id`),
-  KEY `idx_menu_id` (`menu_id`),
-  CONSTRAINT `fk_role_menu_role_id` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_role_menu_menu_id` FOREIGN KEY (`menu_id`) REFERENCES `sys_menu` (`id`) ON DELETE CASCADE
+  KEY `idx_menu_id` (`menu_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色菜单关联表';
 
 
@@ -620,8 +612,7 @@ CREATE TABLE IF NOT EXISTS `guestbook` (
   UNIQUE KEY `uk_guestbook_key` (`guestbook_key`),
   KEY `idx_user_id` (`user_id`),
   KEY `idx_review_status` (`review_status`),
-  KEY `idx_deleted` (`deleted`),
-  CONSTRAINT `fk_guestbook_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL
+  KEY `idx_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='留言簿表';
 
 
@@ -642,8 +633,7 @@ CREATE TABLE IF NOT EXISTS `album` (
   UNIQUE KEY `uk_album_key` (`album_key`),
   KEY `idx_user_id` (`user_id`),
   KEY `idx_status` (`status`),
-  KEY `idx_deleted` (`deleted`),
-  CONSTRAINT `fk_album_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL
+  KEY `idx_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='相册表';
 
 
@@ -665,9 +655,7 @@ CREATE TABLE IF NOT EXISTS `picture` (
   KEY `idx_user_id` (`user_id`),
   KEY `idx_album_id` (`album_id`),
   KEY `idx_status` (`status`),
-  KEY `idx_deleted` (`deleted`),
-  CONSTRAINT `fk_picture_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_picture_album_id` FOREIGN KEY (`album_id`) REFERENCES `album` (`id`) ON DELETE CASCADE
+  KEY `idx_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='图片表';
 
 
@@ -743,8 +731,7 @@ CREATE TABLE IF NOT EXISTS `visitor_access_log` (
   KEY `idx_create_time` (`create_time`),
   KEY `idx_traffic_source` (`traffic_source`),
   KEY `idx_traffic_date` (`traffic_source`,`access_time`),
-  KEY `idx_deleted` (`deleted`),
-  CONSTRAINT `fk_access_log_visitor_id` FOREIGN KEY (`visitor_id`) REFERENCES `visitor` (`id`) ON DELETE CASCADE
+  KEY `idx_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='访客访问记录表';
 
 
