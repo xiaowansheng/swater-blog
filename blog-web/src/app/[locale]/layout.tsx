@@ -5,8 +5,7 @@ import { routing } from '@/lib/i18n/routing';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import '@/styles/globals.css';
-import { SiteConfigProvider } from '@/lib/context/SiteConfigContext';
-import { getPublicConfig } from '@/lib/api/config';
+import { getSiteInfo } from '@/lib/api/config.server';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -22,25 +21,13 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  let siteName = 'Blog';
-  let siteDescription = 'A modern blog platform';
-  
-  try {
-    const config = await getPublicConfig();
-    siteName = config.site?.name || siteName;
-    siteDescription = config.site?.description || siteDescription;
-  } catch (error) {
-    console.warn('Failed to load site config for metadata');
-  }
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSiteInfo();
   
   return {
-    title: siteName,
-    description: siteDescription,
+    title: site.name || 'Blog',
+    description: site.description || 'A modern blog platform',
+    icons: site.favicon ? { icon: site.favicon } : undefined,
     alternates: {
       languages: {
         'zh': '/zh',
@@ -64,14 +51,6 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages();
-  
-  // 获取配置数据
-  let initialConfig = undefined;
-  try {
-    initialConfig = await getPublicConfig();
-  } catch (error) {
-    console.warn('Failed to load site config');
-  }
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -79,11 +58,9 @@ export default async function LocaleLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
-          <SiteConfigProvider initialConfig={initialConfig}>
-            <div className="flex min-h-screen flex-col">
-              {children}
-            </div>
-          </SiteConfigProvider>
+          <div className="flex min-h-screen flex-col">
+            {children}
+          </div>
         </NextIntlClientProvider>
       </body>
     </html>

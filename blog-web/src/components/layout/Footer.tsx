@@ -1,11 +1,9 @@
-'use client';
+import { getSiteInfo } from '@/lib/api/config.server';
 
-import { useTranslations } from 'next-intl';
-import { useSiteConfig } from '@/lib/context/SiteConfigContext';
+export default async function Footer() {
+  const site = await getSiteInfo();
 
-export default function Footer() {
-  const t = useTranslations('common');
-  const { site } = useSiteConfig();
+  const defaultCopyright = `© ${new Date().getFullYear()} ${site.name || 'Blog'}. All rights reserved.`;
 
   return (
     <footer className="border-t border-border/40 py-12 mt-auto bg-card/50 backdrop-blur-xl relative overflow-hidden">
@@ -15,7 +13,7 @@ export default function Footer() {
           <div className="flex justify-center items-center gap-2 mb-2">
             <div className="w-1 h-1 rounded-full bg-primary animate-pulse"></div>
             <p className="text-sm text-muted">
-              {site.copyright || `© ${new Date().getFullYear()} ${site.name || 'Blog'}. All rights reserved.`}
+              {site.copyright || defaultCopyright}
             </p>
             <div className="w-1 h-1 rounded-full bg-accent animate-pulse" style={{ animationDelay: '0.5s' }}></div>
           </div>
@@ -44,4 +42,3 @@ export default function Footer() {
     </footer>
   );
 }
-
