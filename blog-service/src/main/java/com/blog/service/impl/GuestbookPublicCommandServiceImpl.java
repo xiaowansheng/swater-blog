@@ -13,16 +13,14 @@ import com.blog.service.GuestbookPublicCommandService;
 import com.blog.util.BeanUtil;
 import com.blog.util.JsonUtil;
 import com.blog.util.KeyUtil;
+import com.blog.util.RequestUtil;
 import lombok.extern.slf4j.Slf4j;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
 
@@ -44,8 +42,7 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
         Guestbook guestbook = BeanUtil.copyProperties(dto, Guestbook.class);
         guestbook.setGuestbookKey(KeyUtil.generateKey("guestbook"));
 
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String ip = getClientIp(request);
+        String ip = RequestUtil.getClientIp();
         guestbook.setIp(ip);
         
         if (locationProviderFactory != null && ip != null) {
@@ -84,6 +81,10 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
             guestbook.setIpAddress(ip);
         }
 
+        // 设置设备信息
+        String userAgent = RequestUtil.getUserAgent();
+        guestbook.setDeviceInfo(userAgent);
+
         boolean isLogin = StpUtil.isLogin();
         if (isLogin) {
             Long userId = StpUtil.getLoginIdAsLong();
@@ -118,29 +119,6 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
             vo.setImages(dto.getImages());
         }
         return vo;
-    }
-
-    private String getClientIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
-        }
-        return ip;
     }
 
     private void publishEventAfterCommit(Runnable runnable) {

@@ -80,7 +80,14 @@ const PieChart: React.FC<PieChartProps> = ({ data }) => {
     ],
   }
 
-  return <ReactECharts option={option} style={{ height: '300px' }} />
+  return (
+    <ReactECharts
+      option={option}
+      style={{ height: '300px' }}
+      notMerge={true}
+      lazyUpdate={true}
+    />
+  )
 }
 
 export default PieChart

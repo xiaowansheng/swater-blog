@@ -116,6 +116,10 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
         } else {
             comment.setIpAddress(ip != null ? ip : "");
         }
+
+        // 设置设备信息
+        String userAgent = RequestUtil.getUserAgent();
+        comment.setDeviceInfo(userAgent);
         
         if (StpUtil.isLogin()) {
             Long userId = StpUtil.getLoginIdAsLong();
