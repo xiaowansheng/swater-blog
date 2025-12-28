@@ -5,7 +5,7 @@ export interface TalkDTO {
   content: string
   images?: string[]
   isTop?: number
-  status?: number
+  status?: string
 }
 
 export const getTalkList = (params: {
@@ -13,29 +13,29 @@ export const getTalkList = (params: {
   size?: number
   status?: number
 }): Promise<PageResult<Talk>> => {
-  return request.get('/admin/talk/list', { params })
+  return request.get('/admin/moment/list', { params })
 }
 
 export const getTalkById = (id: number): Promise<Talk> => {
-  return request.get(`/admin/talk/${id}`)
+  return request.get(`/admin/moment/${id}`)
 }
 
 export const createTalk = (data: TalkDTO): Promise<number> => {
-  return request.post('/admin/talk', data)
+  return request.post('/admin/moment', data)
 }
 
 export const updateTalk = (id: number, data: TalkDTO): Promise<void> => {
-  return request.put(`/admin/talk/${id}`, data)
+  return request.put(`/admin/moment/${id}`, data)
 }
 
 export const deleteTalk = (id: number): Promise<void> => {
-  return request.delete(`/admin/talk/${id}`)
+  return request.delete(`/admin/moment/${id}`)
 }
 
-export const publishTalk = (id: number): Promise<void> => {
-  return request.post(`/admin/talk/${id}/publish`)
+export const setTalkTop = (id: number): Promise<void> => {
+  return request.post(`/admin/moment/${id}/top`)
 }
 
-export const unpublishTalk = (id: number): Promise<void> => {
-  return request.post(`/admin/talk/${id}/unpublish`)
+export const cancelTalkTop = (id: number): Promise<void> => {
+  return request.post(`/admin/moment/${id}/cancel-top`)
 }

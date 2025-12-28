@@ -139,7 +139,7 @@ export interface Talk {
   content: string
   images?: string[]
   isTop: number
-  status: number
+  status: string
   likeCount: number
   commentCount: number
   createTime: string

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Image, Tooltip, Switch } from 'antd'
+import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Image, Tooltip, Switch, Radio } from 'antd'
 import {
   PlusOutlined,
   EditOutlined,
@@ -7,7 +7,7 @@ import {
   PictureOutlined,
   VerticalAlignTopOutlined,
 } from '@ant-design/icons'
-import { getTalkList, createTalk, updateTalk, deleteTalk } from '@/api/talk'
+import { getTalkList, createTalk, updateTalk, deleteTalk, setTalkTop, cancelTalkTop } from '@/api/talk'
 import { Talk } from '@/types'
 import { formatDate } from '@/utils/format'
 
@@ -42,6 +42,7 @@ const TalkPage: React.FC = () => {
   const handleCreate = () => {
     setEditingTalk(null)
     form.resetFields()
+    form.setFieldsValue({ status: '1', isTop: 0 })
     setModalVisible(true)
   }
 
@@ -49,6 +50,7 @@ const TalkPage: React.FC = () => {
     setEditingTalk(talk)
     form.setFieldsValue({
       ...talk,
+      isTop: talk.isTop === 1,
       images: talk.images?.join('\n'),
     })
     setModalVisible(true)
@@ -64,11 +66,26 @@ const TalkPage: React.FC = () => {
     }
   }
 
+  const handleTopChange = async (record: Talk) => {
+    try {
+      if (record.isTop === 1) {
+        await cancelTalkTop(record.id)
+      } else {
+        await setTalkTop(record.id)
+      }
+      message.success('操作成功')
+      loadTalks()
+    } catch (error) {
+      message.error('操作失败')
+    }
+  }
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields()
       const data = {
         ...values,
+        isTop: values.isTop ? 1 : 0,
         images: values.images ? values.images.split('\n').filter((s: string) => s.trim()) : [],
       }
       if (editingTalk) {
@@ -137,10 +154,22 @@ const TalkPage: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 100,
-      render: (status: number) => (
-        <Tag color={status === 1 ? 'success' : 'default'}>
-          {status === 1 ? '已发布' : '草稿'}
+      render: (status: string) => (
+        <Tag color={status === '1' ? 'success' : 'default'}>
+          {status === '1' ? '已发布' : '草稿'}
         </Tag>
+      ),
+    },
+    {
+      title: '置顶',
+      dataIndex: 'isTop',
+      key: 'isTop',
+      width: 80,
+      render: (isTop: number, record: Talk) => (
+        <Switch
+          checked={isTop === 1}
+          onChange={() => handleTopChange(record)}
+        />
       ),
     },
     {
@@ -235,6 +264,12 @@ const TalkPage: React.FC = () => {
           </Form.Item>
           <Form.Item name="isTop" label="置顶" valuePropName="checked">
             <Switch checkedChildren="是" unCheckedChildren="否" />
+          </Form.Item>
+          <Form.Item name="status" label="状态" rules={[{ required: true }]}>
+            <Radio.Group>
+              <Radio value="1">已发布</Radio>
+              <Radio value="0">草稿</Radio>
+            </Radio.Group>
           </Form.Item>
         </Form>
       </Modal>
