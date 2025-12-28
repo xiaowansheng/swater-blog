@@ -15,7 +15,7 @@ export const getErrorLogList = (params: {
   size?: number
   keyword?: string
 }): Promise<PageResult<LogError>> => {
-  return request.get('/admin/log/error/list', { params })
+  return request.get('/admin/log/exception/list', { params })
 }
 
 export const getOperationLogById = (id: number): Promise<LogOperation> => {
@@ -23,7 +23,7 @@ export const getOperationLogById = (id: number): Promise<LogOperation> => {
 }
 
 export const getErrorLogById = (id: number): Promise<LogError> => {
-  return request.get(`/admin/log/error/${id}`)
+  return request.get(`/admin/log/exception/${id}`)
 }
 
 export const deleteOperationLog = (id: number): Promise<void> => {
@@ -31,7 +31,7 @@ export const deleteOperationLog = (id: number): Promise<void> => {
 }
 
 export const deleteErrorLog = (id: number): Promise<void> => {
-  return request.delete(`/admin/log/error/${id}`)
+  return request.delete(`/admin/log/exception/${id}`)
 }
 
 export const clearOperationLogs = (): Promise<void> => {
@@ -39,5 +39,5 @@ export const clearOperationLogs = (): Promise<void> => {
 }
 
 export const clearErrorLogs = (): Promise<void> => {
-  return request.delete('/admin/log/error/clear')
+  return request.delete('/admin/log/exception/clear')
 }
