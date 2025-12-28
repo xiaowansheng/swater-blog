@@ -72,7 +72,7 @@ public class ApiResourceScanner {
                     info.setMethod(methodType);
                     info.setDescription(apiResource.description());
                     info.setIsOpen(apiResource.isOpen() ? 1 : 0);
-                    info.setKey(generateKey(fullPath, methodType));
+                    info.setApiKey(generateKey(fullPath, methodType));
                     
                     resources.add(info);
                 }
@@ -87,19 +87,19 @@ public class ApiResourceScanner {
     }
     
     public static class ApiResourceInfo {
-        private String key;
+        private String apiKey;
         private String name;
         private String path;
         private String method;
         private String description;
         private Integer isOpen;
         
-        public String getKey() {
-            return key;
+        public String getApiKey() {
+            return apiKey;
         }
         
-        public void setKey(String key) {
-            this.key = key;
+        public void setApiKey(String apiKey) {
+            this.apiKey = apiKey;
         }
         
         public String getName() {

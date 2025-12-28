@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `role` (
 
 CREATE TABLE IF NOT EXISTS `sys_api` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '资源菜单ID',
-  `key` VARCHAR(50) NOT NULL COMMENT '资源唯一标识',
+  `api_key` VARCHAR(50) NOT NULL COMMENT '资源唯一标识',
   `name` VARCHAR(100) NOT NULL COMMENT '资源名称',
   `path` VARCHAR(255) NOT NULL COMMENT '资源访问路径',
   `method` VARCHAR(10) NOT NULL COMMENT '请求方法',
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS `sys_api` (
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_key` (`key`),
+  UNIQUE KEY `uk_api_key` (`api_key`),
   UNIQUE KEY `uk_path_method` (`path`,`method`),
   KEY `idx_parent_id` (`parent_id`),
   KEY `idx_is_open` (`is_open`),
@@ -544,7 +544,7 @@ CREATE TABLE IF NOT EXISTS `log_error` (
 
 CREATE TABLE IF NOT EXISTS `sys_menu` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '菜单ID',
-  `key` VARCHAR(50) NOT NULL COMMENT '菜单唯一标识',
+  `menu_key` VARCHAR(50) NOT NULL COMMENT '菜单唯一标识',
   `title` VARCHAR(50) NOT NULL COMMENT '菜单标题',
   `icon` VARCHAR(255) DEFAULT NULL COMMENT '图标',
   `redirect` VARCHAR(100) DEFAULT NULL COMMENT '路由重定向',
@@ -559,7 +559,7 @@ CREATE TABLE IF NOT EXISTS `sys_menu` (
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_menu_key` (`key`),
+  UNIQUE KEY `uk_menu_key` (`menu_key`),
   KEY `idx_parent_id` (`parent_id`),
   KEY `idx_sort` (`sort`),
   KEY `idx_deleted` (`deleted`)

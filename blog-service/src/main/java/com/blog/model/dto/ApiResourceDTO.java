@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ApiResourceDTO extends BaseDTO {
-    private String key;
+    private String apiKey;
 
     private String name;
 

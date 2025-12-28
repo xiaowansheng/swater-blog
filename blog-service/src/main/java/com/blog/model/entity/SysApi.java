@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @TableName("sys_api")
 public class SysApi extends BaseEntity {
-    private String key;
+    private String apiKey;
 
     private String name;
 

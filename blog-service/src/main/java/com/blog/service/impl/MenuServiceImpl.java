@@ -57,11 +57,11 @@ public class MenuServiceImpl implements MenuService {
     @Override
     @Transactional
     public Long create(MenuDTO dto) {
-        if (dto.getKey() == null || dto.getKey().isEmpty()) {
-            dto.setKey(KeyUtil.generateKey("menu"));
+        if (dto.getMenuKey() == null || dto.getMenuKey().isEmpty()) {
+            dto.setMenuKey(KeyUtil.generateKey("menu"));
         } else {
             LambdaQueryWrapper<SysMenu> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(SysMenu::getKey, dto.getKey()).eq(SysMenu::getDeleted, 0);
+            wrapper.eq(SysMenu::getMenuKey, dto.getMenuKey()).eq(SysMenu::getDeleted, 0);
             if (sysMenuMapper.selectCount(wrapper) > 0) {
                 throw new BusinessException("菜单标识已存在");
             }
@@ -101,9 +101,9 @@ public class MenuServiceImpl implements MenuService {
             throw new BusinessException("菜单不存在");
         }
 
-        if (dto.getKey() != null && !dto.getKey().equals(menu.getKey())) {
+        if (dto.getMenuKey() != null && !dto.getMenuKey().equals(menu.getMenuKey())) {
             LambdaQueryWrapper<SysMenu> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(SysMenu::getKey, dto.getKey()).eq(SysMenu::getDeleted, 0).ne(SysMenu::getId, id);
+            wrapper.eq(SysMenu::getMenuKey, dto.getMenuKey()).eq(SysMenu::getDeleted, 0).ne(SysMenu::getId, id);
             if (sysMenuMapper.selectCount(wrapper) > 0) {
                 throw new BusinessException("菜单标识已存在");
             }

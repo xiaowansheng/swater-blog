@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @TableName("sys_menu")
 public class SysMenu extends BaseEntity {
-    private String key;
+    private String menuKey;
 
     private String title;
 

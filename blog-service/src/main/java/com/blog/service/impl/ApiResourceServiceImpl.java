@@ -64,14 +64,14 @@ public class ApiResourceServiceImpl implements ApiResourceService {
         
         for (ApiResourceScanner.ApiResourceInfo info : resources) {
             LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(SysApi::getKey, info.getKey())
+            wrapper.eq(SysApi::getApiKey, info.getApiKey())
                     .eq(SysApi::getDeleted, 0);
             
             SysApi existingApi = sysApiMapper.selectOne(wrapper);
             
             if (existingApi == null) {
                 SysApi api = new SysApi();
-                api.setKey(info.getKey());
+                api.setApiKey(info.getApiKey());
                 api.setName(info.getName());
                 api.setPath(info.getPath());
                 api.setMethod(info.getMethod());

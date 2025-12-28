@@ -7,7 +7,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class MenuVO extends BaseVO {
-    private String key;
+    private String menuKey;
 
     private String title;
 
