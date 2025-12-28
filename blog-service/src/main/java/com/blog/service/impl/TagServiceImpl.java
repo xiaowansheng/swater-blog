@@ -81,5 +81,25 @@ public class TagServiceImpl implements TagService {
         }
         tagMapper.deleteById(id);
     }
+
+    @Override
+    @Transactional
+    public Long findOrCreateByName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return null;
+        }
+        LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Tag::getName, name.trim());
+        wrapper.eq(Tag::getDeleted, 0);
+        Tag tag = tagMapper.selectOne(wrapper);
+        if (tag != null) {
+            return tag.getId();
+        }
+        
+        TagDTO dto = new TagDTO();
+        dto.setName(name.trim());
+        dto.setSlug(name.trim().toLowerCase().replaceAll("\\s+", "-"));
+        return create(dto);
+    }
 }
 

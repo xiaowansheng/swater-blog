@@ -92,6 +92,26 @@ public class CategoryServiceImpl implements CategoryService {
         categoryMapper.deleteById(id);
     }
 
+    @Override
+    @Transactional
+    public Long findOrCreateByName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return null;
+        }
+        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Category::getName, name.trim());
+        wrapper.eq(Category::getDeleted, 0);
+        Category category = categoryMapper.selectOne(wrapper);
+        if (category != null) {
+            return category.getId();
+        }
+        
+        CategoryDTO dto = new CategoryDTO();
+        dto.setName(name.trim());
+        dto.setSlug(name.trim().toLowerCase().replaceAll("\\s+", "-"));
+        return create(dto);
+    }
+
     private List<CategoryVO> buildTree(List<CategoryVO> categories) {
         List<CategoryVO> rootCategories = categories.stream()
                 .filter(c -> c.getParentId() == null || c.getParentId() == 0)

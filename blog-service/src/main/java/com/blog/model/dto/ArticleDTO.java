@@ -22,6 +22,8 @@ public class ArticleDTO extends BaseDTO {
     private String cover;
 
     private Long categoryId;
+    
+    private String categoryName;
 
     private String type;
 
@@ -38,5 +40,7 @@ public class ArticleDTO extends BaseDTO {
     private Integer isTop;
 
     private List<Long> tagIds;
+
+    private List<String> tagNames;
 }
 

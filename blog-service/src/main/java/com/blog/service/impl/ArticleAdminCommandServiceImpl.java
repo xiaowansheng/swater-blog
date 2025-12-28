@@ -10,6 +10,8 @@ import com.blog.model.dto.ArticleDTO;
 import com.blog.model.entity.Article;
 import com.blog.model.entity.ArticleTag;
 import com.blog.service.ArticleAdminCommandService;
+import com.blog.service.CategoryService;
+import com.blog.service.TagService;
 import com.blog.util.BeanUtil;
 import com.blog.util.KeyUtil;
 import io.micrometer.core.instrument.Timer;
@@ -33,6 +35,12 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
     private ArticleTagMapper articleTagMapper;
 
     @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
+    private TagService tagService;
+
+    @Autowired
     private ApplicationEventPublisher eventPublisher;
     
     @Autowired
@@ -44,6 +52,11 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
         Timer.Sample sample = blogMetrics.startTimer();
         
         try {
+            // 处理自定义分类
+            if (dto.getCategoryId() == null && dto.getCategoryName() != null && !dto.getCategoryName().trim().isEmpty()) {
+                dto.setCategoryId(categoryService.findOrCreateByName(dto.getCategoryName()));
+            }
+
             Article article = BeanUtil.copyProperties(dto, Article.class);
             article.setArticleKey(KeyUtil.generateKey("article"));
             article.setViewCount(0);
@@ -64,8 +77,22 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
             
             articleMapper.insert(article);
             
-            if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
-                saveArticleTags(article.getId(), dto.getTagIds());
+            // 处理标签
+            java.util.Set<Long> allTagIds = new java.util.HashSet<>();
+            if (dto.getTagIds() != null) {
+                allTagIds.addAll(dto.getTagIds());
+            }
+            if (dto.getTagNames() != null) {
+                for (String tagName : dto.getTagNames()) {
+                    Long tagId = tagService.findOrCreateByName(tagName);
+                    if (tagId != null) {
+                        allTagIds.add(tagId);
+                    }
+                }
+            }
+
+            if (!allTagIds.isEmpty()) {
+                saveArticleTags(article.getId(), new java.util.ArrayList<>(allTagIds));
             }
             
             Article savedArticle = articleMapper.selectById(article.getId());
@@ -95,6 +122,11 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
             throw new BusinessException("文章不存在");
         }
         
+        // 处理自定义分类
+        if (dto.getCategoryId() == null && dto.getCategoryName() != null && !dto.getCategoryName().trim().isEmpty()) {
+            dto.setCategoryId(categoryService.findOrCreateByName(dto.getCategoryName()));
+        }
+
         article.setTitle(dto.getTitle());
         article.setSlug(dto.getSlug());
         article.setContent(dto.getContent());
@@ -116,8 +148,23 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
         articleMapper.updateById(article);
         
         articleTagMapper.deleteByArticleId(id);
-        if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
-            saveArticleTags(id, dto.getTagIds());
+        
+        // 处理标签
+        java.util.Set<Long> allTagIds = new java.util.HashSet<>();
+        if (dto.getTagIds() != null) {
+            allTagIds.addAll(dto.getTagIds());
+        }
+        if (dto.getTagNames() != null) {
+            for (String tagName : dto.getTagNames()) {
+                Long tagId = tagService.findOrCreateByName(tagName);
+                if (tagId != null) {
+                    allTagIds.add(tagId);
+                }
+            }
+        }
+
+        if (!allTagIds.isEmpty()) {
+            saveArticleTags(id, new java.util.ArrayList<>(allTagIds));
         }
         
         Article updatedArticle = articleMapper.selectById(id);

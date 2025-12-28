@@ -16,5 +16,7 @@ public interface TagService {
     void update(Long id, TagDTO dto);
 
     void delete(Long id);
+
+    Long findOrCreateByName(String name);
 }
 

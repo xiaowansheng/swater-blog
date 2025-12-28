@@ -16,5 +16,7 @@ public interface CategoryService {
     void update(Long id, CategoryDTO dto);
 
     void delete(Long id);
+
+    Long findOrCreateByName(String name);
 }
 

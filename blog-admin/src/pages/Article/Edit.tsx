@@ -15,6 +15,7 @@ const ArticleEdit: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<Tag[]>([])
+  const [articleStatus, setArticleStatus] = useState<number>(0)
   const cover = Form.useWatch('cover', form)
 
   useEffect(() => {
@@ -46,8 +47,10 @@ const ArticleEdit: React.FC = () => {
   const loadArticle = async () => {
     try {
       const article = await getArticleById(Number(id))
+      setArticleStatus(article.status)
       form.setFieldsValue({
         ...article,
+        categoryId: article.categoryId ? [article.categoryId] : [],
         tagIds: article.tags.map((t) => t.id),
       })
     } catch (error) {
@@ -55,22 +58,65 @@ const ArticleEdit: React.FC = () => {
     }
   }
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: any, status: number = 1) => {
     setLoading(true)
     try {
-      if (id) {
-        await updateArticle(Number(id), values)
-        message.success('更新成功')
-      } else {
-        await createArticle(values)
-        message.success('创建成功')
+      // 分离已有的 ID 和新输入的名称
+      const tagIds: number[] = []
+      const tagNames: string[] = []
+      
+      if (values.tagIds) {
+        values.tagIds.forEach((item: any) => {
+          if (typeof item === 'number') {
+            tagIds.push(item)
+          } else {
+            tagNames.push(item)
+          }
+        })
       }
+
+      let categoryId = undefined
+      let categoryName = undefined
+      const categoryValue = Array.isArray(values.categoryId) ? values.categoryId[0] : values.categoryId
+      if (typeof categoryValue === 'number') {
+        categoryId = categoryValue
+      } else if (categoryValue) {
+        categoryName = categoryValue
+      }
+
+      const payload = {
+        ...values,
+        status,
+        tagIds,
+        tagNames,
+        categoryId,
+        categoryName,
+        isTop: values.isTop ? 1 : 0
+      }
+
+      if (id) {
+        await updateArticle(Number(id), payload)
+        message.success(status === 0 ? '草稿保存成功' : '更新成功')
+      } else {
+        await createArticle(payload)
+        message.success(status === 0 ? '草稿保存成功' : '发布成功')
+      }
+      setArticleStatus(status)
       navigate('/article')
     } catch (error) {
-      message.error(id ? '更新失败' : '创建失败')
+      message.error(id ? '更新失败' : '发布失败')
     } finally {
       setLoading(false)
     }
+  }
+
+  const getStatusTag = () => {
+    if (!id) return null
+    return (
+      <span className={`px-2 py-1 rounded text-xs ${articleStatus === 1 ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>
+        {articleStatus === 1 ? '已发布' : '草稿'}
+      </span>
+    )
   }
 
   return (
@@ -92,7 +138,10 @@ const ArticleEdit: React.FC = () => {
           >
             返回列表
           </Button>
-          <h2 className="text-2xl font-bold m-0">{id ? '编辑文章' : '新建文章'}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold m-0">{id ? '编辑文章' : '新建文章'}</h2>
+            {getStatusTag()}
+          </div>
         </div>
         <Space>
           <Button 
@@ -102,10 +151,21 @@ const ArticleEdit: React.FC = () => {
             取消
           </Button>
           <Button 
-            type="primary" 
-            icon={id ? <SaveOutlined /> : <SendOutlined />}
+            icon={<SaveOutlined />}
             loading={loading}
-            onClick={() => form.submit()}
+            onClick={() => {
+              form.validateFields().then(values => onFinish(values, 0))
+            }}
+          >
+            保存草稿
+          </Button>
+          <Button 
+            type="primary" 
+            icon={<SendOutlined />}
+            loading={loading}
+            onClick={() => {
+              form.validateFields().then(values => onFinish(values, 1))
+            }}
           >
             {id ? '保存修改' : '发布文章'}
           </Button>
@@ -115,27 +175,34 @@ const ArticleEdit: React.FC = () => {
       <Form 
         form={form} 
         layout="vertical" 
-        onFinish={onFinish}
         initialValues={{ isTop: 0 }}
       >
         <Row gutter={24}>
           <Col xs={24} lg={17}>
             <Card className="shadow-sm mb-6" bordered={false}>
               <Form.Item 
-                name="title" 
-                label={<span className="font-medium text-gray-700">文章标题</span>} 
-                rules={[{ required: true, message: '请输入文章标题' }]}
-              >
-                <Input placeholder="请输入文章标题" size="large" className="rounded-md" />
-              </Form.Item>
-              
-              <Form.Item 
-                name="content" 
-                label={<span className="font-medium text-gray-700">文章正文</span>} 
-                rules={[{ required: true, message: '请输入文章内容' }]}
-              >
-                <MarkdownEditor />
-              </Form.Item>
+                  name="title" 
+                  label={<span className="font-medium text-gray-700">文章标题</span>} 
+                  rules={[{ required: true, message: '请输入文章标题' }]}
+                >
+                  <Input placeholder="请输入文章标题" size="large" className="rounded-md font-bold text-lg" />
+                </Form.Item>
+
+                <Form.Item 
+                  name="slug" 
+                  label={<span className="font-medium text-gray-700">访问路径 (Slug)</span>}
+                  extra="如果不填写，将根据标题自动生成。仅支持字母、数字和连字符。"
+                >
+                  <Input placeholder="example-article-slug" className="rounded-md" />
+                </Form.Item>
+                
+                <Form.Item 
+                  name="content" 
+                  label={<span className="font-medium text-gray-700">文章正文</span>} 
+                  rules={[{ required: true, message: '请输入文章内容' }]}
+                >
+                  <MarkdownEditor />
+                </Form.Item>
             </Card>
 
             <Card className="shadow-sm" bordered={false} title={<span className="font-medium">文章摘要</span>}>
@@ -156,9 +223,14 @@ const ArticleEdit: React.FC = () => {
               <Form.Item 
                 name="categoryId" 
                 label="文章分类" 
-                rules={[{ required: true, message: '请选择文章分类' }]}
+                rules={[{ required: true, message: '请选择或输入文章分类' }]}
               >
-                <Select placeholder="请选择分类" className="w-full">
+                <Select 
+                  placeholder="请选择或输入分类" 
+                  className="w-full"
+                  mode="tags"
+                  maxCount={1}
+                >
                   {categories.map((cat) => (
                     <Select.Option key={cat.id} value={cat.id}>
                       {cat.name}
@@ -169,8 +241,8 @@ const ArticleEdit: React.FC = () => {
 
               <Form.Item name="tagIds" label="文章标签">
                 <Select 
-                  mode="multiple" 
-                  placeholder="请选择标签" 
+                  mode="tags" 
+                  placeholder="请选择或输入标签" 
                   className="w-full"
                   allowClear
                 >
