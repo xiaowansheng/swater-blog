@@ -1,16 +1,79 @@
-import { Tabs as AntTabs } from 'antd'
+import { Tabs as AntTabs, Dropdown } from 'antd'
+import type { MenuProps } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTabsStore } from '@/store/tabs'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 const Tabs: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { tabs, activeKey, setActiveTab, removeTab } = useTabsStore()
+  const { tabs, activeKey, setActiveTab, removeTab, closeOtherTabs, closeLeftTabs, closeRightTabs, closeAllTabs } = useTabsStore()
+  const [contextMenuKey, setContextMenuKey] = useState<string | null>(null)
 
   useEffect(() => {
     setActiveTab(location.pathname)
   }, [location.pathname, setActiveTab])
+
+  const getContextMenus = (key: string): MenuProps => {
+    return {
+      items: [
+        {
+          key: 'closeOther',
+          label: '关闭其他',
+          disabled: tabs.length <= 1,
+        },
+        {
+          key: 'closeLeft',
+          label: '关闭左侧',
+          disabled: tabs.indexOf(tabs.find((t) => t.key === key)!) === 0,
+        },
+        {
+          key: 'closeRight',
+          label: '关闭右侧',
+          disabled: tabs.indexOf(tabs.find((t) => t.key === key)!) === tabs.length - 1,
+        },
+        {
+          type: 'divider',
+        },
+        {
+          key: 'closeAll',
+          label: '关闭全部',
+          disabled: tabs.length === 0,
+        },
+      ],
+      onClick: ({ key: menuKey }) => {
+        switch (menuKey) {
+          case 'closeOther':
+            closeOtherTabs(key)
+            if (key !== activeKey) {
+              navigate(key)
+            }
+            break
+          case 'closeLeft':
+            closeLeftTabs(key)
+            if (!tabs.slice(0, tabs.indexOf(tabs.find((t) => t.key === key)!)).find((t) => t.key === activeKey)) {
+              if (key !== activeKey) {
+                navigate(key)
+              }
+            }
+            break
+          case 'closeRight':
+            closeRightTabs(key)
+            if (!tabs.slice(tabs.indexOf(tabs.find((t) => t.key === key)!) + 1).find((t) => t.key === activeKey)) {
+              if (key !== activeKey) {
+                navigate(key)
+              }
+            }
+            break
+          case 'closeAll':
+            closeAllTabs()
+            navigate('/dashboard')
+            break
+        }
+        setContextMenuKey(null)
+      },
+    }
+  }
 
   const handleChange = (key: string) => {
     navigate(key)
@@ -49,7 +112,19 @@ const Tabs: React.FC = () => {
         onEdit={handleEdit}
         items={tabs.map((tab) => ({
           key: tab.key,
-          label: tab.label,
+          label: (
+            <Dropdown
+              menu={getContextMenus(tab.key)}
+              trigger={['contextMenu']}
+              onOpenChange={(open) => {
+                if (open) {
+                  setContextMenuKey(tab.key)
+                }
+              }}
+            >
+              <span>{tab.label}</span>
+            </Dropdown>
+          ),
           closable: tab.closable !== false && tabs.length > 1,
         }))}
         size="small"

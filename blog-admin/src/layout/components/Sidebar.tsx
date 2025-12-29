@@ -134,34 +134,67 @@ const Sidebar: React.FC = () => {
       collapsed={collapsed}
       onCollapse={setCollapsed}
       width={220}
-      className="h-screen"
       style={{
-        overflow: 'auto',
+        height: '100vh',
         position: 'sticky',
-        left: 0,
         top: 0,
-        bottom: 0,
+        left: 0,
       }}
     >
-      <div className="h-16 flex items-center justify-center border-b border-gray-700">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">B</span>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div
+          style={{
+            height: 64,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderBottom: '1px solid #374151',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                background: 'linear-gradient(to right, #3b82f6, #9333ea)',
+                borderRadius: 8,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <span style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>B</span>
+            </div>
+            {!collapsed && (
+              <span style={{ color: 'white', fontSize: 18, fontWeight: 600 }}>
+                Blog Admin
+              </span>
+            )}
           </div>
-          {!collapsed && (
-            <span className="text-white text-lg font-semibold">Blog Admin</span>
-          )}
+        </div>
+        <div
+          style={{
+            flex: 1,
+            overflow: 'hidden',
+          }}
+        >
+          <Menu
+            theme="dark"
+            mode="inline"
+            selectedKeys={getSelectedKeys()}
+            defaultOpenKeys={collapsed ? [] : getOpenKeys()}
+            items={menuItems}
+            onClick={handleMenuClick}
+            style={{
+              borderRight: 0,
+              height: '100%',
+              overflowY: 'auto',
+              overflowX: 'hidden',
+            }}
+          />
         </div>
       </div>
-      <Menu
-        theme="dark"
-        mode="inline"
-        selectedKeys={getSelectedKeys()}
-        defaultOpenKeys={collapsed ? [] : getOpenKeys()}
-        items={menuItems}
-        onClick={handleMenuClick}
-        style={{ borderRight: 0 }}
-      />
     </Sider>
   )
 }

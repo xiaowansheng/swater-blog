@@ -8,6 +8,8 @@ interface TabsState {
   removeTab: (key: string) => void
   setActiveTab: (key: string) => void
   closeOtherTabs: (key: string) => void
+  closeLeftTabs: (key: string) => void
+  closeRightTabs: (key: string) => void
   closeAllTabs: () => void
   refreshTab: (key: string) => void
   getCachedTabs: () => string[]
@@ -47,6 +49,26 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     const { tabs } = get()
     const newTabs = tabs.filter((t) => t.key === key)
     set({ tabs: newTabs, activeKey: key })
+  },
+  closeLeftTabs: (key) => {
+    const { tabs, activeKey } = get()
+    const index = tabs.findIndex((t) => t.key === key)
+    const newTabs = tabs.slice(index)
+    let newActiveKey = activeKey
+    if (!newTabs.find((t) => t.key === activeKey)) {
+      newActiveKey = key
+    }
+    set({ tabs: newTabs, activeKey: newActiveKey })
+  },
+  closeRightTabs: (key) => {
+    const { tabs, activeKey } = get()
+    const index = tabs.findIndex((t) => t.key === key)
+    const newTabs = tabs.slice(0, index + 1)
+    let newActiveKey = activeKey
+    if (!newTabs.find((t) => t.key === activeKey)) {
+      newActiveKey = key
+    }
+    set({ tabs: newTabs, activeKey: newActiveKey })
   },
   closeAllTabs: () => {
     set({ tabs: [], activeKey: '' })
