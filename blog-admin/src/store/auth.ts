@@ -7,6 +7,8 @@ import { getToken, setToken, removeToken } from '@/utils/storage'
 interface AuthState {
   user: User | null
   token: string | null
+  isLoginModalOpen: boolean
+  setLoginModalOpen: (open: boolean) => void
   login: (username: string, password: string) => Promise<void>
   logout: () => Promise<void>
   getCurrentUser: () => Promise<void>
@@ -18,6 +20,8 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       token: getToken(),
+      isLoginModalOpen: false,
+      setLoginModalOpen: (open: boolean) => set({ isLoginModalOpen: open }),
       login: async (username: string, password: string) => {
         const { token, user } = await authApi.login({ username, password })
         setToken(token)

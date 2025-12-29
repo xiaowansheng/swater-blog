@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Header from './components/Header'
 import Sidebar from './components/Sidebar'
 import Tabs from './components/Tabs'
+import LoginModal from '@/components/common/LoginModal'
 import { useAuthStore } from '@/store/auth'
 import { useWebSocket } from '@/hooks/useWebSocket'
 
@@ -30,6 +31,7 @@ const BasicLayout: React.FC = () => {
           <Outlet />
         </Content>
       </Layout>
+      <LoginModal />
     </Layout>
   )
 }

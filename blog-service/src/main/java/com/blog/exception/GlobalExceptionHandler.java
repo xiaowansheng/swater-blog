@@ -1,6 +1,9 @@
 package com.blog.exception;
 
 import com.blog.common.Result;
+import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.exception.NotPermissionException;
+import cn.dev33.satoken.exception.NotRoleException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,6 +17,24 @@ public class GlobalExceptionHandler {
     public Result<?> handleBusinessException(BusinessException e) {
         log.error("业务异常: {}", e.getMessage());
         return Result.error(e.getCode(), e.getMessage());
+    }
+
+    @ExceptionHandler(NotLoginException.class)
+    public Result<?> handleNotLoginException(NotLoginException e) {
+        log.error("未登录异常: {}", e.getMessage());
+        return Result.error(401, "未登录，请先登录");
+    }
+
+    @ExceptionHandler(NotPermissionException.class)
+    public Result<?> handleNotPermissionException(NotPermissionException e) {
+        log.error("无权限异常: {}", e.getMessage());
+        return Result.error(403, "无操作权限");
+    }
+
+    @ExceptionHandler(NotRoleException.class)
+    public Result<?> handleNotRoleException(NotRoleException e) {
+        log.error("无角色异常: {}", e.getMessage());
+        return Result.error(403, "无操作角色");
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
