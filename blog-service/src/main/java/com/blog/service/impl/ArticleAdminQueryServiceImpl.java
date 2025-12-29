@@ -10,6 +10,7 @@ import com.blog.mapper.TagMapper;
 import com.blog.model.entity.Article;
 import com.blog.model.entity.Category;
 import com.blog.model.entity.Tag;
+import com.blog.model.enums.ArticleStatus;
 import com.blog.model.vo.ArticleVO;
 import com.blog.model.vo.ArticleStatisticsVO;
 import com.blog.model.vo.TagVO;
@@ -81,11 +82,11 @@ public class ArticleAdminQueryServiceImpl implements ArticleAdminQueryService {
         statistics.setTotalCount(articleMapper.selectCount(wrapper).longValue());
         
         LambdaQueryWrapper<Article> publishedWrapper = new LambdaQueryWrapper<>();
-        publishedWrapper.eq(Article::getDeleted, 0).eq(Article::getStatus, 1);
+        publishedWrapper.eq(Article::getDeleted, 0).eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode());
         statistics.setPublishedCount(articleMapper.selectCount(publishedWrapper).longValue());
         
         LambdaQueryWrapper<Article> draftWrapper = new LambdaQueryWrapper<>();
-        draftWrapper.eq(Article::getDeleted, 0).eq(Article::getStatus, 0);
+        draftWrapper.eq(Article::getDeleted, 0).eq(Article::getStatus, ArticleStatus.DRAFT.getCode());
         statistics.setDraftCount(articleMapper.selectCount(draftWrapper).longValue());
         
         LambdaQueryWrapper<Article> allWrapper = new LambdaQueryWrapper<>();

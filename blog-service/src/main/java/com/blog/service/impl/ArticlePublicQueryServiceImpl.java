@@ -10,6 +10,7 @@ import com.blog.mapper.TagMapper;
 import com.blog.model.entity.Article;
 import com.blog.model.entity.Category;
 import com.blog.model.entity.Tag;
+import com.blog.model.enums.ArticleStatus;
 import com.blog.model.vo.ArticleVO;
 import com.blog.model.vo.TagVO;
 import com.blog.service.ArticlePublicQueryService;
@@ -40,7 +41,7 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
     public PageResult<ArticleVO> list(Long page, Long size, Long categoryId, Long tagId, String keyword) {
         Page<Article> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Article::getStatus, 1);
+        wrapper.eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode());
         wrapper.eq(Article::getDeleted, 0);
         
         if (categoryId != null) {
@@ -75,7 +76,7 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
     public ArticleVO getById(Long id) {
         Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
                 .eq(Article::getId, id)
-                .eq(Article::getStatus, 1)
+                .eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode())
                 .eq(Article::getDeleted, 0));
         if (article == null) {
             return null;
@@ -88,7 +89,7 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
     public ArticleVO getBySlug(String slug) {
         Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
                 .eq(Article::getSlug, slug)
-                .eq(Article::getStatus, 1)
+                .eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode())
                 .eq(Article::getDeleted, 0));
         if (article == null) {
             return null;

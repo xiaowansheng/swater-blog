@@ -9,6 +9,7 @@ import com.blog.metrics.BlogMetrics;
 import com.blog.model.dto.ArticleDTO;
 import com.blog.model.entity.Article;
 import com.blog.model.entity.ArticleTag;
+import com.blog.model.enums.ArticleStatus;
 import com.blog.service.ArticleAdminCommandService;
 import com.blog.service.CategoryService;
 import com.blog.service.TagService;
@@ -63,7 +64,7 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
             article.setLikeCount(0);
             article.setCommentCount(0);
             if (dto.getStatus() == null) {
-                article.setStatus(0);
+                article.setStatus(ArticleStatus.DRAFT.getCode());
             }
             if (dto.getIsTop() == null) {
                 article.setIsTop(0);
@@ -71,7 +72,7 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
             if (dto.getType() == null) {
                 article.setType("1");
             }
-            if (article.getStatus() == 1) {
+            if (article.getStatus().equals(ArticleStatus.PUBLISHED.getCode())) {
                 article.setPublishedAt(LocalDateTime.now());
             }
             
@@ -141,7 +142,7 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
         article.setStatus(dto.getStatus());
         article.setIsTop(dto.getIsTop());
         
-        if (dto.getStatus() != null && dto.getStatus() == 1 && article.getPublishedAt() == null) {
+        if (dto.getStatus() != null && dto.getStatus().equals(ArticleStatus.PUBLISHED.getCode()) && article.getPublishedAt() == null) {
             article.setPublishedAt(LocalDateTime.now());
         }
         
@@ -201,7 +202,7 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
         if (article == null || article.getDeleted() == 1) {
             throw new BusinessException("文章不存在");
         }
-        article.setStatus(1);
+        article.setStatus(ArticleStatus.PUBLISHED.getCode());
         if (article.getPublishedAt() == null) {
             article.setPublishedAt(LocalDateTime.now());
         }
@@ -219,7 +220,8 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
         if (article == null || article.getDeleted() == 1) {
             throw new BusinessException("文章不存在");
         }
-        article.setStatus(0);
+        // 下架时状态变为私密
+        article.setStatus(ArticleStatus.PRIVATE.getCode());
         articleMapper.updateById(article);
         
         Article unpublishedArticle = articleMapper.selectById(id);

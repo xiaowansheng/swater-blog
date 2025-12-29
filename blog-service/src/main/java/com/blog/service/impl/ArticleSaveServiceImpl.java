@@ -8,6 +8,7 @@ import com.blog.mapper.ArticleTagMapper;
 import com.blog.model.dto.ArticleSaveDTO;
 import com.blog.model.entity.Article;
 import com.blog.model.entity.ArticleTag;
+import com.blog.model.enums.ArticleStatus;
 import com.blog.model.vo.ArticleSaveResultVO;
 import com.blog.service.ArticleSaveService;
 import com.blog.service.CategoryService;
@@ -93,14 +94,14 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
         article.setOriginalTitle(dto.getOriginalTitle());
         article.setOriginalUrl(dto.getOriginalUrl());
         article.setNote(dto.getNote());
-        article.setStatus(dto.getStatus() != null ? dto.getStatus() : 0);
+        article.setStatus(dto.getStatus() != null ? dto.getStatus() : ArticleStatus.DRAFT.getCode());
         article.setIsTop(dto.getIsTop() != null ? dto.getIsTop() : 0);
         article.setViewCount(0);
         article.setLikeCount(0);
         article.setCommentCount(0);
         article.setVersion(1L);
         
-        if (article.getStatus() == 1) {
+        if (article.getStatus().equals(ArticleStatus.PUBLISHED.getCode())) {
             article.setPublishedAt(LocalDateTime.now());
         }
 
@@ -184,7 +185,7 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
             // 只有手动保存时才更新状态
             if (Boolean.FALSE.equals(dto.getAutoSave()) && dto.getStatus() != null) {
                 article.setStatus(dto.getStatus());
-                if (dto.getStatus() == 1 && article.getPublishedAt() == null) {
+                if (dto.getStatus().equals(ArticleStatus.PUBLISHED.getCode()) && article.getPublishedAt() == null) {
                     article.setPublishedAt(LocalDateTime.now());
                 }
             }
