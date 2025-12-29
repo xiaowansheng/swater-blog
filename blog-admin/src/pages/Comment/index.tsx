@@ -88,10 +88,10 @@ const CommentPage: React.FC = () => {
       key: 'author',
       width: 180,
       render: (_: any, record: Comment) => (
-        <div className="flex items-center gap-2">
+        <div className="flex gap-2 items-center">
           <Avatar src={getFullUrl(record.authorAvatar)} icon={<UserOutlined />} size={32} />
           <div>
-            <div className="font-medium text-sm">{record.authorName}</div>
+            <div className="text-sm font-medium">{record.authorName}</div>
             <div className="text-xs text-gray-400">{record.authorEmail}</div>
           </div>
         </div>
@@ -165,7 +165,7 @@ const CommentPage: React.FC = () => {
   return (
     <div className="page-container">
       <div className="search-bar">
-        <div className="flex items-center gap-4">
+        <div className="flex gap-4 items-center">
           <Input
             placeholder="搜索评论内容"
             prefix={<SearchOutlined className="text-gray-400" />}

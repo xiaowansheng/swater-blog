@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Tooltip, Switch, Radio } from 'antd'
+import { useNavigate } from 'react-router-dom'
+import { Table, Button, Space, Popconfirm, message, Tag, Tooltip, Switch } from 'antd'
 import Image from '@/components/common/ImageWithPreview'
 import {
   PlusOutlined,
@@ -8,16 +9,13 @@ import {
   PictureOutlined,
   VerticalAlignTopOutlined,
 } from '@ant-design/icons'
-import { getTalkList, createTalk, updateTalk, deleteTalk, setTalkTop, cancelTalkTop } from '@/api/talk'
+import { getTalkList, deleteTalk, setTalkTop, cancelTalkTop } from '@/api/talk'
 import { Talk } from '@/types'
-import RichTextEditor from '@/components/common/RichTextEditor'
 
 const TalkPage: React.FC = () => {
+  const navigate = useNavigate()
   const [talks, setTalks] = useState<Talk[]>([])
   const [loading, setLoading] = useState(false)
-  const [modalVisible, setModalVisible] = useState(false)
-  const [editingTalk, setEditingTalk] = useState<Talk | null>(null)
-  const [form] = Form.useForm()
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
 
   useEffect(() => {
@@ -41,20 +39,11 @@ const TalkPage: React.FC = () => {
   }
 
   const handleCreate = () => {
-    setEditingTalk(null)
-    form.resetFields()
-    form.setFieldsValue({ status: '1', isTop: 0 })
-    setModalVisible(true)
+    navigate('/talk/create')
   }
 
   const handleEdit = (talk: Talk) => {
-    setEditingTalk(talk)
-    form.setFieldsValue({
-      ...talk,
-      isTop: talk.isTop === 1,
-      images: talk.images?.join('\n'),
-    })
-    setModalVisible(true)
+    navigate(`/talk/edit/${talk.id}`)
   }
 
   const handleDelete = async (id: number) => {
@@ -78,28 +67,6 @@ const TalkPage: React.FC = () => {
       loadTalks()
     } catch (error) {
       message.error('操作失败')
-    }
-  }
-
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields()
-      const data = {
-        ...values,
-        isTop: values.isTop ? 1 : 0,
-        images: values.images ? values.images.split('\n').filter((s: string) => s.trim()) : [],
-      }
-      if (editingTalk) {
-        await updateTalk(editingTalk.id, data)
-        message.success('更新成功')
-      } else {
-        await createTalk(data)
-        message.success('创建成功')
-      }
-      setModalVisible(false)
-      loadTalks()
-    } catch (error) {
-      console.error('提交失败', error)
     }
   }
 
@@ -247,38 +214,6 @@ const TalkPage: React.FC = () => {
           }}
         />
       </div>
-
-      <Modal
-        title={editingTalk ? '编辑说说' : '发布说说'}
-        open={modalVisible}
-        onOk={handleSubmit}
-        onCancel={() => setModalVisible(false)}
-        width={600}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="content"
-            label="说说内容"
-            rules={[{ required: true, message: '请输入说说内容' }]}
-            trigger="onChange"
-            validateTrigger="onBlur"
-          >
-            <RichTextEditor height={200} placeholder="分享你的想法..." />
-          </Form.Item>
-          <Form.Item name="images" label="图片" extra="每行一个图片URL">
-            <Input.TextArea rows={3} placeholder="请输入图片URL，每行一个" />
-          </Form.Item>
-          <Form.Item name="isTop" label="置顶" valuePropName="checked">
-            <Switch checkedChildren="是" unCheckedChildren="否" />
-          </Form.Item>
-          <Form.Item name="status" label="状态" rules={[{ required: true }]}>
-            <Radio.Group>
-              <Radio value="1">已发布</Radio>
-              <Radio value="0">草稿</Radio>
-            </Radio.Group>
-          </Form.Item>
-        </Form>
-      </Modal>
     </div>
   )
 }
