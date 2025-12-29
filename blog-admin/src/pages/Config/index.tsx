@@ -397,15 +397,25 @@ const ConfigPage: React.FC = () => {
       <Card className="chart-card">
         <Spin spinning={loading}>
           <Tabs
+            className="config-tabs"
             activeKey={activeTab}
             onChange={setActiveTab}
             items={tabItems}
             tabPosition="left"
-            style={{ minHeight: 600 }}
           />
         </Spin>
       </Card>
       <style>{`
+        .config-tabs {
+          height: calc(100vh - 280px);
+          min-height: 400px;
+        }
+        .config-tabs .ant-tabs-nav {
+          overflow-y: auto;
+        }
+        .config-tabs .ant-tabs-content-holder {
+          overflow-y: auto;
+        }
         .config-form { max-width: 600px; padding-left: 24px; }
         .config-form .ant-form-item { margin-bottom: 16px; }
       `}</style>
