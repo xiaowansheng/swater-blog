@@ -1,15 +1,18 @@
-import { useState, useEffect } from 'react'
-import { Form, Input, Button, Select, message, Switch, Card, Row, Col, Space, Breadcrumb, Modal, Radio } from 'antd'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Form, Input, Button, message, Switch, Card, Row, Col, Space, Breadcrumb, Modal, Radio } from 'antd'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ArrowLeftOutlined, SaveOutlined, SendOutlined } from '@ant-design/icons'
-import { getArticleById, createArticle, updateArticle } from '@/api/article'
+import { ArrowLeftOutlined, SaveOutlined, SendOutlined, CloudSyncOutlined } from '@ant-design/icons'
+import { getArticleById, ArticleSaveDTO } from '@/api/article'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
-import { Article, Category, Tag } from '@/types'
+import { Category, Tag } from '@/types'
 import MarkdownEditor from '@/components/common/MarkdownEditor'
 import CategorySelector from './components/CategorySelector'
 import TagSelector from './components/TagSelector'
 import ImageUpload from '@/components/common/ImageUpload'
+import SaveStatusIndicator from '@/components/article/SaveStatusIndicator'
+import ConflictResolutionModal from '@/components/article/ConflictResolutionModal'
+import useArticleAutoSave from '@/hooks/useArticleAutoSave'
 
 const ArticleEdit: React.FC = () => {
   const navigate = useNavigate()
@@ -20,8 +23,41 @@ const ArticleEdit: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<Tag[]>([])
   const [articleStatus, setArticleStatus] = useState<number>(0)
-  const cover = Form.useWatch('cover', form)
+  const [showConflictModal, setShowConflictModal] = useState(false)
   const type = Form.useWatch('type', form)
+  
+  // 用于跟踪内容变化
+  const contentRef = useRef<string>('')
+
+  // 自动保存Hook
+  const {
+    saveState,
+    save,
+    debouncedAutoSave,
+    startAutoSaveTimer,
+    stopAutoSaveTimer,
+    retry,
+    resolveConflictWithServer,
+    resolveConflictWithLocal,
+    initArticle,
+    getStatusText,
+    isSaving,
+  } = useArticleAutoSave({
+    autoSaveInterval: 5 * 60 * 1000, // 5分钟
+    debounceDelay: 500,
+    enableAutoSave: true,
+    enableContentChangeAutoSave: true,
+    onSaveSuccess: (result) => {
+      if (result.isNew && !id) {
+        // 新建文章成功后，更新URL但不跳转
+        window.history.replaceState(null, '', `/article/edit/${result.id}`)
+      }
+      setArticleStatus(result.status)
+    },
+    onConflict: () => {
+      setShowConflictModal(true)
+    },
+  })
 
   // 文章类型选项
   const articleTypeOptions = [
@@ -37,11 +73,65 @@ const ArticleEdit: React.FC = () => {
     { value: 2, label: '私密' },
   ]
 
+  // 获取当前表单数据
+  const getFormData = useCallback((): Omit<ArticleSaveDTO, 'autoSave' | 'clientVersion'> => {
+    const values = form.getFieldsValue()
+    
+    // 分离已有的 ID 和新输入的名称
+    const tagIds: number[] = []
+    const tagNames: string[] = []
+    
+    if (values.tagIds) {
+      values.tagIds.forEach((item: any) => {
+        if (typeof item === 'number') {
+          tagIds.push(item)
+        } else {
+          tagNames.push(item)
+        }
+      })
+    }
+
+    let categoryId = undefined
+    let categoryName = undefined
+    const categoryValue = values.categoryId
+    if (typeof categoryValue === 'number') {
+      categoryId = categoryValue
+    } else if (categoryValue) {
+      categoryName = categoryValue
+    }
+
+    return {
+      id: saveState.articleId || (id ? Number(id) : undefined),
+      title: values.title || '',
+      slug: values.slug,
+      content: values.content || '',
+      excerpt: values.summary,
+      cover: values.cover,
+      categoryId,
+      categoryName,
+      type: values.type,
+      originalAuthor: values.originalAuthor,
+      originalTitle: values.originalTitle,
+      originalUrl: values.originalUrl,
+      status: values.publishStatus || 0,
+      isTop: values.isTop ? 1 : 0,
+      tagIds,
+      tagNames,
+    }
+  }, [form, id, saveState.articleId])
+
   useEffect(() => {
     loadCategories()
     loadTags()
     if (id) {
       loadArticle()
+    } else {
+      // 新建文章时启动自动保存定时器
+      startAutoSaveTimer(getFormData)
+    }
+
+    return () => {
+      stopAutoSaveTimer()
     }
   }, [id])
 
@@ -67,75 +157,120 @@ const ArticleEdit: React.FC = () => {
     try {
       const article = await getArticleById(Number(id))
       setArticleStatus(article.status)
+      
+      // 初始化自动保存的文章ID和版本号
+      initArticle(article.id, (article as any).version || 1)
+      
       form.setFieldsValue({
         ...article,
         type: article.type || '1',
         publishStatus: article.status === 0 ? 1 : article.status,
         categoryId: article.categoryId,
         tagIds: article.tags.map((t) => t.id),
+        summary: article.excerpt,
       })
+      
+      contentRef.current = article.content
+      
+      // 加载完成后启动自动保存定时器
+      startAutoSaveTimer(getFormData)
     } catch (error) {
       console.error('加载文章失败', error)
     }
   }
 
+  // 处理内容变化，触发防抖自动保存
+  const handleContentChange = useCallback((content: string) => {
+    form.setFieldValue('content', content)
+    
+    // 只有内容真正变化时才触发自动保存
+    if (content !== contentRef.current) {
+      contentRef.current = content
+      const formData = getFormData()
+      if (formData.title) {
+        debouncedAutoSave(formData)
+      }
+    }
+  }, [form, getFormData, debouncedAutoSave])
+
+  // 处理标题变化
+  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const title = e.target.value
+    form.setFieldValue('title', title)
+    
+    const formData = getFormData()
+    if (formData.content) {
+      debouncedAutoSave(formData)
+    }
+  }, [form, getFormData, debouncedAutoSave])
+
+  // 手动保存草稿
+  const handleSaveDraft = async () => {
+    try {
+      await form.validateFields(['title', 'content'])
+      const formData = getFormData()
+      save({ ...formData, status: 0 })
+    } catch (error) {
+      // 验证失败
+    }
+  }
+
+  // 手动保存到服务器
+  const handleSaveToServer = async () => {
+    try {
+      await form.validateFields(['title', 'content'])
+      const formData = getFormData()
+      save(formData)
+    } catch (error) {
+      // 验证失败
+    }
+  }
+
+  // 发布文章
   const onFinish = async (values: any, status: number = 1) => {
     setLoading(true)
     try {
-      // 分离已有的 ID 和新输入的名称
-      const tagIds: number[] = []
-      const tagNames: string[] = []
-      
-      if (values.tagIds) {
-        values.tagIds.forEach((item: any) => {
-          if (typeof item === 'number') {
-            tagIds.push(item)
-          } else {
-            tagNames.push(item)
-          }
-        })
-      }
-
-      // 如果是发布，使用 publishStatus 字段的值
+      const formData = getFormData()
       const finalStatus = status === 0 ? 0 : (values.publishStatus || 1)
-
-      let categoryId = undefined
-      let categoryName = undefined
-      const categoryValue = values.categoryId
-      if (typeof categoryValue === 'number') {
-        categoryId = categoryValue
-      } else if (categoryValue) {
-        categoryName = categoryValue
-      }
-
-      const payload = {
-        ...values,
-        status: finalStatus,
-        tagIds,
-        tagNames,
-        categoryId,
-        categoryName,
-        isTop: values.isTop ? 1 : 0
-      }
-
-      if (id) {
-        await updateArticle(Number(id), payload)
-        message.success(finalStatus === 0 ? '草稿保存成功' : '更新成功')
-      } else {
-        await createArticle(payload)
-        message.success(finalStatus === 0 ? '草稿保存成功' : '发布成功')
-      }
-      setArticleStatus(finalStatus)
-      navigate('/article')
+      
+      save({ ...formData, status: finalStatus })
+      setIsModalOpen(false)
     } catch (error) {
-      message.error(id ? '更新失败' : '发布失败')
+      message.error('发布失败')
     } finally {
       setLoading(false)
     }
   }
 
+  // 处理冲突 - 使用服务器版本
+  const handleUseServerVersion = () => {
+    if (saveState.conflictData) {
+      form.setFieldValue('content', saveState.conflictData.serverContent)
+      contentRef.current = saveState.conflictData.serverContent
+    }
+    resolveConflictWithServer()
+    setShowConflictModal(false)
+    // 重新加载文章获取最新版本号
+    if (id) {
+      loadArticle()
+    }
+  }
+
+  // 处理冲突 - 使用本地版本覆盖
+  const handleUseLocalVersion = () => {
+    const formData = getFormData()
+    resolveConflictWithLocal(formData)
+    setShowConflictModal(false)
+  }
+
+  // 重试保存
+  const handleRetry = () => {
+    const formData = getFormData()
+    retry(formData)
+  }
+
   const getStatusTag = () => {
-    if (!id) return null
+    if (!id && !saveState.articleId) return null
     const statusMap: Record<number, { bg: string; text: string; label: string }> = {
       0: { bg: 'bg-orange-100', text: 'text-orange-600', label: '草稿' },
       1: { bg: 'bg-green-100', text: 'text-green-600', label: '已发布' },
@@ -174,12 +309,24 @@ const ArticleEdit: React.FC = () => {
           </div>
         </div>
         <Space>
+          {/* 保存状态指示器 */}
+          <SaveStatusIndicator 
+            saveState={saveState}
+            statusText={getStatusText()}
+            onRetry={handleRetry}
+          />
+          
+          <Button 
+            icon={<CloudSyncOutlined />}
+            loading={isSaving}
+            onClick={handleSaveToServer}
+          >
+            保存到服务器
+          </Button>
           <Button 
             icon={<SaveOutlined />}
-            loading={loading}
-            onClick={() => {
-              form.validateFields(['title', 'content']).then(values => onFinish({ ...form.getFieldsValue(), ...values }, 0))
-            }}
+            loading={isSaving}
+            onClick={handleSaveDraft}
           >
             保存草稿
           </Button>
@@ -212,6 +359,7 @@ const ArticleEdit: React.FC = () => {
                   size="large" 
                   variant="borderless"
                   className="text-3xl font-bold border-none px-0 focus:shadow-none hover:bg-transparent" 
+                  onChange={handleTitleChange}
                 />
               </Form.Item>
 
@@ -233,7 +381,7 @@ const ArticleEdit: React.FC = () => {
                 name="content" 
                 rules={[{ required: true, message: '请输入文章内容' }]}
               >
-                <MarkdownEditor />
+                <MarkdownEditor onChange={handleContentChange} />
               </Form.Item>
           </Card>
         </div>
@@ -251,11 +399,10 @@ const ArticleEdit: React.FC = () => {
               key="submit" 
               type="primary" 
               icon={<SendOutlined />}
-              loading={loading}
+              loading={loading || isSaving}
               onClick={() => {
                 form.validateFields().then(values => {
                   onFinish(values, 1);
-                  setIsModalOpen(false);
                 })
               }}
             >
@@ -326,10 +473,19 @@ const ArticleEdit: React.FC = () => {
           </div>
         </Modal>
       </Form>
+
+      {/* 冲突解决对话框 */}
+      <ConflictResolutionModal
+        visible={showConflictModal}
+        localContent={form.getFieldValue('content') || ''}
+        serverContent={saveState.conflictData?.serverContent || ''}
+        serverUpdateTime={saveState.conflictData?.serverUpdateTime || ''}
+        onUseServer={handleUseServerVersion}
+        onUseLocal={handleUseLocalVersion}
+        onCancel={() => setShowConflictModal(false)}
+      />
     </div>
   )
 }
 
 export default ArticleEdit
-
-

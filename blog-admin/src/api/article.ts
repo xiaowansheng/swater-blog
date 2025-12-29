@@ -17,6 +17,44 @@ export interface ArticleDTO {
   note?: string
 }
 
+// 文章保存DTO
+export interface ArticleSaveDTO {
+  id?: number
+  title: string
+  slug?: string
+  content: string
+  excerpt?: string
+  cover?: string
+  categoryId?: number
+  categoryName?: string
+  type?: string
+  originalAuthor?: string
+  originalTitle?: string
+  originalUrl?: string
+  note?: string
+  status?: number
+  isTop?: number
+  tagIds?: number[]
+  tagNames?: string[]
+  autoSave?: boolean
+  clientVersion?: number
+}
+
+// 文章保存结果
+export interface ArticleSaveResult {
+  id: number
+  articleKey: string
+  updateTime: string
+  version: number
+  isNew: boolean
+  autoSave: boolean
+  status: number
+  hasConflict: boolean
+  conflictMessage?: string
+  serverContent?: string
+  serverUpdateTime?: string
+}
+
 export const getArticleList = (params: {
   page?: number
   size?: number
@@ -57,4 +95,19 @@ export const unpublishArticle = (id: number): Promise<void> => {
 
 export const getArticleStatistics = (): Promise<ArticleStatistics> => {
   return request.get('/admin/post/statistics')
+}
+
+// 保存文章（支持自动保存和手动保存）
+export const saveArticle = (data: ArticleSaveDTO): Promise<ArticleSaveResult> => {
+  return request.post('/admin/post/save', data)
+}
+
+// 获取文章当前版本号
+export const getArticleVersion = (id: number): Promise<number> => {
+  return request.get(`/admin/post/${id}/version`)
+}
+
+// 检查文章是否存在版本冲突
+export const checkArticleConflict = (id: number, clientVersion: number): Promise<boolean> => {
+  return request.get(`/admin/post/${id}/conflict`, { params: { clientVersion } })
 }

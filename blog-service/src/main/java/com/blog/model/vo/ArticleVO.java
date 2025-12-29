@@ -51,5 +51,10 @@ public class ArticleVO extends BaseVO {
     private LocalDateTime publishedAt;
 
     private List<TagVO> tags;
+
+    /**
+     * 版本号（用于乐观锁）
+     */
+    private Long version;
 }
 

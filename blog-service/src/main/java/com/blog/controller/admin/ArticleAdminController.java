@@ -4,10 +4,13 @@ import com.blog.annotation.ApiResource;
 import com.blog.common.PageResult;
 import com.blog.common.Result;
 import com.blog.model.dto.ArticleDTO;
+import com.blog.model.dto.ArticleSaveDTO;
 import com.blog.model.vo.ArticleVO;
 import com.blog.model.vo.ArticleStatisticsVO;
+import com.blog.model.vo.ArticleSaveResultVO;
 import com.blog.service.ArticleAdminCommandService;
 import com.blog.service.ArticleAdminQueryService;
+import com.blog.service.ArticleSaveService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +25,9 @@ public class ArticleAdminController {
 
     @Autowired
     private ArticleAdminCommandService articleAdminCommandService;
+
+    @Autowired
+    private ArticleSaveService articleSaveService;
 
     @GetMapping("/list")
     public Result<PageResult<ArticleVO>> list(
@@ -83,6 +89,40 @@ public class ArticleAdminController {
     public Result<ArticleStatisticsVO> getStatistics() {
         ArticleStatisticsVO statistics = articleAdminQueryService.getStatistics();
         return Result.success(statistics);
+    }
+
+    /**
+     * 保存文章（支持自动保存和手动保存）
+     * 新建文章时返回完整数据（含新生成的ID）
+     * 更新文章时返回更新后的时间戳和版本号
+     */
+    @PostMapping("/save")
+    public Result<ArticleSaveResultVO> save(@Valid @RequestBody ArticleSaveDTO dto) {
+        ArticleSaveResultVO result = articleSaveService.save(dto);
+        return Result.success(result);
+    }
+
+    /**
+     * 获取文章当前版本号
+     */
+    @GetMapping("/{id}/version")
+    public Result<Long> getVersion(@PathVariable Long id) {
+        Long version = articleSaveService.getCurrentVersion(id);
+        if (version == null) {
+            return Result.error(404, "文章不存在");
+        }
+        return Result.success(version);
+    }
+
+    /**
+     * 检查文章是否存在版本冲突
+     */
+    @GetMapping("/{id}/conflict")
+    public Result<Boolean> checkConflict(
+            @PathVariable Long id,
+            @RequestParam Long clientVersion) {
+        boolean hasConflict = articleSaveService.hasConflict(id, clientVersion);
+        return Result.success(hasConflict);
     }
 }
 

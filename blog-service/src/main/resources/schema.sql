@@ -202,6 +202,7 @@ CREATE TABLE IF NOT EXISTS `article` (
   `view_count` INT NOT NULL DEFAULT '0' COMMENT '浏览量',
   `like_count` INT NOT NULL DEFAULT '0' COMMENT '点赞数',
   `comment_count` INT NOT NULL DEFAULT '0' COMMENT '评论数',
+  `version` BIGINT NOT NULL DEFAULT '1' COMMENT '版本号（乐观锁）',
   `published_at` DATETIME DEFAULT NULL COMMENT '发布时间',
   `deleted` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否已删除',
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

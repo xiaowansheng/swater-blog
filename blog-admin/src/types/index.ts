@@ -73,6 +73,7 @@ export interface Article {
   tags: Tag[]
   createTime: string
   updateTime?: string
+  version?: number
 }
 
 export interface ArticleStatistics {
