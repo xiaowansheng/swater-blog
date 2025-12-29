@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import Image from '@/components/common/ImageWithPreview';
 import CommentForm from './CommentForm';
 import type { CommentVO } from '@/types';
 import { formatDate } from '@/lib/utils/format';
@@ -22,10 +23,13 @@ export default function CommentItem({ comment }: CommentItemProps) {
       <div className="flex items-start gap-4">
         <div className="flex-shrink-0">
           {comment.avatar ? (
-            <img
+            <Image
               src={comment.avatar}
               alt={comment.nickname}
-              className="w-12 h-12 rounded-full border-2 border-border"
+              width={48}
+              height={48}
+              className="rounded-full border-2 border-border"
+              previewEnabled={false}
             />
           ) : (
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center border-2 border-border">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Table, Button, Space, Popconfirm, message, Input, Select, Tag, Avatar, Tooltip, Card, Breadcrumb } from 'antd'
+import Image from '@/components/common/ImageWithPreview'
 import {
   PlusOutlined,
   EditOutlined,
@@ -122,10 +123,12 @@ const ArticleList: React.FC = () => {
       render: (_: any, record: Article) => (
         <div className="flex items-center gap-3">
           {record.cover ? (
-            <img
+            <Image
               src={record.cover}
               alt={record.title}
-              className="w-20 h-14 object-cover rounded"
+              width={80}
+              height={56}
+              className="object-cover rounded"
             />
           ) : (
             <div className="w-20 h-14 bg-gray-100 rounded flex items-center justify-center text-gray-400">

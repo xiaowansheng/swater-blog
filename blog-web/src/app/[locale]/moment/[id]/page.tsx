@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
-import Image from 'next/image';
+import Image from '@/components/common/ImageWithPreview';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MomentImages from '@/components/moment/MomentImages';
@@ -55,6 +55,7 @@ export default async function MomentDetailPage({
                   width={64}
                   height={64}
                   className="rounded-full flex-shrink-0"
+                  previewEnabled={false}
                 />
               )}
               <div className="flex-1">

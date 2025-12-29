@@ -9,6 +9,7 @@ import {
 } from '@ant-design/icons'
 import { getCommentList, approveComment, rejectComment, deleteComment } from '@/api/comment'
 import { Comment } from '@/types'
+import { getFullUrl } from '@/utils/format'
 
 const CommentPage: React.FC = () => {
   const [comments, setComments] = useState<Comment[]>([])
@@ -88,7 +89,7 @@ const CommentPage: React.FC = () => {
       width: 180,
       render: (_: any, record: Comment) => (
         <div className="flex items-center gap-2">
-          <Avatar src={record.authorAvatar} icon={<UserOutlined />} size={32} />
+          <Avatar src={getFullUrl(record.authorAvatar)} icon={<UserOutlined />} size={32} />
           <div>
             <div className="font-medium text-sm">{record.authorName}</div>
             <div className="text-xs text-gray-400">{record.authorEmail}</div>

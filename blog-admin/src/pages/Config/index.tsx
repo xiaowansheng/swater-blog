@@ -3,6 +3,7 @@ import {
   message, Form, Input, Switch, Tabs, Card, Button, Spin, 
   Upload, InputNumber, Space, Divider
 } from 'antd'
+import Image from '@/components/common/ImageWithPreview'
 import { 
   SaveOutlined, UploadOutlined, 
   GlobalOutlined, UserOutlined, PictureOutlined, 
@@ -98,7 +99,13 @@ const ConfigPage: React.FC = () => {
           <Form.Item noStyle shouldUpdate>
             {() => {
               const url = form.getFieldValue(name)
-              return url ? <img src={url} alt="preview" style={{ height: 32, maxWidth: 80, objectFit: 'cover', borderRadius: 4 }} /> : null
+              return url ? (
+                <Image 
+                  src={url} 
+                  alt="preview" 
+                  style={{ height: 32, maxWidth: 80, objectFit: 'cover', borderRadius: 4 }} 
+                />
+              ) : null
             }}
           </Form.Item>
         </Space>

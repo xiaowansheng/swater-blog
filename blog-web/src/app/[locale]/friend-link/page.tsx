@@ -4,7 +4,7 @@ import Footer from '@/components/layout/Footer';
 import PageHeader from '@/components/layout/PageHeader';
 import { friendLinkApi } from '@/lib/api/friendLink';
 import { ISR_REVALIDATE } from '@/lib/constants';
-import Image from 'next/image';
+import Image from '@/components/common/ImageWithPreview';
 
 export const revalidate = ISR_REVALIDATE.FRIEND_LINK;
 
@@ -40,6 +40,7 @@ export default async function FriendLinkPage({
                       width={56}
                       height={56}
                       className="transition-colors border-2 rounded-full border-border group-hover:border-primary"
+                      previewEnabled={false}
                     />
                   ) : (
                     <div className="flex items-center justify-center transition-colors border-2 rounded-full w-14 h-14 bg-primary/10 border-border group-hover:border-primary">

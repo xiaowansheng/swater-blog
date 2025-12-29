@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Upload, Image, Tag, Input, Select, Tooltip, Card, Row, Col } from 'antd'
+import { Table, Button, Space, Popconfirm, message, Upload, Tag, Input, Select, Tooltip, Card, Row, Col } from 'antd'
+import Image from '@/components/common/ImageWithPreview'
 import {
   UploadOutlined,
   DeleteOutlined,

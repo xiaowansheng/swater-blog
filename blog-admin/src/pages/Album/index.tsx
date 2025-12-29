@@ -10,11 +10,11 @@ import {
   Empty,
   Spin,
   Upload,
-  Image,
   Row,
   Col,
   Tag,
 } from 'antd'
+import Image from '@/components/common/ImageWithPreview'
 import {
   PlusOutlined,
   EditOutlined,
@@ -113,10 +113,11 @@ const AlbumPage: React.FC = () => {
                 cover={
                   album.cover ? (
                     <div className="h-40 overflow-hidden">
-                      <img
+                      <Image
                         alt={album.name}
                         src={album.cover}
                         className="w-full h-full object-cover"
+                        previewEnabled={false}
                       />
                     </div>
                   ) : (

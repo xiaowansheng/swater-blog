@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Image, Tooltip, Switch, Radio } from 'antd'
+import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Tooltip, Switch, Radio } from 'antd'
+import Image from '@/components/common/ImageWithPreview'
 import {
   PlusOutlined,
   EditOutlined,

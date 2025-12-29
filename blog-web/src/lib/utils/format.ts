@@ -26,3 +26,36 @@ export function formatNumber(num: number): string {
   return num.toString();
 }
 
+/**
+ * 转换文件路径为完整可访问 URL
+ * @param path 相对路径或绝对路径
+ * @returns 完整 URL
+ */
+export function getFullUrl(path: string | undefined): string {
+  if (!path) return '';
+  
+  // 如果是完整 URL 或 base64，直接返回
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    return path;
+  }
+  
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+  const prefix = '/api/uploads'; // 假设 web 端也需要这个前缀，或者根据后端配置
+  
+  // 标准化路径，确保以 / 开头
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  
+  // 如果路径已经包含了 baseUrl + prefix，则直接返回
+  if (normalizedPath.startsWith(`${baseUrl}${prefix}`)) {
+    return normalizedPath;
+  }
+  
+  // 如果路径以 prefix 开头，补全 baseUrl
+  if (normalizedPath.startsWith(prefix)) {
+    return `${baseUrl}${normalizedPath}`;
+  }
+
+  // 否则视为纯相对路径，进行拼接
+  return `${baseUrl}${prefix}${normalizedPath}`;
+}
+

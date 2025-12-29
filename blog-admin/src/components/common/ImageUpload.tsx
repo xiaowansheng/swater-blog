@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, message, Modal } from 'antd';
+import Image from '@/components/common/ImageWithPreview';
 import { 
   PlusOutlined, 
   LoadingOutlined, 
@@ -9,7 +10,6 @@ import {
 } from '@ant-design/icons';
 import type { RcFile } from 'antd/es/upload/interface';
 import { uploadFile } from '@/api/file';
-import { getFullUrl } from '@/utils/format';
 
 interface ImageUploadProps {
   value?: string;
@@ -60,7 +60,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     try {
       const res = await uploadFile(file as File, category);
       onSuccess(res);
-      onChange?.(res.filePath);
+      // 后端返回的 res 是 FileMeta 对象，使用 url 或 storagePath
+      const path = res.url || res.storagePath;
+      onChange?.(path);
       message.success('上传成功');
     } catch (error) {
       onError(error);
@@ -80,8 +82,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     setPreviewOpen(true);
   };
 
-  const fullUrl = getFullUrl(value);
-
   // 根据类型确定默认占位文字和图标
   const renderPlaceholder = () => {
     if (placeholder) return placeholder;
@@ -92,8 +92,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   const renderIcon = () => {
     if (loading) return <LoadingOutlined className="text-2xl text-blue-500" />;
-    if (type === 'avatar') return <PlusOutlined className="text-2xl text-gray-400 group-hover:text-blue-500 transition-colors" />;
-    return <CloudUploadOutlined className="text-4xl text-gray-300 group-hover:text-blue-400 transition-colors mb-3" />;
+    if (type === 'avatar') return <PlusOutlined className="text-2xl text-gray-400 transition-colors group-hover:text-blue-500" />;
+    return <CloudUploadOutlined className="mb-3 text-4xl text-gray-300 transition-colors group-hover:text-blue-400" />;
   };
 
   // 容器样式和类名
@@ -145,31 +145,33 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           {value ? (
             <>
               {/* 图片铺满容器 */}
-              <img 
-                src={fullUrl} 
+              <Image 
+                src={value} 
                 alt="preview" 
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" 
+                wrapperClassName="absolute inset-0 w-full h-full"
+                previewEnabled={false}
               />
               
               {/* 遮罩层 - 默认透明，悬停显示 */}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-3 backdrop-blur-[1px]">
                 {/* 重新上传提示 */}
-                <div className="flex flex-col items-center text-white mb-2 pointer-events-none">
-                  <CloudUploadOutlined className="text-3xl mb-1" />
+                <div className="flex flex-col items-center mb-2 text-white pointer-events-none">
+                  <CloudUploadOutlined className="mb-1 text-3xl" />
                   <span className="text-xs font-medium">点击或拖拽重新上传</span>
                 </div>
                 
                 {/* 操作按钮 */}
-                <div className="flex items-center gap-4">
+                <div className="flex gap-4 items-center">
                   <div 
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/40 text-white transition-all duration-200 hover:scale-110 active:scale-95"
+                    className="flex justify-center items-center w-10 h-10 text-white rounded-full transition-all duration-200 bg-white/20 hover:bg-white/40 hover:scale-110 active:scale-95"
                     onClick={handlePreview}
                     title="预览"
                   >
                     <EyeOutlined className="text-lg" />
                   </div>
                   <div 
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-white/20 hover:bg-red-500/60 text-white transition-all duration-200 hover:scale-110 active:scale-95"
+                    className="flex justify-center items-center w-10 h-10 text-white rounded-full transition-all duration-200 bg-white/20 hover:bg-red-500/60 hover:scale-110 active:scale-95"
                     onClick={handleRemove}
                     title="删除"
                   >
@@ -179,13 +181,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               </div>
             </>
           ) : (
-            <div className="p-6 flex flex-col items-center text-center">
+            <div className="flex flex-col items-center p-6 text-center">
               <div className="transition-transform duration-300 group-hover:-translate-y-1">
                 {renderIcon()}
               </div>
-              <div className="text-sm text-gray-500 font-semibold group-hover:text-blue-500 transition-colors">{renderPlaceholder()}</div>
+              <div className="text-sm font-semibold text-gray-500 transition-colors group-hover:text-blue-500">{renderPlaceholder()}</div>
               {type === 'cover' && (
-                <div className="mt-2 text-xs text-gray-400 leading-relaxed">
+                <div className="mt-2 text-xs leading-relaxed text-gray-400">
                   建议比例 {aspectRatio === 'video' ? '16:9' : aspectRatio === 'square' ? '1:1' : '3:4'}<br/>
                   支持 JPG, PNG, WEBP (最大 {limitSize}MB)
                 </div>
@@ -195,9 +197,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           
           {/* 上传中状态 */}
           {loading && (
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
-              <LoadingOutlined className="text-3xl text-blue-500 mb-2" />
-              <span className="text-xs text-gray-500 font-medium">上传中...</span>
+            <div className="flex absolute inset-0 z-10 flex-col justify-center items-center backdrop-blur-sm bg-white/80">
+              <LoadingOutlined className="mb-2 text-3xl text-blue-500" />
+              <span className="text-xs font-medium text-gray-500">上传中...</span>
             </div>
           )}
         </div>
@@ -211,7 +213,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         centered
         width={800}
       >
-        <img alt="preview" style={{ width: '100%' }} src={fullUrl} />
+        <Image alt="preview" style={{ width: '100%' }} src={value} previewEnabled={false} />
       </Modal>
 
       <style dangerouslySetInnerHTML={{ __html: `

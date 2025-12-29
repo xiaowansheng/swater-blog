@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import Image from '@/components/common/ImageWithPreview';
 import ImagePreview from '@/components/ImagePreview';
+import { getFullUrl } from '@/lib/utils/format';
 
 interface MomentImagesProps {
   images: string[];
@@ -12,6 +13,8 @@ interface MomentImagesProps {
 export default function MomentImages({ images, alt }: MomentImagesProps) {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
+
+  const fullUrlImages = images.map(img => getFullUrl(img));
 
   const handleImageClick = (index: number) => {
     setPreviewIndex(index);
@@ -27,7 +30,7 @@ export default function MomentImages({ images, alt }: MomentImagesProps) {
           ? 'grid-cols-2 max-w-2xl'
           : 'grid-cols-3 max-w-3xl'
       }`}>
-        {images.map((img, idx) => (
+        {fullUrlImages.map((img, idx) => (
           <div 
             key={idx} 
             className="relative aspect-video rounded-lg overflow-hidden bg-muted cursor-pointer hover:opacity-90 transition-opacity"
@@ -39,13 +42,14 @@ export default function MomentImages({ images, alt }: MomentImagesProps) {
               fill
               className="object-cover"
               loading="lazy"
+              previewEnabled={false}
             />
           </div>
         ))}
       </div>
 
       <ImagePreview
-        images={images}
+        images={fullUrlImages}
         open={previewOpen}
         onOpenChange={setPreviewOpen}
         initialIndex={previewIndex}

@@ -27,25 +27,29 @@ export const formatFileSize = (bytes: number): string => {
  */
 export const getFullUrl = (path: string | undefined): string => {
   if (!path) return ''
+  
+  // 如果是完整 URL 或 base64，直接返回
   if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
     return path
   }
-  
+
   const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api'
   const prefix = '/uploads'
   
+  // 标准化路径，确保以 / 开头
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  
   // 如果路径已经包含了 baseUrl + prefix，则直接返回
-  if (path.startsWith(`${baseUrl}${prefix}`)) {
-    return path
+  if (normalizedPath.startsWith(`${baseUrl}${prefix}`)) {
+    return normalizedPath
   }
   
-  // 如果路径以 prefix 开头但没有 baseUrl，补全 baseUrl
-  if (path.startsWith(prefix)) {
-    return `${baseUrl}${path}`
+  // 如果路径以 prefix 开头（如 /uploads/xxx.jpg），补全 baseUrl
+  if (normalizedPath.startsWith(prefix)) {
+    return `${baseUrl}${normalizedPath}`
   }
 
   // 否则视为纯相对路径（如 article_cover/xxx.jpg），进行拼接
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`
   return `${baseUrl}${prefix}${normalizedPath}`
 }
 

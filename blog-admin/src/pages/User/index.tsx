@@ -23,7 +23,9 @@ import {
 import { getUserList, createUser, updateUser, deleteUser, resetPassword } from '@/api/user'
 import { getRoleList } from '@/api/role'
 import { User, Role } from '@/types'
-import { formatDate } from '@/utils/format'
+import { formatDate, getFullUrl } from '@/utils/format'
+
+const { Option } = Select
 
 const UserPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([])
@@ -138,7 +140,7 @@ const UserPage: React.FC = () => {
       width: 250,
       render: (_: any, record: User) => (
         <div className="flex items-center gap-3">
-          <Avatar src={record.avatar} icon={<UserOutlined />} size={40} />
+          <Avatar src={getFullUrl(record.avatar)} icon={<UserOutlined />} size={40} />
           <div>
             <div className="font-medium">{record.nickname || record.username}</div>
             <div className="text-xs text-gray-400">{record.email}</div>

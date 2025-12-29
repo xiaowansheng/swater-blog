@@ -2,9 +2,9 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import Image from '@/components/common/ImageWithPreview';
 import type { MomentVO } from '@/types';
-import { formatDate } from '@/lib/utils/format';
+import { formatDate, getFullUrl } from '@/lib/utils/format';
 import ImagePreview from '@/components/ImagePreview';
 
 interface MomentItemProps {
@@ -76,8 +76,9 @@ export default function MomentItem({ moment }: MomentItemProps) {
   };
 
   const totalImages = moment.images?.length || 0;
+  const fullUrlImages = moment.images?.map(img => getFullUrl(img)) || [];
   const showMore = totalImages > displayCount;
-  const displayImages = moment.images?.slice(0, displayCount) || [];
+  const displayImages = fullUrlImages.slice(0, displayCount);
 
   return (
     <article 
@@ -91,6 +92,7 @@ export default function MomentItem({ moment }: MomentItemProps) {
             width={48}
             height={48}
             className="rounded-full shrink-0"
+            previewEnabled={false}
           />
         )}
         <div className="flex-1 min-w-0">
@@ -136,6 +138,7 @@ export default function MomentItem({ moment }: MomentItemProps) {
                 fill
                 className="object-cover"
                 loading="lazy"
+                previewEnabled={false}
               />
             </div>
           ))}
@@ -173,9 +176,9 @@ export default function MomentItem({ moment }: MomentItemProps) {
         </div>
       </div>
 
-      {moment.images && moment.images.length > 0 && (
+      {fullUrlImages.length > 0 && (
         <ImagePreview
-          images={moment.images}
+          images={fullUrlImages}
           open={previewOpen}
           onOpenChange={setPreviewOpen}
           initialIndex={previewIndex}

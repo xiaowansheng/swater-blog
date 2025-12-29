@@ -13,6 +13,7 @@ import { useAuthStore } from '@/store/auth'
 import NotificationBell from './NotificationBell'
 import type { MenuProps } from 'antd'
 import { useState } from 'react'
+import { getFullUrl } from '@/utils/format'
 
 const { Header: AntHeader } = Layout
 
@@ -100,7 +101,7 @@ const Header: React.FC = () => {
         <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
           <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded-lg transition-colors">
             <Avatar
-              src={user?.avatar}
+              src={getFullUrl(user?.avatar)}
               icon={<UserOutlined />}
               size={32}
               className="bg-blue-500"

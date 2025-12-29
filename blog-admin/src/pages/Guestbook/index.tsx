@@ -14,6 +14,7 @@ import {
   deleteBatchGuestbook,
 } from '@/api/guestbook'
 import { Guestbook } from '@/types'
+import { getFullUrl } from '@/utils/format'
 
 const GuestbookPage: React.FC = () => {
   const [guestbooks, setGuestbooks] = useState<Guestbook[]>([])
@@ -101,7 +102,7 @@ const GuestbookPage: React.FC = () => {
       width: 200,
       render: (_: any, record: Guestbook) => (
         <div className="flex items-center gap-3">
-          <Avatar src={record.avatar} icon={<UserOutlined />} />
+          <Avatar src={getFullUrl(record.avatar)} icon={<UserOutlined />} />
           <div>
             <div className="font-medium">{record.nickname}</div>
             <div className="text-xs text-gray-400">{record.email}</div>

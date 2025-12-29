@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { getFullUrl } from '@/lib/utils/format';
 
 interface HeroSectionClientProps {
   siteName: string;
@@ -53,8 +54,9 @@ export default function HeroSectionClient({
   }, [lastScrollY, isScrolling]);
 
   // 首页封面背景样式
-  const heroStyle = coverImage ? {
-    backgroundImage: `url(${coverImage})`,
+  const fullCoverImage = getFullUrl(coverImage);
+  const heroStyle = fullCoverImage ? {
+    backgroundImage: `url(${fullCoverImage})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
   } : {};
@@ -62,7 +64,7 @@ export default function HeroSectionClient({
   return (
     <section className="flex overflow-hidden relative justify-center items-center min-h-screen" style={heroStyle}>
       {/* 背景遮罩 */}
-      {coverImage ? (
+      {fullCoverImage ? (
         <div className="absolute inset-0 z-0 bg-black/40"></div>
       ) : (
         <>
