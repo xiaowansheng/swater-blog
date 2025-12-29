@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import config from '@/config'
 
 export const formatDate = (date: string | Date | null | undefined, format = 'YYYY-MM-DD HH:mm:ss'): string => {
   if (!date) return '-'
@@ -33,23 +34,17 @@ export const getFullUrl = (path: string | undefined): string => {
     return path
   }
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api'
-  const prefix = '/uploads'
+  const { resourcePrefix } = config
   
   // 标准化路径，确保以 / 开头
   const normalizedPath = path.startsWith('/') ? path : `/${path}`
   
-  // 如果路径已经包含了 baseUrl + prefix，则直接返回
-  if (normalizedPath.startsWith(`${baseUrl}${prefix}`)) {
+  // 如果路径已经包含了 resourcePrefix，则直接返回
+  if (normalizedPath.startsWith(resourcePrefix)) {
     return normalizedPath
   }
-  
-  // 如果路径以 prefix 开头（如 /uploads/xxx.jpg），补全 baseUrl
-  if (normalizedPath.startsWith(prefix)) {
-    return `${baseUrl}${normalizedPath}`
-  }
 
-  // 否则视为纯相对路径（如 article_cover/xxx.jpg），进行拼接
-  return `${baseUrl}${prefix}${normalizedPath}`
+  // 否则视为纯相对路径，拼接前缀
+  return `${resourcePrefix}${normalizedPath}`
 }
 

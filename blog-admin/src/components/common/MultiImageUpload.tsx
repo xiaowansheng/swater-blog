@@ -4,6 +4,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import type { RcFile, UploadFile, UploadProps } from 'antd/es/upload/interface';
 import { uploadFile } from '@/api/file';
 import { getFullUrl } from '@/utils/format';
+import config from '@/config';
 
 const getBase64 = (file: RcFile): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -44,8 +45,9 @@ const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
       // Only update if the URLs have actually changed to avoid infinite loops
       const getRelativePath = (url: string | undefined) => {
         if (!url) return '';
-        if (url.includes('/uploads/')) {
-          return url.split('/uploads/')[1];
+        const searchPath = `${config.resourcePrefix}/`;
+        if (url.includes(searchPath)) {
+          return url.split(searchPath)[1];
         }
         return url;
       };
@@ -105,9 +107,10 @@ const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
         // 确保如果是完整 URL，如果是从 getFullUrl 产生的，我们需要根据业务逻辑决定是否还原
         // 但通常 value 传进来是什么，我们传出去就应该保持一致格式（相对路径）
         .map(url => {
-          // 如果 url 包含了 uploads 前缀，尝试提取相对路径
-          if (url.includes('/uploads/')) {
-            return url.split('/uploads/')[1];
+          // 如果 url 包含了 resourcePrefix 前缀，尝试提取相对路径
+          const searchPath = `${config.resourcePrefix}/`;
+          if (url.includes(searchPath)) {
+            return url.split(searchPath)[1];
           }
           return url;
         });

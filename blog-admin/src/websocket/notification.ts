@@ -1,5 +1,6 @@
 import { useAuthStore } from '@/store/auth'
 import { useNotificationStore } from '@/store/notification'
+import config from '@/config'
 
 class NotificationWebSocket {
   private ws: WebSocket | null = null
@@ -10,7 +11,7 @@ class NotificationWebSocket {
   private reconnectDelay = 3000
 
   connect() {
-    const wsUrl = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8080'
+    const wsUrl = config.wsBaseUrl
     const url = `${wsUrl}/ws/notification`
 
     try {

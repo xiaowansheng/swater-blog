@@ -2,9 +2,10 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import { message } from 'antd'
 import { getToken, removeToken } from '@/utils/storage'
 import { Result } from '@/types'
+import config from '@/config'
 
 const request: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: config.apiBaseUrl,
   timeout: 30000,
 })
 
