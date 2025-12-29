@@ -20,7 +20,7 @@ import {
   unpublishArticle,
 } from '@/api/article'
 import { getCategoryList } from '@/api/category'
-import { Article, Category } from '@/types'
+import { Article, Category, ArticleStatus, ARTICLE_STATUS_MAP, ARTICLE_TYPE_MAP } from '@/types'
 
 const ArticleList: React.FC = () => {
   const navigate = useNavigate()
@@ -185,13 +185,7 @@ const ArticleList: React.FC = () => {
       key: 'type',
       width: 80,
       render: (type: string) => {
-        const typeMap: Record<string, { color: string; label: string }> = {
-          '1': { color: 'blue', label: '原创' },
-          '2': { color: 'orange', label: '转载' },
-          '3': { color: 'purple', label: '翻译' },
-          '4': { color: 'cyan', label: '引用' },
-        }
-        const t = typeMap[type] || typeMap['1']
+        const t = ARTICLE_TYPE_MAP[type as keyof typeof ARTICLE_TYPE_MAP] || ARTICLE_TYPE_MAP[ArticleType.ORIGINAL]
         return <Tag color={t.color}>{t.label}</Tag>
       },
     },
@@ -201,12 +195,7 @@ const ArticleList: React.FC = () => {
       key: 'status',
       width: 100,
       render: (status: number) => {
-        const statusMap: Record<number, { color: string; label: string }> = {
-          0: { color: 'default', label: '草稿' },
-          1: { color: 'success', label: '已发布' },
-          2: { color: 'warning', label: '私密' },
-        }
-        const s = statusMap[status] || statusMap[0]
+        const s = ARTICLE_STATUS_MAP[status as keyof typeof ARTICLE_STATUS_MAP] || ARTICLE_STATUS_MAP[ArticleStatus.DRAFT]
         return <Tag color={s.color}>{s.label}</Tag>
       },
     },
@@ -229,7 +218,7 @@ const ArticleList: React.FC = () => {
               onClick={() => navigate(`/article/edit/${record.id}`)}
             />
           </Tooltip>
-          {record.status === 1 ? (
+          {record.status === ArticleStatus.PUBLISHED ? (
             <Tooltip title="下架">
               <Button
                 type="text"
@@ -286,9 +275,9 @@ const ArticleList: React.FC = () => {
             style={{ width: 140 }}
             allowClear
           >
-            <Select.Option value={1}>已发布</Select.Option>
-            <Select.Option value={0}>草稿</Select.Option>
-            <Select.Option value={2}>私密</Select.Option>
+            <Select.Option value={ArticleStatus.PUBLISHED}>已发布</Select.Option>
+            <Select.Option value={ArticleStatus.DRAFT}>草稿</Select.Option>
+            <Select.Option value={ArticleStatus.PRIVATE}>私密</Select.Option>
           </Select>
           <Select
             placeholder="选择分类"

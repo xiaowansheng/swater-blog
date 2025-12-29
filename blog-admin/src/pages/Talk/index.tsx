@@ -10,7 +10,7 @@ import {
   VerticalAlignTopOutlined,
 } from '@ant-design/icons'
 import { getTalkList, deleteTalk, setTalkTop, cancelTalkTop } from '@/api/talk'
-import { Talk } from '@/types'
+import { Talk, TalkStatus, TALK_STATUS_MAP } from '@/types'
 
 const TalkPage: React.FC = () => {
   const navigate = useNavigate()
@@ -85,7 +85,7 @@ const TalkPage: React.FC = () => {
             )}
           </div>
           <div 
-            className="rich-text-content line-clamp-2 text-sm text-gray-600"
+            className="text-sm text-gray-600 rich-text-content line-clamp-2"
             dangerouslySetInnerHTML={{ __html: content }}
           />
         </div>
@@ -97,7 +97,7 @@ const TalkPage: React.FC = () => {
       key: 'images',
       width: 150,
       render: (images: string[]) => (
-        <div className="flex items-center gap-1">
+        <div className="flex gap-1 items-center">
           {images && images.length > 0 ? (
             <Image.PreviewGroup>
               {images.slice(0, 3).map((img, index) => (
@@ -110,11 +110,11 @@ const TalkPage: React.FC = () => {
                 />
               ))}
               {images.length > 3 && (
-                <span className="text-gray-400 text-xs">+{images.length - 3}</span>
+                <span className="text-xs text-gray-400">+{images.length - 3}</span>
               )}
             </Image.PreviewGroup>
           ) : (
-            <span className="text-gray-400 flex items-center gap-1">
+            <span className="flex gap-1 items-center text-gray-400">
               <PictureOutlined /> 无图片
             </span>
           )}
@@ -126,11 +126,10 @@ const TalkPage: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 100,
-      render: (status: string) => (
-        <Tag color={status === '1' ? 'success' : 'default'}>
-          {status === '1' ? '已发布' : '草稿'}
-        </Tag>
-      ),
+      render: (status: string) => {
+        const s = TALK_STATUS_MAP[status as keyof typeof TALK_STATUS_MAP] || TALK_STATUS_MAP[TalkStatus.DRAFT]
+        return <Tag color={s.color}>{s.label}</Tag>
+      },
     },
     {
       title: '置顶',
@@ -189,7 +188,7 @@ const TalkPage: React.FC = () => {
 
   return (
     <div className="page-container">
-      <div className="search-bar flex justify-between items-center">
+      <div className="flex justify-between items-center search-bar">
         <h2 className="text-lg font-medium">说说管理</h2>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
           发布说说

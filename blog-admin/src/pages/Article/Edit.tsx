@@ -5,7 +5,7 @@ import { ArrowLeftOutlined, SaveOutlined, SendOutlined, CloudSyncOutlined } from
 import { getArticleById, ArticleSaveDTO } from '@/api/article'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
-import { Category, Tag } from '@/types'
+import { Category, Tag, ArticleStatus, ArticleType } from '@/types'
 import MarkdownEditor from '@/components/common/MarkdownEditor'
 import CategorySelector from './components/CategorySelector'
 import TagSelector from './components/TagSelector'
@@ -22,7 +22,7 @@ const ArticleEdit: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<Tag[]>([])
-  const [articleStatus, setArticleStatus] = useState<number>(0)
+  const [articleStatus, setArticleStatus] = useState<number>(ArticleStatus.DRAFT)
   const [showConflictModal, setShowConflictModal] = useState(false)
   const type = Form.useWatch('type', form)
   
@@ -61,16 +61,16 @@ const ArticleEdit: React.FC = () => {
 
   // 文章类型选项
   const articleTypeOptions = [
-    { value: '1', label: '原创' },
-    { value: '2', label: '转载' },
-    { value: '3', label: '翻译' },
-    { value: '4', label: '引用' },
+    { value: ArticleType.ORIGINAL, label: '原创' },
+    { value: ArticleType.REPOST, label: '转载' },
+    { value: ArticleType.TRANSLATION, label: '翻译' },
+    { value: ArticleType.QUOTE, label: '引用' },
   ]
 
   // 文章状态选项
   const articleStatusOptions = [
-    { value: 1, label: '公开发布' },
-    { value: 2, label: '私密' },
+    { value: ArticleStatus.PUBLISHED, label: '公开发布' },
+    { value: ArticleStatus.PRIVATE, label: '私密' },
   ]
 
   // 获取当前表单数据
@@ -113,7 +113,7 @@ const ArticleEdit: React.FC = () => {
       originalAuthor: values.originalAuthor,
       originalTitle: values.originalTitle,
       originalUrl: values.originalUrl,
-      status: values.publishStatus || 0,
+      status: values.publishStatus || ArticleStatus.DRAFT,
       isTop: values.isTop ? 1 : 0,
       tagIds,
       tagNames,
@@ -163,8 +163,8 @@ const ArticleEdit: React.FC = () => {
       
       form.setFieldsValue({
         ...article,
-        type: article.type || '1',
-        publishStatus: article.status === 0 ? 1 : article.status,
+        type: article.type || ArticleType.ORIGINAL,
+        publishStatus: article.status === ArticleStatus.DRAFT ? ArticleStatus.PUBLISHED : article.status,
         categoryId: article.categoryId,
         tagIds: article.tags.map((t) => t.id),
         summary: article.excerpt,
@@ -209,7 +209,7 @@ const ArticleEdit: React.FC = () => {
     try {
       await form.validateFields(['title', 'content'])
       const formData = getFormData()
-      save({ ...formData, status: 0 })
+      save({ ...formData, status: ArticleStatus.DRAFT })
     } catch (error) {
       // 验证失败
     }
@@ -231,7 +231,9 @@ const ArticleEdit: React.FC = () => {
     setLoading(true)
     try {
       const formData = getFormData()
-      const finalStatus = status === 0 ? 0 : (values.publishStatus || 1)
+      // 如果当前是草稿，点击发布时应该根据表单选择的状态（公开/私密）来发布
+      // 如果当前已经是发布或私密状态，点击发布时则更新其状态
+      const finalStatus = articleStatus === ArticleStatus.DRAFT ? ArticleStatus.DRAFT : (values.publishStatus || ArticleStatus.PUBLISHED)
       
       save({ ...formData, status: finalStatus })
       setIsModalOpen(false)
@@ -272,11 +274,11 @@ const ArticleEdit: React.FC = () => {
   const getStatusTag = () => {
     if (!id && !saveState.articleId) return null
     const statusMap: Record<number, { bg: string; text: string; label: string }> = {
-      0: { bg: 'bg-orange-100', text: 'text-orange-600', label: '草稿' },
-      1: { bg: 'bg-green-100', text: 'text-green-600', label: '已发布' },
-      2: { bg: 'bg-gray-100', text: 'text-gray-600', label: '私密' },
+      [ArticleStatus.DRAFT]: { bg: 'bg-orange-100', text: 'text-orange-600', label: '草稿' },
+      [ArticleStatus.PUBLISHED]: { bg: 'bg-green-100', text: 'text-green-600', label: '已发布' },
+      [ArticleStatus.PRIVATE]: { bg: 'bg-gray-100', text: 'text-gray-600', label: '私密' },
     }
-    const status = statusMap[articleStatus] || statusMap[0]
+    const status = statusMap[articleStatus as keyof typeof statusMap] || statusMap[ArticleStatus.DRAFT]
     return (
       <span className={`px-2 py-1 rounded text-xs ${status.bg} ${status.text}`}>
         {status.label}
@@ -447,7 +449,7 @@ const ArticleEdit: React.FC = () => {
                   />
                 </Form.Item>
 
-                {(type === '2' || type === '3' || type === '4') && (
+                {(type === ArticleType.REPOST || type === ArticleType.TRANSLATION || type === ArticleType.QUOTE) && (
                   <>
                     <Form.Item name="originalAuthor" label="原文作者">
                       <Input placeholder="请输入原文作者" />

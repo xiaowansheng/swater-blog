@@ -3,6 +3,7 @@ import { Form, Button, message, Card, Switch, Radio, Space } from 'antd'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeftOutlined, SendOutlined, SaveOutlined } from '@ant-design/icons'
 import { createTalk, updateTalk, getTalkById } from '@/api/talk'
+import { TalkStatus } from '@/types'
 import RichTextEditor from '@/components/common/RichTextEditor'
 import MultiImageUpload from '@/components/common/MultiImageUpload'
 
@@ -21,7 +22,7 @@ const TalkEdit: React.FC = () => {
       loadTalk()
     } else {
       form.setFieldsValue({
-        status: '1',
+        status: TalkStatus.PUBLISHED,
         isTop: false,
         images: []
       })
@@ -88,7 +89,7 @@ const TalkEdit: React.FC = () => {
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
-          initialValues={{ status: '1', isTop: false }}
+          initialValues={{ status: TalkStatus.PUBLISHED, isTop: false }}
         >
           <Form.Item
             name="content"
@@ -121,8 +122,8 @@ const TalkEdit: React.FC = () => {
               rules={[{ required: true }]}
             >
               <Radio.Group>
-                <Radio value="1">正式发布</Radio>
-                <Radio value="0">保存草稿</Radio>
+                <Radio value={TalkStatus.PUBLISHED}>正式发布</Radio>
+                <Radio value={TalkStatus.DRAFT}>保存草稿</Radio>
               </Radio.Group>
             </Form.Item>
           </div>
@@ -133,10 +134,10 @@ const TalkEdit: React.FC = () => {
                 type="primary"
                 htmlType="submit"
                 loading={submitting}
-                icon={status === '1' ? <SendOutlined /> : <SaveOutlined />}
+                icon={status === TalkStatus.PUBLISHED ? <SendOutlined /> : <SaveOutlined />}
                 size="large"
               >
-                {isEdit ? '保存修改' : (status === '1' ? '立即发布' : '保存草稿')}
+                {isEdit ? '保存修改' : (status === TalkStatus.PUBLISHED ? '立即发布' : '保存草稿')}
               </Button>
               <Button size="large" onClick={() => navigate('/talk')}>
                 取消

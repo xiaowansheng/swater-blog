@@ -1,4 +1,6 @@
 // API响应类型
+export * from './enums'
+
 export interface Result<T> {
   code: number
   message: string
