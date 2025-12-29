@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react'
 import { 
   message, Form, Input, Switch, Tabs, Card, Button, Spin, 
-  Upload, InputNumber, Space, Divider
+  InputNumber, Divider
 } from 'antd'
-import Image from '@/components/common/ImageWithPreview'
+import ImageUpload from '@/components/common/ImageUpload'
 import { 
-  SaveOutlined, UploadOutlined, 
+  SaveOutlined, 
   GlobalOutlined, UserOutlined, PictureOutlined, 
   LockOutlined, BellOutlined, MessageOutlined,
   CloudUploadOutlined, MailOutlined
 } from '@ant-design/icons'
-import type { UploadProps } from 'antd'
 import * as configApi from '@/api/config'
 
 const { TextArea } = Input
@@ -65,56 +64,20 @@ const ConfigPage: React.FC = () => {
     }
   }
 
-  // 图片上传配置
-  const getUploadProps = (form: any, field: string): UploadProps => ({
-    name: 'file',
-    action: '/api/admin/file/upload',
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    showUploadList: false,
-    accept: 'image/*',
-    onChange(info) {
-      if (info.file.status === 'done') {
-        const url = info.file.response?.data?.url
-        if (url) {
-          form.setFieldValue(field, url)
-          message.success('上传成功')
-        }
-      } else if (info.file.status === 'error') {
-        message.error('上传失败')
-      }
-    },
-  })
-
-  // 图片字段组件
-  const ImageField = ({ form, name, label }: { form: any; name: string; label: string }) => (
-    <Form.Item label={label}>
-      <Space direction="vertical" style={{ width: '100%' }}>
-        <Form.Item name={name} noStyle>
-          <Input placeholder="图片URL" />
-        </Form.Item>
-        <Space>
-          <Upload {...getUploadProps(form, name)}>
-            <Button icon={<UploadOutlined />} size="small">上传</Button>
-          </Upload>
-          <Form.Item noStyle shouldUpdate>
-            {() => {
-              const url = form.getFieldValue(name)
-              return url ? (
-                <Image 
-                  src={url} 
-                  alt="preview" 
-                  style={{ height: 32, maxWidth: 80, objectFit: 'cover', borderRadius: 4 }} 
-                />
-              ) : null
-            }}
-          </Form.Item>
-        </Space>
-      </Space>
+  // 图片字段组件 - 使用 ImageUpload 单图片上传组件
+  const ImageField = ({ name, label, category }: { name: string; label: string; category?: string }) => (
+    <Form.Item name={name} label={label}>
+      <ImageUpload 
+        category={category || 'config'} 
+        type="cover" 
+        aspectRatio="video"
+        width={300}
+      />
     </Form.Item>
   )
 
   // 保存配置
-  const handleSave = async (type: string, form: any, updateFn: (data: any) => Promise<void>) => {
+  const handleSave = async (_type: string, form: any, updateFn: (data: any) => Promise<void>) => {
     setSaving(true)
     try {
       const values = await form.validateFields()
@@ -143,8 +106,8 @@ const ConfigPage: React.FC = () => {
           <Form.Item name="keywords" label="关键词">
             <Input placeholder="多个关键词用逗号分隔" />
           </Form.Item>
-          <ImageField form={siteForm} name="logo" label="网站Logo" />
-          <ImageField form={siteForm} name="favicon" label="网站图标" />
+          <ImageField name="logo" label="网站Logo" />
+          <ImageField name="favicon" label="网站图标" />
           <Form.Item name="createTime" label="建站时间">
             <Input placeholder="如：2024-01-01" />
           </Form.Item>
@@ -176,7 +139,7 @@ const ConfigPage: React.FC = () => {
           <Form.Item name="name" label="作者名称">
             <Input placeholder="博主名称" />
           </Form.Item>
-          <ImageField form={authorForm} name="avatar" label="作者头像" />
+          <ImageField name="avatar" label="作者头像" />
           <Form.Item name="signature" label="个性签名">
             <Input placeholder="一句话介绍自己" />
           </Form.Item>
@@ -231,17 +194,17 @@ const ConfigPage: React.FC = () => {
       label: <span><PictureOutlined /> 封面配置</span>,
       children: (
         <Form form={coverForm} layout="vertical" className="config-form">
-          <ImageField form={coverForm} name="home" label="首页封面" />
-          <ImageField form={coverForm} name="article" label="文章页封面" />
-          <ImageField form={coverForm} name="archive" label="归档页封面" />
-          <ImageField form={coverForm} name="category" label="分类页封面" />
-          <ImageField form={coverForm} name="tag" label="标签页封面" />
-          <ImageField form={coverForm} name="talk" label="说说页封面" />
-          <ImageField form={coverForm} name="album" label="相册页封面" />
-          <ImageField form={coverForm} name="link" label="友链页封面" />
-          <ImageField form={coverForm} name="about" label="关于页封面" />
-          <ImageField form={coverForm} name="message" label="留言页封面" />
-          <ImageField form={coverForm} name="default" label="默认封面" />
+          <ImageField name="home" label="首页封面" />
+          <ImageField name="article" label="文章页封面" />
+          <ImageField name="archive" label="归档页封面" />
+          <ImageField name="category" label="分类页封面" />
+          <ImageField name="tag" label="标签页封面" />
+          <ImageField name="talk" label="说说页封面" />
+          <ImageField name="album" label="相册页封面" />
+          <ImageField name="link" label="友链页封面" />
+          <ImageField name="about" label="关于页封面" />
+          <ImageField name="message" label="留言页封面" />
+          <ImageField name="default" label="默认封面" />
           <Form.Item>
             <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={() => handleSave('cover', coverForm, configApi.updateCoverConfig)}>
               保存
