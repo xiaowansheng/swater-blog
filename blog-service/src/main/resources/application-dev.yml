@@ -151,7 +151,6 @@ file:
     type: local
     local:
       path: uploads
-      url-prefix: /uploads
     oss:
       endpoint: 
       access-key-id: 

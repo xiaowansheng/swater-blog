@@ -68,32 +68,26 @@ public class FileServiceImpl implements FileService {
                     .eq(FileMeta::getDeleted, 0));
 
             FileMeta fileMeta;
+            // 检查数据库中是否存在
             if (existingFile != null) {
-                fileMeta = existingFile;
-                fileMeta.setRefCount((fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0) + 1);
-                fileMetaMapper.updateById(fileMeta);
-            } else {
-                String filePath = storagePlugin.generateFilePath(file.getOriginalFilename(), dto.getCategory());
-                storagePlugin.upload(file, filePath);
+                boolean physicalFileExists = true;
+                try {
+                    physicalFileExists = storagePlugin.exists(existingFile.getFilePath());
+                } catch (Exception e) {
+                    // 如果检查出错或不支持，保守起见认为文件存在，避免重复上传
+                }
 
-                fileMeta = new FileMeta();
-                fileMeta.setFileHash(fileHash);
-                fileMeta.setOriginalName(file.getOriginalFilename());
-                fileMeta.setFileType(getFileType(file.getOriginalFilename()));
-                fileMeta.setFilePath(filePath);
-                fileMeta.setUrl(storagePlugin.getUrl(filePath));
-                fileMeta.setFileSize(file.getSize());
-                fileMeta.setMimeType(file.getContentType());
-                
-                Long userId = StpUtil.getLoginIdAsLong();
-                fileMeta.setUploadUserId(userId);
-                fileMeta.setStatus("ACTIVE");
-                fileMeta.setRefCount(1);
-                
-                fileMetaMapper.insert(fileMeta);
-                
-                FileMeta savedFileMeta = fileMetaMapper.selectById(fileMeta.getId());
-                publishEventAfterCommit(() -> eventPublisher.publishEvent(new FileUploadedEvent(this, fileMeta.getId(), savedFileMeta)));
+                if (physicalFileExists) {
+                    fileMeta = existingFile;
+                    fileMeta.setRefCount((fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0) + 1);
+                    fileMetaMapper.updateById(fileMeta);
+                } else {
+                    // 如果数据库记录存在但物理文件不存在，清理旧记录并重新上传
+                    fileMetaMapper.deleteById(existingFile.getId());
+                    fileMeta = performUpload(file, dto, storagePlugin, fileHash);
+                }
+            } else {
+                fileMeta = performUpload(file, dto, storagePlugin, fileHash);
             }
 
             if (dto.getRefType() != null && dto.getRefId() != null) {
@@ -156,6 +150,32 @@ public class FileServiceImpl implements FileService {
         } else {
             fileMetaMapper.updateById(fileMeta);
         }
+    }
+
+    private FileMeta performUpload(MultipartFile file, FileUploadDTO dto, StoragePlugin storagePlugin, String fileHash) throws Exception {
+        String filePath = storagePlugin.generateFilePath(file.getOriginalFilename(), dto.getCategory());
+        storagePlugin.upload(file, filePath);
+
+        FileMeta fileMeta = new FileMeta();
+        fileMeta.setFileHash(fileHash);
+        fileMeta.setOriginalName(file.getOriginalFilename());
+        fileMeta.setFileType(getFileType(file.getOriginalFilename()));
+        fileMeta.setFilePath(filePath);
+        fileMeta.setUrl(storagePlugin.getUrl(filePath));
+        fileMeta.setFileSize(file.getSize());
+        fileMeta.setMimeType(file.getContentType());
+        
+        Long userId = StpUtil.getLoginIdAsLong();
+        fileMeta.setUploadUserId(userId);
+        fileMeta.setStatus("ACTIVE");
+        fileMeta.setRefCount(1);
+        
+        fileMetaMapper.insert(fileMeta);
+        
+        FileMeta savedFileMeta = fileMetaMapper.selectById(fileMeta.getId());
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new FileUploadedEvent(this, fileMeta.getId(), savedFileMeta)));
+        
+        return fileMeta;
     }
 
     private String getFileType(String filename) {
