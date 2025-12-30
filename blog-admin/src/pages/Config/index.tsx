@@ -23,6 +23,7 @@ import {
   MailOutlined,
 } from "@ant-design/icons";
 import { 
+  ImageUpload,
   CoverUpload, 
   AvatarUpload, 
   SquareUpload 
@@ -91,7 +92,7 @@ const ConfigPage: React.FC = () => {
     }
   };
 
-  // 图片字段组件 - 根据 type 选择不同的上传预设
+  // 图片字段组件 - 根据业务需求选择合适的上传组件
   const ImageField = ({
     type = "cover",
     name,
@@ -108,16 +109,16 @@ const ConfigPage: React.FC = () => {
     };
 
     if (type === "avatar") {
-      // 头像：使用小正方形
+      // 头像：使用圆形预设
       return (
         <Form.Item name={name} label={label}>
-          <SquareUpload {...commonProps} width={100} height={100} />
+          <AvatarUpload {...commonProps} width={100} height={100} />
         </Form.Item>
       );
     }
 
     if (type === "icon") {
-      // 图标：使用更小的正方形
+      // 图标/Favicon：使用正方形预设，尺寸较小
       return (
         <Form.Item name={name} label={label}>
           <SquareUpload {...commonProps} width={64} height={64} />
@@ -126,15 +127,26 @@ const ConfigPage: React.FC = () => {
     }
 
     if (type === "logo") {
-      // Logo：使用矩形但比例较窄
+      // Logo：使用基础组件，完全自定义比例和内部提示
       return (
         <Form.Item name={name} label={label}>
-          <CoverUpload {...commonProps} width={200} aspectRatio="any" height={60} />
+          <ImageUpload 
+            {...commonProps} 
+            width={240} 
+            height={80} 
+            aspectRatio="any"
+          >
+            <div className="flex flex-col items-center">
+              <PictureOutlined className="mb-2 text-2xl text-gray-300" />
+              <span className="text-xs font-medium text-gray-400">上传网站 Logo</span>
+              <span className="mt-1 text-[10px] text-gray-300">建议高度 60px</span>
+            </div>
+          </ImageUpload>
         </Form.Item>
       );
     }
 
-    // 默认封面：16:9 矩形
+    // 默认封面：使用封面预设 (16:9)
     return (
       <Form.Item name={name} label={label}>
         <CoverUpload {...commonProps} width={300} />

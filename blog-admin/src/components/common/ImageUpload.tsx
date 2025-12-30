@@ -21,7 +21,6 @@ interface ImageUploadProps {
   height?: string | number;
   className?: string;
   category?: string; // 业务分类，如: article_cover, avatar 等
-  type?: 'cover' | 'avatar' | 'card' | 'custom'; // 样式类型
   limitSize?: number; // 限制大小，单位 MB
   children?: React.ReactNode; // 自定义未上传时的显示内容
   showHint?: boolean; // 是否显示默认的比例和大小提示
@@ -37,14 +36,18 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   height,
   className = '',
   category,
-  type = 'cover',
   limitSize = 5,
   children,
-  showHint = true,
+  showHint,
 }) => {
   const [loading, setLoading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+
+  // 如果有 children，默认不显示提示，除非显式指定 showHint 为 true
+  // 此外，如果高度过小（如头像、小图标），默认也不显示详细提示
+  const isSmall = (typeof height === 'number' && height < 150) || (shape === 'circle');
+  const shouldShowHint = showHint ?? (children || isSmall ? false : true);
 
   const beforeUpload = (file: RcFile) => {
     const isImage = file.type.startsWith('image/');
@@ -89,15 +92,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   // 根据类型确定默认占位文字和图标
   const renderPlaceholder = () => {
     if (placeholder) return placeholder;
-    if (type === 'avatar') return '上传头像';
-    if (type === 'cover') return '上传封面图';
-    return '点击或拖拽上传';
+    return '上传图片';
   };
 
   const renderIcon = () => {
-    if (loading) return <LoadingOutlined className="text-2xl text-blue-500" />;
-    if (type === 'avatar') return <PlusOutlined className="text-2xl text-gray-400 transition-colors group-hover:text-blue-500" />;
-    return <CloudUploadOutlined className="text-4xl text-gray-300 transition-colors group-hover:text-blue-400" />;
+    if (loading) return <LoadingOutlined className={`${isSmall ? 'text-xl' : 'text-2xl'} text-blue-500`} />;
+    return <CloudUploadOutlined className={`${isSmall ? 'text-2xl' : 'text-4xl'} text-gray-300 transition-colors group-hover:text-blue-400`} />;
   };
 
   // 容器样式和类名
@@ -107,10 +107,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     let shapeClass = "rounded-xl";
     const style: React.CSSProperties = {};
 
-    if (shape === 'circle' || type === 'avatar') {
+    if (shape === 'circle') {
       shapeClass = "rounded-full";
       style.aspectRatio = '1 / 1';
-    } else if (type === 'cover') {
+    } else {
       if (aspectRatio === 'video') style.aspectRatio = '16 / 9';
       else if (aspectRatio === 'square') style.aspectRatio = '1 / 1';
       else if (aspectRatio === 'portrait') style.aspectRatio = '3 / 4';
@@ -149,7 +149,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           {value ? (
             <>
               {/* 图片预览 - 始终保持 cover 样式占满空间 */}
-              <div className="absolute inset-0 w-full h-full overflow-hidden">
+              <div className="overflow-hidden absolute inset-0 w-full h-full">
                 <Image 
                   src={value} 
                   alt="preview" 
@@ -188,16 +188,16 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               </div>
             </>
           ) : (
-            <div className={`flex flex-col items-center justify-center w-full h-full text-center gap-2 ${type === 'avatar' ? 'p-2' : 'p-4 md:p-6'}`}>
+            <div className={`flex flex-col items-center justify-center w-full h-full text-center ${isSmall ? 'gap-1 p-1' : 'gap-2 p-4 md:p-6'}`}>
               {children || (
                 <>
                   <div className="flex-shrink-0 transition-transform duration-300 group-hover:-translate-y-1">
                     {renderIcon()}
                   </div>
-                  <div className="flex-shrink-0 text-sm font-semibold text-gray-500 transition-colors group-hover:text-blue-500">
+                  <div className={`flex-shrink-0 font-semibold text-gray-500 transition-colors group-hover:text-blue-500 ${isSmall ? 'text-xs' : 'text-sm'}`}>
                     {renderPlaceholder()}
                   </div>
-                  {(type === 'cover' || (type === 'custom' && showHint)) && (
+                  {shouldShowHint && (
                     <div className="flex-shrink-0 mt-1 text-xs leading-relaxed text-gray-400">
                       建议比例 {aspectRatio === 'video' ? '16:9' : aspectRatio === 'square' ? '1:1' : '3:4'}<br/>
                       支持 JPG, PNG, WEBP (最大 {limitSize}MB)
@@ -267,10 +267,9 @@ export default ImageUpload;
 /**
  * 扩展组件：头像上传
  */
-export const AvatarUpload: React.FC<Omit<ImageUploadProps, 'type' | 'shape' | 'aspectRatio'>> = (props) => (
+export const AvatarUpload: React.FC<Omit<ImageUploadProps, 'shape' | 'aspectRatio'>> = (props) => (
   <ImageUpload 
     {...props} 
-    type="avatar" 
     shape="circle" 
     aspectRatio="square"
     width={props.width || 120}
@@ -281,10 +280,9 @@ export const AvatarUpload: React.FC<Omit<ImageUploadProps, 'type' | 'shape' | 'a
 /**
  * 扩展组件：封面图上传 (16:9)
  */
-export const CoverUpload: React.FC<Omit<ImageUploadProps, 'type'>> = (props) => (
+export const CoverUpload: React.FC<ImageUploadProps> = (props) => (
   <ImageUpload 
     {...props} 
-    type="cover" 
     aspectRatio="video"
   />
 );
@@ -292,10 +290,9 @@ export const CoverUpload: React.FC<Omit<ImageUploadProps, 'type'>> = (props) => 
 /**
  * 扩展组件：正方形上传 (1:1)
  */
-export const SquareUpload: React.FC<Omit<ImageUploadProps, 'type' | 'aspectRatio'>> = (props) => (
+export const SquareUpload: React.FC<Omit<ImageUploadProps, 'aspectRatio'>> = (props) => (
   <ImageUpload 
     {...props} 
-    type="cover" 
     aspectRatio="square"
   />
 );
@@ -304,9 +301,8 @@ export const SquareUpload: React.FC<Omit<ImageUploadProps, 'type' | 'aspectRatio
  * 扩展组件：自定义上传
  * 支持完全自定义内部显示内容
  */
-export const CustomUpload: React.FC<Omit<ImageUploadProps, 'type'>> = (props) => (
+export const CustomUpload: React.FC<ImageUploadProps> = (props) => (
   <ImageUpload 
     {...props} 
-    type="custom"
   />
 );
