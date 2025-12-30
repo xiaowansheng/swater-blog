@@ -19,7 +19,7 @@ const TalkEdit = lazy(() => import('@/pages/Talk/Edit'))
 const User = lazy(() => import('@/pages/User'))
 const Role = lazy(() => import('@/pages/Role'))
 const Menu = lazy(() => import('@/pages/Menu'))
-const Api = lazy(() => import('@/pages/Api'))
+const Resource = lazy(() => import('@/pages/Resource'))
 const Config = lazy(() => import('@/pages/Config'))
 const File = lazy(() => import('@/pages/File'))
 const Visitor = lazy(() => import('@/pages/Visitor'))
@@ -47,7 +47,7 @@ const routeConfig = [
   { path: '/user', component: User, title: '用户管理', keepAlive: true },
   { path: '/role', component: Role, title: '角色管理', keepAlive: true },
   { path: '/menu', component: Menu, title: '菜单管理', keepAlive: true },
-  { path: '/api', component: Api, title: '接口管理', keepAlive: true },
+  { path: '/resource', component: Resource, title: '接口管理', keepAlive: true },
   { path: '/config', component: Config, title: '系统配置', keepAlive: true },
   { path: '/file', component: File, title: '文件管理', keepAlive: true },
   { path: '/visitor', component: Visitor, title: '访客统计', keepAlive: true },
@@ -134,7 +134,7 @@ const Router: React.FC = () => {
           <Route path="user" element={<Suspense fallback={<PageLoading />}><User /></Suspense>} />
           <Route path="role" element={<Suspense fallback={<PageLoading />}><Role /></Suspense>} />
           <Route path="menu" element={<Suspense fallback={<PageLoading />}><Menu /></Suspense>} />
-          <Route path="api" element={<Suspense fallback={<PageLoading />}><Api /></Suspense>} />
+          <Route path="resource" element={<Suspense fallback={<PageLoading />}><Resource /></Suspense>} />
           <Route path="config" element={<Suspense fallback={<PageLoading />}><Config /></Suspense>} />
           <Route path="file" element={<Suspense fallback={<PageLoading />}><File /></Suspense>} />
           <Route path="visitor" element={<Suspense fallback={<PageLoading />}><Visitor /></Suspense>} />
