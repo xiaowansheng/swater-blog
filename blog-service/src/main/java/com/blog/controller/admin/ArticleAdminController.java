@@ -87,7 +87,7 @@ public class ArticleAdminController {
     }
 
     @PostMapping("/{id}/publish")
-    @ApiOperation(value = "publish", name = "发布文章", type = ApiOperationType.WRITE,
+    @ApiOperation(value = "publish", name = "发布文章", type = ApiOperationType.CREATE,
             description = "发布文章使其在前台可见")
     public Result<Void> publish(@PathVariable Long id) {
         articleAdminCommandService.publish(id);
@@ -95,7 +95,7 @@ public class ArticleAdminController {
     }
 
     @PostMapping("/{id}/unpublish")
-    @ApiOperation(value = "unpublish", name = "取消发布", type = ApiOperationType.WRITE,
+    @ApiOperation(value = "unpublish", name = "取消发布", type = ApiOperationType.CREATE,
             description = "取消文章发布，使其变为草稿状态")
     public Result<Void> unpublish(@PathVariable Long id) {
         articleAdminCommandService.unpublish(id);
@@ -103,7 +103,7 @@ public class ArticleAdminController {
     }
 
     @GetMapping("/statistics")
-    @ApiOperation(value = "statistics", name = "文章统计", type = ApiOperationType.READ,
+    @ApiOperation(value = "statistics", name = "文章统计", type = ApiOperationType.QUERY,
             description = "获取文章相关统计数据")
     public Result<ArticleStatisticsVO> getStatistics() {
         ArticleStatisticsVO statistics = articleAdminQueryService.getStatistics();
