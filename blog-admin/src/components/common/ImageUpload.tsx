@@ -26,7 +26,7 @@ interface ImageUploadProps {
   showHint?: boolean; // 是否显示默认的比例和大小提示
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ 
+export const ImageUpload: React.FC<ImageUploadProps> = ({ 
   value, 
   onChange, 
   aspectRatio = 'video',
