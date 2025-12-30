@@ -5,6 +5,7 @@ import cn.dev33.satoken.interceptor.SaInterceptor;
 import cn.dev33.satoken.router.SaRouter;
 import cn.dev33.satoken.stp.StpUtil;
 import com.blog.context.UserContext;
+import com.blog.interceptor.ApiPermissionInterceptor;
 import com.blog.mapper.UserMapper;
 import com.blog.model.entity.User;
 import com.blog.model.vo.RoleVO;
@@ -35,8 +36,12 @@ public class SaTokenConfig implements WebMvcConfigurer {
     @Autowired
     private RoleService roleService;
 
+    @Autowired
+    private ApiPermissionInterceptor apiPermissionInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // SaToken 登录拦截器 - 负责用户认证和设置用户上下文
         registry.addInterceptor(new SaInterceptor(handler -> {
             // 登录校验 -- 拦截所有 admin 接口
             SaRouter.match("/api/admin/**")
@@ -77,7 +82,14 @@ public class SaTokenConfig implements WebMvcConfigurer {
                             throw e;
                         }
                     });
-        })).addPathPatterns("/**");
+        })).addPathPatterns("/**")
+          .order(1); // 设置拦截器顺序，先执行
+
+        // API权限拦截器 - 负责接口权限验证
+        registry.addInterceptor(apiPermissionInterceptor)
+                .addPathPatterns("/api/**")
+                .excludePathPatterns("/api/auth/**")
+                .order(2); // 在登录拦截器之后执行
     }
 
     /**

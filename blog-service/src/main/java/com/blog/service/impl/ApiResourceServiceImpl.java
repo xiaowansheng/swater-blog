@@ -1,6 +1,7 @@
 package com.blog.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.blog.cache.ApiResourceCache;
 import com.blog.mapper.SysApiMapper;
 import com.blog.model.dto.ApiResourceDTO;
 import com.blog.model.entity.SysApi;
@@ -23,6 +24,9 @@ public class ApiResourceServiceImpl implements ApiResourceService {
 
     @Autowired
     private ApiResourceScanner apiResourceScanner;
+
+    @Autowired
+    private ApiResourceCache apiResourceCache;
 
     @Override
     public List<ApiResourceVO> list() {
@@ -55,20 +59,23 @@ public class ApiResourceServiceImpl implements ApiResourceService {
         }
         BeanUtils.copyProperties(dto, api);
         sysApiMapper.updateById(api);
+
+        // 清除缓存，等待下一次访问时重新加载
+        apiResourceCache.clear();
     }
 
     @Override
     @Transactional
     public void refresh() {
         List<ApiResourceScanner.ApiResourceInfo> resources = apiResourceScanner.scanApiResources();
-        
+
         for (ApiResourceScanner.ApiResourceInfo info : resources) {
             LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(SysApi::getApiKey, info.getApiKey())
                     .eq(SysApi::getDeleted, 0);
-            
+
             SysApi existingApi = sysApiMapper.selectOne(wrapper);
-            
+
             if (existingApi == null) {
                 SysApi api = new SysApi();
                 api.setApiKey(info.getApiKey());
@@ -88,6 +95,8 @@ public class ApiResourceServiceImpl implements ApiResourceService {
                 sysApiMapper.updateById(existingApi);
             }
         }
+
+        // 清除缓存，等待下一次访问时重新加载
+        apiResourceCache.clear();
     }
 }
-
