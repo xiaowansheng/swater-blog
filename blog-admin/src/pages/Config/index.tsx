@@ -1,42 +1,69 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
+import {
+  message,
+  Form,
+  Input,
+  Switch,
+  Tabs,
+  Card,
+  Button,
+  Spin,
+  InputNumber,
+  Divider,
+} from "antd";
+import {
+  SaveOutlined,
+  GlobalOutlined,
+  UserOutlined,
+  PictureOutlined,
+  LockOutlined,
+  BellOutlined,
+  MessageOutlined,
+  CloudUploadOutlined,
+  MailOutlined,
+} from "@ant-design/icons";
 import { 
-  message, Form, Input, Switch, Tabs, Card, Button, Spin, 
-  InputNumber, Divider
-} from 'antd'
-import ImageUpload from '@/components/common/ImageUpload'
-import { 
-  SaveOutlined, 
-  GlobalOutlined, UserOutlined, PictureOutlined, 
-  LockOutlined, BellOutlined, MessageOutlined,
-  CloudUploadOutlined, MailOutlined
-} from '@ant-design/icons'
-import * as configApi from '@/api/config'
+  CoverUpload, 
+  AvatarUpload, 
+  SquareUpload 
+} from "@/components/common/ImageUpload";
+import * as configApi from "@/api/config";
 
-const { TextArea } = Input
+const { TextArea } = Input;
 
 const ConfigPage: React.FC = () => {
-  const [loading, setLoading] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState('site')
-  
-  const [siteForm] = Form.useForm()
-  const [authorForm] = Form.useForm()
-  const [coverForm] = Form.useForm()
-  const [socialForm] = Form.useForm()
-  const [privacyForm] = Form.useForm()
-  const [commentForm] = Form.useForm()
-  const [notifyForm] = Form.useForm()
-  const [uploadForm] = Form.useForm()
-  const [emailForm] = Form.useForm()
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("site");
+
+  const [siteForm] = Form.useForm();
+  const [authorForm] = Form.useForm();
+  const [coverForm] = Form.useForm();
+  const [socialForm] = Form.useForm();
+  const [privacyForm] = Form.useForm();
+  const [commentForm] = Form.useForm();
+  const [notifyForm] = Form.useForm();
+  const [uploadForm] = Form.useForm();
+  const [emailForm] = Form.useForm();
 
   useEffect(() => {
-    loadAllConfigs()
-  }, [])
+    loadAllConfigs();
+  }, []);
 
   const loadAllConfigs = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const [site, author, cover, social, privacy, comment, notify, upload, email] = await Promise.all([
+      const [
+        site,
+        author,
+        cover,
+        social,
+        privacy,
+        comment,
+        notify,
+        upload,
+        email,
+      ] = await Promise.all([
         configApi.getSiteConfig(),
         configApi.getAuthorConfig(),
         configApi.getCoverConfig(),
@@ -46,55 +73,102 @@ const ConfigPage: React.FC = () => {
         configApi.getNotifyConfig(),
         configApi.getUploadConfig(),
         configApi.getEmailConfig(),
-      ])
-      siteForm.setFieldsValue(site)
-      authorForm.setFieldsValue(author)
-      coverForm.setFieldsValue(cover)
-      socialForm.setFieldsValue(social)
-      privacyForm.setFieldsValue(privacy)
-      commentForm.setFieldsValue(comment)
-      notifyForm.setFieldsValue(notify)
-      uploadForm.setFieldsValue(upload)
-      emailForm.setFieldsValue(email)
+      ]);
+      siteForm.setFieldsValue(site);
+      authorForm.setFieldsValue(author);
+      coverForm.setFieldsValue(cover);
+      socialForm.setFieldsValue(social);
+      privacyForm.setFieldsValue(privacy);
+      commentForm.setFieldsValue(comment);
+      notifyForm.setFieldsValue(notify);
+      uploadForm.setFieldsValue(upload);
+      emailForm.setFieldsValue(email);
     } catch (error) {
-      console.error('加载配置失败', error)
-      message.error('加载配置失败')
+      console.error("加载配置失败", error);
+      message.error("加载配置失败");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  // 图片字段组件 - 使用 ImageUpload 单图片上传组件
-  const ImageField = ({ name, label, category }: { name: string; label: string; category?: string }) => (
-    <Form.Item name={name} label={label}>
-      <ImageUpload 
-        category={category || 'config'} 
-        type="cover" 
-        aspectRatio="video"
-        width={300}
-      />
-    </Form.Item>
-  )
+  // 图片字段组件 - 根据 type 选择不同的上传预设
+  const ImageField = ({
+    type = "cover",
+    name,
+    label,
+    category,
+  }: {
+    type?: "cover" | "avatar" | "icon" | "logo";
+    name: string;
+    label: string;
+    category?: string;
+  }) => {
+    const commonProps = {
+      category: category || "config",
+    };
+
+    if (type === "avatar") {
+      // 头像：使用小正方形
+      return (
+        <Form.Item name={name} label={label}>
+          <SquareUpload {...commonProps} width={100} height={100} />
+        </Form.Item>
+      );
+    }
+
+    if (type === "icon") {
+      // 图标：使用更小的正方形
+      return (
+        <Form.Item name={name} label={label}>
+          <SquareUpload {...commonProps} width={64} height={64} />
+        </Form.Item>
+      );
+    }
+
+    if (type === "logo") {
+      // Logo：使用矩形但比例较窄
+      return (
+        <Form.Item name={name} label={label}>
+          <CoverUpload {...commonProps} width={200} aspectRatio="any" height={60} />
+        </Form.Item>
+      );
+    }
+
+    // 默认封面：16:9 矩形
+    return (
+      <Form.Item name={name} label={label}>
+        <CoverUpload {...commonProps} width={300} />
+      </Form.Item>
+    );
+  };
 
   // 保存配置
-  const handleSave = async (_type: string, form: any, updateFn: (data: any) => Promise<void>) => {
-    setSaving(true)
+  const handleSave = async (
+    _type: string,
+    form: any,
+    updateFn: (data: any) => Promise<void>
+  ) => {
+    setSaving(true);
     try {
-      const values = await form.validateFields()
-      await updateFn(values)
-      message.success('保存成功')
+      const values = await form.validateFields();
+      await updateFn(values);
+      message.success("保存成功");
     } catch (error) {
-      console.error('保存失败', error)
-      message.error('保存失败')
+      console.error("保存失败", error);
+      message.error("保存失败");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const tabItems = [
     {
-      key: 'site',
-      label: <span><GlobalOutlined /> 网站信息</span>,
+      key: "site",
+      label: (
+        <span>
+          <GlobalOutlined /> 网站信息
+        </span>
+      ),
       children: (
         <Form form={siteForm} layout="vertical" className="config-form">
           <Form.Item name="name" label="网站名称" rules={[{ required: true }]}>
@@ -106,8 +180,8 @@ const ConfigPage: React.FC = () => {
           <Form.Item name="keywords" label="关键词">
             <Input placeholder="多个关键词用逗号分隔" />
           </Form.Item>
-          <ImageField name="logo" label="网站Logo" />
-          <ImageField name="favicon" label="网站图标" />
+          <ImageField name="logo" label="网站Logo" type="logo" />
+          <ImageField name="favicon" label="网站图标" type="icon" />
           <Form.Item name="createTime" label="建站时间">
             <Input placeholder="如：2024-01-01" />
           </Form.Item>
@@ -124,7 +198,14 @@ const ConfigPage: React.FC = () => {
             <TextArea rows={3} placeholder="首页显示的公告内容" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={() => handleSave('site', siteForm, configApi.updateSiteConfig)}>
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              loading={saving}
+              onClick={() =>
+                handleSave("site", siteForm, configApi.updateSiteConfig)
+              }
+            >
               保存
             </Button>
           </Form.Item>
@@ -132,14 +213,18 @@ const ConfigPage: React.FC = () => {
       ),
     },
     {
-      key: 'author',
-      label: <span><UserOutlined /> 作者信息</span>,
+      key: "author",
+      label: (
+        <span>
+          <UserOutlined /> 作者信息
+        </span>
+      ),
       children: (
         <Form form={authorForm} layout="vertical" className="config-form">
           <Form.Item name="name" label="作者名称">
             <Input placeholder="博主名称" />
           </Form.Item>
-          <ImageField name="avatar" label="作者头像" />
+          <ImageField name="avatar" label="作者头像" type="avatar" />
           <Form.Item name="signature" label="个性签名">
             <Input placeholder="一句话介绍自己" />
           </Form.Item>
@@ -150,7 +235,11 @@ const ConfigPage: React.FC = () => {
           <Form.Item name="email" label="邮箱">
             <Input placeholder="联系邮箱" />
           </Form.Item>
-          <Form.Item name="showEmail" label="前台显示邮箱" valuePropName="checked">
+          <Form.Item
+            name="showEmail"
+            label="前台显示邮箱"
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
           <Form.Item name="qq" label="QQ">
@@ -162,7 +251,11 @@ const ConfigPage: React.FC = () => {
           <Form.Item name="wechat" label="微信">
             <Input placeholder="微信号" />
           </Form.Item>
-          <Form.Item name="showWechat" label="前台显示微信" valuePropName="checked">
+          <Form.Item
+            name="showWechat"
+            label="前台显示微信"
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
           <Divider>社交链接</Divider>
@@ -182,7 +275,14 @@ const ConfigPage: React.FC = () => {
             <Input placeholder="B站主页链接" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={() => handleSave('author', authorForm, configApi.updateAuthorConfig)}>
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              loading={saving}
+              onClick={() =>
+                handleSave("author", authorForm, configApi.updateAuthorConfig)
+              }
+            >
               保存
             </Button>
           </Form.Item>
@@ -190,8 +290,12 @@ const ConfigPage: React.FC = () => {
       ),
     },
     {
-      key: 'cover',
-      label: <span><PictureOutlined /> 封面配置</span>,
+      key: "cover",
+      label: (
+        <span>
+          <PictureOutlined /> 封面配置
+        </span>
+      ),
       children: (
         <Form form={coverForm} layout="vertical" className="config-form">
           <ImageField name="home" label="首页封面" />
@@ -206,7 +310,14 @@ const ConfigPage: React.FC = () => {
           <ImageField name="message" label="留言页封面" />
           <ImageField name="default" label="默认封面" />
           <Form.Item>
-            <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={() => handleSave('cover', coverForm, configApi.updateCoverConfig)}>
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              loading={saving}
+              onClick={() =>
+                handleSave("cover", coverForm, configApi.updateCoverConfig)
+              }
+            >
               保存
             </Button>
           </Form.Item>
@@ -214,24 +325,59 @@ const ConfigPage: React.FC = () => {
       ),
     },
     {
-      key: 'privacy',
-      label: <span><LockOutlined /> 隐私设置</span>,
+      key: "privacy",
+      label: (
+        <span>
+          <LockOutlined /> 隐私设置
+        </span>
+      ),
       children: (
         <Form form={privacyForm} layout="vertical" className="config-form">
-          <Form.Item name="showIp" label="显示IP地址" valuePropName="checked" tooltip="前台是否显示评论/说说的IP地址">
+          <Form.Item
+            name="showIp"
+            label="显示IP地址"
+            valuePropName="checked"
+            tooltip="前台是否显示评论/说说的IP地址"
+          >
             <Switch />
           </Form.Item>
-          <Form.Item name="showLocation" label="显示位置信息" valuePropName="checked" tooltip="前台是否显示省市位置">
+          <Form.Item
+            name="showLocation"
+            label="显示位置信息"
+            valuePropName="checked"
+            tooltip="前台是否显示省市位置"
+          >
             <Switch />
           </Form.Item>
-          <Form.Item name="showDevice" label="显示设备信息" valuePropName="checked" tooltip="前台是否显示设备类型">
+          <Form.Item
+            name="showDevice"
+            label="显示设备信息"
+            valuePropName="checked"
+            tooltip="前台是否显示设备类型"
+          >
             <Switch />
           </Form.Item>
-          <Form.Item name="showBrowser" label="显示浏览器信息" valuePropName="checked" tooltip="前台是否显示浏览器信息">
+          <Form.Item
+            name="showBrowser"
+            label="显示浏览器信息"
+            valuePropName="checked"
+            tooltip="前台是否显示浏览器信息"
+          >
             <Switch />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={() => handleSave('privacy', privacyForm, configApi.updatePrivacyConfig)}>
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              loading={saving}
+              onClick={() =>
+                handleSave(
+                  "privacy",
+                  privacyForm,
+                  configApi.updatePrivacyConfig
+                )
+              }
+            >
               保存
             </Button>
           </Form.Item>
@@ -239,27 +385,59 @@ const ConfigPage: React.FC = () => {
       ),
     },
     {
-      key: 'comment',
-      label: <span><MessageOutlined /> 评论设置</span>,
+      key: "comment",
+      label: (
+        <span>
+          <MessageOutlined /> 评论设置
+        </span>
+      ),
       children: (
         <Form form={commentForm} layout="vertical" className="config-form">
-          <Form.Item name="enableAudit" label="开启评论审核" valuePropName="checked">
+          <Form.Item
+            name="enableAudit"
+            label="开启评论审核"
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
-          <Form.Item name="allowAnonymous" label="允许匿名评论" valuePropName="checked">
+          <Form.Item
+            name="allowAnonymous"
+            label="允许匿名评论"
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
-          <Form.Item name="allowGuest" label="允许游客评论" valuePropName="checked" tooltip="游客需填写昵称和邮箱">
+          <Form.Item
+            name="allowGuest"
+            label="允许游客评论"
+            valuePropName="checked"
+            tooltip="游客需填写昵称和邮箱"
+          >
             <Switch />
           </Form.Item>
-          <Form.Item name="showEmail" label="显示评论者邮箱" valuePropName="checked">
+          <Form.Item
+            name="showEmail"
+            label="显示评论者邮箱"
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
           <Form.Item name="pageSize" label="每页评论数">
             <InputNumber min={5} max={50} />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={() => handleSave('comment', commentForm, configApi.updateCommentConfig)}>
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              loading={saving}
+              onClick={() =>
+                handleSave(
+                  "comment",
+                  commentForm,
+                  configApi.updateCommentConfig
+                )
+              }
+            >
               保存
             </Button>
           </Form.Item>
@@ -267,27 +445,61 @@ const ConfigPage: React.FC = () => {
       ),
     },
     {
-      key: 'notify',
-      label: <span><BellOutlined /> 通知设置</span>,
+      key: "notify",
+      label: (
+        <span>
+          <BellOutlined /> 通知设置
+        </span>
+      ),
       children: (
         <Form form={notifyForm} layout="vertical" className="config-form">
-          <Form.Item name="loginEmail" label="登录邮件通知" valuePropName="checked" tooltip="用户登录时发送邮件通知">
+          <Form.Item
+            name="loginEmail"
+            label="登录邮件通知"
+            valuePropName="checked"
+            tooltip="用户登录时发送邮件通知"
+          >
             <Switch />
           </Form.Item>
-          <Form.Item name="commentEmail" label="评论邮件通知" valuePropName="checked" tooltip="收到新评论时通知博主">
+          <Form.Item
+            name="commentEmail"
+            label="评论邮件通知"
+            valuePropName="checked"
+            tooltip="收到新评论时通知博主"
+          >
             <Switch />
           </Form.Item>
-          <Form.Item name="replyEmail" label="回复邮件通知" valuePropName="checked" tooltip="评论被回复时通知评论者">
+          <Form.Item
+            name="replyEmail"
+            label="回复邮件通知"
+            valuePropName="checked"
+            tooltip="评论被回复时通知评论者"
+          >
             <Switch />
           </Form.Item>
-          <Form.Item name="guestbookEmail" label="留言邮件通知" valuePropName="checked">
+          <Form.Item
+            name="guestbookEmail"
+            label="留言邮件通知"
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
-          <Form.Item name="friendLinkEmail" label="友链申请通知" valuePropName="checked">
+          <Form.Item
+            name="friendLinkEmail"
+            label="友链申请通知"
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={() => handleSave('notify', notifyForm, configApi.updateNotifyConfig)}>
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              loading={saving}
+              onClick={() =>
+                handleSave("notify", notifyForm, configApi.updateNotifyConfig)
+              }
+            >
               保存
             </Button>
           </Form.Item>
@@ -295,24 +507,47 @@ const ConfigPage: React.FC = () => {
       ),
     },
     {
-      key: 'upload',
-      label: <span><CloudUploadOutlined /> 上传设置</span>,
+      key: "upload",
+      label: (
+        <span>
+          <CloudUploadOutlined /> 上传设置
+        </span>
+      ),
       children: (
         <Form form={uploadForm} layout="vertical" className="config-form">
-          <Form.Item name="maxSize" label="文件大小限制(字节)" tooltip="默认10MB = 10485760字节">
+          <Form.Item
+            name="maxSize"
+            label="文件大小限制(字节)"
+            tooltip="默认10MB = 10485760字节"
+          >
             <InputNumber min={1048576} max={104857600} style={{ width: 200 }} />
           </Form.Item>
-          <Form.Item name="allowedTypes" label="允许的文件类型" tooltip="多个类型用逗号分隔">
+          <Form.Item
+            name="allowedTypes"
+            label="允许的文件类型"
+            tooltip="多个类型用逗号分隔"
+          >
             <Input placeholder="jpg,jpeg,png,gif,webp,pdf" />
           </Form.Item>
-          <Form.Item name="imageCompress" label="图片自动压缩" valuePropName="checked">
+          <Form.Item
+            name="imageCompress"
+            label="图片自动压缩"
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
           <Form.Item name="imageQuality" label="压缩质量(1-100)">
             <InputNumber min={1} max={100} />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={() => handleSave('upload', uploadForm, configApi.updateUploadConfig)}>
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              loading={saving}
+              onClick={() =>
+                handleSave("upload", uploadForm, configApi.updateUploadConfig)
+              }
+            >
               保存
             </Button>
           </Form.Item>
@@ -320,8 +555,12 @@ const ConfigPage: React.FC = () => {
       ),
     },
     {
-      key: 'email',
-      label: <span><MailOutlined /> 邮件设置</span>,
+      key: "email",
+      label: (
+        <span>
+          <MailOutlined /> 邮件设置
+        </span>
+      ),
       children: (
         <Form form={emailForm} layout="vertical" className="config-form">
           <Form.Item name="enable" label="启用邮件功能" valuePropName="checked">
@@ -343,14 +582,21 @@ const ConfigPage: React.FC = () => {
             <Input placeholder="邮件显示的发件人名称" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={() => handleSave('email', emailForm, configApi.updateEmailConfig)}>
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              loading={saving}
+              onClick={() =>
+                handleSave("email", emailForm, configApi.updateEmailConfig)
+              }
+            >
               保存
             </Button>
           </Form.Item>
         </Form>
       ),
     },
-  ]
+  ];
 
   return (
     <div className="page-container">
@@ -383,7 +629,7 @@ const ConfigPage: React.FC = () => {
         .config-form .ant-form-item { margin-bottom: 16px; }
       `}</style>
     </div>
-  )
-}
+  );
+};
 
-export default ConfigPage
+export default ConfigPage;

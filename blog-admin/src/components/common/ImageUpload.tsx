@@ -21,8 +21,10 @@ interface ImageUploadProps {
   height?: string | number;
   className?: string;
   category?: string; // 业务分类，如: article_cover, avatar 等
-  type?: 'cover' | 'avatar' | 'card'; // 样式类型
+  type?: 'cover' | 'avatar' | 'card' | 'custom'; // 样式类型
   limitSize?: number; // 限制大小，单位 MB
+  children?: React.ReactNode; // 自定义未上传时的显示内容
+  showHint?: boolean; // 是否显示默认的比例和大小提示
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ 
@@ -36,7 +38,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   className = '',
   category,
   type = 'cover',
-  limitSize = 5
+  limitSize = 5,
+  children,
+  showHint = true,
 }) => {
   const [loading, setLoading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -93,7 +97,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const renderIcon = () => {
     if (loading) return <LoadingOutlined className="text-2xl text-blue-500" />;
     if (type === 'avatar') return <PlusOutlined className="text-2xl text-gray-400 transition-colors group-hover:text-blue-500" />;
-    return <CloudUploadOutlined className="mb-3 text-4xl text-gray-300 transition-colors group-hover:text-blue-400" />;
+    return <CloudUploadOutlined className="text-4xl text-gray-300 transition-colors group-hover:text-blue-400" />;
   };
 
   // 容器样式和类名
@@ -144,16 +148,19 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         <div {...containerProps}>
           {value ? (
             <>
-              {/* 图片铺满容器 */}
-              <Image 
-                src={value} 
-                alt="preview" 
-                className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" 
-                wrapperClassName="absolute inset-0 w-full h-full"
-                previewEnabled={false}
-              />
+              {/* 图片预览 - 始终保持 cover 样式占满空间 */}
+              <div className="absolute inset-0 w-full h-full overflow-hidden">
+                <Image 
+                  src={value} 
+                  alt="preview" 
+                  className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" 
+                  style={{ width: '100%', height: '100%', display: 'block' }}
+                  wrapperClassName="w-full h-full block"
+                  previewEnabled={false}
+                />
+              </div>
               
-              {/* 遮罩层 - 默认透明，悬停显示 */}
+              {/* 遮罩层 - 悬停显示操作 */}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-3 backdrop-blur-[1px]">
                 {/* 重新上传提示 */}
                 <div className="flex flex-col items-center mb-2 text-white pointer-events-none">
@@ -181,16 +188,22 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center p-6 text-center">
-              <div className="transition-transform duration-300 group-hover:-translate-y-1">
-                {renderIcon()}
-              </div>
-              <div className="text-sm font-semibold text-gray-500 transition-colors group-hover:text-blue-500">{renderPlaceholder()}</div>
-              {type === 'cover' && (
-                <div className="mt-2 text-xs leading-relaxed text-gray-400">
-                  建议比例 {aspectRatio === 'video' ? '16:9' : aspectRatio === 'square' ? '1:1' : '3:4'}<br/>
-                  支持 JPG, PNG, WEBP (最大 {limitSize}MB)
-                </div>
+            <div className={`flex flex-col items-center justify-center w-full h-full text-center gap-2 ${type === 'avatar' ? 'p-2' : 'p-4 md:p-6'}`}>
+              {children || (
+                <>
+                  <div className="flex-shrink-0 transition-transform duration-300 group-hover:-translate-y-1">
+                    {renderIcon()}
+                  </div>
+                  <div className="flex-shrink-0 text-sm font-semibold text-gray-500 transition-colors group-hover:text-blue-500">
+                    {renderPlaceholder()}
+                  </div>
+                  {(type === 'cover' || (type === 'custom' && showHint)) && (
+                    <div className="flex-shrink-0 mt-1 text-xs leading-relaxed text-gray-400">
+                      建议比例 {aspectRatio === 'video' ? '16:9' : aspectRatio === 'square' ? '1:1' : '3:4'}<br/>
+                      支持 JPG, PNG, WEBP (最大 {limitSize}MB)
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -236,9 +249,64 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           background: transparent !important;
           margin: 0 !important;
         }
+        .single-image-upload-wrapper .ant-image {
+          width: 100%;
+          height: 100%;
+        }
+        .single-image-upload-wrapper .ant-image-img {
+          height: 100% !important;
+          object-fit: cover;
+        }
       `}} />
     </div>
   );
 };
 
 export default ImageUpload;
+
+/**
+ * 扩展组件：头像上传
+ */
+export const AvatarUpload: React.FC<Omit<ImageUploadProps, 'type' | 'shape' | 'aspectRatio'>> = (props) => (
+  <ImageUpload 
+    {...props} 
+    type="avatar" 
+    shape="circle" 
+    aspectRatio="square"
+    width={props.width || 120}
+    height={props.height || 120}
+  />
+);
+
+/**
+ * 扩展组件：封面图上传 (16:9)
+ */
+export const CoverUpload: React.FC<Omit<ImageUploadProps, 'type'>> = (props) => (
+  <ImageUpload 
+    {...props} 
+    type="cover" 
+    aspectRatio="video"
+  />
+);
+
+/**
+ * 扩展组件：正方形上传 (1:1)
+ */
+export const SquareUpload: React.FC<Omit<ImageUploadProps, 'type' | 'aspectRatio'>> = (props) => (
+  <ImageUpload 
+    {...props} 
+    type="cover" 
+    aspectRatio="square"
+  />
+);
+
+/**
+ * 扩展组件：自定义上传
+ * 支持完全自定义内部显示内容
+ */
+export const CustomUpload: React.FC<Omit<ImageUploadProps, 'type'>> = (props) => (
+  <ImageUpload 
+    {...props} 
+    type="custom"
+  />
+);
