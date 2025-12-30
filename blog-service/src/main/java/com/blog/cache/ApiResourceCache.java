@@ -8,9 +8,10 @@ import com.blog.model.entity.RoleApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * API接口资源缓存管理器
@@ -32,9 +33,14 @@ public class ApiResourceCache {
     private RoleApiMapper roleApiMapper;
 
     /**
-     * 接口资源缓存：key = path:method, value = ApiResourceInfo
+     * 路径匹配器（支持 Ant 风格的路径模式）
      */
-    private final Map<String, ApiResourceInfo> resourceCache = new ConcurrentHashMap<>();
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+    /**
+     * 接口资源缓存列表
+     */
+    private final List<ApiResourceInfo> resourceCache = new CopyOnWriteArrayList<>();
 
     /**
      * 接口角色授权缓存：key = apiId, value = Set<roleId>
@@ -49,7 +55,7 @@ public class ApiResourceCache {
     /**
      * 获取接口资源信息
      * <p>
-     * 如果缓存中没有，则从数据库加载
+     * 使用路径匹配查找接口（支持占位符等）
      * </p>
      *
      * @param path   接口路径
@@ -58,7 +64,19 @@ public class ApiResourceCache {
      */
     public ApiResourceInfo getApiResource(String path, String method) {
         ensureInitialized();
-        return resourceCache.get(path + ":" + method);
+
+        // 遍历所有接口资源，使用路径匹配查找
+        for (ApiResourceInfo info : resourceCache) {
+            if (info.getPath() != null && info.getMethod() != null) {
+                // 使用 Ant 路径匹配器进行匹配
+                if (pathMatcher.match(info.getPath(), path) &&
+                    info.getMethod().equalsIgnoreCase(method)) {
+                    return info;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -117,7 +135,6 @@ public class ApiResourceCache {
         for (SysApi api : apis) {
             // 只缓存非模块的接口（模块的 is_open 可能为 null）
             if (api.getMethod() != null && !api.getMethod().equals("MODULE")) {
-                String key = api.getPath() + ":" + api.getMethod();
                 ApiResourceInfo info = new ApiResourceInfo(
                         api.getId(),
                         api.getApiKey(),
@@ -127,7 +144,7 @@ public class ApiResourceCache {
                         api.getDescription(),
                         api.getIsOpen()
                 );
-                resourceCache.put(key, info);
+                resourceCache.add(info);
             }
         }
 

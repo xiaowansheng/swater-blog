@@ -19,7 +19,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Value("${file.storage.local.path:uploads}")
     private String uploadDir;
 
-    @Value("${file.storage.local.url-prefix:/uploads}")
+    @Value("${file.storage.local.url-prefix:}")
     private String urlPrefix;
 
     @Override
