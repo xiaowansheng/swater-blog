@@ -28,14 +28,11 @@ public @interface ApiOperation {
     /** 操作类型（建议优先使用枚举） */
     ApiOperationType type() default ApiOperationType.OTHER;
 
-    /** 操作类型字符串（用于与历史或动态值兼容，若同时设置，优先使用枚举） */
-    String typeStr() default "";
-
     /** HTTP请求方法（GET、POST、PUT、DELETE等） */
     HttpMethod method() default HttpMethod.UNKNOWN;
 
     /** 接口路径（相对于控制器基础路径） */
-    String path() default "";
+    String[] path() default {""};
 
     /** 完整接口路径（包含控制器基础路径） */
     String fullPath() default "";
@@ -46,23 +43,13 @@ public @interface ApiOperation {
     /** 操作状态：ENABLED-启用，DISABLED-禁用 */
     boolean open() default false;
 
-    /** 是否需要权限验证 */
-    boolean requireAuth() default true;
-
-    /** 是否需要角色验证 */
-    boolean requireRole() default false;
-
     /** 操作描述 */
     String description() default "";
-
-    /** 操作分组（用于接口文档分组） */
-    String group() default "";
 
     /** 操作标签 */
     String[] tags() default {};
 
-    /** 是否启用自动初始化 */
-    boolean autoInit() default true;
+    String version() default "1.0.0";
 
     /** 是否记录操作日志 */
     boolean logOperation() default true;
