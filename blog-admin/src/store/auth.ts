@@ -36,8 +36,14 @@ export const useAuthStore = create<AuthState>()(
         }
       },
       getCurrentUser: async () => {
-        const user = await authApi.getCurrentUser()
-        set({ user })
+        try {
+          const user = await authApi.getCurrentUser()
+          set({ user })
+        } catch (error) {
+          // 如果获取当前用户失败，说明 token 已经失效或网络有问题
+          // 我们这里不强制登出，让 request.ts 的 401 拦截器处理
+          set({ user: null })
+        }
       },
       isAuthenticated: () => {
         return !!get().token
