@@ -2,6 +2,7 @@ package com.blog.controller.admin;
 
 import com.blog.annotation.ApiResource;
 import com.blog.common.Result;
+import com.blog.model.dto.ConfigDTO;
 import com.blog.model.vo.ConfigVO;
 import com.blog.service.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +40,9 @@ public class ConfigController {
     }
 
     @PutMapping("/{key}")
-    public Result<Void> updateByKey(@PathVariable String key, @RequestBody Map<String, String> request) {
-        String value = request.get("value");
-        configService.updateByKey(key, value);
-        return Result.success();
+    public Result<ConfigVO> updateByKey(@PathVariable String key, @RequestBody ConfigDTO configDTO) {
+        ConfigVO vo = configService.updateByKey(key, configDTO);
+        return Result.success(vo);
     }
 
     @PutMapping("/batch")

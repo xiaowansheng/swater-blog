@@ -32,7 +32,9 @@ public class AboutServiceImpl implements AboutService {
     @Override
     @Transactional
     public void updateAbout(AboutDTO dto) {
-        configService.updateByKey(ABOUT_CONFIG_KEY, dto.getContent());
+        com.blog.model.dto.ConfigDTO configDTO = new com.blog.model.dto.ConfigDTO();
+        configDTO.setValue(dto.getContent());
+        configService.updateByKey(ABOUT_CONFIG_KEY, configDTO);
     }
 }
 

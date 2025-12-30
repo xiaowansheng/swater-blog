@@ -97,6 +97,7 @@ dependencies {
     // 使用 Datafaker 替代已停更的 JavaFaker
     testImplementation("net.datafaker:datafaker:2.4.2")
     testImplementation("org.assertj:assertj-core")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 // --- 任务优化配置 ---
@@ -116,8 +117,8 @@ tasks.withType<Test> {
     }
     // Java 21 环境下必须开启，否则 Mockito 可能会报错
     jvmArgs("-XX:+EnableDynamicAgentLoading")
-    finalizedBy(tasks.jacocoTestReport)
-    enabled = false
+    // finalizedBy(tasks.jacocoTestReport)
+    enabled = true
 }
 
 tasks.jacocoTestReport {

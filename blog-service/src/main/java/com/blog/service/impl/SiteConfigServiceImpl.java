@@ -59,15 +59,25 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         }
     }
     
-    @Transactional
-    private void updateConfig(String key, Object config) {
+    @Transactional(rollbackFor = Exception.class)
+    protected void updateConfig(String key, Object config) {
         String jsonValue = JsonUtil.toJson(config);
         SysConfig sysConfig = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
                 .eq(SysConfig::getConfigKey, key)
                 .eq(SysConfig::getDeleted, 0));
+        
         if (sysConfig != null) {
+            log.info("更新现有配置: key={}", key);
             sysConfig.setValue(jsonValue);
             sysConfigMapper.updateById(sysConfig);
+        } else {
+            log.info("创建新配置: key={}", key);
+            sysConfig = new SysConfig();
+            sysConfig.setConfigKey(key);
+            sysConfig.setValue(jsonValue);
+            sysConfig.setName(key); // 默认名称使用key
+            sysConfig.setGroupName("site"); // 默认分组
+            sysConfigMapper.insert(sysConfig);
         }
     }
     

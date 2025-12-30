@@ -119,7 +119,7 @@ class ArticleAdminControllerTest extends BaseWebTest {
         createDTO.setExcerpt("文章摘要");
         createDTO.setCategoryId(testCategory.getId());
         createDTO.setType("original");
-        createDTO.setStatus("draft");
+        createDTO.setStatus(0);
         createDTO.setTagIds(Arrays.asList(1L, 2L));
         
         // When & Then
@@ -167,7 +167,7 @@ class ArticleAdminControllerTest extends BaseWebTest {
         updateDTO.setContent("更新后的内容");
         updateDTO.setExcerpt("更新后的摘要");
         updateDTO.setCategoryId(testCategory.getId());
-        updateDTO.setStatus("published");
+        updateDTO.setStatus(1);
         
         // When & Then
         mockMvc.perform(put("/api/admin/post/{id}", article.getId())

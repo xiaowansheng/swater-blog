@@ -3,6 +3,9 @@ package com.blog.model.vo;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/**
+ * @author xxx
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ConfigVO extends BaseVO {

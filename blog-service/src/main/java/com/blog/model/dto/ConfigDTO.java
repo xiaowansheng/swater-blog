@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ConfigDTO extends BaseDTO {
+
     @NotBlank(message = "配置键不能为空")
     private String configKey;
 
