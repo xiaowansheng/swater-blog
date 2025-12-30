@@ -2,6 +2,7 @@ package com.blog.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.blog.context.UserContext;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.ArticleMapper;
 import com.blog.mapper.CommentMapper;
@@ -120,15 +121,15 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
         // 设置设备信息
         String userAgent = RequestUtil.getUserAgent();
         comment.setDeviceInfo(userAgent);
-        
-        if (StpUtil.isLogin()) {
-            Long userId = StpUtil.getLoginIdAsLong();
+
+        if (UserContext.isLoggedIn()) {
+            Long userId = UserContext.getCurrentUserId();
             comment.setUserId(userId);
             comment.setType("1");
         } else {
             comment.setType("2");
         }
-        
+
         if (dto.getParentId() != null && dto.getParentId() > 0) {
             Comment parent = commentMapper.selectById(dto.getParentId());
             if (parent == null || parent.getDeleted() == 1) {

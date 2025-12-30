@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.common.PageResult;
+import com.blog.context.UserContext;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.AlbumMapper;
 import com.blog.mapper.PictureMapper;
@@ -74,8 +75,8 @@ public class PictureServiceImpl implements PictureService {
 
         Picture picture = BeanUtil.copyProperties(dto, Picture.class);
 
-        if (StpUtil.isLogin()) {
-            picture.setUserId(StpUtil.getLoginIdAsLong());
+        if (UserContext.isLoggedIn()) {
+            picture.setUserId(UserContext.getCurrentUserId());
         }
 
         if (picture.getStatus() == null || picture.getStatus().isEmpty()) {

@@ -1,6 +1,7 @@
 package com.blog.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
+import com.blog.context.UserContext;
 import com.blog.mapper.GuestbookMapper;
 import com.blog.model.dto.GuestbookDTO;
 import com.blog.model.entity.Guestbook;
@@ -85,9 +86,8 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
         String userAgent = RequestUtil.getUserAgent();
         guestbook.setDeviceInfo(userAgent);
 
-        boolean isLogin = StpUtil.isLogin();
-        if (isLogin) {
-            Long userId = StpUtil.getLoginIdAsLong();
+        if (UserContext.isLoggedIn()) {
+            Long userId = UserContext.getCurrentUserId();
             guestbook.setUserId(userId);
             guestbook.setType("1");
         } else {

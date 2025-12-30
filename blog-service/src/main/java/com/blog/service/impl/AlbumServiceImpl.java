@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.common.PageResult;
+import com.blog.context.UserContext;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.AlbumMapper;
 import com.blog.mapper.PictureMapper;
@@ -73,8 +74,8 @@ public class AlbumServiceImpl implements AlbumService {
         Album album = BeanUtil.copyProperties(dto, Album.class);
         album.setAlbumKey(KeyUtil.generateKey("album"));
 
-        if (StpUtil.isLogin()) {
-            album.setUserId(StpUtil.getLoginIdAsLong());
+        if (UserContext.isLoggedIn()) {
+            album.setUserId(UserContext.getCurrentUserId());
         }
 
         if (album.getStatus() == null || album.getStatus().isEmpty()) {

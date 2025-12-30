@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.common.PageResult;
+import com.blog.context.UserContext;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.FileMetaMapper;
 import com.blog.mapper.FileReferenceMapper;
@@ -164,8 +165,8 @@ public class FileServiceImpl implements FileService {
         fileMeta.setUrl(storagePlugin.getUrl(filePath));
         fileMeta.setFileSize(file.getSize());
         fileMeta.setMimeType(file.getContentType());
-        
-        Long userId = StpUtil.getLoginIdAsLong();
+
+        Long userId = UserContext.getCurrentUserId();
         fileMeta.setUploadUserId(userId);
         fileMeta.setStatus("ACTIVE");
         fileMeta.setRefCount(1);

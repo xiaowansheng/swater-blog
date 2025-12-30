@@ -2,11 +2,10 @@ package com.blog.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.blog.context.UserContext;
 import com.blog.mapper.RoleMenuMapper;
 import com.blog.mapper.SysMenuMapper;
-import com.blog.mapper.UserMapper;
 import com.blog.model.entity.SysMenu;
-import com.blog.model.entity.User;
 import com.blog.model.vo.MenuVO;
 import com.blog.service.MenuPublicService;
 import com.blog.service.RoleService;
@@ -28,25 +27,22 @@ public class MenuPublicServiceImpl implements MenuPublicService {
     private RoleMenuMapper roleMenuMapper;
 
     @Autowired
-    private UserMapper userMapper;
-
-    @Autowired
     private RoleService roleService;
 
     @Override
     public List<MenuVO> getCurrentUserMenus() {
-        if (!StpUtil.isLogin()) {
+        if (!UserContext.isLoggedIn()) {
             return List.of();
         }
 
-        Long userId = StpUtil.getLoginIdAsLong();
-        User user = userMapper.selectById(userId);
-        if (user == null || user.getRole() == null || user.getRole().isEmpty()) {
+        // 从 UserContext 获取当前用户，避免重复查询数据库
+        String userRole = UserContext.getCurrentUserRole();
+        if (userRole == null || userRole.isEmpty()) {
             return List.of();
         }
 
         // 根据用户角色名称获取角色ID
-        var role = roleService.getByName(user.getRole());
+        var role = roleService.getByName(userRole);
         if (role == null) {
             return List.of();
         }

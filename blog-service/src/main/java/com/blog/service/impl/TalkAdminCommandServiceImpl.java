@@ -2,6 +2,7 @@ package com.blog.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.blog.context.UserContext;
 import com.blog.event.talk.*;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.TalkMapper;
@@ -46,14 +47,14 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
     public Long create(TalkDTO dto) {
         Talk talk = BeanUtil.copyProperties(dto, Talk.class);
         talk.setTalkKey(KeyUtil.generateKey("talk"));
-        
-        Long userId = StpUtil.getLoginIdAsLong();
+
+        Long userId = UserContext.getCurrentUserId();
         talk.setAuthorId(userId);
-        
+
         if (dto.getImages() != null && !dto.getImages().isEmpty()) {
             talk.setImages(JsonUtil.toJson(dto.getImages()));
         }
-        
+
         talk.setLikeCount(0);
         talk.setCommentCount(0);
 

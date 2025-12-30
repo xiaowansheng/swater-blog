@@ -2,6 +2,7 @@ package com.blog.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.blog.context.UserContext;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.UserMapper;
 import com.blog.model.dto.LoginDTO;
@@ -101,15 +102,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserVO getCurrentUser() {
-        if (!StpUtil.isLogin()) {
-            throw new BusinessException("未登录");
-        }
-        Long userId = StpUtil.getLoginIdAsLong();
-        User user = userMapper.selectById(userId);
-        if (user == null || user.getDeleted() == 1) {
-            throw new BusinessException("用户不存在");
-        }
-        return convertToVO(user);
+        // 从 UserContext 获取当前用户，避免重复查询数据库
+        return UserContext.getCurrentUser();
     }
 
     @Override
