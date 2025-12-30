@@ -22,7 +22,7 @@ INSERT INTO `sys_config` (`config_key`, `name`, `value`, `type`, `description`, 
 ('cover', '页面封面', '{"home":"","article":"","archive":"","category":"","tag":"","talk":"","album":"","link":"","about":"","message":"","default":""}', 'json', '封面配置', '网站设置', 3),
 ('social', '社交链接', '{"github":"","gitee":"","weibo":"","zhihu":"","bilibili":"","twitter":"","facebook":""}', 'json', '社交链接', '网站设置', 4),
 ('privacy', '隐私设置', '{"showIp":false,"showLocation":true,"showDevice":false,"showBrowser":false}', 'json', '隐私设置', '功能设置', 1),
-('comment', '评论设置', '{"enableAudit":false,"allowAnonymous":true,"allowGuest":true,"showEmail":false,"pageSize":10}', 'json', '评论设置', '功能设置', 2),
+('comment', '评论设置', '{"enableAudit":false,"allowAnonymous":true,"allowGuest":true,"showEmail":false}', 'json', '评论设置', '功能设置', 2),
 ('notify', '通知设置', '{"loginEmail":false,"commentEmail":false,"replyEmail":false,"guestbookEmail":false,"friendLinkEmail":false}', 'json', '通知设置', '功能设置', 3),
 ('upload', '上传设置', '{"maxSize":10485760,"allowedTypes":"jpg,jpeg,png,gif,webp","imageCompress":true,"imageQuality":85}', 'json', '上传设置', '功能设置', 4),
 ('email', '邮件设置', '{"enable":false,"host":"smtp.qq.com","port":465,"username":"","password":"","fromName":"Test Blog"}', 'json', '邮件设置', '功能设置', 5);

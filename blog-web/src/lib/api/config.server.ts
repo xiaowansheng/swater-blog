@@ -45,7 +45,6 @@ const defaultConfig: PublicConfigVO = {
   comment: {
     allowAnonymous: false,
     allowGuest: true,
-    pageSize: 10,
   },
 };
 

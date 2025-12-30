@@ -141,8 +141,7 @@ INSERT INTO `sys_config` (`config_key`, `name`, `value`, `type`, `description`, 
   "enableAudit": true,
   "allowAnonymous": false,
   "allowGuest": true,
-  "showEmail": false,
-  "pageSize": 10
+  "showEmail": false
 }', 'json', '评论功能配置', '功能设置', 2);
 
 -- 通知配置（仅后台使用，前台不可见）

@@ -77,7 +77,6 @@ export interface PrivacyConfig {
 export interface CommentConfig {
   allowAnonymous: boolean;
   allowGuest: boolean;
-  pageSize: number;
 }
 
 /**
