@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, message, Modal } from 'antd';
 import Image from '@/components/common/ImageWithPreview';
-import { 
+import {
   PlusOutlined, 
   LoadingOutlined, 
   DeleteOutlined, 
@@ -161,28 +161,30 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               </div>
               
               {/* 遮罩层 - 悬停显示操作 */}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-3 backdrop-blur-[1px]">
-                {/* 重新上传提示 */}
-                <div className="flex flex-col items-center mb-2 text-white pointer-events-none">
-                  <CloudUploadOutlined className="mb-1 text-3xl" />
-                  <span className="text-xs font-medium">点击或拖拽重新上传</span>
-                </div>
+              <div className={`absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center backdrop-blur-[1px] ${isSmall ? 'gap-1' : 'gap-3'}`}>
+                {/* 重新上传提示 - 只有在空间足够时显示 */}
+                {!isSmall && (
+                  <div className="flex flex-col items-center mb-2 text-white pointer-events-none">
+                    <CloudUploadOutlined className="mb-1 text-3xl" />
+                    <span className="text-xs font-medium">点击或拖拽重新上传</span>
+                  </div>
+                )}
                 
                 {/* 操作按钮 */}
-                <div className="flex gap-4 items-center">
+                <div className={`flex items-center ${isSmall ? 'gap-2' : 'gap-4'}`}>
                   <div 
-                    className="flex justify-center items-center w-10 h-10 text-white rounded-full transition-all duration-200 bg-white/20 hover:bg-white/40 hover:scale-110 active:scale-95"
+                    className={`flex justify-center items-center text-white rounded-full transition-all duration-200 bg-white/20 hover:bg-white/40 hover:scale-110 active:scale-95 ${isSmall ? 'w-8 h-8' : 'w-10 h-10'}`}
                     onClick={handlePreview}
                     title="预览"
                   >
-                    <EyeOutlined className="text-lg" />
+                    <EyeOutlined className={isSmall ? 'text-base' : 'text-lg'} />
                   </div>
                   <div 
-                    className="flex justify-center items-center w-10 h-10 text-white rounded-full transition-all duration-200 bg-white/20 hover:bg-red-500/60 hover:scale-110 active:scale-95"
+                    className={`flex justify-center items-center text-white rounded-full transition-all duration-200 bg-white/20 hover:bg-red-500/60 hover:scale-110 active:scale-95 ${isSmall ? 'w-8 h-8' : 'w-10 h-10'}`}
                     onClick={handleRemove}
                     title="删除"
                   >
-                    <DeleteOutlined className="text-lg" />
+                    <DeleteOutlined className={isSmall ? 'text-base' : 'text-lg'} />
                   </div>
                 </div>
               </div>
