@@ -68,7 +68,6 @@ export interface CommentConfig {
   allowAnonymous: boolean
   allowGuest: boolean
   showEmail: boolean
-  pageSize: number
 }
 
 export interface NotifyConfig {

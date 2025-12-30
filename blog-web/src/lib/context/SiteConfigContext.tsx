@@ -51,7 +51,6 @@ const defaultPrivacyConfig: PrivacyConfig = {
 const defaultCommentConfig: CommentConfig = {
   allowAnonymous: false,
   allowGuest: true,
-  pageSize: 10,
 };
 
 interface SiteConfigContextType {

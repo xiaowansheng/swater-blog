@@ -11,7 +11,6 @@ public class CommentConfigDTO {
     private Boolean allowAnonymous = false; // 是否允许匿名
     private Boolean allowGuest = true;      // 是否允许游客评论
     private Boolean showEmail = false;      // 是否显示邮箱
-    private Integer pageSize = 10;          // 每页数量
     
     /**
      * 获取前台可见的评论配置
@@ -20,7 +19,6 @@ public class CommentConfigDTO {
         CommentConfigDTO publicDTO = new CommentConfigDTO();
         publicDTO.setAllowAnonymous(this.allowAnonymous);
         publicDTO.setAllowGuest(this.allowGuest);
-        publicDTO.setPageSize(this.pageSize);
         // enableAudit 和 showEmail 不返回给前台
         return publicDTO;
     }

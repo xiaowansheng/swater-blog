@@ -434,9 +434,6 @@ const ConfigPage: React.FC = () => {
           >
             <Switch />
           </Form.Item>
-          <Form.Item name="pageSize" label="每页评论数">
-            <InputNumber min={5} max={50} />
-          </Form.Item>
           <Form.Item>
             <Button
               type="primary"
