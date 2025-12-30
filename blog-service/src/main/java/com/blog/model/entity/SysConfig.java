@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 @TableName("sys_config")
 public class SysConfig extends BaseEntity {
 
-    private Integer id;
+    private Long id;
 
     @TableField("config_key")
     private String configKey;
