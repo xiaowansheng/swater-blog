@@ -191,8 +191,12 @@ mybatis-plus:
 sa-token:
   token-name: Authorization
   token-prefix: Bearer
-  timeout: 2592000
-  active-timeout: -1
+  # token 有效期 (单位: 秒)，-1 代表永久有效
+  timeout: -1
+  # token 最低活跃频率 (单位: 秒)，如果连续 7 天不操作，则 token 过期
+  active-timeout: 604800
+  # 是否在每次读取 token 时刷新其有效期
+  is-read-timeout: true
   is-concurrent: true
   is-share: true
   token-style: uuid
