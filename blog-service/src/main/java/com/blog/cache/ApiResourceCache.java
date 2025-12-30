@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -53,6 +54,9 @@ public class ApiResourceCache {
     private volatile boolean initialized = false;
 
     /**
+     *  TODO 如果后续需要优化，可以考虑：
+     *          按路径前缀分组建立索引
+     *          使用编译后的路径模式（AntPathMatcher 支持编译）
      * 获取接口资源信息
      * <p>
      * 使用路径匹配查找接口（支持占位符等）
