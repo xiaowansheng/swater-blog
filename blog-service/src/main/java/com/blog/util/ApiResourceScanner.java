@@ -61,6 +61,9 @@ public class ApiResourceScanner {
             moduleInfo.setVersion(moduleOperation.version());
             resources.add(moduleInfo);
 
+            // 判断模块是否开放（用于接口继承）
+            boolean moduleOpen = moduleOperation.open();
+
             // 扫描方法级别的接口
             Method[] methods = clazz.getDeclaredMethods();
             for (Method method : methods) {
@@ -122,7 +125,13 @@ public class ApiResourceScanner {
                     info.setPath(fullPath);
                     info.setMethod(httpMethodStr);
                     info.setDescription(methodOperation.description());
-                    info.setIsOpen(methodOperation.open() ? 1 : 0);
+
+                    // 处理open属性继承逻辑：
+                    // 1. 如果模块不开放，则接口也不开放
+                    // 2. 如果模块开放，但接口明确设置为不开放，则接口不开放
+                    // 3. 否则接口开放
+                    boolean isOpen = moduleOpen && methodOperation.open();
+                    info.setIsOpen(isOpen ? 1 : 0);
 
                     // 处理权限标识
                     String perms = methodOperation.perms();
