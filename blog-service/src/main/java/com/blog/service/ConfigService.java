@@ -18,7 +18,14 @@ public interface ConfigService {
     ConfigVO getByKey(String key);
 
     /**
-     * 更新或插入配置信息 (UPSERT)
+     * 创建配置项
+     * @param configDTO 配置信息
+     * @return 创建后的完整配置数据
+     */
+    ConfigVO create(ConfigDTO configDTO);
+
+    /**
+     * 更新配置信息
      * @param key 配置键
      * @param configDTO 配置信息
      * @return 更新后的完整配置数据

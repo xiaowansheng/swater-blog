@@ -9,6 +9,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @TableName("sys_config")
 public class SysConfig extends BaseEntity {
+
+    private Integer id;
+
     @TableField("config_key")
     private String configKey;
 

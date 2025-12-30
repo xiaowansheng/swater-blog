@@ -1,9 +1,9 @@
 package com.blog.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.blog.mapper.SysConfigMapper;
+import com.blog.model.dto.ConfigDTO;
 import com.blog.model.dto.config.*;
-import com.blog.model.entity.SysConfig;
+import com.blog.model.vo.ConfigVO;
+import com.blog.service.ConfigService;
 import com.blog.service.SiteConfigService;
 import com.blog.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import java.util.Map;
 public class SiteConfigServiceImpl implements SiteConfigService {
     
     @Autowired
-    private SysConfigMapper sysConfigMapper;
+    private ConfigService configService;
     
     // 配置key常量
     private static final String KEY_SITE = "site";
@@ -37,9 +37,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     // ========== 通用方法 ==========
     
     private <T> T getConfig(String key, Class<T> clazz) {
-        SysConfig config = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
-                .eq(SysConfig::getConfigKey, key)
-                .eq(SysConfig::getDeleted, 0));
+        ConfigVO config = configService.getByKey(key);
         if (config == null || config.getValue() == null) {
             try {
                 return clazz.getDeclaredConstructor().newInstance();
@@ -62,22 +60,21 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Transactional(rollbackFor = Exception.class)
     protected void updateConfig(String key, Object config) {
         String jsonValue = JsonUtil.toJson(config);
-        SysConfig sysConfig = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
-                .eq(SysConfig::getConfigKey, key)
-                .eq(SysConfig::getDeleted, 0));
+        ConfigVO existingConfig = configService.getByKey(key);
         
-        if (sysConfig != null) {
+        if (existingConfig != null) {
             log.info("更新现有配置: key={}", key);
-            sysConfig.setValue(jsonValue);
-            sysConfigMapper.updateById(sysConfig);
+            ConfigDTO updateDTO = new ConfigDTO();
+            updateDTO.setValue(jsonValue);
+            configService.updateByKey(key, updateDTO);
         } else {
             log.info("创建新配置: key={}", key);
-            sysConfig = new SysConfig();
-            sysConfig.setConfigKey(key);
-            sysConfig.setValue(jsonValue);
-            sysConfig.setName(key); // 默认名称使用key
-            sysConfig.setGroupName("site"); // 默认分组
-            sysConfigMapper.insert(sysConfig);
+            ConfigDTO createDTO = new ConfigDTO();
+            createDTO.setConfigKey(key);
+            createDTO.setValue(jsonValue);
+            createDTO.setName(key); // 默认名称使用key
+            createDTO.setGroupName("site"); // 默认分组
+            configService.create(createDTO);
         }
     }
     
