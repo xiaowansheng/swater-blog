@@ -69,6 +69,7 @@ const menuItems: MenuProps['items'] = [
       { key: '/user', icon: <UserOutlined />, label: '用户管理' },
       { key: '/role', icon: <TeamOutlined />, label: '角色管理' },
       { key: '/menu', icon: <MenuOutlined />, label: '菜单管理' },
+      { key: '/api', icon: <SettingOutlined />, label: '接口管理' },
       { key: '/config', icon: <SettingOutlined />, label: '系统配置' },
       { key: '/about', icon: <InfoCircleOutlined />, label: '关于页面' },
     ],
@@ -119,7 +120,7 @@ const Sidebar: React.FC = () => {
     if (['/file', '/album'].some(p => path.startsWith(p))) {
       return ['media']
     }
-    if (['/user', '/role', '/menu', '/config', '/about'].some(p => path.startsWith(p))) {
+    if (['/user', '/role', '/menu', '/api', '/config', '/about'].some(p => path.startsWith(p))) {
       return ['system']
     }
     if (['/visitor', '/log'].some(p => path.startsWith(p))) {
