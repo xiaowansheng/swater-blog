@@ -1,9 +1,10 @@
 package com.blog.controller.pub;
 
 import com.blog.annotation.ApiDocumentation;
-import com.blog.annotation.ApiResource;
+import com.blog.annotation.ApiOperation;
 import com.blog.common.PageResult;
 import com.blog.common.Result;
+import com.blog.model.enums.ApiOperationType;
 import com.blog.model.vo.ArticleVO;
 import com.blog.service.ArticlePublicQueryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/public/post")
-@ApiResource(name = "文章公开接口", isOpen = true)
+@ApiOperation(value = "pub:post", name = "文章公开接口", description = "文章相关接口", open = true)
 @Tag(name = "文章公开接口", description = "文章相关的公开API，无需认证即可访问")
 @ApiDocumentation.PublicApi
 public class ArticlePublicController {
@@ -27,18 +28,19 @@ public class ArticlePublicController {
     private ArticlePublicQueryService articlePublicQueryService;
 
     @GetMapping("/list")
+    @ApiOperation(value = "query", name = "获取文章列表", type = ApiOperationType.QUERY, description = "获取已发布的文章列表，支持分页和多种筛选条件")
     @Operation(
         summary = "获取文章列表",
         description = """
             获取已发布的文章列表，支持分页和多种筛选条件。
-            
+
             **功能特性：**
             - 支持按分类筛选
-            - 支持按标签筛选  
+            - 支持按标签筛选
             - 支持关键词搜索
             - 自动分页处理
             - 按发布时间倒序排列
-            
+
             **使用示例：**
             - 获取第一页：`/api/public/post/list?page=1&size=10`
             - 按分类筛选：`/api/public/post/list?categoryId=1`
@@ -68,11 +70,12 @@ public class ArticlePublicController {
     }
 
     @GetMapping("/{id}")
+    @ApiOperation(value = "query", name = "根据ID获取文章详情", type = ApiOperationType.QUERY, description = "根据文章ID获取文章的详细信息")
     @Operation(
         summary = "根据ID获取文章详情",
         description = """
             根据文章ID获取文章的详细信息。
-            
+
             **注意事项：**
             - 只能获取已发布的文章
             - 会自动增加文章浏览量
@@ -119,11 +122,12 @@ public class ArticlePublicController {
     }
 
     @GetMapping("/slug/{slug}")
+    @ApiOperation(value = "query", name = "根据Slug获取文章详情", type = ApiOperationType.QUERY, description = "根据文章的URL别名(slug)获取文章详情")
     @Operation(
         summary = "根据Slug获取文章详情",
         description = """
             根据文章的URL别名(slug)获取文章详情。
-            
+
             **使用场景：**
             - SEO友好的URL
             - 永久链接访问
@@ -142,11 +146,12 @@ public class ArticlePublicController {
     }
 
     @GetMapping("/hot")
+    @ApiOperation(value = "query", name = "获取热门文章", type = ApiOperationType.QUERY, description = "获取热门文章列表，按浏览量和点赞数排序")
     @Operation(
         summary = "获取热门文章",
         description = """
             获取热门文章列表，按浏览量和点赞数排序。
-            
+
             **排序规则：**
             1. 优先按点赞数排序
             2. 其次按浏览量排序
@@ -188,6 +193,7 @@ public class ArticlePublicController {
     }
 
     @GetMapping("/latest")
+    @ApiOperation(value = "query", name = "获取最新文章", type = ApiOperationType.QUERY, description = "获取最新发布的文章列表")
     public Result<List<ArticleVO>> getLatestArticles(@RequestParam(required = false) Integer limit) {
         List<ArticleVO> articles = articlePublicQueryService.getLatestArticles(limit);
         return Result.success(articles);

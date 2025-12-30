@@ -1,6 +1,7 @@
 package com.blog.controller.pub;
 
-import com.blog.annotation.ApiResource;
+import com.blog.annotation.ApiOperation;
+import com.blog.model.enums.ApiOperationType;
 import com.blog.model.vo.ArticleVO;
 import com.blog.service.ArticlePublicQueryService;
 import com.rometools.rome.feed.rss.Channel;
@@ -25,7 +26,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/public/rss")
-@ApiResource(name = "RSS订阅接口", isOpen = true)
+@ApiOperation(value = "pub:rss", name = "RSS订阅接口", description = "RSS订阅相关接口", open = true)
 public class RssController {
     
     @Autowired
@@ -35,6 +36,7 @@ public class RssController {
     private String siteName;
     
     @GetMapping(produces = "application/rss+xml;charset=UTF-8")
+    @ApiOperation(value = "query", name = "获取RSS订阅", type = ApiOperationType.QUERY, description = "获取网站的RSS订阅内容")
     public ResponseEntity<String> rss(HttpServletRequest request) {
         try {
             String baseUrl = ServletUriComponentsBuilder.fromRequestUri(request)

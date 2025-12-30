@@ -1,6 +1,7 @@
 package com.blog.controller.admin;
 
-import com.blog.annotation.ApiResource;
+import com.blog.annotation.ApiOperation;
+import com.blog.model.enums.ApiOperationType;
 import com.blog.common.PageResult;
 import com.blog.common.Result;
 import com.blog.model.vo.GuestbookVO;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/guestbook")
-@ApiResource(name = "留言簿管理接口")
+@ApiOperation(value = "guestbook", name = "留言簿管理模块", description = "留言簿管理接口", open = false)
 public class GuestbookAdminController {
     @Autowired
     private GuestbookAdminQueryService guestbookAdminQueryService;
@@ -20,6 +21,7 @@ public class GuestbookAdminController {
     private GuestbookAdminCommandService guestbookAdminCommandService;
 
     @GetMapping("/list")
+    @ApiOperation(value = "list", name = "查询留言列表", type = ApiOperationType.QUERY, description = "分页查询留言列表")
     public Result<PageResult<GuestbookVO>> list(
             @RequestParam(defaultValue = "1") Long page,
             @RequestParam(defaultValue = "10") Long size,
@@ -29,6 +31,7 @@ public class GuestbookAdminController {
     }
 
     @GetMapping("/{id}")
+    @ApiOperation(value = "detail", name = "获取留言详情", type = ApiOperationType.QUERY, description = "根据ID获取留言详情")
     public Result<GuestbookVO> getById(@PathVariable Long id) {
         GuestbookVO vo = guestbookAdminQueryService.getById(id);
         if (vo == null) {
@@ -38,27 +41,30 @@ public class GuestbookAdminController {
     }
 
     @PostMapping("/{id}/approve")
+    @ApiOperation(value = "approve", name = "审核通过留言", type = ApiOperationType.ENABLE, description = "审核通过留言")
     public Result<Void> approve(@PathVariable Long id) {
         guestbookAdminCommandService.approve(id);
         return Result.success();
     }
 
     @PostMapping("/{id}/reject")
+    @ApiOperation(value = "reject", name = "拒绝留言", type = ApiOperationType.DISABLE, description = "拒绝留言")
     public Result<Void> reject(@PathVariable Long id) {
         guestbookAdminCommandService.reject(id);
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "delete", name = "删除留言", type = ApiOperationType.DELETE, description = "删除留言")
     public Result<Void> delete(@PathVariable Long id) {
         guestbookAdminCommandService.delete(id);
         return Result.success();
     }
 
     @PutMapping("/{id}/visible")
+    @ApiOperation(value = "setVisible", name = "设置留言可见性", type = ApiOperationType.UPDATE, description = "设置留言是否可见")
     public Result<Void> setVisible(@PathVariable Long id, @RequestParam Integer isVisible) {
         guestbookAdminCommandService.setVisible(id, isVisible);
         return Result.success();
     }
 }
-

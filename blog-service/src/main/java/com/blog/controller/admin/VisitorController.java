@@ -1,6 +1,7 @@
 package com.blog.controller.admin;
 
-import com.blog.annotation.ApiResource;
+import com.blog.annotation.ApiOperation;
+import com.blog.model.enums.ApiOperationType;
 import com.blog.common.PageResult;
 import com.blog.common.Result;
 import com.blog.model.vo.VisitorStatisticsVO;
@@ -13,12 +14,13 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/admin/visitor")
-@ApiResource(name = "访客管理接口")
+@ApiOperation(value = "visitor", name = "访客管理模块", description = "访客管理接口", open = false)
 public class VisitorController {
     @Autowired
     private VisitorService visitorService;
 
     @GetMapping("/list")
+    @ApiOperation(value = "list", name = "查询访客列表", type = ApiOperationType.QUERY, description = "分页查询访客列表")
     public Result<PageResult<VisitorVO>> list(
             @RequestParam(required = false) Long page,
             @RequestParam(required = false) Long size,
@@ -28,6 +30,7 @@ public class VisitorController {
     }
 
     @GetMapping("/statistics")
+    @ApiOperation(value = "statistics", name = "访客统计", type = ApiOperationType.QUERY, description = "获取访客统计数据")
     public Result<VisitorStatisticsVO> getStatistics(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
@@ -35,4 +38,3 @@ public class VisitorController {
         return Result.success(statistics);
     }
 }
-

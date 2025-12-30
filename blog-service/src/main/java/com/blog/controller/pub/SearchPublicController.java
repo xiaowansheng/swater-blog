@@ -1,8 +1,9 @@
 package com.blog.controller.pub;
 
-import com.blog.annotation.ApiResource;
+import com.blog.annotation.ApiOperation;
 import com.blog.common.PageResult;
 import com.blog.common.Result;
+import com.blog.model.enums.ApiOperationType;
 import com.blog.model.vo.SearchVO;
 import com.blog.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +11,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/public/search")
-@ApiResource(name = "搜索接口", isOpen = true)
+@ApiOperation(value = "pub:search", name = "搜索接口", description = "搜索相关接口", open = true)
 public class SearchPublicController {
     @Autowired
     private SearchService searchService;
 
     @GetMapping
+    @ApiOperation(value = "query", name = "搜索内容", type = ApiOperationType.QUERY, description = "根据关键词搜索文章、说说等内容")
     public Result<PageResult<SearchVO>> search(
             @RequestParam String keyword,
             @RequestParam(required = false, defaultValue = "all") String type,

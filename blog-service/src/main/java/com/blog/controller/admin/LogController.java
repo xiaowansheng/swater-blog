@@ -1,6 +1,7 @@
 package com.blog.controller.admin;
 
-import com.blog.annotation.ApiResource;
+import com.blog.annotation.ApiOperation;
+import com.blog.model.enums.ApiOperationType;
 import com.blog.common.PageResult;
 import com.blog.common.Result;
 import com.blog.model.vo.LogErrorVO;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/admin/log")
-@ApiResource(name = "日志管理接口")
+@ApiOperation(value = "log", name = "日志管理模块", description = "日志管理接口", open = false)
 public class LogController {
     @Autowired
     private LogOperationService logOperationService;
@@ -24,6 +25,7 @@ public class LogController {
     private LogErrorService logErrorService;
 
     @GetMapping("/operation/list")
+    @ApiOperation(value = "operationList", name = "查询操作日志列表", type = ApiOperationType.QUERY, description = "分页查询操作日志")
     public Result<PageResult<LogOperationVO>> getOperationLogList(
             @RequestParam(required = false) Long page,
             @RequestParam(required = false) Long size,
@@ -35,6 +37,7 @@ public class LogController {
     }
 
     @GetMapping("/operation/{id}")
+    @ApiOperation(value = "operationDetail", name = "获取操作日志详情", type = ApiOperationType.QUERY, description = "根据ID获取操作日志详情")
     public Result<LogOperationVO> getOperationLogById(@PathVariable Long id) {
         LogOperationVO vo = logOperationService.getById(id);
         if (vo == null) {
@@ -44,6 +47,7 @@ public class LogController {
     }
 
     @GetMapping("/exception/list")
+    @ApiOperation(value = "exceptionList", name = "查询异常日志列表", type = ApiOperationType.QUERY, description = "分页查询异常日志")
     public Result<PageResult<LogErrorVO>> getExceptionLogList(
             @RequestParam(required = false) Long page,
             @RequestParam(required = false) Long size,
@@ -55,6 +59,7 @@ public class LogController {
     }
 
     @GetMapping("/exception/{id}")
+    @ApiOperation(value = "exceptionDetail", name = "获取异常日志详情", type = ApiOperationType.QUERY, description = "根据ID获取异常日志详情")
     public Result<LogErrorVO> getExceptionLogById(@PathVariable Long id) {
         LogErrorVO vo = logErrorService.getById(id);
         if (vo == null) {
@@ -64,22 +69,24 @@ public class LogController {
     }
 
     @DeleteMapping("/operation/{id}")
+    @ApiOperation(value = "deleteOperation", name = "删除操作日志", type = ApiOperationType.DELETE, description = "删除操作日志")
     public Result<Void> deleteOperationLog(@PathVariable Long id) {
         logOperationService.delete(id);
         return Result.success();
     }
 
     @DeleteMapping("/exception/{id}")
+    @ApiOperation(value = "deleteException", name = "删除异常日志", type = ApiOperationType.DELETE, description = "删除异常日志")
     public Result<Void> deleteExceptionLog(@PathVariable Long id) {
         logErrorService.delete(id);
         return Result.success();
     }
 
     @PostMapping("/cleanup")
+    @ApiOperation(value = "cleanup", name = "清理日志", type = ApiOperationType.OTHER, description = "清理过期日志")
     public Result<Void> cleanup(@RequestParam(required = false) Integer retentionDays) {
         logOperationService.cleanup(retentionDays);
         logErrorService.cleanup(retentionDays);
         return Result.success();
     }
 }
-

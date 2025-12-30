@@ -1,10 +1,11 @@
 package com.blog.controller;
 
 import com.blog.annotation.ApiDocumentation;
-import com.blog.annotation.ApiResource;
+import com.blog.annotation.ApiOperation;
 import com.blog.annotation.RateLimit;
 import com.blog.common.Result;
 import com.blog.model.dto.LoginDTO;
+import com.blog.model.enums.ApiOperationType;
 import com.blog.model.vo.LoginVO;
 import com.blog.model.vo.UserVO;
 import com.blog.service.AuthService;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@ApiResource(name = "认证接口", isOpen = true)
+@ApiOperation(value = "auth", name = "认证模块", description = "用户认证相关接口", open = true)
 @Tag(name = "认证管理", description = "用户认证相关接口，包括登录、登出、token刷新等")
 @ApiDocumentation.PublicApi
 public class AuthController {
@@ -29,6 +30,7 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
+    @ApiOperation(value = "login", name = "用户登录", type = ApiOperationType.LOGIN, description = "用户登录接口")
     @Operation(
         summary = "用户登录",
         description = """
@@ -140,6 +142,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @ApiOperation(value = "logout", name = "用户登出", type = ApiOperationType.LOGOUT, description = "用户登出接口")
     @Operation(
         summary = "用户登出",
         description = """
@@ -185,6 +188,7 @@ public class AuthController {
     }
 
     @GetMapping("/user-info")
+    @ApiOperation(value = "userInfo", name = "获取用户信息", type = ApiOperationType.QUERY, description = "获取当前用户信息")
     @Operation(
         summary = "获取当前用户信息",
         description = """
@@ -230,6 +234,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
+    @ApiOperation(value = "refreshToken", name = "刷新令牌", type = ApiOperationType.OTHER, description = "刷新访问令牌")
     @Operation(
         summary = "刷新访问令牌",
         description = """
@@ -279,12 +284,14 @@ public class AuthController {
     }
 
     @GetMapping("/current")
+    @ApiOperation(value = "current", name = "获取当前用户", type = ApiOperationType.QUERY, description = "获取当前登录用户")
     public Result<UserVO> getCurrentUser() {
         UserVO user = authService.getCurrentUser();
         return Result.success(user);
     }
 
     @PostMapping("/refresh")
+    @ApiOperation(value = "refresh", name = "刷新令牌", type = ApiOperationType.OTHER, description = "刷新令牌")
     public Result<String> refreshToken() {
         String token = authService.refreshToken();
         return Result.success(token);

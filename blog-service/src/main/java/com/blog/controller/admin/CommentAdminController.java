@@ -1,6 +1,7 @@
 package com.blog.controller.admin;
 
-import com.blog.annotation.ApiResource;
+import com.blog.annotation.ApiOperation;
+import com.blog.model.enums.ApiOperationType;
 import com.blog.common.PageResult;
 import com.blog.common.Result;
 import com.blog.model.vo.CommentVO;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/comment")
-@ApiResource(name = "评论管理接口")
+@ApiOperation(value = "comment", name = "评论管理模块", description = "评论管理接口", open = false)
 public class CommentAdminController {
     @Autowired
     private CommentAdminQueryService commentAdminQueryService;
@@ -20,6 +21,8 @@ public class CommentAdminController {
     private CommentAdminCommandService commentAdminCommandService;
 
     @GetMapping("/list")
+    @ApiOperation(value = "list", name = "查询评论列表", type = ApiOperationType.QUERY,
+            description = "分页查询评论列表")
     public Result<PageResult<CommentVO>> list(
             @RequestParam(required = false) Long page,
             @RequestParam(required = false) Long size,
@@ -31,6 +34,8 @@ public class CommentAdminController {
     }
 
     @GetMapping("/{id}")
+    @ApiOperation(value = "detail", name = "获取评论详情", type = ApiOperationType.QUERY,
+            description = "根据ID获取评论详情")
     public Result<CommentVO> getById(@PathVariable Long id) {
         CommentVO vo = commentAdminQueryService.getById(id);
         if (vo == null) {
@@ -40,33 +45,42 @@ public class CommentAdminController {
     }
 
     @PostMapping("/{id}/approve")
+    @ApiOperation(value = "approve", name = "审核通过", type = ApiOperationType.ENABLE,
+            description = "审核通过评论")
     public Result<Void> approve(@PathVariable Long id) {
         commentAdminCommandService.approve(id);
         return Result.success();
     }
 
     @PostMapping("/{id}/reject")
+    @ApiOperation(value = "reject", name = "审核拒绝", type = ApiOperationType.DISABLE,
+            description = "审核拒绝评论")
     public Result<Void> reject(@PathVariable Long id) {
         commentAdminCommandService.reject(id);
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "delete", name = "删除评论", type = ApiOperationType.DELETE,
+            description = "删除评论")
     public Result<Void> delete(@PathVariable Long id) {
         commentAdminCommandService.delete(id);
         return Result.success();
     }
 
     @PostMapping("/{id}/visible")
+    @ApiOperation(value = "setVisible", name = "设置为可见", type = ApiOperationType.ENABLE,
+            description = "设置评论为可见状态")
     public Result<Void> setVisible(@PathVariable Long id) {
         commentAdminCommandService.setVisible(id);
         return Result.success();
     }
 
     @PostMapping("/{id}/hidden")
+    @ApiOperation(value = "setHidden", name = "设置为隐藏", type = ApiOperationType.DISABLE,
+            description = "设置评论为隐藏状态")
     public Result<Void> setHidden(@PathVariable Long id) {
         commentAdminCommandService.setHidden(id);
         return Result.success();
     }
 }
-
