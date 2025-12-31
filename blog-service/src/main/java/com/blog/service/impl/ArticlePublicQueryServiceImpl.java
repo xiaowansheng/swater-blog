@@ -42,8 +42,7 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
         Page<Article> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode());
-        wrapper.eq(Article::getDeleted, 0);
-        
+
         if (categoryId != null) {
             wrapper.eq(Article::getCategoryId, categoryId);
         }
@@ -76,8 +75,7 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
     public ArticleVO getById(Long id) {
         Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
                 .eq(Article::getId, id)
-                .eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode())
-                .eq(Article::getDeleted, 0));
+                .eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode()));
         if (article == null) {
             return null;
         }
@@ -89,8 +87,7 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
     public ArticleVO getBySlug(String slug) {
         Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
                 .eq(Article::getSlug, slug)
-                .eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode())
-                .eq(Article::getDeleted, 0));
+                .eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode()));
         if (article == null) {
             return null;
         }

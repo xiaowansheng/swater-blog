@@ -33,7 +33,6 @@ public class TalkPublicQueryServiceImpl implements TalkPublicQueryService {
         Page<Talk> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Talk> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Talk::getStatus, "1");
-        wrapper.eq(Talk::getDeleted, 0);
         wrapper.orderByDesc(Talk::getIsTop);
         wrapper.orderByDesc(Talk::getCreateTime);
         
@@ -50,8 +49,7 @@ public class TalkPublicQueryServiceImpl implements TalkPublicQueryService {
     public TalkVO getById(Long id) {
         Talk talk = talkMapper.selectOne(new LambdaQueryWrapper<Talk>()
                 .eq(Talk::getId, id)
-                .eq(Talk::getStatus, "1")
-                .eq(Talk::getDeleted, 0));
+                .eq(Talk::getStatus, "1"));
         if (talk == null) {
             return null;
         }

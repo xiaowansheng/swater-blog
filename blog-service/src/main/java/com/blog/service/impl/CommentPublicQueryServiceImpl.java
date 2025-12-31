@@ -30,7 +30,6 @@ public class CommentPublicQueryServiceImpl implements CommentPublicQueryService 
     public PageResult<CommentVO> list(Long targetId, String targetType, Long page, Long size) {
         Page<Comment> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Comment::getDeleted, 0);
         wrapper.eq(Comment::getStatus, 1);
         wrapper.eq(Comment::getIsVisible, 0);
         
@@ -57,7 +56,6 @@ public class CommentPublicQueryServiceImpl implements CommentPublicQueryService 
 
     private void loadReplies(CommentVO parent) {
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Comment::getDeleted, 0);
         wrapper.eq(Comment::getStatus, 1);
         wrapper.eq(Comment::getIsVisible, 0);
         wrapper.eq(Comment::getRootId, parent.getId());

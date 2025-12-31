@@ -45,8 +45,7 @@ public class AuthServiceImpl implements AuthService {
         // 支持用户名或邮箱登录
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
                 .and(w -> w.eq(User::getUsername, dto.getUsername())
-                        .or().eq(User::getEmail, dto.getUsername()))
-                .eq(User::getDeleted, 0));
+                        .or().eq(User::getEmail, dto.getUsername())));
         
         if (user == null) {
             log.warn("登录失败: 用户 {} 不存在", dto.getUsername());

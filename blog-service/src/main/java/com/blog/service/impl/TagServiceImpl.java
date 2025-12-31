@@ -22,7 +22,6 @@ public class TagServiceImpl implements TagService {
     @Override
     public List<TagVO> list() {
         LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Tag::getDeleted, 0);
         List<Tag> tags = tagMapper.selectList(wrapper);
         return BeanUtil.copyList(tags, TagVO.class);
     }
@@ -30,7 +29,6 @@ public class TagServiceImpl implements TagService {
     @Override
     public List<TagVO> listPublic() {
         LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Tag::getDeleted, 0);
         wrapper.eq(Tag::getStatus, "1");
         List<Tag> tags = tagMapper.selectList(wrapper);
         return BeanUtil.copyList(tags, TagVO.class);
@@ -90,7 +88,6 @@ public class TagServiceImpl implements TagService {
         }
         LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Tag::getName, name.trim());
-        wrapper.eq(Tag::getDeleted, 0);
         Tag tag = tagMapper.selectOne(wrapper);
         if (tag != null) {
             return tag.getId();

@@ -60,7 +60,6 @@ public class DatabaseSearchServiceImpl implements SearchService {
         wrapper.and(w -> w.like(Article::getTitle, keyword)
                 .or().like(Article::getContent, keyword)
                 .or().like(Article::getExcerpt, keyword));
-        wrapper.eq(Article::getDeleted, 0);
         wrapper.orderByDesc(Article::getCreateTime);
         
         Page<Article> pageObj = new Page<>(page, size);
@@ -87,7 +86,6 @@ public class DatabaseSearchServiceImpl implements SearchService {
     private PageResult<SearchVO> searchMoments(String keyword, Long page, Long size) {
         LambdaQueryWrapper<Talk> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(Talk::getContent, keyword);
-        wrapper.eq(Talk::getDeleted, 0);
         wrapper.orderByDesc(Talk::getCreateTime);
         
         Page<Talk> pageObj = new Page<>(page, size);
@@ -112,7 +110,6 @@ public class DatabaseSearchServiceImpl implements SearchService {
     private PageResult<SearchVO> searchComments(String keyword, Long page, Long size) {
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(Comment::getContent, keyword);
-        wrapper.eq(Comment::getDeleted, 0);
         wrapper.orderByDesc(Comment::getCreateTime);
         
         Page<Comment> pageObj = new Page<>(page, size);

@@ -26,8 +26,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     @Override
     public List<FriendLinkVO> list() {
         LambdaQueryWrapper<FriendLink> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(FriendLink::getDeleted, 0)
-                .orderByAsc(FriendLink::getSort)
+        wrapper.orderByAsc(FriendLink::getSort)
                 .orderByDesc(FriendLink::getCreateTime);
 
         List<FriendLink> friendLinks = friendLinkMapper.selectList(wrapper);

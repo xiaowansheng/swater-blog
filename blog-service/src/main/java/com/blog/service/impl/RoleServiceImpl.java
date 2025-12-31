@@ -29,7 +29,6 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<RoleVO> list() {
         LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Role::getDeleted, 0);
         List<Role> roles = roleMapper.selectList(wrapper);
         return BeanUtil.copyList(roles, RoleVO.class);
     }
@@ -58,7 +57,7 @@ public class RoleServiceImpl implements RoleService {
             return null;
         }
         LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Role::getRoleKey, roleName).eq(Role::getDeleted, 0);
+        wrapper.eq(Role::getRoleKey, roleName);
         Role role = roleMapper.selectOne(wrapper);
         if (role == null) {
             return null;
@@ -70,13 +69,13 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public Long create(RoleDTO dto) {
         LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Role::getCode, dto.getCode()).eq(Role::getDeleted, 0);
+        wrapper.eq(Role::getCode, dto.getCode());
         if (roleMapper.selectCount(wrapper) > 0) {
             throw new BusinessException("角色代码已存在");
         }
-        
+
         wrapper.clear();
-        wrapper.eq(Role::getRoleKey, dto.getRoleKey()).eq(Role::getDeleted, 0);
+        wrapper.eq(Role::getRoleKey, dto.getRoleKey());
         if (roleMapper.selectCount(wrapper) > 0) {
             throw new BusinessException("角色标签已存在");
         }
@@ -108,7 +107,7 @@ public class RoleServiceImpl implements RoleService {
         
         if (dto.getCode() != null && !dto.getCode().equals(role.getCode())) {
             LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(Role::getCode, dto.getCode()).eq(Role::getDeleted, 0).ne(Role::getId, id);
+            wrapper.eq(Role::getCode, dto.getCode()).ne(Role::getId, id);
             if (roleMapper.selectCount(wrapper) > 0) {
                 throw new BusinessException("角色代码已存在");
             }
@@ -116,7 +115,7 @@ public class RoleServiceImpl implements RoleService {
         
         if (dto.getRoleKey() != null && !dto.getRoleKey().equals(role.getRoleKey())) {
             LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(Role::getRoleKey, dto.getRoleKey()).eq(Role::getDeleted, 0).ne(Role::getId, id);
+            wrapper.eq(Role::getRoleKey, dto.getRoleKey()).ne(Role::getId, id);
             if (roleMapper.selectCount(wrapper) > 0) {
                 throw new BusinessException("角色标签已存在");
             }

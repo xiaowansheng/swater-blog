@@ -26,8 +26,7 @@ public class LogErrorServiceImpl implements LogErrorService {
     public PageResult<LogErrorVO> list(Long page, Long size, Long userId, LocalDateTime startDate, LocalDateTime endDate) {
         Page<LogError> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<LogError> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(LogError::getDeleted, 0);
-        
+
         if (userId != null) {
             wrapper.eq(LogError::getUserId, userId);
         }

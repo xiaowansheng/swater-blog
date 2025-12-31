@@ -32,7 +32,6 @@ public class ArchiveServiceImpl implements ArchiveService {
     @Override
     public List<ArchiveVO> list() {
         LambdaQueryWrapper<Archive> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Archive::getDeleted, 0);
         wrapper.orderByDesc(Archive::getYear);
         wrapper.orderByDesc(Archive::getMonth);
         List<Archive> archives = archiveMapper.selectList(wrapper);
@@ -43,7 +42,6 @@ public class ArchiveServiceImpl implements ArchiveService {
     public PageResult<ArticleVO> getArticlesByYearAndMonth(Integer year, Integer month, Long page, Long size) {
         Page<Article> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Article::getDeleted, 0);
         wrapper.eq(Article::getStatus, 1);
         if (year != null) {
             wrapper.apply("YEAR(published_at) = {0}", year);
@@ -65,14 +63,12 @@ public class ArchiveServiceImpl implements ArchiveService {
     @Transactional
     public void regenerate() {
         LambdaQueryWrapper<Archive> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Archive::getDeleted, 0);
         List<Archive> archives = archiveMapper.selectList(wrapper);
         for (Archive archive : archives) {
             archiveMapper.deleteById(archive.getId());
         }
         
         LambdaQueryWrapper<Article> articleWrapper = new LambdaQueryWrapper<>();
-        articleWrapper.eq(Article::getDeleted, 0);
         articleWrapper.eq(Article::getStatus, 1);
         articleWrapper.isNotNull(Article::getPublishedAt);
         List<Article> articles = articleMapper.selectList(articleWrapper);

@@ -27,8 +27,7 @@ public class ConfigPublicServiceImpl implements ConfigPublicService {
     @Override
     public ConfigVO getByKey(String key) {
         SysConfig config = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
-                .eq(SysConfig::getConfigKey, key)
-                .eq(SysConfig::getDeleted, 0));
+                .eq(SysConfig::getConfigKey, key));
         if (config == null) {
             return null;
         }
@@ -38,7 +37,6 @@ public class ConfigPublicServiceImpl implements ConfigPublicService {
     @Override
     public Map<String, Object> getByGroup(String groupName) {
         LambdaQueryWrapper<SysConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysConfig::getDeleted, 0);
         if (groupName != null && !groupName.isEmpty()) {
             wrapper.eq(SysConfig::getGroupName, groupName);
         }
@@ -59,7 +57,6 @@ public class ConfigPublicServiceImpl implements ConfigPublicService {
     @Cacheable(value = "siteConfig", key = "'all'", unless = "#result == null")
     public Map<String, Object> getSiteConfig() {
         LambdaQueryWrapper<SysConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysConfig::getDeleted, 0);
         wrapper.in(SysConfig::getGroupName, SITE_CONFIG_GROUPS);
         wrapper.orderByAsc(SysConfig::getGroupName);
         wrapper.orderByAsc(SysConfig::getSort);

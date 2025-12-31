@@ -117,7 +117,6 @@ public class SearchSyncServiceImpl implements SearchSyncService {
         List<Article> articles = articleMapper.selectList(
                 new LambdaQueryWrapper<Article>()
                         .eq(Article::getStatus, 1)
-                        .eq(Article::getDeleted, 0)
         );
 
         List<PostDocument> documents = articles.stream()
@@ -133,7 +132,6 @@ public class SearchSyncServiceImpl implements SearchSyncService {
         List<Talk> talks = talkMapper.selectList(
                 new LambdaQueryWrapper<Talk>()
                         .eq(Talk::getStatus, "1")
-                        .eq(Talk::getDeleted, 0)
         );
 
         List<MomentDocument> documents = talks.stream()
@@ -149,7 +147,6 @@ public class SearchSyncServiceImpl implements SearchSyncService {
         List<Comment> comments = commentMapper.selectList(
                 new LambdaQueryWrapper<Comment>()
                         .eq(Comment::getStatus, 1)
-                        .eq(Comment::getDeleted, 0)
         );
 
         List<CommentDocument> documents = comments.stream()

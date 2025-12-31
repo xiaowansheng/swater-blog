@@ -20,8 +20,7 @@ public class FriendLinkPublicQueryServiceImpl implements FriendLinkPublicQuerySe
     @Override
     public List<FriendLinkVO> list() {
         LambdaQueryWrapper<FriendLink> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(FriendLink::getDeleted, 0)
-                .eq(FriendLink::getStatus, 1)
+        wrapper.eq(FriendLink::getStatus, 1)
                 .eq(FriendLink::getIsVisible, 1)
                 .eq(FriendLink::getReviewStatus, 1)
                 .orderByAsc(FriendLink::getSort)

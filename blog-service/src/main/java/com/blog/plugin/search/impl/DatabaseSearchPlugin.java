@@ -104,7 +104,6 @@ public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
     private PageResult<SearchVO> searchMoments(String keyword, Long page, Long size) {
         LambdaQueryWrapper<Talk> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(Talk::getContent, keyword);
-        wrapper.eq(Talk::getDeleted, 0);
         wrapper.orderByDesc(Talk::getCreateTime);
 
         Page<Talk> pageObj = new Page<>(page, size);

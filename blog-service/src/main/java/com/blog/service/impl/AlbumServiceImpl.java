@@ -40,7 +40,6 @@ public class AlbumServiceImpl implements AlbumService {
     public PageResult<AlbumVO> list(Long page, Long size, Long userId, String status) {
         Page<Album> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Album> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Album::getDeleted, 0);
 
         if (userId != null) {
             wrapper.eq(Album::getUserId, userId);

@@ -26,8 +26,7 @@ public class LogOperationServiceImpl implements LogOperationService {
     public PageResult<LogOperationVO> list(Long page, Long size, Long userId, LocalDateTime startDate, LocalDateTime endDate) {
         Page<LogOperation> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<LogOperation> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(LogOperation::getDeleted, 0);
-        
+
         if (userId != null) {
             wrapper.eq(LogOperation::getUserId, userId);
         }

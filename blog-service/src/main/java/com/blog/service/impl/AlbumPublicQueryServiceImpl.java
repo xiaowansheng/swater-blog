@@ -36,7 +36,6 @@ public class AlbumPublicQueryServiceImpl implements AlbumPublicQueryService {
         Page<Album> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Album> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Album::getStatus, "1")
-                .eq(Album::getDeleted, 0)
                 .orderByDesc(Album::getCreateTime);
 
         Page<Album> result = albumMapper.selectPage(pageParam, wrapper);
@@ -51,8 +50,7 @@ public class AlbumPublicQueryServiceImpl implements AlbumPublicQueryService {
     public AlbumVO getById(Long id) {
         Album album = albumMapper.selectOne(new LambdaQueryWrapper<Album>()
                 .eq(Album::getId, id)
-                .eq(Album::getStatus, "1")
-                .eq(Album::getDeleted, 0));
+                .eq(Album::getStatus, "1"));
         if (album == null) {
             return null;
         }

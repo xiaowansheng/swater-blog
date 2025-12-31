@@ -54,7 +54,6 @@ public class MenuPublicServiceImpl implements MenuPublicService {
 
         LambdaQueryWrapper<SysMenu> wrapper = new LambdaQueryWrapper<>();
         wrapper.in(SysMenu::getId, menuIds)
-                .eq(SysMenu::getDeleted, 0)
                 .orderByAsc(SysMenu::getSort)
                 .orderByDesc(SysMenu::getCreateTime);
 

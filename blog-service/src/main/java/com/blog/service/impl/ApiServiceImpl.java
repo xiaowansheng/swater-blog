@@ -27,8 +27,7 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public List<ApiVO> list() {
         LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysApi::getDeleted, 0)
-                .orderByAsc(SysApi::getSort)
+        wrapper.orderByAsc(SysApi::getSort)
                 .orderByDesc(SysApi::getCreateTime);
 
         List<SysApi> apis = sysApiMapper.selectList(wrapper);
@@ -55,7 +54,7 @@ public class ApiServiceImpl implements ApiService {
             dto.setApiKey(KeyUtil.generateKey("api"));
         } else {
             LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(SysApi::getApiKey, dto.getApiKey()).eq(SysApi::getDeleted, 0);
+            wrapper.eq(SysApi::getApiKey, dto.getApiKey());
             if (sysApiMapper.selectCount(wrapper) > 0) {
                 throw new BusinessException("接口标识已存在");
             }
@@ -86,7 +85,7 @@ public class ApiServiceImpl implements ApiService {
 
         if (dto.getApiKey() != null && !dto.getApiKey().equals(api.getApiKey())) {
             LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(SysApi::getApiKey, dto.getApiKey()).eq(SysApi::getDeleted, 0).ne(SysApi::getId, id);
+            wrapper.eq(SysApi::getApiKey, dto.getApiKey()).ne(SysApi::getId, id);
             if (sysApiMapper.selectCount(wrapper) > 0) {
                 throw new BusinessException("接口标识已存在");
             }
@@ -105,7 +104,7 @@ public class ApiServiceImpl implements ApiService {
         }
 
         LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysApi::getParentId, id).eq(SysApi::getDeleted, 0);
+        wrapper.eq(SysApi::getParentId, id);
         if (sysApiMapper.selectCount(wrapper) > 0) {
             throw new BusinessException("存在子接口，无法删除");
         }

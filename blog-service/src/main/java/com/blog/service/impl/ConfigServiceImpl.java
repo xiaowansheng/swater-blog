@@ -26,7 +26,6 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public List<ConfigVO> list(String groupName) {
         LambdaQueryWrapper<SysConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysConfig::getDeleted, 0);
         if (groupName != null && !groupName.isEmpty()) {
             wrapper.eq(SysConfig::getGroupName, groupName);
         }
@@ -42,7 +41,6 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public List<String> getGroups() {
         LambdaQueryWrapper<SysConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysConfig::getDeleted, 0);
         wrapper.select(SysConfig::getGroupName);
         wrapper.groupBy(SysConfig::getGroupName);
         wrapper.orderByAsc(SysConfig::getGroupName);
@@ -58,8 +56,7 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public ConfigVO getByKey(String key) {
         SysConfig config = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
-                .eq(SysConfig::getConfigKey, key)
-                .eq(SysConfig::getDeleted, 0));
+                .eq(SysConfig::getConfigKey, key));
         if (config == null) {
             return null;
         }
@@ -91,8 +88,7 @@ public class ConfigServiceImpl implements ConfigService {
     public ConfigVO updateByKey(String key, ConfigDTO configDTO) {
         try {
             SysConfig existingConfig = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
-                    .eq(SysConfig::getConfigKey, key)
-                    .eq(SysConfig::getDeleted, 0));
+                    .eq(SysConfig::getConfigKey, key));
 
             if (existingConfig == null) {
                 throw new BusinessException("配置项不存在: " + key);
@@ -134,8 +130,7 @@ public class ConfigServiceImpl implements ConfigService {
             String valueStr = value != null ? value.toString() : "";
 
             SysConfig config = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
-                    .eq(SysConfig::getConfigKey, key)
-                    .eq(SysConfig::getDeleted, 0));
+                    .eq(SysConfig::getConfigKey, key));
             if (config != null) {
                 config.setValue(valueStr);
                 sysConfigMapper.updateById(config);

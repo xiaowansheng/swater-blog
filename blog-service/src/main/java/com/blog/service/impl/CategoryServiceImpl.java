@@ -23,7 +23,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryVO> list() {
         LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Category::getDeleted, 0);
         wrapper.orderByAsc(Category::getSort);
         List<Category> categories = categoryMapper.selectList(wrapper);
         return buildTree(BeanUtil.copyList(categories, CategoryVO.class));
@@ -32,7 +31,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryVO> listPublic() {
         LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Category::getDeleted, 0);
         wrapper.eq(Category::getStatus, "1");
         wrapper.orderByAsc(Category::getSort);
         List<Category> categories = categoryMapper.selectList(wrapper);
@@ -100,7 +98,6 @@ public class CategoryServiceImpl implements CategoryService {
         }
         LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Category::getName, name.trim());
-        wrapper.eq(Category::getDeleted, 0);
         Category category = categoryMapper.selectOne(wrapper);
         if (category != null) {
             return category.getId();

@@ -40,7 +40,6 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
     public PageResult<VisitStatisticsVO> list(VisitStatisticsQueryDTO queryDTO) {
         Page<VisitStatistics> page = PageUtil.buildPage(queryDTO);
         LambdaQueryWrapper<VisitStatistics> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(VisitStatistics::getDeleted, 0);
 
         if (queryDTO.getPageType() != null) {
             wrapper.eq(VisitStatistics::getPageType, queryDTO.getPageType());
@@ -88,8 +87,7 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
     @Transactional
     public void aggregateStatistics(LocalDateTime startDate, LocalDateTime endDate) {
         LambdaQueryWrapper<VisitorAccessLog> logWrapper = new LambdaQueryWrapper<>();
-        logWrapper.eq(VisitorAccessLog::getDeleted, 0)
-                .ge(VisitorAccessLog::getAccessTime, startDate)
+        logWrapper.ge(VisitorAccessLog::getAccessTime, startDate)
                 .le(VisitorAccessLog::getAccessTime, endDate);
 
         List<VisitorAccessLog> logs = visitorAccessLogMapper.selectList(logWrapper);
@@ -126,8 +124,7 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
 
             if (!visitorIds.isEmpty()) {
                 LambdaQueryWrapper<Visitor> visitorWrapper = new LambdaQueryWrapper<>();
-                visitorWrapper.in(Visitor::getId, visitorIds)
-                        .eq(Visitor::getDeleted, 0);
+                visitorWrapper.in(Visitor::getId, visitorIds);
                 List<Visitor> visitors = visitorMapper.selectList(visitorWrapper);
 
                 Map<String, Long> countryMap = new HashMap<>();

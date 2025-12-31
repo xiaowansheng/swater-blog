@@ -51,8 +51,7 @@ public class NotificationServiceImpl implements NotificationService {
     public PageResult<NotificationVO> list(Long userId, Long page, Long size, Integer isRead) {
         Page<SysNotification> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<SysNotification> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysNotification::getDeleted, 0);
-        
+
         if (userId != null) {
             wrapper.eq(SysNotification::getUserId, userId);
         }
@@ -94,7 +93,6 @@ public class NotificationServiceImpl implements NotificationService {
     public void markAllAsRead(Long userId) {
         LambdaUpdateWrapper<SysNotification> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(SysNotification::getUserId, userId)
-                .eq(SysNotification::getDeleted, 0)
                 .eq(SysNotification::getIsRead, 0)
                 .set(SysNotification::getIsRead, 1);
         sysNotificationMapper.update(null, wrapper);

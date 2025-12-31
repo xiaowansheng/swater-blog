@@ -30,7 +30,6 @@ public class GuestbookAdminQueryServiceImpl implements GuestbookAdminQueryServic
     public PageResult<GuestbookVO> list(Long page, Long size, Integer reviewStatus) {
         Page<Guestbook> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Guestbook> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Guestbook::getDeleted, 0);
 
         if (reviewStatus != null) {
             wrapper.eq(Guestbook::getReviewStatus, reviewStatus);

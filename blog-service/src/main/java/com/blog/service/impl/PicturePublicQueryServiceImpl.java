@@ -34,8 +34,7 @@ public class PicturePublicQueryServiceImpl implements PicturePublicQueryService 
     public PageResult<PictureVO> list(Long page, Long size, Long albumId) {
         Page<Picture> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Picture> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Picture::getStatus, "1")
-                .eq(Picture::getDeleted, 0);
+        wrapper.eq(Picture::getStatus, "1");
 
         if (albumId != null) {
             wrapper.eq(Picture::getAlbumId, albumId);
@@ -55,8 +54,7 @@ public class PicturePublicQueryServiceImpl implements PicturePublicQueryService 
     public PictureVO getById(Long id) {
         Picture picture = pictureMapper.selectOne(new LambdaQueryWrapper<Picture>()
                 .eq(Picture::getId, id)
-                .eq(Picture::getStatus, "1")
-                .eq(Picture::getDeleted, 0));
+                .eq(Picture::getStatus, "1"));
         if (picture == null) {
             return null;
         }

@@ -43,8 +43,7 @@ public class UserServiceImpl implements UserService {
     public PageResult<UserVO> list(Long page, Long size, String keyword) {
         Page<User> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(User::getDeleted, 0);
-        
+
         if (keyword != null && !keyword.isEmpty()) {
             wrapper.and(w -> w.like(User::getUsername, keyword)
                     .or().like(User::getNickname, keyword)
@@ -74,14 +73,14 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public Long create(UserDTO dto) {
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(User::getUsername, dto.getUsername()).eq(User::getDeleted, 0);
+        wrapper.eq(User::getUsername, dto.getUsername());
         if (userMapper.selectCount(wrapper) > 0) {
             throw new BusinessException("用户名已存在");
         }
-        
+
         if (dto.getEmail() != null && !dto.getEmail().isEmpty()) {
             wrapper.clear();
-            wrapper.eq(User::getEmail, dto.getEmail()).eq(User::getDeleted, 0);
+            wrapper.eq(User::getEmail, dto.getEmail());
             if (userMapper.selectCount(wrapper) > 0) {
                 throw new BusinessException("邮箱已存在");
             }
@@ -120,7 +119,7 @@ public class UserServiceImpl implements UserService {
         
         if (dto.getUsername() != null && !dto.getUsername().equals(user.getUsername())) {
             LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(User::getUsername, dto.getUsername()).eq(User::getDeleted, 0).ne(User::getId, id);
+            wrapper.eq(User::getUsername, dto.getUsername()).ne(User::getId, id);
             if (userMapper.selectCount(wrapper) > 0) {
                 throw new BusinessException("用户名已存在");
             }
@@ -128,7 +127,7 @@ public class UserServiceImpl implements UserService {
         
         if (dto.getEmail() != null && !dto.getEmail().isEmpty() && !dto.getEmail().equals(user.getEmail())) {
             LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(User::getEmail, dto.getEmail()).eq(User::getDeleted, 0).ne(User::getId, id);
+            wrapper.eq(User::getEmail, dto.getEmail()).ne(User::getId, id);
             if (userMapper.selectCount(wrapper) > 0) {
                 throw new BusinessException("邮箱已存在");
             }

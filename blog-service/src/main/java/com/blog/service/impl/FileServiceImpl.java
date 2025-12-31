@@ -65,8 +65,7 @@ public class FileServiceImpl implements FileService {
             StoragePlugin storagePlugin = plugins.get(0);
             String fileHash = storagePlugin.calculateHash(file);
             FileMeta existingFile = fileMetaMapper.selectOne(new LambdaQueryWrapper<FileMeta>()
-                    .eq(FileMeta::getFileHash, fileHash)
-                    .eq(FileMeta::getDeleted, 0));
+                    .eq(FileMeta::getFileHash, fileHash));
 
             FileMeta fileMeta;
             // 检查数据库中是否存在
@@ -110,8 +109,7 @@ public class FileServiceImpl implements FileService {
     public PageResult<FileVO> list(Long page, Long size, String type) {
         Page<FileMeta> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<FileMeta> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(FileMeta::getDeleted, 0);
-        
+
         if (type != null && !type.isEmpty()) {
             wrapper.eq(FileMeta::getFileType, type);
         }

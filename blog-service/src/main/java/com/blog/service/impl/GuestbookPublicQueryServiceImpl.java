@@ -30,8 +30,7 @@ public class GuestbookPublicQueryServiceImpl implements GuestbookPublicQueryServ
     public PageResult<GuestbookVO> list(Long page, Long size) {
         Page<Guestbook> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Guestbook> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Guestbook::getDeleted, 0)
-                .eq(Guestbook::getIsVisible, 1)
+        wrapper.eq(Guestbook::getIsVisible, 1)
                 .eq(Guestbook::getReviewStatus, 1)
                 .orderByDesc(Guestbook::getCreateTime);
 

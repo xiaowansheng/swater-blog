@@ -31,8 +31,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
     @Override
     public List<ApiResourceVO> list() {
         LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysApi::getDeleted, 0)
-                .orderByAsc(SysApi::getSort)
+        wrapper.orderByAsc(SysApi::getSort)
                 .orderByDesc(SysApi::getCreateTime);
 
         List<SysApi> apis = sysApiMapper.selectList(wrapper);
@@ -71,8 +70,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
 
         for (ApiResourceScanner.ApiResourceInfo info : resources) {
             LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(SysApi::getApiKey, info.getApiKey())
-                    .eq(SysApi::getDeleted, 0);
+            wrapper.eq(SysApi::getApiKey, info.getApiKey());
 
             SysApi existingApi = sysApiMapper.selectOne(wrapper);
 

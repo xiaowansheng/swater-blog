@@ -49,14 +49,12 @@ public class VisitorServiceImpl implements VisitorService {
         
         if (dto.getVisitorUuid() != null && !dto.getVisitorUuid().isEmpty()) {
             visitor = visitorMapper.selectOne(new LambdaQueryWrapper<Visitor>()
-                    .eq(Visitor::getVisitorUuid, dto.getVisitorUuid())
-                    .eq(Visitor::getDeleted, 0));
+                    .eq(Visitor::getVisitorUuid, dto.getVisitorUuid()));
         }
         
         if (visitor == null) {
             visitor = visitorMapper.selectOne(new LambdaQueryWrapper<Visitor>()
-                    .eq(Visitor::getIpAddress, dto.getIp())
-                    .eq(Visitor::getDeleted, 0));
+                    .eq(Visitor::getIpAddress, dto.getIp()));
         }
         
         boolean isNewVisitor = false;
@@ -160,8 +158,7 @@ public class VisitorServiceImpl implements VisitorService {
     public PageResult<VisitorVO> list(Long page, Long size, String keyword) {
         Page<Visitor> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Visitor> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Visitor::getDeleted, 0);
-        
+
         if (keyword != null && !keyword.isEmpty()) {
             wrapper.and(w -> w.like(Visitor::getIpAddress, keyword)
                     .or().like(Visitor::getCountry, keyword)
@@ -183,7 +180,6 @@ public class VisitorServiceImpl implements VisitorService {
         VisitorStatisticsVO statistics = new VisitorStatisticsVO();
         
         LambdaQueryWrapper<Visitor> visitorWrapper = new LambdaQueryWrapper<>();
-        visitorWrapper.eq(Visitor::getDeleted, 0);
         if (startDate != null) {
             visitorWrapper.ge(Visitor::getFirstVisitTime, startDate);
         }
@@ -193,7 +189,6 @@ public class VisitorServiceImpl implements VisitorService {
         statistics.setTotalVisitors(visitorMapper.selectCount(visitorWrapper).longValue());
         
         LambdaQueryWrapper<VisitorAccessLog> logWrapper = new LambdaQueryWrapper<>();
-        logWrapper.eq(VisitorAccessLog::getDeleted, 0);
         if (startDate != null) {
             logWrapper.ge(VisitorAccessLog::getAccessTime, startDate);
         }

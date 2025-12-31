@@ -29,7 +29,6 @@ public class TalkAdminQueryServiceImpl implements TalkAdminQueryService {
     public PageResult<TalkVO> list(Long page, Long size) {
         Page<Talk> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Talk> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Talk::getDeleted, 0);
         wrapper.orderByDesc(Talk::getIsTop);
         wrapper.orderByDesc(Talk::getCreateTime);
         

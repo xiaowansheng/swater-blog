@@ -40,8 +40,7 @@ public class ArticleAdminQueryServiceImpl implements ArticleAdminQueryService {
     public PageResult<ArticleVO> list(Long page, Long size, Integer status, Long categoryId, String keyword) {
         Page<Article> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Article::getDeleted, 0);
-        
+
         if (status != null) {
             wrapper.eq(Article::getStatus, status);
         }
@@ -77,20 +76,18 @@ public class ArticleAdminQueryServiceImpl implements ArticleAdminQueryService {
     public ArticleStatisticsVO getStatistics() {
         ArticleStatisticsVO statistics = new ArticleStatisticsVO();
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Article::getDeleted, 0);
-        
+
         statistics.setTotalCount(articleMapper.selectCount(wrapper).longValue());
-        
+
         LambdaQueryWrapper<Article> publishedWrapper = new LambdaQueryWrapper<>();
-        publishedWrapper.eq(Article::getDeleted, 0).eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode());
+        publishedWrapper.eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode());
         statistics.setPublishedCount(articleMapper.selectCount(publishedWrapper).longValue());
         
         LambdaQueryWrapper<Article> draftWrapper = new LambdaQueryWrapper<>();
-        draftWrapper.eq(Article::getDeleted, 0).eq(Article::getStatus, ArticleStatus.DRAFT.getCode());
+        draftWrapper.eq(Article::getStatus, ArticleStatus.DRAFT.getCode());
         statistics.setDraftCount(articleMapper.selectCount(draftWrapper).longValue());
-        
+
         LambdaQueryWrapper<Article> allWrapper = new LambdaQueryWrapper<>();
-        allWrapper.eq(Article::getDeleted, 0);
         List<Article> articles = articleMapper.selectList(allWrapper);
         long totalViewCount = 0;
         long totalLikeCount = 0;

@@ -40,7 +40,6 @@ public class PictureServiceImpl implements PictureService {
     public PageResult<PictureVO> list(Long page, Long size, Long albumId) {
         Page<Picture> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Picture> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Picture::getDeleted, 0);
 
         if (albumId != null) {
             wrapper.eq(Picture::getAlbumId, albumId);

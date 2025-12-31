@@ -30,8 +30,7 @@ public class CommentAdminQueryServiceImpl implements CommentAdminQueryService {
     public PageResult<CommentVO> list(Long page, Long size, Integer status, Long targetId, String targetType) {
         Page<Comment> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Comment::getDeleted, 0);
-        
+
         if (status != null) {
             wrapper.eq(Comment::getStatus, status);
         }
