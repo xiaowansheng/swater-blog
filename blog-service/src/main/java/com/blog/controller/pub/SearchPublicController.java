@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/public/search")
-@ApiOperation(value = "pub:search", name = "搜索接口", description = "搜索相关接口", open = true)
+@ApiOperation(name = "搜索接口", description = "搜索相关接口", open = true)
 public class SearchPublicController {
     @Autowired
     private SearchService searchService;
 
     @GetMapping
-    @ApiOperation(value = "query", name = "搜索内容", type = ApiOperationType.QUERY, description = "根据关键词搜索文章、说说等内容")
+    @ApiOperation(name = "搜索内容", type = ApiOperationType.QUERY, description = "根据关键词搜索文章、说说等内容")
     public Result<PageResult<SearchVO>> search(
             @RequestParam String keyword,
             @RequestParam(required = false, defaultValue = "all") String type,

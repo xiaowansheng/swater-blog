@@ -14,20 +14,20 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/friend-link")
-@ApiOperation(value = "friend-link", name = "友链管理模块", description = "友链管理接口", open = false)
+@ApiOperation(name = "友链管理模块", description = "友链管理接口", open = false)
 public class FriendLinkController {
     @Autowired
     private FriendLinkService friendLinkService;
 
     @GetMapping("/list")
-    @ApiOperation(value = "list", name = "查询友链列表", type = ApiOperationType.QUERY, description = "查询所有友链")
+    @ApiOperation(name = "查询友链列表", type = ApiOperationType.QUERY, description = "查询所有友链")
     public Result<List<FriendLinkVO>> list() {
         List<FriendLinkVO> list = friendLinkService.list();
         return Result.success(list);
     }
 
     @GetMapping("/{id}")
-    @ApiOperation(value = "detail", name = "获取友链详情", type = ApiOperationType.QUERY, description = "根据ID获取友链详情")
+    @ApiOperation(name = "获取友链详情", type = ApiOperationType.QUERY, description = "根据ID获取友链详情")
     public Result<FriendLinkVO> getById(@PathVariable Long id) {
         FriendLinkVO vo = friendLinkService.getById(id);
         if (vo == null) {
@@ -37,35 +37,35 @@ public class FriendLinkController {
     }
 
     @PostMapping
-    @ApiOperation(value = "create", name = "创建友链", type = ApiOperationType.CREATE, description = "创建新友链")
+    @ApiOperation(name = "创建友链", type = ApiOperationType.CREATE, description = "创建新友链")
     public Result<Long> create(@Valid @RequestBody FriendLinkDTO dto) {
         Long id = friendLinkService.create(dto);
         return Result.success(id);
     }
 
     @PutMapping("/{id}")
-    @ApiOperation(value = "update", name = "更新友链", type = ApiOperationType.UPDATE, description = "更新友链信息")
+    @ApiOperation(name = "更新友链", type = ApiOperationType.UPDATE, description = "更新友链信息")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody FriendLinkDTO dto) {
         friendLinkService.update(id, dto);
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
-    @ApiOperation(value = "admin:friend-link:delete", name = "删除友链", type = ApiOperationType.DELETE, description = "删除友链")
+    @ApiOperation(name = "删除友链", type = ApiOperationType.DELETE, description = "删除友链")
     public Result<Void> delete(@PathVariable Long id) {
         friendLinkService.delete(id);
         return Result.success();
     }
 
     @PostMapping("/{id}/approve")
-    @ApiOperation(value = "approve", name = "审核通过友链", type = ApiOperationType.ENABLE, description = "审核通过友链申请")
+    @ApiOperation(name = "审核通过友链", type = ApiOperationType.ENABLE, description = "审核通过友链申请")
     public Result<Void> approve(@PathVariable Long id) {
         friendLinkService.approve(id);
         return Result.success();
     }
 
     @PostMapping("/{id}/reject")
-    @ApiOperation(value = "reject", name = "拒绝友链", type = ApiOperationType.DISABLE, description = "拒绝友链申请")
+    @ApiOperation(name = "拒绝友链", type = ApiOperationType.DISABLE, description = "拒绝友链申请")
     public Result<Void> reject(@PathVariable Long id) {
         friendLinkService.reject(id);
         return Result.success();

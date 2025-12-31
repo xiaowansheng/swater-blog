@@ -51,7 +51,9 @@ public class ApiResourceScanner {
             // 添加模块信息（类级别）
             ApiResourceInfo moduleInfo = new ApiResourceInfo();
             moduleInfo.setModule(true);
-            moduleInfo.setApiKey(moduleOperation.value());
+            // 生成模块的 apiKey（从基础路径推断）
+            String moduleApiKey = generateModuleApiKey(basePath);
+            moduleInfo.setApiKey(moduleApiKey);
             moduleInfo.setName(moduleOperation.name());
             moduleInfo.setDescription(moduleOperation.description());
             moduleInfo.setPath(basePath);
@@ -116,10 +118,9 @@ public class ApiResourceScanner {
                     info.setModule(false);
 
                     // 生成接口唯一标识
-                    String apiKey = methodOperation.value();
-                    if (apiKey == null || apiKey.isEmpty()) {
-                        apiKey = generateKey(fullPath, httpMethodStr);
-                    }
+                    String apiKey = generateKey(fullPath, httpMethodStr);
+
+                    // 如果apiKey已经包含冒号（如 user:list），直接使用
                     info.setApiKey(apiKey);
                     info.setName(methodOperation.name());
                     info.setPath(fullPath);
@@ -136,8 +137,8 @@ public class ApiResourceScanner {
                     // 处理权限标识
                     String perms = methodOperation.perms();
                     if (perms == null || perms.isEmpty()) {
-                        // 自动生成权限标识：模块:操作
-                        perms = moduleOperation.value() + ":" + methodOperation.value();
+                        // 自动生成权限标识：模块:接口
+                        perms = moduleApiKey + ":" + apiKey;
                     }
                     info.setPerms(perms);
 
@@ -156,11 +157,40 @@ public class ApiResourceScanner {
 
     /**
      * 生成API key
+     * 使用哈希算法确保唯一性
      */
     private String generateKey(String path, String method) {
-        return method.toLowerCase() + ":" + path.replace("/", "_").replaceAll("[{}]", "");
+        // 统一处理路径：去除首尾斜杠，转小写
+        String normalizedPath = path.toLowerCase().replaceAll("^/+|/+$", "");
+
+        // 生成唯一标识：方法 + 路径的哈希值
+        String pathHash = String.valueOf(Math.abs(normalizedPath.hashCode()));
+
+        return method.toLowerCase() + ":" + pathHash;
     }
-    
+
+    /**
+     * 从基础路径生成模块的 apiKey
+     * 例如：/api/admin/user → api:admin:user
+     */
+    private String generateModuleApiKey(String basePath) {
+        if (basePath == null || basePath.isEmpty()) {
+            return "default";
+        }
+
+        // 去除首尾斜杠，按斜杠分割
+        String cleanPath = basePath.replaceAll("^/+|/+$", "");
+        String[] parts = cleanPath.split("/");
+
+        // 使用路径的第一部分（通常是 api、admin、pub 等）
+        if (parts.length > 0) {
+            // 将路径转换为 apiKey 格式：/api/admin → api:admin
+            return String.join(":", parts);
+        }
+
+        return cleanPath;
+    }
+
     public static class ApiResourceInfo {
         private String apiKey;
         private String name;

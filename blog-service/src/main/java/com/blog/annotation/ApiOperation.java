@@ -19,9 +19,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ApiOperation {
 
-    /** 操作唯一标识（英文标识），如：create、update、delete、list等 */
-    String value();
-
     /** 操作显示名称（中文或可读名称），如：创建文章、更新用户、删除权限 */
     String name();
 

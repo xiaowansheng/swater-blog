@@ -14,27 +14,27 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/admin/visit-statistics")
-@ApiOperation(value = "visit-statistics", name = "访问统计模块", description = "访问统计管理接口", open = false)
+@ApiOperation(name = "访问统计模块", description = "访问统计管理接口", open = false)
 public class VisitStatisticsController {
     @Autowired
     private VisitStatisticsService visitStatisticsService;
 
     @GetMapping("/list")
-    @ApiOperation(value = "list", name = "查询访问统计列表", type = ApiOperationType.QUERY, description = "分页查询访问统计")
+    @ApiOperation(name = "查询访问统计列表", type = ApiOperationType.QUERY, description = "分页查询访问统计")
     public Result<PageResult<VisitStatisticsVO>> list(VisitStatisticsQueryDTO queryDTO) {
         PageResult<VisitStatisticsVO> result = visitStatisticsService.list(queryDTO);
         return Result.success(result);
     }
 
     @GetMapping("/{id}")
-    @ApiOperation(value = "detail", name = "获取访问统计详情", type = ApiOperationType.QUERY, description = "根据ID获取访问统计")
+    @ApiOperation(name = "获取访问统计详情", type = ApiOperationType.QUERY, description = "根据ID获取访问统计")
     public Result<VisitStatisticsVO> getById(@PathVariable Long id) {
         VisitStatisticsVO vo = visitStatisticsService.getById(id);
         return Result.success(vo);
     }
 
     @PostMapping("/aggregate")
-    @ApiOperation(value = "aggregate", name = "聚合统计数据", type = ApiOperationType.OTHER, description = "聚合访问统计数据")
+    @ApiOperation(name = "聚合统计数据", type = ApiOperationType.OTHER, description = "聚合访问统计数据")
     public Result<Void> aggregateStatistics(@RequestParam(required = false) LocalDateTime date) {
         if (date != null) {
             visitStatisticsService.aggregateStatistics(date);
@@ -45,7 +45,7 @@ public class VisitStatisticsController {
     }
 
     @PostMapping("/aggregate/range")
-    @ApiOperation(value = "aggregateRange", name = "聚合范围统计数据", type = ApiOperationType.OTHER, description = "聚合指定时间范围的访问统计")
+    @ApiOperation(name = "聚合范围统计数据", type = ApiOperationType.OTHER, description = "聚合指定时间范围的访问统计")
     public Result<Void> aggregateStatisticsRange(@RequestParam LocalDateTime startDate,
                                                    @RequestParam LocalDateTime endDate) {
         visitStatisticsService.aggregateStatistics(startDate, endDate);

@@ -14,20 +14,20 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/api-resource")
-@ApiOperation(value = "api-resource", name = "接口资源管理模块", description = "接口资源管理接口", open = false)
+@ApiOperation(name = "接口资源管理模块", description = "接口资源管理接口", open = false)
 public class ApiResourceController {
     @Autowired
     private ApiResourceService apiResourceService;
 
     @GetMapping("/list")
-    @ApiOperation(value = "list", name = "查询接口资源列表", type = ApiOperationType.QUERY, description = "查询所有接口资源")
+    @ApiOperation(name = "查询接口资源列表", type = ApiOperationType.QUERY, description = "查询所有接口资源")
     public Result<List<ApiResourceVO>> list() {
         List<ApiResourceVO> list = apiResourceService.list();
         return Result.success(list);
     }
 
     @GetMapping("/{id}")
-    @ApiOperation(value = "detail", name = "获取接口资源详情", type = ApiOperationType.QUERY, description = "根据ID获取接口资源详情")
+    @ApiOperation(name = "获取接口资源详情", type = ApiOperationType.QUERY, description = "根据ID获取接口资源详情")
     public Result<ApiResourceVO> getById(@PathVariable Long id) {
         ApiResourceVO vo = apiResourceService.getById(id);
         if (vo == null) {
@@ -37,14 +37,14 @@ public class ApiResourceController {
     }
 
     @PutMapping("/{id}")
-    @ApiOperation(value = "update", name = "更新接口资源", type = ApiOperationType.UPDATE, description = "更新接口资源信息")
+    @ApiOperation(name = "更新接口资源", type = ApiOperationType.UPDATE, description = "更新接口资源信息")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody ApiResourceDTO dto) {
         apiResourceService.update(id, dto);
         return Result.success();
     }
 
     @PostMapping("/refresh")
-    @ApiOperation(value = "refresh", name = "刷新接口资源", type = ApiOperationType.OTHER, description = "刷新系统中的接口资源")
+    @ApiOperation(name = "刷新接口资源", type = ApiOperationType.OTHER, description = "刷新系统中的接口资源")
     public Result<Void> refresh() {
         apiResourceService.refresh();
         return Result.success();

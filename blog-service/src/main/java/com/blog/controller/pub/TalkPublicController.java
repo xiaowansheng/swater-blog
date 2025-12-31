@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/public/moment")
-@ApiOperation(value = "pub:moment", name = "说说公开接口", description = "说说相关接口", open = true)
+@ApiOperation(name = "说说公开接口", description = "说说相关接口", open = true)
 public class TalkPublicController {
     @Autowired
     private TalkPublicQueryService talkPublicQueryService;
 
     @GetMapping("/list")
-    @ApiOperation(value = "query", name = "获取说说列表", type = ApiOperationType.QUERY, description = "分页获取说说列表")
+    @ApiOperation(name = "获取说说列表", type = ApiOperationType.QUERY, description = "分页获取说说列表")
     public Result<PageResult<TalkVO>> list(
             @RequestParam(required = false) Long page,
             @RequestParam(required = false) Long size) {
@@ -26,7 +26,7 @@ public class TalkPublicController {
     }
 
     @GetMapping("/{id}")
-    @ApiOperation(value = "query", name = "获取说说详情", type = ApiOperationType.QUERY, description = "根据ID获取说说详情")
+    @ApiOperation(name = "获取说说详情", type = ApiOperationType.QUERY, description = "根据ID获取说说详情")
     public Result<TalkVO> getById(@PathVariable Long id) {
         TalkVO vo = talkPublicQueryService.getById(id);
         if (vo == null) {

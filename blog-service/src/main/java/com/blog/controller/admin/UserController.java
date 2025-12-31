@@ -15,13 +15,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/user")
-@ApiOperation(value = "user", name = "用户管理模块", description = "用户的增删改查和权限管理", open = false)
+@ApiOperation(name = "用户管理模块", description = "用户的增删改查和权限管理", open = false)
 public class UserController {
     @Autowired
     private UserService userService;
 
     @GetMapping("/list")
-    @ApiOperation(value = "list", name = "查询用户列表", type = ApiOperationType.QUERY,
+    @ApiOperation(name = "查询用户列表", type = ApiOperationType.QUERY,
             description = "分页查询用户列表，支持按关键词搜索")
     public Result<PageResult<UserVO>> list(
             @RequestParam(required = false) Long page,
@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @ApiOperation(value = "detail", name = "获取用户详情", type = ApiOperationType.QUERY,
+    @ApiOperation(name = "获取用户详情", type = ApiOperationType.QUERY,
             description = "根据ID查询单个用户的详细信息")
     public Result<UserVO> getById(@PathVariable Long id) {
         UserVO vo = userService.getById(id);
@@ -43,7 +43,7 @@ public class UserController {
     }
 
     @PostMapping
-    @ApiOperation(value = "create", name = "创建用户", type = ApiOperationType.CREATE,
+    @ApiOperation(name = "创建用户", type = ApiOperationType.CREATE,
             description = "创建新用户")
     public Result<Long> create(@Valid @RequestBody UserDTO dto) {
         Long id = userService.create(dto);
@@ -51,7 +51,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @ApiOperation(value = "update", name = "更新用户", type = ApiOperationType.UPDATE,
+    @ApiOperation(name = "更新用户", type = ApiOperationType.UPDATE,
             description = "更新用户信息")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody UserDTO dto) {
         userService.update(id, dto);
@@ -59,7 +59,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @ApiOperation(value = "delete", name = "删除用户", type = ApiOperationType.DELETE,
+    @ApiOperation(name = "删除用户", type = ApiOperationType.DELETE,
             description = "删除指定用户")
     public Result<Void> delete(@PathVariable Long id) {
         userService.delete(id);
@@ -67,7 +67,7 @@ public class UserController {
     }
 
     @PostMapping("/{id}/reset-password")
-    @ApiOperation(value = "resetPassword", name = "重置密码", type = ApiOperationType.UPDATE,
+    @ApiOperation(name = "重置密码", type = ApiOperationType.UPDATE,
             description = "重置用户密码")
     public Result<Void> resetPassword(@PathVariable Long id, @Valid @RequestBody ResetPasswordDTO dto) {
         userService.resetPassword(id, dto);
@@ -75,7 +75,7 @@ public class UserController {
     }
 
     @PostMapping("/{id}/roles")
-    @ApiOperation(value = "assignRoles", name = "分配角色", type = ApiOperationType.UPDATE,
+    @ApiOperation(name = "分配角色", type = ApiOperationType.UPDATE,
             description = "为用户分配角色")
     public Result<Void> assignRoles(@PathVariable Long id, @RequestBody List<Long> roleIds) {
         userService.assignRoles(id, roleIds);

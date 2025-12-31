@@ -142,6 +142,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
 
                 sysApiMapper.insert(api);
             } else {
+                existingApi.setApiKey(apiInfo.getApiKey()); // 更新apiKey（重要！）
                 existingApi.setName(apiInfo.getName());
                 existingApi.setPath(apiInfo.getPath());
                 existingApi.setMethod(apiInfo.getMethod());
@@ -163,7 +164,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
 
     /**
      * 从接口路径推断模块的apiKey
-     * 例如：/admin/user → admin
+     * 例如：/api/admin/user/list → api:admin:user
      */
     private String inferModuleApiKeyFromPath(String path, Map<String, Long> moduleApiKeyToIdMap) {
         if (path == null || path.isEmpty()) {
@@ -174,12 +175,17 @@ public class ApiResourceServiceImpl implements ApiResourceService {
         String cleanPath = path.startsWith("/") ? path.substring(1) : path;
         String[] parts = cleanPath.split("/");
 
-        if (parts.length > 0) {
-            // 取路径的第一部分作为模块key
-            String possibleModuleKey = parts[0];
-            // 检查这个key是否在模块map中
-            if (moduleApiKeyToIdMap.containsKey(possibleModuleKey)) {
-                return possibleModuleKey;
+        if (parts.length >= 2) {
+            // 尝试从最长到最短的路径匹配
+            // 例如：先尝试 api:admin:user，再尝试 api:admin，最后尝试 api
+            for (int i = parts.length - 1; i > 0; i--) {
+                String[] moduleParts = new String[i];
+                System.arraycopy(parts, 0, moduleParts, 0, i);
+                String possibleModuleKey = String.join(":", moduleParts);
+
+                if (moduleApiKeyToIdMap.containsKey(possibleModuleKey)) {
+                    return possibleModuleKey;
+                }
             }
         }
 
