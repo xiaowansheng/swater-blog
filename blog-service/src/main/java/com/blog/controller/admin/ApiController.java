@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/api")
+@RequestMapping("/api/admin/resource")
 @ApiOperation(value = "api", name = "接口管理模块", description = "接口管理接口", open = false)
 public class ApiController {
     @Autowired

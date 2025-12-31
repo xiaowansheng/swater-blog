@@ -120,7 +120,8 @@ public class ApiResourceServiceImpl implements ApiResourceService {
         // 第二步：处理所有接口，设置parentId
         for (ApiResourceScanner.ApiResourceInfo apiInfo : apis) {
             LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(SysApi::getApiKey, apiInfo.getApiKey());
+            wrapper.eq(SysApi::getPath, apiInfo.getPath());
+            wrapper.eq(SysApi::getMethod,apiInfo.getMethod());
 
             SysApi existingApi = sysApiMapper.selectOne(wrapper);
 
