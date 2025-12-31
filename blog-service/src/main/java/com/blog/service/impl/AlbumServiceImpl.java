@@ -61,7 +61,7 @@ public class AlbumServiceImpl implements AlbumService {
     @Override
     public AlbumVO getById(Long id) {
         Album album = albumMapper.selectById(id);
-        if (album == null || album.getDeleted() == 1) {
+        if (album == null) {
             return null;
         }
         return convertToVO(album);
@@ -89,7 +89,7 @@ public class AlbumServiceImpl implements AlbumService {
     @Transactional
     public void update(Long id, AlbumDTO dto) {
         Album album = albumMapper.selectById(id);
-        if (album == null || album.getDeleted() == 1) {
+        if (album == null) {
             throw new BusinessException("相册不存在");
         }
 
@@ -101,7 +101,7 @@ public class AlbumServiceImpl implements AlbumService {
     @Transactional
     public void delete(Long id) {
         Album album = albumMapper.selectById(id);
-        if (album == null || album.getDeleted() == 1) {
+        if (album == null) {
             throw new BusinessException("相册不存在");
         }
         albumMapper.deleteById(id);

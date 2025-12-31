@@ -23,7 +23,7 @@ public class GuestbookAdminCommandServiceImpl implements GuestbookAdminCommandSe
     @Transactional
     public void approve(Long id) {
         Guestbook guestbook = guestbookMapper.selectById(id);
-        if (guestbook == null || guestbook.getDeleted() == 1) {
+        if (guestbook == null) {
             return;
         }
         guestbook.setReviewStatus(1);
@@ -37,7 +37,7 @@ public class GuestbookAdminCommandServiceImpl implements GuestbookAdminCommandSe
     @Transactional
     public void reject(Long id) {
         Guestbook guestbook = guestbookMapper.selectById(id);
-        if (guestbook == null || guestbook.getDeleted() == 1) {
+        if (guestbook == null) {
             return;
         }
         guestbook.setReviewStatus(2);
@@ -51,7 +51,7 @@ public class GuestbookAdminCommandServiceImpl implements GuestbookAdminCommandSe
     @Transactional
     public void delete(Long id) {
         Guestbook guestbook = guestbookMapper.selectById(id);
-        if (guestbook == null || guestbook.getDeleted() == 1) {
+        if (guestbook == null) {
             return;
         }
         guestbookMapper.deleteById(id);
@@ -63,7 +63,7 @@ public class GuestbookAdminCommandServiceImpl implements GuestbookAdminCommandSe
     @Transactional
     public void setVisible(Long id, Integer isVisible) {
         Guestbook guestbook = guestbookMapper.selectById(id);
-        if (guestbook == null || guestbook.getDeleted() == 1) {
+        if (guestbook == null) {
             return;
         }
         guestbook.setIsVisible(isVisible);

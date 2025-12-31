@@ -119,7 +119,7 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
     @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public void update(Long id, ArticleDTO dto) {
         Article article = articleMapper.selectById(id);
-        if (article == null || article.getDeleted() == 1) {
+        if (article == null) {
             throw new BusinessException("文章不存在");
         }
         
@@ -177,7 +177,7 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
     @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public void delete(Long id) {
         Article article = articleMapper.selectById(id);
-        if (article == null || article.getDeleted() == 1) {
+        if (article == null) {
             throw new BusinessException("文章不存在");
         }
         articleMapper.deleteById(id);
@@ -199,7 +199,7 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
     @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public void publish(Long id) {
         Article article = articleMapper.selectById(id);
-        if (article == null || article.getDeleted() == 1) {
+        if (article == null) {
             throw new BusinessException("文章不存在");
         }
         article.setStatus(ArticleStatus.PUBLISHED.getCode());
@@ -217,7 +217,7 @@ public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandServic
     @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public void unpublish(Long id) {
         Article article = articleMapper.selectById(id);
-        if (article == null || article.getDeleted() == 1) {
+        if (article == null) {
             throw new BusinessException("文章不存在");
         }
         // 下架时状态变为私密

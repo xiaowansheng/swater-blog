@@ -53,7 +53,7 @@ public class CommentAdminQueryServiceImpl implements CommentAdminQueryService {
     @Override
     public CommentVO getById(Long id) {
         Comment comment = commentMapper.selectById(id);
-        if (comment == null || comment.getDeleted() == 1) {
+        if (comment == null) {
             return null;
         }
         return convertToVO(comment);

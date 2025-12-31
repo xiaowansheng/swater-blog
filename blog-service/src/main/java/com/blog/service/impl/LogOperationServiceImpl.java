@@ -49,7 +49,7 @@ public class LogOperationServiceImpl implements LogOperationService {
     @Override
     public LogOperationVO getById(Long id) {
         LogOperation log = logOperationMapper.selectById(id);
-        if (log == null || log.getDeleted() == 1) {
+        if (log == null) {
             return null;
         }
         return BeanUtil.copyProperties(log, LogOperationVO.class);
@@ -59,7 +59,7 @@ public class LogOperationServiceImpl implements LogOperationService {
     @Transactional
     public void delete(Long id) {
         LogOperation log = logOperationMapper.selectById(id);
-        if (log == null || log.getDeleted() == 1) {
+        if (log == null) {
             return;
         }
         logOperationMapper.deleteById(id);

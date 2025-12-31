@@ -38,7 +38,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     @Override
     public FriendLinkVO getById(Long id) {
         FriendLink friendLink = friendLinkMapper.selectById(id);
-        if (friendLink == null || friendLink.getDeleted() == 1) {
+        if (friendLink == null) {
             return null;
         }
         return BeanUtil.copyProperties(friendLink, FriendLinkVO.class);
@@ -68,7 +68,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     @Transactional
     public void update(Long id, FriendLinkDTO dto) {
         FriendLink friendLink = friendLinkMapper.selectById(id);
-        if (friendLink == null || friendLink.getDeleted() == 1) {
+        if (friendLink == null) {
             return;
         }
         BeanUtils.copyProperties(dto, friendLink);
@@ -79,7 +79,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     @Transactional
     public void delete(Long id) {
         FriendLink friendLink = friendLinkMapper.selectById(id);
-        if (friendLink == null || friendLink.getDeleted() == 1) {
+        if (friendLink == null) {
             return;
         }
         friendLinkMapper.deleteById(id);
@@ -89,7 +89,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     @Transactional
     public void approve(Long id) {
         FriendLink friendLink = friendLinkMapper.selectById(id);
-        if (friendLink == null || friendLink.getDeleted() == 1) {
+        if (friendLink == null) {
             return;
         }
         friendLink.setReviewStatus(1);
@@ -100,7 +100,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     @Transactional
     public void reject(Long id) {
         FriendLink friendLink = friendLinkMapper.selectById(id);
-        if (friendLink == null || friendLink.getDeleted() == 1) {
+        if (friendLink == null) {
             return;
         }
         friendLink.setReviewStatus(2);

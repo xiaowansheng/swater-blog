@@ -121,7 +121,7 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
     @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public void update(Long id, TalkDTO dto) {
         Talk talk = talkMapper.selectById(id);
-        if (talk == null || talk.getDeleted() == 1) {
+        if (talk == null) {
             throw new BusinessException("说说不存在");
         }
         
@@ -148,7 +148,7 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
     @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public void delete(Long id) {
         Talk talk = talkMapper.selectById(id);
-        if (talk == null || talk.getDeleted() == 1) {
+        if (talk == null) {
             throw new BusinessException("说说不存在");
         }
         talkMapper.deleteById(id);
@@ -161,7 +161,7 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
     @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public void setTop(Long id) {
         Talk talk = talkMapper.selectById(id);
-        if (talk == null || talk.getDeleted() == 1) {
+        if (talk == null) {
             throw new BusinessException("说说不存在");
         }
         talk.setIsTop(1);
@@ -173,7 +173,7 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
     @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public void cancelTop(Long id) {
         Talk talk = talkMapper.selectById(id);
-        if (talk == null || talk.getDeleted() == 1) {
+        if (talk == null) {
             throw new BusinessException("说说不存在");
         }
         talk.setIsTop(0);

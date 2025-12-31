@@ -48,7 +48,7 @@ public class GuestbookAdminQueryServiceImpl implements GuestbookAdminQueryServic
     @Override
     public GuestbookVO getById(Long id) {
         Guestbook guestbook = guestbookMapper.selectById(id);
-        if (guestbook == null || guestbook.getDeleted() == 1) {
+        if (guestbook == null) {
             return null;
         }
         return convertToVO(guestbook);

@@ -66,7 +66,7 @@ public class ArticleAdminQueryServiceImpl implements ArticleAdminQueryService {
     @Override
     public ArticleVO getById(Long id) {
         Article article = articleMapper.selectById(id);
-        if (article == null || article.getDeleted() == 1) {
+        if (article == null) {
             return null;
         }
         return convertToVO(article);

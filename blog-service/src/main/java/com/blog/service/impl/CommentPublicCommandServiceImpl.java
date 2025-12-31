@@ -64,12 +64,12 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
         
         if ("ARTICLE".equalsIgnoreCase(dto.getTargetType())) {
             Article article = articleMapper.selectById(dto.getTargetId());
-            if (article == null || article.getDeleted() == 1) {
+            if (article == null) {
                 throw new BusinessException("文章不存在");
             }
         } else if ("TALK".equalsIgnoreCase(dto.getTargetType())) {
             Talk talk = talkMapper.selectById(dto.getTargetId());
-            if (talk == null || talk.getDeleted() == 1) {
+            if (talk == null) {
                 throw new BusinessException("说说不存在");
             }
         } else {
@@ -132,7 +132,7 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
 
         if (dto.getParentId() != null && dto.getParentId() > 0) {
             Comment parent = commentMapper.selectById(dto.getParentId());
-            if (parent == null || parent.getDeleted() == 1) {
+            if (parent == null) {
                 throw new BusinessException("父评论不存在");
             }
             comment.setParentId(dto.getParentId());

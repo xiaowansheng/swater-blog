@@ -140,7 +140,7 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
         lock.lock();
         try {
             Article article = articleMapper.selectById(articleId);
-            if (article == null || article.getDeleted() == 1) {
+            if (article == null) {
                 throw new BusinessException("文章不存在");
             }
 

@@ -40,7 +40,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryVO getById(Long id) {
         Category category = categoryMapper.selectById(id);
-        if (category == null || category.getDeleted() == 1) {
+        if (category == null) {
             return null;
         }
         return BeanUtil.copyProperties(category, CategoryVO.class);
@@ -68,7 +68,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void update(Long id, CategoryDTO dto) {
         Category category = categoryMapper.selectById(id);
-        if (category == null || category.getDeleted() == 1) {
+        if (category == null) {
             throw new BusinessException("分类不存在");
         }
         category.setName(dto.getName());
@@ -84,7 +84,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void delete(Long id) {
         Category category = categoryMapper.selectById(id);
-        if (category == null || category.getDeleted() == 1) {
+        if (category == null) {
             throw new BusinessException("分类不存在");
         }
         categoryMapper.deleteById(id);

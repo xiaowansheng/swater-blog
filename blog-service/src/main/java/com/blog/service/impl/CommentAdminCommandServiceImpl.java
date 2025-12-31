@@ -37,7 +37,7 @@ public class CommentAdminCommandServiceImpl implements CommentAdminCommandServic
     @Transactional
     public void approve(Long id) {
         Comment comment = commentMapper.selectById(id);
-        if (comment == null || comment.getDeleted() == 1) {
+        if (comment == null) {
             throw new BusinessException("评论不存在");
         }
         comment.setStatus(1);
@@ -51,7 +51,7 @@ public class CommentAdminCommandServiceImpl implements CommentAdminCommandServic
     @Transactional
     public void reject(Long id) {
         Comment comment = commentMapper.selectById(id);
-        if (comment == null || comment.getDeleted() == 1) {
+        if (comment == null) {
             throw new BusinessException("评论不存在");
         }
         comment.setStatus(0);
@@ -65,7 +65,7 @@ public class CommentAdminCommandServiceImpl implements CommentAdminCommandServic
     @Transactional
     public void delete(Long id) {
         Comment comment = commentMapper.selectById(id);
-        if (comment == null || comment.getDeleted() == 1) {
+        if (comment == null) {
             throw new BusinessException("评论不存在");
         }
         
@@ -78,7 +78,7 @@ public class CommentAdminCommandServiceImpl implements CommentAdminCommandServic
     @Transactional
     public void setVisible(Long id) {
         Comment comment = commentMapper.selectById(id);
-        if (comment == null || comment.getDeleted() == 1) {
+        if (comment == null) {
             throw new BusinessException("评论不存在");
         }
         comment.setIsVisible(0);
@@ -92,7 +92,7 @@ public class CommentAdminCommandServiceImpl implements CommentAdminCommandServic
     @Transactional
     public void setHidden(Long id) {
         Comment comment = commentMapper.selectById(id);
-        if (comment == null || comment.getDeleted() == 1) {
+        if (comment == null) {
             throw new BusinessException("评论不存在");
         }
         comment.setIsVisible(1);

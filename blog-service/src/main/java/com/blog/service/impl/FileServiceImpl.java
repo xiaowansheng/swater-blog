@@ -127,7 +127,7 @@ public class FileServiceImpl implements FileService {
     @Transactional
     public void delete(Long id) {
         FileMeta fileMeta = fileMetaMapper.selectById(id);
-        if (fileMeta == null || fileMeta.getDeleted() == 1) {
+        if (fileMeta == null) {
             throw new BusinessException("文件不存在");
         }
 

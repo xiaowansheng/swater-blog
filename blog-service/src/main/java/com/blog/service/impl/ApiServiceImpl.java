@@ -41,7 +41,7 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public ApiVO getById(Long id) {
         SysApi api = sysApiMapper.selectById(id);
-        if (api == null || api.getDeleted() == 1) {
+        if (api == null) {
             return null;
         }
         return BeanUtil.copyProperties(api, ApiVO.class);
@@ -79,7 +79,7 @@ public class ApiServiceImpl implements ApiService {
     @Transactional
     public void update(Long id, ApiDTO dto) {
         SysApi api = sysApiMapper.selectById(id);
-        if (api == null || api.getDeleted() == 1) {
+        if (api == null) {
             throw new BusinessException("接口不存在");
         }
 
@@ -99,7 +99,7 @@ public class ApiServiceImpl implements ApiService {
     @Transactional
     public void delete(Long id) {
         SysApi api = sysApiMapper.selectById(id);
-        if (api == null || api.getDeleted() == 1) {
+        if (api == null) {
             throw new BusinessException("接口不存在");
         }
 
