@@ -33,12 +33,8 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
         // 获取当前请求的路径和方法
         String requestPath = request.getRequestURI();
         String requestMethod = request.getMethod();
-
-        // 获取当前用户（在之前的拦截器中已经设置）
-        UserVO currentUser = UserContext.getCurrentUser();
-
         // 执行接口权限验证
-        return checkApiPermission(requestPath, requestMethod, currentUser);
+        return checkApiPermission(requestPath, requestMethod);
     }
 
     /**
@@ -46,10 +42,9 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
      *
      * @param path       接口路径
      * @param method     HTTP方法
-     * @param currentUser 当前用户
      * @return true 表示有权限，false 表示无权限
      */
-    private boolean checkApiPermission(String path, String method, UserVO currentUser) {
+    private boolean checkApiPermission(String path, String method) {
         // 从缓存中获取接口信息
         ApiResourceCache.ApiResourceInfo apiInfo = apiResourceCache.getApiResource(path, method);
 
@@ -64,6 +59,9 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
             log.debug("开放接口，允许访问: path={}, method={}", path, method);
             return true;
         }
+
+        // 获取当前用户（在之前的拦截器中已经设置）
+        UserVO currentUser = UserContext.getCurrentUser();
 
         // 非开放接口，需要验证用户权限
         // 获取接口授权的角色列表

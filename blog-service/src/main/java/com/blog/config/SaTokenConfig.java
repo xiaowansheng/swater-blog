@@ -15,6 +15,7 @@ import com.blog.util.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -47,8 +48,8 @@ public class SaTokenConfig implements WebMvcConfigurer {
             SaRouter.match("/api/admin/**")
                     .notMatch("/api/auth/**")
                     .check(r -> {
-                        // 放行 OPTIONS 请求
-                        if (SaHolder.getRequest().getMethod().equals("OPTIONS")) {
+                        // 放行 OPTIONS 请求（CORS 预检请求）
+                        if (HttpMethod.OPTIONS.matches(SaHolder.getRequest().getMethod())) {
                             return;
                         }
 
