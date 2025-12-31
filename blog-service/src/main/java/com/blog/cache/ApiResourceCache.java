@@ -54,7 +54,7 @@ public class ApiResourceCache {
     private volatile boolean initialized = false;
 
     /**
-     *  TODO 如果后续需要优化，可以考虑：
+     * TODO 如果后续需要优化，可以考虑：
      *          按路径前缀分组建立索引
      *          使用编译后的路径模式（AntPathMatcher 支持编译）
      * 获取接口资源信息
@@ -74,7 +74,7 @@ public class ApiResourceCache {
             if (info.getPath() != null && info.getMethod() != null) {
                 // 使用 Ant 路径匹配器进行匹配
                 if (pathMatcher.match(info.getPath(), path) &&
-                    info.getMethod().equalsIgnoreCase(method)) {
+                        info.getMethod().equalsIgnoreCase(method)) {
                     return info;
                 }
             }
@@ -91,7 +91,7 @@ public class ApiResourceCache {
      */
     public Set<Long> getApiRoles(Long apiId) {
         ensureInitialized();
-        return apiRoleCache.getOrDefault(apiId, Collections.emptySet());
+        return apiRoleCache.getOrDefault(apiId, Collections.<Long>emptySet());
     }
 
     /**
@@ -126,9 +126,12 @@ public class ApiResourceCache {
      * 从数据库加载接口资源到缓存
      */
     private void loadCache() {
-        // 查询所有未删除的接口
+        // 查询所有的接口，去除模块
         LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysApi::getDeleted, 0);
+        wrapper
+                .eq(SysApi::getParentId, 0)
+                .or()
+                .eq(SysApi::getParentId, null);
         List<SysApi> apis = sysApiMapper.selectList(wrapper);
 
         // 清空缓存
@@ -138,7 +141,7 @@ public class ApiResourceCache {
         // 构建接口资源缓存
         for (SysApi api : apis) {
             // 只缓存非模块的接口（模块的 is_open 可能为 null）
-            if (api.getMethod() != null && !api.getMethod().equals("MODULE")) {
+            if (api.getMethod() != null) {
                 ApiResourceInfo info = new ApiResourceInfo(
                         api.getId(),
                         api.getApiKey(),
@@ -176,7 +179,7 @@ public class ApiResourceCache {
         private final Integer isOpen;
 
         public ApiResourceInfo(Long id, String apiKey, String name, String path,
-                              String method, String description, Integer isOpen) {
+                               String method, String description, Integer isOpen) {
             this.id = id;
             this.apiKey = apiKey;
             this.name = name;
