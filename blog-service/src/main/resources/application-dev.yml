@@ -274,6 +274,8 @@ logging:
 
 # 监控配置 - 开发环境
 management:
+  server:
+    port: 8081  # 监控服务独立端口（与应用主端口分离）
   endpoints:
     web:
       exposure:
