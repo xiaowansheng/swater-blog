@@ -30,6 +30,11 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // 放行 OPTIONS 请求（CORS 预检请求）
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+
         // 获取当前请求的路径和方法
         String requestPath = request.getRequestURI();
         String requestMethod = request.getMethod();
