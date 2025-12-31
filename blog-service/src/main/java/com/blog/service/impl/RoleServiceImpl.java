@@ -36,7 +36,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleVO getById(Long id) {
         Role role = roleMapper.selectById(id);
-        if (role == null || role.getDeleted() == 1) {
+        if (role == null) {
             return null;
         }
         return BeanUtil.copyProperties(role, RoleVO.class);
@@ -101,7 +101,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public void update(Long id, RoleDTO dto) {
         Role role = roleMapper.selectById(id);
-        if (role == null || role.getDeleted() == 1) {
+        if (role == null) {
             throw new BusinessException("角色不存在");
         }
         
@@ -142,7 +142,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public void delete(Long id) {
         Role role = roleMapper.selectById(id);
-        if (role == null || role.getDeleted() == 1) {
+        if (role == null) {
             throw new BusinessException("角色不存在");
         }
         roleMapper.deleteById(id);
@@ -153,7 +153,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public void assignApis(Long id, List<Long> apiIds) {
         Role role = roleMapper.selectById(id);
-        if (role == null || role.getDeleted() == 1) {
+        if (role == null) {
             throw new BusinessException("角色不存在");
         }
         roleApiMapper.deleteByRoleId(id);

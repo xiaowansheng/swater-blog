@@ -43,7 +43,7 @@ public class TalkAdminQueryServiceImpl implements TalkAdminQueryService {
     @Override
     public TalkVO getById(Long id) {
         Talk talk = talkMapper.selectById(id);
-        if (talk == null || talk.getDeleted() == 1) {
+        if (talk == null) {
             return null;
         }
         return convertToVO(talk);

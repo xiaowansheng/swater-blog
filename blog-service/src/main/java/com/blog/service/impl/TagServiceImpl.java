@@ -37,7 +37,7 @@ public class TagServiceImpl implements TagService {
     @Override
     public TagVO getById(Long id) {
         Tag tag = tagMapper.selectById(id);
-        if (tag == null || tag.getDeleted() == 1) {
+        if (tag == null) {
             return null;
         }
         return BeanUtil.copyProperties(tag, TagVO.class);
@@ -59,7 +59,7 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public void update(Long id, TagDTO dto) {
         Tag tag = tagMapper.selectById(id);
-        if (tag == null || tag.getDeleted() == 1) {
+        if (tag == null) {
             throw new BusinessException("标签不存在");
         }
         tag.setName(dto.getName());
@@ -74,7 +74,7 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public void delete(Long id) {
         Tag tag = tagMapper.selectById(id);
-        if (tag == null || tag.getDeleted() == 1) {
+        if (tag == null) {
             throw new BusinessException("标签不存在");
         }
         tagMapper.deleteById(id);

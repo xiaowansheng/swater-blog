@@ -49,7 +49,7 @@ public class SearchSyncServiceImpl implements SearchSyncService {
     @Transactional
     public void syncPost(Long articleId) {
         Article article = articleMapper.selectById(articleId);
-        if (article == null || article.getDeleted() == 1) {
+        if (article == null) {
             return;
         }
 
@@ -65,7 +65,7 @@ public class SearchSyncServiceImpl implements SearchSyncService {
     @Transactional
     public void syncMoment(Long talkId) {
         Talk talk = talkMapper.selectById(talkId);
-        if (talk == null || talk.getDeleted() == 1) {
+        if (talk == null) {
             return;
         }
 
@@ -81,7 +81,7 @@ public class SearchSyncServiceImpl implements SearchSyncService {
     @Transactional
     public void syncComment(Long commentId) {
         Comment comment = commentMapper.selectById(commentId);
-        if (comment == null || comment.getDeleted() == 1) {
+        if (comment == null) {
             return;
         }
 

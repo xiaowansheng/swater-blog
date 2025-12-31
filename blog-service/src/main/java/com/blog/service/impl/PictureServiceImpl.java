@@ -58,7 +58,7 @@ public class PictureServiceImpl implements PictureService {
     @Override
     public PictureVO getById(Long id) {
         Picture picture = pictureMapper.selectById(id);
-        if (picture == null || picture.getDeleted() == 1) {
+        if (picture == null) {
             return null;
         }
         return convertToVO(picture);
@@ -68,7 +68,7 @@ public class PictureServiceImpl implements PictureService {
     @Transactional
     public Long create(PictureDTO dto) {
         Album album = albumMapper.selectById(dto.getAlbumId());
-        if (album == null || album.getDeleted() == 1) {
+        if (album == null) {
             throw new BusinessException("相册不存在");
         }
 
@@ -96,13 +96,13 @@ public class PictureServiceImpl implements PictureService {
     @Transactional
     public void update(Long id, PictureDTO dto) {
         Picture picture = pictureMapper.selectById(id);
-        if (picture == null || picture.getDeleted() == 1) {
+        if (picture == null) {
             throw new BusinessException("图片不存在");
         }
 
         if (dto.getAlbumId() != null && !dto.getAlbumId().equals(picture.getAlbumId())) {
             Album album = albumMapper.selectById(dto.getAlbumId());
-            if (album == null || album.getDeleted() == 1) {
+            if (album == null) {
                 throw new BusinessException("相册不存在");
             }
         }
@@ -115,7 +115,7 @@ public class PictureServiceImpl implements PictureService {
     @Transactional
     public void delete(Long id) {
         Picture picture = pictureMapper.selectById(id);
-        if (picture == null || picture.getDeleted() == 1) {
+        if (picture == null) {
             throw new BusinessException("图片不存在");
         }
         pictureMapper.deleteById(id);
@@ -125,12 +125,12 @@ public class PictureServiceImpl implements PictureService {
     @Transactional
     public void moveToAlbum(Long id, Long albumId) {
         Picture picture = pictureMapper.selectById(id);
-        if (picture == null || picture.getDeleted() == 1) {
+        if (picture == null) {
             throw new BusinessException("图片不存在");
         }
 
         Album album = albumMapper.selectById(albumId);
-        if (album == null || album.getDeleted() == 1) {
+        if (album == null) {
             throw new BusinessException("相册不存在");
         }
 

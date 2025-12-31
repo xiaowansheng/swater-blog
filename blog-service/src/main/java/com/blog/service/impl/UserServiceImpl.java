@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
     @Cacheable(value = "user", key = "#id")
     public UserVO getById(Long id) {
         User user = userMapper.selectById(id);
-        if (user == null || user.getDeleted() == 1) {
+        if (user == null) {
             return null;
         }
         return convertToVO(user);
@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService {
     @CacheEvict(value = "user", key = "#id")
     public void update(Long id, UserDTO dto) {
         User user = userMapper.selectById(id);
-        if (user == null || user.getDeleted() == 1) {
+        if (user == null) {
             throw new BusinessException("用户不存在");
         }
         
@@ -157,7 +157,7 @@ public class UserServiceImpl implements UserService {
     @CacheEvict(value = "user", key = "#id")
     public void delete(Long id) {
         User user = userMapper.selectById(id);
-        if (user == null || user.getDeleted() == 1) {
+        if (user == null) {
             throw new BusinessException("用户不存在");
         }
         userMapper.deleteById(id);
@@ -170,7 +170,7 @@ public class UserServiceImpl implements UserService {
     @CacheEvict(value = "user", key = "#id")
     public void resetPassword(Long id, ResetPasswordDTO dto) {
         User user = userMapper.selectById(id);
-        if (user == null || user.getDeleted() == 1) {
+        if (user == null) {
             throw new BusinessException("用户不存在");
         }
         user.setPassword(PasswordUtil.encode(dto.getPassword()));
@@ -184,7 +184,7 @@ public class UserServiceImpl implements UserService {
     @CacheEvict(value = "user", key = "#id")
     public void assignRoles(Long id, List<Long> roleIds) {
         User user = userMapper.selectById(id);
-        if (user == null || user.getDeleted() == 1) {
+        if (user == null) {
             throw new BusinessException("用户不存在");
         }
         

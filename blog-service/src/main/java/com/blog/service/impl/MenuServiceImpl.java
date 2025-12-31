@@ -47,7 +47,7 @@ public class MenuServiceImpl implements MenuService {
     @Override
     public MenuVO getById(Long id) {
         SysMenu menu = sysMenuMapper.selectById(id);
-        if (menu == null || menu.getDeleted() == 1) {
+        if (menu == null) {
             return null;
         }
         return BeanUtil.copyProperties(menu, MenuVO.class);
@@ -96,7 +96,7 @@ public class MenuServiceImpl implements MenuService {
     @Transactional
     public void update(Long id, MenuDTO dto) {
         SysMenu menu = sysMenuMapper.selectById(id);
-        if (menu == null || menu.getDeleted() == 1) {
+        if (menu == null) {
             throw new BusinessException("菜单不存在");
         }
 
@@ -129,7 +129,7 @@ public class MenuServiceImpl implements MenuService {
     @Transactional
     public void delete(Long id) {
         SysMenu menu = sysMenuMapper.selectById(id);
-        if (menu == null || menu.getDeleted() == 1) {
+        if (menu == null) {
             throw new BusinessException("菜单不存在");
         }
 

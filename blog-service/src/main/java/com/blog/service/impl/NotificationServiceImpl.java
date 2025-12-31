@@ -71,7 +71,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public NotificationVO getById(Long id) {
         SysNotification notification = sysNotificationMapper.selectById(id);
-        if (notification == null || notification.getDeleted() == 1) {
+        if (notification == null) {
             return null;
         }
         return convertToVO(notification);
@@ -81,7 +81,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void markAsRead(Long id) {
         SysNotification notification = sysNotificationMapper.selectById(id);
-        if (notification == null || notification.getDeleted() == 1) {
+        if (notification == null) {
             return;
         }
         notification.setIsRead(1);
@@ -102,7 +102,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void delete(Long id) {
         SysNotification notification = sysNotificationMapper.selectById(id);
-        if (notification == null || notification.getDeleted() == 1) {
+        if (notification == null) {
             return;
         }
         sysNotificationMapper.deleteById(id);

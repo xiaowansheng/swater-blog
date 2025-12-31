@@ -46,7 +46,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
     @Override
     public ApiResourceVO getById(Long id) {
         SysApi api = sysApiMapper.selectById(id);
-        if (api == null || api.getDeleted() == 1) {
+        if (api == null) {
             return null;
         }
         return BeanUtil.copyProperties(api, ApiResourceVO.class);
@@ -56,7 +56,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
     @Transactional
     public void update(Long id, ApiResourceDTO dto) {
         SysApi api = sysApiMapper.selectById(id);
-        if (api == null || api.getDeleted() == 1) {
+        if (api == null) {
             return;
         }
         BeanUtils.copyProperties(dto, api);

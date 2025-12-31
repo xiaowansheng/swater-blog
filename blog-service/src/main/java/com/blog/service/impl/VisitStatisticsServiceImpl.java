@@ -67,7 +67,7 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
     @Override
     public VisitStatisticsVO getById(Long id) {
         VisitStatistics entity = visitStatisticsMapper.selectById(id);
-        if (entity == null || entity.getDeleted() == 1) {
+        if (entity == null) {
             return null;
         }
         return convertToVO(entity);
