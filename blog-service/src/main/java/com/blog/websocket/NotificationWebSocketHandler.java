@@ -22,6 +22,9 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         if (userId != null) {
             sessions.put(userId, session);
             log.info("WebSocket连接建立，用户ID: {}", userId);
+        } else {
+            log.warn("WebSocket连接建立失败：无法获取用户ID");
+            session.close();
         }
     }
 
@@ -51,16 +54,28 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    /**
+     * 从 WebSocket Session 中获取用户 ID
+     * <p>
+     * 用户 ID 在握手阶段由 WebSocketHandshakeInterceptor 设置到 session 属性中
+     * </p>
+     *
+     * @param session WebSocket 会话
+     * @return 用户 ID，如果无法获取则返回 null
+     */
     private Long getUserIdFromSession(WebSocketSession session) {
-        String query = session.getUri().getQuery();
-        if (query != null && query.contains("userId=")) {
-            String userIdStr = query.substring(query.indexOf("userId=") + 7);
-            if (userIdStr.contains("&")) {
-                userIdStr = userIdStr.substring(0, userIdStr.indexOf("&"));
-            }
+        Object userIdObj = session.getAttributes().get("userId");
+        if (userIdObj instanceof Long) {
+            return (Long) userIdObj;
+        }
+        if (userIdObj instanceof Integer) {
+            return ((Integer) userIdObj).longValue();
+        }
+        if (userIdObj instanceof String) {
             try {
-                return Long.parseLong(userIdStr);
+                return Long.parseLong((String) userIdObj);
             } catch (NumberFormatException e) {
+                log.error("无法解析用户ID: {}", userIdObj);
                 return null;
             }
         }

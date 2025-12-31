@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/store/auth'
 import { useNotificationStore } from '@/store/notification'
 import config from '@/config'
+import { getToken } from '@/utils/storage'
 
 class NotificationWebSocket {
   private ws: WebSocket | null = null
@@ -12,7 +13,15 @@ class NotificationWebSocket {
 
   connect() {
     const wsUrl = config.wsBaseUrl
-    const url = `${wsUrl}/ws/notification`
+    const token = getToken()
+
+    if (!token) {
+      console.warn('未找到 Token，无法建立 WebSocket 连接')
+      return
+    }
+
+    // WebSocket 握手时通过 URL 参数传递 Token
+    const url = `${wsUrl}/ws/notification?token=${encodeURIComponent(token)}`
 
     try {
       this.ws = new WebSocket(url)
@@ -36,9 +45,16 @@ class NotificationWebSocket {
         console.error('WebSocket错误', error)
       }
 
-      this.ws.onclose = () => {
-        console.log('WebSocket连接已关闭')
+      this.ws.onclose = (event) => {
+        console.log('WebSocket连接已关闭', event.code, event.reason)
         this.stopHeartbeat()
+
+        // 如果是认证失败（code 4001 或类似），不再重连
+        if (event.code === 4001 || event.reason === 'Unauthorized') {
+          console.error('WebSocket 认证失败，停止重连')
+          return
+        }
+
         this.reconnect()
       }
     } catch (error) {
