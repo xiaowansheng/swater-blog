@@ -130,8 +130,7 @@ public class ApiResourceCache {
         LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
         wrapper
                 .ne(SysApi::getParentId, 0)
-                .or()
-                .ne(SysApi::getParentId, null);
+                .isNotNull(SysApi::getParentId);
         List<SysApi> apis = sysApiMapper.selectList(wrapper);
 
         // 清空缓存
