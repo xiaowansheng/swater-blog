@@ -188,6 +188,11 @@ mybatis-plus:
       insert-strategy: not_null            # 插入策略
       update-strategy: not_null            # 更新策略
 
+# API 资源配置
+api-resource:
+  # 应用启动时是否自动刷新接口资源
+  auto-refresh-on-startup: true
+
 sa-token:
   token-name: Authorization
   token-prefix: Bearer
