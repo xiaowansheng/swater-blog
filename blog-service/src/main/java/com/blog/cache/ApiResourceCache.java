@@ -129,9 +129,9 @@ public class ApiResourceCache {
         // 查询所有的接口，去除模块
         LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
         wrapper
-                .eq(SysApi::getParentId, 0)
+                .ne(SysApi::getParentId, 0)
                 .or()
-                .eq(SysApi::getParentId, null);
+                .ne(SysApi::getParentId, null);
         List<SysApi> apis = sysApiMapper.selectList(wrapper);
 
         // 清空缓存
