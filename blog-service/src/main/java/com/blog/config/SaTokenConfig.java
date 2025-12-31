@@ -44,9 +44,8 @@ public class SaTokenConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         // SaToken 登录拦截器 - 负责用户认证和设置用户上下文
         registry.addInterceptor(new SaInterceptor(handler -> {
-            // 登录校验 -- 拦截所有 admin 接口
-            SaRouter.match("/api/admin/**")
-                    .notMatch("/api/auth/**")
+            // 登录校验 -- 拦截所有 admin 接口和需要认证的auth接口
+            SaRouter.match("/api/admin/**", "/api/auth/current", "/api/auth/userinfo", "/api/auth/refresh")
                     .check(r -> {
                         // 放行 OPTIONS 请求（CORS 预检请求）
                         if (HttpMethod.OPTIONS.matches(SaHolder.getRequest().getMethod())) {
