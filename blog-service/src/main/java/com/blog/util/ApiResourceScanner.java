@@ -2,6 +2,7 @@ package com.blog.util;
 
 import com.blog.annotation.ApiOperation;
 import com.blog.model.enums.ApiOperationType;
+import lombok.Data;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
@@ -20,10 +21,10 @@ public class ApiResourceScanner {
 
     /**
      * 扫描所有带有 @ApiOperation 注解的控制器和接口方法
-     * 返回模块（类级别）和接口（方法级别）信息
+     * 返回模块树形结构（模块包含子接口列表）
      */
-    public List<ApiResourceInfo> scanApiResources() {
-        List<ApiResourceInfo> resources = new ArrayList<>();
+    public List<ModuleNode> scanApiResources() {
+        List<ModuleNode> modules = new ArrayList<>();
 
         String[] beanNames = applicationContext.getBeanNamesForAnnotation(RestController.class);
 
@@ -48,25 +49,22 @@ public class ApiResourceScanner {
                 basePath = classMapping.value()[0];
             }
 
-            // 添加模块信息（类级别）
-            ApiResourceInfo moduleInfo = new ApiResourceInfo();
-            moduleInfo.setModule(true);
-            // 生成模块的 apiKey（从基础路径推断）
-            String moduleApiKey = generateModuleApiKey(basePath);
-            moduleInfo.setApiKey(moduleApiKey);
-            moduleInfo.setName(moduleOperation.name());
-            moduleInfo.setDescription(moduleOperation.description());
-            moduleInfo.setPath(basePath);
-            moduleInfo.setMethod("MODULE");
-            moduleInfo.setIsOpen(moduleOperation.open() ? 1 : 0);
-            moduleInfo.setPerms(moduleOperation.perms());
-            moduleInfo.setVersion(moduleOperation.version());
-            resources.add(moduleInfo);
+            // 创建模块节点
+            ModuleNode moduleNode = new ModuleNode();
+            moduleNode.setApiKey(generateModuleApiKey(basePath));
+            moduleNode.setName(moduleOperation.name());
+            moduleNode.setDescription(moduleOperation.description());
+            moduleNode.setPath(basePath);
+            moduleNode.setMethod("MODULE");
+            moduleNode.setIsOpen(moduleOperation.open() ? 1 : 0);
+            moduleNode.setPerms(moduleOperation.perms());
+            moduleNode.setVersion(moduleOperation.version());
 
             // 判断模块是否开放（用于接口继承）
             boolean moduleOpen = moduleOperation.open();
 
             // 扫描方法级别的接口
+            List<ApiNode> apis = new ArrayList<>();
             Method[] methods = clazz.getDeclaredMethods();
             for (Method method : methods) {
                 ApiOperation methodOperation = method.getAnnotation(ApiOperation.class);
@@ -114,45 +112,40 @@ public class ApiResourceScanner {
                 for (String methodPath : paths) {
                     String fullPath = basePath + methodPath;
 
-                    ApiResourceInfo info = new ApiResourceInfo();
-                    info.setModule(false);
-
+                    ApiNode apiNode = new ApiNode();
                     // 生成接口唯一标识
                     String apiKey = generateKey(fullPath, httpMethodStr);
+                    apiNode.setApiKey(apiKey);
+                    apiNode.setName(methodOperation.name());
+                    apiNode.setPath(fullPath);
+                    apiNode.setMethod(httpMethodStr);
+                    apiNode.setDescription(methodOperation.description());
 
-                    // 如果apiKey已经包含冒号（如 user:list），直接使用
-                    info.setApiKey(apiKey);
-                    info.setName(methodOperation.name());
-                    info.setPath(fullPath);
-                    info.setMethod(httpMethodStr);
-                    info.setDescription(methodOperation.description());
-
-                    // 处理open属性继承逻辑：
-                    // 1. 如果模块不开放，则接口也不开放
-                    // 2. 如果模块开放，但接口明确设置为不开放，则接口不开放
-                    // 3. 否则接口开放
+                    // 处理open属性继承逻辑
                     boolean isOpen = moduleOpen && methodOperation.open();
-                    info.setIsOpen(isOpen ? 1 : 0);
+                    apiNode.setIsOpen(isOpen ? 1 : 0);
 
                     // 处理权限标识
                     String perms = methodOperation.perms();
                     if (perms == null || perms.isEmpty()) {
-                        // 自动生成权限标识：模块:接口
-                        perms = moduleApiKey + ":" + apiKey;
+                        perms = moduleNode.getApiKey() + ":" + apiKey;
                     }
-                    info.setPerms(perms);
+                    apiNode.setPerms(perms);
 
-                    info.setType(methodOperation.type().name());
-                    info.setVersion(methodOperation.version());
-                    info.setLogOperation(methodOperation.logOperation());
-                    info.setLogException(methodOperation.logException());
+                    apiNode.setType(methodOperation.type().name());
+                    apiNode.setVersion(methodOperation.version());
+                    apiNode.setLogOperation(methodOperation.logOperation());
+                    apiNode.setLogException(methodOperation.logException());
 
-                    resources.add(info);
+                    apis.add(apiNode);
                 }
             }
+
+            moduleNode.setApis(apis);
+            modules.add(moduleNode);
         }
 
-        return resources;
+        return modules;
     }
 
     /**
@@ -191,115 +184,38 @@ public class ApiResourceScanner {
         return cleanPath;
     }
 
-    public static class ApiResourceInfo {
+    /**
+     * 模块节点（包含子接口列表）
+     */
+    @Data
+    public static class ModuleNode {
         private String apiKey;
         private String name;
         private String path;
         private String method;
         private String description;
         private Integer isOpen;
-        private boolean module; // 是否为模块（类级别）
-        private String perms; // 权限标识
-        private String type; // 操作类型
-        private String version; // 版本
-        private boolean logOperation; // 是否记录操作日志
-        private boolean logException; // 是否记录异常日志
+        private String perms;
+        private String version;
+        private List<ApiNode> apis; // 子接口列表
+    }
 
-        public String getApiKey() {
-            return apiKey;
-        }
-
-        public void setApiKey(String apiKey) {
-            this.apiKey = apiKey;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getPath() {
-            return path;
-        }
-
-        public void setPath(String path) {
-            this.path = path;
-        }
-
-        public String getMethod() {
-            return method;
-        }
-
-        public void setMethod(String method) {
-            this.method = method;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        public Integer getIsOpen() {
-            return isOpen;
-        }
-
-        public void setIsOpen(Integer isOpen) {
-            this.isOpen = isOpen;
-        }
-
-        public boolean isModule() {
-            return module;
-        }
-
-        public void setModule(boolean module) {
-            this.module = module;
-        }
-
-        public String getPerms() {
-            return perms;
-        }
-
-        public void setPerms(String perms) {
-            this.perms = perms;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public String getVersion() {
-            return version;
-        }
-
-        public void setVersion(String version) {
-            this.version = version;
-        }
-
-        public boolean isLogOperation() {
-            return logOperation;
-        }
-
-        public void setLogOperation(boolean logOperation) {
-            this.logOperation = logOperation;
-        }
-
-        public boolean isLogException() {
-            return logException;
-        }
-
-        public void setLogException(boolean logException) {
-            this.logException = logException;
-        }
+    /**
+     * API 接口节点
+     */
+    @Data
+    public static class ApiNode {
+        private String apiKey;
+        private String name;
+        private String path;
+        private String method;
+        private String description;
+        private Integer isOpen;
+        private String perms;
+        private String type;
+        private String version;
+        private boolean logOperation;
+        private boolean logException;
     }
 }
 

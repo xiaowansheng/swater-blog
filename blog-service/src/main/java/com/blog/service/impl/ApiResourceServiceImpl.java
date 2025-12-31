@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,92 +66,19 @@ public class ApiResourceServiceImpl implements ApiResourceService {
     @Override
     @Transactional
     public void refresh() {
-        List<ApiResourceScanner.ApiResourceInfo> resources = apiResourceScanner.scanApiResources();
+        // 获取树形结构的模块列表
+        List<ApiResourceScanner.ModuleNode> modules = apiResourceScanner.scanApiResources();
 
-        // 分离模块和接口
-        List<ApiResourceScanner.ApiResourceInfo> modules = new ArrayList<>();
-        List<ApiResourceScanner.ApiResourceInfo> apis = new ArrayList<>();
+        // 遍历每个模块及其子接口
+        for (ApiResourceScanner.ModuleNode moduleNode : modules) {
+            // 第一步：处理模块（插入或更新），获取模块ID
+            Long moduleId = processModule(moduleNode);
 
-        for (ApiResourceScanner.ApiResourceInfo info : resources) {
-            if (info.isModule()) {
-                modules.add(info);
-            } else {
-                apis.add(info);
-            }
-        }
-
-        // 用于存储模块的 apiKey → ID 映射
-        Map<String, Long> moduleApiKeyToIdMap = new HashMap<>();
-
-        // 第一步：处理所有模块
-        for (ApiResourceScanner.ApiResourceInfo moduleInfo : modules) {
-            LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(SysApi::getApiKey, moduleInfo.getApiKey());
-
-            SysApi existingModule = sysApiMapper.selectOne(wrapper);
-
-            if (existingModule == null) {
-                SysApi module = new SysApi();
-                module.setApiKey(moduleInfo.getApiKey());
-                module.setName(moduleInfo.getName());
-                module.setPath(moduleInfo.getPath());
-                module.setMethod(moduleInfo.getMethod());
-                module.setDescription(moduleInfo.getDescription());
-                module.setIsOpen(moduleInfo.getIsOpen());
-                module.setSort(0);
-                module.setParentId(0L); // 模块的parentId设为0
-                sysApiMapper.insert(module);
-                moduleApiKeyToIdMap.put(moduleInfo.getApiKey(), module.getId());
-            } else {
-                existingModule.setName(moduleInfo.getName());
-                existingModule.setPath(moduleInfo.getPath());
-                existingModule.setMethod(moduleInfo.getMethod());
-                existingModule.setDescription(moduleInfo.getDescription());
-                existingModule.setIsOpen(moduleInfo.getIsOpen());
-                existingModule.setParentId(0L); // 确保模块的parentId为0
-                sysApiMapper.updateById(existingModule);
-                moduleApiKeyToIdMap.put(moduleInfo.getApiKey(), existingModule.getId());
-            }
-        }
-
-        // 第二步：处理所有接口，设置parentId
-        for (ApiResourceScanner.ApiResourceInfo apiInfo : apis) {
-            LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(SysApi::getPath, apiInfo.getPath());
-            wrapper.eq(SysApi::getMethod,apiInfo.getMethod());
-
-            SysApi existingApi = sysApiMapper.selectOne(wrapper);
-
-            if (existingApi == null) {
-                SysApi api = new SysApi();
-                api.setApiKey(apiInfo.getApiKey());
-                api.setName(apiInfo.getName());
-                api.setPath(apiInfo.getPath());
-                api.setMethod(apiInfo.getMethod());
-                api.setDescription(apiInfo.getDescription());
-                api.setIsOpen(apiInfo.getIsOpen());
-                api.setSort(0);
-
-                // 从路径推断模块的apiKey（路径的第一部分通常是模块）
-                String moduleApiKey = inferModuleApiKeyFromPath(apiInfo.getPath(), moduleApiKeyToIdMap);
-                Long parentId = moduleApiKeyToIdMap.get(moduleApiKey);
-                api.setParentId(parentId != null ? parentId : 0L);
-
-                sysApiMapper.insert(api);
-            } else {
-                existingApi.setApiKey(apiInfo.getApiKey()); // 更新apiKey（重要！）
-                existingApi.setName(apiInfo.getName());
-                existingApi.setPath(apiInfo.getPath());
-                existingApi.setMethod(apiInfo.getMethod());
-                existingApi.setDescription(apiInfo.getDescription());
-                existingApi.setIsOpen(apiInfo.getIsOpen());
-
-                // 更新parentId
-                String moduleApiKey = inferModuleApiKeyFromPath(apiInfo.getPath(), moduleApiKeyToIdMap);
-                Long parentId = moduleApiKeyToIdMap.get(moduleApiKey);
-                existingApi.setParentId(parentId != null ? parentId : 0L);
-
-                sysApiMapper.updateById(existingApi);
+            // 第二步：处理该模块下的所有接口，使用模块ID作为parentId
+            if (moduleNode.getApis() != null && !moduleNode.getApis().isEmpty()) {
+                for (ApiResourceScanner.ApiNode apiNode : moduleNode.getApis()) {
+                    processApi(apiNode, moduleId);
+                }
             }
         }
 
@@ -163,32 +87,72 @@ public class ApiResourceServiceImpl implements ApiResourceService {
     }
 
     /**
-     * 从接口路径推断模块的apiKey
-     * 例如：/api/admin/user/list → api:admin:user
+     * 处理模块：插入或更新，返回模块ID
      */
-    private String inferModuleApiKeyFromPath(String path, Map<String, Long> moduleApiKeyToIdMap) {
-        if (path == null || path.isEmpty()) {
-            return null;
+    private Long processModule(ApiResourceScanner.ModuleNode moduleNode) {
+        LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysApi::getApiKey, moduleNode.getApiKey());
+
+        SysApi existingModule = sysApiMapper.selectOne(wrapper);
+
+        if (existingModule == null) {
+            // 新增模块
+            SysApi module = new SysApi();
+            module.setApiKey(moduleNode.getApiKey());
+            module.setName(moduleNode.getName());
+            module.setPath(moduleNode.getPath());
+            module.setMethod(moduleNode.getMethod());
+            module.setDescription(moduleNode.getDescription());
+            module.setIsOpen(moduleNode.getIsOpen());
+            module.setSort(0);
+            module.setParentId(0L); // 模块的parentId设为0
+            sysApiMapper.insert(module);
+            return module.getId();
+        } else {
+            // 更新模块
+            existingModule.setName(moduleNode.getName());
+            existingModule.setPath(moduleNode.getPath());
+            existingModule.setMethod(moduleNode.getMethod());
+            existingModule.setDescription(moduleNode.getDescription());
+            existingModule.setIsOpen(moduleNode.getIsOpen());
+            existingModule.setParentId(0L); // 确保模块的parentId为0
+            sysApiMapper.updateById(existingModule);
+            return existingModule.getId();
         }
+    }
 
-        // 移除开头的斜杠，按斜杠分割
-        String cleanPath = path.startsWith("/") ? path.substring(1) : path;
-        String[] parts = cleanPath.split("/");
+    /**
+     * 处理接口：插入或更新，使用指定的模块ID作为parentId
+     */
+    private void processApi(ApiResourceScanner.ApiNode apiNode, Long parentId) {
+        LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysApi::getPath, apiNode.getPath());
+        wrapper.eq(SysApi::getMethod, apiNode.getMethod());
 
-        if (parts.length >= 2) {
-            // 尝试从最长到最短的路径匹配
-            // 例如：先尝试 api:admin:user，再尝试 api:admin，最后尝试 api
-            for (int i = parts.length - 1; i > 0; i--) {
-                String[] moduleParts = new String[i];
-                System.arraycopy(parts, 0, moduleParts, 0, i);
-                String possibleModuleKey = String.join(":", moduleParts);
+        SysApi existingApi = sysApiMapper.selectOne(wrapper);
 
-                if (moduleApiKeyToIdMap.containsKey(possibleModuleKey)) {
-                    return possibleModuleKey;
-                }
-            }
+        if (existingApi == null) {
+            // 新增接口
+            SysApi api = new SysApi();
+            api.setApiKey(apiNode.getApiKey());
+            api.setName(apiNode.getName());
+            api.setPath(apiNode.getPath());
+            api.setMethod(apiNode.getMethod());
+            api.setDescription(apiNode.getDescription());
+            api.setIsOpen(apiNode.getIsOpen());
+            api.setSort(0);
+            api.setParentId(parentId); // 直接使用模块ID
+            sysApiMapper.insert(api);
+        } else {
+            // 更新接口
+            existingApi.setApiKey(apiNode.getApiKey());
+            existingApi.setName(apiNode.getName());
+            existingApi.setPath(apiNode.getPath());
+            existingApi.setMethod(apiNode.getMethod());
+            existingApi.setDescription(apiNode.getDescription());
+            existingApi.setIsOpen(apiNode.getIsOpen());
+            existingApi.setParentId(parentId); // 更新parentId为模块ID
+            sysApiMapper.updateById(existingApi);
         }
-
-        return null;
     }
 }
