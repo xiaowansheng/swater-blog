@@ -6,39 +6,71 @@ export default async function Footer() {
   const defaultCopyright = `© ${new Date().getFullYear()} ${site.name || 'Blog'}. All rights reserved.`;
 
   return (
-    <footer className="border-t border-border/40 py-12 mt-auto bg-card/50 backdrop-blur-xl relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-t from-primary/5 via-transparent to-transparent"></div>
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center space-y-6">
-          <div className="flex justify-center items-center gap-2 mb-2">
-            <div className="w-1 h-1 rounded-full bg-primary animate-pulse"></div>
-            <p className="text-sm text-muted">
-              {site.copyright || defaultCopyright}
-            </p>
-            <div className="w-1 h-1 rounded-full bg-accent animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-          </div>
-          {(site.icp || site.police) && (
-            <div className="flex justify-center gap-4 text-xs text-muted">
-              {site.icp && <span>{site.icp}</span>}
-              {site.police && <span>{site.police}</span>}
-            </div>
-          )}
-          <div className="flex justify-center gap-8 text-sm">
-            <a href="/about" className="text-muted hover:text-primary transition-all hover:scale-110 relative group">
-              关于
-              <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-accent scale-x-0 group-hover:scale-x-100 transition-transform rounded-full"></span>
-            </a>
-            <a href="/friend-link" className="text-muted hover:text-primary transition-all hover:scale-110 relative group">
-              友链
-              <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-accent scale-x-0 group-hover:scale-x-100 transition-transform rounded-full"></span>
-            </a>
-            <a href="/guestbook" className="text-muted hover:text-primary transition-all hover:scale-110 relative group">
-              留言
-              <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-accent scale-x-0 group-hover:scale-x-100 transition-transform rounded-full"></span>
-            </a>
+    <footer className="relative mt-auto overflow-hidden py-16 bg-background/80 backdrop-blur-md">
+      {/* Cute Divider */}
+      <div className="absolute top-0 left-0 w-full h-8 flex items-center justify-center pointer-events-none">
+        <div className="w-full h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
+        <div className="absolute px-4 bg-background">
+          <div className="flex gap-2 items-center">
+            <span className="w-1.5 h-1.5 rounded-full bg-deco-pink animate-pulse"></span>
+            <span className="w-2 h-2 rounded-full bg-primary"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-deco-yellow animate-pulse" style={{ animationDelay: '0.5s' }}></span>
           </div>
         </div>
       </div>
+
+      <div className="container relative z-10 px-6 mx-auto max-w-7xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
+          {/* Copyright Info */}
+          <div className="text-center md:text-left space-y-2">
+            <div className="flex items-center gap-2 justify-center md:justify-start">
+              <span className="text-xl font-bold font-title text-primary tracking-tight">{site.name}</span>
+              <span className="px-2 py-0.5 text-[10px] rounded-full bg-primary/10 text-primary font-medium uppercase tracking-wider">Fresh & Healing</span>
+            </div>
+            <p className="text-sm text-muted-foreground/80 font-medium">
+              {site.copyright || defaultCopyright}
+            </p>
+            {(site.icp || site.police) && (
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground/60">
+                {site.icp && <span className="hover:text-primary transition-colors cursor-default">{site.icp}</span>}
+                {site.police && <span className="hover:text-primary transition-colors cursor-default">{site.police}</span>}
+              </div>
+            )}
+          </div>
+
+          {/* Quick Links */}
+          <div className="flex justify-center gap-8 items-center">
+            <a href="/about" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
+              关于
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
+            </a>
+            <a href="/friend-link" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
+              友链
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
+            </a>
+            <a href="/guestbook" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
+              留言
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
+            </a>
+          </div>
+
+          {/* Tech Stack / Extra Info */}
+          <div className="text-center md:text-right">
+            <div className="inline-flex flex-col items-center md:items-end gap-1">
+              <p className="text-xs font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">Powered by</p>
+              <div className="flex gap-3 items-center grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
+                <span className="text-sm font-semibold text-foreground/70">Next.js</span>
+                <span className="w-1 h-1 rounded-full bg-border"></span>
+                <span className="text-sm font-semibold text-foreground/70">Tailwind</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Background Decorative Gradients */}
+      <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute -top-24 -right-24 w-64 h-64 bg-deco-pink/5 rounded-full blur-3xl pointer-events-none"></div>
     </footer>
   );
 }

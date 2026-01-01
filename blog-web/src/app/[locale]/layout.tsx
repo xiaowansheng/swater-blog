@@ -3,18 +3,25 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/lib/i18n/routing';
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Nunito, Varela_Round, Noto_Sans_SC } from 'next/font/google';
 import '@/styles/globals.css';
 import { getSiteInfo } from '@/lib/api/config.server';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const nunito = Nunito({
+  variable: '--font-nunito',
   subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const varelaRound = Varela_Round({
+  variable: '--font-varela-round',
   subsets: ['latin'],
+  weight: '400',
+});
+
+const notoSansSC = Noto_Sans_SC({
+  variable: '--font-noto-sans-sc',
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
 });
 
 export function generateStaticParams() {
@@ -37,6 +44,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+import { DecorationProvider } from '@/lib/context/DecorationContext';
+import DecorationManager from '@/components/decoration/DecorationManager';
+
 export default async function LocaleLayout({
   children,
   params,
@@ -55,12 +65,15 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${nunito.variable} ${varelaRound.variable} ${notoSansSC.variable} antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
-          <div className="flex min-h-screen flex-col">
-            {children}
-          </div>
+          <DecorationProvider>
+            <div className="flex min-h-screen flex-col relative">
+              <DecorationManager />
+              {children}
+            </div>
+          </DecorationProvider>
         </NextIntlClientProvider>
       </body>
     </html>
