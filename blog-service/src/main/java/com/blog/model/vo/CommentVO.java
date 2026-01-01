@@ -8,8 +8,6 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class CommentVO extends BaseVO {
-    private String commentKey;
-
     private String content;
 
     private List<String> images;

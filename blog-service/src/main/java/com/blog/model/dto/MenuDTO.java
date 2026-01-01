@@ -8,8 +8,6 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class MenuDTO extends BaseDTO {
-    private String menuKey;
-
     @NotBlank(message = "菜单标题不能为空")
     private String title;
 

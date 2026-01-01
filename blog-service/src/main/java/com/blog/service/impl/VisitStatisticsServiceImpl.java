@@ -151,11 +151,11 @@ public class VisitStatisticsServiceImpl implements VisitStatisticsService {
                     if (visitor.getDeviceBrand() != null) {
                         deviceBrandMap.put(visitor.getDeviceBrand(), deviceBrandMap.getOrDefault(visitor.getDeviceBrand(), 0L) + 1);
                     }
-                    if (visitor.getOs() != null) {
-                        osMap.put(visitor.getOs(), osMap.getOrDefault(visitor.getOs(), 0L) + 1);
+                    if (visitor.getOsName() != null) {
+                        osMap.put(visitor.getOsName(), osMap.getOrDefault(visitor.getOsName(), 0L) + 1);
                     }
-                    if (visitor.getBrowser() != null) {
-                        browserMap.put(visitor.getBrowser(), browserMap.getOrDefault(visitor.getBrowser(), 0L) + 1);
+                    if (visitor.getBrowserName() != null) {
+                        browserMap.put(visitor.getBrowserName(), browserMap.getOrDefault(visitor.getBrowserName(), 0L) + 1);
                     }
                 }
 

@@ -55,12 +55,12 @@ public class BaiduLocationProviderPlugin implements LocationProviderPlugin, Plug
         locationInfo.setProvince(addressDetail.getStr("province", ""));
         locationInfo.setCity(addressDetail.getStr("city", ""));
         locationInfo.setDistrict(addressDetail.getStr("district", ""));
-        locationInfo.setLocationDetail(content.getStr("address", ""));
+        locationInfo.setLocation(content.getStr("address", ""));
         if (point != null) {
             locationInfo.setLatitude(new java.math.BigDecimal(point.getStr("y", "0")));
             locationInfo.setLongitude(new java.math.BigDecimal(point.getStr("x", "0")));
         }
-        locationInfo.setIpAddress(locationInfo.getLocationDetail());
+        locationInfo.setIp(locationInfo.getLocation());
         
         return locationInfo;
     }

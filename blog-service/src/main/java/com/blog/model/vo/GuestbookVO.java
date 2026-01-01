@@ -7,8 +7,6 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class GuestbookVO extends BaseVO {
-    private String guestbookKey;
-
     private String content;
 
     private List<String> images;

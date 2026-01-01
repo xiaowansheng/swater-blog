@@ -10,9 +10,6 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = true)
 @TableName("comment")
 public class Comment extends BaseEntity {
-    @TableField("comment_key")
-    private String commentKey;
-
     private String content;
 
     private String images;

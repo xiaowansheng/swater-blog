@@ -62,29 +62,29 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
                     guestbook.setCity(locationInfo.getCity());
                     guestbook.setLatitude(locationInfo.getLatitude());
                     guestbook.setLongitude(locationInfo.getLongitude());
-                    guestbook.setLocationDetail(locationInfo.getLocationDetail());
-                    if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
-                        guestbook.setIpAddress(locationInfo.getIpAddress());
+                    guestbook.setLocation(locationInfo.getLocation());
+                    if (locationInfo.getIp() != null && !locationInfo.getIp().isEmpty()) {
+                        guestbook.setIp(locationInfo.getIp());
                     } else {
-                        guestbook.setIpAddress(ip);
+                        guestbook.setIp(ip);
                     }
-                    guestbook.setLocation(locationInfo.getLocationDetail() != null ? locationInfo.getLocationDetail() : 
+                    guestbook.setLocation(locationInfo.getLocation() != null ? locationInfo.getLocation() : 
                             (locationInfo.getProvince() != null && locationInfo.getCity() != null ? 
                                     locationInfo.getProvince() + locationInfo.getCity() : null));
                 } else {
-                    guestbook.setIpAddress(ip);
+                    guestbook.setIp(ip);
                 }
             } catch (Exception e) {
                 log.warn("IP定位失败，IP: {}", ip, e);
-                guestbook.setIpAddress(ip);
+                guestbook.setIp(ip);
             }
         } else {
-            guestbook.setIpAddress(ip);
+            guestbook.setIp(ip);
         }
 
         // 设置设备信息
         String userAgent = RequestUtil.getUserAgent();
-        guestbook.setDeviceInfo(userAgent);
+        guestbook.setDevice(userAgent);
 
         if (UserContext.isLoggedIn()) {
             Long userId = UserContext.getCurrentUserId();

@@ -287,7 +287,6 @@ CREATE TABLE IF NOT EXISTS `talk` (
 
 CREATE TABLE IF NOT EXISTS `comment` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '评论ID',
-  `comment_key` VARCHAR(50) DEFAULT NULL COMMENT '评论唯一标识',
   `content` TEXT NOT NULL COMMENT '评论内容',
   `images` VARCHAR(2048) DEFAULT '[]' COMMENT '图片（JSON数组）',
   `post_id` BIGINT DEFAULT NULL COMMENT '文章ID',
@@ -315,7 +314,6 @@ CREATE TABLE IF NOT EXISTS `comment` (
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_comment_key` (`comment_key`),
   KEY `idx_post_id` (`post_id`),
   KEY `idx_moment_id` (`moment_id`),
   KEY `idx_user_id` (`user_id`),
@@ -533,7 +531,6 @@ CREATE TABLE IF NOT EXISTS `log_error` (
 
 CREATE TABLE IF NOT EXISTS `sys_menu` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '菜单ID',
-  `menu_key` VARCHAR(50) NOT NULL COMMENT '菜单唯一标识',
   `title` VARCHAR(50) NOT NULL COMMENT '菜单标题',
   `icon` VARCHAR(255) DEFAULT NULL COMMENT '图标',
   `redirect` VARCHAR(100) DEFAULT NULL COMMENT '路由重定向',
@@ -548,7 +545,6 @@ CREATE TABLE IF NOT EXISTS `sys_menu` (
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_menu_key` (`menu_key`),
   KEY `idx_parent_id` (`parent_id`),
   KEY `idx_sort` (`sort`),
   KEY `idx_deleted` (`deleted`)
@@ -571,7 +567,6 @@ CREATE TABLE IF NOT EXISTS `role_menu` (
 
 CREATE TABLE IF NOT EXISTS `guestbook` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '留言ID',
-  `guestbook_key` VARCHAR(50) NOT NULL COMMENT '留言唯一标识',
   `content` VARCHAR(1024) NOT NULL COMMENT '留言内容',
   `images` VARCHAR(2048) DEFAULT '[]' COMMENT '图片（JSON数组）',
   `user_id` BIGINT DEFAULT NULL COMMENT '用户ID',
@@ -595,7 +590,6 @@ CREATE TABLE IF NOT EXISTS `guestbook` (
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_guestbook_key` (`guestbook_key`),
   KEY `idx_user_id` (`user_id`),
   KEY `idx_review_status` (`review_status`),
   KEY `idx_deleted` (`deleted`)

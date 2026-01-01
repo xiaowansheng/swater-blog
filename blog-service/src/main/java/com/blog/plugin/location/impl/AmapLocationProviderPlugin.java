@@ -51,10 +51,10 @@ public class AmapLocationProviderPlugin implements LocationProviderPlugin, Plugi
         locationInfo.setProvince(jsonObject.getStr("province", ""));
         locationInfo.setCity(jsonObject.getStr("city", ""));
         locationInfo.setDistrict(jsonObject.getStr("district", ""));
-        locationInfo.setLocationDetail(jsonObject.getStr("province", "") + 
+        locationInfo.setLocation(jsonObject.getStr("province", "") + 
                 jsonObject.getStr("city", "") + 
                 jsonObject.getStr("district", ""));
-        locationInfo.setIpAddress(locationInfo.getLocationDetail());
+        locationInfo.setIp(locationInfo.getLocation());
         
         return locationInfo;
     }

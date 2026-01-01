@@ -77,29 +77,29 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
                     talk.setCity(locationInfo.getCity());
                     talk.setLatitude(locationInfo.getLatitude());
                     talk.setLongitude(locationInfo.getLongitude());
-                    talk.setLocationDetail(locationInfo.getLocationDetail());
-                    if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
-                        talk.setIpAddress(locationInfo.getIpAddress());
+                    talk.setLocation(locationInfo.getLocation());
+                    if (locationInfo.getIp() != null && !locationInfo.getIp().isEmpty()) {
+                        talk.setIp(locationInfo.getIp());
                     } else {
-                        talk.setIpAddress(ip);
+                        talk.setIp(ip);
                     }
-                    talk.setLocation(locationInfo.getLocationDetail() != null ? locationInfo.getLocationDetail() :
+                    talk.setLocation(locationInfo.getLocation() != null ? locationInfo.getLocation() :
                             (locationInfo.getProvince() != null && locationInfo.getCity() != null ?
                                     locationInfo.getProvince() + locationInfo.getCity() : null));
                 } else {
-                    talk.setIpAddress(ip);
+                    talk.setIp(ip);
                 }
             } catch (Exception e) {
                 log.warn("说说发布IP定位失败，IP: {}", ip, e);
-                talk.setIpAddress(ip);
+                talk.setIp(ip);
             }
         } else {
-            talk.setIpAddress(ip);
+            talk.setIp(ip);
         }
 
         // 设置设备信息
         String userAgent = RequestUtil.getUserAgent();
-        talk.setDeviceInfo(userAgent);
+        talk.setDevice(userAgent);
         
         if (dto.getStatus() == null) {
             talk.setStatus("1");

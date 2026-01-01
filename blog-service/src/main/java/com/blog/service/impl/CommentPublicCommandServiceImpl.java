@@ -98,29 +98,29 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
                     comment.setCity(locationInfo.getCity());
                     comment.setLatitude(locationInfo.getLatitude());
                     comment.setLongitude(locationInfo.getLongitude());
-                    comment.setLocationDetail(locationInfo.getLocationDetail());
-                    if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
-                        comment.setIpAddress(locationInfo.getIpAddress());
+                    comment.setLocation(locationInfo.getLocation());
+                    if (locationInfo.getIp() != null && !locationInfo.getIp().isEmpty()) {
+                        comment.setIp(locationInfo.getIp());
                     } else {
-                        comment.setIpAddress(ip);
+                        comment.setIp(ip);
                     }
-                    comment.setLocation(locationInfo.getLocationDetail() != null ? locationInfo.getLocationDetail() : 
+                    comment.setLocation(locationInfo.getLocation() != null ? locationInfo.getLocation() : 
                             (locationInfo.getProvince() != null && locationInfo.getCity() != null ? 
                                     locationInfo.getProvince() + locationInfo.getCity() : null));
                 } else {
-                    comment.setIpAddress(ip);
+                    comment.setIp(ip);
                 }
             } catch (Exception e) {
                 log.warn("IP定位失败，IP: {}", ip, e);
-                comment.setIpAddress(ip);
+                comment.setIp(ip);
             }
         } else {
-            comment.setIpAddress(ip != null ? ip : "");
+            comment.setIp(ip != null ? ip : "");
         }
 
         // 设置设备信息
         String userAgent = RequestUtil.getUserAgent();
-        comment.setDeviceInfo(userAgent);
+        comment.setDevice(userAgent);
 
         if (UserContext.isLoggedIn()) {
             Long userId = UserContext.getCurrentUserId();

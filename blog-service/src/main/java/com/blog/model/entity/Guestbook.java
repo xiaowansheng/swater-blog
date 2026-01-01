@@ -10,9 +10,6 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = true)
 @TableName("guestbook")
 public class Guestbook extends BaseEntity {
-    @TableField("guestbook_key")
-    private String guestbookKey;
-
     private String content;
 
     private String images;

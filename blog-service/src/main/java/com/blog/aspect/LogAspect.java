@@ -191,7 +191,7 @@ public class LogAspect {
         logOperation.setRequestUrl(request.getRequestURI());
         logOperation.setRequestMethod(request.getMethod());
         logOperation.setPath(request.getRequestURI());
-        logOperation.setIpAddress(ip);
+        logOperation.setIp(ip);
 
         // 方法信息
         MethodSignature signature = (MethodSignature) point.getSignature();
@@ -254,7 +254,7 @@ public class LogAspect {
         logError.setRequestUrl(request.getRequestURI());
         logError.setRequestMethod(request.getMethod());
         logError.setPath(request.getRequestURI());
-        logError.setIpAddress(ip);
+        logError.setIp(ip);
 
         // 方法信息
         MethodSignature signature = (MethodSignature) point.getSignature();

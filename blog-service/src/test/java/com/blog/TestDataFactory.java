@@ -113,7 +113,7 @@ public class TestDataFactory {
         comment.setStatus(1); // 修复：使用 Integer 类型，1 表示已审核
         comment.setIsVisible(1);
         comment.setIp(faker.internet().ipV4Address());
-        comment.setIpAddress(faker.address().city());
+        comment.setIp(faker.address().city());
         comment.setCountry("中国");
         comment.setProvince(faker.address().state());
         comment.setCity(faker.address().city());

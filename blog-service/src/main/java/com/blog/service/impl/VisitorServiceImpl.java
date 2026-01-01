@@ -54,7 +54,7 @@ public class VisitorServiceImpl implements VisitorService {
         
         if (visitor == null) {
             visitor = visitorMapper.selectOne(new LambdaQueryWrapper<Visitor>()
-                    .eq(Visitor::getIpAddress, dto.getIp()));
+                    .eq(Visitor::getIp, dto.getIp()));
         }
         
         boolean isNewVisitor = false;
@@ -62,7 +62,7 @@ public class VisitorServiceImpl implements VisitorService {
             isNewVisitor = true;
             visitor = new Visitor();
             visitor.setVisitorUuid(UUID.randomUUID().toString().replace("-", ""));
-            visitor.setIpAddress(dto.getIp());
+            visitor.setIp(dto.getIp());
             visitor.setFirstVisitTime(now);
             visitor.setVisitCount(1);
             visitor.setStatus("ACTIVE");
@@ -84,23 +84,23 @@ public class VisitorServiceImpl implements VisitorService {
                         visitor.setDistrict(locationInfo.getDistrict());
                         visitor.setLatitude(locationInfo.getLatitude());
                         visitor.setLongitude(locationInfo.getLongitude());
-                        visitor.setLocationDetail(locationInfo.getLocationDetail());
+                        visitor.setLocation(locationInfo.getLocation());
                         visitor.setIsp(locationInfo.getIsp());
                         visitor.setTimezone(locationInfo.getTimezone());
-                        if (locationInfo.getIpAddress() != null && !locationInfo.getIpAddress().isEmpty()) {
-                            visitor.setIpAddress(locationInfo.getIpAddress());
+                        if (locationInfo.getIp() != null && !locationInfo.getIp().isEmpty()) {
+                            visitor.setIp(locationInfo.getIp());
                         } else {
-                            visitor.setIpAddress(dto.getIp());
+                            visitor.setIp(dto.getIp());
                         }
                     } else {
-                        visitor.setIpAddress(dto.getIp());
+                        visitor.setIp(dto.getIp());
                     }
                 } catch (Exception e) {
                     log.warn("IP定位失败，IP: {}", dto.getIp(), e);
-                    visitor.setIpAddress(dto.getIp());
+                    visitor.setIp(dto.getIp());
                 }
             } else {
-                visitor.setIpAddress(dto.getIp());
+                visitor.setIp(dto.getIp());
             }
             
             visitorMapper.insert(visitor);
@@ -126,7 +126,7 @@ public class VisitorServiceImpl implements VisitorService {
                             visitor.setDistrict(locationInfo.getDistrict());
                             visitor.setLatitude(locationInfo.getLatitude());
                             visitor.setLongitude(locationInfo.getLongitude());
-                            visitor.setLocationDetail(locationInfo.getLocationDetail());
+                            visitor.setLocation(locationInfo.getLocation());
                             visitor.setIsp(locationInfo.getIsp());
                             visitor.setTimezone(locationInfo.getTimezone());
                         }
@@ -142,11 +142,10 @@ public class VisitorServiceImpl implements VisitorService {
         VisitorAccessLog log = new VisitorAccessLog();
         log.setVisitorId(visitor.getId());
         log.setVisitorUuid(visitor.getVisitorUuid());
-        log.setIpAddress(dto.getIp());
+        log.setIp(dto.getIp());
         log.setPageType(dto.getPageType());
         log.setPageId(dto.getPageId());
         log.setPageUrl(dto.getPageUrl());
-        log.setReferer(dto.getReferer());
         log.setSessionId(dto.getSessionId());
         log.setIsNewVisitor(isNewVisitor ? 1 : 0);
         log.setAccessTime(now);
@@ -160,7 +159,7 @@ public class VisitorServiceImpl implements VisitorService {
         LambdaQueryWrapper<Visitor> wrapper = new LambdaQueryWrapper<>();
 
         if (keyword != null && !keyword.isEmpty()) {
-            wrapper.and(w -> w.like(Visitor::getIpAddress, keyword)
+            wrapper.and(w -> w.like(Visitor::getIp, keyword)
                     .or().like(Visitor::getCountry, keyword)
                     .or().like(Visitor::getCity, keyword)
                     .or().like(Visitor::getVisitorUuid, keyword));
