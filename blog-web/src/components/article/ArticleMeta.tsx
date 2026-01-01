@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { formatDate } from '@/lib/utils/format';
 import { usePathname } from '@/lib/i18n/routing';
 import type { PostVO } from '@/types';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ArticleMetaProps {
   article: PostVO;
@@ -13,9 +15,21 @@ export default function ArticleMeta({ article }: ArticleMetaProps) {
   const t = useTranslations('common');
   const pathname = usePathname();
   const locale = pathname?.split('/')[1] || 'zh';
+  const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(article.likeCount || 0);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const handleLike = () => {
+    if (liked) return;
+    setLiked(true);
+    setLikes(prev => prev + 1);
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 1000);
+  };
 
   return (
-    <div className="flex flex-wrap items-center gap-4 text-sm text-muted mb-8 pb-6 border-b border-border/40">
+    <div className="flex flex-wrap gap-4 items-center pb-6 mb-8 text-sm border-b text-muted border-border/40">
+      {/* ... existing fields ... */}
       {article.authorName && (
         <span className="flex items-center gap-1.5">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,14 +53,63 @@ export default function ArticleMeta({ article }: ArticleMetaProps) {
         </svg>
         {article.viewCount}
       </span>
-      {article.likeCount > 0 && (
-        <span className="flex items-center gap-1.5">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      
+      {/* Interactive Like Button */}
+      <button 
+        onClick={handleLike}
+        disabled={liked}
+        className={`flex items-center gap-1.5 transition-all relative ${liked ? 'text-deco-pink scale-110' : 'hover:text-deco-pink hover:scale-105'}`}
+      >
+        <motion.span
+          animate={liked ? { scale: [1, 1.4, 1] } : {}}
+          transition={{ duration: 0.3 }}
+        >
+          <svg className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
           </svg>
-          {article.likeCount}
-        </span>
-      )}
+        </motion.span>
+        {likes}
+        
+        {/* Cute Particle Effect (Confetti) */}
+        <AnimatePresence>
+          {showConfetti && (
+            <div className="absolute inset-0 pointer-events-none">
+              {[...Array(12)].map((_, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ 
+                    opacity: 1, 
+                    x: 0, 
+                    y: 0, 
+                    scale: 0,
+                    rotate: 0 
+                  }}
+                  animate={{ 
+                    opacity: [1, 1, 0], 
+                    x: (Math.random() - 0.5) * 100, 
+                    y: (Math.random() - 0.8) * 80,
+                    scale: [0, 1.2, 0.5],
+                    rotate: Math.random() * 360
+                  }}
+                  transition={{ 
+                    duration: 0.8, 
+                    ease: "easeOut",
+                    delay: Math.random() * 0.1
+                  }}
+                  className={`absolute left-1/2 top-1/2 w-2 h-2 rounded-sm ${
+                    i % 3 === 0 ? 'bg-deco-pink' : i % 3 === 1 ? 'bg-deco-yellow' : 'bg-primary'
+                  }`}
+                  style={{
+                    clipPath: i % 2 === 0 ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' : 'none', // Star or Square
+                    borderRadius: i % 2 === 0 ? '0' : '50%'
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </AnimatePresence>
+      </button>
+
       {article.commentCount > 0 && (
         <span className="flex items-center gap-1.5">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,14 +119,14 @@ export default function ArticleMeta({ article }: ArticleMetaProps) {
         </span>
       )}
       {article.categoryName && (
-        <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
+        <span className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary">
           {article.categoryName}
         </span>
       )}
       {article.tags && article.tags.length > 0 && (
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex flex-wrap gap-2">
           {article.tags.map((tag) => (
-            <span key={tag.id} className="px-3 py-1 bg-secondary hover:bg-primary/10 hover:text-primary rounded-full text-xs font-medium transition-colors cursor-pointer">
+            <span key={tag.id} className="px-3 py-1 text-xs font-medium rounded-full transition-colors cursor-pointer bg-secondary hover:bg-primary/10 hover:text-primary">
               {tag.name}
             </span>
           ))}

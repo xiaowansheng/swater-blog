@@ -7,6 +7,7 @@ import { usePathname } from '@/lib/i18n/routing';
 import { motion } from 'framer-motion';
 import MobileMenu from './MobileMenu';
 import LanguageSwitcher from '../common/LanguageSwitcher';
+import { useDecoration } from '@/lib/context/DecorationContext';
 
 interface NavItem {
   href: string;
@@ -20,6 +21,7 @@ interface HeaderClientProps {
 
 export default function HeaderClient({ siteName, navItems }: HeaderClientProps) {
   const { theme, toggleTheme, mounted } = useTheme();
+  const { level, setLevel } = useDecoration();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [visible, setVisible] = useState(true);
@@ -107,7 +109,16 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
                     : isActive ? 'text-white bg-white/20' : 'text-white/80 hover:text-white hover:bg-white/10'
                 }`}
               >
-                {item.label}
+                <span className="relative z-10">{item.label}</span>
+                
+                {/* Little Stars Hover Effect */}
+                <span className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <span className="absolute animate-twinkle text-[10px]">✨</span>
+                </span>
+                <span className="absolute -bottom-1 -left-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none delay-100">
+                  <span className="absolute animate-twinkle text-[8px]" style={{ animationDelay: '0.5s' }}>✨</span>
+                </span>
+
                 {isActive && (
                   <motion.span 
                     layoutId="nav-active"
@@ -121,6 +132,27 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
 
         <div className="flex gap-2 items-center">
           <LanguageSwitcher scrolled={scrolled} />
+          
+          {/* Decoration Level Toggle */}
+          <button
+            onClick={() => {
+              const levels: ('none' | 'light' | 'full')[] = ['none', 'light', 'full'];
+              const nextIndex = (levels.indexOf(level) + 1) % levels.length;
+              setLevel(levels[nextIndex]);
+            }}
+            className={`p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
+              scrolled 
+                ? 'hover:bg-primary/10' 
+                : 'hover:bg-white/10 text-white'
+            }`}
+            title={`装饰等级: ${level === 'none' ? '关闭' : level === 'light' ? '简约' : '全开'}`}
+          >
+            <span className="relative z-10 text-lg">
+              {level === 'none' ? '🍃' : level === 'light' ? '🌸' : '✨'}
+            </span>
+            <span className="absolute inset-0 bg-primary/5 opacity-0 transition-opacity group-hover:opacity-100"></span>
+          </button>
+
           {mounted && (
           <button
             onClick={toggleTheme}

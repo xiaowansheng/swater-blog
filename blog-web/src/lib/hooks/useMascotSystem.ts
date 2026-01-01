@@ -36,29 +36,6 @@ export function useMascotSystem() {
 
   const [isVisible, setIsVisible] = useState(false);
 
-  // Show a greeting after a short delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setState(prev => ({
-        ...prev,
-        bubbleText: GREETINGS[Math.floor(Math.random() * GREETINGS.length)]
-      }));
-      setIsVisible(true);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Auto-hide bubble after 5 seconds
-  useEffect(() => {
-    if (isVisible && state.bubbleText) {
-      const timer = setTimeout(() => {
-        setIsVisible(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [isVisible, state.bubbleText]);
-
   const say = useCallback((text: string) => {
     setState(prev => ({ ...prev, bubbleText: text }));
     setIsVisible(true);
@@ -78,6 +55,52 @@ export function useMascotSystem() {
       setState(prev => ({ ...prev, isHappy: false }));
     }, 2000);
   }, []);
+
+  // Show a greeting after a short delay
+  useEffect(() => {
+    const hour = new Date().getHours();
+    let timeGreeting = '';
+    if (hour >= 5 && hour < 12) timeGreeting = '早上好！今天也要元气满满哦~ ☀️';
+    else if (hour >= 12 && hour < 18) timeGreeting = '下午好，要喝杯午后甜点吗？ 🍵';
+    else if (hour >= 18 && hour < 22) timeGreeting = '晚上好，忙碌了一天辛苦啦~ ✨';
+    else timeGreeting = '熬夜对身体不好，早点休息吧 (´-ω-`)';
+
+    const timer = setTimeout(() => {
+      setState(prev => ({
+        ...prev,
+        bubbleText: timeGreeting || GREETINGS[Math.floor(Math.random() * GREETINGS.length)]
+      }));
+      setIsVisible(true);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Scroll listener for long_read event
+  useEffect(() => {
+    let hasTriggered = false;
+    const handleScroll = () => {
+      if (hasTriggered) return;
+      const scrollPercent = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight;
+      if (scrollPercent > 0.8) {
+        say('读到这里辛苦了！喝杯水休息一下吧~ 🥤');
+        hasTriggered = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [say]);
+
+  // Auto-hide bubble after 5 seconds
+  useEffect(() => {
+    if (isVisible && state.bubbleText) {
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, state.bubbleText]);
 
   return {
     ...state,

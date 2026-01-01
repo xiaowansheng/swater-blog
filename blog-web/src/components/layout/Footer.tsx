@@ -7,15 +7,19 @@ export default async function Footer() {
 
   return (
     <footer className="relative mt-auto overflow-hidden py-16 bg-background/80 backdrop-blur-md">
-      {/* Cute Divider */}
-      <div className="absolute top-0 left-0 w-full h-8 flex items-center justify-center pointer-events-none">
-        <div className="w-full h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
-        <div className="absolute px-4 bg-background">
-          <div className="flex gap-2 items-center">
-            <span className="w-1.5 h-1.5 rounded-full bg-deco-pink animate-pulse"></span>
-            <span className="w-2 h-2 rounded-full bg-primary"></span>
-            <span className="w-1.5 h-1.5 rounded-full bg-deco-yellow animate-pulse" style={{ animationDelay: '0.5s' }}></span>
-          </div>
+      {/* Cute Wavy Divider */}
+      <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] transform rotate-180">
+        <svg className="relative block w-[calc(100%+1.3px)] h-12 text-primary/10 fill-current" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+        </svg>
+      </div>
+      
+      {/* Centered Decoration */}
+      <div className="absolute top-0 left-0 w-full h-8 flex items-center justify-center pointer-events-none z-10">
+        <div className="flex gap-3 items-center px-6 py-1 bg-background/50 backdrop-blur-sm rounded-full border border-primary/10">
+          <span className="w-1.5 h-1.5 rounded-full bg-deco-pink animate-pulse"></span>
+          <span className="w-2 h-2 rounded-full bg-primary animate-bounce"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-deco-yellow animate-pulse" style={{ animationDelay: '0.5s' }}></span>
         </div>
       </div>
 
