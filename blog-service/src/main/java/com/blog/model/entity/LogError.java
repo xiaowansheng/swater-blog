@@ -29,8 +29,6 @@ public class LogError extends BaseEntity {
 
     private String params;
 
-    private String ip;
-
     @TableField("ip_address")
     private String ipAddress;
 

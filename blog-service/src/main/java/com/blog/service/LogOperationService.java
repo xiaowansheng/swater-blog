@@ -1,6 +1,7 @@
 package com.blog.service;
 
 import com.blog.common.PageResult;
+import com.blog.model.entity.LogOperation;
 import com.blog.model.vo.LogOperationVO;
 
 import java.time.LocalDateTime;
@@ -13,5 +14,10 @@ public interface LogOperationService {
     void delete(Long id);
 
     void cleanup(Integer retentionDays);
+
+    /**
+     * 保存操作日志
+     */
+    void save(LogOperation logOperation);
 }
 

@@ -24,8 +24,6 @@ public class LogOperation extends BaseEntity {
 
     private String result;
 
-    private String ip;
-
     @TableField("ip_address")
     private String ipAddress;
 

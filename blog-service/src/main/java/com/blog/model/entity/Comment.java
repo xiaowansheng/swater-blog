@@ -45,8 +45,6 @@ public class Comment extends BaseEntity {
     @TableField("is_visible")
     private Integer isVisible;
 
-    private String ip;
-
     @TableField("ip_address")
     private String ipAddress;
 

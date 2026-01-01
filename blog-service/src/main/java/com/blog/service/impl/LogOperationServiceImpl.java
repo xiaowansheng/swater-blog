@@ -74,5 +74,13 @@ public class LogOperationServiceImpl implements LogOperationService {
         LocalDateTime cutoffDate = LocalDateTime.now().minusDays(retentionDays);
         logOperationMapper.deleteByCreateTimeBefore(cutoffDate);
     }
+
+    @Override
+    @Transactional
+    public void save(LogOperation logOperation) {
+        if (logOperation != null) {
+            logOperationMapper.insert(logOperation);
+        }
+    }
 }
 

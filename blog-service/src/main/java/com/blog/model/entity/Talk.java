@@ -31,8 +31,6 @@ public class Talk extends BaseEntity {
     @TableField("is_top")
     private Integer isTop;
 
-    private String ip;
-
     @TableField("ip_address")
     private String ipAddress;
 

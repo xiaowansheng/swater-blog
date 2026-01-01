@@ -74,5 +74,13 @@ public class LogErrorServiceImpl implements LogErrorService {
         LocalDateTime cutoffDate = LocalDateTime.now().minusDays(retentionDays);
         logErrorMapper.deleteByCreateTimeBefore(cutoffDate);
     }
+
+    @Override
+    @Transactional
+    public void save(LogError logError) {
+        if (logError != null) {
+            logErrorMapper.insert(logError);
+        }
+    }
 }
 
