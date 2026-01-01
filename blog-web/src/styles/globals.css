@@ -1,67 +1,70 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f0fdf4;
-  --foreground: #14532d;
+  /* ===== Base ===== */
+  --background: #fdfcff;              /* 微蓝白 */
+  --foreground: #1e1b4b;              /* 深蓝紫文字 */
 
   --card: #ffffff;
-  --card-foreground: #14532d;
-  --card-border: #bbf7d0;
+  --card-foreground: #1e1b4b;
+  --card-border: #e0e7ff;             /* 淡蓝紫边框 */
 
-  --primary: #34d399;
+  /* ===== Brand ===== */
+  --primary: #60a5fa;                 /* 天空蓝 */
   --primary-foreground: #ffffff;
 
-  --secondary: #d1fae5;
-  --secondary-foreground: #065f46;
+  --secondary: #fce7f3;               /* 浅樱花粉 */
+  --secondary-foreground: #831843;
 
+  --accent: #f472b6;                  /* 樱花粉强调 */
   --muted: #64748b;
-  --accent: #6ee7b7;
 
+  /* ===== Decoration ===== */
   --deco-pink: #f9a8d4;
-  --deco-yellow: #fde047;
-  --deco-blue: #bae6fd;
+  --deco-yellow: #fde68a;
+  --deco-blue: #bfdbfe;
+  --deco-green: #6ee7b7;              /* 只用于小点缀 */
 
-  --border: #bbf7d0;
-  --ring: #34d399;
+  /* ===== Border & Effect ===== */
+  --border: #e0e7ff;
+  --ring: #93c5fd;
+  --color-hover-glow: rgba(96, 165, 250, 0.35);
 
-  /* 语义化 Token */
+  /* ===== Semantic ===== */
   --color-bg-main: var(--background);
   --color-bg-card: var(--card);
   --color-text-main: var(--foreground);
   --color-accent-main: var(--primary);
   --color-accent-deco: var(--deco-pink);
-  --color-hover-glow: rgba(52, 211, 153, 0.4);
   --color-divider: var(--secondary);
 
-  /* 动画强度 */
+  /* ===== Motion ===== */
   --motion-soft: 0.3;
   --motion-medium: 0.6;
   --motion-strong: 1;
 }
 
 .dark {
-  --background: #022c22;
-  --foreground: #ecfdf5;
+  --background: #0b102a;              /* 夜空蓝 */
+  --foreground: #eef2ff;
 
-  --card: #064e3b;
-  --card-foreground: #ecfdf5;
-  --card-border: #059669;
+  --card: #11153a;
+  --card-foreground: #eef2ff;
+  --card-border: #2c2f6c;
 
-  --primary: #34d399;
-  --primary-foreground: #022c22;
+  --primary: #7aa2ff;                 /* 夜空蓝 */
+  --primary-foreground: #0b102a;
 
-  --secondary: #065f46;
-  --secondary-foreground: #ecfdf5;
+  --secondary: #2a174d;               /* 深紫 */
+  --secondary-foreground: #f5f3ff;
 
-  --muted: #94a3b8;
-  --accent: #059669;
+  --accent: #f472b6;                  /* 夜樱粉 */
+  --muted: #9ca3af;
 
-  --deco-pink: #f472b6;
-  --deco-yellow: #facc15;
-
-  --border: #059669;
-  --ring: #34d399;
+  --border: #2c2f6c;
+  --ring: #7aa2ff;
 }
+
 
 @theme inline {
   --color-background: var(--background);
