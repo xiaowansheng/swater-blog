@@ -121,8 +121,8 @@ public class ApiResourceScanner {
                     apiNode.setMethod(httpMethodStr);
                     apiNode.setDescription(methodOperation.description());
 
-                    // 处理open属性继承逻辑
-                    boolean isOpen = moduleOpen && methodOperation.open();
+                    // 处理open属性继承逻辑，模块开放或接口开放时，接口开放
+                    boolean isOpen = moduleOpen || methodOperation.open();
                     apiNode.setIsOpen(isOpen ? 1 : 0);
 
                     // 处理权限标识
