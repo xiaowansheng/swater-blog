@@ -297,7 +297,7 @@ body::after {
   overflow: hidden;
 }
 
-.modern-card::before {
+/* .modern-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -309,7 +309,28 @@ body::after {
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.4s ease;
-}
+} */
+
+/* 卡片右上角书签装饰 */
+/*.modern-card::after {*/
+/*  content: '';*/
+/*  position: absolute;*/
+/*  top: 0;*/
+/*  right: 2rem;*/
+/*  width: 1.5rem;*/
+/*  height: 2.5rem;*/
+/*  background: var(--primary);*/
+/*  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%);*/
+/*  opacity: 0.6;*/
+/*  transition: all 0.4s ease;*/
+/*  z-index: 10;*/
+/*}*/
+
+/*.modern-card:hover::after {*/
+/*  height: 3rem;*/
+/*  opacity: 1;*/
+/*  background: var(--accent);*/
+/*}*/
 
 .modern-card:hover {
   transform: translateY(-8px);
@@ -319,9 +340,9 @@ body::after {
   border-color: var(--primary);
 }
 
-.modern-card:hover::before {
+/* .modern-card:hover::before {
   transform: scaleX(1);
-}
+} */
 
 .dark .modern-card {
   box-shadow: 
