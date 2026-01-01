@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class VisitorVO extends BaseVO {
     private String visitorUuid;
 
-    private String ipAddress;
+    private String ip;
 
     private String country;
 

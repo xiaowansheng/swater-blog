@@ -24,8 +24,6 @@ public class LogErrorVO extends BaseVO {
 
     private String ip;
 
-    private String ipAddress;
-
     private String version;
 
     private String requestUrl;

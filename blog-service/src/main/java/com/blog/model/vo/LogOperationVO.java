@@ -22,8 +22,6 @@ public class LogOperationVO extends BaseVO {
 
     private String ip;
 
-    private String ipAddress;
-
     private Long duration;
 
     private Integer status;

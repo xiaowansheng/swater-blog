@@ -15,7 +15,7 @@ public class LocationInfo {
     private BigDecimal longitude;
     private String isp;
     private String timezone;
-    private String ipAddress;
+    private String ip;
     private String device;
     private String browser;
 }

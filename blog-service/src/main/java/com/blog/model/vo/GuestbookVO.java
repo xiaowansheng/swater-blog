@@ -27,8 +27,6 @@ public class GuestbookVO extends BaseVO {
 
     private String ip;
 
-    private String ipAddress;
-
     private String country;
 
     private String province;

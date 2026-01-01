@@ -28,8 +28,7 @@ public class Guestbook extends BaseEntity {
 
     private String qq;
 
-    @TableField("ip_address")
-    private String ipAddress;
+    private String ip;
 
     private String country;
 

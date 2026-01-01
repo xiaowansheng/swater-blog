@@ -16,8 +16,7 @@ public class VisitorAccessLog extends BaseEntity {
     @TableField("visitor_uuid")
     private String visitorUuid;
 
-    @TableField("ip_address")
-    private String ipAddress;
+    private String ip;
 
     @TableField("page_type")
     private String pageType;

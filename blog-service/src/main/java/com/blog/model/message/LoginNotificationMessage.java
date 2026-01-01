@@ -12,7 +12,6 @@ public class LoginNotificationMessage implements Serializable {
     private Long userId;
     private String username;
     private String ip;
-    private String ipAddress;
     private String device;
     private LocalDateTime timestamp;
 }

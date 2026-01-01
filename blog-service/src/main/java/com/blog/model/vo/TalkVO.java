@@ -28,8 +28,6 @@ public class TalkVO extends BaseVO {
 
     private String ip;
 
-    private String ipAddress;
-
     private String country;
 
     private String province;
