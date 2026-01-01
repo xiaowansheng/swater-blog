@@ -7,5 +7,7 @@ public interface AlbumPublicQueryService {
     PageResult<AlbumVO> list(Long page, Long size);
 
     AlbumVO getById(Long id);
+
+    AlbumVO getByKey(String key);
 }
 

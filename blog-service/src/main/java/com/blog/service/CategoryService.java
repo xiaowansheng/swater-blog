@@ -11,6 +11,8 @@ public interface CategoryService {
 
     CategoryVO getById(Long id);
 
+    CategoryVO getByKey(String key);
+
     Long create(CategoryDTO dto);
 
     void update(Long id, CategoryDTO dto);

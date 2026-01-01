@@ -66,7 +66,7 @@ export default function MomentItem({ moment }: MomentItemProps) {
   }, [moment.images]);
 
   const handleContentClick = () => {
-    router.push(`/moment/${moment.id}`);
+    router.push(`/moment/${moment.talkKey}`);
   };
 
   const handleImageClick = (e: React.MouseEvent, index: number) => {

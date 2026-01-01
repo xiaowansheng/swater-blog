@@ -11,6 +11,8 @@ public interface TagService {
 
     TagVO getById(Long id);
 
+    TagVO getByKey(String key);
+
     Long create(TagDTO dto);
 
     void update(Long id, TagDTO dto);

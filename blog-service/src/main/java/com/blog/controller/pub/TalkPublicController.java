@@ -34,5 +34,15 @@ public class TalkPublicController {
         }
         return Result.success(vo);
     }
+
+    @GetMapping("/key/{key}")
+    @ApiOperation(name = "根据Key获取说说详情", type = ApiOperationType.QUERY, description = "根据说说的Key获取说说详情")
+    public Result<TalkVO> getByKey(@PathVariable String key) {
+        TalkVO vo = talkPublicQueryService.getByKey(key);
+        if (vo == null) {
+            return Result.error(404, "说说不存在");
+        }
+        return Result.success(vo);
+    }
 }
 

@@ -69,6 +69,29 @@ public class AlbumPublicQueryServiceImpl implements AlbumPublicQueryService {
         return vo;
     }
 
+    @Override
+    public AlbumVO getByKey(String key) {
+        Album album = albumMapper.selectOne(new LambdaQueryWrapper<Album>()
+                .eq(Album::getAlbumKey, key)
+                .eq(Album::getStatus, "1"));
+        if (album == null) {
+            return null;
+        }
+        AlbumVO vo = convertToVO(album);
+        List<Picture> pictures = pictureMapper.selectByAlbumId(album.getId());
+        if (pictures != null && !pictures.isEmpty()) {
+            List<PictureVO> pictureVOs = pictures.stream()
+                    .map(p -> {
+                        PictureVO pvo = BeanUtil.copyProperties(p, PictureVO.class);
+                        pvo.setAlbumName(album.getName());
+                        return pvo;
+                    })
+                    .collect(Collectors.toList());
+            vo.setPictures(pictureVOs);
+        }
+        return vo;
+    }
+
     private AlbumVO convertToVO(Album album) {
         AlbumVO vo = BeanUtil.copyProperties(album, AlbumVO.class);
         if (album.getUserId() != null) {

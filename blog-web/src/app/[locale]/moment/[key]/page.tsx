@@ -14,11 +14,11 @@ export const revalidate = ISR_REVALIDATE.HOME;
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; id: string }>;
+  params: Promise<{ locale: string; key: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
+  const { key } = await params;
   try {
-    const moment = await momentApi.getById(parseInt(id, 10));
+    const moment = await momentApi.getByKey(key);
     const content = moment.content.replace(/<[^>]*>/g, '').substring(0, 100);
     return {
       title: `说说 - ${content}...`,
@@ -34,13 +34,13 @@ export async function generateMetadata({
 export default async function MomentDetailPage({
   params,
 }: {
-  params: Promise<{ locale: string; id: string }>;
+  params: Promise<{ locale: string; key: string }>;
 }) {
-  const { id } = await params;
+  const { key } = await params;
   const t = await getTranslations('common');
 
   try {
-    const moment = await momentApi.getById(parseInt(id, 10));
+    const moment = await momentApi.getByKey(key);
 
     return (
       <>
@@ -68,14 +68,14 @@ export default async function MomentDetailPage({
               </div>
             </div>
 
-            <div 
+            <div
               className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
               dangerouslySetInnerHTML={{ __html: moment.content }}
             />
 
             {moment.images && moment.images.length > 0 && (
-              <MomentImages 
-                images={moment.images} 
+              <MomentImages
+                images={moment.images}
                 alt={moment.content.substring(0, 20)}
               />
             )}

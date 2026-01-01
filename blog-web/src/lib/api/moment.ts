@@ -11,5 +11,9 @@ export const momentApi = {
   getById: (id: number) => {
     return fetchServer<MomentVO>(`/api/public/moment/${id}`);
   },
+
+  getByKey: (key: string) => {
+    return fetchServer<MomentVO>(`/api/public/moment/key/${key}`);
+  },
 };
 

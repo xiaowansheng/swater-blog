@@ -33,5 +33,15 @@ public class AlbumPublicController {
         }
         return Result.success(vo);
     }
+
+    @GetMapping("/key/{key}")
+    @ApiOperation(name = "根据Key获取相册详情", type = ApiOperationType.QUERY, description = "根据相册的Key获取相册详情")
+    public Result<AlbumVO> getByKey(@PathVariable String key) {
+        AlbumVO vo = albumPublicQueryService.getByKey(key);
+        if (vo == null) {
+            return Result.error(404, "相册不存在");
+        }
+        return Result.success(vo);
+    }
 }
 

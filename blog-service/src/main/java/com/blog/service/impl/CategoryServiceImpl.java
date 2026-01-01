@@ -47,6 +47,17 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public CategoryVO getByKey(String key) {
+        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Category::getCategoryKey, key);
+        Category category = categoryMapper.selectOne(wrapper);
+        if (category == null) {
+            return null;
+        }
+        return BeanUtil.copyProperties(category, CategoryVO.class);
+    }
+
+    @Override
     @Transactional
     public Long create(CategoryDTO dto) {
         Category category = BeanUtil.copyProperties(dto, Category.class);

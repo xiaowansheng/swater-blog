@@ -56,6 +56,18 @@ public class TalkPublicQueryServiceImpl implements TalkPublicQueryService {
         return convertToVO(talk);
     }
 
+    @Override
+    @Cacheable(value = "talk", key = "'key:' + #key")
+    public TalkVO getByKey(String key) {
+        Talk talk = talkMapper.selectOne(new LambdaQueryWrapper<Talk>()
+                .eq(Talk::getTalkKey, key)
+                .eq(Talk::getStatus, "1"));
+        if (talk == null) {
+            return null;
+        }
+        return convertToVO(talk);
+    }
+
     private TalkVO convertToVO(Talk talk) {
         TalkVO vo = BeanUtil.copyProperties(talk, TalkVO.class);
         if (talk.getAuthorId() != null) {

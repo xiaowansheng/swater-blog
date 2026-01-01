@@ -7,5 +7,7 @@ public interface TalkPublicQueryService {
     PageResult<TalkVO> list(Long page, Long size);
 
     TalkVO getById(Long id);
+
+    TalkVO getByKey(String key);
 }
 

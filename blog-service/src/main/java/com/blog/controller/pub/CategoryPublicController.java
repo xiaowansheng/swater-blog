@@ -32,5 +32,15 @@ public class CategoryPublicController {
         }
         return Result.success(vo);
     }
+
+    @GetMapping("/key/{key}")
+    @ApiOperation(name = "根据Key获取分类详情", type = ApiOperationType.QUERY, description = "根据分类的Key获取分类详情")
+    public Result<CategoryVO> getByKey(@PathVariable String key) {
+        CategoryVO vo = categoryService.getByKey(key);
+        if (vo == null) {
+            return Result.error(404, "分类不存在");
+        }
+        return Result.success(vo);
+    }
 }
 

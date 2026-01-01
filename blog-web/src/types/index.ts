@@ -155,6 +155,7 @@ export interface ArchiveVO {
 
 export interface MomentVO {
   id: number;
+  talkKey: string;
   content: string;
   images?: string[];
   authorId: number;

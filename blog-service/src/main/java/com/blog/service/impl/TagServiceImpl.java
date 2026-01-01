@@ -44,6 +44,17 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    public TagVO getByKey(String key) {
+        LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Tag::getTagKey, key);
+        Tag tag = tagMapper.selectOne(wrapper);
+        if (tag == null) {
+            return null;
+        }
+        return BeanUtil.copyProperties(tag, TagVO.class);
+    }
+
+    @Override
     @Transactional
     public Long create(TagDTO dto) {
         Tag tag = BeanUtil.copyProperties(dto, Tag.class);

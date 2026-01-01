@@ -32,5 +32,15 @@ public class TagPublicController {
         }
         return Result.success(vo);
     }
+
+    @GetMapping("/key/{key}")
+    @ApiOperation(name = "根据Key获取标签详情", type = ApiOperationType.QUERY, description = "根据标签的Key获取标签详情")
+    public Result<TagVO> getByKey(@PathVariable String key) {
+        TagVO vo = tagService.getByKey(key);
+        if (vo == null) {
+            return Result.error(404, "标签不存在");
+        }
+        return Result.success(vo);
+    }
 }
 
