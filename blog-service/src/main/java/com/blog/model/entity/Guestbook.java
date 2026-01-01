@@ -41,17 +41,11 @@ public class Guestbook extends BaseEntity {
 
     private BigDecimal longitude;
 
-    @TableField("location_detail")
-    private String locationDetail;
-
-    @TableField("device_info")
-    private String deviceInfo;
+    private String location;
 
     private String device;
 
     private String browser;
-
-    private String location;
 
     @TableField("is_visible")
     private Integer isVisible;

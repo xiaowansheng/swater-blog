@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 public class VisitorVO extends BaseVO {
     private String visitorUuid;
 
-    private String ip;
-
     private String ipAddress;
 
     private String country;
@@ -26,13 +24,11 @@ public class VisitorVO extends BaseVO {
 
     private BigDecimal longitude;
 
-    private String locationDetail;
+    private String location;
 
     private String isp;
 
     private String timezone;
-
-    private String deviceInfo;
 
     private String deviceType;
 
@@ -40,19 +36,13 @@ public class VisitorVO extends BaseVO {
 
     private String deviceModel;
 
-    private String os;
-
     private String osName;
 
     private String osVersion;
 
-    private String browser;
-
     private String browserName;
 
     private String browserVersion;
-
-    private String referer;
 
     private String refererUrl;
 
@@ -61,6 +51,12 @@ public class VisitorVO extends BaseVO {
     private String searchEngine;
 
     private String searchKeywords;
+
+    private String utmSource;
+
+    private String utmMedium;
+
+    private String utmCampaign;
 
     private Integer visitCount;
 

@@ -28,8 +28,6 @@ public class VisitorAccessLog extends BaseEntity {
     @TableField("page_url")
     private String pageUrl;
 
-    private String referer;
-
     @TableField("session_id")
     private String sessionId;
 

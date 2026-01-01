@@ -29,15 +29,11 @@ public class Visitor extends BaseEntity {
 
     private BigDecimal longitude;
 
-    @TableField("location_detail")
-    private String locationDetail;
+    private String location;
 
     private String isp;
 
     private String timezone;
-
-    @TableField("device_info")
-    private String deviceInfo;
 
     @TableField("device_type")
     private String deviceType;
@@ -48,23 +44,17 @@ public class Visitor extends BaseEntity {
     @TableField("device_model")
     private String deviceModel;
 
-    private String os;
-
     @TableField("os_name")
     private String osName;
 
     @TableField("os_version")
     private String osVersion;
 
-    private String browser;
-
     @TableField("browser_name")
     private String browserName;
 
     @TableField("browser_version")
     private String browserVersion;
-
-    private String referer;
 
     @TableField("referer_url")
     private String refererUrl;

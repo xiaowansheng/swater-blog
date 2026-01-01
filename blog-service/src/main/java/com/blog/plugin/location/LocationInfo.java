@@ -10,10 +10,12 @@ public class LocationInfo {
     private String province;
     private String city;
     private String district;
-    private String locationDetail;
+    private String location;
     private BigDecimal latitude;
     private BigDecimal longitude;
     private String isp;
     private String timezone;
     private String ipAddress;
+    private String device;
+    private String browser;
 }

@@ -40,10 +40,10 @@ public class TalkVO extends BaseVO {
 
     private BigDecimal longitude;
 
-    private String locationDetail;
-
-    private String deviceInfo;
-
     private String location;
+
+    private String device;
+
+    private String browser;
 }
 

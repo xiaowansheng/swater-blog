@@ -56,15 +56,11 @@ public class CommentVO extends BaseVO {
 
     private BigDecimal longitude;
 
-    private String locationDetail;
-
-    private String deviceInfo;
+    private String location;
 
     private String device;
 
     private String browser;
-
-    private String location;
 
     private List<CommentVO> replies;
 }

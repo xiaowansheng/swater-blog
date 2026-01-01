@@ -18,7 +18,7 @@ public class VisitorAccessDTO {
 
     private String sessionId;
 
-    private String deviceInfo;
+    private String device;
 
     private String browser;
 
