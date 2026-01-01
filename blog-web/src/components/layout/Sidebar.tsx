@@ -94,7 +94,7 @@ export default async function Sidebar({ categories = [], tags = [], hotArticles 
                   {index + 1}
                 </span>
                 <Link
-                  href={`/post/${article.slug}`}
+                  href={`/post/${article.articleKey}`}
                   className="text-sm text-foreground/70 hover:text-primary hover:underline line-clamp-2 flex-1 transition-all group-hover:translate-x-1"
                 >
                   {article.title}

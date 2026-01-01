@@ -145,6 +145,29 @@ public class ArticlePublicController {
         return Result.success(vo);
     }
 
+    @GetMapping("/key/{key}")
+    @ApiOperation(name = "根据Key获取文章详情", type = ApiOperationType.QUERY, description = "根据文章的Key获取文章详情")
+    @Operation(
+        summary = "根据Key获取文章详情",
+        description = """
+            根据文章的Key获取文章详情。
+
+            **使用场景：**
+            - 内部标识符访问
+            - 稳定的文章链接
+            """
+    )
+    @ApiDocumentation.StandardApiResponses
+    public Result<ArticleVO> getByKey(
+            @Parameter(description = "文章Key", required = true, example = "article-123")
+            @PathVariable String key) {
+        ArticleVO vo = articlePublicQueryService.getByKey(key);
+        if (vo == null) {
+            return Result.error(404, "文章不存在");
+        }
+        return Result.success(vo);
+    }
+
     @GetMapping("/hot")
     @ApiOperation(name = "获取热门文章", type = ApiOperationType.QUERY, description = "获取热门文章列表，按浏览量和点赞数排序")
     @Operation(

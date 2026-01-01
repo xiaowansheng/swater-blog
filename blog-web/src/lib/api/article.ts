@@ -29,6 +29,10 @@ export const articleApi = {
     return fetchServer<PostVO>(`/api/public/post/slug/${slug}`);
   },
 
+  getByKey: (key: string) => {
+    return fetchServer<PostVO>(`/api/public/post/key/${key}`);
+  },
+
   getHot: (limit: number = 10) => {
     return fetchServer<PostVO[]>(`/api/public/post/hot?limit=${limit}`);
   },
@@ -54,6 +58,10 @@ export const articleApi = {
 
     getBySlug: (slug: string) => {
       return fetchClient<PostVO>(`/api/public/post/slug/${slug}`);
+    },
+
+    getByKey: (key: string) => {
+      return fetchClient<PostVO>(`/api/public/post/key/${key}`);
     },
   },
 };

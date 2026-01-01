@@ -70,6 +70,7 @@ public class DatabaseSearchServiceImpl implements SearchService {
                     SearchVO vo = new SearchVO();
                     vo.setType("post");
                     vo.setId(article.getId());
+                    vo.setArticleKey(article.getArticleKey());
                     vo.setTitle(article.getTitle());
                     vo.setContent(article.getContent());
                     vo.setExcerpt(article.getExcerpt());

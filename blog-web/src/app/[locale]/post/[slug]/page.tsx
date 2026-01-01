@@ -24,7 +24,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   try {
-    const article = await articleApi.getBySlug(slug);
+    const article = await articleApi.getByKey(slug);
     return generateArticleMetadata(article, locale);
   } catch {
     return {
@@ -42,7 +42,7 @@ export default async function PostDetailPage({
   const t = await getTranslations('common');
 
   try {
-    const article = await articleApi.getBySlug(slug);
+    const article = await articleApi.getByKey(slug);
 
     return (
       <>

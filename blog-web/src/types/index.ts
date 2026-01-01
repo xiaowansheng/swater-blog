@@ -93,6 +93,7 @@ export interface PublicConfigVO {
 
 export interface PostVO {
   id: number;
+  articleKey: string;
   title: string;
   slug: string;
   content: string;
@@ -175,6 +176,7 @@ export interface FriendLinkVO {
 
 export interface SearchVO {
   id: number;
+  articleKey?: string;
   type: 'post' | 'moment' | 'comment';
   title: string;
   content: string;

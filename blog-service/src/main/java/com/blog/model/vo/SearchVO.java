@@ -8,6 +8,7 @@ import java.util.Map;
 public class SearchVO {
     private String type;
     private Long id;
+    private String articleKey;
     private String title;
     private String content;
     private String excerpt;

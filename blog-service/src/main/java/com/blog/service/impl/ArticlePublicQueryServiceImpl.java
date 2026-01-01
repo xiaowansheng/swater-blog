@@ -95,6 +95,18 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
     }
 
     @Override
+    @Cacheable(value = "article:key", key = "#key")
+    public ArticleVO getByKey(String key) {
+        Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
+                .eq(Article::getArticleKey, key)
+                .eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode()));
+        if (article == null) {
+            return null;
+        }
+        return convertToVO(article);
+    }
+
+    @Override
     @Cacheable(value = "article:hot", key = "#limit != null ? #limit : 10")
     public List<ArticleVO> getHotArticles(Integer limit) {
         List<Article> articles = articleMapper.selectHotArticles(limit != null ? limit : 10);

@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const articles = await articleApi.getList({ page: 1, size: 100 });
       for (const article of articles.records) {
         sitemapEntries.push({
-          url: `${baseUrl}/${locale}/post/${article.slug}`,
+          url: `${baseUrl}/${locale}/post/${article.articleKey}`,
           lastModified: new Date(article.updateTime),
           changeFrequency: 'weekly',
           priority: 0.8,

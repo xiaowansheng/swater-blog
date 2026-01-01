@@ -24,10 +24,10 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-        className="group modern-card overflow-hidden relative"
+        className="overflow-hidden relative group modern-card"
       >
-        <Link href={`/post/${article.slug}`}>
-          <div className="relative h-64 w-full overflow-hidden">
+        <Link href={`/post/${article.articleKey}`}>
+          <div className="overflow-hidden relative w-full h-64">
             <Image
               src={article.cover}
               alt={article.title}
@@ -35,8 +35,8 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
               className="object-cover transition-transform duration-700 group-hover:scale-110"
               previewEnabled={false}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+            <div className="absolute inset-0 bg-gradient-to-t to-transparent opacity-0 transition-opacity duration-500 from-black/80 via-black/40 group-hover:opacity-100"></div>
+            <div className="absolute top-4 right-4 opacity-0 transition-all duration-300 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0">
               {article.categoryName && (
                 <span className="px-4 py-1.5 bg-primary/90 backdrop-blur-sm text-white rounded-full text-xs font-semibold shadow-lg">
                   {article.categoryName}
@@ -44,16 +44,16 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
               )}
             </div>
           </div>
-          <div className="p-6 relative">
-            <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="relative p-6">
+            <div className="absolute top-0 right-6 left-6 h-px bg-gradient-to-r from-transparent to-transparent opacity-0 transition-opacity via-primary/60 group-hover:opacity-100"></div>
             <h2 className="text-2xl font-bold mb-3 line-clamp-2 group-hover:text-primary transition-all duration-300 bg-gradient-to-r from-foreground via-foreground/90 to-foreground bg-[length:200%_100%] group-hover:bg-[length:100%_100%] bg-clip-text relative">
               {article.title}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent group-hover:w-full transition-all duration-500 rounded-full"></span>
             </h2>
             {article.excerpt && (
-              <p className="text-foreground/70 mb-4 line-clamp-2 leading-relaxed">{article.excerpt}</p>
+              <p className="mb-4 leading-relaxed text-foreground/70 line-clamp-2">{article.excerpt}</p>
             )}
-            <div className="flex items-center gap-4 text-sm text-muted flex-wrap">
+            <div className="flex flex-wrap gap-4 items-center text-sm text-muted">
               <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 group-hover:bg-primary/10 transition-colors">
                 <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -79,18 +79,18 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-      className="group modern-card p-6 relative"
+      className="relative p-6 group modern-card"
     >
-      <Link href={`/post/${article.slug}`}>
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      <Link href={`/post/${article.articleKey}`}>
+        <div className="absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent to-transparent opacity-0 transition-opacity via-primary/60 group-hover:opacity-100"></div>
         <h2 className="text-2xl font-bold mb-3 group-hover:text-primary transition-all duration-300 bg-gradient-to-r from-foreground via-foreground/90 to-foreground bg-[length:200%_100%] group-hover:bg-[length:100%_100%] bg-clip-text relative">
           {article.title}
           <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent group-hover:w-full transition-all duration-500 rounded-full"></span>
         </h2>
         {article.excerpt && (
-          <p className="text-foreground/70 mb-4 line-clamp-2 leading-relaxed">{article.excerpt}</p>
+          <p className="mb-4 leading-relaxed text-foreground/70 line-clamp-2">{article.excerpt}</p>
         )}
-        <div className="flex items-center gap-4 text-sm text-muted flex-wrap">
+        <div className="flex flex-wrap gap-4 items-center text-sm text-muted">
           <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/50 group-hover:bg-primary/10 transition-colors">
             <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

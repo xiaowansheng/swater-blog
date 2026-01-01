@@ -47,23 +47,31 @@ export default async function SearchPage({
         <PageHeader title={`${t('results')}: ${keyword}`} description={`找到 ${results.total} 条结果`} />
         <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="space-y-6">
-            {results.records.map((result) => (
-              <div key={result.id} className="p-6 rounded-xl border transition-all duration-300 bg-card border-border hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1">
-                <h2 className="mb-3 text-xl font-bold transition-colors hover:text-primary">
-                  <a href={result.url}>{result.title}</a>
-                </h2>
-                <p className="mb-3 text-foreground/70 line-clamp-2">{result.content}</p>
-                <a
-                  href={result.url}
-                  className="flex gap-1 items-center text-sm text-primary hover:underline"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                  {result.url}
-                </a>
-              </div>
-            ))}
+            {results.records.map((result) => {
+              const url = result.type === 'post' 
+                ? `/post/${result.articleKey || result.id}` 
+                : result.type === 'moment'
+                ? `/moment/${result.id}`
+                : result.url || '#';
+
+              return (
+                <div key={result.id} className="p-6 rounded-xl border transition-all duration-300 bg-card border-border hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1">
+                  <h2 className="mb-3 text-xl font-bold transition-colors hover:text-primary">
+                    <a href={url}>{result.title}</a>
+                  </h2>
+                  <p className="mb-3 text-foreground/70 line-clamp-2">{result.content}</p>
+                  <a
+                    href={url}
+                    className="flex gap-1 items-center text-sm text-primary hover:underline"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    {url}
+                  </a>
+                </div>
+              );
+            })}
           </div>
         </main>
         <Footer />

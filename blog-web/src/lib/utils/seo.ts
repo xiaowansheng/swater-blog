@@ -27,10 +27,10 @@ export function generateArticleMetadata(
       images: article.cover ? [article.cover] : undefined,
     },
     alternates: {
-      canonical: `/${locale}/post/${article.slug}`,
+      canonical: `/${locale}/post/${article.articleKey}`,
       languages: {
-        'zh': `/zh/post/${article.slug}`,
-        'en': `/en/post/${article.slug}`,
+        'zh': `/zh/post/${article.articleKey}`,
+        'en': `/en/post/${article.articleKey}`,
       },
     },
   };
