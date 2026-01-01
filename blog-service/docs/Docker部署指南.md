@@ -16,7 +16,7 @@
                       │
 ┌─────────────────────┴───────────────────────────────────────┐
 │                   Blog Application                         │
-│                     Port: 8080                             │
+│                     Port: 8888                             │
 │                   (Spring Boot)                            │
 └─┬─────────┬─────────┬─────────┬─────────┬─────────┬─────────┘
   │         │         │         │         │         │
@@ -30,7 +30,7 @@
 
 | 服务 | 镜像 | 端口 | 说明 |
 |------|------|------|------|
-| blog-service | 自构建 | 8080 | 主应用服务 |
+| blog-service | 自构建 | 8888 | 主应用服务 |
 | mysql | mysql:8.0 | 3306 | 数据库 |
 | redis | redis:7-alpine | 6379 | 缓存 |
 | rabbitmq | rabbitmq:3-management | 5672, 15672 | 消息队列 |
@@ -407,9 +407,9 @@ docker-compose up -d --scale blog-service=3
 
 # 负载均衡配置
 upstream blog_backend {
-    server blog-service_1:8080;
-    server blog-service_2:8080;
-    server blog-service_3:8080;
+    server blog-service_1:8888;
+    server blog-service_2:8888;
+    server blog-service_3:8888;
 }
 ```
 
@@ -467,11 +467,11 @@ export JAVA_OPTS="-Xms512m -Xmx1024m"
 #### 4. 端口冲突
 ```bash
 # 检查端口占用
-netstat -tulpn | grep :8080
+netstat -tulpn | grep :8888
 
 # 修改端口映射
 ports:
-  - "8081:8080"
+  - "8081:8888"
 ```
 
 ### 性能调优

@@ -280,7 +280,7 @@ REM 等待应用服务
 call :log_info "等待应用服务..."
 :wait_app
 timeout /t 10 /nobreak >nul
-curl -f http://localhost:8080/actuator/health >nul 2>&1
+curl -f http://localhost:8888/actuator/health >nul 2>&1
 if errorlevel 1 goto wait_app
 
 call :log_info "服务就绪检查完成"
@@ -291,7 +291,7 @@ REM 健康检查
 call :log_info "执行健康检查..."
 
 call :log_info "检查Blog应用..."
-curl -f http://localhost:8080/actuator/health >nul 2>&1
+curl -f http://localhost:8888/actuator/health >nul 2>&1
 if errorlevel 1 (
     call :log_error "✗ Blog应用 - 不健康"
 ) else (

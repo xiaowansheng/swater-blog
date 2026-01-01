@@ -32,8 +32,8 @@ echo 访问地址:
 echo - Grafana面板: http://localhost:3000 (admin/admin123)
 echo - Prometheus: http://localhost:9090
 echo - AlertManager: http://localhost:9093
-echo - Blog服务健康检查: http://localhost:8080/actuator/health
-echo - Blog服务指标: http://localhost:8080/actuator/prometheus
+echo - Blog服务健康检查: http://localhost:8888/actuator/health
+echo - Blog服务指标: http://localhost:8888/actuator/prometheus
 echo ========================================
 
 pause

@@ -67,7 +67,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ### 获取Token
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST http://localhost:8888/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin",
@@ -77,7 +77,7 @@ curl -X POST http://localhost:8080/api/auth/login \
 
 ### Token刷新
 ```bash
-curl -X POST http://localhost:8080/api/auth/refresh-token \
+curl -X POST http://localhost:8888/api/auth/refresh-token \
   -H "Content-Type: application/json" \
   -d '{
     "refreshToken": "your-refresh-token"
@@ -156,17 +156,17 @@ curl -X POST http://localhost:8080/api/auth/refresh-token \
 
 ### 1. 获取文章列表
 ```bash
-curl -X GET "http://localhost:8080/api/public/post/list?page=1&size=10&categoryId=1"
+curl -X GET "http://localhost:8888/api/public/post/list?page=1&size=10&categoryId=1"
 ```
 
 ### 2. 搜索文章
 ```bash
-curl -X GET "http://localhost:8080/api/public/search?keyword=Spring Boot&type=article"
+curl -X GET "http://localhost:8888/api/public/search?keyword=Spring Boot&type=article"
 ```
 
 ### 3. 发布文章（需要认证）
 ```bash
-curl -X POST http://localhost:8080/api/admin/post \
+curl -X POST http://localhost:8888/api/admin/post \
   -H "Authorization: Bearer your-token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -180,7 +180,7 @@ curl -X POST http://localhost:8080/api/admin/post \
 
 ### 4. 上传文件
 ```bash
-curl -X POST http://localhost:8080/api/admin/file/upload \
+curl -X POST http://localhost:8888/api/admin/file/upload \
   -H "Authorization: Bearer your-token" \
   -F "file=@/path/to/file.jpg"
 ```
@@ -188,7 +188,7 @@ curl -X POST http://localhost:8080/api/admin/file/upload \
 ## 开发工具
 
 ### Swagger UI
-访问地址: http://localhost:8080/swagger-ui.html
+访问地址: http://localhost:8888/swagger-ui.html
 - 交互式API文档
 - 在线测试功能
 - 参数说明和示例
@@ -208,27 +208,27 @@ curl -X POST http://localhost:8080/api/admin/file/upload \
 
 ### 健康检查
 ```bash
-curl http://localhost:8080/actuator/health
+curl http://localhost:8888/actuator/health
 ```
 
 ### 性能指标
 ```bash
-curl http://localhost:8080/actuator/metrics
-curl http://localhost:8080/actuator/prometheus
+curl http://localhost:8888/actuator/metrics
+curl http://localhost:8888/actuator/prometheus
 ```
 
 ### 限流状态
 ```bash
-curl http://localhost:8080/api/security-test/rate-limit/status
+curl http://localhost:8888/api/security-test/rate-limit/status
 ```
 
 ### 安全测试
 ```bash
 # 测试SQL注入检测
-curl -X POST "http://localhost:8080/api/security-test/sql-injection-check?input=admin' OR 1=1 --"
+curl -X POST "http://localhost:8888/api/security-test/sql-injection-check?input=admin' OR 1=1 --"
 
 # 测试数据脱敏
-curl -X POST http://localhost:8080/api/security-test/data-masking \
+curl -X POST http://localhost:8888/api/security-test/data-masking \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","phone":"13812345678"}'
 ```
@@ -255,7 +255,7 @@ docker build -t blog-api:latest .
 # 运行容器
 docker run -d \
   --name blog-api \
-  -p 8080:8080 \
+  -p 8888:8888 \
   -e SPRING_PROFILES_ACTIVE=prod \
   blog-api:latest
 ```
@@ -263,7 +263,7 @@ docker run -d \
 ## 常见问题
 
 ### Q: 如何获取API文档？
-A: 启动应用后访问 http://localhost:8080/swagger-ui.html
+A: 启动应用后访问 http://localhost:8888/swagger-ui.html
 
 ### Q: Token过期怎么办？
 A: 使用refresh token调用 `/api/auth/refresh-token` 接口

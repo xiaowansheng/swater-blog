@@ -85,7 +85,7 @@ public class OpenApiConfig {
     private List<Server> createServers() {
         return Arrays.asList(
                 new Server()
-                        .url("http://localhost:8080" + contextPath)
+                        .url("http://localhost:8888" + contextPath)
                         .description("开发环境"),
                 new Server()
                         .url("https://api.yourblog.com" + contextPath)

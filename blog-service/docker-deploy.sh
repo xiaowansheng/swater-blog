@@ -313,7 +313,7 @@ wait_for_services() {
     wait_time=0
     
     while [ $wait_time -lt $max_wait ]; do
-        if curl -f http://localhost:8080/actuator/health &> /dev/null; then
+        if curl -f http://localhost:8888/actuator/health &> /dev/null; then
             log_info "应用服务已就绪"
             break
         fi
@@ -335,7 +335,7 @@ health_check() {
     log_info "执行健康检查..."
     
     local services=(
-        "http://localhost:8080/actuator/health:Blog应用"
+        "http://localhost:8888/actuator/health:Blog应用"
         "http://localhost:15672:RabbitMQ管理界面"
         "http://localhost:9200/_cluster/health:Elasticsearch"
     )

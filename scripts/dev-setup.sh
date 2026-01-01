@@ -128,8 +128,8 @@ if [ -d "blog-web" ]; then
 fi
 
 echo "✅ 所有服务已启动！"
-echo "📡 后端服务: http://localhost:8080"
-echo "📚 API 文档: http://localhost:8080/swagger-ui.html"
+echo "📡 后端服务: http://localhost:8888"
+echo "📚 API 文档: http://localhost:8888/swagger-ui.html"
 echo "🖥️  管理后台: http://localhost:3001"
 if [ -d "blog-web" ]; then
     echo "🌐 博客前端: http://localhost:3000"
@@ -177,7 +177,7 @@ echo -e "  • 查看服务日志: ${GREEN}docker-compose logs -f [service-name]
 echo ""
 echo -e "${YELLOW}⚠️  注意事项:${NC}"
 echo -e "  • 首次启动可能需要较长时间下载依赖"
-echo -e "  • 请确保端口 3000, 3001, 8080, 3306, 6379, 5672, 9200 未被占用"
+echo -e "  • 请确保端口 3000, 3001, 8888, 3306, 6379, 5672, 9200 未被占用"
 echo -e "  • 修改 .env 文件中的配置以适应你的环境"
 echo ""
 echo -e "${GREEN}🚀 现在可以运行 ./start-dev.sh 启动开发环境！${NC}"

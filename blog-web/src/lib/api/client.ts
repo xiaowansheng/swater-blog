@@ -2,8 +2,8 @@ import type { ApiResponse } from '@/types';
 import { getMockResponse, createMockResponse } from './mock';
 
 const API_BASE_URL = typeof window !== 'undefined' 
-  ? process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'
-  : 'http://localhost:8080';
+  ? process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8888'
+  : 'http://localhost:8888';
 
 export async function fetchClient<T>(
   url: string,

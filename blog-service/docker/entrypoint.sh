@@ -166,7 +166,7 @@ setup_jvm_options() {
 setup_spring_options() {
     # 默认配置
     export SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
-    export SERVER_PORT=${SERVER_PORT:-8080}
+    export SERVER_PORT=${SERVER_PORT:-8888}
     
     # 日志配置
     export LOGGING_FILE_NAME=${LOGGING_FILE_NAME:-logs/application.log}

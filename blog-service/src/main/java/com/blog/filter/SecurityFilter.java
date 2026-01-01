@@ -315,10 +315,10 @@ public class SecurityFilter implements Filter {
         
         // 允许的开发环境域名组合
         String[][] allowedDevCombinations = {
-            {"localhost:3000", "localhost:8080"},  // 前端开发服务器 -> 后端开发服务器
-            {"127.0.0.1:3000", "127.0.0.1:8080"}, // 本地IP访问
-            {"localhost:3000", "127.0.0.1:8080"},  // 混合访问
-            {"127.0.0.1:3000", "localhost:8080"}   // 混合访问
+            {"localhost:3000", "localhost:8888"},  // 前端开发服务器 -> 后端开发服务器
+            {"127.0.0.1:3000", "127.0.0.1:8888"}, // 本地IP访问
+            {"localhost:3000", "127.0.0.1:8888"},  // 混合访问
+            {"127.0.0.1:3000", "localhost:8888"}   // 混合访问
         };
         
         for (String[] combination : allowedDevCombinations) {

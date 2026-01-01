@@ -15,7 +15,7 @@ scrape_configs:
   # Blog服务监控
   - job_name: 'blog-service'
     static_configs:
-      - targets: ['host.docker.internal:8080']
+      - targets: ['host.docker.internal:8888']
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     scrape_timeout: 5s

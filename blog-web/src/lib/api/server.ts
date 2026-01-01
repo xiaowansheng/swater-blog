@@ -1,7 +1,7 @@
 import type { ApiResponse } from '@/types';
 import { getMockResponse } from './mock';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8888';
 
 export async function fetchServer<T>(
   url: string,

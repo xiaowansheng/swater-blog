@@ -71,7 +71,7 @@ docker-compose up -d
 # 3. 等待服务启动完成，访问应用
 # 博客前端: http://localhost:3000
 # 管理后台: http://localhost:3001  
-# API文档: http://localhost:8080/swagger-ui.html
+# API文档: http://localhost:8888/swagger-ui.html
 ```
 
 ### 方式二：本地开发

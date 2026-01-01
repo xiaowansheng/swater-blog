@@ -7,7 +7,7 @@ const config = {
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
   
   // WebSocket 基础路径
-  wsBaseUrl: import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8080',
+  wsBaseUrl: import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8888',
   
   // 上传接口地址
   uploadUrl: import.meta.env.VITE_UPLOAD_URL || '/api/upload',

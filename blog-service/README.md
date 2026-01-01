@@ -37,9 +37,9 @@
 
 ## 端口
 
-默认端口：8080
+默认端口：8888
 
 ## API 文档
 
-启动后访问：http://localhost:8080/swagger-ui.html
+启动后访问：http://localhost:8888/swagger-ui.html
 

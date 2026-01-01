@@ -14,7 +14,7 @@ sleep 30
 
 echo ""
 echo "2. 检查应用是否启动成功..."
-if ! curl -s http://localhost:8080/actuator/health > /dev/null; then
+if ! curl -s http://localhost:8888/actuator/health > /dev/null; then
     echo "错误: 应用启动失败或未完全启动"
     echo "请检查应用日志"
     kill $APP_PID 2>/dev/null
@@ -26,7 +26,7 @@ echo ""
 echo "3. 生成OpenAPI规范文档..."
 mkdir -p docs/api
 
-if ! curl -s http://localhost:8080/v3/api-docs > docs/api/openapi.json; then
+if ! curl -s http://localhost:8888/v3/api-docs > docs/api/openapi.json; then
     echo "错误: 无法获取OpenAPI文档"
     kill $APP_PID 2>/dev/null
     exit 1
@@ -35,10 +35,10 @@ echo "OpenAPI规范文档已生成: docs/api/openapi.json"
 
 echo ""
 echo "4. 生成分组API文档..."
-curl -s http://localhost:8080/v3/api-docs/public > docs/api/public-api.json
-curl -s http://localhost:8080/v3/api-docs/admin > docs/api/admin-api.json
-curl -s http://localhost:8080/v3/api-docs/auth > docs/api/auth-api.json
-curl -s http://localhost:8080/v3/api-docs/monitoring > docs/api/monitoring-api.json
+curl -s http://localhost:8888/v3/api-docs/public > docs/api/public-api.json
+curl -s http://localhost:8888/v3/api-docs/admin > docs/api/admin-api.json
+curl -s http://localhost:8888/v3/api-docs/auth > docs/api/auth-api.json
+curl -s http://localhost:8888/v3/api-docs/monitoring > docs/api/monitoring-api.json
 
 echo ""
 echo "5. 生成Postman集合..."
@@ -52,7 +52,7 @@ cat > docs/api/Blog-API.postman_collection.json << 'EOF'
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080",
+      "value": "http://localhost:8888",
       "type": "string"
     },
     {
@@ -118,7 +118,7 @@ cat > docs/api/index.html << 'EOF'
         <div class="card">
             <h3>📖 在线文档</h3>
             <p>交互式API文档，可以直接测试API接口</p>
-            <a href="http://localhost:8080/swagger-ui.html" class="btn" target="_blank">打开Swagger UI</a>
+            <a href="http://localhost:8888/swagger-ui.html" class="btn" target="_blank">打开Swagger UI</a>
         </div>
         
         <div class="card">
@@ -156,7 +156,7 @@ cat > docs/api/index.html << 'EOF'
             <h3>🛠️ 快速开始</h3>
             <ol>
                 <li>启动应用: <code>./gradlew bootRun</code></li>
-                <li>访问文档: <a href="http://localhost:8080/swagger-ui.html">http://localhost:8080/swagger-ui.html</a></li>
+                <li>访问文档: <a href="http://localhost:8888/swagger-ui.html">http://localhost:8888/swagger-ui.html</a></li>
                 <li>获取token: 调用 <code>/api/auth/login</code> 接口</li>
                 <li>测试API: 在请求头中添加 <code>Authorization: Bearer {token}</code></li>
             </ol>
@@ -170,7 +170,7 @@ echo ""
 echo "========================================"
 echo "API文档生成完成！"
 echo ""
-echo "📖 在线文档: http://localhost:8080/swagger-ui.html"
+echo "📖 在线文档: http://localhost:8888/swagger-ui.html"
 echo "📄 文档索引: docs/api/index.html"
 echo "📋 OpenAPI规范: docs/api/openapi.json"
 echo "🚀 Postman集合: docs/api/Blog-API.postman_collection.json"

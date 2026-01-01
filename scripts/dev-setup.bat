@@ -126,8 +126,8 @@ echo     cd ..
 echo ^)
 echo.
 echo echo ✅ 所有服务已启动！
-echo echo 📡 后端服务: http://localhost:8080
-echo echo 📚 API 文档: http://localhost:8080/swagger-ui.html
+echo echo 📡 后端服务: http://localhost:8888
+echo echo 📚 API 文档: http://localhost:8888/swagger-ui.html
 echo echo 🖥️  管理后台: http://localhost:3001
 echo if exist blog-web (
 echo     echo 🌐 博客前端: http://localhost:3000
@@ -162,7 +162,7 @@ echo   • 查看服务日志: docker-compose logs -f [service-name]
 echo.
 echo ⚠️  注意事项:
 echo   • 首次启动可能需要较长时间下载依赖
-echo   • 请确保端口 3000, 3001, 8080, 3306, 6379, 5672, 9200 未被占用
+echo   • 请确保端口 3000, 3001, 8888, 3306, 6379, 5672, 9200 未被占用
 echo   • 修改 .env 文件中的配置以适应你的环境
 echo.
 echo 🚀 现在可以运行 start-dev.bat 启动开发环境！

@@ -124,13 +124,13 @@ public class ArticleAdminCommandService {
 #### 5. 监控面板访问
 ```bash
 # 健康检查
-curl http://localhost:8080/actuator/health
+curl http://localhost:8888/actuator/health
 
 # 指标数据
-curl http://localhost:8080/actuator/metrics
+curl http://localhost:8888/actuator/metrics
 
 # Prometheus格式指标
-curl http://localhost:8080/actuator/prometheus
+curl http://localhost:8888/actuator/prometheus
 ```
 
 ### 阶段二：完整监控方案（生产环境）⭐⭐⭐⭐⭐
@@ -178,7 +178,7 @@ global:
 scrape_configs:
   - job_name: 'blog-service'
     static_configs:
-      - targets: ['host.docker.internal:8080']
+      - targets: ['host.docker.internal:8888']
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     
