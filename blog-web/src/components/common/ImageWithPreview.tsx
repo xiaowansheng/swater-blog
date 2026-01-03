@@ -46,6 +46,8 @@ export default function ImageWithPreview({
     return <div className={`flex justify-center items-center text-gray-400 bg-gray-100 ${className}`} {...(restProps as any)}>无图片</div>;
   }
 
+  const { className: imgClassName, ...otherRestProps } = restProps as any;
+
   return (
     <>
       <div 
@@ -56,7 +58,8 @@ export default function ImageWithPreview({
         <Image
           src={fullUrl}
           alt={alt}
-          {...restProps}
+          className={`object-cover ${imgClassName || ''}`}
+          {...otherRestProps}
         />
       </div>
 
