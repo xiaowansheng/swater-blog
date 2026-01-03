@@ -51,22 +51,22 @@ export default async function HomePage() {
         tagCount={tags.length}
         categoryCount={categories.length}
       />
-      <main id="articles" className="container relative z-10 flex-1 px-4 py-16 mx-auto">
-        <div className="flex gap-8">
-          <div className="flex-1">
+      <main id="articles" className="container relative z-10 flex-1 px-3 sm:px-4 py-8 sm:py-12 md:py-16 mx-auto">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+          <div className="flex-1 w-full">
             {articleList.records.length > 0 ? (
               <ArticleList articles={articleList.records} />
             ) : (
-              <div className="overflow-hidden relative p-16 text-center modern-card">
+              <div className="overflow-hidden relative p-8 sm:p-12 md:p-16 text-center modern-card">
                 <div className="absolute inset-0 bg-gradient-to-br via-transparent from-primary/5 to-accent/5"></div>
                 <div className="relative z-10">
-                  <div className="flex justify-center items-center mx-auto mb-6 w-20 h-20 bg-gradient-to-br rounded-2xl from-primary/20 to-accent/20">
-                    <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex justify-center items-center mx-auto mb-4 sm:mb-6 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br rounded-2xl from-primary/20 to-accent/20">
+                    <svg className="w-8 h-8 sm:w-10 sm:h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <p className="mb-2 text-xl font-semibold text-foreground/70">{t('noData')}</p>
-                  <p className="text-sm text-muted">
+                  <p className="mb-2 text-lg sm:text-xl font-semibold text-foreground/70">{t('noData')}</p>
+                  <p className="text-xs sm:text-sm text-muted">
                     {process.env.NODE_ENV === 'development' && 'API服务器未连接，请确保后端服务正在运行'}
                   </p>
                 </div>

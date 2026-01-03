@@ -130,9 +130,9 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
           })}
         </nav>
 
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-1.5 sm:gap-2 items-center">
           <LanguageSwitcher scrolled={scrolled} />
-          
+
           {/* Decoration Level Toggle */}
           <button
             onClick={() => {
@@ -140,9 +140,9 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
               const nextIndex = (levels.indexOf(level) + 1) % levels.length;
               setLevel(levels[nextIndex]);
             }}
-            className={`p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
-              scrolled 
-                ? 'hover:bg-primary/10' 
+            className={`min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
+              scrolled
+                ? 'hover:bg-primary/10'
                 : 'hover:bg-white/10 text-white'
             }`}
             title={`装饰等级: ${level === 'none' ? '关闭' : level === 'light' ? '简约' : '全开'}`}
@@ -156,9 +156,9 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
           {mounted && (
           <button
             onClick={toggleTheme}
-            className={`p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
-              scrolled 
-                ? 'hover:bg-primary/10' 
+            className={`min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
+              scrolled
+                ? 'hover:bg-primary/10'
                 : 'hover:bg-white/10 text-white'
             }`}
             aria-label="Toggle theme"
@@ -169,9 +169,9 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
           )}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`md:hidden p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 ${
-              scrolled 
-                ? 'hover:bg-primary/10' 
+            className={`md:hidden min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 ${
+              scrolled
+                ? 'hover:bg-primary/10'
                 : 'hover:bg-white/10 text-white'
             }`}
             aria-label="Toggle menu"

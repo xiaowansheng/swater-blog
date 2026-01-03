@@ -40,18 +40,18 @@ export default function MobileMenu({ open, onClose }: MobileMenuProps) {
               leaveTo="translate-x-full"
             >
               <Dialog.Panel className="w-full max-w-[280px] h-screen transform overflow-hidden rounded-l-3xl bg-background/95 backdrop-blur-xl border-l border-primary/10 shadow-2xl transition-all flex flex-col">
-                <div className="p-8 pb-6 flex justify-between items-center">
-                  <h2 className="text-2xl font-bold font-title text-primary">菜单</h2>
-                  <button 
+                <div className="p-6 pb-4 flex justify-between items-center">
+                  <h2 className="text-xl font-bold font-title text-primary">菜单</h2>
+                  <button
                     onClick={onClose}
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary"
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-primary/10 text-primary active:bg-primary/20 transition-colors"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
-                <nav className="flex-1 px-4 flex flex-col gap-2 overflow-y-auto">
+                <nav className="flex-1 px-3 flex flex-col gap-1 overflow-y-auto">
                   {[
                     { href: '/', label: t('home') },
                     { href: '/post', label: t('posts') },
@@ -64,7 +64,7 @@ export default function MobileMenu({ open, onClose }: MobileMenuProps) {
                       key={item.href}
                       href={item.href}
                       onClick={onClose}
-                      className="px-6 py-4 rounded-2xl hover:bg-primary/5 active:bg-primary/10 transition-all text-lg font-bold font-title text-foreground/80 hover:text-primary flex items-center gap-3 group"
+                      className="min-h-[48px] px-5 rounded-2xl hover:bg-primary/5 active:bg-primary/10 transition-all text-base font-bold font-title text-foreground/80 hover:text-primary flex items-center gap-3 group"
                     >
                       <span className="w-2 h-2 rounded-full bg-primary/30 group-hover:bg-primary transition-colors"></span>
                       {item.label}
