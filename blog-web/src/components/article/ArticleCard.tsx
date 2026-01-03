@@ -44,7 +44,7 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
       <div className="flex-1 p-5 sm:p-6 md:p-8 flex flex-col min-w-0">
         <div className="flex-1">
           <Link href={`/post/${article.articleKey}`}>
-            <h2 className="text-xl sm:text-2xl font-bold mb-3 group-hover:text-primary transition-all duration-300 font-title leading-tight">
+            <h2 className="text-xl sm:text-2xl font-bold mb-3 group-hover:text-primary transition-all duration-300 font-title leading-tight text-center truncate">
               {article.title}
             </h2>
           </Link>
