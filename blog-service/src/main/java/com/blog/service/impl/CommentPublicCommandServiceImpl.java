@@ -77,8 +77,7 @@ public class CommentPublicCommandServiceImpl implements CommentPublicCommandServ
         }
         
         Comment comment = BeanUtil.copyProperties(dto, Comment.class);
-        comment.setCommentKey(KeyUtil.generateKey("comment"));
-        
+
         String ip = RequestUtil.getClientIp();
         comment.setIp(ip != null ? ip : "");
         

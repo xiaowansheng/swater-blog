@@ -41,7 +41,6 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
     @Transactional
     public GuestbookVO submit(GuestbookDTO dto) {
         Guestbook guestbook = BeanUtil.copyProperties(dto, Guestbook.class);
-        guestbook.setGuestbookKey(KeyUtil.generateKey("guestbook"));
 
         String ip = RequestUtil.getClientIp();
         guestbook.setIp(ip);

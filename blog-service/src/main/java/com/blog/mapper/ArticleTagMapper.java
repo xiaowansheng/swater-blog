@@ -12,5 +12,7 @@ public interface ArticleTagMapper extends com.blog.mapper.BaseMapper<ArticleTag>
     List<Long> selectArticleIdsByTagId(@Param("tagId") Long tagId);
 
     void deleteByArticleId(@Param("articleId") Long articleId);
+
+    List<ArticleTag> selectByArticleIds(@Param("articleIds") List<Long> articleIds);
 }
 

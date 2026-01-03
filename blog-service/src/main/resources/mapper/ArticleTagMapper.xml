@@ -14,5 +14,14 @@
     <delete id="deleteByArticleId">
         DELETE FROM article_tag WHERE article_id = #{articleId}
     </delete>
+
+    <select id="selectByArticleIds" resultType="com.blog.model.entity.ArticleTag">
+        SELECT *
+        FROM article_tag
+        WHERE article_id IN
+        <foreach item="articleId" collection="articleIds" open="(" separator="," close=")">
+            #{articleId}
+        </foreach>
+    </select>
 </mapper>
 
