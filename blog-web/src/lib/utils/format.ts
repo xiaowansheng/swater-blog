@@ -73,3 +73,30 @@ export function getFullUrl(path: string | undefined): string {
   return `${baseUrl}${prefix}${normalizedPath}`;
 }
 
+/**
+ * 去除 Markdown 标签，返回纯文本
+ * @param md Markdown 文本
+ * @returns 纯文本
+ */
+export function stripMarkdown(md: string | undefined): string {
+  if (!md) return '';
+  return md
+    // 去除图片
+    .replace(/!\[.*?\]\(.*?\)/g, '')
+    // 去除链接
+    .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+    // 去除标题
+    .replace(/^#+\s+/gm, '')
+    // 去除加粗、斜体
+    .replace(/[*_]{1,3}(.*?)[*_]{1,3}/g, '$1')
+    // 去除代码块
+    .replace(/```[\s\S]*?```/g, '')
+    // 去除行内代码
+    .replace(/`(.*?)`/g, '$1')
+    // 去除 HTML 标签
+    .replace(/<[^>]*>/g, '')
+    // 去除多余空格和换行
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
