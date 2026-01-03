@@ -39,6 +39,20 @@ export function getFullUrl(path: string | undefined): string {
     return path;
   }
   
+  const resourcePrefix = process.env.NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX || (process.env as any).VITE_UPLOAD_RESOURCE_PREFIX;
+  
+  if (resourcePrefix) {
+    // 如果路径已经包含了 resourcePrefix，则直接返回
+    if (path.startsWith(resourcePrefix)) {
+      return path;
+    }
+    // 标准化路径，确保以 / 开头
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    // 如果 resourcePrefix 以 / 结尾，而 normalizedPath 也以 / 开头，去掉一个
+    const finalPrefix = resourcePrefix.endsWith('/') ? resourcePrefix.slice(0, -1) : resourcePrefix;
+    return `${finalPrefix}${normalizedPath}`;
+  }
+  
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
   const prefix = '/api/uploads'; // 假设 web 端也需要这个前缀，或者根据后端配置
   
