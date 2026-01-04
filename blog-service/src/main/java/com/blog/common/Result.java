@@ -1,14 +1,20 @@
 package com.blog.common;
 
-import lombok.Data;
-import java.time.LocalDateTime;
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import java.time.LocalDateTime;
+@Getter
+@Setter
 @Data
 public class Result<T> {
     private Integer code;
     private String message;
     private T data;
     private LocalDateTime timestamp;
+
+
 
     public static <T> Result<T> success(T data) {
         Result<T> result = new Result<>();
@@ -18,6 +24,8 @@ public class Result<T> {
         result.setTimestamp(LocalDateTime.now());
         return result;
     }
+
+
 
     public static <T> Result<T> success() {
         return success(null);

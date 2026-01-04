@@ -1,0 +1,24 @@
+package com.blog.modules.file.event.file;
+
+
+import com.blog.common.model.event.BaseEvent;
+import com.blog.modules.file.model.entity.FileMeta;
+public class FileUploadedEvent extends BaseEvent {
+    private final Long fileId;
+    private final FileMeta fileMeta;
+
+    public FileUploadedEvent(Object source, Long fileId, FileMeta fileMeta) {
+        super(source, "FILE_UPLOADED");
+        this.fileId = fileId;
+        this.fileMeta = fileMeta;
+    }
+
+    public Long getFileId() {
+        return fileId;
+    }
+
+    public FileMeta getFileMeta() {
+        return fileMeta;
+    }
+}
+

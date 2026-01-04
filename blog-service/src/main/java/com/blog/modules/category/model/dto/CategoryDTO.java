@@ -1,0 +1,25 @@
+package com.blog.modules.category.model.dto;
+
+
+
+import com.blog.common.model.dto.BaseDTO;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import jakarta.validation.constraints.NotBlank;
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class CategoryDTO extends com.blog.common.model.dto.BaseDTO {
+    @NotBlank(message = "分类名称不能为空")
+    private String name;
+
+    private String slug;
+
+    private String description;
+
+    private Long parentId;
+
+    private Integer sort;
+
+    private String status;
+}
+
