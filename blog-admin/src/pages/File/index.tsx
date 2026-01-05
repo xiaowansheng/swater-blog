@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Upload, Tag, Input, Select, Tooltip, Card, Row, Col } from 'antd'
+import { Table, Button, Space, Popconfirm, message, Upload, Tag, Input, Select, Tooltip, Card, Row, Col, Modal } from 'antd'
 import Image from '@/components/common/ImageWithPreview'
 import {
   UploadOutlined,
@@ -16,7 +16,7 @@ import {
 } from '@ant-design/icons'
 import { getFileList, uploadFile, deleteFile } from '@/api/file'
 import { FileMeta } from '@/types'
-import { formatFileSize } from '@/utils/format'
+import { formatFileSize, getFullUrl } from '@/utils/format'
 
 const FilePage: React.FC = () => {
   const [files, setFiles] = useState<FileMeta[]>([])
@@ -25,6 +25,8 @@ const FilePage: React.FC = () => {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 })
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
   const [filters, setFilters] = useState<{ keyword?: string; fileType?: string }>({})
+  const [previewFile, setPreviewFile] = useState<FileMeta | null>(null)
+  const [previewVisible, setPreviewVisible] = useState(false)
 
   useEffect(() => {
     loadFiles()
@@ -74,8 +76,79 @@ const FilePage: React.FC = () => {
   }
 
   const handleCopyUrl = (url: string) => {
-    navigator.clipboard.writeText(url)
+    const fullUrl = getFullUrl(url)
+    navigator.clipboard.writeText(fullUrl)
     message.success('链接已复制')
+  }
+
+  const handlePreview = (file: FileMeta) => {
+    setPreviewFile(file)
+    setPreviewVisible(true)
+  }
+
+  const renderPreviewContent = () => {
+    if (!previewFile) return null
+
+    const fullUrl = getFullUrl(previewFile.url)
+
+    if (previewFile.mimeType?.startsWith('image')) {
+      return (
+        <div className="flex justify-center items-center min-h-[400px]">
+          <Image
+            src={fullUrl}
+            alt={previewFile.originalName}
+            style={{ maxWidth: '100%', maxHeight: '70vh' }}
+            preview={false}
+          />
+        </div>
+      )
+    }
+
+    if (previewFile.mimeType?.startsWith('video')) {
+      return (
+        <div className="flex justify-center items-center min-h-[400px]">
+          <video
+            src={fullUrl}
+            controls
+            style={{ maxWidth: '100%', maxHeight: '70vh' }}
+          />
+        </div>
+      )
+    }
+
+    if (previewFile.mimeType?.includes('pdf')) {
+      return (
+        <div className="min-h-[70vh]">
+          <iframe
+            src={fullUrl}
+            style={{ width: '100%', height: '70vh', border: 'none' }}
+            title={previewFile.originalName}
+          />
+        </div>
+      )
+    }
+
+    if (previewFile.mimeType?.includes('text') || previewFile.mimeType?.includes('json')) {
+      return (
+        <div className="min-h-[400px]">
+          <iframe
+            src={fullUrl}
+            style={{ width: '100%', height: '70vh', border: 'none' }}
+            title={previewFile.originalName}
+          />
+        </div>
+      )
+    }
+
+    return (
+      <div className="text-center py-12">
+        <FileOutlined className="text-6xl text-gray-300 mb-4" />
+        <p className="text-gray-500 mb-4">该文件类型不支持预览</p>
+        <Button type="primary" onClick={() => window.open(fullUrl, '_blank')}>
+          在新窗口打开
+        </Button>
+      </div>
+    )
   }
 
   const getFileIcon = (fileType: string) => {
@@ -103,7 +176,7 @@ const FilePage: React.FC = () => {
         <div className="flex items-center gap-3">
           {isImage(record.mimeType) ? (
             <Image
-              src={record.url}
+              src={getFullUrl(record.url)}
               width={48}
               height={48}
               className="object-cover rounded"
@@ -167,7 +240,7 @@ const FilePage: React.FC = () => {
             <Button
               type="text"
               icon={<EyeOutlined />}
-              onClick={() => window.open(record.url, '_blank')}
+              onClick={() => handlePreview(record)}
             />
           </Tooltip>
           <Popconfirm
@@ -260,7 +333,7 @@ const FilePage: React.FC = () => {
                     isImage(file.mimeType) ? (
                       <div className="h-32 overflow-hidden">
                         <Image
-                          src={file.url}
+                          src={getFullUrl(file.url)}
                           alt={file.originalName}
                           className="w-full h-full object-cover"
                         />
@@ -273,7 +346,7 @@ const FilePage: React.FC = () => {
                   }
                   actions={[
                     <CopyOutlined key="copy" onClick={() => handleCopyUrl(file.url)} />,
-                    <EyeOutlined key="view" onClick={() => window.open(file.url, '_blank')} />,
+                    <EyeOutlined key="view" onClick={() => handlePreview(file)} />,
                     <Popconfirm
                       key="delete"
                       title="确定删除？"
@@ -301,6 +374,18 @@ const FilePage: React.FC = () => {
           </Row>
         </div>
       )}
+
+      <Modal
+        title={previewFile?.originalName || '文件预览'}
+        open={previewVisible}
+        onCancel={() => setPreviewVisible(false)}
+        footer={null}
+        width="90%"
+        style={{ maxWidth: 1200 }}
+        styles={{ body: { padding: '24px' } }}
+      >
+        {renderPreviewContent()}
+      </Modal>
     </div>
   )
 }
