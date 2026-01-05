@@ -5,6 +5,7 @@ import { ArrowLeftOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
 import { getTalkById } from '@/api/talk'
 import { getAuthorConfig } from '@/api/config'
 import { Talk, TalkStatus, TALK_STATUS_MAP } from '@/types'
+import { getFullUrl } from '@/utils/format'
 import Image from '@/components/common/ImageWithPreview'
 
 interface AuthorInfo {
@@ -84,7 +85,7 @@ const TalkDetail: React.FC = () => {
           {/* 头部信息 */}
           <div className="flex justify-between items-start mb-4 pb-4 border-b border-gray-100">
             <div className="flex items-center gap-3">
-              <Avatar src={authorInfo.avatar} size={48}>
+              <Avatar src={getFullUrl(authorInfo.avatar)} size={48}>
                 {authorInfo.name?.charAt(0)?.toUpperCase()}
               </Avatar>
               <div className="flex flex-col">

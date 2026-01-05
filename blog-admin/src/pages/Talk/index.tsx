@@ -9,6 +9,7 @@ import {
 import { getTalkList, deleteTalk } from '@/api/talk'
 import { getAuthorConfig } from '@/api/config'
 import { Talk, TalkStatus, TALK_STATUS_MAP } from '@/types'
+import { getFullUrl } from '@/utils/format'
 import TalkContent from './components/TalkContent'
 import TalkImages from './components/TalkImages'
 import ActionMenu from './components/ActionMenu'
@@ -167,7 +168,7 @@ const TalkPage: React.FC = () => {
                   {/* 头部：作者信息 + 标签 + 操作按钮 */}
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3 flex-1">
-                      <Avatar src={authorInfo.avatar} size={40}>
+                      <Avatar src={getFullUrl(authorInfo.avatar)} size={40}>
                         {authorInfo.name?.charAt(0)?.toUpperCase()}
                       </Avatar>
                       <div className="flex flex-col">
