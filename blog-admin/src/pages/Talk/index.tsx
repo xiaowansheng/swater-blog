@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Card, Space, Tag, Row, Col, Input, Select, Empty, Spin, message, Avatar } from 'antd'
+import { Button, Card, Space, Tag, Row, Col, Input, Select, Empty, Spin, message, Avatar, Tooltip } from 'antd'
 import {
   PlusOutlined,
   SearchOutlined,
   VerticalAlignTopOutlined,
+  EnvironmentOutlined,
+  MobileOutlined,
+  GlobalOutlined,
 } from '@ant-design/icons'
 import { getTalkList, deleteTalk } from '@/api/talk'
 import { getAuthorConfig } from '@/api/config'
@@ -200,12 +203,44 @@ const TalkPage: React.FC = () => {
                   <TalkImages images={talk.images} />
 
                   {/* 元信息 */}
-                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
-                    <Space size={16} className="text-sm text-gray-500">
-                      <span>❤️ {talk.likeCount || 0}</span>
-                      <span>💬 {talk.commentCount || 0}</span>
-                    </Space>
-                    <span className="text-xs text-gray-400">{talk.createTime}</span>
+                  <div className="mt-4 pt-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <Space size={16} className="text-sm text-gray-500">
+                        <span>❤️ {talk.likeCount || 0}</span>
+                        <span>💬 {talk.commentCount || 0}</span>
+                      </Space>
+                      <span className="text-xs text-gray-400">{talk.createTime}</span>
+                    </div>
+
+                    {/* 访客信息 */}
+                    {(talk.city || talk.device || talk.browser) && (
+                      <div className="flex items-center gap-3 text-xs text-gray-400 mt-2">
+                        {talk.city && (
+                          <Tooltip title={`${talk.country || ''} ${talk.province || ''} ${talk.city}`.trim()}>
+                            <span className="flex items-center gap-1">
+                              <EnvironmentOutlined />
+                              {[talk.province, talk.city].filter(Boolean).join(' ')}
+                            </span>
+                          </Tooltip>
+                        )}
+                        {talk.device && (
+                          <Tooltip title={talk.device}>
+                            <span className="flex items-center gap-1">
+                              <MobileOutlined />
+                              {talk.device}
+                            </span>
+                          </Tooltip>
+                        )}
+                        {talk.browser && (
+                          <Tooltip title={talk.browser}>
+                            <span className="flex items-center gap-1">
+                              <GlobalOutlined />
+                              {talk.browser}
+                            </span>
+                          </Tooltip>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </Card>
               </Col>

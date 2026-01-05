@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Card, Button, Tag, Space, Spin, Empty, Avatar } from 'antd'
-import { ArrowLeftOutlined, VerticalAlignTopOutlined } from '@ant-design/icons'
+import { Card, Button, Tag, Space, Spin, Empty, Avatar, Tooltip, Divider } from 'antd'
+import { ArrowLeftOutlined, VerticalAlignTopOutlined, EnvironmentOutlined, MobileOutlined, GlobalOutlined } from '@ant-design/icons'
 import { getTalkById } from '@/api/talk'
 import { getAuthorConfig } from '@/api/config'
 import { Talk, TalkStatus, TALK_STATUS_MAP } from '@/types'
@@ -132,10 +132,50 @@ const TalkDetail: React.FC = () => {
           )}
 
           {/* 元信息 */}
-          <div className="flex items-center gap-6 pt-4 border-t border-gray-100 text-sm text-gray-500">
-            <span>❤️ 点赞 {talk.likeCount || 0}</span>
-            <span>💬 评论 {talk.commentCount || 0}</span>
-            {talk.updateTime && <span>更新于 {talk.updateTime}</span>}
+          <div className="pt-4 border-t border-gray-100">
+            <div className="flex items-center gap-6 text-sm text-gray-500 mb-3">
+              <span>❤️ 点赞 {talk.likeCount || 0}</span>
+              <span>💬 评论 {talk.commentCount || 0}</span>
+              {talk.updateTime && <span>更新于 {talk.updateTime}</span>}
+            </div>
+
+            {/* 访客信息 */}
+            {(talk.city || talk.device || talk.browser) && (
+              <>
+                <Divider className="my-3" />
+                <div className="text-xs text-gray-500 space-y-2">
+                  <div className="font-medium text-gray-700 mb-2">发布信息</div>
+                  <div className="flex items-center gap-6">
+                    {talk.city && (
+                      <div className="flex items-center gap-2">
+                        <EnvironmentOutlined />
+                        <span>
+                          {[talk.country, talk.province, talk.city].filter(Boolean).join(' ')}
+                        </span>
+                      </div>
+                    )}
+                    {talk.device && (
+                      <div className="flex items-center gap-2">
+                        <MobileOutlined />
+                        <span>{talk.device}</span>
+                      </div>
+                    )}
+                    {talk.browser && (
+                      <div className="flex items-center gap-2">
+                        <GlobalOutlined />
+                        <span>{talk.browser}</span>
+                      </div>
+                    )}
+                  </div>
+                  {talk.ip && (
+                    <div className="text-xs text-gray-400 mt-1">IP: {talk.ip}</div>
+                  )}
+                  {talk.location && (
+                    <div className="text-xs text-gray-400">位置: {talk.location}</div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </Card>
       </div>

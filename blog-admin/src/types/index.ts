@@ -140,14 +140,27 @@ export interface Comment {
 // 说说相关
 export interface Talk {
   id: number
+  talkKey?: string
   content: string
   images?: string[]
+  authorId?: number
+  authorName?: string
   isTop: number
   status: string
   likeCount: number
   commentCount: number
   createTime: string
   updateTime?: string
+  // 发布时的环境信息
+  ip?: string
+  country?: string
+  province?: string
+  city?: string
+  latitude?: number
+  longitude?: number
+  location?: string
+  device?: string
+  browser?: string
 }
 
 // 通知相关
