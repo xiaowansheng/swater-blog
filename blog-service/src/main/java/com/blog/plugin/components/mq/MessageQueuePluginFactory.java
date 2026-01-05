@@ -1,7 +1,7 @@
 package com.blog.plugin.components.mq;
 
 
-import com.blog.plugin.config.PluginProperties;
+import com.blog.plugin.components.mq.config.MqPluginProperties;
 import com.blog.plugin.core.Plugin;
 import com.blog.plugin.core.PluginSelector;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ public class MessageQueuePluginFactory {
     private List<MessageQueuePlugin> messageQueuePlugins;
 
     @Autowired
-    private PluginProperties pluginProperties;
+    private MqPluginProperties mqPluginProperties;
     
     public List<MessageQueuePlugin> getPlugins() {
         return messageQueuePlugins.stream()
@@ -27,8 +27,9 @@ public class MessageQueuePluginFactory {
     public MessageQueuePlugin getActivePlugin() {
         return PluginSelector.selectSingle(
                 messageQueuePlugins,
-                pluginProperties.getMq().getActive(),
-                pluginProperties.getMq().getFallback()
+                mqPluginProperties.getActive(),
+                mqPluginProperties.getFallback()
         );
     }
 }
+

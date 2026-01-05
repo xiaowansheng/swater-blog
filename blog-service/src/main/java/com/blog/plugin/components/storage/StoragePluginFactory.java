@@ -1,7 +1,7 @@
 package com.blog.plugin.components.storage;
 
 
-import com.blog.plugin.config.PluginProperties;
+import com.blog.plugin.components.storage.config.StoragePluginProperties;
 import com.blog.plugin.core.Plugin;
 import com.blog.plugin.core.PluginSelector;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ public class StoragePluginFactory {
     private List<StoragePlugin> storagePlugins;
 
     @Autowired
-    private PluginProperties pluginProperties;
+    private StoragePluginProperties storagePluginProperties;
     
     public List<StoragePlugin> getPlugins() {
         return storagePlugins.stream()
@@ -25,13 +25,14 @@ public class StoragePluginFactory {
     }
 
     /**
-        获取单一存储插件，支持 active/fallback 配置。
+     * 获取单一存储插件，支持 active/fallback 配置。
      */
     public StoragePlugin getActivePlugin() {
         return PluginSelector.selectSingle(
                 storagePlugins,
-                pluginProperties.getStorage().getActive(),
-                pluginProperties.getStorage().getFallback()
+                storagePluginProperties.getActive(),
+                storagePluginProperties.getFallback()
         );
     }
 }
+

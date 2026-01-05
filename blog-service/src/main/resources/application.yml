@@ -333,3 +333,23 @@ springdoc:
       paths-to-match: '/api/monitoring/**'
   show-actuator: true
 
+plugin:
+  storage:
+    active: local
+    fallback:
+  mq:
+    active: rabbitmq
+    fallback: memory
+  notification:
+    enabled:
+      - websocket
+      - email
+  search:
+    active: database
+    fallback:
+  comment:
+    active: builtin
+    fallback:
+  scheduler:
+    active: spring
+    fallback:

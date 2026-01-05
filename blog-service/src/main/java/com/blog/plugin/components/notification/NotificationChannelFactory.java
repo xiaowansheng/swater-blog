@@ -1,7 +1,7 @@
 package com.blog.plugin.components.notification;
 
 
-import com.blog.plugin.config.PluginProperties;
+import com.blog.plugin.components.notification.config.NotificationChannelProperties;
 import com.blog.plugin.core.Plugin;
 import com.blog.plugin.core.PluginSelector;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +16,10 @@ public class NotificationChannelFactory {
     private List<NotificationChannelPlugin> channels;
 
     @Autowired
-    private PluginProperties pluginProperties;
+    private NotificationChannelProperties notificationChannelProperties;
     
     public List<NotificationChannelPlugin> getEnabledChannels() {
-        List<String> enabled = pluginProperties.getNotification().getEnabled();
+        List<String> enabled = notificationChannelProperties.getEnabled();
         return PluginSelector.selectBroadcast(
                 channels.stream()
                         .filter(Plugin::isEnabled)
@@ -28,3 +28,4 @@ public class NotificationChannelFactory {
         );
     }
 }
+

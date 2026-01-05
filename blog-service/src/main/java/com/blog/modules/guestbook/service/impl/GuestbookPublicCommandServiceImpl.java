@@ -7,6 +7,9 @@ import com.blog.modules.guestbook.mapper.GuestbookMapper;
 import com.blog.modules.guestbook.model.dto.GuestbookDTO;
 import com.blog.modules.guestbook.model.entity.Guestbook;
 import com.blog.modules.guestbook.model.vo.GuestbookVO;
+import com.blog.plugin.components.guestbook.GuestbookProcessorFactory;
+import com.blog.plugin.components.guestbook.GuestbookProcessorPlugin;
+import com.blog.plugin.core.ProcessResult;
 import com.blog.plugin.components.location.LocationInfo;
 import com.blog.plugin.components.location.LocationProviderFactory;
 import com.blog.plugin.components.location.LocationProviderPlugin;
@@ -31,6 +34,9 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
     
     @Autowired(required = false)
     private LocationProviderFactory locationProviderFactory;
+
+    @Autowired(required = false)
+    private GuestbookProcessorFactory guestbookProcessorFactory;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -77,6 +83,29 @@ public class GuestbookPublicCommandServiceImpl implements GuestbookPublicCommand
             }
         } else {
             guestbook.setIp(ip);
+        }
+
+        // 插件化留言处理（清理/审核/防垃圾）
+        if (guestbookProcessorFactory != null) {
+            try {
+                List<GuestbookProcessorPlugin> processors = guestbookProcessorFactory.getProcessors();
+                ProcessResult processResult = null;
+                for (GuestbookProcessorPlugin processor : processors) {
+                    processResult = processor.process(dto);
+                    if (processResult != null && processResult.getProcessedContent() != null) {
+                        guestbook.setContent(processResult.getProcessedContent());
+                    }
+                    if (processResult != null && (processResult.isSpam() || !processResult.isApproved())) {
+                        guestbook.setReviewStatus(0);
+                        break;
+                    }
+                }
+                if (processResult != null && !processResult.isSpam() && processResult.isApproved()) {
+                    guestbook.setReviewStatus(1);
+                }
+            } catch (Exception e) {
+                log.warn("留言处理插件执行失败", e);
+            }
         }
 
         // 设置设备信息
