@@ -12,7 +12,7 @@ interface MomentItemProps {
   moment: MomentVO;
 }
 
-const MAX_HEIGHT = 120;
+const MAX_HEIGHT = 250;
 const MAX_ROWS = 2;
 const GAP = 8;
 const MIN_IMAGE_WIDTH = 100;
