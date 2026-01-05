@@ -2,7 +2,7 @@ package com.blog.modules.friendlink.service;
 
 
 
-import com.blog.common.PageResult;
+import com.blog.shared.PageResult;
 import com.blog.modules.friendlink.model.dto.FriendLinkDTO;
 import com.blog.modules.friendlink.model.vo.FriendLinkVO;
 import java.util.List;

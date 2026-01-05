@@ -7,7 +7,7 @@ import com.blog.modules.friendlink.mapper.FriendLinkMapper;
 import com.blog.modules.friendlink.model.entity.FriendLink;
 import com.blog.modules.friendlink.model.vo.FriendLinkVO;
 import com.blog.modules.friendlink.service.FriendLinkPublicQueryService;
-import com.blog.common.util.BeanUtil;
+import com.blog.shared.util.BeanUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.blog.modules.guestbook.event;
 
 
-import com.blog.common.model.event.BaseEvent;
+import com.blog.shared.model.event.BaseEvent;
 public class GuestbookDeletedEvent extends BaseEvent {
     private final Long guestbookId;
 

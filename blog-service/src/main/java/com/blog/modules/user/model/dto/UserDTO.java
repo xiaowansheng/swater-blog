@@ -2,7 +2,7 @@ package com.blog.modules.user.model.dto;
 
 
 
-import com.blog.common.model.dto.BaseDTO;
+import com.blog.shared.model.dto.BaseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.NotBlank;
@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Email;
 import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class UserDTO extends com.blog.common.model.dto.BaseDTO {
+public class UserDTO extends com.blog.shared.model.dto.BaseDTO {
     @NotBlank(message = "用户名不能为空")
     private String username;
 

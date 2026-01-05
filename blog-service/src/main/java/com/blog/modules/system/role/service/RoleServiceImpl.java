@@ -2,15 +2,15 @@ package com.blog.modules.system.role.service;
 
 import com.blog.modules.system.role.mapper.RoleApiMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.blog.common.exception.BusinessException;
+import com.blog.shared.exception.BusinessException;
 import com.blog.modules.system.role.mapper.RoleMapper;
 import com.blog.modules.system.role.model.dto.RoleDTO;
 import com.blog.modules.system.role.model.entity.Role;
 import com.blog.modules.system.role.model.entity.RoleApi;
 import com.blog.modules.system.role.model.vo.RoleVO;
 import com.blog.modules.system.role.service.RoleService;
-import com.blog.common.util.BeanUtil;
-import com.blog.common.util.KeyUtil;
+import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.KeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

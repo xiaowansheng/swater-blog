@@ -6,12 +6,12 @@ package com.blog.modules.system.config.service;
 
 import com.blog.modules.system.config.model.dto.ConfigDTO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.blog.common.exception.BusinessException;
+import com.blog.shared.exception.BusinessException;
 import com.blog.modules.system.config.mapper.SysConfigMapper;
 import com.blog.modules.system.config.model.entity.SysConfig;
 import com.blog.modules.system.config.model.vo.ConfigVO;
 import com.blog.modules.system.config.service.ConfigService;
-import com.blog.common.util.BeanUtil;
+import com.blog.shared.util.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

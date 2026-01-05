@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("guestbook")
-public class Guestbook extends com.blog.common.model.entity.BaseEntity {
+public class Guestbook extends com.blog.shared.model.entity.BaseEntity {
     private String content;
 
     private String images;

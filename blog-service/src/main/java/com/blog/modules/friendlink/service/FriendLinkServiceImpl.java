@@ -4,14 +4,14 @@ package com.blog.modules.friendlink.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.blog.common.PageResult;
+import com.blog.shared.PageResult;
 import com.blog.modules.friendlink.mapper.FriendLinkMapper;
 import com.blog.modules.friendlink.model.dto.FriendLinkDTO;
 import com.blog.modules.friendlink.model.entity.FriendLink;
 import com.blog.modules.friendlink.model.vo.FriendLinkVO;
 import com.blog.modules.friendlink.service.FriendLinkService;
-import com.blog.common.util.BeanUtil;
-import com.blog.common.util.PageUtil;
+import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.PageUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

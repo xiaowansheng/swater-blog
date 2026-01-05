@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("album")
-public class Album extends com.blog.common.model.entity.BaseEntity {
+public class Album extends com.blog.shared.model.entity.BaseEntity {
     @TableField("album_key")
     private String albumKey;
 

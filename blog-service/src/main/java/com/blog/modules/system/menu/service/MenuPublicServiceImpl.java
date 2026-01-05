@@ -4,14 +4,14 @@ package com.blog.modules.system.menu.service;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.blog.core.context.UserContext;
+import com.blog.bootstrap.context.UserContext;
 import com.blog.modules.system.role.mapper.RoleMenuMapper;
 import com.blog.modules.system.menu.mapper.SysMenuMapper;
 import com.blog.modules.system.menu.model.entity.SysMenu;
 import com.blog.modules.system.menu.model.vo.MenuVO;
 import com.blog.modules.system.menu.service.MenuPublicService;
 import com.blog.modules.system.role.service.RoleService;
-import com.blog.common.util.BeanUtil;
+import com.blog.shared.util.BeanUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;

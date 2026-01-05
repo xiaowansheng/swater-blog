@@ -1,9 +1,9 @@
 package com.blog.modules.search.controller.pub;
 
 
-import com.blog.common.annotation.ApiOperation;
-import com.blog.common.PageResult;
-import com.blog.common.Result;
+import com.blog.shared.annotation.ApiOperation;
+import com.blog.shared.PageResult;
+import com.blog.shared.Result;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.modules.search.model.vo.SearchVO;
 import com.blog.modules.search.service.SearchService;

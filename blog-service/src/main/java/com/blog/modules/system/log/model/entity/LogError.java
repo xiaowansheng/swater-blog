@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("log_error")
-public class LogError extends com.blog.common.model.entity.BaseEntity {
+public class LogError extends com.blog.shared.model.entity.BaseEntity {
     @TableField("user_id")
     private Long userId;
 

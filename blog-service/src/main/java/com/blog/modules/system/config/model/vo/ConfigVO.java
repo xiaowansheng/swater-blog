@@ -2,7 +2,7 @@ package com.blog.modules.system.config.model.vo;
 
 
 
-import com.blog.common.model.vo.BaseVO;
+import com.blog.shared.model.vo.BaseVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 /**
@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ConfigVO extends com.blog.common.model.vo.BaseVO {
+public class ConfigVO extends com.blog.shared.model.vo.BaseVO {
     private String configKey;
 
     private String name;

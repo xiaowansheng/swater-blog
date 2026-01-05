@@ -1,9 +1,9 @@
 package com.blog.modules.tag.controller.admin;
 
 
-import com.blog.common.annotation.ApiOperation;
+import com.blog.shared.annotation.ApiOperation;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
-import com.blog.common.Result;
+import com.blog.shared.Result;
 import com.blog.modules.tag.model.dto.TagDTO;
 import com.blog.modules.tag.model.vo.TagVO;
 import com.blog.modules.tag.service.TagService;

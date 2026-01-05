@@ -1,7 +1,7 @@
 package com.blog.modules.album.service;
 
 
-import com.blog.common.PageResult;
+import com.blog.shared.PageResult;
 import com.blog.modules.album.model.vo.AlbumVO;
 public interface AlbumPublicQueryService {
     PageResult<AlbumVO> list(Long page, Long size);

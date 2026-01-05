@@ -1,6 +1,6 @@
 // package com.blog.modules.search.service;
 
-// import com.blog.common.PageResult;
+// import com.blog.shared.PageResult;
 // import com.blog.modules.article.mapper.ArticleMapper;
 // import com.blog.modules.article.mapper.ArticleTagMapper;
 // import com.blog.modules.category.mapper.CategoryMapper;
@@ -18,9 +18,9 @@
 // import com.blog.modules.talk.model.entity.Talk;
 // import com.blog.modules.user.model.entity.User;
 // import com.blog.modules.search.model.vo.SearchVO;
-// import com.blog.core.repository.CommentDocumentRepository;
-// import com.blog.core.repository.MomentDocumentRepository;
-// import com.blog.core.repository.PostDocumentRepository;
+// import com.blog.infrastructure.repository.CommentDocumentRepository;
+// import com.blog.infrastructure.repository.MomentDocumentRepository;
+// import com.blog.infrastructure.repository.PostDocumentRepository;
 // import com.blog.modules.search.service.SearchService;
 // import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 // import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;

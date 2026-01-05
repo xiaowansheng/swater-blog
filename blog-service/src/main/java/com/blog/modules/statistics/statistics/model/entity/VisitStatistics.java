@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("visit_statistics")
-public class VisitStatistics extends com.blog.common.model.entity.BaseEntity {
+public class VisitStatistics extends com.blog.shared.model.entity.BaseEntity {
     @TableField("page_type")
     private String pageType;
 

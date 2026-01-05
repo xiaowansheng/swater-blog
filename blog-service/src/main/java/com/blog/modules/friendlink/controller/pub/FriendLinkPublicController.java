@@ -2,8 +2,8 @@ package com.blog.modules.friendlink.controller.pub;
 
 
 
-import com.blog.common.annotation.ApiOperation;
-import com.blog.common.Result;
+import com.blog.shared.annotation.ApiOperation;
+import com.blog.shared.Result;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.modules.friendlink.model.vo.FriendLinkVO;
 import com.blog.modules.friendlink.service.FriendLinkPublicQueryService;

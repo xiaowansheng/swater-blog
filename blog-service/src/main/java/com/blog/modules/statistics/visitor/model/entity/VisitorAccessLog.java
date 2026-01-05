@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("visitor_access_log")
-public class VisitorAccessLog extends com.blog.common.model.entity.BaseEntity {
+public class VisitorAccessLog extends com.blog.shared.model.entity.BaseEntity {
     @TableField("visitor_id")
     private Long visitorId;
 

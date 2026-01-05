@@ -1,7 +1,7 @@
 package com.blog.modules.notification.service;
 
 
-import com.blog.common.PageResult;
+import com.blog.shared.PageResult;
 import com.blog.modules.notification.model.dto.NotificationDTO;
 import com.blog.modules.notification.model.vo.NotificationVO;
 public interface NotificationService {

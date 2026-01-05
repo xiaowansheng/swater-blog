@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("talk")
-public class Talk extends com.blog.common.model.entity.BaseEntity {
+public class Talk extends com.blog.shared.model.entity.BaseEntity {
     @TableField("talk_key")
     private String talkKey;
 

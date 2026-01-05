@@ -4,14 +4,14 @@ package com.blog.modules.article.model.vo;
 
 
 import com.blog.modules.tag.model.vo.TagVO;
-import com.blog.common.model.vo.BaseVO;
+import com.blog.shared.model.vo.BaseVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
 import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ArticleVO extends com.blog.common.model.vo.BaseVO {
+public class ArticleVO extends com.blog.shared.model.vo.BaseVO {
     private String articleKey;
 
     private String title;

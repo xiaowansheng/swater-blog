@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("archive")
-public class Archive extends com.blog.common.model.entity.BaseEntity {
+public class Archive extends com.blog.shared.model.entity.BaseEntity {
     private Integer year;
 
     private Integer month;

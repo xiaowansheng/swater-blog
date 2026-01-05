@@ -1,10 +1,10 @@
 package com.blog.modules.notification.controller.admin;
 
 
-import com.blog.common.annotation.ApiOperation;
+import com.blog.shared.annotation.ApiOperation;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
-import com.blog.common.Result;
-import com.blog.common.PageResult;
+import com.blog.shared.Result;
+import com.blog.shared.PageResult;
 import com.blog.modules.notification.model.dto.NotificationDTO;
 import com.blog.modules.notification.model.vo.NotificationVO;
 import com.blog.modules.notification.service.NotificationService;

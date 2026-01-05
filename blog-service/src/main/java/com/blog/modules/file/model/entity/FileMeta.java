@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("file_meta")
-public class FileMeta extends com.blog.common.model.entity.BaseEntity {
+public class FileMeta extends com.blog.shared.model.entity.BaseEntity {
     @TableField("file_hash")
     private String fileHash;
 

@@ -2,10 +2,10 @@ package com.blog.modules.statistics.statistics.controller.admin;
 
 
 
-import com.blog.common.annotation.ApiOperation;
+import com.blog.shared.annotation.ApiOperation;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
-import com.blog.common.PageResult;
-import com.blog.common.Result;
+import com.blog.shared.PageResult;
+import com.blog.shared.Result;
 import com.blog.modules.statistics.statistics.model.dto.VisitStatisticsQueryDTO;
 import com.blog.modules.statistics.statistics.model.vo.VisitStatisticsVO;
 import com.blog.modules.statistics.statistics.service.VisitStatisticsService;

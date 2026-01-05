@@ -2,7 +2,7 @@ package com.blog.modules.statistics.visitor.service;
 
 
 
-import com.blog.common.PageResult;
+import com.blog.shared.PageResult;
 import com.blog.modules.statistics.visitor.model.dto.VisitorAccessDTO;
 import com.blog.modules.statistics.visitor.model.vo.VisitorStatisticsVO;
 import com.blog.modules.statistics.visitor.model.vo.VisitorVO;

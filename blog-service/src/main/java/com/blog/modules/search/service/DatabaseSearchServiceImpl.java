@@ -2,7 +2,7 @@ package com.blog.modules.search.service;
 
 
 
-import com.blog.common.PageResult;
+import com.blog.shared.PageResult;
 import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.comment.mapper.CommentMapper;
 import com.blog.modules.talk.mapper.TalkMapper;

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("visitor")
-public class Visitor extends com.blog.common.model.entity.BaseEntity {
+public class Visitor extends com.blog.shared.model.entity.BaseEntity {
     @TableField("visitor_uuid")
     private String visitorUuid;
 

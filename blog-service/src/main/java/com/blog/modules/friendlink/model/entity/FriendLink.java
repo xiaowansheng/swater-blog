@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("friend_link")
-public class FriendLink extends com.blog.common.model.entity.BaseEntity {
+public class FriendLink extends com.blog.shared.model.entity.BaseEntity {
     private String name;
 
     private String url;

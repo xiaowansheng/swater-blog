@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.modules.comment.event.CommentApprovedEvent;
 import com.blog.modules.comment.event.CommentDeletedEvent;
 import com.blog.modules.comment.event.CommentUpdatedEvent;
-import com.blog.common.exception.BusinessException;
+import com.blog.shared.exception.BusinessException;
 import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.comment.mapper.CommentMapper;
 import com.blog.modules.talk.mapper.TalkMapper;

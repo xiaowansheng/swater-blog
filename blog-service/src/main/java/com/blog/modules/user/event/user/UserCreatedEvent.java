@@ -1,7 +1,7 @@
 package com.blog.modules.user.event.user;
 
 
-import com.blog.common.model.event.BaseEvent;
+import com.blog.shared.model.event.BaseEvent;
 import com.blog.modules.user.model.entity.User;
 public class UserCreatedEvent extends BaseEvent {
     private final Long userId;

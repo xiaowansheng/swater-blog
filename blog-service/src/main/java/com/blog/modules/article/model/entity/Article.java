@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("article")
-public class Article extends com.blog.common.model.entity.BaseEntity {
+public class Article extends com.blog.shared.model.entity.BaseEntity {
     /**
      * 版本号（乐观锁）
      */

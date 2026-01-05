@@ -4,13 +4,13 @@ package com.blog.modules.system.config.model.dto;
 
 
 import com.blog.modules.system.config.model.dto.ConfigDTO;
-import com.blog.common.model.dto.BaseDTO;
+import com.blog.shared.model.dto.BaseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.NotBlank;
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ConfigDTO extends com.blog.common.model.dto.BaseDTO {
+public class ConfigDTO extends com.blog.shared.model.dto.BaseDTO {
 
     @NotBlank(message = "配置键不能为空")
     private String configKey;

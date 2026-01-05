@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("picture")
-public class Picture extends com.blog.common.model.entity.BaseEntity {
+public class Picture extends com.blog.shared.model.entity.BaseEntity {
     @TableField("user_id")
     private Long userId;
 

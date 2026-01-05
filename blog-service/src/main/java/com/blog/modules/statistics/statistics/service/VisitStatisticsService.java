@@ -1,7 +1,7 @@
 package com.blog.modules.statistics.statistics.service;
 
 
-import com.blog.common.PageResult;
+import com.blog.shared.PageResult;
 import com.blog.modules.statistics.statistics.model.dto.VisitStatisticsQueryDTO;
 import com.blog.modules.statistics.statistics.model.vo.VisitStatisticsVO;
 public interface VisitStatisticsService {

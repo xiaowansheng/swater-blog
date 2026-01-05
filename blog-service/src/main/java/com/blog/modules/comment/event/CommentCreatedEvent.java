@@ -1,7 +1,7 @@
 package com.blog.modules.comment.event;
 
 
-import com.blog.common.model.event.BaseEvent;
+import com.blog.shared.model.event.BaseEvent;
 import com.blog.modules.comment.model.entity.Comment;
 public class CommentCreatedEvent extends BaseEvent {
     private final Long commentId;

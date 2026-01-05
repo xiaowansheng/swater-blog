@@ -2,14 +2,14 @@ package com.blog.modules.category.service;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.blog.common.exception.BusinessException;
+import com.blog.shared.exception.BusinessException;
 import com.blog.modules.category.mapper.CategoryMapper;
 import com.blog.modules.category.model.dto.CategoryDTO;
 import com.blog.modules.category.model.entity.Category;
 import com.blog.modules.category.model.vo.CategoryVO;
 import com.blog.modules.category.service.CategoryService;
-import com.blog.common.util.BeanUtil;
-import com.blog.common.util.KeyUtil;
+import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.KeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -2,7 +2,7 @@ package com.blog.modules.system.log.service;
 
 
 
-import com.blog.common.PageResult;
+import com.blog.shared.PageResult;
 import com.blog.modules.system.log.model.entity.LogError;
 import com.blog.modules.system.log.model.vo.LogErrorVO;
 import java.time.LocalDateTime;

@@ -3,14 +3,14 @@ package com.blog.modules.system.api.service;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.blog.common.exception.BusinessException;
+import com.blog.shared.exception.BusinessException;
 import com.blog.modules.system.api.mapper.SysApiMapper;
 import com.blog.modules.system.api.model.dto.ApiDTO;
 import com.blog.modules.system.api.model.entity.SysApi;
 import com.blog.modules.system.api.model.vo.ApiVO;
 import com.blog.modules.system.api.service.ApiService;
-import com.blog.common.util.BeanUtil;
-import com.blog.common.util.KeyUtil;
+import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.KeyUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

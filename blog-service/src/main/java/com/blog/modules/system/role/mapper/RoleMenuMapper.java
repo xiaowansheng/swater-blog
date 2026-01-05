@@ -3,13 +3,13 @@ package com.blog.modules.system.role.mapper;
 
 
 
-import com.blog.common.model.BaseMapper;
+import com.blog.shared.model.BaseMapper;
 import com.blog.modules.system.role.model.entity.RoleMenu;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;
 @Mapper
-public interface RoleMenuMapper extends com.blog.common.model.BaseMapper<RoleMenu> {
+public interface RoleMenuMapper extends com.blog.shared.model.BaseMapper<RoleMenu> {
     void deleteByRoleId(@Param("roleId") Long roleId);
 
     void deleteByMenuId(@Param("menuId") Long menuId);

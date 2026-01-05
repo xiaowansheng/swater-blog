@@ -1,7 +1,7 @@
 package com.blog.modules.talk.event.talk;
 
 
-import com.blog.common.model.event.BaseEvent;
+import com.blog.shared.model.event.BaseEvent;
 import com.blog.modules.talk.model.entity.Talk;
 public class TalkCreatedEvent extends BaseEvent {
     private final Long talkId;

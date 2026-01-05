@@ -2,12 +2,12 @@ package com.blog.modules.archive.model.vo;
 
 
 
-import com.blog.common.model.vo.BaseVO;
+import com.blog.shared.model.vo.BaseVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ArchiveVO extends com.blog.common.model.vo.BaseVO {
+public class ArchiveVO extends com.blog.shared.model.vo.BaseVO {
     private Integer year;
 
     private Integer month;

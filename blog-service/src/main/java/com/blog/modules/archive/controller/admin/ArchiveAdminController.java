@@ -1,9 +1,9 @@
 package com.blog.modules.archive.controller.admin;
 
 
-import com.blog.common.annotation.ApiOperation;
+import com.blog.shared.annotation.ApiOperation;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
-import com.blog.common.Result;
+import com.blog.shared.Result;
 import com.blog.modules.archive.model.vo.ArchiveVO;
 import com.blog.modules.archive.service.ArchiveService;
 import org.springframework.beans.factory.annotation.Autowired;

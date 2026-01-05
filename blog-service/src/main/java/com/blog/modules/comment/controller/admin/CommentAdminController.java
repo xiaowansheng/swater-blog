@@ -1,10 +1,10 @@
 package com.blog.modules.comment.controller.admin;
 
 
-import com.blog.common.annotation.ApiOperation;
+import com.blog.shared.annotation.ApiOperation;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
-import com.blog.common.PageResult;
-import com.blog.common.Result;
+import com.blog.shared.PageResult;
+import com.blog.shared.Result;
 import com.blog.modules.comment.model.vo.CommentVO;
 import com.blog.modules.comment.service.CommentAdminCommandService;
 import com.blog.modules.comment.service.CommentAdminQueryService;

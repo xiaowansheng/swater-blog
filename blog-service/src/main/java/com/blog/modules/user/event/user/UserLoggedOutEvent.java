@@ -1,7 +1,7 @@
 package com.blog.modules.user.event.user;
 
 
-import com.blog.common.model.event.BaseEvent;
+import com.blog.shared.model.event.BaseEvent;
 public class UserLoggedOutEvent extends BaseEvent {
     private final Long userId;
 

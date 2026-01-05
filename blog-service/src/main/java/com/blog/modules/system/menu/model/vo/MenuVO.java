@@ -2,13 +2,13 @@ package com.blog.modules.system.menu.model.vo;
 
 
 
-import com.blog.common.model.vo.BaseVO;
+import com.blog.shared.model.vo.BaseVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class MenuVO extends com.blog.common.model.vo.BaseVO {
+public class MenuVO extends com.blog.shared.model.vo.BaseVO {
     private String title;
 
     private String icon;

@@ -1,10 +1,10 @@
 package com.blog.modules.auth.controller;
 
 
-import com.blog.common.annotation.ApiDocumentation;
-import com.blog.common.annotation.ApiOperation;
-import com.blog.common.annotation.RateLimit;
-import com.blog.common.Result;
+import com.blog.shared.annotation.ApiDocumentation;
+import com.blog.shared.annotation.ApiOperation;
+import com.blog.shared.annotation.RateLimit;
+import com.blog.shared.Result;
 import com.blog.modules.auth.model.dto.LoginDTO;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.modules.auth.model.vo.LoginVO;

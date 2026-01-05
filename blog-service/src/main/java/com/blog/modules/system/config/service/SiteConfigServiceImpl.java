@@ -25,7 +25,7 @@ import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
 import com.blog.modules.system.config.model.vo.ConfigVO;
 import com.blog.modules.system.config.service.ConfigService;
 import com.blog.modules.system.config.service.SiteConfigService;
-import com.blog.common.util.JsonUtil;
+import com.blog.shared.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;

@@ -3,7 +3,7 @@ package com.blog.modules.system.menu.service;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.blog.common.exception.BusinessException;
+import com.blog.shared.exception.BusinessException;
 import com.blog.modules.system.role.mapper.RoleMenuMapper;
 import com.blog.modules.system.menu.mapper.SysMenuMapper;
 import com.blog.modules.system.menu.model.dto.MenuDTO;
@@ -11,8 +11,8 @@ import com.blog.modules.system.role.model.entity.RoleMenu;
 import com.blog.modules.system.menu.model.entity.SysMenu;
 import com.blog.modules.system.menu.model.vo.MenuVO;
 import com.blog.modules.system.menu.service.MenuService;
-import com.blog.common.util.BeanUtil;
-import com.blog.common.util.KeyUtil;
+import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.KeyUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

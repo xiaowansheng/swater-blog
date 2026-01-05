@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("category")
-public class Category extends com.blog.common.model.entity.BaseEntity {
+public class Category extends com.blog.shared.model.entity.BaseEntity {
     @TableField("category_key")
     private String categoryKey;
 

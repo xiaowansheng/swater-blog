@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("sys_notification")
-public class SysNotification extends com.blog.common.model.entity.BaseEntity {
+public class SysNotification extends com.blog.shared.model.entity.BaseEntity {
     @TableField("user_id")
     private Long userId;
 

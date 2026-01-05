@@ -2,13 +2,13 @@ package com.blog.modules.file.model.vo;
 
 
 
-import com.blog.common.model.vo.BaseVO;
+import com.blog.shared.model.vo.BaseVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class FileVO extends com.blog.common.model.vo.BaseVO {
+public class FileVO extends com.blog.shared.model.vo.BaseVO {
     private String fileHash;
 
     private String originalName;

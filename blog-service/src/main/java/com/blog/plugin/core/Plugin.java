@@ -15,7 +15,9 @@ public interface Plugin {
     String getName();
     
     /**
-     * 插件版本
+     * 插件版本，未显式实现时提供默认版本号
      */
-    String getVersion();
+    default String getVersion() {
+        return "1.0.0";
+    }
 }

@@ -6,14 +6,14 @@ package com.blog.modules.user.model.vo;
 
 import com.blog.modules.user.model.vo.UserVO;
 import com.blog.modules.system.role.model.vo.RoleVO;
-import com.blog.common.model.vo.BaseVO;
+import com.blog.shared.model.vo.BaseVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
 import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class UserVO extends com.blog.common.model.vo.BaseVO {
+public class UserVO extends com.blog.shared.model.vo.BaseVO {
     private String username;
 
     private String email;

@@ -1,7 +1,7 @@
 package com.blog.modules.file.event.file;
 
 
-import com.blog.common.model.event.BaseEvent;
+import com.blog.shared.model.event.BaseEvent;
 import com.blog.modules.file.model.entity.FileMeta;
 public class FileUploadedEvent extends BaseEvent {
     private final Long fileId;

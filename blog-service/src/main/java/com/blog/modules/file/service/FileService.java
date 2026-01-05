@@ -1,7 +1,7 @@
 package com.blog.modules.file.service;
 
 
-import com.blog.common.PageResult;
+import com.blog.shared.PageResult;
 import com.blog.modules.file.model.dto.FileUploadDTO;
 import com.blog.modules.file.model.vo.FileVO;
 import org.springframework.web.multipart.MultipartFile;

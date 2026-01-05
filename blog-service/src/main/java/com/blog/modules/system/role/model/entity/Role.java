@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("role")
-public class Role extends com.blog.common.model.entity.BaseEntity {
+public class Role extends com.blog.shared.model.entity.BaseEntity {
     private String name;
 
     private String code;

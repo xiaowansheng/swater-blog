@@ -2,14 +2,14 @@ package com.blog.modules.content.picture.model.dto;
 
 
 
-import com.blog.common.model.dto.BaseDTO;
+import com.blog.shared.model.dto.BaseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PictureDTO extends com.blog.common.model.dto.BaseDTO {
+public class PictureDTO extends com.blog.shared.model.dto.BaseDTO {
     @NotNull(message = "相册ID不能为空")
     private Long albumId;
 

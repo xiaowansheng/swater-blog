@@ -1,7 +1,7 @@
 package com.blog.modules.article.event;
 
 
-import com.blog.common.model.event.BaseEvent;
+import com.blog.shared.model.event.BaseEvent;
 import com.blog.modules.article.model.entity.Article;
 public class ArticlePublishedEvent extends BaseEvent {
     private final Long articleId;

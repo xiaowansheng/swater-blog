@@ -4,13 +4,13 @@ package com.blog.modules.system.log.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.blog.common.PageResult;
+import com.blog.shared.PageResult;
 import com.blog.modules.system.log.mapper.LogErrorMapper;
 import com.blog.modules.system.log.model.entity.LogError;
 import com.blog.modules.system.log.model.vo.LogErrorVO;
 import com.blog.modules.system.log.service.LogErrorService;
-import com.blog.common.util.BeanUtil;
-import com.blog.common.util.PageUtil;
+import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

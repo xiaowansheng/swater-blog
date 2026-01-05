@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("sys_menu")
-public class SysMenu extends com.blog.common.model.entity.BaseEntity {
+public class SysMenu extends com.blog.shared.model.entity.BaseEntity {
     private String menuKey;
 
     private String title;

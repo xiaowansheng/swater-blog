@@ -2,14 +2,14 @@ package com.blog.modules.statistics.visitor.model.vo;
 
 
 
-import com.blog.common.model.vo.BaseVO;
+import com.blog.shared.model.vo.BaseVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class VisitorVO extends com.blog.common.model.vo.BaseVO {
+public class VisitorVO extends com.blog.shared.model.vo.BaseVO {
     private String visitorUuid;
 
     private String ip;
