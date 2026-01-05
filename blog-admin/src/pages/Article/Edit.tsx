@@ -166,7 +166,7 @@ const ArticleEdit: React.FC = () => {
         type: article.type || ArticleType.ORIGINAL,
         publishStatus: article.status === ArticleStatus.DRAFT ? ArticleStatus.PUBLISHED : article.status,
         categoryId: article.categoryId,
-        tagIds: article.tags.map((t) => t.id),
+        tagIds: article.tags?.map((t) => t.id) || [],
         summary: article.excerpt,
       })
       
@@ -227,7 +227,7 @@ const ArticleEdit: React.FC = () => {
   }
 
   // 发布文章
-  const onFinish = async (values: any, status: number = 1) => {
+  const onFinish = async (values: any) => {
     setLoading(true)
     try {
       const formData = getFormData()
@@ -404,7 +404,7 @@ const ArticleEdit: React.FC = () => {
               loading={loading || isSaving}
               onClick={() => {
                 form.validateFields().then(values => {
-                  onFinish(values, 1);
+                  onFinish(values);
                 })
               }}
             >

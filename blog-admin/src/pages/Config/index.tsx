@@ -40,7 +40,6 @@ const ConfigPage: React.FC = () => {
   const [siteForm] = Form.useForm();
   const [authorForm] = Form.useForm();
   const [coverForm] = Form.useForm();
-  const [socialForm] = Form.useForm();
   const [privacyForm] = Form.useForm();
   const [commentForm] = Form.useForm();
   const [notifyForm] = Form.useForm();
@@ -78,7 +77,6 @@ const ConfigPage: React.FC = () => {
       siteForm.setFieldsValue(site);
       authorForm.setFieldsValue(author);
       coverForm.setFieldsValue(cover);
-      socialForm.setFieldsValue(social);
       privacyForm.setFieldsValue(privacy);
       commentForm.setFieldsValue(comment);
       notifyForm.setFieldsValue(notify);

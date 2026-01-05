@@ -10,6 +10,17 @@ interface ArticleListProps {
 }
 
 export default function ArticleList({ articles, variant }: ArticleListProps) {
+  // 添加空值检查
+  if (!articles || !Array.isArray(articles)) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center text-gray-500 py-8">
+          暂无文章数据
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {articles.map((article, index) => (
