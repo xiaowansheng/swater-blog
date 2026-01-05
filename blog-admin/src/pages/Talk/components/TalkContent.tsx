@@ -7,7 +7,7 @@ interface TalkContentProps {
 
 /**
  * 说说内容组件
- * - 默认显示5行，超过时显示渐变蒙版和"展开"按钮
+ * - 默认最大高度300px，超过时显示渐变蒙版和"展开"按钮
  * - 支持展开/收起切换
  */
 const TalkContent: React.FC<TalkContentProps> = ({ content }) => {
@@ -16,10 +16,9 @@ const TalkContent: React.FC<TalkContentProps> = ({ content }) => {
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // 检测内容是否超过5行
+    // 检测内容是否超过300px
     if (contentRef.current) {
-      const lineHeight = parseFloat(getComputedStyle(contentRef.current).lineHeight)
-      const maxHeight = lineHeight * 5
+      const maxHeight = 300
       setIsOverflow(contentRef.current.scrollHeight > maxHeight)
     }
   }, [content])
@@ -32,9 +31,11 @@ const TalkContent: React.FC<TalkContentProps> = ({ content }) => {
     <div className="relative">
       <div
         ref={contentRef}
-        className={`rich-text-content text-sm text-gray-700 leading-relaxed transition-all duration-300 ${
-          expanded ? '' : 'line-clamp-5'
-        }`}
+        className="rich-text-content text-sm text-gray-700 leading-relaxed transition-all duration-300"
+        style={{
+          maxHeight: expanded ? 'none' : '300px',
+          overflow: expanded ? 'visible' : 'hidden',
+        }}
         dangerouslySetInnerHTML={{ __html: content }}
       />
 
