@@ -11,11 +11,13 @@ interface MarkdownEditorProps {
   height?: number
   placeholder?: string
   category?: string
+  onSave?: () => void
 }
 
 const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   value = '',
   onChange,
+  onSave,
   height = 600,
   placeholder = '开始写作吧...',
   category = 'article_image'
@@ -23,6 +25,12 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   const editorRef = useRef<HTMLDivElement>(null)
   const vditorInstance = useRef<Vditor | null>(null)
   const [isInit, setIsInit] = useState(false)
+  const onSaveRef = useRef(onSave)
+
+  // 更新 onSave 引用
+  useEffect(() => {
+    onSaveRef.current = onSave
+  }, [onSave])
 
   useEffect(() => {
     if (!editorRef.current) return
@@ -74,11 +82,23 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       },
     })
 
+    // 添加 Ctrl+S 快捷键监听
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 检测 Ctrl+S 或 Cmd+S（Mac）
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault() // 阻止浏览器默认保存行为
+        onSaveRef.current?.() // 调用保存回调
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
     return () => {
       if (vditorInstance.current) {
         vditorInstance.current.destroy()
         vditorInstance.current = null
       }
+      document.removeEventListener('keydown', handleKeyDown)
     }
   }, [])
 

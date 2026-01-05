@@ -414,11 +414,14 @@ const ArticleEdit: React.FC = () => {
                 </div>
               </Form.Item>
               
-              <Form.Item 
-                name="content" 
+              <Form.Item
+                name="content"
                 rules={[{ required: true, message: '请输入文章内容' }]}
               >
-                <MarkdownEditor onChange={handleContentChange} />
+                <MarkdownEditor
+                  onChange={handleContentChange}
+                  onSave={handleSaveToServer}
+                />
               </Form.Item>
           </Card>
         </div>
