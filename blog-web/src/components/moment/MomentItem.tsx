@@ -6,6 +6,7 @@ import Image from '@/components/common/ImageWithPreview';
 import type { MomentVO } from '@/types';
 import { formatDate, getFullUrl } from '@/lib/utils/format';
 import ImagePreview from '@/components/ImagePreview';
+import { useSiteConfig } from '@/lib/context/SiteConfigContext';
 
 interface MomentItemProps {
   moment: MomentVO;
@@ -19,6 +20,7 @@ const MAX_IMAGE_WIDTH = 300;
 
 export default function MomentItem({ moment }: MomentItemProps) {
   const router = useRouter();
+  const { author } = useSiteConfig();
   const contentRef = useRef<HTMLDivElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const [shouldTruncate, setShouldTruncate] = useState(false);
@@ -81,40 +83,39 @@ export default function MomentItem({ moment }: MomentItemProps) {
   const displayImages = fullUrlImages.slice(0, displayCount);
 
   return (
-    <article 
+    <article
       className="p-6 transition-all border rounded-2xl bg-card border-border hover:shadow-lg"
     >
-      <div className="flex items-start gap-4 mb-4">
-        {moment.authorAvatar && (
+      <div className="flex items-start gap-3 mb-4">
+        {author.avatar && (
           <Image
-            src={moment.authorAvatar}
-            alt={moment.authorName || '作者'}
-            width={48}
-            height={48}
+            src={author.avatar}
+            alt={author.name || '作者'}
+            width={40}
+            height={40}
             className="rounded-full shrink-0"
             previewEnabled={false}
           />
         )}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="font-medium">{moment.authorName || '博主'}</span>
-            <span className="text-sm text-muted-foreground">
-              {formatDate(moment.createTime)}
-            </span>
+          <div className="font-medium mb-1">{author.name || '博主'}</div>
+          <div className="text-xs text-muted-foreground/70">
+            {formatDate(moment.createTime)}
           </div>
-          <div 
-            ref={contentRef}
-            className="relative overflow-hidden prose-sm prose cursor-pointer max-w-none dark:prose-invert"
-            style={shouldTruncate ? { 
-              maxHeight: `${MAX_HEIGHT}px`,
-              maskImage: 'linear-gradient(to bottom, black calc(100% - 20px), transparent 100%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 20px), transparent 100%)'
-            } : {}}
-            onClick={handleContentClick}
-            dangerouslySetInnerHTML={{ __html: moment.content }}
-          />
         </div>
       </div>
+
+      <div
+        ref={contentRef}
+        className="relative overflow-hidden prose-sm prose cursor-pointer max-w-none dark:prose-invert mb-4"
+        style={shouldTruncate ? {
+          maxHeight: `${MAX_HEIGHT}px`,
+          maskImage: 'linear-gradient(to bottom, black calc(100% - 20px), transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 20px), transparent 100%)'
+        } : {}}
+        onClick={handleContentClick}
+        dangerouslySetInnerHTML={{ __html: moment.content }}
+      />
 
       {moment.images && moment.images.length > 0 && (
         <div 

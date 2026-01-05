@@ -8,6 +8,7 @@ import MomentImages from '@/components/moment/MomentImages';
 import { momentApi } from '@/lib/api/moment';
 import { formatDate } from '@/lib/utils/format';
 import { ISR_REVALIDATE } from '@/lib/constants';
+import { getAuthorInfo } from '@/lib/api/config.server';
 
 export const revalidate = ISR_REVALIDATE.HOME;
 
@@ -40,30 +41,31 @@ export default async function MomentDetailPage({
   const t = await getTranslations('common');
 
   try {
-    const moment = await momentApi.getByKey(key);
+    const [moment, author] = await Promise.all([
+      momentApi.getByKey(key),
+      getAuthorInfo()
+    ]);
 
     return (
       <>
         <Header />
         <main className="container mx-auto px-4 py-12 flex-1">
           <article className="bg-card border border-border rounded-2xl p-8 md:p-12 shadow-sm max-w-3xl mx-auto">
-            <div className="flex gap-4 items-start mb-6">
-              {moment.authorAvatar && (
+            <div className="flex items-start gap-3 mb-6">
+              {author.avatar && (
                 <Image
-                  src={moment.authorAvatar}
-                  alt={moment.authorName || '作者'}
-                  width={64}
-                  height={64}
+                  src={author.avatar}
+                  alt={author.name || '作者'}
+                  width={48}
+                  height={48}
                   className="rounded-full flex-shrink-0"
                   previewEnabled={false}
                 />
               )}
               <div className="flex-1">
-                <div className="flex gap-2 items-center mb-2">
-                  <span className="text-lg font-medium">{moment.authorName || '博主'}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {formatDate(moment.createTime)}
-                  </span>
+                <div className="text-lg font-medium mb-1">{author.name || '博主'}</div>
+                <div className="text-xs text-muted-foreground/70">
+                  {formatDate(moment.createTime)}
                 </div>
               </div>
             </div>

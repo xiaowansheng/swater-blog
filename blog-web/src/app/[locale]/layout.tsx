@@ -5,7 +5,8 @@ import { routing } from '@/lib/i18n/routing';
 import type { Metadata } from 'next';
 import { Nunito, Varela_Round, Noto_Sans_SC } from 'next/font/google';
 import '@/styles/globals.css';
-import { getSiteInfo } from '@/lib/api/config.server';
+import { getSiteInfo, getServerConfig } from '@/lib/api/config.server';
+import { SiteConfigProvider } from '@/lib/context/SiteConfigContext';
 
 const nunito = Nunito({
   variable: '--font-nunito',
@@ -61,6 +62,7 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages();
+  const config = await getServerConfig();
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -68,12 +70,14 @@ export default async function LocaleLayout({
         className={`${nunito.variable} ${varelaRound.variable} ${notoSansSC.variable} antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
-          <DecorationProvider>
-            <div className="flex min-h-screen flex-col relative">
-              <DecorationManager />
-              {children}
-            </div>
-          </DecorationProvider>
+          <SiteConfigProvider initialConfig={config}>
+            <DecorationProvider>
+              <div className="flex min-h-screen flex-col relative">
+                <DecorationManager />
+                {children}
+              </div>
+            </DecorationProvider>
+          </SiteConfigProvider>
         </NextIntlClientProvider>
       </body>
     </html>
