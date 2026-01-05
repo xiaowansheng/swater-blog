@@ -9,6 +9,10 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @TableName("friend_link")
 public class FriendLink extends com.blog.shared.model.entity.BaseEntity {
+
+    @TableField("user_id")
+    private Long userId;
+
     private String name;
 
     private String url;
@@ -28,8 +32,5 @@ public class FriendLink extends com.blog.shared.model.entity.BaseEntity {
     private Integer reviewStatus;
 
     private Integer sort;
-
-    @TableField("user_id")
-    private Long userId;
 }
 

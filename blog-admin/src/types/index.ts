@@ -169,6 +169,7 @@ export interface FriendLink {
   url: string
   logo: string
   description: string
+  author: string
   sort?: number
   status: number
   createTime: string

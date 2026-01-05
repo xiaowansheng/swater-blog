@@ -6,6 +6,9 @@ export interface FriendLinkDTO {
   url: string
   logo: string
   description: string
+  author: string
+  sort?: number
+  status?: number
 }
 
 export const getFriendLinkList = (): Promise<FriendLink[]> => {

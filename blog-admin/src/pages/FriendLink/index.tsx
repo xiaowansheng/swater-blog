@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Avatar, Tooltip } from 'antd'
+import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Avatar, Tooltip, InputNumber, Select } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined } from '@ant-design/icons'
 import { getFriendLinkList, createFriendLink, updateFriendLink, deleteFriendLink } from '@/api/friendLink'
 import { FriendLink } from '@/types'
@@ -168,8 +168,9 @@ const FriendLinkPage: React.FC = () => {
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
         width={500}
+        styles={{ body: { maxHeight: '60vh', overflowY: 'auto' } }}
       >
-        <Form form={form} layout="vertical">
+        <Form form={form} layout="vertical" style={{ padding: '24px' }}>
           <Form.Item
             name="name"
             label="网站名称"
@@ -190,8 +191,32 @@ const FriendLinkPage: React.FC = () => {
           <Form.Item name="logo" label="网站Logo">
             <Input placeholder="请输入Logo图片URL" />
           </Form.Item>
+          <Form.Item
+            name="author"
+            label="作者"
+            rules={[{ required: true, message: '请输入作者' }]}
+          >
+            <Input placeholder="请输入作者名称" />
+          </Form.Item>
           <Form.Item name="description" label="网站描述">
             <Input.TextArea rows={3} placeholder="请输入网站描述" />
+          </Form.Item>
+          <Form.Item
+            name="sort"
+            label="排序"
+            initialValue={0}
+          >
+            <InputNumber min={0} placeholder="请输入排序值，数字越小越靠前" style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item
+            name="status"
+            label="状态"
+            initialValue={1}
+          >
+            <Select>
+              <Select.Option value={0}>待审核</Select.Option>
+              <Select.Option value={1}>已审核</Select.Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>
