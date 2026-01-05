@@ -1,4 +1,4 @@
-package com.blog.plugin.guestbook;
+package com.blog.plugin.components.guestbook;
 
 
 

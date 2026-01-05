@@ -1,12 +1,11 @@
-package com.blog.plugin.mq.impl;
+package com.blog.plugin.components.mq.impl;
 
 
 
 import com.blog.plugin.core.Plugin;
-import com.blog.plugin.mq.MessageQueuePlugin;
+import com.blog.plugin.components.mq.MessageQueuePlugin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Component;
 import jakarta.annotation.PostConstruct;

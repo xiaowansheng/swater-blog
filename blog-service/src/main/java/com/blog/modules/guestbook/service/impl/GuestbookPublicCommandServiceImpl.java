@@ -2,20 +2,18 @@ package com.blog.modules.guestbook.service.impl;
 
 
 
-import cn.dev33.satoken.stp.StpUtil;
 import com.blog.bootstrap.context.UserContext;
 import com.blog.modules.guestbook.mapper.GuestbookMapper;
 import com.blog.modules.guestbook.model.dto.GuestbookDTO;
 import com.blog.modules.guestbook.model.entity.Guestbook;
 import com.blog.modules.guestbook.model.vo.GuestbookVO;
-import com.blog.plugin.location.LocationInfo;
-import com.blog.plugin.location.LocationProviderFactory;
-import com.blog.plugin.location.LocationProviderPlugin;
+import com.blog.plugin.components.location.LocationInfo;
+import com.blog.plugin.components.location.LocationProviderFactory;
+import com.blog.plugin.components.location.LocationProviderPlugin;
 import com.blog.modules.guestbook.event.GuestbookCreatedEvent;
 import com.blog.modules.guestbook.service.GuestbookPublicCommandService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.JsonUtil;
-import com.blog.shared.util.KeyUtil;
 import com.blog.shared.util.RequestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

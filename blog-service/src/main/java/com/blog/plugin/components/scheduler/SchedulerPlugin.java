@@ -1,4 +1,4 @@
-package com.blog.plugin.scheduler;
+package com.blog.plugin.components.scheduler;
 
 /**
  * 定时任务调度插件接口

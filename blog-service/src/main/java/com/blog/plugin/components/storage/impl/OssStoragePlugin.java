@@ -1,4 +1,4 @@
-package com.blog.plugin.storage.impl;
+package com.blog.plugin.components.storage.impl;
 
 
 
@@ -6,7 +6,7 @@ import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.PutObjectRequest;
 import com.blog.plugin.core.Plugin;
-import com.blog.plugin.storage.StoragePlugin;
+import com.blog.plugin.components.storage.StoragePlugin;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.beans.factory.annotation.Value;

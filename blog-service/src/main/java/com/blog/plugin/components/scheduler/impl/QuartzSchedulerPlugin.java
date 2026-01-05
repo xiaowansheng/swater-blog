@@ -1,9 +1,9 @@
-package com.blog.plugin.scheduler.impl;
+package com.blog.plugin.components.scheduler.impl;
 
 
 
 import com.blog.plugin.core.Plugin;
-import com.blog.plugin.scheduler.SchedulerPlugin;
+import com.blog.plugin.components.scheduler.SchedulerPlugin;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;

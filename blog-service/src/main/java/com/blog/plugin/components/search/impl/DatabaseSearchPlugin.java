@@ -1,4 +1,4 @@
-package com.blog.plugin.search.impl;
+package com.blog.plugin.components.search.impl;
 
 
 
@@ -11,7 +11,7 @@ import com.blog.modules.comment.model.entity.Comment;
 import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.search.model.vo.SearchVO;
 import com.blog.plugin.core.Plugin;
-import com.blog.plugin.search.SearchPlugin;
+import com.blog.plugin.components.search.SearchPlugin;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;

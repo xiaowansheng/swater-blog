@@ -1,4 +1,4 @@
-package com.blog.plugin.storage.impl;
+package com.blog.plugin.components.storage.impl;
 
 
 
@@ -6,14 +6,14 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.blog.plugin.core.Plugin;
-import com.blog.plugin.storage.StoragePlugin;
+import com.blog.plugin.components.storage.StoragePlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.File;
+
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;

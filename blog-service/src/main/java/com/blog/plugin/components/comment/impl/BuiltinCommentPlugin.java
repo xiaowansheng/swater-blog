@@ -1,4 +1,4 @@
-package com.blog.plugin.comment.impl;
+package com.blog.plugin.components.comment.impl;
 
 
 
@@ -13,17 +13,16 @@ import com.blog.modules.comment.model.entity.Comment;
 import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.comment.model.vo.CommentVO;
-import com.blog.plugin.comment.CommentProviderPlugin;
-import com.blog.plugin.comment.processor.CommentProcessorFactory;
-import com.blog.plugin.comment.processor.CommentProcessorPlugin;
+import com.blog.plugin.components.comment.CommentProviderPlugin;
+import com.blog.plugin.components.comment.processor.CommentProcessorFactory;
+import com.blog.plugin.components.comment.processor.CommentProcessorPlugin;
 import com.blog.plugin.core.Plugin;
 import com.blog.plugin.core.ProcessResult;
-import com.blog.plugin.location.LocationInfo;
-import com.blog.plugin.location.LocationProviderFactory;
-import com.blog.plugin.location.LocationProviderPlugin;
+import com.blog.plugin.components.location.LocationInfo;
+import com.blog.plugin.components.location.LocationProviderFactory;
+import com.blog.plugin.components.location.LocationProviderPlugin;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.JsonUtil;
-import com.blog.shared.util.KeyUtil;
 import com.blog.shared.util.PageUtil;
 import com.blog.shared.util.RequestUtil;
 import cn.dev33.satoken.stp.StpUtil;

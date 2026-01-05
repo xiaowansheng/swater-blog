@@ -1,4 +1,4 @@
-package com.blog.plugin.email;
+package com.blog.plugin.components.email;
 
 
 import java.util.Map;

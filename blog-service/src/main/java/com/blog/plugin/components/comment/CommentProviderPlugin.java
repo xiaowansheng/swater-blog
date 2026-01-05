@@ -1,4 +1,4 @@
-package com.blog.plugin.comment;
+package com.blog.plugin.components.comment;
 
 
 import com.blog.shared.PageResult;

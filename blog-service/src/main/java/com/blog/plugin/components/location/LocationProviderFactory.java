@@ -1,4 +1,4 @@
-package com.blog.plugin.location;
+package com.blog.plugin.components.location;
 
 
 

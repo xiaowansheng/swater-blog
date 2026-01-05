@@ -1,4 +1,4 @@
-package com.blog.plugin.notification;
+package com.blog.plugin.components.notification;
 
 
 import com.blog.plugin.config.PluginProperties;

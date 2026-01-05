@@ -1,8 +1,8 @@
-package com.blog.plugin.comment.processor.impl;
+package com.blog.plugin.components.comment.processor.impl;
 
 
 import com.blog.modules.comment.model.dto.CommentDTO;
-import com.blog.plugin.comment.processor.CommentProcessorPlugin;
+import com.blog.plugin.components.comment.processor.CommentProcessorPlugin;
 import com.blog.plugin.core.Plugin;
 import com.blog.plugin.core.ProcessResult;
 import com.blog.plugin.core.TextProcessor;

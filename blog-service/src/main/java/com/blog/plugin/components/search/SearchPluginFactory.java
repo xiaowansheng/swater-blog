@@ -1,4 +1,4 @@
-package com.blog.plugin.search;
+package com.blog.plugin.components.search;
 
 
 

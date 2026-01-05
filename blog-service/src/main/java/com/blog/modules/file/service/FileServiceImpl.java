@@ -2,7 +2,6 @@ package com.blog.modules.file.service;
 
 
 
-import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.shared.PageResult;
@@ -18,9 +17,8 @@ import com.blog.modules.user.model.entity.User;
 import com.blog.modules.file.model.vo.FileVO;
 import com.blog.modules.file.event.file.FileDeletedEvent;
 import com.blog.modules.file.event.file.FileUploadedEvent;
-import com.blog.plugin.storage.StoragePlugin;
-import com.blog.plugin.storage.StoragePluginFactory;
-import com.blog.modules.file.service.FileService;
+import com.blog.plugin.components.storage.StoragePlugin;
+import com.blog.plugin.components.storage.StoragePluginFactory;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;

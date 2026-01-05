@@ -1,4 +1,4 @@
-package com.blog.plugin.storage;
+package com.blog.plugin.components.storage;
 
 
 import com.blog.plugin.config.PluginProperties;

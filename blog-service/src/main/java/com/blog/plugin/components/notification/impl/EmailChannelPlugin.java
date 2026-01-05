@@ -1,14 +1,13 @@
-package com.blog.plugin.notification.impl;
+package com.blog.plugin.components.notification.impl;
 
 
 
 import com.blog.plugin.core.Plugin;
-import com.blog.plugin.email.EmailProviderFactory;
-import com.blog.plugin.email.EmailProviderPlugin;
-import com.blog.plugin.notification.NotificationChannelPlugin;
+import com.blog.plugin.components.email.EmailProviderFactory;
+import com.blog.plugin.components.email.EmailProviderPlugin;
+import com.blog.plugin.components.notification.NotificationChannelPlugin;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.user.model.entity.User;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

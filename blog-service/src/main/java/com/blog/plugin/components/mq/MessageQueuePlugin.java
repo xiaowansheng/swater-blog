@@ -1,4 +1,4 @@
-package com.blog.plugin.mq;
+package com.blog.plugin.components.mq;
 
 
 import com.blog.plugin.core.Plugin;

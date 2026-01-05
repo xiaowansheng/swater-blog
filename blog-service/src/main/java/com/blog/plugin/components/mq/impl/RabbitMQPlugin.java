@@ -1,8 +1,8 @@
-package com.blog.plugin.mq.impl;
+package com.blog.plugin.components.mq.impl;
 
 
 import com.blog.plugin.core.Plugin;
-import com.blog.plugin.mq.MessageQueuePlugin;
+import com.blog.plugin.components.mq.MessageQueuePlugin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

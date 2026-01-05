@@ -1,9 +1,9 @@
-package com.blog.plugin.email.impl;
+package com.blog.plugin.components.email.impl;
 
 
 
 import com.blog.plugin.core.Plugin;
-import com.blog.plugin.email.EmailProviderPlugin;
+import com.blog.plugin.components.email.EmailProviderPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

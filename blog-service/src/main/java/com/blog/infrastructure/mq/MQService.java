@@ -2,8 +2,8 @@ package com.blog.infrastructure.mq;
 
 
 import com.blog.modules.notification.model.message.NotificationMessage;
-import com.blog.plugin.mq.MessageQueuePlugin;
-import com.blog.plugin.mq.MessageQueuePluginFactory;
+import com.blog.plugin.components.mq.MessageQueuePlugin;
+import com.blog.plugin.components.mq.MessageQueuePluginFactory;
 import com.blog.shared.constant.ExchangeConstant;
 import com.blog.shared.constant.QueueConstant;
 import lombok.extern.slf4j.Slf4j;

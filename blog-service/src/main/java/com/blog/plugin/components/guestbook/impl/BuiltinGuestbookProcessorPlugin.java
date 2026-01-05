@@ -1,11 +1,11 @@
-package com.blog.plugin.guestbook.impl;
+package com.blog.plugin.components.guestbook.impl;
 
 
 import com.blog.modules.guestbook.model.dto.GuestbookDTO;
 import com.blog.plugin.core.Plugin;
 import com.blog.plugin.core.ProcessResult;
 import com.blog.plugin.core.TextProcessor;
-import com.blog.plugin.guestbook.GuestbookProcessorPlugin;
+import com.blog.plugin.components.guestbook.GuestbookProcessorPlugin;
 import com.blog.shared.util.RequestUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

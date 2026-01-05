@@ -1,9 +1,9 @@
-package com.blog.plugin.notification.impl;
+package com.blog.plugin.components.notification.impl;
 
 
 
 import com.blog.plugin.core.Plugin;
-import com.blog.plugin.notification.NotificationChannelPlugin;
+import com.blog.plugin.components.notification.NotificationChannelPlugin;
 import com.blog.infrastructure.websocket.NotificationWebSocketHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

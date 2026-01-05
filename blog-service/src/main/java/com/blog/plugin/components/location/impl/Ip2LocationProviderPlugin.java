@@ -1,9 +1,9 @@
-package com.blog.plugin.location.impl;
+package com.blog.plugin.components.location.impl;
 
 
 import com.blog.plugin.core.Plugin;
-import com.blog.plugin.location.LocationInfo;
-import com.blog.plugin.location.LocationProviderPlugin;
+import com.blog.plugin.components.location.LocationInfo;
+import com.blog.plugin.components.location.LocationProviderPlugin;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;

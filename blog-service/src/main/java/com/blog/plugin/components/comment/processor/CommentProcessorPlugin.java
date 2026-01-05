@@ -1,4 +1,4 @@
-package com.blog.plugin.comment.processor;
+package com.blog.plugin.components.comment.processor;
 
 
 import com.blog.modules.comment.model.dto.CommentDTO;
