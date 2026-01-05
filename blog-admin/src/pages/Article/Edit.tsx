@@ -20,6 +20,7 @@ const ArticleEdit: React.FC = () => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isPublishing, setIsPublishing] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<Tag[]>([])
   const [articleStatus, setArticleStatus] = useState<number>(ArticleStatus.DRAFT)
@@ -119,6 +120,45 @@ const ArticleEdit: React.FC = () => {
       tagNames,
     }
   }, [form, id, saveState.articleId])
+
+  // 监听保存状态，发布成功后跳转到文章列表
+  useEffect(() => {
+    if (isPublishing && saveState.status === 'saved' && !isSaving) {
+      // 发布成功，跳转到文章列表
+      setIsModalOpen(false)
+      setIsPublishing(false)
+      setTimeout(() => {
+        navigate('/article')
+      }, 100)
+    }
+  }, [isPublishing, saveState.status, isSaving, navigate])
+
+  // 监听保存失败
+  useEffect(() => {
+    if (isPublishing && saveState.status === 'error' && !isSaving) {
+      // 发布失败
+      setIsPublishing(false)
+      message.error(saveState.errorMessage || '发布失败')
+    }
+  }, [isPublishing, saveState.status, saveState.errorMessage, isSaving])
+
+  // 监听版本冲突
+  useEffect(() => {
+    if (isPublishing && saveState.status === 'conflict' && !isSaving) {
+      // 发布时遇到版本冲突
+      setIsPublishing(false)
+      setIsModalOpen(false)
+      setShowConflictModal(true)
+    }
+  }, [isPublishing, saveState.status, isSaving])
+
+  // 监听离线状态
+  useEffect(() => {
+    if (isPublishing && saveState.status === 'offline') {
+      // 离线状态，取消发布
+      setIsPublishing(false)
+    }
+  }, [isPublishing, saveState.status])
 
   useEffect(() => {
     loadCategories()
@@ -229,19 +269,14 @@ const ArticleEdit: React.FC = () => {
   // 发布文章
   const onFinish = async (values: any) => {
     setLoading(true)
-    try {
-      const formData = getFormData()
-      // 如果当前是草稿，点击发布时应该根据表单选择的状态（公开/私密）来发布
-      // 如果当前已经是发布或私密状态，点击发布时则更新其状态
-      const finalStatus = articleStatus === ArticleStatus.DRAFT ? ArticleStatus.DRAFT : (values.publishStatus || ArticleStatus.PUBLISHED)
-      
-      save({ ...formData, status: finalStatus })
-      setIsModalOpen(false)
-    } catch (error) {
-      message.error('发布失败')
-    } finally {
-      setLoading(false)
-    }
+    setIsPublishing(true)
+    const formData = getFormData()
+    // 根据表单选择的状态（公开/私密）来发布
+    const finalStatus = values.publishStatus || ArticleStatus.PUBLISHED
+
+    save({ ...formData, status: finalStatus })
+    // 不立即关闭弹窗，等待保存完成后由 useEffect 处理跳转
+    setLoading(false)
   }
 
   // 处理冲突 - 使用服务器版本
@@ -391,17 +426,41 @@ const ArticleEdit: React.FC = () => {
         <Modal
           title="发布文章配置"
           open={isModalOpen}
-          onCancel={() => setIsModalOpen(false)}
+          onCancel={() => {
+            // 如果正在发布，不允许关闭
+            if (isPublishing || isSaving) {
+              message.warning('正在发布中，请稍候...')
+              return
+            }
+            setIsModalOpen(false)
+          }}
           width={700}
+          styles={{
+            body: {
+              maxHeight: '60vh',
+              overflowY: 'auto',
+              paddingRight: '16px',
+            }
+          }}
           footer={[
-            <Button key="back" onClick={() => setIsModalOpen(false)}>
+            <Button
+              key="back"
+              onClick={() => {
+                // 如果正在发布，不允许关闭
+                if (isPublishing || isSaving) {
+                  message.warning('正在发布中，请稍候...')
+                  return
+                }
+                setIsModalOpen(false)
+              }}
+            >
               返回编辑
             </Button>,
-            <Button 
-              key="submit" 
-              type="primary" 
+            <Button
+              key="submit"
+              type="primary"
               icon={<SendOutlined />}
-              loading={loading || isSaving}
+              loading={loading || isSaving || isPublishing}
               onClick={() => {
                 form.validateFields().then(values => {
                   onFinish(values);
