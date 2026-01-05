@@ -23,9 +23,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 @Service
 public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService {
@@ -128,19 +131,21 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
             return Collections.emptyList();
         }
         // 1. 一次性查询所有分类
-        List<Long> categoryIds = articles.stream().map(Article::getCategoryId).distinct().collect(Collectors.toList());
-        Map<Long, Category> categoryMap = categoryMapper.selectBatchIds(categoryIds).stream()
-                .collect(Collectors.toMap(Category::getId, category -> category));
+        List<Long> categoryIds = articles.stream().map(Article::getCategoryId).filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        Map<Long, Category> categoryMap = categoryIds.isEmpty() ? new HashMap<>() :
+                categoryMapper.selectBatchIds(categoryIds).stream()
+                        .collect(Collectors.toMap(Category::getId, category -> category));
 
         // 2. 一次性查询所有文章的标签关系
         List<Long> articleIds = articles.stream().map(Article::getId).collect(Collectors.toList());
         List<ArticleTag> articleTags = articleTagMapper.selectByArticleIds(articleIds);
 
         // 3. 一次性查询所有需要的标签
-        List<Long> tagIds = articleTags.stream().map(ArticleTag::getTagId).distinct().collect(Collectors.toList());
-        Map<Long, TagVO> tagMap = tagMapper.selectBatchIds(tagIds).stream()
-                .map(tag -> BeanUtil.copyProperties(tag, TagVO.class))
-                .collect(Collectors.toMap(TagVO::getId, tag -> tag));
+        List<Long> tagIds = articleTags.stream().map(ArticleTag::getTagId).filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        Map<Long, TagVO> tagMap = tagIds.isEmpty() ? new HashMap<>() :
+                tagMapper.selectBatchIds(tagIds).stream()
+                        .map(tag -> BeanUtil.copyProperties(tag, TagVO.class))
+                        .collect(Collectors.toMap(TagVO::getId, tag -> tag));
 
         // 4. 在内存中组装标签到文章
         Map<Long, List<TagVO>> articleTagMap = articleTags.stream()
