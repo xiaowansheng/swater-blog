@@ -11,7 +11,9 @@ export interface TalkDTO {
 export const getTalkList = (params: {
   page?: number
   size?: number
-  status?: number
+  keyword?: string
+  status?: string
+  isTop?: number
 }): Promise<PageResult<Talk>> => {
   return request.get('/admin/moment/list', { params })
 }

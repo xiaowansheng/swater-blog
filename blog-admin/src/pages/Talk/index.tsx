@@ -1,26 +1,51 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Table, Button, Space, Popconfirm, message, Tag, Tooltip, Switch } from 'antd'
-import Image from '@/components/common/ImageWithPreview'
+import { Button, Card, Space, Tag, Row, Col, Input, Select, Empty, Spin, message, Avatar } from 'antd'
 import {
   PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  PictureOutlined,
+  SearchOutlined,
   VerticalAlignTopOutlined,
 } from '@ant-design/icons'
-import { getTalkList, deleteTalk, setTalkTop, cancelTalkTop } from '@/api/talk'
+import { getTalkList, deleteTalk } from '@/api/talk'
+import { getAuthorConfig } from '@/api/config'
 import { Talk, TalkStatus, TALK_STATUS_MAP } from '@/types'
+import TalkContent from './components/TalkContent'
+import TalkImages from './components/TalkImages'
+import ActionMenu from './components/ActionMenu'
+
+interface AuthorInfo {
+  name: string
+  avatar: string
+}
 
 const TalkPage: React.FC = () => {
   const navigate = useNavigate()
   const [talks, setTalks] = useState<Talk[]>([])
   const [loading, setLoading] = useState(false)
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
+  const [filters, setFilters] = useState<{
+    keyword?: string
+    status?: string
+    isTop?: number
+  }>({})
+  const [authorInfo, setAuthorInfo] = useState<AuthorInfo>({ name: '', avatar: '' })
 
   useEffect(() => {
     loadTalks()
+    loadAuthorConfig()
   }, [pagination.current, pagination.pageSize])
+
+  const loadAuthorConfig = async () => {
+    try {
+      const authorConfig = await getAuthorConfig()
+      setAuthorInfo({
+        name: authorConfig.name,
+        avatar: authorConfig.avatar,
+      })
+    } catch (error) {
+      console.error('加载作者配置失败', error)
+    }
+  }
 
   const loadTalks = async () => {
     setLoading(true)
@@ -28,6 +53,7 @@ const TalkPage: React.FC = () => {
       const result = await getTalkList({
         page: pagination.current,
         size: pagination.pageSize,
+        ...filters,
       })
       setTalks(result.records)
       setPagination((prev) => ({ ...prev, total: result.total }))
@@ -36,6 +62,16 @@ const TalkPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSearch = () => {
+    setPagination({ ...pagination, current: 1 })
+    loadTalks()
+  }
+
+  const handleReset = () => {
+    setFilters({})
+    setPagination({ ...pagination, current: 1 })
   }
 
   const handleCreate = () => {
@@ -56,162 +92,146 @@ const TalkPage: React.FC = () => {
     }
   }
 
-  const handleTopChange = async (record: Talk) => {
-    try {
-      if (record.isTop === 1) {
-        await cancelTalkTop(record.id)
-      } else {
-        await setTalkTop(record.id)
-      }
-      message.success('操作成功')
-      loadTalks()
-    } catch (error) {
-      message.error('操作失败')
-    }
+  const getStatusColor = (status: string) => {
+    const s = TALK_STATUS_MAP[status as keyof typeof TALK_STATUS_MAP] || TALK_STATUS_MAP[TalkStatus.DRAFT]
+    return s.color
   }
 
-  const columns = [
-    {
-      title: '内容',
-      dataIndex: 'content',
-      key: 'content',
-      render: (content: string, record: Talk) => (
-        <div className="flex flex-col gap-1 max-w-[400px]">
-          <div className="flex items-center">
-            {record.isTop === 1 && (
-              <Tag color="red" className="mr-2">
-                <VerticalAlignTopOutlined /> 置顶
-              </Tag>
-            )}
-          </div>
-          <div 
-            className="text-sm text-gray-600 rich-text-content line-clamp-2"
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
-        </div>
-      ),
-    },
-    {
-      title: '图片',
-      dataIndex: 'images',
-      key: 'images',
-      width: 150,
-      render: (images: string[]) => (
-        <div className="flex gap-1 items-center">
-          {images && images.length > 0 ? (
-            <Image.PreviewGroup>
-              {images.slice(0, 3).map((img, index) => (
-                <Image
-                  key={index}
-                  src={img}
-                  width={40}
-                  height={40}
-                  className="object-cover rounded"
-                />
-              ))}
-              {images.length > 3 && (
-                <span className="text-xs text-gray-400">+{images.length - 3}</span>
-              )}
-            </Image.PreviewGroup>
-          ) : (
-            <span className="flex gap-1 items-center text-gray-400">
-              <PictureOutlined /> 无图片
-            </span>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      width: 100,
-      render: (status: string) => {
-        const s = TALK_STATUS_MAP[status as keyof typeof TALK_STATUS_MAP] || TALK_STATUS_MAP[TalkStatus.DRAFT]
-        return <Tag color={s.color}>{s.label}</Tag>
-      },
-    },
-    {
-      title: '置顶',
-      dataIndex: 'isTop',
-      key: 'isTop',
-      width: 80,
-      render: (isTop: number, record: Talk) => (
-        <Switch
-          checked={isTop === 1}
-          onChange={() => handleTopChange(record)}
-        />
-      ),
-    },
-    {
-      title: '互动',
-      key: 'interaction',
-      width: 120,
-      render: (_: any, record: Talk) => (
-        <div className="text-xs text-gray-500">
-          <span>❤️ {record.likeCount || 0}</span>
-          <span className="ml-2">💬 {record.commentCount || 0}</span>
-        </div>
-      ),
-    },
-    {
-      title: '发布时间',
-      dataIndex: 'createTime',
-      key: 'createTime',
-      width: 160,
-    },
-    {
-      title: '操作',
-      key: 'action',
-      width: 150,
-      render: (_: any, record: Talk) => (
-        <Space>
-          <Tooltip title="编辑">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(record)}
-            />
-          </Tooltip>
-          <Popconfirm
-            title="确定删除这条说说吗？"
-            onConfirm={() => handleDelete(record.id)}
-          >
-            <Tooltip title="删除">
-              <Button type="text" danger icon={<DeleteOutlined />} />
-            </Tooltip>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ]
+  const getStatusLabel = (status: string) => {
+    const s = TALK_STATUS_MAP[status as keyof typeof TALK_STATUS_MAP] || TALK_STATUS_MAP[TalkStatus.DRAFT]
+    return s.label
+  }
 
   return (
     <div className="page-container">
-      <div className="flex justify-between items-center search-bar">
-        <h2 className="text-lg font-medium">说说管理</h2>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-          发布说说
-        </Button>
+      {/* 搜索栏 */}
+      <div className="search-bar">
+        <div className="flex flex-wrap items-center gap-4">
+          <Input
+            placeholder="搜索说说内容"
+            prefix={<SearchOutlined className="text-gray-400" />}
+            value={filters.keyword}
+            onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
+            style={{ width: 200 }}
+            allowClear
+            onPressEnter={handleSearch}
+          />
+          <Select
+            placeholder="发布状态"
+            value={filters.status}
+            onChange={(value) => setFilters({ ...filters, status: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value={TalkStatus.PUBLISHED}>已发布</Select.Option>
+            <Select.Option value={TalkStatus.DRAFT}>草稿</Select.Option>
+          </Select>
+          <Select
+            placeholder="置顶状态"
+            value={filters.isTop}
+            onChange={(value) => setFilters({ ...filters, isTop: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value={1}>已置顶</Select.Option>
+            <Select.Option value={0}>未置顶</Select.Option>
+          </Select>
+          <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+            搜索
+          </Button>
+          <Button onClick={handleReset}>重置</Button>
+          <div className="flex-1" />
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+            发布说说
+          </Button>
+        </div>
       </div>
 
-      <div className="table-container">
-        <Table
-          columns={columns}
-          dataSource={talks}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条说说`,
-            onChange: (page, pageSize) =>
-              setPagination({ ...pagination, current: page, pageSize }),
-          }}
-        />
+      {/* 卡片列表 */}
+      <div className="max-w-4xl mx-auto">
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Spin size="large" />
+          </div>
+        ) : talks.length === 0 ? (
+          <Empty description="暂无说说" className="py-12" />
+        ) : (
+          <Row gutter={[16, 16]}>
+            {talks.map((talk) => (
+              <Col xs={24} sm={24} md={24} lg={24} key={talk.id}>
+                <Card
+                  hoverable
+                  className="talk-card shadow-sm"
+                  onClick={() => navigate(`/talk/detail/${talk.id}`)}
+                >
+                  {/* 头部：作者信息 + 标签 + 操作按钮 */}
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-3 flex-1">
+                      <Avatar src={authorInfo.avatar} size={40}>
+                        {authorInfo.name?.charAt(0)?.toUpperCase()}
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-800">{authorInfo.name}</span>
+                        <Space size={4}>
+                          {talk.isTop === 1 && (
+                            <Tag color="red" icon={<VerticalAlignTopOutlined />} className="mb-0">
+                              置顶
+                            </Tag>
+                          )}
+                          <Tag color={getStatusColor(talk.status)} className="mb-0">
+                            {getStatusLabel(talk.status)}
+                          </Tag>
+                        </Space>
+                      </div>
+                    </div>
+                    <ActionMenu
+                      talk={talk}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      onRefresh={loadTalks}
+                    />
+                  </div>
+
+                  {/* 内容区域 */}
+                  <TalkContent content={talk.content} />
+
+                  {/* 图片网格 */}
+                  <TalkImages images={talk.images} />
+
+                  {/* 元信息 */}
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                    <Space size={16} className="text-sm text-gray-500">
+                      <span>❤️ {talk.likeCount || 0}</span>
+                      <span>💬 {talk.commentCount || 0}</span>
+                    </Space>
+                    <span className="text-xs text-gray-400">{talk.createTime}</span>
+                  </div>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
+
+        {/* 分页 */}
+        {!loading && talks.length > 0 && (
+          <div className="flex justify-center mt-6">
+            <Button
+              disabled={pagination.current <= 1}
+              onClick={() => setPagination({ ...pagination, current: pagination.current - 1 })}
+            >
+              上一页
+            </Button>
+            <span className="mx-4 text-sm text-gray-500">
+              第 {pagination.current} 页 / 共 {Math.ceil(pagination.total / pagination.pageSize)} 页
+            </span>
+            <Button
+              disabled={pagination.current >= Math.ceil(pagination.total / pagination.pageSize)}
+              onClick={() => setPagination({ ...pagination, current: pagination.current + 1 })}
+            >
+              下一页
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )

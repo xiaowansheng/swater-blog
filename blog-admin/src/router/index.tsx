@@ -16,6 +16,7 @@ const Tag = lazy(() => import('@/pages/Tag'))
 const Comment = lazy(() => import('@/pages/Comment'))
 const Talk = lazy(() => import('@/pages/Talk'))
 const TalkEdit = lazy(() => import('@/pages/Talk/Edit'))
+const TalkDetail = lazy(() => import('@/pages/Talk/Detail'))
 const User = lazy(() => import('@/pages/User'))
 const Role = lazy(() => import('@/pages/Role'))
 const Menu = lazy(() => import('@/pages/Menu'))
@@ -44,6 +45,7 @@ const routeConfig = [
   { path: '/talk', component: Talk, title: '说说管理', keepAlive: true },
   { path: '/talk/edit/:id', component: TalkEdit, title: '编辑说说', keepAlive: false },
   { path: '/talk/create', component: TalkEdit, title: '发布说说', keepAlive: false },
+  { path: '/talk/detail/:id', component: TalkDetail, title: '说说详情', keepAlive: false },
   { path: '/user', component: User, title: '用户管理', keepAlive: true },
   { path: '/role', component: Role, title: '角色管理', keepAlive: true },
   { path: '/menu', component: Menu, title: '菜单管理', keepAlive: true },
@@ -131,6 +133,7 @@ const Router: React.FC = () => {
           <Route path="talk" element={<Suspense fallback={<PageLoading />}><Talk /></Suspense>} />
           <Route path="talk/edit/:id" element={<Suspense fallback={<PageLoading />}><TalkEdit /></Suspense>} />
           <Route path="talk/create" element={<Suspense fallback={<PageLoading />}><TalkEdit /></Suspense>} />
+          <Route path="talk/detail/:id" element={<Suspense fallback={<PageLoading />}><TalkDetail /></Suspense>} />
           <Route path="user" element={<Suspense fallback={<PageLoading />}><User /></Suspense>} />
           <Route path="role" element={<Suspense fallback={<PageLoading />}><Role /></Suspense>} />
           <Route path="menu" element={<Suspense fallback={<PageLoading />}><Menu /></Suspense>} />
