@@ -1,10 +1,10 @@
 package com.blog.plugin.storage;
 
 
-
+import com.blog.plugin.core.Plugin;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
-public interface StoragePlugin {
+public interface StoragePlugin extends Plugin {
     String upload(MultipartFile file, String filePath) throws Exception;
     
     String upload(InputStream inputStream, String filePath, long contentLength, String contentType) throws Exception;

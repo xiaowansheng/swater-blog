@@ -58,11 +58,10 @@ public class FileServiceImpl implements FileService {
         }
 
         try {
-            List<StoragePlugin> plugins = storagePluginFactory.getPlugins();
-            if (plugins.isEmpty()) {
+            StoragePlugin storagePlugin = storagePluginFactory.getActivePlugin();
+            if (storagePlugin == null) {
                 throw new BusinessException("未找到可用的存储插件");
             }
-            StoragePlugin storagePlugin = plugins.get(0);
             String fileHash = storagePlugin.calculateHash(file);
             FileMeta existingFile = fileMetaMapper.selectOne(new LambdaQueryWrapper<FileMeta>()
                     .eq(FileMeta::getFileHash, fileHash));
@@ -219,4 +218,3 @@ public class FileServiceImpl implements FileService {
         }
     }
 }
-

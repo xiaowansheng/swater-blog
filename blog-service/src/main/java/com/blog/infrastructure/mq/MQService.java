@@ -1,17 +1,15 @@
 package com.blog.infrastructure.mq;
 
 
-
-import com.blog.shared.constant.ExchangeConstant;
-import com.blog.shared.constant.QueueConstant;
 import com.blog.modules.notification.model.message.NotificationMessage;
-import com.blog.plugin.core.Plugin;
 import com.blog.plugin.mq.MessageQueuePlugin;
 import com.blog.plugin.mq.MessageQueuePluginFactory;
+import com.blog.shared.constant.ExchangeConstant;
+import com.blog.shared.constant.QueueConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.List;
+
 @Slf4j
 @Service
 public class MQService {
@@ -25,16 +23,7 @@ public class MQService {
             return;
         }
         
-        List<MessageQueuePlugin> plugins = mqPluginFactory.getPlugins();
-        if (plugins.isEmpty()) {
-            log.warn("没有可用的MQ插件，跳过消息发送");
-            return;
-        }
-        
-        MessageQueuePlugin plugin = plugins.stream()
-                .filter(p -> p instanceof Plugin && ((Plugin) p).isEnabled())
-                .findFirst()
-                .orElse(null);
+        MessageQueuePlugin plugin = mqPluginFactory.getActivePlugin();
         
         if (plugin == null) {
             log.warn("没有启用的MQ插件，跳过消息发送");
@@ -45,8 +34,7 @@ public class MQService {
             String routingKey = getRoutingKey(message.getType());
             plugin.send(ExchangeConstant.NOTIFICATION_EXCHANGE, routingKey, message);
         } catch (Exception e) {
-            String pluginName = plugin instanceof Plugin ? ((Plugin) plugin).getName() : "unknown";
-            log.error("发送通知消息到MQ失败，插件: {}", pluginName, e);
+            log.error("发送通知消息到MQ失败，插件 {}", plugin, e);
         }
     }
     
@@ -63,4 +51,3 @@ public class MQService {
         }
     }
 }
-
