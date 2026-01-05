@@ -13,6 +13,7 @@ import {
   FileOutlined,
   VideoCameraOutlined,
   FileTextOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons'
 import { getFileList, uploadFile, deleteFile } from '@/api/file'
 import { FileMeta } from '@/types'
@@ -84,6 +85,17 @@ const FilePage: React.FC = () => {
   const handlePreview = (file: FileMeta) => {
     setPreviewFile(file)
     setPreviewVisible(true)
+  }
+
+  const handleDownload = (file: FileMeta) => {
+    const fullUrl = getFullUrl(file.url)
+    const link = document.createElement('a')
+    link.href = fullUrl
+    link.download = file.originalName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    message.success('下载已开始')
   }
 
   const renderPreviewContent = () => {
@@ -218,6 +230,27 @@ const FilePage: React.FC = () => {
         record.width && record.height ? `${record.width}×${record.height}` : '-',
     },
     {
+      title: '文件路径',
+      dataIndex: 'filePath',
+      key: 'filePath',
+      width: 200,
+      ellipsis: true,
+      render: (path: string) => (
+        <span className="text-xs text-gray-500" title={path}>
+          {path || '-'}
+        </span>
+      ),
+    },
+    {
+      title: '引用次数',
+      dataIndex: 'refCount',
+      key: 'refCount',
+      width: 100,
+      render: (count: number) => (
+        <Tag color={count > 0 ? 'blue' : 'default'}>{count || 0}</Tag>
+      ),
+    },
+    {
       title: '上传时间',
       dataIndex: 'createTime',
       key: 'createTime',
@@ -226,9 +259,16 @@ const FilePage: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      width: 150,
+      width: 200,
       render: (_: any, record: FileMeta) => (
         <Space>
+          <Tooltip title="下载">
+            <Button
+              type="text"
+              icon={<DownloadOutlined />}
+              onClick={() => handleDownload(record)}
+            />
+          </Tooltip>
           <Tooltip title="复制链接">
             <Button
               type="text"
@@ -345,6 +385,7 @@ const FilePage: React.FC = () => {
                     )
                   }
                   actions={[
+                    <DownloadOutlined key="download" onClick={() => handleDownload(file)} />,
                     <CopyOutlined key="copy" onClick={() => handleCopyUrl(file.url)} />,
                     <EyeOutlined key="view" onClick={() => handlePreview(file)} />,
                     <Popconfirm
@@ -363,9 +404,21 @@ const FilePage: React.FC = () => {
                       </span>
                     }
                     description={
-                      <span className="text-xs text-gray-400">
-                        {formatFileSize(file.fileSize)}
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs text-gray-400">
+                          {formatFileSize(file.fileSize)}
+                        </span>
+                        {file.filePath && (
+                          <span className="text-xs text-gray-400 truncate" title={file.filePath}>
+                            {file.filePath}
+                          </span>
+                        )}
+                        <div className="flex items-center gap-1">
+                          <Tag color={file.refCount > 0 ? 'blue' : 'default'} className="text-xs">
+                            引用: {file.refCount || 0}
+                          </Tag>
+                        </div>
+                      </div>
                     }
                   />
                 </Card>

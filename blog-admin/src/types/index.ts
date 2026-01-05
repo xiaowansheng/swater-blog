@@ -182,6 +182,7 @@ export interface FileMeta {
   originalName: string
   storageName: string
   storagePath: string
+  filePath: string
   url: string
   fileSize: number
   mimeType: string
@@ -191,6 +192,7 @@ export interface FileMeta {
   width?: number
   height?: number
   duration?: number
+  refCount?: number
   createTime: string
 }
 
