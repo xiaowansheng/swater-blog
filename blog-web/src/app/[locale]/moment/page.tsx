@@ -28,12 +28,14 @@ export default async function MomentPage({
         <Header />
         <PageHeader title={t('moments')} description="记录生活的瞬间" />
         <main className="container flex-1 px-4 py-12 mx-auto">
-          <MomentList moments={momentList.records} />
-          <Pagination
-            current={momentList.current}
-            total={momentList.pages}
-            basePath="/moment"
-          />
+          <div className="max-w-4xl mx-auto">
+            <MomentList moments={momentList.records} />
+            <Pagination
+              current={momentList.current}
+              total={momentList.pages}
+              basePath="/moment"
+            />
+          </div>
         </main>
         <Footer />
       </>
