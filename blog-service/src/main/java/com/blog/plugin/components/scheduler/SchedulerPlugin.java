@@ -1,9 +1,12 @@
 package com.blog.plugin.components.scheduler;
 
+
+import com.blog.plugin.core.Plugin;
+
 /**
  * 定时任务调度插件接口
  */
-public interface SchedulerPlugin {
+public interface SchedulerPlugin extends Plugin {
     /**
      * 添加定时任务
      * @param taskName 任务名称

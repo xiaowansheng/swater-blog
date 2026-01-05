@@ -1,5 +1,9 @@
 package com.blog.plugin.components.location;
 
-public interface LocationProviderPlugin {
+
+import com.blog.plugin.core.Plugin;
+
+public interface LocationProviderPlugin extends Plugin {
     LocationInfo getLocationInfo(String ip) throws Exception;
 }
+
