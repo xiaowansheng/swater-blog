@@ -1,15 +1,12 @@
 package com.blog.modules.system.role.service;
 
-
-
-
-import com.blog.modules.system.api.mapper.RoleApiMapper;
+import com.blog.modules.system.role.mapper.RoleApiMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.common.exception.BusinessException;
 import com.blog.modules.system.role.mapper.RoleMapper;
 import com.blog.modules.system.role.model.dto.RoleDTO;
 import com.blog.modules.system.role.model.entity.Role;
-import com.blog.modules.system.api.model.entity.RoleApi;
+import com.blog.modules.system.role.model.entity.RoleApi;
 import com.blog.modules.system.role.model.vo.RoleVO;
 import com.blog.modules.system.role.service.RoleService;
 import com.blog.common.util.BeanUtil;
@@ -133,8 +130,7 @@ public class RoleServiceImpl implements RoleService {
         roleMapper.updateById(role);
         
         if (dto.getApiIds() != null) {
-            // TODO: Fix RoleApiMapper.deleteByRoleId method
-            // roleApiMapper.deleteByRoleId(id);
+            roleApiMapper.deleteByRoleId(id);
             if (!dto.getApiIds().isEmpty()) {
                 saveRoleApis(id, dto.getApiIds());
             }
@@ -149,8 +145,7 @@ public class RoleServiceImpl implements RoleService {
             throw new BusinessException("角色不存在");
         }
         roleMapper.deleteById(id);
-        // TODO: Fix RoleApiMapper.deleteByRoleId method
-        // roleApiMapper.deleteByRoleId(id);
+        roleApiMapper.deleteByRoleId(id);
     }
 
     @Override
@@ -160,8 +155,7 @@ public class RoleServiceImpl implements RoleService {
         if (role == null) {
             throw new BusinessException("角色不存在");
         }
-        // TODO: Fix RoleApiMapper.deleteByRoleId method
-        // roleApiMapper.deleteByRoleId(id);
+        roleApiMapper.deleteByRoleId(id);
         if (apiIds != null && !apiIds.isEmpty()) {
             saveRoleApis(id, apiIds);
         }

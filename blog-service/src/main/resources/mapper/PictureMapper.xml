@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.blog.mapper.PictureMapper">
-    <select id="selectByAlbumId" resultType="com.blog.model.entity.Picture">
+<mapper namespace="com.blog.modules.content.picture.mapper.PictureMapper">
+    <select id="selectByAlbumId" resultType="com.blog.modules.content.picture.model.entity.Picture">
         SELECT * FROM picture
         WHERE album_id = #{albumId}
         AND deleted = 0

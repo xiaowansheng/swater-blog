@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.blog.mapper.FileReferenceMapper">
-    <select id="selectByFileId" resultType="com.blog.model.entity.FileReference">
+<mapper namespace="com.blog.modules.file.mapper.FileReferenceMapper">
+    <select id="selectByFileId" resultType="com.blog.modules.file.model.entity.FileReference">
         SELECT * FROM file_reference
         WHERE file_id = #{fileId}
     </select>

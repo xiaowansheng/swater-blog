@@ -16,7 +16,6 @@ import com.blog.modules.talk.model.entity.Talk;
 import com.blog.core.repository.CommentDocumentRepository;
 import com.blog.core.repository.MomentDocumentRepository;
 import com.blog.core.repository.PostDocumentRepository;
-import com.blog.modules.search.service.SearchSyncService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

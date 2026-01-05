@@ -1,12 +1,10 @@
 package com.blog.core.cache;
 
-
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.blog.modules.system.api.mapper.RoleApiMapper;
+import com.blog.modules.system.role.mapper.RoleApiMapper;
 import com.blog.modules.system.api.mapper.SysApiMapper;
 import com.blog.modules.system.api.model.entity.SysApi;
-import com.blog.modules.system.api.model.entity.RoleApi;
+import com.blog.modules.system.role.model.entity.RoleApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

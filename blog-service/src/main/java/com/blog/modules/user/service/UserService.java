@@ -2,7 +2,7 @@ package com.blog.modules.user.service;
 
 
 import com.blog.common.PageResult;
-import com.blog.modules.user.model.dto.ResetPasswordDTO;
+import com.blog.modules.auth.model.dto.ResetPasswordDTO;
 import com.blog.modules.user.model.dto.UserDTO;
 import com.blog.modules.user.model.vo.UserVO;
 import java.util.List;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.blog.mapper.ArticleTagMapper">
+<mapper namespace="com.blog.modules.article.mapper.ArticleTagMapper">
     <select id="selectTagIdsByArticleId" resultType="java.lang.Long">
         SELECT tag_id FROM article_tag
         WHERE article_id = #{articleId}
@@ -15,7 +15,7 @@
         DELETE FROM article_tag WHERE article_id = #{articleId}
     </delete>
 
-    <select id="selectByArticleIds" resultType="com.blog.model.entity.ArticleTag">
+    <select id="selectByArticleIds" resultType="com.blog.modules.article.model.entity.ArticleTag">
         SELECT *
         FROM article_tag
         WHERE article_id IN

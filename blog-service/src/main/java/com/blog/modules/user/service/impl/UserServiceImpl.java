@@ -1,9 +1,6 @@
 package com.blog.modules.user.service.impl;
 
-
-
-
-import com.blog.modules.user.model.dto.ResetPasswordDTO;
+import com.blog.modules.auth.model.dto.ResetPasswordDTO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.common.PageResult;
@@ -16,12 +13,6 @@ import com.blog.modules.user.event.UserDeletedEvent;
 import com.blog.modules.user.event.UserPasswordResetEvent;
 import com.blog.common.exception.BusinessException;
 import com.blog.modules.user.mapper.UserMapper;
-import com.blog.modules.user.model.dto.UserDTO;
-import com.blog.modules.user.model.entity.User;
-import com.blog.modules.user.event.UserCreatedEvent;
-import com.blog.modules.user.event.UserUpdatedEvent;
-import com.blog.modules.user.event.UserDeletedEvent;
-import com.blog.modules.user.event.UserPasswordResetEvent;
 import com.blog.modules.system.role.model.vo.RoleVO;
 import com.blog.modules.user.model.vo.UserVO;
 import com.blog.modules.system.role.service.RoleService;
@@ -185,8 +176,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
-        // TODO: Fix ResetPasswordDTO.getPassword method
-        // user.setPassword(PasswordUtil.encode(dto.getPassword()));
+        user.setPassword(PasswordUtil.encode(dto.getPassword()));
         userMapper.updateById(user);
         
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserPasswordResetEvent(this, id)));
