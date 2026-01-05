@@ -50,8 +50,8 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
           </Link>
 
           <div className="flex flex-wrap items-center gap-3 mb-4">
-            {article.categoryName && (
-              <Link href={`/category/${article.categoryId}`}>
+            {article.categoryName && article.categoryKey && (
+              <Link href={`/category/${article.categoryKey}`}>
                 <span className="px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold border border-primary/20 hover:bg-primary hover:text-white transition-colors">
                   {article.categoryName}
                 </span>
@@ -82,9 +82,9 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
         {article.tags && article.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-auto pt-4 border-t border-border/40">
             {article.tags.map((tag) => (
-              <Link 
-                key={tag.id} 
-                href={`/tag/${tag.id}`}
+              <Link
+                key={tag.id}
+                href={`/tag/${tag.tagKey}`}
                 className="text-xs px-2.5 py-1 rounded-md bg-secondary/40 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300 border border-transparent hover:border-primary/20"
               >
                 #{tag.name}

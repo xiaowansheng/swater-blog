@@ -9,5 +9,9 @@ export const tagApi = {
   getById: (id: number) => {
     return fetchServer<TagVO>(`/api/public/tag/${id}`);
   },
+
+  getByKey: (key: string) => {
+    return fetchServer<TagVO>(`/api/public/tag/key/${key}`);
+  },
 };
 

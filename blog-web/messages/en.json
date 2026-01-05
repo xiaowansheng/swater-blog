@@ -26,7 +26,8 @@
     "related": "Related Articles",
     "noMore": "No more",
     "noData": "No data",
-    "author": "Author"
+    "author": "Author",
+    "totalArticles": "Total Articles"
   },
   "nav": {
     "home": "Home",

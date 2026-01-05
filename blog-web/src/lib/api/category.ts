@@ -9,5 +9,9 @@ export const categoryApi = {
   getById: (id: number) => {
     return fetchServer<CategoryVO>(`/api/public/category/${id}`);
   },
+
+  getByKey: (key: string) => {
+    return fetchServer<CategoryVO>(`/api/public/category/key/${key}`);
+  },
 };
 

@@ -26,7 +26,8 @@
     "related": "相关文章",
     "noMore": "没有更多了",
     "noData": "暂无数据",
-    "author": "作者"
+    "author": "作者",
+    "totalArticles": "文章总数"
   },
   "nav": {
     "home": "首页",

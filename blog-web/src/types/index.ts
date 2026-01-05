@@ -103,6 +103,7 @@ export interface PostVO {
   authorName?: string;
   authorAvatar?: string;
   categoryId?: number;
+  categoryKey?: string;
   categoryName?: string;
   tagIds?: number[];
   tags?: TagVO[];
@@ -118,6 +119,7 @@ export interface PostVO {
 
 export interface CategoryVO {
   id: number;
+  categoryKey: string;
   name: string;
   description?: string;
   articleCount?: number;
@@ -125,6 +127,7 @@ export interface CategoryVO {
 
 export interface TagVO {
   id: number;
+  tagKey: string;
   name: string;
   color?: string;
   articleCount?: number;

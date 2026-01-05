@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { formatDate } from '@/lib/utils/format';
-import { usePathname } from '@/lib/i18n/routing';
+import { usePathname, Link } from '@/lib/i18n/routing';
 import type { PostVO } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -118,17 +118,24 @@ export default function ArticleMeta({ article }: ArticleMetaProps) {
           {article.commentCount}
         </span>
       )}
-      {article.categoryName && (
-        <span className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary">
+      {article.categoryName && article.categoryKey && (
+        <Link
+          href={`/category/${article.categoryKey}`}
+          className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors"
+        >
           {article.categoryName}
-        </span>
+        </Link>
       )}
       {article.tags && article.tags.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {article.tags.map((tag) => (
-            <span key={tag.id} className="px-3 py-1 text-xs font-medium rounded-full transition-colors cursor-pointer bg-secondary hover:bg-primary/10 hover:text-primary">
+            <Link
+              key={tag.id}
+              href={`/tag/${tag.tagKey}`}
+              className="px-3 py-1 text-xs font-medium rounded-full transition-colors bg-secondary hover:bg-primary/10 hover:text-primary"
+            >
               {tag.name}
-            </span>
+            </Link>
           ))}
         </div>
       )}

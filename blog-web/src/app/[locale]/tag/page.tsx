@@ -27,7 +27,7 @@ export default async function TagListPage({
             {tags.map((tag) => (
               <Link
                 key={tag.id}
-                href={`/tag/${tag.id}`}
+                href={`/tag/${tag.tagKey}`}
                 className="group px-5 py-3 bg-card border border-border rounded-xl hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1"
               >
                 <span className="font-medium group-hover:text-primary transition-colors">{tag.name}</span>
