@@ -13,14 +13,18 @@ import com.blog.modules.notification.model.entity.SysNotification;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.notification.model.vo.NotificationVO;
 import com.blog.modules.notification.service.NotificationService;
+import com.blog.plugin.components.notification.NotificationChannelFactory;
+import com.blog.plugin.components.notification.NotificationChannelPlugin;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.PageUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+@Slf4j
 @Service
 public class NotificationServiceImpl implements NotificationService {
     @Autowired
@@ -28,6 +32,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired(required = false)
+    private NotificationChannelFactory notificationChannelFactory;
 
     @Override
     @Transactional
@@ -125,6 +132,27 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setIsRead(0);
         notification.setSentTime(LocalDateTime.now());
         sysNotificationMapper.updateById(notification);
+
+        dispatchChannels(userId, type, title, content);
+    }
+
+    private void dispatchChannels(Long userId, String type, String title, String content) {
+        if (notificationChannelFactory == null) {
+            log.warn("通知渠道插件工厂未配置，跳过发送");
+            return;
+        }
+        List<NotificationChannelPlugin> channels = notificationChannelFactory.getEnabledChannels();
+        if (channels == null || channels.isEmpty()) {
+            log.warn("未找到可用的通知渠道插件");
+            return;
+        }
+        for (NotificationChannelPlugin channel : channels) {
+            try {
+                channel.send(userId, type, title, content);
+            } catch (Exception e) {
+                log.error("通知渠道 {} 发送失败", channel.getId(), e);
+            }
+        }
     }
 
     private NotificationVO convertToVO(SysNotification notification) {
@@ -138,4 +166,3 @@ public class NotificationServiceImpl implements NotificationService {
         return vo;
     }
 }
-

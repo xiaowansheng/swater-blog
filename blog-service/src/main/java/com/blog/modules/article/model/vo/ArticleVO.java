@@ -30,6 +30,8 @@ public class ArticleVO extends com.blog.shared.model.vo.BaseVO {
 
     private Long categoryId;
 
+    private String categoryKey;
+
     private String categoryName;
 
     private String type;

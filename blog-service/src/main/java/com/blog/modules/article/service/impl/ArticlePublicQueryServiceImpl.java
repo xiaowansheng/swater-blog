@@ -129,8 +129,8 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
         }
         // 1. 一次性查询所有分类
         List<Long> categoryIds = articles.stream().map(Article::getCategoryId).distinct().collect(Collectors.toList());
-        Map<Long, String> categoryMap = categoryMapper.selectBatchIds(categoryIds).stream()
-                .collect(Collectors.toMap(Category::getId, Category::getName));
+        Map<Long, Category> categoryMap = categoryMapper.selectBatchIds(categoryIds).stream()
+                .collect(Collectors.toMap(Category::getId, category -> category));
 
         // 2. 一次性查询所有文章的标签关系
         List<Long> articleIds = articles.stream().map(Article::getId).collect(Collectors.toList());
@@ -150,7 +150,11 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
         // 5. 组装最终VO
         return articles.stream().map(article -> {
             ArticleVO vo = BeanUtil.copyProperties(article, ArticleVO.class);
-            vo.setCategoryName(categoryMap.get(article.getCategoryId()));
+            Category category = categoryMap.get(article.getCategoryId());
+            if (category != null) {
+                vo.setCategoryName(category.getName());
+                vo.setCategoryKey(category.getCategoryKey());
+            }
             vo.setTags(articleTagMap.get(article.getId()));
             return vo;
         }).collect(Collectors.toList());
@@ -162,6 +166,7 @@ public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService 
             Category category = categoryMapper.selectById(article.getCategoryId());
             if (category != null) {
                 vo.setCategoryName(category.getName());
+                vo.setCategoryKey(category.getCategoryKey());
             }
         }
         List<Long> tagIds = articleTagMapper.selectTagIdsByArticleId(article.getId());
