@@ -196,8 +196,13 @@ public class LogAspect {
         // 方法信息
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
-        logOperation.setMethod(method.getDeclaringClass().getName() + "." + method.getName());
-        logOperation.setCallingMethod(method.getDeclaringClass().getSimpleName() + "." + method.getName());
+
+        // method 存储 HTTP 方法（GET/POST/PUT/DELETE）
+        logOperation.setMethod(request.getMethod());
+
+        // calling_method 存储完整的 Java 方法签名（包名 + 类名 + 方法名）
+        String fullMethod = method.getDeclaringClass().getName() + "." + method.getName();
+        logOperation.setCallingMethod(fullMethod);
 
         // 请求参数
         try {
@@ -259,8 +264,17 @@ public class LogAspect {
         // 方法信息
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
-        logError.setMethod(method.getDeclaringClass().getName() + "." + method.getName());
-        logError.setCallingMethod(method.getDeclaringClass().getSimpleName() + "." + method.getName());
+
+        // method 存储 HTTP 方法（GET/POST/PUT/DELETE）
+        logError.setMethod(request.getMethod());
+
+        // calling_method 存储完整的 Java 方法签名（包名 + 类名 + 方法名）
+        String fullMethod = method.getDeclaringClass().getName() + "." + method.getName();
+        // 限制方法名长度，避免超过数据库字段长度
+        if (fullMethod.length() > 500) {
+            fullMethod = fullMethod.substring(0, 500);
+        }
+        logError.setCallingMethod(fullMethod);
 
         // 请求参数
         try {
