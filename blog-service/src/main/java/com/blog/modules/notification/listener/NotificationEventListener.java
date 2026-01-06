@@ -1,6 +1,8 @@
 package com.blog.modules.notification.listener;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.blog.modules.article.mapper.ArticleMapper;
+import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.comment.event.CommentApprovedEvent;
 import com.blog.modules.comment.event.CommentCreatedEvent;
 import com.blog.modules.comment.mapper.CommentMapper;
@@ -9,6 +11,8 @@ import com.blog.modules.guestbook.event.GuestbookCreatedEvent;
 import com.blog.modules.notification.service.NotificationService;
 import com.blog.modules.system.config.service.SiteConfigService;
 import com.blog.modules.system.config.model.dto.config.NotifyConfigDTO;
+import com.blog.modules.talk.mapper.TalkMapper;
+import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.user.event.user.UserCreatedEvent;
 import com.blog.modules.user.event.user.UserLoggedInEvent;
 import com.blog.modules.user.event.user.UserPasswordResetEvent;
@@ -34,6 +38,12 @@ public class NotificationEventListener {
 
     @Autowired(required = false)
     private CommentMapper commentMapper;
+
+    @Autowired(required = false)
+    private ArticleMapper articleMapper;
+
+    @Autowired(required = false)
+    private TalkMapper talkMapper;
 
     /**
      * 用户登录事件
@@ -131,7 +141,6 @@ public class NotificationEventListener {
             }
 
             var comment = event.getComment();
-            Long authorId = comment.getAuthorId();
             Long userId = comment.getUserId();
             String content = comment.getContent();
             String nickname = comment.getNickname();
@@ -165,7 +174,25 @@ public class NotificationEventListener {
                 }
             }
 
-            // 2. 通知文章/说说作者（如果评论者不是作者本人）
+            // 2. 通知文章/说说作者
+            Long authorId = null;
+            try {
+                if ("ARTICLE".equalsIgnoreCase(targetType) && articleMapper != null) {
+                    Article article = articleMapper.selectById(targetId);
+                    if (article != null) {
+                        authorId = article.getAuthorId();
+                    }
+                } else if ("TALK".equalsIgnoreCase(targetType) && talkMapper != null) {
+                    Talk talk = talkMapper.selectById(targetId);
+                    if (talk != null) {
+                        authorId = talk.getAuthorId();
+                    }
+                }
+            } catch (Exception e) {
+                log.error("查询作者ID失败，目标类型: {}, 目标ID: {}", targetType, targetId, e);
+            }
+
+            // 如果找到作者ID，且评论者不是作者本人，则发送通知
             if (authorId != null && !authorId.equals(userId)) {
                 String title = "收到新评论";
                 String notificationContent = String.format("您的文章/说说收到了一条新评论：\n%s", content);
