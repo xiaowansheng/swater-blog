@@ -9,7 +9,7 @@ import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.comment.model.entity.Comment;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.comment.model.vo.CommentVO;
-import com.blog.modules.comment.service.CommentAdminQueryService;
+import com.blog.modules.comment.service.CommentQueryService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
-public class CommentAdminQueryServiceImpl implements CommentAdminQueryService {
+public class CommentQueryServiceImpl implements CommentQueryService {
     @Autowired
     private CommentMapper commentMapper;
 

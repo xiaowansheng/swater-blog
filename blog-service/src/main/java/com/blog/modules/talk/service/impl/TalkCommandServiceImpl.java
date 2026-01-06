@@ -11,7 +11,7 @@ import com.blog.modules.talk.model.entity.Talk;
 import com.blog.plugin.components.location.LocationInfo;
 import com.blog.plugin.components.location.LocationProviderFactory;
 import com.blog.plugin.components.location.LocationProviderPlugin;
-import com.blog.modules.talk.service.TalkAdminCommandService;
+import com.blog.modules.talk.service.TalkCommandService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.KeyUtil;
@@ -27,7 +27,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.List;
 @Slf4j
 @Service
-public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
+public class TalkCommandServiceImpl implements TalkCommandService {
     private final TalkMapper talkMapper;
 
     @Autowired
@@ -36,7 +36,7 @@ public class TalkAdminCommandServiceImpl implements TalkAdminCommandService {
     @Autowired(required = false)
     private LocationProviderFactory locationProviderFactory;
 
-    public TalkAdminCommandServiceImpl(TalkMapper talkMapper) {
+    public TalkCommandServiceImpl(TalkMapper talkMapper) {
         this.talkMapper = talkMapper;
     }
 

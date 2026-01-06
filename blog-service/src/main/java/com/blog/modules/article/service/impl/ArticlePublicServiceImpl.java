@@ -16,7 +16,7 @@ import com.blog.modules.tag.model.entity.Tag;
 import com.blog.modules.article.model.enums.ArticleStatus;
 import com.blog.modules.article.model.vo.ArticleVO;
 import com.blog.modules.tag.model.vo.TagVO;
-import com.blog.modules.article.service.ArticlePublicQueryService;
+import com.blog.modules.article.service.ArticlePublicService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 @Service
-public class ArticlePublicQueryServiceImpl implements ArticlePublicQueryService {
+public class ArticlePublicServiceImpl implements ArticlePublicService {
     @Autowired
     private ArticleMapper articleMapper;
 

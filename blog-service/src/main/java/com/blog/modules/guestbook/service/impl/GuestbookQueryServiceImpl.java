@@ -10,7 +10,7 @@ import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.guestbook.model.entity.Guestbook;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.guestbook.model.vo.GuestbookVO;
-import com.blog.modules.guestbook.service.GuestbookPublicQueryService;
+import com.blog.modules.guestbook.service.GuestbookQueryService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
-public class GuestbookPublicQueryServiceImpl implements GuestbookPublicQueryService {
+public class GuestbookQueryServiceImpl implements GuestbookQueryService {
     @Autowired
     private GuestbookMapper guestbookMapper;
 
@@ -27,12 +27,15 @@ public class GuestbookPublicQueryServiceImpl implements GuestbookPublicQueryServ
     private UserMapper userMapper;
 
     @Override
-    public PageResult<GuestbookVO> list(Long page, Long size) {
+    public PageResult<GuestbookVO> list(Long page, Long size, Integer reviewStatus) {
         Page<Guestbook> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Guestbook> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Guestbook::getIsVisible, 1)
-                .eq(Guestbook::getReviewStatus, 1)
-                .orderByDesc(Guestbook::getCreateTime);
+
+        if (reviewStatus != null) {
+            wrapper.eq(Guestbook::getReviewStatus, reviewStatus);
+        }
+
+        wrapper.orderByDesc(Guestbook::getCreateTime);
 
         Page<Guestbook> result = guestbookMapper.selectPage(pageParam, wrapper);
         List<GuestbookVO> voList = result.getRecords().stream()
@@ -40,6 +43,15 @@ public class GuestbookPublicQueryServiceImpl implements GuestbookPublicQueryServ
                 .collect(Collectors.toList());
 
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
+    }
+
+    @Override
+    public GuestbookVO getById(Long id) {
+        Guestbook guestbook = guestbookMapper.selectById(id);
+        if (guestbook == null) {
+            return null;
+        }
+        return convertToVO(guestbook);
     }
 
     private GuestbookVO convertToVO(Guestbook guestbook) {

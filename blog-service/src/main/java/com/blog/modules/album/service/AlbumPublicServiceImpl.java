@@ -13,7 +13,7 @@ import com.blog.modules.content.picture.model.entity.Picture;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.album.model.vo.AlbumVO;
 import com.blog.modules.content.picture.model.vo.PictureVO;
-import com.blog.modules.album.service.AlbumPublicQueryService;
+import com.blog.modules.album.service.AlbumPublicService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
-public class AlbumPublicQueryServiceImpl implements AlbumPublicQueryService {
+public class AlbumPublicServiceImpl implements AlbumPublicService {
     @Autowired
     private AlbumMapper albumMapper;
 

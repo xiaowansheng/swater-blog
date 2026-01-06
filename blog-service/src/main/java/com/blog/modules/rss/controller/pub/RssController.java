@@ -5,7 +5,7 @@ package com.blog.modules.rss.controller.pub;
 import com.blog.shared.annotation.ApiOperation;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.modules.article.model.vo.ArticleVO;
-import com.blog.modules.article.service.ArticlePublicQueryService;
+import com.blog.modules.article.service.ArticlePublicService;
 import com.rometools.rome.feed.rss.Channel;
 import com.rometools.rome.feed.rss.Description;
 import com.rometools.rome.feed.rss.Item;
@@ -30,7 +30,7 @@ import java.util.List;
 public class RssController {
     
     @Autowired
-    private ArticlePublicQueryService articlePublicQueryService;
+    private ArticlePublicService articlePublicService;
     
     @Value("${spring.application.name:Swater Blog}")
     private String siteName;
@@ -52,7 +52,7 @@ public class RssController {
             channel.setLastBuildDate(new Date());
             
             List<Item> items = new ArrayList<>();
-            List<ArticleVO> articles = articlePublicQueryService.getLatestArticles(20);
+            List<ArticleVO> articles = articlePublicService.getLatestArticles(20);
             
             for (ArticleVO article : articles) {
                 Item item = new Item();

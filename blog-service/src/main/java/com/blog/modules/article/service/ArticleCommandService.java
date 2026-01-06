@@ -3,7 +3,7 @@ package com.blog.modules.article.service;
 
 import com.blog.modules.article.model.dto.ArticleDTO;
 import java.util.List;
-public interface ArticleAdminCommandService {
+public interface ArticleCommandService {
     Long create(ArticleDTO dto);
 
     void update(Long id, ArticleDTO dto);

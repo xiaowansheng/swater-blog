@@ -11,7 +11,7 @@ import com.blog.modules.article.model.dto.ArticleDTO;
 import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.article.model.entity.ArticleTag;
 import com.blog.modules.article.model.enums.ArticleStatus;
-import com.blog.modules.article.service.ArticleAdminCommandService;
+import com.blog.modules.article.service.ArticleCommandService;
 import com.blog.modules.category.service.CategoryService;
 import com.blog.modules.tag.service.TagService;
 import com.blog.shared.util.BeanUtil;
@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
-public class ArticleAdminCommandServiceImpl implements ArticleAdminCommandService {
+public class ArticleCommandServiceImpl implements ArticleCommandService {
     @Autowired
     private ArticleMapper articleMapper;
 

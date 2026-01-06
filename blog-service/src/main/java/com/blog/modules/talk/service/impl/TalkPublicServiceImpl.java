@@ -10,7 +10,7 @@ import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.talk.model.vo.TalkVO;
-import com.blog.modules.talk.service.TalkPublicQueryService;
+import com.blog.modules.talk.service.TalkPublicService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
-public class TalkPublicQueryServiceImpl implements TalkPublicQueryService {
+public class TalkPublicServiceImpl implements TalkPublicService {
     @Autowired
     private TalkMapper talkMapper;
 

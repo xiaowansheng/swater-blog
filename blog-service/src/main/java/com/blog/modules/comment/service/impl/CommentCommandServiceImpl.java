@@ -12,7 +12,7 @@ import com.blog.modules.talk.mapper.TalkMapper;
 import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.comment.model.entity.Comment;
 import com.blog.modules.talk.model.entity.Talk;
-import com.blog.modules.comment.service.CommentAdminCommandService;
+import com.blog.modules.comment.service.CommentCommandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 @Service
-public class CommentAdminCommandServiceImpl implements CommentAdminCommandService {
+public class CommentCommandServiceImpl implements CommentCommandService {
     @Autowired
     private CommentMapper commentMapper;
 

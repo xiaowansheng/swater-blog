@@ -1,6 +1,6 @@
 package com.blog.modules.guestbook.service;
 
-public interface GuestbookAdminCommandService {
+public interface GuestbookCommandService {
     void approve(Long id);
 
     void reject(Long id);

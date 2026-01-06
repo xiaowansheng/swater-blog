@@ -10,8 +10,8 @@ import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.modules.article.model.vo.ArticleVO;
 import com.blog.modules.article.model.vo.ArticleStatisticsVO;
 import com.blog.modules.article.model.vo.ArticleSaveResultVO;
-import com.blog.modules.article.service.ArticleAdminCommandService;
-import com.blog.modules.article.service.ArticleAdminQueryService;
+import com.blog.modules.article.service.ArticleCommandService;
+import com.blog.modules.article.service.ArticleQueryService;
 import com.blog.modules.article.service.ArticleSaveService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +22,10 @@ import java.util.List;
 @ApiOperation(name = "文章管理模块", description = "文章的增删改查和发布管理", open = false)
 public class ArticleAdminController {
     @Autowired
-    private ArticleAdminQueryService articleAdminQueryService;
+    private ArticleQueryService articleQueryService;
 
     @Autowired
-    private ArticleAdminCommandService articleAdminCommandService;
+    private ArticleCommandService articleCommandService;
 
     @Autowired
     private ArticleSaveService articleSaveService;
@@ -39,7 +39,7 @@ public class ArticleAdminController {
             @RequestParam(required = false) Integer status,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String keyword) {
-        PageResult<ArticleVO> result = articleAdminQueryService.list(page, size, status, categoryId, keyword);
+        PageResult<ArticleVO> result = articleQueryService.list(page, size, status, categoryId, keyword);
         return Result.success(result);
     }
 
@@ -47,7 +47,7 @@ public class ArticleAdminController {
     @ApiOperation(name = "获取文章详情", type = ApiOperationType.QUERY,
             description = "根据ID查询单篇文章的详细信息")
     public Result<ArticleVO> getById(@PathVariable Long id) {
-        ArticleVO vo = articleAdminQueryService.getById(id);
+        ArticleVO vo = articleQueryService.getById(id);
         if (vo == null) {
             return Result.error(404, "文章不存在");
         }
@@ -58,7 +58,7 @@ public class ArticleAdminController {
     @ApiOperation(name = "创建文章", type = ApiOperationType.CREATE,
             description = "创建新文章")
     public Result<Long> create(@Valid @RequestBody ArticleDTO dto) {
-        Long id = articleAdminCommandService.create(dto);
+        Long id = articleCommandService.create(dto);
         return Result.success(id);
     }
 
@@ -66,7 +66,7 @@ public class ArticleAdminController {
     @ApiOperation(name = "更新文章", type = ApiOperationType.UPDATE,
             description = "更新已存在的文章内容")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody ArticleDTO dto) {
-        articleAdminCommandService.update(id, dto);
+        articleCommandService.update(id, dto);
         return Result.success();
     }
 
@@ -74,7 +74,7 @@ public class ArticleAdminController {
     @ApiOperation(name = "删除文章", type = ApiOperationType.DELETE,
             description = "删除单篇文章")
     public Result<Void> delete(@PathVariable Long id) {
-        articleAdminCommandService.delete(id);
+        articleCommandService.delete(id);
         return Result.success();
     }
 
@@ -82,7 +82,7 @@ public class ArticleAdminController {
     @ApiOperation(name = "批量删除文章", type = ApiOperationType.DELETE,
             description = "批量删除多篇文章")
     public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
-        articleAdminCommandService.deleteBatch(ids);
+        articleCommandService.deleteBatch(ids);
         return Result.success();
     }
 
@@ -90,7 +90,7 @@ public class ArticleAdminController {
     @ApiOperation(name = "发布文章", type = ApiOperationType.CREATE,
             description = "发布文章使其在前台可见")
     public Result<Void> publish(@PathVariable Long id) {
-        articleAdminCommandService.publish(id);
+        articleCommandService.publish(id);
         return Result.success();
     }
 
@@ -98,7 +98,7 @@ public class ArticleAdminController {
     @ApiOperation(name = "取消发布", type = ApiOperationType.CREATE,
             description = "取消文章发布，使其变为草稿状态")
     public Result<Void> unpublish(@PathVariable Long id) {
-        articleAdminCommandService.unpublish(id);
+        articleCommandService.unpublish(id);
         return Result.success();
     }
 
@@ -106,7 +106,7 @@ public class ArticleAdminController {
     @ApiOperation(name = "文章统计", type = ApiOperationType.QUERY,
             description = "获取文章相关统计数据")
     public Result<ArticleStatisticsVO> getStatistics() {
-        ArticleStatisticsVO statistics = articleAdminQueryService.getStatistics();
+        ArticleStatisticsVO statistics = articleQueryService.getStatistics();
         return Result.success(statistics);
     }
 

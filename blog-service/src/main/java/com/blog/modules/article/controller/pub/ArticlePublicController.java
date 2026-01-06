@@ -7,7 +7,7 @@ import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.modules.article.model.vo.ArticleVO;
-import com.blog.modules.article.service.ArticlePublicQueryService;
+import com.blog.modules.article.service.ArticlePublicService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +25,7 @@ import java.util.List;
 @ApiDocumentation.PublicApi
 public class ArticlePublicController {
     @Autowired
-    private ArticlePublicQueryService articlePublicQueryService;
+    private ArticlePublicService articlePublicService;
 
     @GetMapping("/list")
     @ApiOperation(name = "获取文章列表", type = ApiOperationType.QUERY, description = "获取已发布的文章列表，支持分页和多种筛选条件")
@@ -65,7 +65,7 @@ public class ArticlePublicController {
             
             @Parameter(description = "搜索关键词，在标题和内容中搜索", example = "Spring Boot")
             @RequestParam(required = false) String keyword) {
-        PageResult<ArticleVO> result = articlePublicQueryService.list(page, size, categoryId, tagId, keyword);
+        PageResult<ArticleVO> result = articlePublicService.list(page, size, categoryId, tagId, keyword);
         return Result.success(result);
     }
 
@@ -114,7 +114,7 @@ public class ArticlePublicController {
     public Result<ArticleVO> getById(
             @Parameter(description = "文章ID", required = true, example = "1")
             @PathVariable Long id) {
-        ArticleVO vo = articlePublicQueryService.getById(id);
+        ArticleVO vo = articlePublicService.getById(id);
         if (vo == null) {
             return Result.error(404, "文章不存在");
         }
@@ -138,7 +138,7 @@ public class ArticlePublicController {
     public Result<ArticleVO> getBySlug(
             @Parameter(description = "文章URL别名", required = true, example = "spring-boot-tutorial")
             @PathVariable String slug) {
-        ArticleVO vo = articlePublicQueryService.getBySlug(slug);
+        ArticleVO vo = articlePublicService.getBySlug(slug);
         if (vo == null) {
             return Result.error(404, "文章不存在");
         }
@@ -161,7 +161,7 @@ public class ArticlePublicController {
     public Result<ArticleVO> getByKey(
             @Parameter(description = "文章Key", required = true, example = "article-123")
             @PathVariable String key) {
-        ArticleVO vo = articlePublicQueryService.getByKey(key);
+        ArticleVO vo = articlePublicService.getByKey(key);
         if (vo == null) {
             return Result.error(404, "文章不存在");
         }
@@ -211,14 +211,14 @@ public class ArticlePublicController {
     public Result<List<ArticleVO>> getHotArticles(
             @Parameter(description = "返回数量限制，默认10，最大50", example = "10")
             @RequestParam(required = false) Integer limit) {
-        List<ArticleVO> articles = articlePublicQueryService.getHotArticles(limit);
+        List<ArticleVO> articles = articlePublicService.getHotArticles(limit);
         return Result.success(articles);
     }
 
     @GetMapping("/latest")
     @ApiOperation(name = "获取最新文章", type = ApiOperationType.QUERY, description = "获取最新发布的文章列表")
     public Result<List<ArticleVO>> getLatestArticles(@RequestParam(required = false) Integer limit) {
-        List<ArticleVO> articles = articlePublicQueryService.getLatestArticles(limit);
+        List<ArticleVO> articles = articlePublicService.getLatestArticles(limit);
         return Result.success(articles);
     }
 }

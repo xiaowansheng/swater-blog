@@ -2,7 +2,7 @@ package com.blog.modules.talk.service;
 
 
 import com.blog.modules.talk.model.dto.TalkDTO;
-public interface TalkAdminCommandService {
+public interface TalkCommandService {
     Long create(TalkDTO dto);
 
     void update(Long id, TalkDTO dto);

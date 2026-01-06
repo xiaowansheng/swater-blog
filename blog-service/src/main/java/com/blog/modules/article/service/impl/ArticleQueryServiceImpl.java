@@ -15,7 +15,7 @@ import com.blog.modules.article.model.enums.ArticleStatus;
 import com.blog.modules.article.model.vo.ArticleVO;
 import com.blog.modules.article.model.vo.ArticleStatisticsVO;
 import com.blog.modules.tag.model.vo.TagVO;
-import com.blog.modules.article.service.ArticleAdminQueryService;
+import com.blog.modules.article.service.ArticleQueryService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
-public class ArticleAdminQueryServiceImpl implements ArticleAdminQueryService {
+public class ArticleQueryServiceImpl implements ArticleQueryService {
     @Autowired
     private ArticleMapper articleMapper;
 

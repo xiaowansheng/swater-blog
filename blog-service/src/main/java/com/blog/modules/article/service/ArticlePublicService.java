@@ -4,7 +4,7 @@ package com.blog.modules.article.service;
 import com.blog.shared.PageResult;
 import com.blog.modules.article.model.vo.ArticleVO;
 import java.util.List;
-public interface ArticlePublicQueryService {
+public interface ArticlePublicService {
     PageResult<ArticleVO> list(Long page, Long size, Long categoryId, Long tagId, String keyword);
 
     ArticleVO getById(Long id);

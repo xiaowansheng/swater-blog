@@ -4,7 +4,7 @@ package com.blog.modules.guestbook.service.impl;
 import com.blog.modules.guestbook.event.*;
 import com.blog.modules.guestbook.mapper.GuestbookMapper;
 import com.blog.modules.guestbook.model.entity.Guestbook;
-import com.blog.modules.guestbook.service.GuestbookAdminCommandService;
+import com.blog.modules.guestbook.service.GuestbookCommandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 @Service
-public class GuestbookAdminCommandServiceImpl implements GuestbookAdminCommandService {
+public class GuestbookCommandServiceImpl implements GuestbookCommandService {
     @Autowired
     private GuestbookMapper guestbookMapper;
 

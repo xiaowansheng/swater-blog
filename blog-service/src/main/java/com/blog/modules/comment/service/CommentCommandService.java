@@ -1,6 +1,6 @@
 package com.blog.modules.comment.service;
 
-public interface CommentAdminCommandService {
+public interface CommentCommandService {
     void approve(Long id);
 
     void reject(Long id);
