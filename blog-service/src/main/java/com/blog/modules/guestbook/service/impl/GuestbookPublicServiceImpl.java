@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.shared.PageResult;
 import com.blog.modules.guestbook.mapper.GuestbookMapper;
 import com.blog.modules.user.mapper.UserMapper;
+import com.blog.modules.guestbook.model.dto.GuestbookDTO;
 import com.blog.modules.guestbook.model.entity.Guestbook;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.guestbook.model.vo.GuestbookVO;
@@ -16,6 +17,7 @@ import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
@@ -40,6 +42,25 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
                 .collect(Collectors.toList());
 
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
+    }
+
+    @Override
+    public GuestbookVO submit(GuestbookDTO dto) {
+        Guestbook guestbook = BeanUtil.copyProperties(dto, Guestbook.class);
+        
+        // Set default values
+        guestbook.setIsVisible(1); // Visible by default
+        guestbook.setReviewStatus(0); // Pending review
+        // Convert images list to JSON string if present
+        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+            guestbook.setImages(JsonUtil.toJson(dto.getImages()));
+        }
+        
+        // Save to database
+        guestbookMapper.insert(guestbook);
+        
+        // Convert to VO and return
+        return convertToVO(guestbook);
     }
 
     private GuestbookVO convertToVO(Guestbook guestbook) {

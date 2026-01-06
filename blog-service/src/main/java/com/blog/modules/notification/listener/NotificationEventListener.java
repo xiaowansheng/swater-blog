@@ -58,7 +58,7 @@ public class NotificationEventListener {
     public void handleUserLoggedIn(UserLoggedInEvent event) {
         try {
             NotifyConfigDTO notifyConfig = siteConfigService.getNotifyConfig();
-            if (notifyConfig == null || notifyConfig.getLoginEmail() == null || !notifyConfig.getLoginEmail()) {
+            if (notifyConfig == null || notifyConfig.getLoginNotify() == null || !notifyConfig.getLoginNotify()) {
                 log.debug("登录通知未启用，跳过发送");
                 return;
             }
@@ -139,7 +139,7 @@ public class NotificationEventListener {
     public void handleCommentCreated(CommentCreatedEvent event) {
         try {
             NotifyConfigDTO notifyConfig = siteConfigService.getNotifyConfig();
-            if (notifyConfig == null || notifyConfig.getCommentEmail() == null || !notifyConfig.getCommentEmail()) {
+            if (notifyConfig == null || notifyConfig.getCommentNotify() == null || !notifyConfig.getCommentNotify()) {
                 log.debug("评论通知未启用，跳过发送");
                 return;
             }
@@ -154,7 +154,7 @@ public class NotificationEventListener {
 
             // 1. 如果是回复评论，通知被回复的用户
             if (parentId != null && parentId > 0 && commentMapper != null) {
-                boolean replyEnabled = notifyConfig.getReplyEmail() != null && notifyConfig.getReplyEmail();
+                boolean replyEnabled = notifyConfig.getReplyNotify() != null && notifyConfig.getReplyNotify();
                 if (replyEnabled) {
                     try {
                         // 查询父评论获取被回复用户的ID
@@ -244,7 +244,7 @@ public class NotificationEventListener {
     public void handleGuestbookCreated(GuestbookCreatedEvent event) {
         try {
             NotifyConfigDTO notifyConfig = siteConfigService.getNotifyConfig();
-            if (notifyConfig == null || notifyConfig.getGuestbookEmail() == null || !notifyConfig.getGuestbookEmail()) {
+            if (notifyConfig == null || notifyConfig.getGuestbookNotify() == null || !notifyConfig.getGuestbookNotify()) {
                 log.debug("留言通知未启用，跳过发送");
                 return;
             }
@@ -274,7 +274,7 @@ public class NotificationEventListener {
     public void handleFriendLinkCreated(FriendLinkCreatedEvent event) {
         try {
             NotifyConfigDTO notifyConfig = siteConfigService.getNotifyConfig();
-            if (notifyConfig == null || notifyConfig.getFriendLinkEmail() == null || !notifyConfig.getFriendLinkEmail()) {
+            if (notifyConfig == null || notifyConfig.getFriendLinkNotify() == null || !notifyConfig.getFriendLinkNotify()) {
                 log.debug("友链申请通知未启用，跳过发送");
                 return;
             }

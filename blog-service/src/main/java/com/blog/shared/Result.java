@@ -4,7 +4,9 @@ package com.blog.shared;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Data
@@ -13,7 +15,6 @@ public class Result<T> {
     private String message;
     private T data;
     private LocalDateTime timestamp;
-
 
 
     public static <T> Result<T> success(T data) {
@@ -26,9 +27,17 @@ public class Result<T> {
     }
 
 
-
     public static <T> Result<T> success() {
         return success(null);
+    }
+
+    public static <T> Result<T> success(String message, T data) {
+        Result<T> result = new Result<>();
+        result.setCode(200);
+        result.setMessage(message);
+        result.setData(data);
+        result.setTimestamp(LocalDateTime.now());
+        return result;
     }
 
     public static <T> Result<T> error(Integer code, String message) {

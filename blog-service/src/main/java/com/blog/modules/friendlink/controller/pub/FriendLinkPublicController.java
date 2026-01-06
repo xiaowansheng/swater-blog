@@ -1,7 +1,6 @@
 package com.blog.modules.friendlink.controller.pub;
 
 
-
 import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.Result;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
@@ -14,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @RestController
 @RequestMapping("/api/public/friend-link")
 @ApiOperation(name = "友链公开接口", description = "友情链接相关接口", open = true)
@@ -35,7 +35,7 @@ public class FriendLinkPublicController {
     @ApiOperation(name = "申请友情链接", type = ApiOperationType.CREATE, description = "前台访客提交友链申请")
     public Result<Long> apply(@Valid @RequestBody FriendLinkApplicationDTO dto) {
         Long id = friendLinkPublicService.apply(dto);
-        return Result.success(id, "友链申请已提交，等待管理员审核");
+        return Result.success("友链申请已提交，等待管理员审核", id);
     }
 }
 
