@@ -178,6 +178,14 @@ export interface FriendLinkVO {
   category?: string;
 }
 
+export interface FriendLinkApplicationDTO {
+  name: string;
+  url: string;
+  logo?: string;
+  description?: string;
+  author: string;
+}
+
 export interface SearchVO {
   id: number;
   articleKey?: string;
