@@ -1,8 +1,8 @@
 package com.blog.modules.friendlink.model.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.URL;
 import lombok.Data;
+import jakarta.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.URL;
 
 /**
  * 友链申请DTO（前台访客申请友链使用）
