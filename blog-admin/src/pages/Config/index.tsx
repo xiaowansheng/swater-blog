@@ -43,8 +43,8 @@ const ConfigPage: React.FC = () => {
   const [privacyForm] = Form.useForm();
   const [commentForm] = Form.useForm();
   const [notifyForm] = Form.useForm();
-  const [uploadForm] = Form.useForm();
-  const [emailForm] = Form.useForm();
+  // const [uploadForm] = Form.useForm();
+  // const [emailForm] = Form.useForm();
 
   useEffect(() => {
     loadAllConfigs();
@@ -61,8 +61,8 @@ const ConfigPage: React.FC = () => {
         privacy,
         comment,
         notify,
-        upload,
-        email,
+        // upload,
+        // email,
       ] = await Promise.all([
         configApi.getSiteConfig(),
         configApi.getAuthorConfig(),
@@ -71,8 +71,8 @@ const ConfigPage: React.FC = () => {
         configApi.getPrivacyConfig(),
         configApi.getCommentConfig(),
         configApi.getNotifyConfig(),
-        configApi.getUploadConfig(),
-        configApi.getEmailConfig(),
+        // configApi.getUploadConfig(),
+        // configApi.getEmailConfig(),
       ]);
       siteForm.setFieldsValue(site);
       authorForm.setFieldsValue(author);
@@ -80,8 +80,8 @@ const ConfigPage: React.FC = () => {
       privacyForm.setFieldsValue(privacy);
       commentForm.setFieldsValue(comment);
       notifyForm.setFieldsValue(notify);
-      uploadForm.setFieldsValue(upload);
-      emailForm.setFieldsValue(email);
+      // uploadForm.setFieldsValue(upload);
+      // emailForm.setFieldsValue(email);
     } catch (error) {
       console.error("加载配置失败", error);
       message.error("加载配置失败");
@@ -513,96 +513,96 @@ const ConfigPage: React.FC = () => {
         </Form>
       ),
     },
-    {
-      key: "upload",
-      label: (
-        <span>
-          <CloudUploadOutlined /> 上传设置
-        </span>
-      ),
-      children: (
-        <Form form={uploadForm} layout="vertical" className="config-form">
-          <Form.Item
-            name="maxSize"
-            label="文件大小限制(字节)"
-            tooltip="默认10MB = 10485760字节"
-          >
-            <InputNumber min={1048576} max={104857600} style={{ width: 200 }} />
-          </Form.Item>
-          <Form.Item
-            name="allowedTypes"
-            label="允许的文件类型"
-            tooltip="多个类型用逗号分隔"
-          >
-            <Input placeholder="jpg,jpeg,png,gif,webp,pdf" />
-          </Form.Item>
-          <Form.Item
-            name="imageCompress"
-            label="图片自动压缩"
-            valuePropName="checked"
-          >
-            <Switch />
-          </Form.Item>
-          <Form.Item name="imageQuality" label="压缩质量(1-100)">
-            <InputNumber min={1} max={100} />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              loading={saving}
-              onClick={() =>
-                handleSave("upload", uploadForm, configApi.updateUploadConfig)
-              }
-            >
-              保存
-            </Button>
-          </Form.Item>
-        </Form>
-      ),
-    },
-    {
-      key: "email",
-      label: (
-        <span>
-          <MailOutlined /> 邮件设置
-        </span>
-      ),
-      children: (
-        <Form form={emailForm} layout="vertical" className="config-form">
-          <Form.Item name="enable" label="启用邮件功能" valuePropName="checked">
-            <Switch />
-          </Form.Item>
-          <Form.Item name="host" label="SMTP服务器">
-            <Input placeholder="如：smtp.qq.com" />
-          </Form.Item>
-          <Form.Item name="port" label="SMTP端口">
-            <InputNumber min={1} max={65535} />
-          </Form.Item>
-          <Form.Item name="username" label="邮箱账号">
-            <Input placeholder="发件人邮箱" />
-          </Form.Item>
-          <Form.Item name="password" label="邮箱密码/授权码">
-            <Input.Password placeholder="邮箱密码或授权码" />
-          </Form.Item>
-          <Form.Item name="fromName" label="发件人名称">
-            <Input placeholder="邮件显示的发件人名称" />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              loading={saving}
-              onClick={() =>
-                handleSave("email", emailForm, configApi.updateEmailConfig)
-              }
-            >
-              保存
-            </Button>
-          </Form.Item>
-        </Form>
-      ),
-    },
+    // {
+    //   key: "upload",
+    //   label: (
+    //     <span>
+    //       <CloudUploadOutlined /> 上传设置
+    //     </span>
+    //   ),
+    //   children: (
+    //     <Form form={uploadForm} layout="vertical" className="config-form">
+    //       <Form.Item
+    //         name="maxSize"
+    //         label="文件大小限制(字节)"
+    //         tooltip="默认10MB = 10485760字节"
+    //       >
+    //         <InputNumber min={1048576} max={104857600} style={{ width: 200 }} />
+    //       </Form.Item>
+    //       <Form.Item
+    //         name="allowedTypes"
+    //         label="允许的文件类型"
+    //         tooltip="多个类型用逗号分隔"
+    //       >
+    //         <Input placeholder="jpg,jpeg,png,gif,webp,pdf" />
+    //       </Form.Item>
+    //       <Form.Item
+    //         name="imageCompress"
+    //         label="图片自动压缩"
+    //         valuePropName="checked"
+    //       >
+    //         <Switch />
+    //       </Form.Item>
+    //       <Form.Item name="imageQuality" label="压缩质量(1-100)">
+    //         <InputNumber min={1} max={100} />
+    //       </Form.Item>
+    //       <Form.Item>
+    //         <Button
+    //           type="primary"
+    //           icon={<SaveOutlined />}
+    //           loading={saving}
+    //           onClick={() =>
+    //             handleSave("upload", uploadForm, configApi.updateUploadConfig)
+    //           }
+    //         >
+    //           保存
+    //         </Button>
+    //       </Form.Item>
+    //     </Form>
+    //   ),
+    // },
+    // {
+    //   key: "email",
+    //   label: (
+    //     <span>
+    //       <MailOutlined /> 邮件设置
+    //     </span>
+    //   ),
+    //   children: (
+    //     <Form form={emailForm} layout="vertical" className="config-form">
+    //       <Form.Item name="enable" label="启用邮件功能" valuePropName="checked">
+    //         <Switch />
+    //       </Form.Item>
+    //       <Form.Item name="host" label="SMTP服务器">
+    //         <Input placeholder="如：smtp.qq.com" />
+    //       </Form.Item>
+    //       <Form.Item name="port" label="SMTP端口">
+    //         <InputNumber min={1} max={65535} />
+    //       </Form.Item>
+    //       <Form.Item name="username" label="邮箱账号">
+    //         <Input placeholder="发件人邮箱" />
+    //       </Form.Item>
+    //       <Form.Item name="password" label="邮箱密码/授权码">
+    //         <Input.Password placeholder="邮箱密码或授权码" />
+    //       </Form.Item>
+    //       <Form.Item name="fromName" label="发件人名称">
+    //         <Input placeholder="邮件显示的发件人名称" />
+    //       </Form.Item>
+    //       <Form.Item>
+    //         <Button
+    //           type="primary"
+    //           icon={<SaveOutlined />}
+    //           loading={saving}
+    //           onClick={() =>
+    //             handleSave("email", emailForm, configApi.updateEmailConfig)
+    //           }
+    //         >
+    //           保存
+    //         </Button>
+    //       </Form.Item>
+    //     </Form>
+    //   ),
+    // },
   ];
 
   return (
