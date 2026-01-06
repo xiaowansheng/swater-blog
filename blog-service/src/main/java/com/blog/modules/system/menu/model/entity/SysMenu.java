@@ -9,8 +9,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @TableName("sys_menu")
 public class SysMenu extends com.blog.shared.model.entity.BaseEntity {
-    private String menuKey;
-
     private String title;
 
     private String icon;
