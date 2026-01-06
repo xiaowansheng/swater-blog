@@ -26,5 +26,30 @@
         </if>
         ORDER BY published_at DESC
     </select>
+
+    <select id="selectArchiveStatistics" resultType="java.util.HashMap">
+        SELECT
+            YEAR(published_at) as year,
+            MONTH(published_at) as month,
+            COUNT(*) as postCount
+        FROM article
+        WHERE deleted = 0 AND status = 1 AND published_at IS NOT NULL
+        GROUP BY YEAR(published_at), MONTH(published_at)
+        ORDER BY year DESC, month DESC
+    </select>
+
+    <select id="selectAllArchiveStatistics" resultType="java.util.HashMap">
+        SELECT
+            YEAR(published_at) as year,
+            MONTH(published_at) as month,
+            COUNT(*) as postCount,
+            SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) as publishedCount,
+            SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) as draftCount,
+            SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) as privateCount
+        FROM article
+        WHERE deleted = 0 AND published_at IS NOT NULL
+        GROUP BY YEAR(published_at), MONTH(published_at)
+        ORDER BY year DESC, month DESC
+    </select>
 </mapper>
 

@@ -151,9 +151,11 @@ export interface CommentVO {
 
 export interface ArchiveVO {
   year: number;
-  month?: number;
-  count: number;
-  posts?: PostVO[];
+  month: number;
+  postCount: number;
+  publishedCount?: number;
+  draftCount?: number;
+  privateCount?: number;
 }
 
 export interface MomentVO {

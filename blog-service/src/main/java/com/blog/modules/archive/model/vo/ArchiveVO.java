@@ -13,5 +13,11 @@ public class ArchiveVO extends com.blog.shared.model.vo.BaseVO {
     private Integer month;
 
     private Integer postCount;
+
+    private Integer publishedCount;
+
+    private Integer draftCount;
+
+    private Integer privateCount;
 }
 

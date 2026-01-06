@@ -88,6 +88,16 @@ export interface ArticleStatistics {
   totalCommentCount: number
 }
 
+// 归档相关
+export interface ArchiveVO {
+  year: number
+  month: number
+  postCount: number
+  publishedCount?: number
+  draftCount?: number
+  privateCount?: number
+}
+
 
 // 分类相关
 export interface Category {
