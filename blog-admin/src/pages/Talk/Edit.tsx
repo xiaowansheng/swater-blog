@@ -6,6 +6,9 @@ import { createTalk, updateTalk, getTalkById } from '@/api/talk'
 import { TalkStatus } from '@/types'
 import RichTextEditor from '@/components/common/RichTextEditor'
 import MultiImageUpload from '@/components/common/MultiImageUpload'
+import TalkSaveStatus from '@/components/talk/TalkSaveStatus'
+
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
 const TalkEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -14,6 +17,11 @@ const TalkEdit: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const status = Form.useWatch('status', form)
+
+  // 保存状态
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
+  const [lastSavedTime, setLastSavedTime] = useState<Date>()
+  const [errorMessage, setErrorMessage] = useState<string>()
 
   const isEdit = !!id
 
@@ -38,6 +46,9 @@ const TalkEdit: React.FC = () => {
         isTop: talk.isTop === 1,
         images: talk.images || []
       })
+      // 设置已保存状态
+      setSaveStatus('saved')
+      setLastSavedTime(new Date(talk.updateTime || talk.createTime))
     } catch (error) {
       message.error('加载说说失败')
       navigate('/talk')
@@ -48,6 +59,7 @@ const TalkEdit: React.FC = () => {
 
   const handleSubmit = async (values: any) => {
     setSubmitting(true)
+    setSaveStatus('saving')
     try {
       const data = {
         ...values,
@@ -61,10 +73,19 @@ const TalkEdit: React.FC = () => {
         await createTalk(data)
         message.success('发布成功')
       }
-      navigate('/talk')
+
+      setSaveStatus('saved')
+      setLastSavedTime(new Date())
+
+      // 等待一小段时间让用户看到保存成功状态
+      setTimeout(() => {
+        navigate('/talk')
+      }, 300)
     } catch (error) {
       console.error('提交失败', error)
       message.error('操作失败')
+      setSaveStatus('error')
+      setErrorMessage('操作失败，请重试')
     } finally {
       setSubmitting(false)
     }
@@ -74,6 +95,8 @@ const TalkEdit: React.FC = () => {
     try {
       const values = await form.validateFields()
       setSubmitting(true)
+      setSaveStatus('saving')
+      setErrorMessage(undefined)
 
       const data = {
         ...values,
@@ -92,12 +115,18 @@ const TalkEdit: React.FC = () => {
           navigate(`/talk/edit/${newId}`, { replace: true })
         }
       }
+
+      setSaveStatus('saved')
+      setLastSavedTime(new Date())
     } catch (error) {
       if (error?.errorFields) {
         message.warning('请填写必填项')
+        setSaveStatus('idle')
       } else {
         console.error('保存失败', error)
         message.error('保存失败')
+        setSaveStatus('error')
+        setErrorMessage('保存失败，请重试')
       }
     } finally {
       setSubmitting(false)
@@ -134,6 +163,11 @@ const TalkEdit: React.FC = () => {
           </h2>
         </div>
         <Space>
+          <TalkSaveStatus
+            status={saveStatus}
+            lastSavedTime={lastSavedTime}
+            errorMessage={errorMessage}
+          />
           <Button
             icon={<SaveOutlined />}
             loading={submitting}
