@@ -347,28 +347,21 @@ const ArticleEdit: React.FC = () => {
         </div>
         <Space>
           {/* 保存状态指示器 */}
-          <SaveStatusIndicator 
+          <SaveStatusIndicator
             saveState={saveState}
             statusText={getStatusText()}
             onRetry={handleRetry}
           />
-          
-          <Button 
-            icon={<CloudSyncOutlined />}
-            loading={isSaving}
-            onClick={handleSaveToServer}
-          >
-            保存到服务器
-          </Button>
-          <Button 
+
+          <Button
             icon={<SaveOutlined />}
             loading={isSaving}
             onClick={handleSaveDraft}
           >
-            保存草稿
+            保存草稿 (Ctrl+S)
           </Button>
-          <Button 
-            type="primary" 
+          <Button
+            type="primary"
             icon={<SendOutlined />}
             loading={loading}
             onClick={() => {
@@ -420,7 +413,7 @@ const ArticleEdit: React.FC = () => {
               >
                 <MarkdownEditor
                   onChange={handleContentChange}
-                  onSave={handleSaveToServer}
+                  onSave={handleSaveDraft}
                 />
               </Form.Item>
           </Card>
