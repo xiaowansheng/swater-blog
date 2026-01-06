@@ -87,55 +87,55 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     // ========== 获取配置 ==========
     
     @Override
-    @Cacheable(value = "configs", key = "'site'")
+    @Cacheable(value = "configs", key = "'site'", unless = "#result == null")
     public SiteConfigDTO getSiteConfig() {
         return getConfig(KEY_SITE, SiteConfigDTO.class);
     }
-    
+
     @Override
-    @Cacheable(value = "configs", key = "'author'")
+    @Cacheable(value = "configs", key = "'author'", unless = "#result == null")
     public AuthorConfigDTO getAuthorConfig() {
         return getConfig(KEY_AUTHOR, AuthorConfigDTO.class);
     }
-    
+
     @Override
-    @Cacheable(value = "configs", key = "'cover'")
+    @Cacheable(value = "configs", key = "'cover'", unless = "#result == null")
     public CoverConfigDTO getCoverConfig() {
         return getConfig(KEY_COVER, CoverConfigDTO.class);
     }
-    
+
     @Override
-    @Cacheable(value = "configs", key = "'social'")
+    @Cacheable(value = "configs", key = "'social'", unless = "#result == null")
     public SocialConfigDTO getSocialConfig() {
         return getConfig(KEY_SOCIAL, SocialConfigDTO.class);
     }
-    
+
     @Override
-    @Cacheable(value = "configs", key = "'privacy'")
+    @Cacheable(value = "configs", key = "'privacy'", unless = "#result == null")
     public PrivacyConfigDTO getPrivacyConfig() {
         return getConfig(KEY_PRIVACY, PrivacyConfigDTO.class);
     }
-    
+
     @Override
-    @Cacheable(value = "configs", key = "'comment'")
+    @Cacheable(value = "configs", key = "'comment'", unless = "#result == null")
     public CommentConfigDTO getCommentConfig() {
         return getConfig(KEY_COMMENT, CommentConfigDTO.class);
     }
-    
+
     @Override
-    @Cacheable(value = "configs", key = "'notify'")
+    @Cacheable(value = "configs", key = "'notify'", unless = "#result == null")
     public NotifyConfigDTO getNotifyConfig() {
         return getConfig(KEY_NOTIFY, NotifyConfigDTO.class);
     }
-    
+
     @Override
-    @Cacheable(value = "configs", key = "'upload'")
+    @Cacheable(value = "configs", key = "'upload'", unless = "#result == null")
     public UploadConfigDTO getUploadConfig() {
         return getConfig(KEY_UPLOAD, UploadConfigDTO.class);
     }
-    
+
     @Override
-    @Cacheable(value = "configs", key = "'email'")
+    @Cacheable(value = "configs", key = "'email'", unless = "#result == null")
     public EmailConfigDTO getEmailConfig() {
         return getConfig(KEY_EMAIL, EmailConfigDTO.class);
     }
@@ -208,7 +208,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     // ========== 前台公开接口 ==========
     
     @Override
-    @Cacheable(value = "configs", key = "'public'")
+    @Cacheable(value = "configs", key = "'public'", unless = "#result == null || #result.isEmpty()")
     public Map<String, Object> getPublicConfig() {
         Map<String, Object> result = new LinkedHashMap<>();
         

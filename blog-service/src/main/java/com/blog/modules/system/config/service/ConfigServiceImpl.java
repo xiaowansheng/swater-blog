@@ -30,7 +30,7 @@ public class ConfigServiceImpl implements ConfigService {
     private SysConfigMapper sysConfigMapper;
 
     @Override
-    @Cacheable(value = "configs", key = "'list:' + (#groupName != null ? #groupName : 'all')")
+    @Cacheable(value = "configs", key = "'list:' + (#groupName != null ? #groupName : 'all')", unless = "#result == null || #result.isEmpty()")
     public List<ConfigVO> list(String groupName) {
         LambdaQueryWrapper<SysConfig> wrapper = new LambdaQueryWrapper<>();
         if (groupName != null && !groupName.isEmpty()) {
@@ -46,7 +46,7 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    @Cacheable(value = "configs", key = "'groups'")
+    @Cacheable(value = "configs", key = "'groups'", unless = "#result == null || #result.isEmpty()")
     public List<String> getGroups() {
         LambdaQueryWrapper<SysConfig> wrapper = new LambdaQueryWrapper<>();
         wrapper.select(SysConfig::getGroupName);
@@ -62,7 +62,7 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    @Cacheable(value = "configs", key = "'key:' + #key")
+    @Cacheable(value = "configs", key = "'key:' + #key", unless = "#result == null")
     public ConfigVO getByKey(String key) {
         SysConfig config = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
                 .eq(SysConfig::getConfigKey, key));
