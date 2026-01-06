@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Form, Button, message, Card, Switch, Radio, Space } from 'antd'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeftOutlined, SendOutlined, SaveOutlined } from '@ant-design/icons'
@@ -53,7 +53,7 @@ const TalkEdit: React.FC = () => {
         ...values,
         isTop: values.isTop ? 1 : 0,
       }
-      
+
       if (isEdit) {
         await updateTalk(Number(id), data)
         message.success('更新成功')
@@ -70,18 +70,86 @@ const TalkEdit: React.FC = () => {
     }
   }
 
+  const handleSave = useCallback(async () => {
+    try {
+      const values = await form.validateFields()
+      setSubmitting(true)
+
+      const data = {
+        ...values,
+        isTop: values.isTop ? 1 : 0,
+        status: TalkStatus.DRAFT, // 保存按钮固定保存为草稿
+      }
+
+      if (isEdit) {
+        await updateTalk(Number(id), data)
+        message.success('保存成功')
+      } else {
+        const newId = await createTalk(data)
+        message.success('保存成功')
+        // 保存后跳转到编辑页面，以便继续编辑
+        if (!id && newId) {
+          navigate(`/talk/edit/${newId}`, { replace: true })
+        }
+      }
+    } catch (error) {
+      if (error?.errorFields) {
+        message.warning('请填写必填项')
+      } else {
+        console.error('保存失败', error)
+        message.error('保存失败')
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }, [form, isEdit, id, navigate])
+
+  // 快捷键保存 Ctrl+S 或 Cmd+S
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        handleSave()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [handleSave])
+
   return (
     <div className="page-container">
-      <div className="flex items-center gap-4 mb-4">
-        <Button 
-          icon={<ArrowLeftOutlined />} 
-          onClick={() => navigate('/talk')}
-        >
-          返回列表
-        </Button>
-        <h2 className="text-xl font-semibold m-0">
-          {isEdit ? '编辑说说' : '发布说说'}
-        </h2>
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-4">
+          <Button
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate('/talk')}
+          >
+            返回列表
+          </Button>
+          <h2 className="text-xl font-semibold m-0">
+            {isEdit ? '编辑说说' : '发布说说'}
+          </h2>
+        </div>
+        <Space>
+          <Button
+            icon={<SaveOutlined />}
+            loading={submitting}
+            onClick={handleSave}
+          >
+            保存草稿 (Ctrl+S)
+          </Button>
+          <Button
+            type="primary"
+            loading={submitting}
+            icon={<SendOutlined />}
+            onClick={() => form.submit()}
+          >
+            {isEdit ? '保存修改' : '立即发布'}
+          </Button>
+        </Space>
       </div>
 
       <Card loading={loading} className="shadow-sm">
@@ -108,42 +176,26 @@ const TalkEdit: React.FC = () => {
           </Form.Item>
 
           <div className="flex gap-8">
-            <Form.Item 
-              name="isTop" 
-              label="置顶" 
+            <Form.Item
+              name="isTop"
+              label="置顶"
               valuePropName="checked"
             >
               <Switch checkedChildren="是" unCheckedChildren="否" />
             </Form.Item>
 
-            <Form.Item 
-              name="status" 
-              label="发布状态" 
+            <Form.Item
+              name="status"
+              label="发布状态"
               rules={[{ required: true }]}
             >
               <Radio.Group>
                 <Radio value={TalkStatus.PUBLISHED}>正式发布</Radio>
-                <Radio value={TalkStatus.DRAFT}>保存草稿</Radio>
+                <Radio value={TalkStatus.PRIVATE}>私密</Radio>
+                <Radio value={TalkStatus.DRAFT}>草稿</Radio>
               </Radio.Group>
             </Form.Item>
           </div>
-
-          <Form.Item className="mb-0 mt-4">
-            <Space size="middle">
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={submitting}
-                icon={status === TalkStatus.PUBLISHED ? <SendOutlined /> : <SaveOutlined />}
-                size="large"
-              >
-                {isEdit ? '保存修改' : (status === TalkStatus.PUBLISHED ? '立即发布' : '保存草稿')}
-              </Button>
-              <Button size="large" onClick={() => navigate('/talk')}>
-                取消
-              </Button>
-            </Space>
-          </Form.Item>
         </Form>
       </Card>
     </div>

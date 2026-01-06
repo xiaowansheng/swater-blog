@@ -128,6 +128,7 @@ const TalkPage: React.FC = () => {
             allowClear
           >
             <Select.Option value={TalkStatus.PUBLISHED}>已发布</Select.Option>
+            <Select.Option value={TalkStatus.PRIVATE}>私密</Select.Option>
             <Select.Option value={TalkStatus.DRAFT}>草稿</Select.Option>
           </Select>
           <Select

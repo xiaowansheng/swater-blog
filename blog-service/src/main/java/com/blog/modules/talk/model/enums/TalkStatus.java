@@ -8,7 +8,8 @@ import lombok.Getter;
 @Getter
 public enum TalkStatus {
     DRAFT("0", "草稿"),
-    PUBLISHED("1", "已发布");
+    PUBLISHED("1", "已发布"),
+    PRIVATE("2", "私密");
 
     private final String code;
     private final String description;

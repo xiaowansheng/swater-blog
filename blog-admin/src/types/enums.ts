@@ -23,6 +23,7 @@ export enum ArticleType {
 export enum TalkStatus {
   DRAFT = '0',
   PUBLISHED = '1',
+  PRIVATE = '2',
 }
 
 /**
@@ -44,4 +45,5 @@ export const ARTICLE_TYPE_MAP = {
 export const TALK_STATUS_MAP = {
   [TalkStatus.DRAFT]: { color: 'default', label: '草稿' },
   [TalkStatus.PUBLISHED]: { color: 'success', label: '已发布' },
+  [TalkStatus.PRIVATE]: { color: 'warning', label: '私密' },
 }
