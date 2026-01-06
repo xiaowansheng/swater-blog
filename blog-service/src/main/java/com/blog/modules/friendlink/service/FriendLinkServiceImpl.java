@@ -1,19 +1,16 @@
 package com.blog.modules.friendlink.service;
 
-
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.blog.shared.PageResult;
 import com.blog.modules.friendlink.mapper.FriendLinkMapper;
 import com.blog.modules.friendlink.model.dto.FriendLinkDTO;
 import com.blog.modules.friendlink.model.entity.FriendLink;
 import com.blog.modules.friendlink.model.vo.FriendLinkVO;
-import com.blog.modules.friendlink.service.FriendLinkService;
+import com.blog.modules.friendlink.event.FriendLinkCreatedEvent;
+import com.blog.modules.friendlink.event.FriendLinkApprovedEvent;
 import com.blog.shared.util.BeanUtil;
-import com.blog.shared.util.PageUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -22,6 +19,9 @@ import java.util.stream.Collectors;
 public class FriendLinkServiceImpl implements FriendLinkService {
     @Autowired
     private FriendLinkMapper friendLinkMapper;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<FriendLinkVO> list() {
@@ -61,6 +61,10 @@ public class FriendLinkServiceImpl implements FriendLinkService {
             friendLink.setSort(0);
         }
         friendLinkMapper.insert(friendLink);
+
+        // 发布友链申请事件
+        eventPublisher.publishEvent(new FriendLinkCreatedEvent(this, friendLink.getId(), friendLink));
+
         return friendLink.getId();
     }
 
@@ -94,6 +98,9 @@ public class FriendLinkServiceImpl implements FriendLinkService {
         }
         friendLink.setReviewStatus(1);
         friendLinkMapper.updateById(friendLink);
+
+        // 发布友链审核通过事件
+        eventPublisher.publishEvent(new FriendLinkApprovedEvent(this, friendLink.getId(), friendLink));
     }
 
     @Override

@@ -8,6 +8,8 @@ import com.blog.modules.comment.event.CommentCreatedEvent;
 import com.blog.modules.comment.mapper.CommentMapper;
 import com.blog.modules.comment.model.entity.Comment;
 import com.blog.modules.comment.model.enums.TargetType;
+import com.blog.modules.friendlink.event.FriendLinkCreatedEvent;
+import com.blog.modules.friendlink.event.FriendLinkApprovedEvent;
 import com.blog.modules.guestbook.event.GuestbookCreatedEvent;
 import com.blog.modules.notification.model.enums.NotificationType;
 import com.blog.modules.notification.service.NotificationService;
@@ -260,6 +262,62 @@ public class NotificationEventListener {
             log.info("留言通知已发送，访客: {}", nickname);
         } catch (Exception e) {
             log.error("发送留言通知失败，留言ID: {}", event.getGuestbookId(), e);
+        }
+    }
+
+    /**
+     * 友链申请事件
+     * 当有新友链申请时，通知管理员
+     */
+    @Async("eventTaskExecutor")
+    @EventListener
+    public void handleFriendLinkCreated(FriendLinkCreatedEvent event) {
+        try {
+            NotifyConfigDTO notifyConfig = siteConfigService.getNotifyConfig();
+            if (notifyConfig == null || notifyConfig.getFriendLinkEmail() == null || !notifyConfig.getFriendLinkEmail()) {
+                log.debug("友链申请通知未启用，跳过发送");
+                return;
+            }
+
+            var friendLink = event.getFriendLink();
+            String name = friendLink.getName();
+            String url = friendLink.getUrl();
+            String author = friendLink.getAuthor();
+
+            String title = "收到新的友链申请";
+            String content = String.format("收到来自 %s 的友链申请：\n网站名称：%s\n网站地址：%s", author != null ? author : "访客", name, url);
+
+            // 发送通知给管理员
+            notificationService.sendNotification(1L, NotificationType.FRIEND_LINK.getCode(), title, content);
+
+            log.info("友链申请通知已发送，网站名称: {}, URL: {}", name, url);
+        } catch (Exception e) {
+            log.error("发送友链申请通知失败，友链ID: {}", event.getFriendLinkId(), e);
+        }
+    }
+
+    /**
+     * 友链审核通过事件
+     * 当友链申请被审核通过时，通知申请人
+     */
+    @Async("eventTaskExecutor")
+    @EventListener
+    public void handleFriendLinkApproved(FriendLinkApprovedEvent event) {
+        try {
+            var friendLink = event.getFriendLink();
+            Long userId = friendLink.getUserId();
+            String name = friendLink.getName();
+
+            String title = "友链申请已通过";
+            String content = String.format("您申请的友链（%s）已通过审核并展示在网站上", name);
+
+            // 发送通知给申请人（如果有用户ID）
+            if (userId != null && userId > 0) {
+                notificationService.sendNotification(userId, NotificationType.FRIEND_LINK_APPROVED.getCode(), title, content);
+                log.info("友链审核通过通知已发送，用户ID: {}, 网站名称: {}", userId, name);
+            }
+        } catch (Exception e) {
+            log.error("发送友链审核通过通知失败，友链ID: {}", event.getFriendLinkId(), e);
         }
     }
 }

@@ -20,6 +20,10 @@ public enum NotificationType {
     // 留言相关
     GUESTBOOK("GUESTBOOK", "留言"),
 
+    // 友链相关
+    FRIEND_LINK("FRIEND_LINK", "友链申请"),
+    FRIEND_LINK_APPROVED("FRIEND_LINK_APPROVED", "友链审核通过"),
+
     // 其他
     SYSTEM("SYSTEM", "系统通知");
 
