@@ -180,6 +180,31 @@ export default function ArchiveTimeline() {
                                 {article.title}
                               </Link>
 
+                              {/* 分类和标签 */}
+                              <div className="flex items-center gap-3 flex-wrap text-sm">
+                                {article.category && (
+                                  <Link
+                                    href={`/category/${article.category.id}`}
+                                    className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors flex items-center gap-1"
+                                  >
+                                    📁 {article.category.name}
+                                  </Link>
+                                )}
+                                {article.tags && article.tags.length > 0 && (
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    {article.tags.map((tag) => (
+                                      <Link
+                                        key={tag.id}
+                                        href={`/tag/${tag.id}`}
+                                        className="px-2 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                                      >
+                                        🏷️ {tag.name}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
                               {/* 统计信息 */}
                               <div className="flex items-center gap-4 text-sm text-muted">
                                 <span className="flex items-center gap-1">
@@ -198,21 +223,6 @@ export default function ArchiveTimeline() {
                                 <p className="text-muted text-sm line-clamp-2">
                                   {stripHtml(article.content)}
                                 </p>
-                              )}
-
-                              {/* 标签 */}
-                              {article.tags && article.tags.length > 0 && (
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span>🏷️</span>
-                                  {article.tags.map((tag) => (
-                                    <span
-                                      key={tag.id}
-                                      className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs hover:bg-primary/10 transition-colors"
-                                    >
-                                      {tag.name}
-                                    </span>
-                                  ))}
-                                </div>
                               )}
                             </div>
                           </div>
