@@ -1,6 +1,7 @@
 package com.blog.modules.system.config.model.dto.config;
 
 import lombok.Data;
+
 import java.util.Map;
 
 /**
@@ -43,33 +44,13 @@ public class AuthorConfigDTO {
      */
     private String socialLinks;
 
-    // Manual setter methods (Lombok backup)
-    public void setName(String name) { this.name = name; }
-    public void setAvatar(String avatar) { this.avatar = avatar; }
-    public void setSignature(String signature) { this.signature = signature; }
-    public void setIntroduction(String introduction) { this.introduction = introduction; }
-    public void setEmail(String email) { this.email = email; }
-    public void setWebsite(String website) { this.website = website; }
-    public void setSocialLinks(String socialLinks) { this.socialLinks = socialLinks; }
-
-    // Manual getter methods (Lombok backup)
-    public String getName() { return name; }
-    public String getAvatar() { return avatar; }
-    public String getSignature() { return signature; }
-    public String getIntroduction() { return introduction; }
-    public String getDescription() { return description; }
-    public String getEmail() { return email; }
-    public String getWebsite() { return website; }
-    public String getSocialLinks() { return socialLinks; }
-
     public Map<String, Object> toPublicView() {
         // Return a Map with fields matching frontend AuthorInfo interface
         Map<String, Object> publicView = new java.util.LinkedHashMap<>();
         publicView.put("name", this.name);
         publicView.put("avatar", this.avatar);
         publicView.put("signature", this.signature != null ? this.signature : "");
-        publicView.put("introduction", this.introduction != null ? this.introduction :
-                       (this.description != null ? this.description : ""));
+        publicView.put("introduction", this.introduction != null ? this.introduction : "");
         return publicView;
     }
 }
