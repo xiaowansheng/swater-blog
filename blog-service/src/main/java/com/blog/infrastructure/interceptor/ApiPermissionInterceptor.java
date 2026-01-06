@@ -76,9 +76,9 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
         if (authorizedRoleIds == null || authorizedRoleIds.isEmpty()) {
             log.debug("接口未配置授权角色，默认需要admin角色: path={}, method={}", path, method);
             // 检查用户是否是admin
-            if (!"admin".equals(currentUser.getRole())) {
+            if (!"admin".equals(currentUser.getRoleKey())) {
                 log.warn("用户无权限访问（非admin）: path={}, method={}, userRole={}",
-                        path, method, currentUser.getRole());
+                        path, method, currentUser.getRoleKey());
                 throw new NotPermissionException("无权限访问");
             }
             return true;
@@ -97,7 +97,7 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
 
         if (!hasPermission) {
             log.warn("用户无权限访问（角色不匹配）: path={}, method={}, userId={}, userRole={}",
-                    path, method, currentUser.getId(), currentUser.getRole());
+                    path, method, currentUser.getId(), currentUser.getRoleKey());
             throw new NotPermissionException("无权限访问");
         }
 

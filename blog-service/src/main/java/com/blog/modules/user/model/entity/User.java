@@ -32,7 +32,8 @@ public class User extends com.blog.shared.model.entity.BaseEntity {
 
     private String introduction;
 
-    private String role;
+    @TableField("role_key")
+    private String roleKey;
 
     private Integer status;
 

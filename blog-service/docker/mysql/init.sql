@@ -9,11 +9,11 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 -- 创建默认管理员用户
 INSERT INTO `user` (
-    `username`, `email`, `password`, `nickname`, `avatar`, 
-    `role`, `status`, `disabled`, `create_time`, `update_time`
+    `username`, `email`, `password`, `nickname`, `avatar`,
+    `role_key`, `status`, `disabled`, `create_time`, `update_time`
 ) VALUES (
-    'admin', 
-    'admin@blog.com', 
+    'admin',
+    'admin@blog.com',
     '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', -- 密码: 123456
     '管理员',
     '/uploads/avatar/default-admin.jpg',
@@ -26,12 +26,12 @@ INSERT INTO `user` (
 
 -- 创建默认角色
 INSERT INTO `role` (
-    `name`, `code`, `role_key`, `description`, 
+    `name`, `role_key`, `description`,
     `status`, `disabled`, `create_time`, `update_time`
-) VALUES 
-    ('管理员', 'ADMIN', 'admin', '系统管理员，拥有所有权限', 1, 0, NOW(), NOW()),
-    ('编辑', 'EDITOR', 'editor', '内容编辑，可以管理文章和评论', 1, 0, NOW(), NOW()),
-    ('用户', 'USER', 'user', '普通用户，可以评论和互动', 1, 0, NOW(), NOW())
+) VALUES
+    ('管理员', 'admin', '系统管理员，拥有所有权限', 1, 0, NOW(), NOW()),
+    ('编辑', 'editor', '内容编辑，可以管理文章和评论', 1, 0, NOW(), NOW()),
+    ('用户', 'user', '普通用户，可以评论和互动', 1, 0, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `update_time` = NOW();
 
 -- 创建默认分类

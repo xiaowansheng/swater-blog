@@ -34,7 +34,7 @@ public class UserDTO extends com.blog.shared.model.dto.BaseDTO {
 
     private String introduction;
 
-    private String role;
+    private String roleKey;
 
     private Integer status;
 

@@ -4,16 +4,16 @@
 -- ========================================
 
 -- 1. 插入角色数据
-INSERT INTO `role` (`id`, `name`, `code`, `role_key`, `description`, `status`) VALUES
-(1, '超级管理员', 'SUPER_ADMIN', 'super_admin', '系统超级管理员，拥有所有权限', 1),
-(2, '管理员', 'ADMIN', 'admin', '系统管理员，拥有大部分权限', 1),
-(3, '编辑', 'EDITOR', 'editor', '内容编辑，可以管理文章和评论', 1),
-(4, '作者', 'AUTHOR', 'author', '文章作者，可以发布和管理自己的文章', 1),
-(5, '普通用户', 'USER', 'user', '普通注册用户', 1);
+INSERT INTO `role` (`id`, `name`, `role_key`, `description`, `status`) VALUES
+(1, '超级管理员', 'super_admin', '系统超级管理员，拥有所有权限', 1),
+(2, '管理员', 'admin', '系统管理员，拥有大部分权限', 1),
+(3, '编辑', 'editor', '内容编辑，可以管理文章和评论', 1),
+(4, '作者', 'author', '文章作者，可以发布和管理自己的文章', 1),
+(5, '普通用户', 'user', '普通注册用户', 1);
 
 -- 2. 插入用户数据
 -- 密码均为: 123456 (hash: $2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi)
-INSERT INTO `user` (`id`, `username`, `email`, `password`, `nickname`, `avatar`, `role`, `status`, `disabled`, `ip_address_signup`, `ip_source_signup`) VALUES
+INSERT INTO `user` (`id`, `username`, `email`, `password`, `nickname`, `avatar`, `role_key`, `status`, `disabled`, `ip_address_signup`, `ip_source_signup`) VALUES
 (1, 'admin', 'admin@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '超级管理员', '/uploads/avatar/admin.jpg', 'admin', 1, 0, '127.0.0.1', '本地'),
 (2, 'editor', 'editor@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '内容编辑', '/uploads/avatar/editor.jpg', 'editor', 1, 0, '127.0.0.1', '本地'),
 (3, 'author1', 'author1@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '技术作者', '/uploads/avatar/author1.jpg', 'author', 1, 0, '127.0.0.1', '本地'),

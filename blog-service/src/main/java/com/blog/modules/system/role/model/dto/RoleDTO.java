@@ -13,9 +13,6 @@ public class RoleDTO extends com.blog.shared.model.dto.BaseDTO {
     @NotBlank(message = "角色名称不能为空")
     private String name;
 
-    @NotBlank(message = "角色代码不能为空")
-    private String code;
-
     @NotBlank(message = "角色标签不能为空")
     private String roleKey;
 

@@ -74,10 +74,10 @@ const RolePage: React.FC = () => {
       render: (name: string) => <span className="font-medium">{name}</span>,
     },
     {
-      title: '角色编码',
-      dataIndex: 'code',
-      key: 'code',
-      render: (code: string) => <Tag color="blue">{code}</Tag>,
+      title: '角色标签',
+      dataIndex: 'roleKey',
+      key: 'roleKey',
+      render: (roleKey: string) => <Tag color="blue">{roleKey}</Tag>,
     },
     {
       title: '描述',
@@ -165,11 +165,11 @@ const RolePage: React.FC = () => {
             <Input placeholder="请输入角色名称" />
           </Form.Item>
           <Form.Item
-            name="code"
-            label="角色编码"
-            rules={[{ required: true, message: '请输入角色编码' }]}
+            name="roleKey"
+            label="角色标签"
+            rules={[{ required: true, message: '请输入角色标签' }]}
           >
-            <Input placeholder="请输入角色编码，如 admin" disabled={!!editingRole} />
+            <Input placeholder="请输入角色标签，如 admin" disabled={!!editingRole} />
           </Form.Item>
           <Form.Item name="description" label="角色描述">
             <Input.TextArea rows={3} placeholder="请输入角色描述" />

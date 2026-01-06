@@ -3,7 +3,7 @@ import { Role } from '@/types'
 
 export interface RoleDTO {
   name: string
-  code: string
+  roleKey: string
   description?: string
 }
 

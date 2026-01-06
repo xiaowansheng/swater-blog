@@ -57,7 +57,7 @@ public class DataInitializer implements ApplicationRunner {
             admin.setEmail("admin@blog.com");
             admin.setIpAddressSignup("127.0.0.1");
             admin.setIpSourceSignup("本地");
-            admin.setRole("admin");
+            admin.setRoleKey("admin");
             admin.setStatus(1);
             admin.setDisabled(0);
             userMapper.insert(admin);

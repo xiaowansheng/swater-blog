@@ -76,7 +76,7 @@ public class SaTokenConfig implements WebMvcConfigurer {
                             UserVO userVO = convertToVO(user);
                             UserContext.setCurrentUser(userVO);
 
-                            log.debug("用户上下文已设置: userId={}, role={}", userId, user.getRole());
+                            log.debug("用户上下文已设置: userId={}, role={}", userId, user.getRoleKey());
                         } catch (Exception e) {
                             log.error("设置用户上下文失败", e);
                             throw e;
@@ -97,9 +97,9 @@ public class SaTokenConfig implements WebMvcConfigurer {
      */
     private UserVO convertToVO(User user) {
         UserVO vo = BeanUtil.copyProperties(user, UserVO.class);
-        if (user.getRole() != null && !user.getRole().isEmpty()) {
-            // 根据用户的 role 字段获取角色信息
-            RoleVO role = roleService.getByName(user.getRole());
+        if (user.getRoleKey() != null && !user.getRoleKey().isEmpty()) {
+            // 根据用户的 roleKey 字段获取角色信息
+            RoleVO role = roleService.getByName(user.getRoleKey());
             if (role != null) {
                 vo.setRoles(List.of(role));
             }

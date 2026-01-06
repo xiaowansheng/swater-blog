@@ -68,17 +68,11 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public Long create(RoleDTO dto) {
         LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Role::getCode, dto.getCode());
-        if (roleMapper.selectCount(wrapper) > 0) {
-            throw new BusinessException("角色代码已存在");
-        }
-
-        wrapper.clear();
         wrapper.eq(Role::getRoleKey, dto.getRoleKey());
         if (roleMapper.selectCount(wrapper) > 0) {
             throw new BusinessException("角色标签已存在");
         }
-        
+
         Role role = BeanUtil.copyProperties(dto, Role.class);
         if (dto.getStatus() == null) {
             role.setStatus(1);
@@ -86,13 +80,13 @@ public class RoleServiceImpl implements RoleService {
         if (dto.getDisabled() == null) {
             role.setDisabled(0);
         }
-        
+
         roleMapper.insert(role);
-        
+
         if (dto.getApiIds() != null && !dto.getApiIds().isEmpty()) {
             saveRoleApis(role.getId(), dto.getApiIds());
         }
-        
+
         return role.getId();
     }
 
@@ -103,15 +97,7 @@ public class RoleServiceImpl implements RoleService {
         if (role == null) {
             throw new BusinessException("角色不存在");
         }
-        
-        if (dto.getCode() != null && !dto.getCode().equals(role.getCode())) {
-            LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(Role::getCode, dto.getCode()).ne(Role::getId, id);
-            if (roleMapper.selectCount(wrapper) > 0) {
-                throw new BusinessException("角色代码已存在");
-            }
-        }
-        
+
         if (dto.getRoleKey() != null && !dto.getRoleKey().equals(role.getRoleKey())) {
             LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(Role::getRoleKey, dto.getRoleKey()).ne(Role::getId, id);
@@ -119,16 +105,15 @@ public class RoleServiceImpl implements RoleService {
                 throw new BusinessException("角色标签已存在");
             }
         }
-        
+
         role.setName(dto.getName());
-        role.setCode(dto.getCode());
         role.setRoleKey(dto.getRoleKey());
         role.setDescription(dto.getDescription());
         role.setStatus(dto.getStatus());
         role.setDisabled(dto.getDisabled());
-        
+
         roleMapper.updateById(role);
-        
+
         if (dto.getApiIds() != null) {
             roleApiMapper.deleteByRoleId(id);
             if (!dto.getApiIds().isEmpty()) {

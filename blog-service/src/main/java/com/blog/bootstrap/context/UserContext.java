@@ -62,11 +62,11 @@ public class UserContext {
      * @throws BusinessException 如果用户未登录
      */
     public static String getCurrentUserRole() {
-        String role = getCurrentUser().getRole();
-        if (role == null || role.isEmpty()) {
+        String roleKey = getCurrentUser().getRoleKey();
+        if (roleKey == null || roleKey.isEmpty()) {
             throw new BusinessException("用户角色不存在");
         }
-        return role;
+        return roleKey;
     }
 
     /**

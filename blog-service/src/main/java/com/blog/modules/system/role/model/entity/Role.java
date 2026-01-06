@@ -11,8 +11,6 @@ import lombok.EqualsAndHashCode;
 public class Role extends com.blog.shared.model.entity.BaseEntity {
     private String name;
 
-    private String code;
-
     @TableField("role_key")
     private String roleKey;
 

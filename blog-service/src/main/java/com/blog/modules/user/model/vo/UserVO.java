@@ -32,7 +32,7 @@ public class UserVO extends com.blog.shared.model.vo.BaseVO {
 
     private String introduction;
 
-    private String role;
+    private String roleKey;
 
     private Integer status;
 

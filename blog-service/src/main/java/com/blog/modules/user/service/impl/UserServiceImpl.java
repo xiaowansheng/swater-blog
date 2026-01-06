@@ -99,8 +99,8 @@ public class UserServiceImpl implements UserService {
         if (dto.getDisabled() == null) {
             user.setDisabled(0);
         }
-        if (dto.getRole() == null) {
-            user.setRole("user");
+        if (dto.getRoleKey() == null) {
+            user.setRoleKey("user");
         }
         
         userMapper.insert(user);
@@ -145,7 +145,7 @@ public class UserServiceImpl implements UserService {
         user.setSignature(dto.getSignature());
         user.setWebsite(dto.getWebsite());
         user.setIntroduction(dto.getIntroduction());
-        user.setRole(dto.getRole());
+        user.setRoleKey(dto.getRoleKey());
         user.setStatus(dto.getStatus());
         user.setDisabled(dto.getDisabled());
         
@@ -196,14 +196,14 @@ public class UserServiceImpl implements UserService {
             Long roleId = roleIds.get(0);
             RoleVO role = roleService.getById(roleId);
             if (role != null) {
-                user.setRole(role.getRoleKey());
+                user.setRoleKey(role.getRoleKey());
                 userMapper.updateById(user);
             } else {
                 throw new BusinessException("角色不存在");
             }
         } else {
             // 如果没有提供角色，设置为默认用户角色
-            user.setRole("user");
+            user.setRoleKey("user");
             userMapper.updateById(user);
         }
         
@@ -213,9 +213,9 @@ public class UserServiceImpl implements UserService {
 
     private UserVO convertToVO(User user) {
         UserVO vo = BeanUtil.copyProperties(user, UserVO.class);
-        if (user.getRole() != null && !user.getRole().isEmpty()) {
-            // 根据用户的role字段获取角色信息
-            RoleVO role = roleService.getByName(user.getRole());
+        if (user.getRoleKey() != null && !user.getRoleKey().isEmpty()) {
+            // 根据用户的roleKey字段获取角色信息
+            RoleVO role = roleService.getByName(user.getRoleKey());
             if (role != null) {
                 vo.setRoles(List.of(role));
             }

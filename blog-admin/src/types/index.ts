@@ -29,7 +29,7 @@ export interface User {
   signature?: string
   website?: string
   introduction?: string
-  role?: string
+  roleKey?: string
   status: number
   disabled: number
   lastLoginTime?: string
@@ -42,7 +42,7 @@ export interface User {
 export interface Role {
   id: number
   name: string
-  code: string
+  roleKey: string
   description?: string
   status?: number
   createTime?: string

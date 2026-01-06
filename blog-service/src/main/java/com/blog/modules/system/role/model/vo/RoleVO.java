@@ -10,8 +10,6 @@ import lombok.EqualsAndHashCode;
 public class RoleVO extends com.blog.shared.model.vo.BaseVO {
     private String name;
 
-    private String code;
-
     private String roleKey;
 
     private String description;

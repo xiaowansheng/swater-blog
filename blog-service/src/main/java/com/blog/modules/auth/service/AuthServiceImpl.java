@@ -116,9 +116,9 @@ public class AuthServiceImpl implements AuthService {
 
     private UserVO convertToVO(User user) {
         UserVO vo = BeanUtil.copyProperties(user, UserVO.class);
-        if (user.getRole() != null && !user.getRole().isEmpty()) {
-            // 根据用户的role字段获取角色信息
-            RoleVO role = roleService.getByName(user.getRole());
+        if (user.getRoleKey() != null && !user.getRoleKey().isEmpty()) {
+            // 根据用户的roleKey字段获取角色信息
+            RoleVO role = roleService.getByName(user.getRoleKey());
             if (role != null) {
                 vo.setRoles(List.of(role));
             }
