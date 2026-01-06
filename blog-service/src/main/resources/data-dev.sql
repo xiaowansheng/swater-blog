@@ -147,11 +147,11 @@ INSERT INTO `sys_config` (`config_key`, `name`, `value`, `type`, `description`, 
 -- 通知配置（仅后台使用，前台不可见）
 INSERT INTO `sys_config` (`config_key`, `name`, `value`, `type`, `description`, `group_name`, `sort`) VALUES
 ('notify', '通知设置', '{
-  "loginEmail": false,
-  "commentEmail": true,
-  "replyEmail": true,
-  "guestbookEmail": true,
-  "friendLinkEmail": true
+  "loginNotify": false,
+  "commentNotify": true,
+  "replyNotify": true,
+  "guestbookNotify": true,
+  "friendLinkNotify": true
 }', 'json', '系统通知配置', '功能设置', 3);
 
 -- 上传设置（仅后台使用）

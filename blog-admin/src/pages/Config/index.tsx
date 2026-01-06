@@ -461,38 +461,38 @@ const ConfigPage: React.FC = () => {
       children: (
         <Form form={notifyForm} layout="vertical" className="config-form">
           <Form.Item
-            name="loginEmail"
-            label="登录邮件通知"
+            name="loginNotify"
+            label="登录通知"
             valuePropName="checked"
-            tooltip="用户登录时发送邮件通知"
+            tooltip="用户登录时发送通知"
           >
             <Switch />
           </Form.Item>
           <Form.Item
-            name="commentEmail"
-            label="评论邮件通知"
+            name="commentNotify"
+            label="评论通知"
             valuePropName="checked"
             tooltip="收到新评论时通知博主"
           >
             <Switch />
           </Form.Item>
           <Form.Item
-            name="replyEmail"
-            label="回复邮件通知"
+            name="replyNotify"
+            label="回复通知"
             valuePropName="checked"
             tooltip="评论被回复时通知评论者"
           >
             <Switch />
           </Form.Item>
           <Form.Item
-            name="guestbookEmail"
-            label="留言邮件通知"
+            name="guestbookNotify"
+            label="留言通知"
             valuePropName="checked"
           >
             <Switch />
           </Form.Item>
           <Form.Item
-            name="friendLinkEmail"
+            name="friendLinkNotify"
             label="友链申请通知"
             valuePropName="checked"
           >

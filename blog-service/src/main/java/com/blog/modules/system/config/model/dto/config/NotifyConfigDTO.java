@@ -1,8 +1,5 @@
 package com.blog.modules.system.config.model.dto.config;
 
-
-
-
 import com.blog.modules.system.config.model.dto.ConfigDTO;
 import com.blog.modules.system.config.model.dto.config.NotifyConfigDTO;
 import lombok.Data;
@@ -11,9 +8,9 @@ import lombok.Data;
  */
 @Data
 public class NotifyConfigDTO {
-    private Boolean loginEmail = false;
-    private Boolean commentEmail = true;
-    private Boolean replyEmail = true;
-    private Boolean guestbookEmail = true;
-    private Boolean friendLinkEmail = true;
+    private Boolean loginNotify = false;
+    private Boolean commentNotify = true;
+    private Boolean replyNotify = true;
+    private Boolean guestbookNotify = true;
+    private Boolean friendLinkNotify = true;
 }

@@ -71,11 +71,11 @@ export interface CommentConfig {
 }
 
 export interface NotifyConfig {
-  loginEmail: boolean
-  commentEmail: boolean
-  replyEmail: boolean
-  guestbookEmail: boolean
-  friendLinkEmail: boolean
+  loginNotify: boolean
+  commentNotify: boolean
+  replyNotify: boolean
+  guestbookNotify: boolean
+  friendLinkNotify: boolean
 }
 
 export interface UploadConfig {
