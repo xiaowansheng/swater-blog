@@ -14,6 +14,10 @@ import com.blog.modules.system.config.service.ConfigService;
 import com.blog.shared.util.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -26,6 +30,7 @@ public class ConfigServiceImpl implements ConfigService {
     private SysConfigMapper sysConfigMapper;
 
     @Override
+    @Cacheable(value = "configs", key = "'list:' + (#groupName != null ? #groupName : 'all')")
     public List<ConfigVO> list(String groupName) {
         LambdaQueryWrapper<SysConfig> wrapper = new LambdaQueryWrapper<>();
         if (groupName != null && !groupName.isEmpty()) {
@@ -41,6 +46,7 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
+    @Cacheable(value = "configs", key = "'groups'")
     public List<String> getGroups() {
         LambdaQueryWrapper<SysConfig> wrapper = new LambdaQueryWrapper<>();
         wrapper.select(SysConfig::getGroupName);
@@ -56,6 +62,7 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
+    @Cacheable(value = "configs", key = "'key:' + #key")
     public ConfigVO getByKey(String key) {
         SysConfig config = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
                 .eq(SysConfig::getConfigKey, key));
@@ -67,6 +74,13 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @Caching(
+        put = @CachePut(value = "configs", key = "'key:' + #configDTO.configKey"),
+        evict = {
+            @CacheEvict(value = "configs", key = "'list:' + (#configDTO.groupName != null ? #configDTO.groupName : 'all')"),
+            @CacheEvict(value = "configs", key = "'groups'")
+        }
+    )
     public ConfigVO create(ConfigDTO configDTO) {
         try {
             SysConfig config = new SysConfig();
@@ -87,6 +101,10 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @Caching(
+        put = @CachePut(value = "configs", key = "'key:' + #key"),
+        evict = @CacheEvict(value = "configs", allEntries = true)
+    )
     public ConfigVO updateByKey(String key, ConfigDTO configDTO) {
         try {
             SysConfig existingConfig = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
@@ -125,6 +143,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "configs", allEntries = true)
     public void updateBatch(Map<String, Object> configs) {
         for (Map.Entry<String, Object> entry : configs.entrySet()) {
             String key = entry.getKey();
