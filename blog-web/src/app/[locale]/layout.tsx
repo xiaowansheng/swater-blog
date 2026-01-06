@@ -47,6 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 import { DecorationProvider } from '@/lib/context/DecorationContext';
 import DecorationManager from '@/components/decoration/DecorationManager';
+import PageLoadingWrapper from '@/components/common/PageLoadingWrapper';
 
 export default async function LocaleLayout({
   children,
@@ -72,10 +73,12 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <SiteConfigProvider initialConfig={config}>
             <DecorationProvider>
-              <div className="flex min-h-screen flex-col relative">
-                <DecorationManager />
-                {children}
-              </div>
+              <PageLoadingWrapper>
+                <div className="flex min-h-screen flex-col relative">
+                  <DecorationManager />
+                  {children}
+                </div>
+              </PageLoadingWrapper>
             </DecorationProvider>
           </SiteConfigProvider>
         </NextIntlClientProvider>
