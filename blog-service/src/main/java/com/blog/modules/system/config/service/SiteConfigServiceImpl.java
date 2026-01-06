@@ -1,17 +1,5 @@
 package com.blog.modules.system.config.service;
 
-
-
-
-
-
-
-
-
-
-
-
-
 import com.blog.modules.system.config.model.dto.ConfigDTO;
 import com.blog.modules.system.config.model.dto.config.EmailConfigDTO;
 import com.blog.modules.system.config.model.dto.config.UploadConfigDTO;
@@ -99,55 +87,55 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     // ========== 获取配置 ==========
     
     @Override
-    @Cacheable(value = "config", key = "'site'")
+    @Cacheable(value = "configs", key = "'site'")
     public SiteConfigDTO getSiteConfig() {
         return getConfig(KEY_SITE, SiteConfigDTO.class);
     }
     
     @Override
-    @Cacheable(value = "config", key = "'author'")
+    @Cacheable(value = "configs", key = "'author'")
     public AuthorConfigDTO getAuthorConfig() {
         return getConfig(KEY_AUTHOR, AuthorConfigDTO.class);
     }
     
     @Override
-    @Cacheable(value = "config", key = "'cover'")
+    @Cacheable(value = "configs", key = "'cover'")
     public CoverConfigDTO getCoverConfig() {
         return getConfig(KEY_COVER, CoverConfigDTO.class);
     }
     
     @Override
-    @Cacheable(value = "config", key = "'social'")
+    @Cacheable(value = "configs", key = "'social'")
     public SocialConfigDTO getSocialConfig() {
         return getConfig(KEY_SOCIAL, SocialConfigDTO.class);
     }
     
     @Override
-    @Cacheable(value = "config", key = "'privacy'")
+    @Cacheable(value = "configs", key = "'privacy'")
     public PrivacyConfigDTO getPrivacyConfig() {
         return getConfig(KEY_PRIVACY, PrivacyConfigDTO.class);
     }
     
     @Override
-    @Cacheable(value = "config", key = "'comment'")
+    @Cacheable(value = "configs", key = "'comment'")
     public CommentConfigDTO getCommentConfig() {
         return getConfig(KEY_COMMENT, CommentConfigDTO.class);
     }
     
     @Override
-    @Cacheable(value = "config", key = "'notify'")
+    @Cacheable(value = "configs", key = "'notify'")
     public NotifyConfigDTO getNotifyConfig() {
         return getConfig(KEY_NOTIFY, NotifyConfigDTO.class);
     }
     
     @Override
-    @Cacheable(value = "config", key = "'upload'")
+    @Cacheable(value = "configs", key = "'upload'")
     public UploadConfigDTO getUploadConfig() {
         return getConfig(KEY_UPLOAD, UploadConfigDTO.class);
     }
     
     @Override
-    @Cacheable(value = "config", key = "'email'")
+    @Cacheable(value = "configs", key = "'email'")
     public EmailConfigDTO getEmailConfig() {
         return getConfig(KEY_EMAIL, EmailConfigDTO.class);
     }
@@ -155,63 +143,63 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     // ========== 更新配置 ==========
     
     @Override
-    @CacheEvict(value = "config", key = "'site'")
+    @CacheEvict(value = "configs", key = "'site'")
     @Transactional
     public void updateSiteConfig(SiteConfigDTO config) {
         updateConfig(KEY_SITE, config);
     }
     
     @Override
-    @CacheEvict(value = "config", key = "'author'")
+    @CacheEvict(value = "configs", key = "'author'")
     @Transactional
     public void updateAuthorConfig(AuthorConfigDTO config) {
         updateConfig(KEY_AUTHOR, config);
     }
     
     @Override
-    @CacheEvict(value = "config", key = "'cover'")
+    @CacheEvict(value = "configs", key = "'cover'")
     @Transactional
     public void updateCoverConfig(CoverConfigDTO config) {
         updateConfig(KEY_COVER, config);
     }
     
     @Override
-    @CacheEvict(value = "config", key = "'social'")
+    @CacheEvict(value = "configs", key = "'social'")
     @Transactional
     public void updateSocialConfig(SocialConfigDTO config) {
         updateConfig(KEY_SOCIAL, config);
     }
     
     @Override
-    @CacheEvict(value = "config", key = "'privacy'")
+    @CacheEvict(value = "configs", key = "'privacy'")
     @Transactional
     public void updatePrivacyConfig(PrivacyConfigDTO config) {
         updateConfig(KEY_PRIVACY, config);
     }
     
     @Override
-    @CacheEvict(value = "config", key = "'comment'")
+    @CacheEvict(value = "configs", key = "'comment'")
     @Transactional
     public void updateCommentConfig(CommentConfigDTO config) {
         updateConfig(KEY_COMMENT, config);
     }
     
     @Override
-    @CacheEvict(value = "config", key = "'notify'")
+    @CacheEvict(value = "configs", key = "'notify'")
     @Transactional
     public void updateNotifyConfig(NotifyConfigDTO config) {
         updateConfig(KEY_NOTIFY, config);
     }
     
     @Override
-    @CacheEvict(value = "config", key = "'upload'")
+    @CacheEvict(value = "configs", key = "'upload'")
     @Transactional
     public void updateUploadConfig(UploadConfigDTO config) {
         updateConfig(KEY_UPLOAD, config);
     }
     
     @Override
-    @CacheEvict(value = "config", key = "'email'")
+    @CacheEvict(value = "configs", key = "'email'")
     @Transactional
     public void updateEmailConfig(EmailConfigDTO config) {
         updateConfig(KEY_EMAIL, config);
@@ -220,7 +208,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     // ========== 前台公开接口 ==========
     
     @Override
-    @Cacheable(value = "config", key = "'public'")
+    @Cacheable(value = "configs", key = "'public'")
     public Map<String, Object> getPublicConfig() {
         Map<String, Object> result = new LinkedHashMap<>();
         
