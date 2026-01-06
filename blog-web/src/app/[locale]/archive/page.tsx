@@ -2,12 +2,11 @@ import { getTranslations } from 'next-intl/server';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PageHeader from '@/components/layout/PageHeader';
-import { archiveApi } from '@/lib/api/archive';
 import { categoryApi } from '@/lib/api/category';
 import { tagApi } from '@/lib/api/tag';
 import { Link } from '@/lib/i18n/routing';
 import { ISR_REVALIDATE } from '@/lib/constants';
-import type { ArchiveVO } from '@/types';
+import ArchiveTimeline from '@/components/archive/ArchiveTimeline';
 
 export const revalidate = ISR_REVALIDATE.ARCHIVE;
 
@@ -19,55 +18,17 @@ export default async function ArchiveListPage({
   const t = await getTranslations('common');
 
   try {
-    const [archives, categories, tags] = await Promise.all([
-      archiveApi.getList(),
+    const [categories, tags] = await Promise.all([
       categoryApi.getList().catch(() => []),
       tagApi.getList().catch(() => []),
     ]);
-
-    // 按年分组
-    const groupedArchives = archives.reduce((acc: Record<number, ArchiveVO[]>, archive) => {
-      if (!acc[archive.year]) {
-        acc[archive.year] = [];
-      }
-      acc[archive.year].push(archive);
-      return acc;
-    }, {});
-
-    // 排序并计算每年的文章总数
-    const sortedYears = Object.keys(groupedArchives)
-      .map(Number)
-      .sort((a, b) => b - a);
-
-    // 每年内的月份按倒序排序
-    sortedYears.forEach(year => {
-      groupedArchives[year].sort((a, b) => b.month - a.month);
-    });
-
-    const totalPosts = archives.reduce((sum, archive) => sum + archive.postCount, 0);
-    const totalYears = sortedYears.length;
 
     return (
       <>
         <Header />
         <PageHeader title={t('archives')} description="文章归档、分类与标签" />
         <main className="container flex-1 px-4 py-12 mx-auto space-y-12">
-          {/* 归档统计 */}
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-card border border-border rounded-xl p-6 text-center">
-              <div className="text-3xl font-bold text-primary mb-2">{totalYears}</div>
-              <div className="text-muted text-sm">归档年数</div>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-6 text-center">
-              <div className="text-3xl font-bold text-primary mb-2">{totalPosts}</div>
-              <div className="text-muted text-sm">文章总数</div>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-6 text-center">
-              <div className="text-3xl font-bold text-primary mb-2">{archives.length}</div>
-              <div className="text-muted text-sm">归档月数</div>
-            </div>
-          </section>
-
+          {/* 分类和标签 */}
           {categories.length > 0 && (
             <section>
               <h2 className="text-2xl font-bold mb-6">文章分类</h2>
@@ -120,49 +81,7 @@ export default async function ArchiveListPage({
           {/* 时间轴归档 */}
           <section>
             <h2 className="text-2xl font-bold mb-6">时间归档</h2>
-            <div className="space-y-8">
-              {sortedYears.map((year) => {
-                const yearArchives = groupedArchives[year];
-                const yearTotal = yearArchives.reduce((sum, a) => sum + a.postCount, 0);
-
-                return (
-                  <div key={year} className="relative">
-                    {/* 年份标题 */}
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full">
-                        <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="text-3xl font-bold text-primary">{year}年</h3>
-                        <p className="text-muted text-sm mt-1">共 {yearTotal} 篇文章</p>
-                      </div>
-                    </div>
-
-                    {/* 月份列表 */}
-                    <div className="ml-20 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {yearArchives.map((archive) => (
-                        <Link
-                          key={`${archive.year}-${archive.month}`}
-                          href={`/archive/${archive.year}/${archive.month}`}
-                          className="group bg-card border border-border rounded-lg p-4 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-lg font-semibold group-hover:text-primary transition-colors">
-                              {archive.month}月
-                            </span>
-                            <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                              {archive.postCount}
-                            </span>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <ArchiveTimeline />
           </section>
         </main>
         <Footer />
