@@ -34,9 +34,23 @@ public class AboutServiceImpl implements AboutService {
     @Override
     @Transactional
     public void updateAbout(AboutDTO dto) {
-        com.blog.modules.system.config.model.dto.ConfigDTO configDTO = new com.blog.modules.system.config.model.dto.ConfigDTO();
-        configDTO.setValue(dto.getContent());
-        configService.updateByKey(ABOUT_CONFIG_KEY, configDTO);
+        com.blog.modules.system.config.model.vo.ConfigVO existingConfig = configService.getByKey(ABOUT_CONFIG_KEY);
+
+        if (existingConfig == null) {
+            // 创建新配置
+            com.blog.modules.system.config.model.dto.ConfigDTO configDTO = new com.blog.modules.system.config.model.dto.ConfigDTO();
+            configDTO.setConfigKey(ABOUT_CONFIG_KEY);
+            configDTO.setName("关于页面内容");
+            configDTO.setValue(dto.getContent());
+            configDTO.setGroupName("content");
+            configDTO.setType("text");
+            configService.create(configDTO);
+        } else {
+            // 更新现有配置
+            com.blog.modules.system.config.model.dto.ConfigDTO configDTO = new com.blog.modules.system.config.model.dto.ConfigDTO();
+            configDTO.setValue(dto.getContent());
+            configService.updateByKey(ABOUT_CONFIG_KEY, configDTO);
+        }
     }
 }
 

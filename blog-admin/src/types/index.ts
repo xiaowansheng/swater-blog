@@ -353,7 +353,6 @@ export interface Guestbook {
 // 关于页面
 export interface About {
   id: number
-  title: string
   content: string
   updateTime: string
 }

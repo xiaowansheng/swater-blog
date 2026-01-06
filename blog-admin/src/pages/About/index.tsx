@@ -7,7 +7,6 @@ import MarkdownEditor from '@/components/common/MarkdownEditor'
 
 const AboutPage: React.FC = () => {
   const navigate = useNavigate()
-  const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -20,7 +19,6 @@ const AboutPage: React.FC = () => {
     setLoading(true)
     try {
       const data = await getAbout()
-      setTitle(data.title || '')
       setContent(data.content || '')
     } catch (error) {
       console.error('加载关于页面失败', error)
@@ -30,10 +28,6 @@ const AboutPage: React.FC = () => {
   }
 
   const handleSave = async () => {
-    if (!title.trim()) {
-      message.warning('请输入标题')
-      return
-    }
     if (!content.trim()) {
       message.warning('请输入内容')
       return
@@ -41,7 +35,7 @@ const AboutPage: React.FC = () => {
 
     setSaving(true)
     try {
-      await updateAbout({ title, content })
+      await updateAbout({ content })
       message.success('保存成功')
     } catch (error) {
       message.error('保存失败')
@@ -91,18 +85,6 @@ const AboutPage: React.FC = () => {
       </div>
 
       <Card className="shadow-sm" variant="borderless">
-        <div className="mb-6">
-          <label className="block text-base font-medium text-gray-700 mb-2">
-            页面标题
-          </label>
-          <Input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="请输入页面标题"
-            size="large"
-            className="rounded-md"
-          />
-        </div>
         <div className="mb-6">
           <label className="block text-base font-medium text-gray-700 mb-2">
             页面内容
