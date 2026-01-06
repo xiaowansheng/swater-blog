@@ -7,7 +7,9 @@ import com.blog.modules.comment.event.CommentApprovedEvent;
 import com.blog.modules.comment.event.CommentCreatedEvent;
 import com.blog.modules.comment.mapper.CommentMapper;
 import com.blog.modules.comment.model.entity.Comment;
+import com.blog.modules.comment.model.enums.TargetType;
 import com.blog.modules.guestbook.event.GuestbookCreatedEvent;
+import com.blog.modules.notification.model.enums.NotificationType;
 import com.blog.modules.notification.service.NotificationService;
 import com.blog.modules.system.config.service.SiteConfigService;
 import com.blog.modules.system.config.model.dto.config.NotifyConfigDTO;
@@ -66,7 +68,7 @@ public class NotificationEventListener {
             String content = String.format("用户ID: %d 于IP地址: %s 登录了系统", userId, ip);
 
             // 发送通知给管理员（userId=1通常是超级管理员）
-            notificationService.sendNotification(1L, "USER_LOGIN", title, content);
+            notificationService.sendNotification(1L, NotificationType.USER_LOGIN.getCode(), title, content);
 
             log.info("用户登录通知已发送，用户ID: {}, IP: {}", userId, ip);
         } catch (Exception e) {
@@ -90,12 +92,12 @@ public class NotificationEventListener {
             String content = String.format("亲爱的 %s，欢迎注册成为本站会员！如有任何问题，请随时联系我们。", username);
 
             // 发送欢迎通知给新用户
-            notificationService.sendNotification(userId, "USER_REGISTER", title, content);
+            notificationService.sendNotification(userId, NotificationType.USER_REGISTER.getCode(), title, content);
 
             // 同时通知管理员有新用户注册
             String adminTitle = "新用户注册通知";
             String adminContent = String.format("新用户 %s (%s) 已注册成为会员", username, email);
-            notificationService.sendNotification(1L, "USER_REGISTER", adminTitle, adminContent);
+            notificationService.sendNotification(1L, NotificationType.USER_REGISTER.getCode(), adminTitle, adminContent);
 
             log.info("用户注册通知已发送，用户ID: {}, 用户名: {}", userId, username);
         } catch (Exception e) {
@@ -117,7 +119,7 @@ public class NotificationEventListener {
             String content = "您的密码已被成功重置。如果这不是您本人的操作，请立即联系管理员。";
 
             // 发送密码重置通知给用户
-            notificationService.sendNotification(userId, "PASSWORD_RESET", title, content);
+            notificationService.sendNotification(userId, NotificationType.PASSWORD_RESET.getCode(), title, content);
 
             log.info("密码重置通知已发送，用户ID: {}", userId);
         } catch (Exception e) {
@@ -144,7 +146,7 @@ public class NotificationEventListener {
             Long userId = comment.getUserId();
             String content = comment.getContent();
             String nickname = comment.getNickname();
-            String targetType = comment.getTargetType();
+            String targetTypeStr = comment.getTargetType();
             Long targetId = comment.getTargetId();
             Long parentId = comment.getParentId();
 
@@ -163,7 +165,7 @@ public class NotificationEventListener {
                                 String replyTitle = "收到新回复";
                                 String replyContent = String.format("用户 %s 回复了您的评论：\n%s", nickname, content);
 
-                                notificationService.sendNotification(parentUserId, "COMMENT_REPLY", replyTitle, replyContent);
+                                notificationService.sendNotification(parentUserId, NotificationType.COMMENT_REPLY.getCode(), replyTitle, replyContent);
 
                                 log.info("回复评论通知已发送，被回复用户ID: {}, 父评论ID: {}", parentUserId, parentId);
                             }
@@ -176,20 +178,21 @@ public class NotificationEventListener {
 
             // 2. 通知文章/说说作者
             Long authorId = null;
+            TargetType targetType = TargetType.fromCode(targetTypeStr);
             try {
-                if ("ARTICLE".equalsIgnoreCase(targetType) && articleMapper != null) {
+                if (TargetType.ARTICLE.equals(targetType) && articleMapper != null) {
                     Article article = articleMapper.selectById(targetId);
                     if (article != null) {
                         authorId = article.getAuthorId();
                     }
-                } else if ("TALK".equalsIgnoreCase(targetType) && talkMapper != null) {
+                } else if (TargetType.TALK.equals(targetType) && talkMapper != null) {
                     Talk talk = talkMapper.selectById(targetId);
                     if (talk != null) {
                         authorId = talk.getAuthorId();
                     }
                 }
             } catch (Exception e) {
-                log.error("查询作者ID失败，目标类型: {}, 目标ID: {}", targetType, targetId, e);
+                log.error("查询作者ID失败，目标类型: {}, 目标ID: {}", targetTypeStr, targetId, e);
             }
 
             // 如果找到作者ID，且评论者不是作者本人，则发送通知
@@ -198,9 +201,9 @@ public class NotificationEventListener {
                 String notificationContent = String.format("您的文章/说说收到了一条新评论：\n%s", content);
 
                 // 发送通知给作者
-                notificationService.sendNotification(authorId, "COMMENT", title, notificationContent);
+                notificationService.sendNotification(authorId, NotificationType.COMMENT.getCode(), title, notificationContent);
 
-                log.info("评论通知已发送，作者ID: {}, 目标类型: {}, 目标ID: {}", authorId, targetType, targetId);
+                log.info("评论通知已发送，作者ID: {}, 目标类型: {}, 目标ID: {}", authorId, targetType != null ? targetType.getDescription() : targetTypeStr, targetId);
             }
         } catch (Exception e) {
             log.error("发送评论通知失败，评论ID: {}", event.getCommentId(), e);
@@ -222,7 +225,7 @@ public class NotificationEventListener {
             String content = "您发表的评论已通过审核并展示";
 
             // 发送通知给评论者
-            notificationService.sendNotification(userId, "COMMENT_APPROVED", title, content);
+            notificationService.sendNotification(userId, NotificationType.COMMENT_APPROVED.getCode(), title, content);
 
             log.info("评论审核通过通知已发送，用户ID: {}", userId);
         } catch (Exception e) {
@@ -252,7 +255,7 @@ public class NotificationEventListener {
             String notificationContent = String.format("访客 %s 在留言板留下了新消息：\n%s", nickname, content);
 
             // 发送通知给管理员
-            notificationService.sendNotification(1L, "GUESTBOOK", title, notificationContent);
+            notificationService.sendNotification(1L, NotificationType.GUESTBOOK.getCode(), title, notificationContent);
 
             log.info("留言通知已发送，访客: {}", nickname);
         } catch (Exception e) {
