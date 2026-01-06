@@ -108,3 +108,16 @@ export const getCommentConfig = cache(async (): Promise<CommentConfig> => {
   const config = await getServerConfig();
   return config.comment;
 });
+
+/**
+ * 获取关于页面内容
+ */
+export const getAboutContent = cache(async (): Promise<string> => {
+  try {
+    const data = await fetchServer<{ content: string }>('/api/public/about');
+    return data.content || '';
+  } catch (error) {
+    console.warn('Failed to load about content:', error);
+    return '';
+  }
+});
