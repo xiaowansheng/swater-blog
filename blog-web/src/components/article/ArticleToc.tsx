@@ -10,15 +10,13 @@ interface TocItem {
 
 interface ArticleTocProps {
   className?: string;
-  onContentRendered?: boolean; // 新增：用于监听内容渲染完成
 }
 
-export default function ArticleToc({ className = '', onContentRendered }: ArticleTocProps) {
+export default function ArticleToc({ className = '' }: ArticleTocProps) {
   const [tocItems, setTocItems] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string>('');
 
   const generateToc = () => {
-    // 获取文章内容中的所有标题 - 更新为 Vditor 渲染的内容
     const headings = document.querySelectorAll('.vditor-reset h1, .vditor-reset h2, .vditor-reset h3, .vditor-reset h4, .vditor-reset h5, .vditor-reset h6');
     const items: TocItem[] = [];
 
@@ -39,58 +37,25 @@ export default function ArticleToc({ className = '', onContentRendered }: Articl
     setTocItems(items);
   };
 
-  useEffect(() => {
-    // 延迟执行，确保 Vditor 渲染完成
-    const timer = setTimeout(() => {
-      generateToc();
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   // 监听 Vditor 渲染完成事件
   useEffect(() => {
     const handleVditorRendered = () => {
-      setTimeout(() => {
-        generateToc();
-      }, 100);
+      setTimeout(generateToc, 100);
     };
 
+    // 初始延迟生成
+    const timer = setTimeout(generateToc, 500);
+
+    // 监听渲染完成事件
     window.addEventListener('vditorRendered', handleVditorRendered);
-    return () => window.removeEventListener('vditorRendered', handleVditorRendered);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('vditorRendered', handleVditorRendered);
+    };
   }, []);
 
-  // 使用 MutationObserver 监听 DOM 变化
-  useEffect(() => {
-    const observer = new MutationObserver((mutations) => {
-      let shouldUpdate = false;
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          const target = mutation.target as Element;
-          if (target.classList.contains('vditor-reset') || target.closest('.vditor-reset')) {
-            shouldUpdate = true;
-          }
-        }
-      });
-      
-      if (shouldUpdate) {
-        setTimeout(() => {
-          generateToc();
-        }, 100);
-      }
-    });
-
-    const vditorContainer = document.querySelector('.vditor-reset');
-    if (vditorContainer) {
-      observer.observe(vditorContainer, {
-        childList: true,
-        subtree: true
-      });
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
+  // 监听滚动，高亮当前标题
   useEffect(() => {
     if (tocItems.length === 0) return;
 
@@ -121,7 +86,7 @@ export default function ArticleToc({ className = '', onContentRendered }: Articl
   const scrollToHeading = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const offset = 80; // 考虑固定头部的高度
+      const offset = 80;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - offset;
 

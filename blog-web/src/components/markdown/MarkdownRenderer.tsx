@@ -14,38 +14,37 @@ export default function MarkdownRenderer({ content, onRendered }: MarkdownRender
 
   useEffect(() => {
     if (containerRef.current && content) {
-      // 清空之前的内容
+      // 清空容器
       containerRef.current.innerHTML = '';
       
-      // 简化的 Vditor 预览配置
+      // 使用 Vditor.preview 渲染 Markdown
       Vditor.preview(containerRef.current, content, {
         mode: 'light',
+        anchor: 1,
         hljs: {
           enable: true,
-          style: 'github',
-          lineNumber: false
+          style: 'github'
         },
         math: {
           inlineDigit: true,
           engine: 'KaTeX'
         },
         speech: {
-          enable: false,
+          enable: false
         },
-        anchor: 1,
         after: () => {
+          // 渲染完成后的回调
           if (containerRef.current) {
-            containerRef.current.classList.add('vditor-content');
-            containerRef.current.style.visibility = 'visible';
-            
-            // 触发自定义事件通知 TOC 组件
+            // 触发自定义事件通知其他组件
             const event = new CustomEvent('vditorRendered', {
               detail: { container: containerRef.current }
             });
             window.dispatchEvent(event);
           }
+          
+          // 执行回调
           if (onRendered) {
-            setTimeout(onRendered, 100);
+            setTimeout(onRendered, 50);
           }
         }
       });
@@ -55,13 +54,10 @@ export default function MarkdownRenderer({ content, onRendered }: MarkdownRender
   return (
     <div 
       ref={containerRef}
-      className="vditor-reset max-w-none prose prose-lg dark:prose-invert"
-      style={{ 
-        minHeight: '200px',
-        visibility: 'hidden',
+      className="vditor-reset prose prose-lg max-w-none"
+      style={{
         maxWidth: '100%',
-        width: '100%',
-        overflow: 'hidden'
+        width: '100%'
       }}
     />
   );
