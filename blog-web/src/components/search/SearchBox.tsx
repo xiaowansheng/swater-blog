@@ -14,7 +14,6 @@ export default function SearchBox() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (keyword.trim()) {
-      console.log('搜索触发加载');
       startLoading();
       router.push(`/search?keyword=${encodeURIComponent(keyword.trim())}`);
     }

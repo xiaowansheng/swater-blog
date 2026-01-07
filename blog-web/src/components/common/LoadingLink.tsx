@@ -15,7 +15,6 @@ export default function LoadingLink({ href, children, className, onClick }: Load
   const { startLoading } = useSimpleRouteLoading();
 
   const handleClick = () => {
-    console.log('LoadingLink 点击:', href);
     startLoading();
     onClick?.();
   };

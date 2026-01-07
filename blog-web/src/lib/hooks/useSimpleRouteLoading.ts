@@ -12,8 +12,6 @@ export function useSimpleRouteLoading() {
   useEffect(() => {
     // 如果路径发生变化且不是首次加载
     if (prevPathnameRef.current && prevPathnameRef.current !== pathname) {
-      console.log('路径变化检测:', prevPathnameRef.current, '->', pathname);
-      
       // 立即显示加载状态
       setIsLoading(true);
       

@@ -10,7 +10,6 @@ export default function TopProgressBar() {
 
   useEffect(() => {
     if (isLoading) {
-      console.log('开始显示进度条');
       // 重置进度
       setProgress(0);
       
