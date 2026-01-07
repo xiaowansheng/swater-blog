@@ -390,6 +390,41 @@ health:
   custom:
     enabled: true
 
+# ========================================
+# 插件配置 - 开发环境
+# ========================================
+plugin:
+  # 存储插件配置
+  storage:
+    active: local  # 本地存储
+    fallback:
+
+  # 消息队列插件配置
+  mq:
+    active: rabbitmq  # RabbitMQ
+    fallback: memory  # 降级到内存MQ
+
+  # 通知渠道插件配置
+  notification:
+    enabled:
+      - websocket  # WebSocket通知
+      - email      # 邮件通知
+
+  # 搜索插件配置
+  search:
+    active: database  # 开发环境使用数据库搜索
+    fallback:
+
+  # 评论插件配置
+  comment:
+    active: builtin  # 内置评论系统
+    fallback:
+
+  # 定时任务插件配置
+  scheduler:
+    active: spring  # Spring定时任务
+    fallback:
+
 # 开发环境专用配置
 dev:
   # 热重载配置
