@@ -48,15 +48,17 @@ export default function ArticleToc({ className = '', onContentRendered }: Articl
     return () => clearTimeout(timer);
   }, []);
 
-  // 监听内容渲染完成
+  // 监听 Vditor 渲染完成事件
   useEffect(() => {
-    if (onContentRendered) {
-      // 内容渲染完成后重新生成目录
+    const handleVditorRendered = () => {
       setTimeout(() => {
         generateToc();
       }, 100);
-    }
-  }, [onContentRendered]);
+    };
+
+    window.addEventListener('vditorRendered', handleVditorRendered);
+    return () => window.removeEventListener('vditorRendered', handleVditorRendered);
+  }, []);
 
   // 使用 MutationObserver 监听 DOM 变化
   useEffect(() => {
