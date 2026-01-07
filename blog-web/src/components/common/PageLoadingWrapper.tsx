@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import PageLoading from './PageLoading';
-// import RouteLoading from './RouteLoading';
-import AnimeRouteLoading from './AnimeRouteLoading';
+import RouteLoading from './RouteLoading';
 
 export default function PageLoadingWrapper({
   children,
@@ -29,32 +28,30 @@ export default function PageLoadingWrapper({
       const timer = setTimeout(() => {
         setIsInitialLoading(false);
         sessionStorage.setItem('hasVisited', 'true');
-      }, 2000);
+      }, 3000); // 增加到3秒，让用户能完整体验首屏动画
 
       return () => clearTimeout(timer);
     }
   }, []);
 
-  // 在挂载前直接渲染 children，避免闪烁
-  if (!mounted) {
-    return <>{children}</>;
+  // 在挂载前或首次加载时，只显示加载动画
+  if (!mounted || isInitialLoading) {
+    return (
+      <>
+        {mounted && (
+          <PageLoading onComplete={() => setIsInitialLoading(false)} minDuration={3000} />
+        )}
+      </>
+    );
   }
 
   return (
     <>
-      {/* 首次访问加载动画 */}
-      {isInitialLoading && (
-        <PageLoading onComplete={() => setIsInitialLoading(false)} minDuration={2000} />
-      )}
-      
       {/* 路由切换加载动画 */}
-      {/* 二次元风格（适中的可爱程度）*/}
-      {/* <RouteLoading /> */}
-      {/* 超级二次元风格（更加丰富的动画） */}
-      <AnimeRouteLoading />
+      <RouteLoading />
       
       {/* 页面内容 */}
-      {!isInitialLoading && children}
+      {children}
     </>
   );
 }
