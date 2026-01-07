@@ -1,11 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Link, usePathname } from '@/lib/i18n/routing';
+import { usePathname } from '@/lib/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { formatDate, stripMarkdown } from '@/lib/utils/format';
 import type { PostVO } from '@/types';
 import Image from '@/components/common/ImageWithPreview';
+import LoadingLink from '@/components/common/LoadingLink';
 
 interface ArticleCardProps {
   article: PostVO;
@@ -27,7 +28,7 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
       className={`overflow-hidden group modern-card flex flex-col ${showCover ? 'md:flex-row' : ''}`}
     >
       {showCover && (
-        <Link href={`/post/${article.articleKey}`} className="md:w-[40%] lg:w-[35%] shrink-0">
+        <LoadingLink href={`/post/${article.articleKey}`} className="md:w-[40%] lg:w-[35%] shrink-0">
           <div className="overflow-hidden relative h-48 sm:h-56 md:h-full min-h-[240px]">
             <Image
               src={article.cover!}
@@ -38,24 +39,24 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
             />
             <div className="absolute inset-0 bg-gradient-to-t to-transparent opacity-0 transition-opacity duration-500 from-black/60 via-black/20 group-hover:opacity-100"></div>
           </div>
-        </Link>
+        </LoadingLink>
       )}
       
       <div className="flex-1 p-5 sm:p-6 md:p-8 flex flex-col min-w-0">
         <div className="flex-1">
-          <Link href={`/post/${article.articleKey}`}>
+          <LoadingLink href={`/post/${article.articleKey}`}>
             <h2 className="text-xl sm:text-2xl font-bold mb-3 group-hover:text-primary transition-all duration-300 font-title leading-tight text-center truncate">
               {article.title}
             </h2>
-          </Link>
+          </LoadingLink>
 
           <div className="flex flex-wrap items-center gap-3 mb-4">
             {article.categoryName && article.categoryKey && (
-              <Link href={`/category/${article.categoryKey}`}>
+              <LoadingLink href={`/category/${article.categoryKey}`}>
                 <span className="px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold border border-primary/20 hover:bg-primary hover:text-white transition-colors">
                   {article.categoryName}
                 </span>
-              </Link>
+              </LoadingLink>
             )}
             <div className="flex items-center gap-4 text-xs text-muted-foreground/60">
               <span className="flex items-center gap-1.5">
@@ -82,13 +83,13 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
         {article.tags && article.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-auto pt-4 border-t border-border/40">
             {article.tags.map((tag) => (
-              <Link
+              <LoadingLink
                 key={tag.id}
                 href={`/tag/${tag.tagKey}`}
                 className="text-xs px-2.5 py-1 rounded-md bg-secondary/40 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300 border border-transparent hover:border-primary/20"
               >
                 #{tag.name}
-              </Link>
+              </LoadingLink>
             ))}
           </div>
         )}

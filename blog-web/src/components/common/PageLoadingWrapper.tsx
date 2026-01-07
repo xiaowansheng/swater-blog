@@ -1,18 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import PageLoading from './PageLoading';
+import RouteLoading from './RouteLoading';
 
 export default function PageLoadingWrapper({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
-  const pathname = usePathname();
 
+  // 首次访问的加载逻辑
   useEffect(() => {
     // 标记组件已挂载
     setMounted(true);
@@ -21,24 +21,18 @@ export default function PageLoadingWrapper({
     const hasVisited = sessionStorage.getItem('hasVisited');
 
     if (hasVisited) {
-      // 已经访问过，不显示加载动画
-      setIsLoading(false);
+      // 已经访问过，不显示首次加载动画
+      setIsInitialLoading(false);
     } else {
       // 首次访问，显示加载动画
       const timer = setTimeout(() => {
-        setIsLoading(false);
+        setIsInitialLoading(false);
         sessionStorage.setItem('hasVisited', 'true');
       }, 2000);
 
       return () => clearTimeout(timer);
     }
   }, []);
-
-  // 路由切换时的加载（可选，如果需要每次路由切换都显示动画）
-  useEffect(() => {
-    // 可以在这里添加路由切换时的加载逻辑
-    // 目前只保留首次访问的加载动画
-  }, [pathname]);
 
   // 在挂载前直接渲染 children，避免闪烁
   if (!mounted) {
@@ -47,8 +41,16 @@ export default function PageLoadingWrapper({
 
   return (
     <>
-      <PageLoading onComplete={() => setIsLoading(false)} />
-      {!isLoading && children}
+      {/* 首次访问加载动画 */}
+      {isInitialLoading && (
+        <PageLoading onComplete={() => setIsInitialLoading(false)} minDuration={2000} />
+      )}
+      
+      {/* 路由切换加载动画 */}
+      <RouteLoading />
+      
+      {/* 页面内容 */}
+      {!isInitialLoading && children}
     </>
   );
 }

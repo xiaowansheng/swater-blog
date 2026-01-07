@@ -3,15 +3,19 @@
 import { useState } from 'react';
 import { useRouter } from '@/lib/i18n/routing';
 import { useTranslations } from 'next-intl';
+import { useSimpleRouteLoading } from '@/lib/hooks/useSimpleRouteLoading';
 
 export default function SearchBox() {
   const t = useTranslations('search');
   const router = useRouter();
+  const { startLoading } = useSimpleRouteLoading();
   const [keyword, setKeyword] = useState('');
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (keyword.trim()) {
+      console.log('搜索触发加载');
+      startLoading();
       router.push(`/search?keyword=${encodeURIComponent(keyword.trim())}`);
     }
   };
