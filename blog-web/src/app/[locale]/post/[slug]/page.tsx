@@ -4,7 +4,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PageHeader from '@/components/layout/PageHeader';
 import MarkdownRenderer from '@/components/markdown/MarkdownRenderer';
-import ArticleMeta from '@/components/article/ArticleMeta';
+// import ArticleMeta from '@/components/article/ArticleMeta';
 import ArticleLike from '@/components/article/ArticleLike';
 import ArticleCopyright from '@/components/article/ArticleCopyright';
 import ArticleMenu from '@/components/article/ArticleMenu';
