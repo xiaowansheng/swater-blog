@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import PageLoading from './PageLoading';
-import RouteLoading from './RouteLoading';
+// import RouteLoading from './RouteLoading';
+import AnimeRouteLoading from './AnimeRouteLoading';
 
 export default function PageLoadingWrapper({
   children,
@@ -48,9 +49,9 @@ export default function PageLoadingWrapper({
       
       {/* 路由切换加载动画 */}
       {/* 二次元风格（适中的可爱程度）*/}
-      <RouteLoading />
+      {/* <RouteLoading /> */}
       {/* 超级二次元风格（更加丰富的动画） */}
-      {/* <AnimeRouteLoading /> */}
+      <AnimeRouteLoading />
       
       {/* 页面内容 */}
       {!isInitialLoading && children}
