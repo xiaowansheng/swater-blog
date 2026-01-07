@@ -6,7 +6,7 @@
     "categories": "Categories",
     "tags": "Tags",
     "search": "Search",
-    "guestbook": "Guestbook",
+    "guestbook": "Messages",
     "friendLinks": "Friend Links",
     "moments": "Moments",
     "loading": "Loading...",
@@ -50,7 +50,7 @@
     "tags": "Tags",
     "archives": "Archives",
     "about": "About",
-    "guestbook": "Guestbook",
+    "guestbook": "Messages",
     "friendLinks": "Friend Links",
     "moments": "Moments"
   },

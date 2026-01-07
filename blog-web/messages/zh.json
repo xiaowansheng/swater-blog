@@ -6,7 +6,7 @@
     "categories": "分类",
     "tags": "标签",
     "search": "搜索",
-    "guestbook": "留言板",
+    "guestbook": "留言",
     "friendLinks": "友链",
     "moments": "说说",
     "loading": "加载中...",
@@ -50,7 +50,7 @@
     "tags": "标签",
     "archives": "归档",
     "about": "关于",
-    "guestbook": "留言板",
+    "guestbook": "留言",
     "friendLinks": "友链",
     "moments": "说说"
   },

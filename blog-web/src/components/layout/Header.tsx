@@ -12,6 +12,7 @@ export default async function Header() {
     { href: '/post', label: t('posts') },
     { href: '/archive', label: t('archives') },
     { href: '/moment', label: t('moments') },
+    { href: '/guestbook', label: t('guestbook') },
     { href: '/friend-link', label: t('friendLinks') },
     { href: '/about', label: t('about') },
   ];
