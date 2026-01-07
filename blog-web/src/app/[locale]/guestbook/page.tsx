@@ -25,10 +25,10 @@ export default async function GuestbookPage({
         <Header />
         <PageHeader title={t('guestbook')} description="留下你的足迹" />
         <main className="container flex-1 px-4 py-12 mx-auto">
-          <div className="mb-10">
+          {/* <div className="mb-10">
             <h1 className="mb-4 text-5xl font-bold gradient-text">{t('guestbook')}</h1>
             <p className="text-lg text-muted">留下你的足迹</p>
-          </div>
+          </div> */}
           <div className="mb-10">
             <CommentForm />
           </div>

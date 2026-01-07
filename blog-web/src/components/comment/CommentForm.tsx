@@ -96,7 +96,7 @@ export default function CommentForm({
           className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none shadow-sm focus:shadow-md"
         />
       </div>
-      <div className="flex gap-3">
+      <div className="flex gap-3 justify-end">
         <button
           type="submit"
           disabled={loading}
