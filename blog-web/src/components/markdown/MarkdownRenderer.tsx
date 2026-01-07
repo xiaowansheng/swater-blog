@@ -21,7 +21,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
           img: ({ node, ...props }) => (
             <div className="my-4">
               <Image
-                src={props.src || ''}
+                src={typeof props.src === 'string' ? props.src : ''}
                 alt={props.alt || ''}
                 width={800}
                 height={450}

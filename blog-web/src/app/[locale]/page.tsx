@@ -14,7 +14,7 @@ export const revalidate = ISR_REVALIDATE.HOME;
 export default async function HomePage() {
   const t = await getTranslations('common');
 
-  let articleList = { records: [], total: 0, size: 10, current: 1, pages: 0 };
+  let articleList: any = { records: [], total: 0, size: 10, current: 1, pages: 0 };
   let hotArticles: any[] = [];
   let categories: any[] = [];
   let tags: any[] = [];
@@ -65,10 +65,13 @@ export default async function HomePage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <p className="mb-2 text-lg sm:text-xl font-semibold text-foreground/70">{t('noData')}</p>
-                  <p className="text-xs sm:text-sm text-muted">
-                    {process.env.NODE_ENV === 'development' && 'API服务器未连接，请确保后端服务正在运行'}
-                  </p>
+                  <h3 className="mb-3 text-xl sm:text-2xl font-semibold text-foreground/80">{t('noArticles')}</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-2">{t('noArticlesHint')}</p>
+                  {process.env.NODE_ENV === 'development' && (
+                    <p className="mt-4 text-xs sm:text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-4 py-2 rounded-lg inline-block">
+                      {t('apiNotConnected')}
+                    </p>
+                  )}
                 </div>
               </div>
             )}

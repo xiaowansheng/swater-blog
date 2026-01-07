@@ -29,9 +29,9 @@ export default async function ArchiveListPage({
         <PageHeader title={t('archives')} description="文章归档、分类与标签" />
         <main className="container flex-1 px-4 py-12 mx-auto space-y-12">
           {/* 分类和标签 */}
-          {categories.length > 0 && (
-            <section>
-              <h2 className="text-2xl font-bold mb-6">文章分类</h2>
+          <section>
+            <h2 className="text-2xl font-bold mb-6">文章分类</h2>
+            {categories.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categories.map((category) => (
                   <Link
@@ -53,12 +53,19 @@ export default async function ArchiveListPage({
                   </Link>
                 ))}
               </div>
-            </section>
-          )}
+            ) : (
+              <div className="overflow-hidden relative p-6 sm:p-8 text-center modern-card">
+                <div className="absolute inset-0 bg-gradient-to-br via-transparent from-primary/5 to-accent/5"></div>
+                <div className="relative z-10">
+                  <p className="text-muted-foreground">{t('noCategories')}</p>
+                </div>
+              </div>
+            )}
+          </section>
 
-          {tags.length > 0 && (
-            <section>
-              <h2 className="text-2xl font-bold mb-6">所有标签</h2>
+          <section>
+            <h2 className="text-2xl font-bold mb-6">所有标签</h2>
+            {tags.length > 0 ? (
               <div className="flex flex-wrap gap-3">
                 {tags.map((tag) => (
                   <Link
@@ -75,8 +82,15 @@ export default async function ArchiveListPage({
                   </Link>
                 ))}
               </div>
-            </section>
-          )}
+            ) : (
+              <div className="overflow-hidden relative p-6 sm:p-8 text-center modern-card">
+                <div className="absolute inset-0 bg-gradient-to-br via-transparent from-primary/5 to-accent/5"></div>
+                <div className="relative z-10">
+                  <p className="text-muted-foreground">{t('noTags')}</p>
+                </div>
+              </div>
+            )}
+          </section>
 
           {/* 时间轴归档 */}
           <section>
