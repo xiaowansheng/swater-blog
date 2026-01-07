@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer';
 import ArticleHeader from '@/components/article/ArticleHeader';
 import MarkdownRenderer from '@/components/markdown/MarkdownRenderer';
 import ArticleMeta from '@/components/article/ArticleMeta';
+import ArticleStats from '@/components/article/ArticleStats';
 import ArticleCopyright from '@/components/article/ArticleCopyright';
 import ArticleMenu from '@/components/article/ArticleMenu';
 import ArticleMenuMobile from '@/components/article/ArticleMenuMobile';
@@ -65,6 +66,7 @@ export default async function PostDetailPage({
               <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-code:bg-secondary prose-code:px-1 prose-code:rounded prose-pre:bg-secondary/50">
                 <MarkdownRenderer content={article.content} />
               </div>
+              <ArticleStats article={article} />
               <ArticleCopyright article={article} author={author} />
             </article>
 

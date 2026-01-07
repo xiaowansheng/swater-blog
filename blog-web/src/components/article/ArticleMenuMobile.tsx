@@ -383,28 +383,6 @@ export default function ArticleMenuMobile({ article }: ArticleMenuMobileProps) {
                   </div>
                   <span className="font-medium">⬆️ 回到顶部</span>
                 </motion.button>
-
-                <motion.div 
-                  className="pt-3 border-t border-border/30"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <div className="grid grid-cols-3 gap-4 text-center text-xs">
-                    <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200/30">
-                      <div className="font-bold text-lg text-blue-600 dark:text-blue-400">{article.content?.length || 0}</div>
-                      <div className="text-blue-500 dark:text-blue-300">📝 字数</div>
-                    </div>
-                    <div className="p-3 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200/30">
-                      <div className="font-bold text-lg text-green-600 dark:text-green-400">{article.viewCount || 0}</div>
-                      <div className="text-green-500 dark:text-green-300">👀 阅读</div>
-                    </div>
-                    <div className="p-3 bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-lg border border-pink-200/30">
-                      <div className="font-bold text-lg text-pink-600 dark:text-pink-400">{article.likeCount || 0}</div>
-                      <div className="text-pink-500 dark:text-pink-300">❤️ 点赞</div>
-                    </div>
-                  </div>
-                </motion.div>
               </motion.div>
             )}
           </motion.div>

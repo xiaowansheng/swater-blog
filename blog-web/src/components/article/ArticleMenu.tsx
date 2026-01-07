@@ -180,14 +180,6 @@ export default function ArticleMenu({ article }: ArticleMenuProps) {
                 </svg>
                 <span>跳到底部</span>
               </button>
-
-              <div className="pt-2 border-t border-border">
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <div>字数: {article.content?.length || 0}</div>
-                  <div>阅读: {article.viewCount || 0}</div>
-                  <div>点赞: {article.likeCount || 0}</div>
-                </div>
-              </div>
             </div>
           )}
         </div>
