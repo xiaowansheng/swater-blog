@@ -49,6 +49,7 @@ import { DecorationProvider } from '@/lib/context/DecorationContext';
 import DecorationManager from '@/components/decoration/DecorationManager';
 import PageLoadingWrapper from '@/components/common/PageLoadingWrapper';
 import TopProgressBar from '@/components/common/TopProgressBar';
+import FloatingToolbar from '@/components/widgets/FloatingToolbar';
 
 export default async function LocaleLayout({
   children,
@@ -78,6 +79,7 @@ export default async function LocaleLayout({
               <PageLoadingWrapper>
                 <div className="flex min-h-screen flex-col relative">
                   <DecorationManager />
+                  <FloatingToolbar />
                   {children}
                 </div>
               </PageLoadingWrapper>

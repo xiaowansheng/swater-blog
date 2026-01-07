@@ -9,7 +9,6 @@ import ArticleCopyright from '@/components/article/ArticleCopyright';
 import ArticleMenu from '@/components/article/ArticleMenu';
 import ArticleMenuMobile from '@/components/article/ArticleMenuMobile';
 import ReadingProgress from '@/components/widgets/ReadingProgress';
-import FloatingToolbar from '@/components/widgets/FloatingToolbar';
 import { articleApi } from '@/lib/api/article';
 import { getAuthorInfo } from '@/lib/api/config.server';
 import { ISR_REVALIDATE } from '@/lib/constants';
@@ -53,7 +52,6 @@ export default async function PostDetailPage({
     return (
       <>
         <ReadingProgress />
-        <FloatingToolbar />
         <Header />
         
         {/* 文章头部 */}
