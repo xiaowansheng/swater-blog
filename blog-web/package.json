@@ -13,15 +13,11 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
     "framer-motion": "^12.23.26",
-    "highlight.js": "^11.11.1",
     "next": "16.1.0",
     "next-intl": "^4.6.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-markdown": "^10.1.0",
-    "rehype-highlight": "^7.0.2",
-    "rehype-raw": "^7.0.0",
-    "remark-gfm": "^4.0.1"
+    "vditor": "^3.11.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

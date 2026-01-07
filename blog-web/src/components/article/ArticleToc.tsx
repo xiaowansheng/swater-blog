@@ -10,15 +10,16 @@ interface TocItem {
 
 interface ArticleTocProps {
   className?: string;
+  onContentRendered?: boolean; // 新增：用于监听内容渲染完成
 }
 
-export default function ArticleToc({ className = '' }: ArticleTocProps) {
+export default function ArticleToc({ className = '', onContentRendered }: ArticleTocProps) {
   const [tocItems, setTocItems] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string>('');
 
-  useEffect(() => {
-    // 获取文章内容中的所有标题
-    const headings = document.querySelectorAll('.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6');
+  const generateToc = () => {
+    // 获取文章内容中的所有标题 - 更新为 Vditor 渲染的内容
+    const headings = document.querySelectorAll('.vditor-reset h1, .vditor-reset h2, .vditor-reset h3, .vditor-reset h4, .vditor-reset h5, .vditor-reset h6');
     const items: TocItem[] = [];
 
     headings.forEach((heading, index) => {
@@ -36,6 +37,56 @@ export default function ArticleToc({ className = '' }: ArticleTocProps) {
     });
 
     setTocItems(items);
+  };
+
+  useEffect(() => {
+    // 延迟执行，确保 Vditor 渲染完成
+    const timer = setTimeout(() => {
+      generateToc();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 监听内容渲染完成
+  useEffect(() => {
+    if (onContentRendered) {
+      // 内容渲染完成后重新生成目录
+      setTimeout(() => {
+        generateToc();
+      }, 100);
+    }
+  }, [onContentRendered]);
+
+  // 使用 MutationObserver 监听 DOM 变化
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      let shouldUpdate = false;
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          const target = mutation.target as Element;
+          if (target.classList.contains('vditor-reset') || target.closest('.vditor-reset')) {
+            shouldUpdate = true;
+          }
+        }
+      });
+      
+      if (shouldUpdate) {
+        setTimeout(() => {
+          generateToc();
+        }, 100);
+      }
+    });
+
+    const vditorContainer = document.querySelector('.vditor-reset');
+    if (vditorContainer) {
+      observer.observe(vditorContainer, {
+        childList: true,
+        subtree: true
+      });
+    }
+
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {

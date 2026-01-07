@@ -435,3 +435,332 @@ body::after {
 button, a {
   touch-action: manipulation;
 }
+
+/* ===== Vditor Theme Integration ===== */
+.vditor-reset {
+  font-family: var(--font-sans) !important;
+  line-height: 1.7;
+  color: var(--foreground) !important;
+  background: transparent !important;
+  direction: ltr !important;
+  text-align: left !important;
+  writing-mode: horizontal-tb !important;
+  display: block !important;
+  flex-direction: column !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+}
+
+.vditor-content {
+  color: var(--foreground);
+  line-height: 1.7;
+  direction: ltr !important;
+  text-align: left !important;
+  writing-mode: horizontal-tb !important;
+  display: block !important;
+  flex-direction: column !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+}
+
+/* 强制重置 Vditor 的所有布局样式 */
+.vditor-reset,
+.vditor-reset > *,
+.vditor-reset div,
+.vditor-reset section,
+.vditor-reset article {
+  display: block !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  max-width: 100% !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+}
+
+/* 确保 Vditor 内容正确显示 */
+.vditor-reset * {
+  font-family: inherit !important;
+  direction: ltr !important;
+  writing-mode: horizontal-tb !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.vditor-reset .vditor-ir .vditor-ir__marker,
+.vditor-reset .vditor-ir .vditor-ir__marker--hide {
+  display: none !important;
+}
+
+/* 强制所有文本元素使用正确的排列方向和宽度限制 */
+.vditor-content p,
+.vditor-content div,
+.vditor-content span,
+.vditor-content h1,
+.vditor-content h2,
+.vditor-content h3,
+.vditor-content h4,
+.vditor-content h5,
+.vditor-content h6,
+.vditor-content li,
+.vditor-content td,
+.vditor-content th {
+  direction: ltr !important;
+  text-align: left !important;
+  writing-mode: horizontal-tb !important;
+  display: block !important;
+  max-width: 100% !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+}
+
+.vditor-content h1,
+.vditor-content h2,
+.vditor-content h3,
+.vditor-content h4,
+.vditor-content h5,
+.vditor-content h6 {
+  color: var(--foreground);
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.vditor-content h1 {
+  font-size: 2.25rem;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.vditor-content h2 {
+  font-size: 1.875rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.25rem;
+}
+
+.vditor-content h3 {
+  font-size: 1.5rem;
+}
+
+.vditor-content h4 {
+  font-size: 1.25rem;
+}
+
+.vditor-content p {
+  margin-bottom: 1rem;
+  color: var(--foreground);
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.vditor-content a {
+  color: var(--primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+  display: inline !important;
+  word-break: break-all !important;
+}
+
+.vditor-content a:hover {
+  border-bottom-color: var(--primary);
+}
+
+.vditor-content blockquote {
+  border-left: 4px solid var(--primary);
+  background: var(--secondary);
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.vditor-content blockquote p {
+  margin: 0;
+  color: var(--secondary-foreground);
+}
+
+.vditor-content code {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-family: var(--font-mono);
+  display: inline !important;
+  word-break: break-all !important;
+  overflow-wrap: break-word !important;
+}
+
+.vditor-content pre {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.vditor-content pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: var(--foreground);
+  display: block !important;
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+}
+
+.vditor-content ul,
+.vditor-content ol {
+  margin: 1rem 0;
+  padding-left: 2rem;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.vditor-content li {
+  margin: 0.5rem 0;
+  color: var(--foreground);
+  display: list-item !important;
+  max-width: 100% !important;
+  overflow-wrap: break-word !important;
+}
+
+.vditor-content table {
+  width: 100%;
+  max-width: 100% !important;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  display: table !important;
+  table-layout: fixed !important;
+}
+
+.vditor-content th,
+.vditor-content td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  display: table-cell !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+.vditor-content th {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  font-weight: 600;
+}
+
+.vditor-content tr:last-child td {
+  border-bottom: none;
+}
+
+.vditor-content img {
+  max-width: 100% !important;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: block !important;
+}
+
+.vditor-content hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 2rem 0;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Math formulas */
+.vditor-content .katex {
+  color: var(--foreground);
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+/* Task lists */
+.vditor-content .vditor-task {
+  list-style: none;
+  margin-left: -2rem;
+}
+
+.vditor-content .vditor-task input[type="checkbox"] {
+  margin-right: 0.5rem;
+  accent-color: var(--primary);
+}
+
+/* Mermaid diagrams */
+.vditor-content .vditor-mermaid {
+  text-align: center;
+  margin: 1.5rem 0;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+/* Code highlighting adjustments for dark mode */
+.dark .vditor-content .hljs {
+  background: var(--card) !important;
+  color: var(--foreground) !important;
+}
+
+.dark .vditor-content pre {
+  background: var(--card);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .vditor-content {
+    font-size: 1rem;
+  }
+  
+  .vditor-content h1 {
+    font-size: 1.75rem;
+  }
+  
+  .vditor-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  .vditor-content h3 {
+    font-size: 1.25rem;
+  }
+  
+  .vditor-content pre {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .vditor-content table {
+    font-size: 0.875rem;
+  }
+  
+  .vditor-content th,
+  .vditor-content td {
+    padding: 0.5rem 0.75rem;
+  }
+}
