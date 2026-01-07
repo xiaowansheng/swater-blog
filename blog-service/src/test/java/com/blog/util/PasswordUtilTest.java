@@ -1,8 +1,6 @@
 package com.blog.util;
 
-
-
-import com.blog.common.util.PasswordUtil;
+import com.blog.shared.util.PasswordUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
