@@ -47,7 +47,10 @@ export default function PageLoadingWrapper({
       )}
       
       {/* 路由切换加载动画 */}
+      {/* 二次元风格（适中的可爱程度）*/}
       <RouteLoading />
+      {/* 超级二次元风格（更加丰富的动画） */}
+      {/* <AnimeRouteLoading /> */}
       
       {/* 页面内容 */}
       {!isInitialLoading && children}

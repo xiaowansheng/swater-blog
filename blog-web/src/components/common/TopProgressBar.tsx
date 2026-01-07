@@ -39,7 +39,7 @@ export default function TopProgressBar() {
     <AnimatePresence>
       {(isLoading || progress > 0) && (
         <motion.div
-          className="fixed top-0 left-0 right-0 z-[9999] h-1 bg-gradient-to-r from-primary via-accent to-primary"
+          className="fixed top-0 left-0 right-0 z-[9999] h-1 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400"
           initial={{ scaleX: 0, opacity: 0 }}
           animate={{ 
             scaleX: progress / 100, 
@@ -59,16 +59,30 @@ export default function TopProgressBar() {
             opacity: { duration: 0.1 }
           }}
         >
-          {/* 光效动画 */}
+          {/* 彩虹光效动画 */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/70 to-transparent"
             animate={{
               x: ['-100%', '100%']
             }}
             transition={{
-              duration: 1.5,
+              duration: 1.2,
               repeat: Infinity,
               ease: 'linear'
+            }}
+          />
+          
+          {/* 闪光点装饰 */}
+          <motion.div
+            className="absolute top-0 right-0 w-2 h-1 bg-gradient-to-r from-yellow-300 to-pink-300 rounded-full"
+            animate={{
+              scale: [1, 1.5, 1],
+              opacity: [0.8, 1, 0.8],
+            }}
+            transition={{
+              duration: 0.8,
+              repeat: Infinity,
+              ease: 'easeInOut',
             }}
           />
         </motion.div>
