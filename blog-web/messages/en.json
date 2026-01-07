@@ -63,7 +63,12 @@
     "author": "Author",
     "readTime": "Read time",
     "minutes": "minutes",
-    "toc": "Table of Contents"
+    "toc": "Table of Contents",
+    "copyright": "Copyright Notice",
+    "copyrightNotice": "Written by {author}, licensed under",
+    "license": "CC BY 4.0 International License",
+    "articleLink": "Article Link",
+    "lastUpdated": "Last updated"
   },
   "comment": {
     "title": "Comments",

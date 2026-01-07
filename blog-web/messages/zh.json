@@ -63,7 +63,12 @@
     "author": "作者",
     "readTime": "阅读时间",
     "minutes": "分钟",
-    "toc": "目录"
+    "toc": "目录",
+    "copyright": "版权声明",
+    "copyrightNotice": "本文由 {author} 撰写，采用",
+    "license": "知识共享署名 4.0 国际许可协议",
+    "articleLink": "文章链接",
+    "lastUpdated": "最后更新"
   },
   "comment": {
     "title": "评论",

@@ -5,9 +5,11 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MarkdownRenderer from '@/components/markdown/MarkdownRenderer';
 import ArticleMeta from '@/components/article/ArticleMeta';
+import ArticleCopyright from '@/components/article/ArticleCopyright';
 import ReadingProgress from '@/components/widgets/ReadingProgress';
 import FloatingToolbar from '@/components/widgets/FloatingToolbar';
 import { articleApi } from '@/lib/api/article';
+import { getAuthorInfo } from '@/lib/api/config.server';
 import { ISR_REVALIDATE } from '@/lib/constants';
 import { generateArticleMetadata } from '@/lib/utils/seo';
 
@@ -42,7 +44,10 @@ export default async function PostDetailPage({
   const t = await getTranslations('common');
 
   try {
-    const article = await articleApi.getByKey(slug);
+    const [article, author] = await Promise.all([
+      articleApi.getByKey(slug),
+      getAuthorInfo()
+    ]);
 
     return (
       <>
@@ -56,6 +61,7 @@ export default async function PostDetailPage({
             <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-code:bg-secondary prose-code:px-1 prose-code:rounded prose-pre:bg-secondary/50">
               <MarkdownRenderer content={article.content} />
             </div>
+            <ArticleCopyright article={article} author={author} />
           </article>
         </main>
         <Footer />
