@@ -26,7 +26,7 @@ export default function FloatingToolbar() {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-8 right-8 z-40 flex flex-col items-center">
+    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-center">
       <AnimatePresence>
         {isOpen && (
           <motion.div
