@@ -8,7 +8,7 @@ interface PageHeaderProps {
 
 export default function PageHeader({ title, description, children }: PageHeaderProps) {
   return (
-    <section className="relative flex overflow-hidden justify-center items-center h-[50vh] max-h-[600px] min-h-[400px]">
+    <section className="relative flex overflow-hidden justify-center items-center h-[40vh] max-h-[500px] min-h-[350px]">
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-background via-background to-primary/5"></div>
       <div className="absolute inset-0 z-0 bg-gradient-to-b to-transparent pointer-events-none from-black/15 via-black/5 dark:from-black/30 dark:via-black/10"></div>
       <div className="absolute inset-0 z-0">

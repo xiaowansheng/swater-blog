@@ -137,7 +137,7 @@ export default async function PostDetailPage({
           <div className="lg:flex lg:gap-8">
             {/* 主要内容 */}
             <article className="flex-1 bg-card border border-border rounded-2xl p-8 md:p-12 shadow-sm">
-              <ArticleMeta article={article} />
+              {/* <ArticleMeta article={article} /> */}
               <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-code:bg-secondary prose-code:px-1 prose-code:rounded prose-pre:bg-secondary/50">
                 <MarkdownRenderer content={article.content} />
               </div>
