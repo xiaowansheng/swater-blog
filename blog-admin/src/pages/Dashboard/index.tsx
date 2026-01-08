@@ -82,73 +82,69 @@ const Dashboard: React.FC = () => {
     <div className="page-container fade-in">
       {/* 统计卡片 */}
       <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="文章总数"
-            value={statistics?.articleCount || 0}
-            icon={<FileTextOutlined />}
-            color="#1890ff"
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="分类数"
-            value={statistics?.categoryCount || 0}
-            icon={<FolderOpenOutlined />}
-            color="#13c2c2"
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="标签数"
-            value={statistics?.tagCount || 0}
-            icon={<TagsOutlined />}
-            color="#722ed1"
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="总访问量"
-            value={statistics?.totalVisitCount || 0}
-            icon={<EyeOutlined />}
-            color="#fa8c16"
-          />
-        </Col>
+        {[
+          {
+            title: '总访问量',
+            value: statistics?.totalVisitCount || 0,
+            icon: <EyeOutlined />,
+            color: '#fa8c16',
+          },
+          {
+            title: '总访客数',
+            value: statistics?.totalVisitorCount || 0,
+            icon: <TeamOutlined />,
+            color: '#8c8c8c',
+          },
+          {
+            title: '今日访问量',
+            value: statistics?.todayVisit || 0,
+            icon: <RiseOutlined />,
+            color: '#52c41a',
+          },
+          {
+            title: '今日访客数',
+            value: statistics?.todayVisitor || 0,
+            icon: <TeamOutlined />,
+            color: '#d46b08',
+          },
+        ].map((item) => (
+          <Col xs={24} sm={12} lg={6} key={item.title}>
+            <StatCard {...item} />
+          </Col>
+        ))}
       </Row>
 
       <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="总访客数"
-            value={statistics?.totalVisitorCount || 0}
-            icon={<TeamOutlined />}
-            color="#8c8c8c"
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="今日访问量"
-            value={statistics?.todayVisit || 0}
-            icon={<RiseOutlined />}
-            color="#52c41a"
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="今日访客数"
-            value={statistics?.todayVisitor || 0}
-            icon={<TeamOutlined />}
-            color="#d46b08"
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="评论总数"
-            value={statistics?.commentCount || 0}
-            icon={<CommentOutlined />}
-            color="#52c41a"
-          />
-        </Col>
+        {[
+          {
+            title: '文章总数',
+            value: statistics?.articleCount || 0,
+            icon: <FileTextOutlined />,
+            color: '#1890ff',
+          },
+          {
+            title: '分类数',
+            value: statistics?.categoryCount || 0,
+            icon: <FolderOpenOutlined />,
+            color: '#13c2c2',
+          },
+          {
+            title: '标签数',
+            value: statistics?.tagCount || 0,
+            icon: <TagsOutlined />,
+            color: '#722ed1',
+          },
+          {
+            title: '评论总数',
+            value: statistics?.commentCount || 0,
+            icon: <CommentOutlined />,
+            color: '#52c41a',
+          },
+        ].map((item) => (
+          <Col xs={24} sm={12} lg={6} key={item.title}>
+            <StatCard {...item} />
+          </Col>
+        ))}
       </Row>
 
       {/* 图表区域 */}
