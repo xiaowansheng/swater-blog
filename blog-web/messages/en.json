@@ -71,7 +71,7 @@
     "lastUpdated": "Last updated"
   },
   "comment": {
-    "title": "Comments",
+    "title": "Comments ({count})",
     "submit": "Submit Comment",
     "reply": "Reply",
     "cancel": "Cancel",
@@ -82,7 +82,19 @@
     "namePlaceholder": "Enter your name",
     "emailPlaceholder": "Enter your email (optional)",
     "success": "Comment submitted successfully, awaiting review",
-    "error": "Failed to submit comment, please try again"
+    "error": "Failed to submit comment, please try again",
+    "sending": "Sending...",
+    "sendComment": "Send Comment ✨",
+    "replyingTo": "Replying to {name}",
+    "loading": "Loading comments...",
+    "noComments": "No comments yet, be the first to comment~",
+    "expandReplies": "Expand {count} replies",
+    "collapseReplies": "Collapse {count} replies",
+    "selectEmoji": "Select Emoji",
+    "uploadImage": "Upload Image",
+    "maxImageSize": "Image size cannot exceed {size}MB",
+    "maxImages": "Maximum {count} images allowed",
+    "invalidImage": "Only image files are allowed"
   },
   "search": {
     "placeholder": "Search articles, tags...",

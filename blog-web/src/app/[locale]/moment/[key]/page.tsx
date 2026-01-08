@@ -5,6 +5,7 @@ import Image from '@/components/common/ImageWithPreview';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MomentImages from '@/components/moment/MomentImages';
+import { AnimeComment } from '@/components/anime-comment';
 import { momentApi } from '@/lib/api/moment';
 import { formatDate } from '@/lib/utils/format';
 import { ISR_REVALIDATE } from '@/lib/constants';
@@ -91,6 +92,11 @@ export default async function MomentDetailPage({
                 <span>💬</span>
                 <span>{moment.commentCount || 0}</span>
               </div>
+            </div>
+
+            {/* 二次元评论组件 */}
+            <div className="mt-12">
+              <AnimeComment momentId={moment.id} />
             </div>
           </article>
         </main>

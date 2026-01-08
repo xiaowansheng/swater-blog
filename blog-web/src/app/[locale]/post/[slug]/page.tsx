@@ -10,6 +10,7 @@ import ArticleCopyright from '@/components/article/ArticleCopyright';
 import ArticleMenu from '@/components/article/ArticleMenu';
 import ArticleMenuMobile from '@/components/article/ArticleMenuMobile';
 import ReadingProgress from '@/components/widgets/ReadingProgress';
+import { AnimeComment } from '@/components/anime-comment';
 import { articleApi } from '@/lib/api/article';
 import { getAuthorInfo } from '@/lib/api/config.server';
 import { ISR_REVALIDATE } from '@/lib/constants';
@@ -143,6 +144,11 @@ export default async function PostDetailPage({
               </div>
               <ArticleLike article={article} />
               <ArticleCopyright article={article} author={author} />
+
+              {/* 二次元评论组件 */}
+              <div className="mt-12">
+                <AnimeComment postId={article.id} />
+              </div>
             </article>
 
             {/* 侧边栏菜单 - 只在大屏幕显示 */}

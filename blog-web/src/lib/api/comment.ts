@@ -3,24 +3,26 @@ import { fetchClient } from './client';
 import type { CommentVO, PageResult } from '@/types';
 
 export interface CommentSubmitDTO {
-  postId?: number;
-  momentId?: number;
+  targetId?: number;
+  targetType?: 'ARTICLE' | 'TALK';
   parentId?: number;
   nickname: string;
   email?: string;
+  qq?: string;
+  captcha?: string;
   content: string;
 }
 
 export const commentApi = {
   getList: (params: {
-    postId?: number;
-    momentId?: number;
+    targetId?: number;
+    targetType?: 'ARTICLE' | 'TALK';
     page?: number;
     size?: number;
   }) => {
     const searchParams = new URLSearchParams();
-    if (params.postId) searchParams.append('postId', params.postId.toString());
-    if (params.momentId) searchParams.append('momentId', params.momentId.toString());
+    if (params.targetId) searchParams.append('targetId', params.targetId.toString());
+    if (params.targetType) searchParams.append('targetType', params.targetType);
     if (params.page) searchParams.append('page', params.page.toString());
     if (params.size) searchParams.append('size', params.size.toString());
     return fetchServer<PageResult<CommentVO>>(

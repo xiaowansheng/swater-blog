@@ -71,7 +71,7 @@
     "lastUpdated": "最后更新"
   },
   "comment": {
-    "title": "评论",
+    "title": "评论 ({count})",
     "submit": "提交评论",
     "reply": "回复",
     "cancel": "取消",
@@ -82,7 +82,19 @@
     "namePlaceholder": "请输入昵称",
     "emailPlaceholder": "请输入邮箱（可选）",
     "success": "评论提交成功，等待审核",
-    "error": "评论提交失败，请重试"
+    "error": "评论提交失败，请重试",
+    "sending": "发送中...",
+    "sendComment": "发送评论 ✨",
+    "replyingTo": "正在回复 {name}",
+    "loading": "加载评论中...",
+    "noComments": "还没有评论哦，快来抢沙发吧~",
+    "expandReplies": "展开 {count} 条回复",
+    "collapseReplies": "收起 {count} 条回复",
+    "selectEmoji": "选择表情",
+    "uploadImage": "上传图片",
+    "maxImageSize": "图片大小不能超过 {size}MB",
+    "maxImages": "最多只能上传 {count} 张图片",
+    "invalidImage": "只能上传图片文件"
   },
   "search": {
     "placeholder": "搜索文章、标签...",
