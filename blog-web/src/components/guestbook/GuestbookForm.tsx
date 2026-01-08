@@ -52,6 +52,10 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!nickname.trim()) {
+      setError(tGuestbook('nicknameRequired'));
+      return;
+    }
     if (!content.trim()) {
       setError('Please enter content');
       return;
@@ -71,7 +75,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
 
     try {
       const message = await guestbookApi.submit({
-        nickname: nickname.trim() || undefined,
+        nickname: nickname.trim(),
         email: email.trim(),
         qq: qq.trim() || undefined,
         content: content.trim(),
@@ -121,6 +125,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
           placeholder={t('namePlaceholder')}
+          required
           className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
         />
       </div>

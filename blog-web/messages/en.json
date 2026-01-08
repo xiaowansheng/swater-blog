@@ -52,6 +52,7 @@
     "tips": "Tips",
     "tipsContent": "Please keep messages civil and help maintain a positive environment",
     "messageCount": "messages",
+    "nicknameRequired": "Nickname is required",
     "emailRequired": "Email is required",
     "emailCodeRequired": "Email code is required",
     "emailCodeSent": "Verification code sent",
