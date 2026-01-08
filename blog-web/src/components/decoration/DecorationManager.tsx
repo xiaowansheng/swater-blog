@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useDecoration } from '@/lib/context/DecorationContext';
 import SakuraRain from '@/components/decoration/SakuraRain';
 import CornerDecoration from '@/components/decoration/CornerDecoration';
-import Mascot from '@/components/decoration/Mascot';
+// import Mascot from '@/components/decoration/Mascot';
 
 export default function DecorationManager() {
   const { level } = useDecoration();
@@ -25,7 +25,7 @@ export default function DecorationManager() {
     <>
       <CornerDecoration />
       {level === 'full' && <SakuraRain />}
-      <Mascot />
+      {/* <Mascot /> */}
     </>
   );
 }

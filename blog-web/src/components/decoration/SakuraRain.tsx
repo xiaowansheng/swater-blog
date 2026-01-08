@@ -17,7 +17,7 @@ export default function SakuraRain() {
 
   useEffect(() => {
     const generatePetals = () => {
-      const newPetals = Array.from({ length: 15 }).map((_, i) => ({
+      const newPetals = Array.from({ length: 25 }).map((_, i) => ({
         id: Date.now() + i,
         x: Math.random() * 100, // percentage
         delay: Math.random() * 10,
