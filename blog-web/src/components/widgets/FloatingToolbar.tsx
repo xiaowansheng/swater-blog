@@ -155,24 +155,57 @@ export default function FloatingToolbar() {
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              {/* 可爱的菜单图标 */}
-              <div className="flex flex-col items-center gap-1">
-                <motion.div 
-                  className="w-4 h-0.5 bg-white rounded-full"
-                  animate={{ scaleX: [1, 0.8, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              {/* 二次元风格星星图标 */}
+              <motion.svg
+                className="w-7 h-7"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                {/* 主星星 */}
+                <motion.path
+                  d="M12 2L14.5 9.5L22 10L15.5 14.5L17.5 22L12 17.5L6.5 22L8.5 14.5L2 10L9.5 9.5L12 2Z"
+                  fill="white"
+                  animate={{
+                    scale: [1, 1.15, 1],
+                    rotate: [0, 10, -10, 0]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
                 />
-                <motion.div 
-                  className="w-3 h-0.5 bg-white rounded-full"
-                  animate={{ scaleX: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
+                {/* 左上角小星星 */}
+                <motion.path
+                  d="M6 3L7 5.5L9.5 6L7 6.5L6 9L5 6.5L2.5 6L5 5.5L6 3Z"
+                  fill="white"
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    opacity: [0.6, 1, 0.6]
+                  }}
+                  transition={{
+                    duration: 1.8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.2
+                  }}
                 />
-                <motion.div 
-                  className="w-4 h-0.5 bg-white rounded-full"
-                  animate={{ scaleX: [1, 0.9, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
+                {/* 右下角小星星 */}
+                <motion.path
+                  d="M19 15L20 17.5L22.5 18L20 18.5L19 21L18 18.5L15.5 18L18 17.5L19 15Z"
+                  fill="white"
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    opacity: [0.6, 1, 0.6]
+                  }}
+                  transition={{
+                    duration: 1.8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.5
+                  }}
                 />
-              </div>
+              </motion.svg>
             </motion.div>
           )}
         </motion.div>
