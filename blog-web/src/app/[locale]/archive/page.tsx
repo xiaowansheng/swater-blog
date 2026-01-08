@@ -36,7 +36,7 @@ export default async function ArchiveListPage({
                 {categories.map((category) => (
                   <Link
                     key={category.id}
-                    href={`/category/${category.id}`}
+                    href={`/category/${category.categoryKey}`}
                     className="group bg-card border border-border rounded-xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1"
                   >
                     <div className="flex items-start justify-between mb-3">

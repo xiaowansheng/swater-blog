@@ -29,7 +29,7 @@ export default async function Sidebar({ categories = [], tags = [], hotArticles 
             {categories.slice(0, 10).map((category) => (
               <li key={category.id}>
                 <Link
-                  href={`/category/${category.id}`}
+                  href={`/category/${category.categoryKey}`}
                   className="flex items-center justify-between text-foreground/70 hover:text-primary hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 rounded-lg px-2.5 sm:px-3 py-2 sm:py-2.5 transition-all group relative overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center gap-2">
