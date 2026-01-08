@@ -9,7 +9,6 @@ export default async function Header() {
 
   const navItems = [
     { href: '/', label: t('home') },
-    { href: '/post', label: t('posts') },
     { href: '/archive', label: t('archives') },
     { href: '/moment', label: t('moments') },
     { href: '/guestbook', label: t('guestbook') },
