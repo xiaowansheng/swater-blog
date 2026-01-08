@@ -1,6 +1,6 @@
-package com.blog.modules.guestbook.service;
+package com.blog.modules.message.service;
 
-public interface GuestbookVerificationService {
+public interface MessageVerificationService {
     void sendEmailCode(String email);
 
     void validateEmailCode(String email, String code);

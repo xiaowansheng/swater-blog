@@ -24,7 +24,7 @@ export const guestbookApi = {
     );
   },
   sendEmailCode: (email: string) => {
-    return fetchClient<void>('/api/public/guestbook/email-code', {
+    return fetchClient<void>('/api/public/message/email-code', {
       method: 'POST',
       body: JSON.stringify({ email }),
     });

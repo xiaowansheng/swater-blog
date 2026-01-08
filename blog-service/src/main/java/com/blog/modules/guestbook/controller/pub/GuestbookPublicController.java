@@ -5,11 +5,9 @@ import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.guestbook.model.dto.GuestbookDTO;
-import com.blog.modules.guestbook.model.dto.GuestbookEmailCodeDTO;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.modules.guestbook.model.vo.GuestbookVO;
 import com.blog.modules.guestbook.service.GuestbookPublicService;
-import com.blog.modules.guestbook.service.GuestbookVerificationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +17,6 @@ import org.springframework.web.bind.annotation.*;
 public class GuestbookPublicController {
     @Autowired
     private GuestbookPublicService guestbookPublicService;
-    @Autowired
-    private GuestbookVerificationService guestbookVerificationService;
 
     @GetMapping("/list")
     @ApiOperation(name = "获取留言列表", type = ApiOperationType.QUERY, description = "分页获取留言列表")
@@ -36,13 +32,6 @@ public class GuestbookPublicController {
     public Result<GuestbookVO> submit(@Valid @RequestBody GuestbookDTO dto) {
         GuestbookVO vo = guestbookPublicService.submit(dto);
         return Result.success(vo);
-    }
-
-    @PostMapping("/email-code")
-    @ApiOperation(name = "发送留言邮箱验证码", type = ApiOperationType.CREATE, description = "发送留言邮箱验证码")
-    public Result<Void> sendEmailCode(@Valid @RequestBody GuestbookEmailCodeDTO dto) {
-        guestbookVerificationService.sendEmailCode(dto.getEmail());
-        return Result.success();
     }
 }
 

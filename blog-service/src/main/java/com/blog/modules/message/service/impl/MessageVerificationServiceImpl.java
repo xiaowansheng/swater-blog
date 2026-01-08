@@ -1,6 +1,6 @@
-package com.blog.modules.guestbook.service.impl;
+package com.blog.modules.message.service.impl;
 
-import com.blog.modules.guestbook.service.GuestbookVerificationService;
+import com.blog.modules.message.service.MessageVerificationService;
 import com.blog.plugin.components.email.EmailProviderFactory;
 import com.blog.plugin.components.email.EmailProviderPlugin;
 import com.blog.shared.exception.BusinessException;
@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class GuestbookVerificationServiceImpl implements GuestbookVerificationService {
-    private static final String KEY_PREFIX = "guestbook:email_code:";
+public class MessageVerificationServiceImpl implements MessageVerificationService {
+    private static final String KEY_PREFIX = "message:email_code:";
     private static final int CODE_LENGTH = 6;
     private static final long CODE_TTL_SECONDS = 300;
     private static final long RESEND_COOLDOWN_SECONDS = 60;
@@ -43,7 +43,7 @@ public class GuestbookVerificationServiceImpl implements GuestbookVerificationSe
         String code = generateCode();
         redisTemplate.opsForValue().set(key, code, CODE_TTL_SECONDS, TimeUnit.SECONDS);
 
-        String subject = "Guestbook verification code";
+        String subject = "Message verification code";
         String content = "Your verification code is: " + code + "\nIt expires in 5 minutes.";
         try {
             providers.get(0).sendEmail(email, subject, content);

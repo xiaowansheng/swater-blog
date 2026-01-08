@@ -1,11 +1,11 @@
-package com.blog.modules.guestbook.model.dto;
+package com.blog.modules.message.model.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class GuestbookEmailCodeDTO {
+public class EmailCodeDTO {
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;

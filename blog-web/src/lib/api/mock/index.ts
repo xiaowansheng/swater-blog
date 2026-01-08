@@ -184,7 +184,7 @@ const mockHandlers: MockHandler[] = [
     },
   },
   {
-    pattern: /^\/api\/public\/guestbook\/email-code$/,
+    pattern: /^\/api\/public\/message\/email-code$/,
     handler: (url, options) => {
       if (options?.method === 'POST') {
         return { success: true };
