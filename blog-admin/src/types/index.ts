@@ -222,21 +222,35 @@ export interface FileMeta {
 // 访客相关
 export interface Visitor {
   id: number
-  visitorKey: string
+  visitorUuid: string
   ip: string
   country?: string
   province?: string
   city?: string
+  district?: string
+  latitude?: number
+  longitude?: number
+  location?: string
   isp?: string
+  timezone?: string
   deviceType?: string
   deviceBrand?: string
-  os?: string
+  deviceModel?: string
+  osName?: string
   osVersion?: string
-  browser?: string
+  browserName?: string
   browserVersion?: string
-  firstVisitTime: string
-  lastVisitTime: string
+  refererUrl?: string
+  trafficSource?: string
+  searchEngine?: string
+  searchKeywords?: string
+  utmSource?: string
+  utmMedium?: string
+  utmCampaign?: string
+  firstVisitTime?: string
+  lastVisitTime?: string
   visitCount: number
+  status?: string
 }
 
 export interface VisitorStatistics {

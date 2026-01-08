@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Table, Card, Row, Col, Statistic, Tag, DatePicker, Space, Spin } from 'antd'
+import { Table, Card, Row, Col, Statistic, Tag, DatePicker, Space, Tooltip } from 'antd'
 import {
   UserOutlined,
   EyeOutlined,
   GlobalOutlined,
   DesktopOutlined,
+  ApartmentOutlined,
+  ChromeOutlined,
 } from '@ant-design/icons'
 import { getVisitorList, getVisitorStatistics } from '@/api/visitor'
 import { Visitor, VisitorStatistics } from '@/types'
@@ -19,11 +21,16 @@ const VisitorPage: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [statsLoading, setStatsLoading] = useState(false)
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
+  const [statRange, setStatRange] = useState<[string | null, string | null]>([null, null])
 
   useEffect(() => {
     loadVisitors()
     loadStatistics()
   }, [pagination.current, pagination.pageSize])
+
+  useEffect(() => {
+    loadStatistics()
+  }, [statRange])
 
   const loadVisitors = async () => {
     setLoading(true)
@@ -44,7 +51,11 @@ const VisitorPage: React.FC = () => {
   const loadStatistics = async () => {
     setStatsLoading(true)
     try {
-      const data = await getVisitorStatistics()
+      const [startDate, endDate] = statRange
+      const data = await getVisitorStatistics({
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+      })
       setStatistics(data)
     } catch (error) {
       console.error('加载统计数据失败', error)
@@ -56,8 +67,8 @@ const VisitorPage: React.FC = () => {
   const columns = [
     {
       title: '访客标识',
-      dataIndex: 'visitorKey',
-      key: 'visitorKey',
+      dataIndex: 'visitorUuid',
+      key: 'visitorUuid',
       width: 200,
       ellipsis: true,
     },
@@ -68,31 +79,64 @@ const VisitorPage: React.FC = () => {
       width: 140,
     },
     {
-      title: '地区',
+      title: '地区/ISP',
       key: 'location',
-      width: 180,
+      width: 200,
       render: (_: any, record: Visitor) => (
-        <span>
-          {[record.country, record.province, record.city].filter(Boolean).join(' ') || '-'}
-        </span>
+        <div>
+          <div>{[record.country, record.province, record.city, record.district].filter(Boolean).join(' / ') || '-'}</div>
+          <div className="text-xs text-gray-400">{record.isp || record.timezone || '-'}</div>
+        </div>
       ),
     },
     {
       title: '设备',
       key: 'device',
-      width: 150,
+      width: 180,
       render: (_: any, record: Visitor) => (
         <div>
           <div>{record.deviceType || '-'}</div>
-          <div className="text-xs text-gray-400">{record.os}</div>
+          <div className="text-xs text-gray-400">
+            {[record.deviceBrand, record.deviceModel].filter(Boolean).join(' ')}
+          </div>
         </div>
       ),
     },
     {
+      title: '操作系统',
+      key: 'os',
+      width: 160,
+      render: (_: any, record: Visitor) => (
+        <span>{[record.osName, record.osVersion].filter(Boolean).join(' ') || '-'}</span>
+      ),
+    },
+    {
       title: '浏览器',
-      dataIndex: 'browser',
       key: 'browser',
-      width: 120,
+      width: 160,
+      render: (_: any, record: Visitor) => (
+        <span>{[record.browserName, record.browserVersion].filter(Boolean).join(' ') || '-'}</span>
+      ),
+    },
+    {
+      title: '来源',
+      key: 'trafficSource',
+      width: 160,
+      render: (_: any, record: Visitor) => (
+        <Space size={4} direction="vertical">
+          <Tag color="purple" style={{ marginBottom: 0 }}>{record.trafficSource || 'UNKNOWN'}</Tag>
+          {record.refererUrl && (
+            <Tooltip title={record.refererUrl}>
+              <div className="text-xs text-gray-400 truncate max-w-[140px]">{record.refererUrl}</div>
+            </Tooltip>
+          )}
+          {(record.utmSource || record.utmMedium || record.utmCampaign) && (
+            <div className="text-xs text-gray-400">
+              {[record.utmSource, record.utmMedium, record.utmCampaign].filter(Boolean).join(' / ')}
+            </div>
+          )}
+        </Space>
+      ),
     },
     {
       title: '访问次数',
@@ -124,12 +168,20 @@ const VisitorPage: React.FC = () => {
     ? Object.entries(statistics.visitorsByBrowser).map(([name, value]) => ({ name, value }))
     : []
 
+  const osData = statistics?.visitorsByOs
+    ? Object.entries(statistics.visitorsByOs).map(([name, value]) => ({ name, value }))
+    : []
+
+  const countryData = statistics?.visitorsByCountry
+    ? Object.entries(statistics.visitorsByCountry).map(([name, value]) => ({ name, value }))
+    : []
+
   return (
     <div className="page-container">
       {/* 统计卡片 */}
-      <Row gutter={[16, 16]} className="mb-6">
+      <Row gutter={[16, 16]} className="mb-4">
         <Col xs={24} sm={12} lg={6}>
-          <Card className="stat-card">
+          <Card className="stat-card" loading={statsLoading}>
             <Statistic
               title="总访客数"
               value={statistics?.totalVisitors || 0}
@@ -138,7 +190,7 @@ const VisitorPage: React.FC = () => {
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card className="stat-card">
+          <Card className="stat-card" loading={statsLoading}>
             <Statistic
               title="总浏览量"
               value={statistics?.totalPageViews || 0}
@@ -147,16 +199,16 @@ const VisitorPage: React.FC = () => {
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card className="stat-card">
+          <Card className="stat-card" loading={statsLoading}>
             <Statistic
-              title="独立访客"
+              title="独立访客(24h)"
               value={statistics?.uniqueVisitors || 0}
               prefix={<GlobalOutlined className="text-purple-500" />}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card className="stat-card">
+          <Card className="stat-card" loading={statsLoading}>
             <Statistic
               title="设备类型"
               value={Object.keys(statistics?.visitorsByDevice || {}).length}
@@ -167,16 +219,42 @@ const VisitorPage: React.FC = () => {
         </Col>
       </Row>
 
+      <Card className="mb-4" size="small" title="统计时间范围">
+        <Space>
+          <RangePicker
+            showTime
+            onChange={(values) => {
+              const start = values?.[0]?.toISOString() || null
+              const end = values?.[1]?.toISOString() || null
+              setStatRange([start, end])
+            }}
+          />
+        </Space>
+      </Card>
+
       {/* 图表区域 */}
       <Row gutter={[16, 16]} className="mb-6">
         <Col xs={24} lg={12}>
-          <Card title="设备分布" className="chart-card" loading={statsLoading}>
+          <Card title="设备分布" className="chart-card" loading={statsLoading} extra={<DesktopOutlined />}>
             <PieChart data={deviceData} />
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="浏览器分布" className="chart-card" loading={statsLoading}>
+          <Card title="浏览器分布" className="chart-card" loading={statsLoading} extra={<ChromeOutlined />}>
             <BarChart data={browserData} />
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} className="mb-6">
+        <Col xs={24} lg={12}>
+          <Card title="操作系统分布" className="chart-card" loading={statsLoading}>
+            <PieChart data={osData} />
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="国家/地区分布" className="chart-card" loading={statsLoading} extra={<ApartmentOutlined />}>
+            <BarChart data={countryData} />
           </Card>
         </Col>
       </Row>
