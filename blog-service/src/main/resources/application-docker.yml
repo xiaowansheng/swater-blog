@@ -30,6 +30,14 @@ spring:
   profiles:
     active: docker
 
+  # Thymeleaf 模板配置
+  thymeleaf:
+    prefix: classpath:templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: true  # 生产环境启用缓存
+
   # Docker环境数据源配置 - 使用环境变量
   datasource:
     url: jdbc:mysql://${DB_HOST:mysql}:${DB_PORT:3306}/${DB_NAME:blog}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
@@ -124,6 +132,7 @@ spring:
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
+    from-name: ${MAIL_FROM_NAME:Swater Blog}
     properties:
       mail:
         smtp:
@@ -156,7 +165,7 @@ file:
 
 # 通知配置 - Docker环境
 notification:
-  channels: 
+  channels:
     - websocket
     - email
   email:
@@ -164,14 +173,10 @@ notification:
   websocket:
     enabled: true
 
-# 邮件配置
+# 邮件插件配置
 email:
   provider:
     type: spring-mail
-  from: ${MAIL_USERNAME:}
-  from-name: Swater Blog
-  templates:
-    path: classpath:templates/email/
 
 # 位置服务配置 - Docker环境
 location:

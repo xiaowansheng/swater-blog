@@ -8,6 +8,13 @@ server:
 spring:
   application:
     name: blog
+  # Thymeleaf 模板配置
+  thymeleaf:
+    prefix: classpath:templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false  # 开发时禁用缓存
   # Jackson 日期格式化配置
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
@@ -77,6 +84,7 @@ spring:
     port: 587
     username: your-email@qq.com
     password: your-password
+    from-name: Swater Blog
     properties:
       mail:
         smtp:
@@ -102,7 +110,7 @@ file:
       domain: 
 
 notification:
-  channels: 
+  channels:
     - websocket
     - email
   email:
@@ -110,13 +118,10 @@ notification:
   websocket:
     enabled: true
 
+# 邮件插件配置
 email:
   provider:
     type: spring-mail
-  from: your-email@qq.com
-  from-name: Swater Blog
-  templates:
-    path: classpath:templates/email/
 
 location:
   provider:

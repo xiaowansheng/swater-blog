@@ -4,6 +4,7 @@ import com.blog.modules.message.service.MessageVerificationService;
 import com.blog.plugin.components.email.EmailProviderFactory;
 import com.blog.plugin.components.email.EmailProviderPlugin;
 import com.blog.shared.exception.BusinessException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Slf4j
 public class MessageVerificationServiceImpl implements MessageVerificationService {
     private static final String KEY_PREFIX = "message:email_code:";
     private static final int CODE_LENGTH = 6;
@@ -48,6 +50,7 @@ public class MessageVerificationServiceImpl implements MessageVerificationServic
         try {
             providers.get(0).sendEmail(email, subject, content);
         } catch (Exception e) {
+            log.error("Failed to send verification email", e);
             throw new BusinessException(500, "Failed to send verification email");
         }
     }

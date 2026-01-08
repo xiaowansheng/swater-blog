@@ -27,7 +27,15 @@ server:
 spring:
   application:
     name: blog-dev
-    
+
+  # Thymeleaf 模板配置
+  thymeleaf:
+    prefix: classpath:templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false  # 开发时禁用缓存
+
   # 开发环境数据源配置
   datasource:
     url: jdbc:mysql://localhost:3306/${DB_NAME:blog}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
@@ -124,6 +132,7 @@ spring:
     port: 587
     username: your-dev-email@qq.com
     password: your-dev-password
+    from-name: Swater Blog Dev
     properties:
       mail:
         smtp:
@@ -160,7 +169,7 @@ file:
 
 # 通知配置 - 开发环境
 notification:
-  channels: 
+  channels:
     - websocket
     - email
   email:
@@ -168,14 +177,10 @@ notification:
   websocket:
     enabled: true
 
-# 邮件配置
+# 邮件插件配置
 email:
   provider:
     type: spring-mail
-  from: your-dev-email@qq.com
-  from-name: Swater Blog Dev
-  templates:
-    path: classpath:templates/email/
 
 # 位置服务配置 - 开发环境
 location:
