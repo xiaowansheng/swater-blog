@@ -17,6 +17,11 @@ export const guestbookApi = {
       `/api/public/guestbook/list?page=${page}&size=${size}`
     );
   },
+  getListClient: (page: number = 1, size: number = 10) => {
+    return fetchClient<PageResult<GuestbookVO>>(
+      `/api/public/guestbook/list?page=${page}&size=${size}`
+    );
+  },
 
   submit: (data: GuestbookSubmitDTO) => {
     return fetchClient<GuestbookVO>('/api/public/guestbook', {

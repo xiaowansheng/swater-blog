@@ -2,16 +2,15 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { guestbookApi } from '@/lib/api/guestbook';
+import type { GuestbookVO } from '@/types';
 
 interface GuestbookFormProps {
-  onSuccess?: () => void;
+  onSuccess?: (message: GuestbookVO) => void;
 }
 
 export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
   const t = useTranslations('comment');
-  const router = useRouter();
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
   const [qq, setQq] = useState('');
@@ -32,7 +31,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
     setSuccess('');
 
     try {
-      await guestbookApi.submit({
+      const message = await guestbookApi.submit({
         nickname: nickname.trim() || undefined,
         email: email.trim() || undefined,
         qq: qq.trim() || undefined,
@@ -43,8 +42,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
       setQq('');
       setContent('');
       setSuccess(t('success'));
-      onSuccess?.();
-      router.refresh();
+      onSuccess?.(message);
     } catch (err) {
       setError(t('error'));
     } finally {
