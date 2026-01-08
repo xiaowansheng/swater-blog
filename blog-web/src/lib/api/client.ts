@@ -1,5 +1,6 @@
 import type { ApiResponse } from '@/types';
 import { getMockResponse, createMockResponse } from './mock';
+import toast from 'react-hot-toast';
 
 const API_BASE_URL = typeof window !== 'undefined' 
   ? process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8888'
@@ -7,31 +8,51 @@ const API_BASE_URL = typeof window !== 'undefined'
 
 export async function fetchClient<T>(
   url: string,
-  options?: RequestInit
+  options?: RequestInit & { silent?: boolean }
 ): Promise<T> {
   const mockData = getMockResponse<T>(url, options);
   if (mockData !== null) {
     return mockData;
   }
 
-  const response = await fetch(`${API_BASE_URL}${url}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+    });
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) {
+      const errorMessage = `HTTP error! status: ${response.status}`;
+      if (!options?.silent) {
+        toast.error(errorMessage);
+      }
+      throw new Error(errorMessage);
+    }
+
+    const result: ApiResponse<T> = await response.json();
+
+    if (result.code !== 200) {
+      const errorMessage = result.message || 'Request failed';
+      if (!options?.silent) {
+        toast.error(errorMessage);
+      }
+      throw new Error(errorMessage);
+    }
+
+    return result.data;
+  } catch (error) {
+    // 如果是网络错误或其他未处理的错误
+    if (error instanceof Error && !error.message.includes('HTTP error!') && !error.message.includes('Request failed')) {
+      const errorMessage = '服务请求失败';
+      // if (!options?.silent) {
+      //   toast.error(errorMessage);
+      // }
+      throw new Error(errorMessage);
+    }
+    throw error;
   }
-
-  const result: ApiResponse<T> = await response.json();
-
-  if (result.code !== 200) {
-    throw new Error(result.message || 'Request failed');
-  }
-
-  return result.data;
 }
 

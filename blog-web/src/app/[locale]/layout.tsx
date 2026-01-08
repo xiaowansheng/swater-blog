@@ -8,6 +8,7 @@ import '@/styles/globals.css';
 import { getSiteInfo, getServerConfig } from '@/lib/api/config.server';
 import { SiteConfigProvider } from '@/lib/context/SiteConfigContext';
 import VisitorTracker from '@/components/visitor/VisitorTracker';
+import { Toaster } from 'react-hot-toast';
 
 const nunito = Nunito({
   variable: '--font-nunito',
@@ -91,6 +92,57 @@ export default async function LocaleLayout({
                   <Footer />
                 </div>
               </PageLoadingWrapper>
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: 'linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--secondary)) 100%)',
+                    color: 'hsl(var(--foreground))',
+                    border: '1px solid hsl(var(--primary) / 0.2)',
+                    borderRadius: '16px',
+                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    backdropFilter: 'blur(8px)',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    padding: '16px 20px',
+                    minWidth: '300px',
+                  },
+                  success: {
+                    style: {
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      color: 'white',
+                      border: '1px solid rgba(16, 185, 129, 0.3)',
+                    },
+                    iconTheme: {
+                      primary: 'white',
+                      secondary: '#10b981',
+                    },
+                  },
+                  error: {
+                    style: {
+                      background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                      color: 'white',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                    },
+                    iconTheme: {
+                      primary: 'white',
+                      secondary: '#ef4444',
+                    },
+                  },
+                  loading: {
+                    style: {
+                      background: 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%)',
+                      color: 'white',
+                      border: '1px solid hsl(var(--primary) / 0.3)',
+                    },
+                    iconTheme: {
+                      primary: 'white',
+                      secondary: 'hsl(var(--primary))',
+                    },
+                  },
+                }}
+              />
             </DecorationProvider>
           </SiteConfigProvider>
         </NextIntlClientProvider>
