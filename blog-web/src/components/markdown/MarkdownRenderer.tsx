@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import Vditor from 'vditor';
 import 'vditor/dist/index.css';
+import { useTheme } from '@/lib/utils/theme';
 
 interface MarkdownRendererProps {
   content: string;
@@ -11,6 +12,8 @@ interface MarkdownRendererProps {
 
 export default function MarkdownRenderer({ content, onRendered }: MarkdownRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
+  const currentTheme = theme === 'dark' ? 'dark' : 'light';
 
   useEffect(() => {
     if (containerRef.current && content) {
@@ -19,11 +22,13 @@ export default function MarkdownRenderer({ content, onRendered }: MarkdownRender
       
       // 使用 Vditor.preview 渲染 Markdown
       Vditor.preview(containerRef.current, content, {
-        mode: 'light',
+        // 跟随站点主题
+        mode: currentTheme,
+        theme: currentTheme,
         anchor: 1,
         hljs: {
           enable: true,
-          style: 'github'
+          style: currentTheme === 'dark' ? 'atom-one-dark' : 'github'
         },
         math: {
           inlineDigit: true,
@@ -49,7 +54,7 @@ export default function MarkdownRenderer({ content, onRendered }: MarkdownRender
         }
       });
     }
-  }, [content, onRendered]);
+  }, [content, onRendered, currentTheme]);
 
   return (
     <div 

@@ -612,9 +612,9 @@ button, a {
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   overflow: hidden;
-  display: block !important;
+  display: block;
   overflow-x: auto !important;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .vditor-reset table table {
