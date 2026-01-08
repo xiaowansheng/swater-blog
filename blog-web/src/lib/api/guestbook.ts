@@ -9,6 +9,7 @@ export interface GuestbookSubmitDTO {
   type?: string;
   images?: string[];
   content: string;
+  emailCode?: string;
 }
 
 export const guestbookApi = {
@@ -21,6 +22,12 @@ export const guestbookApi = {
     return fetchClient<PageResult<GuestbookVO>>(
       `/api/public/guestbook/list?page=${page}&size=${size}`
     );
+  },
+  sendEmailCode: (email: string) => {
+    return fetchClient<void>('/api/public/guestbook/email-code', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
   },
 
   submit: (data: GuestbookSubmitDTO) => {

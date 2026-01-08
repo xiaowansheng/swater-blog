@@ -12,9 +12,11 @@ import com.blog.modules.guestbook.model.entity.Guestbook;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.guestbook.model.vo.GuestbookVO;
 import com.blog.modules.guestbook.service.GuestbookPublicService;
+import com.blog.modules.guestbook.service.GuestbookVerificationService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
+import com.blog.shared.exception.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -27,6 +29,8 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private GuestbookVerificationService guestbookVerificationService;
 
     @Override
     public PageResult<GuestbookVO> list(Long page, Long size) {
@@ -46,6 +50,14 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
 
     @Override
     public GuestbookVO submit(GuestbookDTO dto) {
+        if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+            throw new BusinessException(400, "Email is required");
+        }
+        if (dto.getEmailCode() == null || dto.getEmailCode().trim().isEmpty()) {
+            throw new BusinessException(400, "Email code is required");
+        }
+        guestbookVerificationService.validateEmailCode(dto.getEmail(), dto.getEmailCode());
+
         Guestbook guestbook = BeanUtil.copyProperties(dto, Guestbook.class);
         
         // Set default values

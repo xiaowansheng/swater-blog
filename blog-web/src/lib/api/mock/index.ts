@@ -184,6 +184,15 @@ const mockHandlers: MockHandler[] = [
     },
   },
   {
+    pattern: /^\/api\/public\/guestbook\/email-code$/,
+    handler: (url, options) => {
+      if (options?.method === 'POST') {
+        return { success: true };
+      }
+      return null;
+    },
+  },
+  {
     pattern: /^\/api\/public\/moment\/list/,
     handler: (url) => {
       const params = new URLSearchParams(url.split('?')[1] || '');

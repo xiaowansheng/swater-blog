@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { guestbookApi } from '@/lib/api/guestbook';
 import type { GuestbookVO } from '@/types';
@@ -11,18 +11,57 @@ interface GuestbookFormProps {
 
 export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
   const t = useTranslations('comment');
+  const tGuestbook = useTranslations('guestbook');
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
   const [qq, setQq] = useState('');
   const [content, setContent] = useState('');
+  const [emailCode, setEmailCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = window.setInterval(() => {
+      setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [cooldown]);
+
+  const handleSendCode = async () => {
+    if (!email.trim()) {
+      setError(tGuestbook('emailRequired'));
+      return;
+    }
+    setSendingCode(true);
+    setError('');
+    setSuccess('');
+    try {
+      await guestbookApi.sendEmailCode(email.trim());
+      setSuccess(tGuestbook('emailCodeSent'));
+      setCooldown(60);
+    } catch (err) {
+      setError(tGuestbook('emailCodeSendFailed'));
+    } finally {
+      setSendingCode(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) {
       setError('Please enter content');
+      return;
+    }
+    if (!email.trim()) {
+      setError(tGuestbook('emailRequired'));
+      return;
+    }
+    if (!emailCode.trim()) {
+      setError(tGuestbook('emailCodeRequired'));
       return;
     }
 
@@ -33,14 +72,17 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
     try {
       const message = await guestbookApi.submit({
         nickname: nickname.trim() || undefined,
-        email: email.trim() || undefined,
+        email: email.trim(),
         qq: qq.trim() || undefined,
         content: content.trim(),
+        emailCode: emailCode.trim(),
+        type: '2',
       });
       setNickname('');
       setEmail('');
       setQq('');
       setContent('');
+      setEmailCode('');
       setSuccess(t('success'));
       onSuccess?.(message);
     } catch (err) {
@@ -88,8 +130,35 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('emailPlaceholder')}
+          required
           className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
         />
+      </div>
+      <div>
+        <div className="flex gap-3 items-end">
+          <div className="flex-1">
+            <input
+              type="text"
+              value={emailCode}
+              onChange={(e) => setEmailCode(e.target.value)}
+              placeholder={tGuestbook('emailCodePlaceholder')}
+              required
+              className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={handleSendCode}
+            disabled={sendingCode || cooldown > 0}
+            className="px-4 py-3 border border-border rounded-xl hover:bg-muted/50 transition-all text-sm disabled:opacity-50"
+          >
+            {cooldown > 0
+              ? tGuestbook('resendCode', { seconds: cooldown })
+              : sendingCode
+                ? tGuestbook('sendingCode')
+                : tGuestbook('sendCode')}
+          </button>
+        </div>
       </div>
       <div>
         <input

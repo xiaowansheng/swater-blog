@@ -22,5 +22,7 @@ public class GuestbookDTO extends com.blog.shared.model.dto.BaseDTO {
     private String email;
 
     private String qq;
+
+    private String emailCode;
 }
 
