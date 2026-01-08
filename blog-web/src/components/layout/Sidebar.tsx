@@ -105,6 +105,24 @@ export default async function Sidebar({ categories = [], tags = [], hotArticles 
         </div>
       )}
 
+      {categories.length === 0 && tags.length === 0 && hotArticles.length === 0 && (
+        <div className="modern-card p-6 sm:p-8 md:p-10 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-accent to-primary opacity-30"></div>
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-accent to-transparent opacity-20"></div>
+          <div className="flex flex-col items-center justify-center text-center py-8 sm:py-10 space-y-4">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 flex items-center justify-center shadow-lg shadow-primary/10">
+              <svg className="w-8 h-8 sm:w-10 sm:h-10 text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm sm:text-base font-medium text-foreground/70">暂无内容</p>
+              <p className="text-xs sm:text-sm text-foreground/50">网站内容正在整理中，敬请期待</p>
+            </div>
+          </div>
+        </div>
+      )}
+
     </aside>
   );
 }
