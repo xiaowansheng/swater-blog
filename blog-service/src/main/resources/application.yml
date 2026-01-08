@@ -118,11 +118,6 @@ notification:
   websocket:
     enabled: true
 
-# 邮件插件配置
-email:
-  provider:
-    type: spring-mail
-
 location:
   provider:
     type: amap

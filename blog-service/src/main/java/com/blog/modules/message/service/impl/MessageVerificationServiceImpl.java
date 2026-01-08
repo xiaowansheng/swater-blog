@@ -1,8 +1,7 @@
 package com.blog.modules.message.service.impl;
 
+import com.blog.infrastructure.mail.EmailService;
 import com.blog.modules.message.service.MessageVerificationService;
-import com.blog.plugin.components.email.EmailProviderFactory;
-import com.blog.plugin.components.email.EmailProviderPlugin;
 import com.blog.shared.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -25,7 +23,7 @@ public class MessageVerificationServiceImpl implements MessageVerificationServic
     private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
-    private EmailProviderFactory emailProviderFactory;
+    private EmailService emailService;
 
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -37,8 +35,7 @@ public class MessageVerificationServiceImpl implements MessageVerificationServic
             throw new BusinessException(429, "Email code already sent, please try again later");
         }
 
-        List<EmailProviderPlugin> providers = emailProviderFactory.getProviders();
-        if (providers.isEmpty()) {
+        if (!emailService.isConfigured()) {
             throw new BusinessException(500, "Email provider is not configured");
         }
 
@@ -48,7 +45,7 @@ public class MessageVerificationServiceImpl implements MessageVerificationServic
         String subject = "Message verification code";
         String content = "Your verification code is: " + code + "\nIt expires in 5 minutes.";
         try {
-            providers.get(0).sendEmail(email, subject, content);
+            emailService.sendEmail(email, subject, content);
         } catch (Exception e) {
             log.error("Failed to send verification email", e);
             throw new BusinessException(500, "Failed to send verification email");

@@ -1,21 +1,21 @@
-package com.blog.plugin.components.email.impl;
+package com.blog.infrastructure.mail;
 
-import com.blog.plugin.core.Plugin;
-import com.blog.plugin.components.email.EmailProviderPlugin;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Map;
 
-@Component
-@ConditionalOnProperty(name = "email.provider.type", havingValue = "spring-mail", matchIfMissing = true)
-public class SpringMailProviderPlugin implements EmailProviderPlugin, Plugin {
+@Slf4j
+@Service
+@ConditionalOnProperty(name = "spring.mail.host")
+public class EmailService {
 
     @Autowired(required = false)
     private JavaMailSender mailSender;
@@ -29,20 +29,9 @@ public class SpringMailProviderPlugin implements EmailProviderPlugin, Plugin {
     @Value("${spring.mail.from-name:Swater Blog}")
     private String fromName;
 
-    @Override
-    public String getName() {
-        return "spring-mail";
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return mailSender != null;
-    }
-
-    @Override
     public void sendEmail(String to, String subject, String content) throws Exception {
         if (mailSender == null) {
-            throw new IllegalStateException("JavaMailSender未配置");
+            throw new IllegalStateException("邮件服务未配置");
         }
         if (from == null || from.isEmpty()) {
             throw new IllegalStateException("邮件发件人地址未配置 (spring.mail.username)");
@@ -57,12 +46,12 @@ public class SpringMailProviderPlugin implements EmailProviderPlugin, Plugin {
         helper.setText(content, true);
 
         mailSender.send(message);
+        log.info("邮件发送成功: to={}, subject={}", to, subject);
     }
 
-    @Override
     public void sendEmailWithTemplate(String to, String subject, String templateName, Map<String, Object> variables) throws Exception {
         if (mailSender == null) {
-            throw new IllegalStateException("JavaMailSender未配置");
+            throw new IllegalStateException("邮件服务未配置");
         }
 
         String content;
@@ -75,5 +64,9 @@ public class SpringMailProviderPlugin implements EmailProviderPlugin, Plugin {
         }
 
         sendEmail(to, subject, content);
+    }
+
+    public boolean isConfigured() {
+        return mailSender != null && from != null && !from.isEmpty();
     }
 }
