@@ -1,18 +1,24 @@
 import { useEffect, useState } from 'react'
-import { Row, Col, Card, Spin } from 'antd'
+import { Row, Col, Card, Spin, List, Avatar, Tag, Space, Typography } from 'antd'
 import {
   FileTextOutlined,
+  FolderOpenOutlined,
+  TagsOutlined,
   CommentOutlined,
   EyeOutlined,
   RiseOutlined,
+  TeamOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
+  LikeOutlined,
 } from '@ant-design/icons'
 import { getDashboardStatistics } from '@/api/statistics'
 import { DashboardStatistics } from '@/types'
 import LineChart from '@/components/Chart/LineChart'
 import BarChart from '@/components/Chart/BarChart'
-import PieChart from '@/components/Chart/PieChart'
+import dayjs from 'dayjs'
+
+const { Title, Text } = Typography
 
 interface StatCardProps {
   title: string
@@ -82,8 +88,57 @@ const Dashboard: React.FC = () => {
             value={statistics?.articleCount || 0}
             icon={<FileTextOutlined />}
             color="#1890ff"
-            trend={12}
-            trendLabel="较上周"
+          />
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <StatCard
+            title="分类数"
+            value={statistics?.categoryCount || 0}
+            icon={<FolderOpenOutlined />}
+            color="#13c2c2"
+          />
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <StatCard
+            title="标签数"
+            value={statistics?.tagCount || 0}
+            icon={<TagsOutlined />}
+            color="#722ed1"
+          />
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <StatCard
+            title="总访问量"
+            value={statistics?.totalVisitCount || 0}
+            icon={<EyeOutlined />}
+            color="#fa8c16"
+          />
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} className="mb-6">
+        <Col xs={24} sm={12} lg={6}>
+          <StatCard
+            title="总访客数"
+            value={statistics?.totalVisitorCount || 0}
+            icon={<TeamOutlined />}
+            color="#8c8c8c"
+          />
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <StatCard
+            title="今日访问量"
+            value={statistics?.todayVisit || 0}
+            icon={<RiseOutlined />}
+            color="#52c41a"
+          />
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <StatCard
+            title="今日访客数"
+            value={statistics?.todayVisitor || 0}
+            icon={<TeamOutlined />}
+            color="#d46b08"
           />
         </Col>
         <Col xs={24} sm={12} lg={6}>
@@ -92,55 +147,70 @@ const Dashboard: React.FC = () => {
             value={statistics?.commentCount || 0}
             icon={<CommentOutlined />}
             color="#52c41a"
-            trend={8}
-            trendLabel="较上周"
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="访客总数"
-            value={statistics?.visitorCount || 0}
-            icon={<EyeOutlined />}
-            color="#722ed1"
-            trend={-3}
-            trendLabel="较上周"
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="今日访问"
-            value={statistics?.todayVisit || 0}
-            icon={<RiseOutlined />}
-            color="#fa8c16"
-            trend={25}
-            trendLabel="较昨日"
           />
         </Col>
       </Row>
 
       {/* 图表区域 */}
       <Row gutter={[16, 16]}>
-        <Col xs={24} lg={12}>
-          <Card title="访问量趋势" className="chart-card" variant="borderless">
-            <LineChart data={statistics?.visitTrend || []} />
+        <Col xs={24} lg={24}>
+          <Card title="访问量 / 访客趋势" className="chart-card" variant="borderless">
+            <LineChart
+              seriesList={[
+                { name: '访问量', data: statistics?.visitTrend || [], color: '#1890ff' },
+                { name: '访客数', data: statistics?.visitorTrend || [], color: '#ff7875' },
+              ]}
+            />
           </Card>
         </Col>
-        <Col xs={24} lg={12}>
-          <Card title="文章发布趋势" className="chart-card" variant="borderless">
-            <BarChart data={statistics?.articleTrend || []} />
+      </Row>
+
+      <Row gutter={[16, 16]} className="mt-4">
+        <Col xs={24} lg={24}>
+          <Card title="最近一月文章/说说发布趋势" className="chart-card" variant="borderless">
+            <BarChart
+              seriesList={[
+                { name: '文章', data: statistics?.articleTrend || [], color: '#1890ff' },
+                { name: '说说', data: statistics?.talkTrend || [], color: '#faad14' },
+              ]}
+            />
           </Card>
         </Col>
       </Row>
 
       <Row gutter={[16, 16]} className="mt-4">
         <Col xs={24} lg={12}>
-          <Card title="设备分布" className="chart-card" variant="borderless">
-            <PieChart data={statistics?.categoryDistribution || []} />
+          <Card title="访问量 Top10 文章" className="chart-card" variant="borderless">
+            <List
+              dataSource={statistics?.topViewedArticles || []}
+              renderItem={(item, index) => (
+                <List.Item
+                  actions={[<Tag color="blue" key="view">浏览 {item.value}</Tag>]}
+                >
+                  <List.Item.Meta
+                    avatar={<Avatar>{index + 1}</Avatar>}
+                    title={<Text strong>{item.name}</Text>}
+                  />
+                </List.Item>
+              )}
+            />
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="浏览器统计" className="chart-card" variant="borderless">
-            <BarChart data={statistics?.tagStatistics || []} />
+          <Card title="点赞 Top10 文章" className="chart-card" variant="borderless">
+            <List
+              dataSource={statistics?.topLikedArticles || []}
+              renderItem={(item, index) => (
+                <List.Item
+                  actions={[<Tag color="green" key="like">点赞 {item.value}</Tag>]}
+                >
+                  <List.Item.Meta
+                    avatar={<Avatar>{index + 1}</Avatar>}
+                    title={<Text strong>{item.name}</Text>}
+                  />
+                </List.Item>
+              )}
+            />
           </Card>
         </Col>
       </Row>

@@ -398,11 +398,19 @@ export interface TabState {
 // Dashboard统计
 export interface DashboardStatistics {
   articleCount: number
+  categoryCount: number
+  tagCount: number
+  totalVisitCount: number
+  totalVisitorCount: number
   commentCount: number
-  visitorCount: number
   todayVisit: number
+  todayVisitor: number
   articleTrend: TrendData[]
+  talkTrend: TrendData[]
   visitTrend: TrendData[]
+  visitorTrend: TrendData[]
+  topViewedArticles: ChartData[]
+  topLikedArticles: ChartData[]
   categoryDistribution: ChartData[]
   tagStatistics: ChartData[]
   recentArticles: Article[]

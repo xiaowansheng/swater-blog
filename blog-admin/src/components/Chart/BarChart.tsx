@@ -1,18 +1,62 @@
 import ReactECharts from 'echarts-for-react'
 import { ChartData, TrendData } from '@/types'
 
-interface BarChartProps {
-  data: ChartData[] | TrendData[]
+interface BarSeries {
+  name: string
+  data: (ChartData | TrendData)[]
+  color?: string
 }
 
-const BarChart: React.FC<BarChartProps> = ({ data }) => {
-  // 判断数据类型
-  const isChartData = (item: ChartData | TrendData): item is ChartData => {
-    return 'name' in item
+interface BarChartProps {
+  data?: ChartData[] | TrendData[]
+  seriesList?: BarSeries[]
+}
+
+const DEFAULT_COLORS = ['#1890ff', '#fa8c16', '#52c41a', '#eb2f96']
+
+const BarChart: React.FC<BarChartProps> = ({ data = [], seriesList }) => {
+  const buildSingleSeries = () => {
+    const isChartData = (item: ChartData | TrendData): item is ChartData => {
+      return 'name' in item
+    }
+    const xAxisData = data.map((item) => (isChartData(item) ? item.name : item.date))
+    const seriesData = data.map((item) => item.value)
+    return { xAxisData, series: [{ name: '数据', data: seriesData, color: DEFAULT_COLORS[0] }] }
   }
 
-  const xAxisData = data.map((item) => (isChartData(item) ? item.name : item.date))
-  const seriesData = data.map((item) => item.value)
+  const buildMultiSeries = () => {
+    const xAxisSet = new Set<string>()
+    seriesList?.forEach((series) => {
+      series.data.forEach((item) => {
+        const key = 'name' in item ? item.name : item.date
+        xAxisSet.add(key)
+      })
+    })
+    const xAxisData = Array.from(xAxisSet).sort()
+    const series = seriesList?.map((series, idx) => {
+      const color = series.color || DEFAULT_COLORS[idx % DEFAULT_COLORS.length]
+      const map: Record<string, number> = {}
+      series.data.forEach((item) => {
+        const key = 'name' in item ? item.name : item.date
+        map[key] = item.value
+      })
+      const values = xAxisData.map((key) => map[key] || 0)
+      return {
+        name: series.name,
+        data: values,
+        type: 'bar' as const,
+        barGap: '30%',
+        barWidth: seriesList.length > 1 ? '25%' : '40%',
+        itemStyle: {
+          borderRadius: [4, 4, 0, 0],
+          color,
+        },
+      }
+    })
+    return { xAxisData, series: series || [] }
+  }
+
+  const { xAxisData, series } = seriesList && seriesList.length > 0 ? buildMultiSeries() : buildSingleSeries()
 
   const option = {
     tooltip: {
@@ -30,11 +74,12 @@ const BarChart: React.FC<BarChartProps> = ({ data }) => {
         },
       },
     },
+    legend: series.length > 1 ? { top: 0 } : undefined,
     grid: {
       left: '3%',
       right: '4%',
       bottom: '3%',
-      top: '10%',
+      top: series.length > 1 ? '18%' : '10%',
       containLabel: true,
     },
     xAxis: {
@@ -73,42 +118,7 @@ const BarChart: React.FC<BarChartProps> = ({ data }) => {
         },
       },
     },
-    series: [
-      {
-        data: seriesData,
-        type: 'bar',
-        barWidth: '40%',
-        itemStyle: {
-          borderRadius: [4, 4, 0, 0],
-          color: {
-            type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: '#1890ff' },
-              { offset: 1, color: '#69c0ff' },
-            ],
-          },
-        },
-        emphasis: {
-          itemStyle: {
-            color: {
-              type: 'linear',
-              x: 0,
-              y: 0,
-              x2: 0,
-              y2: 1,
-              colorStops: [
-                { offset: 0, color: '#096dd9' },
-                { offset: 1, color: '#1890ff' },
-              ],
-            },
-          },
-        },
-      },
-    ],
+    series,
   }
 
   return (
