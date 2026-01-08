@@ -182,7 +182,7 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
           </button>
         </div>
       </div>
-      <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+      <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} navItems={navItems} />
     </header>
   );
 }
