@@ -698,6 +698,7 @@ CREATE TABLE IF NOT EXISTS `visitor_access_log` (
   `utm_campaign` VARCHAR(100) DEFAULT NULL COMMENT 'UTM活动参数',
   `deleted` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否已删除',
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   KEY `idx_visitor_id` (`visitor_id`),
   KEY `idx_visitor_uuid` (`visitor_uuid`),

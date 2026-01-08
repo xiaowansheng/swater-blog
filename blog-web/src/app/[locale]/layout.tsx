@@ -7,6 +7,7 @@ import { Nunito, Varela_Round, Noto_Sans_SC } from 'next/font/google';
 import '@/styles/globals.css';
 import { getSiteInfo, getServerConfig } from '@/lib/api/config.server';
 import { SiteConfigProvider } from '@/lib/context/SiteConfigContext';
+import VisitorTracker from '@/components/visitor/VisitorTracker';
 
 const nunito = Nunito({
   variable: '--font-nunito',
@@ -80,6 +81,7 @@ export default async function LocaleLayout({
                 <div className="flex min-h-screen flex-col relative">
                   <DecorationManager />
                   <FloatingToolbar />
+                  <VisitorTracker />
                   {children}
                 </div>
               </PageLoadingWrapper>

@@ -65,6 +65,7 @@ dependencies {
     implementation("co.elastic.clients:elasticsearch-java")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.github.mweirauch:micrometer-jvm-extras:0.2.2")
+    implementation("nl.basjes.parse.useragent:yauaa:7.23.0")
 
     // --- API文档工具 (SpringDoc OpenAPI 最新版) ---
     // 2.8.x 是目前的黄金版本，完美适配 Spring Boot 3.4.x

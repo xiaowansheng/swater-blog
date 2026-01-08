@@ -7,6 +7,7 @@ public class VisitorAccessDTO {
     private String visitorUuid;
 
     private String ip;
+    private String userAgent;
 
     private String pageType;
 
@@ -18,10 +19,29 @@ public class VisitorAccessDTO {
 
     private String sessionId;
 
-    private String device;
+    private String deviceType;
+
+    private String deviceBrand;
+
+    private String deviceModel;
 
     private String browser;
 
-    private String os;
-}
+    private String browserVersion;
 
+    private String os;
+
+    private String osVersion;
+
+    private String trafficSource;
+
+    private String searchEngine;
+
+    private String searchKeywords;
+
+    private String utmSource;
+
+    private String utmMedium;
+
+    private String utmCampaign;
+}
