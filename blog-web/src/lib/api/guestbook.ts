@@ -1,22 +1,25 @@
 import { fetchServer } from './server';
 import { fetchClient } from './client';
-import type { CommentVO, PageResult } from '@/types';
+import type { GuestbookVO, PageResult } from '@/types';
 
 export interface GuestbookSubmitDTO {
-  nickname: string;
+  nickname?: string;
   email?: string;
+  qq?: string;
+  type?: string;
+  images?: string[];
   content: string;
 }
 
 export const guestbookApi = {
   getList: (page: number = 1, size: number = 10) => {
-    return fetchServer<PageResult<CommentVO>>(
+    return fetchServer<PageResult<GuestbookVO>>(
       `/api/public/guestbook/list?page=${page}&size=${size}`
     );
   },
 
   submit: (data: GuestbookSubmitDTO) => {
-    return fetchClient<CommentVO>('/api/public/guestbook', {
+    return fetchClient<GuestbookVO>('/api/public/guestbook', {
       method: 'POST',
       body: JSON.stringify(data),
     });

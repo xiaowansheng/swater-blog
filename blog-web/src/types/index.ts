@@ -149,6 +149,25 @@ export interface CommentVO {
   children?: CommentVO[];
 }
 
+export interface GuestbookVO {
+  id: number;
+  content: string;
+  images?: string[];
+  userId?: number;
+  userName?: string;
+  type?: string;
+  nickname?: string;
+  email?: string;
+  qq?: string;
+  ip?: string;
+  country?: string;
+  province?: string;
+  city?: string;
+  isVisible?: number;
+  reviewStatus?: number;
+  createTime: string;
+}
+
 export interface ArchiveVO {
   year: number;
   month: number;
