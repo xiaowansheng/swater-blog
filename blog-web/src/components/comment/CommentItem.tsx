@@ -63,7 +63,8 @@ export default function CommentItem({ comment }: CommentItemProps) {
         <div className="mt-4 ml-16">
           <CommentForm
             parentId={comment.id}
-            postId={comment.postId}
+            targetId={comment.postId}
+            targetType="ARTICLE"
             onSuccess={() => setShowReply(false)}
           />
         </div>

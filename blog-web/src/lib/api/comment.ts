@@ -36,5 +36,9 @@ export const commentApi = {
       body: JSON.stringify(data),
     });
   },
+
+  getCaptcha: () => {
+    return fetchClient<{ image: string; key: string }>('/api/public/captcha');
+  },
 };
 
