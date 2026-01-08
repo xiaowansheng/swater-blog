@@ -1,7 +1,5 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import PageHeader from '@/components/layout/PageHeader';
 import MarkdownRenderer from '@/components/markdown/MarkdownRenderer';
 // import ArticleMeta from '@/components/article/ArticleMeta';
@@ -55,8 +53,6 @@ export default async function PostDetailPage({
     return (
       <>
         <ReadingProgress />
-        <Header />
-        
         {/* 文章头部 */}
         <PageHeader>
           {/* 文章标题 */}
@@ -157,11 +153,9 @@ export default async function PostDetailPage({
             </aside>
           </div>
         </main>
-        
+
         {/* 移动端菜单 */}
         <ArticleMenuMobile article={article} />
-        
-        <Footer />
       </>
     );
   } catch (error) {

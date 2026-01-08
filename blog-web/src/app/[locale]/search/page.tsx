@@ -1,6 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import PageHeader from '@/components/layout/PageHeader';
 import { searchApi } from '@/lib/api/search';
 
@@ -18,7 +16,7 @@ export default async function SearchPage({
   if (!keyword) {
     return (
       <>
-        <Header />
+        
         <PageHeader title={t('results')} description={tCommon('search')} />
         <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="overflow-hidden relative p-8 sm:p-12 md:p-16 text-center modern-card">
@@ -34,7 +32,7 @@ export default async function SearchPage({
             </div>
           </div>
         </main>
-        <Footer />
+        
       </>
     );
   }
@@ -49,7 +47,7 @@ export default async function SearchPage({
 
     return (
       <>
-        <Header />
+        
         <PageHeader title={`${t('results')}: ${keyword}`} description={`找到 ${results.total} 条结果`} />
         <main className="container flex-1 px-4 py-12 mx-auto">
           {results.records.length > 0 ? (
@@ -95,14 +93,14 @@ export default async function SearchPage({
             </div>
           )}
         </main>
-        <Footer />
+        
       </>
     );
   } catch (error) {
     console.error('Failed to search:', error);
     return (
       <>
-        <Header />
+        
         <PageHeader title={t('results')} description={tCommon('search')} />
         <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="p-12 text-center rounded-xl border shadow-sm bg-card border-border">
@@ -112,7 +110,7 @@ export default async function SearchPage({
             <p className="text-lg text-foreground/70">{t('noResults')}</p>
           </div>
         </main>
-        <Footer />
+        
       </>
     );
   }

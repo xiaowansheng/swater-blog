@@ -2,8 +2,6 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import Image from '@/components/common/ImageWithPreview';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import MomentImages from '@/components/moment/MomentImages';
 import { AnimeComment } from '@/components/anime-comment';
 import { momentApi } from '@/lib/api/moment';
@@ -49,7 +47,7 @@ export default async function MomentDetailPage({
 
     return (
       <>
-        <Header />
+        
         <main className="container mx-auto px-4 py-12 flex-1">
           <article className="bg-card border border-border rounded-2xl p-8 md:p-12 shadow-sm max-w-4xl mx-auto">
             <div className="flex items-start gap-3 mb-6">
@@ -100,7 +98,7 @@ export default async function MomentDetailPage({
             </div>
           </article>
         </main>
-        <Footer />
+        
       </>
     );
   } catch (error) {

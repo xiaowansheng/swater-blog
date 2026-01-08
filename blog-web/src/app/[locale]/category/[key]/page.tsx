@@ -1,6 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import PageHeader from '@/components/layout/PageHeader';
 import ArticleList from '@/components/article/ArticleList';
 import Pagination from '@/components/common/Pagination';
@@ -32,7 +30,7 @@ export default async function CategoryPage({
 
     return (
       <>
-        <Header />
+        
         <PageHeader title={category.name} description={category.description || undefined} />
         <main className="container flex-1 px-4 py-12 mx-auto">
           {articleList.records.length > 0 ? (
@@ -67,19 +65,19 @@ export default async function CategoryPage({
             </div>
           )}
         </main>
-        <Footer />
+        
       </>
     );
   } catch (error) {
     console.error('Failed to load category:', error);
     return (
       <>
-        <Header />
+        
         <PageHeader title={t('categories')} />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>
-        <Footer />
+        
       </>
     );
   }

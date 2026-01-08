@@ -1,6 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import PageHeader from '@/components/layout/PageHeader';
 import { categoryApi } from '@/lib/api/category';
 import { tagApi } from '@/lib/api/tag';
@@ -25,7 +23,6 @@ export default async function ArchiveListPage({
 
     return (
       <>
-        <Header />
         <PageHeader title={t('archives')} description="文章归档、分类与标签" />
         <main className="container flex-1 px-4 py-12 mx-auto space-y-12">
           {/* 分类和标签 */}
@@ -98,19 +95,16 @@ export default async function ArchiveListPage({
             <ArchiveTimeline />
           </section>
         </main>
-        <Footer />
       </>
     );
   } catch (error) {
     console.error('Failed to load archives:', error);
     return (
       <>
-        <Header />
         <PageHeader title={t('archives')} description="文章归档" />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>
-        <Footer />
       </>
     );
   }

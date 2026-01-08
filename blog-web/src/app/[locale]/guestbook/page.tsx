@@ -1,10 +1,8 @@
 
 import { getTranslations } from 'next-intl/server';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import PageHeader from '@/components/layout/PageHeader';
-import CommentList from '@/components/comment/CommentList';
-import CommentForm from '@/components/comment/CommentForm';
+import GuestbookList from '@/components/guestbook/GuestbookList';
+import GuestbookForm from '@/components/guestbook/GuestbookForm';
 import { guestbookApi } from '@/lib/api/guestbook';
 
 export default async function GuestbookPage({
@@ -24,7 +22,7 @@ export default async function GuestbookPage({
 
     return (
       <>
-        <Header />
+        
         <PageHeader>
           <div className="relative w-full overflow-hidden">
             <div className="relative mx-auto max-w-4xl px-4 text-center">
@@ -83,7 +81,7 @@ export default async function GuestbookPage({
                           </span>
                         </div>
                         {guestbook.records.length > 0 ? (
-                          <CommentList comments={guestbook.records} />
+                          <GuestbookList messages={guestbook.records} />
                         ) : (
                           <div className="overflow-hidden relative p-8 sm:p-12 md:p-16 text-center modern-card">
                             <div className="absolute inset-0 bg-gradient-to-br via-transparent from-primary/5 to-accent/5"></div>
@@ -116,7 +114,7 @@ export default async function GuestbookPage({
                               <p className="text-sm text-muted-foreground">{tGuestbook('messageHint')}</p>
                             </div>
                           </div>
-                          <CommentForm targetType="TALK" />
+                          <GuestbookForm />
                           <div className="mt-6 rounded-[20px] border border-accent/15 bg-card/70 px-5 py-4 text-sm text-muted-foreground shadow-sm">
                             <p className="font-semibold text-foreground/80">{tGuestbook('tips')}</p>
                             <p className="mt-2 leading-relaxed">{tGuestbook('tipsContent')}</p>
@@ -132,19 +130,19 @@ export default async function GuestbookPage({
             </div>
           </section>
         </main>
-        <Footer />
+        
       </>
     );
   } catch (error) {
     console.error('Failed to load guestbook:', error);
     return (
       <>
-        <Header />
+        
         <PageHeader title={t('guestbook')} description={tGuestbook('description')} />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>
-        <Footer />
+        
       </>
     );
   }

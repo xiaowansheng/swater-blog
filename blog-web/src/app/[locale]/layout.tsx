@@ -51,6 +51,8 @@ import DecorationManager from '@/components/decoration/DecorationManager';
 import PageLoadingWrapper from '@/components/common/PageLoadingWrapper';
 import TopProgressBar from '@/components/common/TopProgressBar';
 import FloatingToolbar from '@/components/widgets/FloatingToolbar';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 
 export default async function LocaleLayout({
   children,
@@ -82,7 +84,11 @@ export default async function LocaleLayout({
                   <DecorationManager />
                   <FloatingToolbar />
                   <VisitorTracker />
-                  {children}
+                  <Header />
+                  <div className="flex-1">
+                    {children}
+                  </div>
+                  <Footer />
                 </div>
               </PageLoadingWrapper>
             </DecorationProvider>

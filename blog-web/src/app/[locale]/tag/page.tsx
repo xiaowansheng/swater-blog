@@ -1,6 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import PageHeader from '@/components/layout/PageHeader';
 import { tagApi } from '@/lib/api/tag';
 import { Link } from '@/lib/i18n/routing';
@@ -20,7 +18,7 @@ export default async function TagListPage({
 
     return (
       <>
-        <Header />
+        
         <PageHeader title={t('tags')} description="所有标签" />
         <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="flex flex-wrap gap-3">
@@ -40,19 +38,19 @@ export default async function TagListPage({
             ))}
           </div>
         </main>
-        <Footer />
+        
       </>
     );
   } catch (error) {
     console.error('Failed to load tags:', error);
     return (
       <>
-        <Header />
+        
         <PageHeader title={t('tags')} description="所有标签" />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>
-        <Footer />
+        
       </>
     );
   }

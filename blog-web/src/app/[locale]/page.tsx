@@ -1,6 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import Sidebar from '@/components/layout/Sidebar';
 import ArticleList from '@/components/article/ArticleList';
 import HeroSection from '@/components/home/HeroSection';
@@ -45,8 +43,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Header />
-      <HeroSection 
+      <HeroSection
         articleCount={articleList.total || 0}
         tagCount={tags.length}
         categoryCount={categories.length}
@@ -79,7 +76,6 @@ export default async function HomePage() {
           <Sidebar categories={categories} tags={tags} hotArticles={hotArticles} />
         </div>
       </main>
-      <Footer />
     </>
   );
 }

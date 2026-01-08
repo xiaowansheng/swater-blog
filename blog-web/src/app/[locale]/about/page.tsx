@@ -1,6 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import PageHeader from '@/components/layout/PageHeader';
 import MarkdownRenderer from '@/components/markdown/MarkdownRenderer';
 import { ISR_REVALIDATE } from '@/lib/constants';
@@ -18,7 +16,6 @@ export default async function AboutPage({
 
   return (
     <>
-      <Header />
       <PageHeader title={t('about')} description="关于我" />
       <main className="container flex-1 px-4 py-12 mx-auto">
         <div className="bg-card border border-border rounded-2xl p-8 md:p-12 shadow-sm">
@@ -41,7 +38,6 @@ export default async function AboutPage({
           )}
         </div>
       </main>
-      <Footer />
     </>
   );
 }

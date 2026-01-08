@@ -1,6 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import PageHeader from '@/components/layout/PageHeader';
 import { categoryApi } from '@/lib/api/category';
 import { Link } from '@/lib/i18n/routing';
@@ -20,7 +18,6 @@ export default async function CategoryListPage({
 
     return (
       <>
-        <Header />
         <PageHeader title={t('categories')} description="文章分类" />
         <main className="container flex-1 px-3 sm:px-4 py-8 sm:py-12 mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -45,19 +42,16 @@ export default async function CategoryListPage({
             ))}
           </div>
         </main>
-        <Footer />
       </>
     );
   } catch (error) {
     console.error('Failed to load categories:', error);
     return (
       <>
-        <Header />
         <PageHeader title={t('categories')} description="文章分类" />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>
-        <Footer />
       </>
     );
   }

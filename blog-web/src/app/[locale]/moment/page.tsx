@@ -1,6 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import PageHeader from '@/components/layout/PageHeader';
 import MomentList from '@/components/moment/MomentList';
 import Pagination from '@/components/common/Pagination';
@@ -25,7 +23,7 @@ export default async function MomentPage({
 
     return (
       <>
-        <Header />
+        
         <PageHeader title={t('moments')} description="记录生活的瞬间" />
         <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="max-w-4xl mx-auto">
@@ -54,19 +52,19 @@ export default async function MomentPage({
             )}
           </div>
         </main>
-        <Footer />
+        
       </>
     );
   } catch (error) {
     console.error('Failed to load moments:', error);
     return (
       <>
-        <Header />
+        
         <PageHeader title={t('moments')} description="记录生活的瞬间" />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>
-        <Footer />
+        
       </>
     );
   }
