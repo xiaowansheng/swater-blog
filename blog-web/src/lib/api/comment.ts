@@ -40,5 +40,12 @@ export const commentApi = {
   getCaptcha: () => {
     return fetchClient<{ image: string; key: string }>('/api/public/captcha');
   },
+
+  sendEmailCode: (email: string) => {
+    return fetchClient<void>('/api/public/message/email-code', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
 };
 

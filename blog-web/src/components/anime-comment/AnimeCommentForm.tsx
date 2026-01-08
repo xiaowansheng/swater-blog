@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { AnimeCommentConfig, CommentFormData } from './types';
 import EmojiPicker from './EmojiPicker';
+import toast from 'react-hot-toast';
+import { commentApi } from '@/lib/api/comment';
 
 interface AnimeCommentFormProps {
   config: AnimeCommentConfig;
@@ -40,6 +42,8 @@ export default function AnimeCommentForm({
   const [images, setImages] = useState<File[]>([]);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 从本地存储加载用户信息
@@ -56,6 +60,39 @@ export default function AnimeCommentForm({
       }));
     }
   }, []);
+
+  // 初始化倒计时状态
+  useEffect(() => {
+    const savedEndTime = localStorage.getItem('commentEmailCodeEndTime');
+    if (savedEndTime) {
+      const endTime = parseInt(savedEndTime, 10);
+      const now = Date.now();
+      const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+      if (remaining > 0) {
+        setCooldown(remaining);
+      } else {
+        localStorage.removeItem('commentEmailCodeEndTime');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (cooldown <= 0) {
+      localStorage.removeItem('commentEmailCodeEndTime');
+      return;
+    }
+    
+    const timer = window.setInterval(() => {
+      setCooldown((prev) => {
+        const newValue = prev > 0 ? prev - 1 : 0;
+        if (newValue <= 0) {
+          localStorage.removeItem('commentEmailCodeEndTime');
+        }
+        return newValue;
+      });
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [cooldown]);
 
   // keep target info in sync
   useEffect(() => {
@@ -76,23 +113,44 @@ export default function AnimeCommentForm({
     }));
   };
 
+  // 发送邮箱验证码
+  const handleSendEmailCode = async () => {
+    if (!formData.email?.trim()) {
+      toast.error('请输入邮箱地址');
+      return;
+    }
+    setSendingCode(true);
+    try {
+      await commentApi.sendEmailCode(formData.email.trim());
+      toast.success('验证码已发送到您的邮箱');
+      // 保存倒计时结束时间到 localStorage
+      const endTime = Date.now() + 60 * 1000; // 60秒后
+      localStorage.setItem('commentEmailCodeEndTime', endTime.toString());
+      setCooldown(60);
+    } catch (err) {
+      // 全局拦截器已经处理了错误提示，这里不需要再设置错误
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
   // 处理图片选择
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const validFiles = files.filter(file => {
       if (file.size > config.maxImageSize * 1024 * 1024) {
-        alert(`图片大小不能超过 ${config.maxImageSize}MB`);
+        toast.error(`图片大小不能超过 ${config.maxImageSize}MB`);
         return false;
       }
       if (!file.type.startsWith('image/')) {
-        alert('只能上传图片文件');
+        toast.error('只能上传图片文件');
         return false;
       }
       return true;
     });
 
     if (images.length + validFiles.length > config.maxImages) {
-      alert(`最多只能上传 ${config.maxImages} 张图片`);
+      toast.error(`最多只能上传 ${config.maxImages} 张图片`);
       return;
     }
 
@@ -120,22 +178,27 @@ export default function AnimeCommentForm({
 
     // 验证
     if (!formData.nickname.trim()) {
-      alert('请输入昵称');
+      toast.error('请输入昵称');
+      return;
+    }
+
+    if (!formData.email?.trim()) {
+      toast.error('请输入邮箱地址');
       return;
     }
 
     if (!formData.content.trim()) {
-      alert('请输入评论内容');
+      toast.error('请输入评论内容');
       return;
     }
 
     if (!formData.targetId) {
-      alert('缺少评论目标信息，请刷新后重试');
+      toast.error('缺少评论目标信息，请刷新后重试');
       return;
     }
 
     if (!formData.captcha?.trim()) {
-      alert('请输入验证码');
+      toast.error('请输入邮箱验证码');
       return;
     }
 
@@ -144,6 +207,9 @@ export default function AnimeCommentForm({
     try {
       const success = await onSubmit({ ...formData, images });
       if (success) {
+        // 显示成功提示
+        toast.success('评论发布成功！');
+        
         // 保存用户信息到本地存储
         localStorage.setItem('comment_nickname', formData.nickname);
         if (formData.email) {
@@ -231,21 +297,6 @@ export default function AnimeCommentForm({
             </div>
             <div className="flex-1">
               <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="邮箱"
-                className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80 backdrop-blur-sm"
-                maxLength={100}
-              />
-            </div>
-          </div>
-
-          {/* 其他用户信息 */}
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <input
                 type="text"
                 name="qq"
                 value={formData.qq}
@@ -255,17 +306,47 @@ export default function AnimeCommentForm({
                 maxLength={50}
               />
             </div>
+          </div>
+
+          {/* 邮箱和验证码 */}
+          <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <input
-                type="text"
-                name="captcha"
-                value={formData.captcha}
+                type="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
-                placeholder="验证码"
+                placeholder="邮箱 *"
                 className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80 backdrop-blur-sm"
-                maxLength={20}
+                maxLength={100}
                 required
               />
+            </div>
+            <div className="flex-1">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  name="captcha"
+                  value={formData.captcha}
+                  onChange={handleChange}
+                  placeholder="邮箱验证码"
+                  className="flex-1 px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80 backdrop-blur-sm"
+                  maxLength={20}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={handleSendEmailCode}
+                  disabled={sendingCode || cooldown > 0 || !formData.email?.trim()}
+                  className="px-4 py-3 bg-gradient-to-r from-pink-400 to-purple-400 text-white rounded-xl hover:from-pink-500 hover:to-purple-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
+                >
+                  {cooldown > 0
+                    ? `${cooldown}s`
+                    : sendingCode
+                      ? '发送中...'
+                      : '发送验证码'}
+                </button>
+              </div>
             </div>
           </div>
 

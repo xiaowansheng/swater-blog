@@ -93,7 +93,7 @@ export default function AnimeComment({
 
       return true;
     } catch (error) {
-      console.error('Failed to submit comment:', error);
+      // 全局拦截器已经处理了错误提示
       return false;
     }
   };
