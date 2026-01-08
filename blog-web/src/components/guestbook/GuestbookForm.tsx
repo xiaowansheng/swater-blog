@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { guestbookApi } from '@/lib/api/guestbook';
 import type { GuestbookVO } from '@/types';
+import toast from 'react-hot-toast';
 
 interface GuestbookFormProps {
   onSuccess?: (message: GuestbookVO) => void;
@@ -21,12 +22,36 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
   const [sendingCode, setSendingCode] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+
+  // 初始化倒计时状态
+  useEffect(() => {
+    const savedEndTime = localStorage.getItem('emailCodeEndTime');
+    if (savedEndTime) {
+      const endTime = parseInt(savedEndTime, 10);
+      const now = Date.now();
+      const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+      if (remaining > 0) {
+        setCooldown(remaining);
+      } else {
+        localStorage.removeItem('emailCodeEndTime');
+      }
+    }
+  }, []);
 
   useEffect(() => {
-    if (cooldown <= 0) return;
+    if (cooldown <= 0) {
+      localStorage.removeItem('emailCodeEndTime');
+      return;
+    }
+    
     const timer = window.setInterval(() => {
-      setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+      setCooldown((prev) => {
+        const newValue = prev > 0 ? prev - 1 : 0;
+        if (newValue <= 0) {
+          localStorage.removeItem('emailCodeEndTime');
+        }
+        return newValue;
+      });
     }, 1000);
     return () => window.clearInterval(timer);
   }, [cooldown]);
@@ -38,13 +63,15 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
     }
     setSendingCode(true);
     setError('');
-    setSuccess('');
     try {
       await guestbookApi.sendEmailCode(email.trim());
-      setSuccess(tGuestbook('emailCodeSent'));
+      toast.success(tGuestbook('emailCodeSent'));
+      // 保存倒计时结束时间到 localStorage
+      const endTime = Date.now() + 60 * 1000; // 60秒后
+      localStorage.setItem('emailCodeEndTime', endTime.toString());
       setCooldown(60);
     } catch (err) {
-      setError(tGuestbook('emailCodeSendFailed'));
+      // 全局拦截器已经处理了错误提示，这里不需要再设置错误
     } finally {
       setSendingCode(false);
     }
@@ -71,7 +98,6 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
 
     setSubmitting(true);
     setError('');
-    setSuccess('');
 
     try {
       const message = await guestbookApi.submit({
@@ -87,10 +113,10 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
       setQq('');
       setContent('');
       setEmailCode('');
-      setSuccess(t('success'));
+      toast.success(t('success'));
       onSuccess?.(message);
     } catch (err) {
-      setError(t('error'));
+      // 全局拦截器已经处理了错误提示，这里不需要再设置错误
     } finally {
       setSubmitting(false);
     }
@@ -106,16 +132,6 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {error}
-          </p>
-        </div>
-      )}
-      {success && (
-        <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 border border-green-200 dark:border-green-800 rounded-xl shadow-sm">
-          <p className="text-green-600 dark:text-green-400 text-sm font-medium flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            {success}
           </p>
         </div>
       )}
