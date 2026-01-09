@@ -6,6 +6,7 @@ import { AnimeCommentProps, AnimeCommentConfig, CommentFormData } from './types'
 import { DEFAULT_COMMENT_CONFIG } from './constants';
 import AnimeCommentForm from './AnimeCommentForm';
 import AnimeCommentList from './AnimeCommentList';
+import { UserInfoProvider } from './UserInfoContext';
 import { commentApi } from '@/lib/api/comment';
 
 /**
@@ -22,8 +23,7 @@ export default function AnimeComment({
   const [config, setConfig] = useState<AnimeCommentConfig>(DEFAULT_COMMENT_CONFIG);
   const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [replyTo, setReplyTo] = useState<number | null>(null);
-  const [replyToName, setReplyToName] = useState<string>('');
+  const [activeReplyFormId, setActiveReplyFormId] = useState<number | null>(null);
   const targetType: CommentFormData['targetType'] = postId ? 'ARTICLE' : 'TALK';
   const targetId = postId ?? momentId;
 
@@ -70,7 +70,6 @@ export default function AnimeComment({
       await commentApi.submit({
         targetId,
         targetType,
-        parentId: replyTo || undefined,
         nickname: data.nickname,
         email: data.email,
         qq: data.qq,
@@ -87,10 +86,6 @@ export default function AnimeComment({
       });
       setComments(result.records || []);
 
-      // 清除回复状态
-      setReplyTo(null);
-      setReplyToName('');
-
       return true;
     } catch (error) {
       // 全局拦截器已经处理了错误提示
@@ -98,22 +93,40 @@ export default function AnimeComment({
     }
   };
 
-  // 处理回复
-  const handleReply = (commentId: number, nickname: string) => {
-    setReplyTo(commentId);
-    setReplyToName(nickname);
-    // 滚动到表单
-    document.getElementById('comment-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // 处理回复（打开回复表单）
+  const handleReply = (commentId: number) => {
+    // 如果点击的是当前已展开的评论，则关闭
+    if (activeReplyFormId === commentId) {
+      setActiveReplyFormId(null);
+    } else {
+      // 否则，展开该评论的回复表单（自动关闭其他）
+      setActiveReplyFormId(commentId);
+    }
   };
 
-  // 取消回复
-  const handleCancelReply = () => {
-    setReplyTo(null);
-    setReplyToName('');
+  // 关闭回复表单
+  const handleCloseReplyForm = () => {
+    setActiveReplyFormId(null);
+  };
+
+  // 回复提交成功后的回调
+  const handleReplySubmitSuccess = () => {
+    // 重新加载评论列表
+    commentApi.getList({
+      targetId,
+      targetType,
+      page: 1,
+      size: 100,
+    }).then(result => {
+      setComments(result.records || []);
+    });
+    // 关闭回复表单
+    setActiveReplyFormId(null);
   };
 
   return (
-    <div className={`anime-comment ${className}`}>
+    <UserInfoProvider>
+      <div className={`anime-comment ${className}`}>
       {showTitle && (
         <div className="mb-8">
           <h3 className="text-2xl font-bold gradient-text mb-2">
@@ -124,23 +137,30 @@ export default function AnimeComment({
       )}
 
       {/* 评论表单 */}
-      <AnimeCommentForm
-        config={config}
-        replyTo={replyTo}
-        replyToName={replyToName}
-        targetType={targetType}
-        targetId={targetId}
-        onCancelReply={handleCancelReply}
-        onSubmit={handleSubmit}
-      />
+      {targetId && (
+        <AnimeCommentForm
+          config={config}
+          targetType={targetType}
+          targetId={targetId}
+          onSubmit={handleSubmit}
+        />
+      )}
 
       {/* 评论列表 */}
-      <AnimeCommentList
-        comments={comments}
-        loading={loading}
-        onReply={handleReply}
-        config={config}
-      />
+      {targetId && (
+        <AnimeCommentList
+          comments={comments}
+          loading={loading}
+          onReply={handleReply}
+          activeReplyFormId={activeReplyFormId}
+          onCloseReplyForm={handleCloseReplyForm}
+          onReplySubmitSuccess={handleReplySubmitSuccess}
+          targetType={targetType}
+          targetId={targetId}
+          config={config}
+        />
+      )}
     </div>
+    </UserInfoProvider>
   );
 }

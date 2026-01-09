@@ -2,12 +2,16 @@
 
 import { AnimeCommentConfig } from './types';
 import AnimeCommentItem from './AnimeCommentItem';
-import { getRandomAnimeAvatar } from './constants';
 
 interface AnimeCommentListProps {
   comments: any[];
   loading: boolean;
-  onReply: (commentId: number, nickname: string) => void;
+  onReply: (commentId: number) => void;
+  activeReplyFormId: number | null;
+  onCloseReplyForm: () => void;
+  onReplySubmitSuccess: () => void;
+  targetType: 'ARTICLE' | 'TALK';
+  targetId: number;
   config: AnimeCommentConfig;
 }
 
@@ -18,6 +22,11 @@ export default function AnimeCommentList({
   comments,
   loading,
   onReply,
+  activeReplyFormId,
+  onCloseReplyForm,
+  onReplySubmitSuccess,
+  targetType,
+  targetId,
   config,
 }: AnimeCommentListProps) {
   if (loading) {
@@ -50,6 +59,11 @@ export default function AnimeCommentList({
           key={comment.id}
           comment={comment}
           onReply={onReply}
+          activeReplyFormId={activeReplyFormId}
+          onCloseReplyForm={onCloseReplyForm}
+          onReplySubmitSuccess={onReplySubmitSuccess}
+          targetType={targetType}
+          targetId={targetId}
           config={config}
           depth={0}
         />

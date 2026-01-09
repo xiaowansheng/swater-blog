@@ -4,10 +4,16 @@ import { useState } from 'react';
 import { formatDate } from '@/lib/utils/format';
 import { AnimeCommentConfig } from './types';
 import { getRandomAnimeAvatar } from './constants';
+import ReplyForm from './ReplyForm';
 
 interface AnimeCommentItemProps {
   comment: any;
-  onReply: (commentId: number, nickname: string) => void;
+  onReply: (commentId: number) => void;
+  activeReplyFormId: number | null;
+  onCloseReplyForm: () => void;
+  onReplySubmitSuccess: () => void;
+  targetType: 'ARTICLE' | 'TALK';
+  targetId: number;
   config: AnimeCommentConfig;
   depth: number;
 }
@@ -18,11 +24,17 @@ interface AnimeCommentItemProps {
 export default function AnimeCommentItem({
   comment,
   onReply,
+  activeReplyFormId,
+  onCloseReplyForm,
+  onReplySubmitSuccess,
+  targetType,
+  targetId,
   config,
   depth,
 }: AnimeCommentItemProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const avatar = comment.avatar || getRandomAnimeAvatar(comment.nickname);
+  const showReplyForm = activeReplyFormId === comment.id;
 
   // 最大嵌套深度
   const MAX_DEPTH = 3;
@@ -122,13 +134,17 @@ export default function AnimeCommentItem({
             {/* 操作按钮 */}
             <div className="flex items-center gap-4 mt-3">
               <button
-                onClick={() => onReply(comment.id, comment.nickname)}
-                className="text-sm text-pink-500 hover:text-pink-600 flex items-center gap-1 transition-colors group/btn"
+                onClick={() => onReply(comment.id)}
+                className={`text-sm flex items-center gap-1 transition-colors group/btn ${
+                  showReplyForm
+                    ? 'text-purple-600 hover:text-purple-700'
+                    : 'text-pink-500 hover:text-pink-600'
+                }`}
               >
                 <svg className="w-4 h-4 group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                 </svg>
-                回复
+                {showReplyForm ? '收起回复' : '回复'}
               </button>
             </div>
           </div>
@@ -159,6 +175,19 @@ export default function AnimeCommentItem({
         )}
       </div>
 
+      {/* 回复表单 */}
+      {showReplyForm && (
+        <ReplyForm
+          parentId={comment.id}
+          parentNickname={comment.nickname}
+          targetType={targetType}
+          targetId={targetId}
+          config={config}
+          onSubmitSuccess={onReplySubmitSuccess}
+          onCancel={onCloseReplyForm}
+        />
+      )}
+
       {/* 子评论 */}
       {isExpanded && comment.children && comment.children.length > 0 && canNestMore && (
         <div className="mt-4 space-y-4">
@@ -167,6 +196,11 @@ export default function AnimeCommentItem({
               key={child.id}
               comment={child}
               onReply={onReply}
+              activeReplyFormId={activeReplyFormId}
+              onCloseReplyForm={onCloseReplyForm}
+              onReplySubmitSuccess={onReplySubmitSuccess}
+              targetType={targetType}
+              targetId={targetId}
               config={config}
               depth={depth + 1}
             />
