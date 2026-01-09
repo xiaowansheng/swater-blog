@@ -32,6 +32,11 @@ public class CommentDTO extends com.blog.shared.model.dto.BaseDTO {
 
     private String captcha;
 
+    /**
+     * 游客保持“自己的评论”可识别的 token（前端生成保存）
+     */
+    private String ownerToken;
+
     private String ip;
 
     private String country;

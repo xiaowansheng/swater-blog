@@ -84,22 +84,42 @@ const mockHandlers: MockHandler[] = [
       const params = new URLSearchParams(url.split('?')[1] || '');
       const page = parseInt(params.get('page') || '1');
       const size = parseInt(params.get('size') || '10');
-      const postId = params.get('postId');
-      const momentId = params.get('momentId');
-      
-      let records = [...commentData.list];
-      
-      if (postId) {
-        records = records.filter(c => c.postId === parseInt(postId));
+      const parentIdParam = params.get('parentId');
+      const targetId = params.get('targetId');
+      const targetType = params.get('targetType');
+
+      const flatRecords = commentData.list.flatMap((c) => {
+        const top = { ...c, replyCount: c.children?.length || 0 };
+        const children = (c.children || []).map(child => ({
+          ...child,
+          replyToUser: { nickname: c.nickname },
+        }));
+        delete (top as any).children;
+        return [top, ...children];
+      });
+
+      let records = [...flatRecords];
+
+      if (targetId && targetType === 'ARTICLE') {
+        records = records.filter((c) => c.postId === parseInt(targetId));
       }
-      if (momentId) {
-        records = records.filter(c => c.momentId === parseInt(momentId));
+      if (targetId && targetType === 'TALK') {
+        records = records.filter((c) => c.momentId === parseInt(targetId));
       }
-      
+
+      if (parentIdParam !== null) {
+        const parentId = parseInt(parentIdParam);
+        if (parentId === 0) {
+          records = records.filter((c) => !c.parentId);
+        } else {
+          records = records.filter((c) => c.parentId === parentId);
+        }
+      }
+
       const total = records.length;
       const start = (page - 1) * size;
       const end = start + size;
-      
+
       return {
         records: records.slice(start, end),
         total,
@@ -117,6 +137,8 @@ const mockHandlers: MockHandler[] = [
         return {
           id: Date.now(),
           ...body,
+          replyCount: 0,
+          likeCount: 0,
           status: 1,
           createTime: new Date().toISOString(),
         };

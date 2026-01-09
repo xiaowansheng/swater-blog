@@ -42,6 +42,10 @@ public class CommentVO extends com.blog.shared.model.vo.BaseVO {
 
     private Integer isVisible;
 
+    private Integer replyCount;
+
+    private Boolean isOwner;
+
     private String ip;
 
     private String country;
@@ -62,4 +66,3 @@ public class CommentVO extends com.blog.shared.model.vo.BaseVO {
 
     private List<CommentVO> replies;
 }
-

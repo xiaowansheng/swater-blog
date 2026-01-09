@@ -143,6 +143,15 @@ export interface CommentVO {
   avatar?: string;
   content: string;
   status: number;
+  statusText?: string;
+  replyCount?: number;
+  likeCount?: number;
+  isAuthor?: boolean;
+  isOwner?: boolean;
+  replyToUser?: {
+    id?: number;
+    nickname?: string;
+  };
   ip?: string;
   userAgent?: string;
   createTime: string;

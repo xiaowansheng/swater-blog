@@ -1,30 +1,51 @@
 'use client';
 
+import type { CommentVO } from '@/types';
 import { AnimeCommentConfig } from './types';
 import AnimeCommentItem from './AnimeCommentItem';
 
-interface AnimeCommentListProps {
-  comments: any[];
+interface ReplyState {
+  items: CommentVO[];
+  page: number;
+  pages: number;
   loading: boolean;
+  expanded: boolean;
+}
+
+interface AnimeCommentListProps {
+  comments: CommentVO[];
+  loading: boolean;
+  loadingMore: boolean;
+  hasMore: boolean;
+  onLoadMore: () => void;
   onReply: (commentId: number) => void;
   activeReplyFormId: number | null;
   onCloseReplyForm: () => void;
-  onReplySubmitSuccess: () => void;
+  onReplySubmitSuccess: (parentId: number) => void;
+  onToggleReplies: (commentId: number, replyCount?: number) => void;
+  onLoadMoreReplies: (commentId: number) => void;
+  replies: Record<number, ReplyState>;
   targetType: 'ARTICLE' | 'TALK';
   targetId: number;
   config: AnimeCommentConfig;
 }
 
 /**
- * 二次元评论列表组件
+ * 二次元评论列表（两级）
  */
 export default function AnimeCommentList({
   comments,
   loading,
+  loadingMore,
+  hasMore,
+  onLoadMore,
   onReply,
   activeReplyFormId,
   onCloseReplyForm,
   onReplySubmitSuccess,
+  onToggleReplies,
+  onLoadMoreReplies,
+  replies,
   targetType,
   targetId,
   config,
@@ -35,7 +56,7 @@ export default function AnimeCommentList({
         <div className="relative">
           <div className="w-16 h-16 border-4 border-pink-200 border-t-pink-500 rounded-full animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center text-2xl animate-bounce">
-            ✿
+            ✨
           </div>
         </div>
         <p className="mt-4 text-gray-500">加载评论中...</p>
@@ -46,7 +67,7 @@ export default function AnimeCommentList({
   if (comments.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-6xl mb-4 animate-float">｡ﾟ(ﾟ´Д｀)ﾟ｡</div>
+        <div className="text-6xl mb-4 animate-float">٩(◕‿◕｡)۶</div>
         <p className="text-gray-500 text-lg">还没有评论哦，快来抢沙发吧~</p>
       </div>
     );
@@ -58,6 +79,9 @@ export default function AnimeCommentList({
         <AnimeCommentItem
           key={comment.id}
           comment={comment}
+          replyState={replies[comment.id]}
+          onToggleReplies={onToggleReplies}
+          onLoadMoreReplies={onLoadMoreReplies}
           onReply={onReply}
           activeReplyFormId={activeReplyFormId}
           onCloseReplyForm={onCloseReplyForm}
@@ -65,9 +89,21 @@ export default function AnimeCommentList({
           targetType={targetType}
           targetId={targetId}
           config={config}
-          depth={0}
         />
       ))}
+
+      {hasMore && (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={onLoadMore}
+            disabled={loadingMore}
+            className="px-6 py-2 rounded-full border border-pink-200 text-pink-600 hover:bg-pink-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loadingMore ? '加载中...' : '加载更多评论'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

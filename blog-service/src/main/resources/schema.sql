@@ -296,6 +296,7 @@ CREATE TABLE IF NOT EXISTS `comment` (
   `nickname` VARCHAR(30) DEFAULT NULL COMMENT '游客别名',
   `email` VARCHAR(128) DEFAULT NULL COMMENT '游客邮箱',
   `qq` VARCHAR(15) DEFAULT NULL COMMENT '游客QQ号',
+  `owner_token` VARCHAR(128) DEFAULT NULL COMMENT '游客会话标识，用于前端识别自己的评论',
   `status` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '审核状态（0-待审核，1-已通过）',
   `is_visible` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否隐藏评论',
   `ip` VARCHAR(255) NOT NULL COMMENT 'IP地址',

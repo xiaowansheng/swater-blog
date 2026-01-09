@@ -1,28 +1,50 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { formatDate } from '@/lib/utils/format';
+import type { CommentVO } from '@/types';
 import { AnimeCommentConfig } from './types';
 import { getRandomAnimeAvatar } from './constants';
 import ReplyForm from './ReplyForm';
 
+interface ReplyState {
+  items: CommentVO[];
+  page: number;
+  pages: number;
+  loading: boolean;
+  expanded: boolean;
+}
+
 interface AnimeCommentItemProps {
-  comment: any;
+  comment: CommentVO;
+  replyState?: ReplyState;
+  onToggleReplies: (commentId: number, replyCount?: number) => void;
+  onLoadMoreReplies: (commentId: number) => void;
   onReply: (commentId: number) => void;
   activeReplyFormId: number | null;
   onCloseReplyForm: () => void;
-  onReplySubmitSuccess: () => void;
+  onReplySubmitSuccess: (parentId: number) => void;
   targetType: 'ARTICLE' | 'TALK';
   targetId: number;
   config: AnimeCommentConfig;
-  depth: number;
 }
 
-/**
- * 二次元评论项组件
- */
+const STATUS_LABEL = {
+  pending: '审核中，仅自己可见',
+  hidden: '已隐藏，仅自己可见',
+};
+
+function getStatusLabel(status: number | string | undefined) {
+  if (status === 1 || status === 'published' || status === undefined) return null;
+  if (status === 0 || status === 'pending') return STATUS_LABEL.pending;
+  return STATUS_LABEL.hidden;
+}
+
 export default function AnimeCommentItem({
   comment,
+  replyState,
+  onToggleReplies,
+  onLoadMoreReplies,
   onReply,
   activeReplyFormId,
   onCloseReplyForm,
@@ -30,60 +52,19 @@ export default function AnimeCommentItem({
   targetType,
   targetId,
   config,
-  depth,
 }: AnimeCommentItemProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
   const avatar = comment.avatar || getRandomAnimeAvatar(comment.nickname);
   const showReplyForm = activeReplyFormId === comment.id;
-
-  // 最大嵌套深度
-  const MAX_DEPTH = 3;
-  const isNested = depth > 0;
-  const canNestMore = depth < MAX_DEPTH;
-
-  // 获取边框颜色类
-  const getBorderClass = () => {
-    const colors = [
-      'border-pink-200',
-      'border-purple-200',
-      'border-blue-200',
-      'border-green-200',
-    ];
-    return colors[depth % colors.length];
-  };
-
-  // 获取背景颜色类
-  const getBgClass = () => {
-    const bgs = [
-      'from-pink-50/50',
-      'from-purple-50/50',
-      'from-blue-50/50',
-      'from-green-50/50',
-    ];
-    return bgs[depth % bgs.length];
-  };
+  const statusLabel = useMemo(() => getStatusLabel(comment.status), [comment.status]);
+  const replies = replyState?.items || [];
+  const expanded = replyState?.expanded;
+  const hasMoreReplies = replyState ? replyState.page < replyState.pages : false;
 
   return (
-    <div
-      className={`animate-fade-in ${isNested ? 'ml-8 md:ml-12' : ''}`}
-      style={{ animationDelay: `${depth * 0.1}s` }}
-    >
-      <div className={`bg-gradient-to-br ${getBgClass()} to-white/80 backdrop-blur-sm rounded-2xl p-5 border-2 ${getBorderClass()} shadow-sm hover:shadow-md transition-all duration-300 relative group`}>
-        {/* 装饰元素 */}
-        {!isNested && (
-          <>
-            <div className="absolute -top-2 -right-2 text-2xl opacity-30 group-hover:opacity-60 transition-opacity">
-              ✿
-            </div>
-            <div className="absolute -bottom-1 -left-1 text-xl opacity-20 group-hover:opacity-40 transition-opacity">
-              ✦
-            </div>
-          </>
-        )}
-
-        {/* 评论头部 */}
+    <div className="animate-fade-in">
+      <div className="bg-gradient-to-br from-pink-50/50 to-white/80 backdrop-blur-sm rounded-2xl p-5 border-2 border-pink-200 shadow-sm hover:shadow-md transition-all duration-300 relative group">
+        {/* 头部 */}
         <div className="flex items-start gap-4">
-          {/* 头像 */}
           <div className="relative flex-shrink-0">
             <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-3 border-pink-300 shadow-md group-hover:scale-110 transition-transform duration-300">
               <img
@@ -95,9 +76,7 @@ export default function AnimeCommentItem({
             <div className="absolute -top-1 -right-1 text-xs animate-pulse">✨</div>
           </div>
 
-          {/* 评论内容 */}
           <div className="flex-1 min-w-0">
-            {/* 昵称和时间 */}
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="font-bold text-gray-800 text-base">
                 {comment.nickname}
@@ -105,33 +84,27 @@ export default function AnimeCommentItem({
               <span className="text-xs text-gray-400">
                 {formatDate(comment.createTime, 'YYYY-MM-DD HH:mm')}
               </span>
-              {isNested && comment.replyTo && (
-                <span className="text-xs text-purple-500 bg-purple-100 px-2 py-0.5 rounded-full">
-                  回复
+              {comment.isAuthor && (
+                <span className="text-xs text-white bg-purple-500 px-2 py-0.5 rounded-full">
+                  作者
+                </span>
+              )}
+              {statusLabel && comment.isOwner && (
+                <span className="text-xs text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
+                  {statusLabel}
                 </span>
               )}
             </div>
 
-            {/* 评论内容 */}
+            {/* 内容 */}
             <div className="text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+              {comment.replyToUser?.nickname && (
+                <span className="text-purple-500">@{comment.replyToUser.nickname} </span>
+              )}
               {comment.content}
             </div>
 
-            {/* 评论图片 */}
-            {comment.images && comment.images.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {comment.images.map((image: string, index: number) => (
-                  <img
-                    key={index}
-                    src={image}
-                    alt={`评论图片 ${index + 1}`}
-                    className="w-24 h-24 object-cover rounded-lg border-2 border-pink-200 hover:border-pink-400 transition-colors cursor-pointer"
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* 操作按钮 */}
+            {/* 操作 */}
             <div className="flex items-center gap-4 mt-3">
               <button
                 onClick={() => onReply(comment.id)}
@@ -146,33 +119,31 @@ export default function AnimeCommentItem({
                 </svg>
                 {showReplyForm ? '收起回复' : '回复'}
               </button>
+              {typeof comment.replyCount === 'number' && comment.replyCount > 0 && (
+                <button
+                  onClick={() => onToggleReplies(comment.id, comment.replyCount)}
+                  className="text-sm text-purple-500 hover:text-purple-600 flex items-center gap-1 transition-colors"
+                >
+                  {expanded ? (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                      收起 {comment.replyCount} 条回复
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      展开 {comment.replyCount} 条回复
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
-
-        {/* 子评论展开/收起按钮 */}
-        {comment.children && comment.children.length > 0 && (
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="mt-4 text-sm text-purple-500 hover:text-purple-600 flex items-center gap-1 transition-colors"
-          >
-            {isExpanded ? (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-                收起 {comment.children.length} 条回复
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-                展开 {comment.children.length} 条回复
-              </>
-            )}
-          </button>
-        )}
       </div>
 
       {/* 回复表单 */}
@@ -183,28 +154,76 @@ export default function AnimeCommentItem({
           targetType={targetType}
           targetId={targetId}
           config={config}
-          onSubmitSuccess={onReplySubmitSuccess}
+          onSubmitSuccess={() => onReplySubmitSuccess(comment.id)}
           onCancel={onCloseReplyForm}
         />
       )}
 
-      {/* 子评论 */}
-      {isExpanded && comment.children && comment.children.length > 0 && canNestMore && (
-        <div className="mt-4 space-y-4">
-          {comment.children.map((child: any) => (
-            <AnimeCommentItem
+      {/* 回复列表 */}
+      {expanded && (
+        <div className="mt-4 ml-8 md:ml-12 space-y-4">
+          {replyState?.loading && (
+            <div className="text-sm text-gray-500">回复加载中...</div>
+          )}
+          {!replyState?.loading && replies.length === 0 && (
+            <div className="text-sm text-gray-500">暂无回复</div>
+          )}
+          {replies.map((child) => (
+            <div
               key={child.id}
-              comment={child}
-              onReply={onReply}
-              activeReplyFormId={activeReplyFormId}
-              onCloseReplyForm={onCloseReplyForm}
-              onReplySubmitSuccess={onReplySubmitSuccess}
-              targetType={targetType}
-              targetId={targetId}
-              config={config}
-              depth={depth + 1}
-            />
+              className="bg-white/80 border border-purple-100 rounded-xl p-4 shadow-sm"
+            >
+              <div className="flex items-start gap-3">
+                <img
+                  src={child.avatar || getRandomAnimeAvatar(child.nickname)}
+                  alt={child.nickname}
+                  className="w-10 h-10 rounded-full border-2 border-purple-200"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="font-semibold text-gray-800">{child.nickname}</span>
+                    <span className="text-xs text-gray-400">
+                      {formatDate(child.createTime, 'YYYY-MM-DD HH:mm')}
+                    </span>
+                    {child.isAuthor && (
+                      <span className="text-xs text-white bg-purple-500 px-2 py-0.5 rounded-full">
+                        作者
+                      </span>
+                    )}
+                    {getStatusLabel(child.status) && child.isOwner && (
+                      <span className="text-xs text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
+                        {getStatusLabel(child.status)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-gray-700 whitespace-pre-wrap break-words mt-1">
+                    {child.replyToUser?.nickname && (
+                      <span className="text-purple-500">@{child.replyToUser.nickname} </span>
+                    )}
+                    {child.content}
+                  </div>
+                  <div className="mt-2">
+                    <button
+                      onClick={() => onReply(comment.id)}
+                      className="text-xs text-purple-500 hover:text-purple-600"
+                    >
+                      回复
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           ))}
+          {hasMoreReplies && (
+            <button
+              type="button"
+              onClick={() => onLoadMoreReplies(comment.id)}
+              disabled={replyState?.loading}
+              className="text-sm text-purple-500 hover:text-purple-600"
+            >
+              {replyState?.loading ? '加载中...' : '查看更多回复'}
+            </button>
+          )}
         </div>
       )}
     </div>

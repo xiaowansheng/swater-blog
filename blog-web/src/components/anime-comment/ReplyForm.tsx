@@ -12,7 +12,7 @@ interface ReplyFormProps {
   targetType: 'ARTICLE' | 'TALK';
   targetId: number;
   config: any;
-  onSubmitSuccess: () => void;
+  onSubmitSuccess: (parentId: number) => void;
   onCancel: () => void;
 }
 
@@ -196,7 +196,7 @@ export default function ReplyForm({
       });
 
       toast.success('回复发布成功！');
-      onSubmitSuccess();
+      onSubmitSuccess(parentId);
     } catch (error) {
       // 全局拦截器已经处理了错误提示
     } finally {

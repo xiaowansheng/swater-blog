@@ -7,8 +7,6 @@ import com.blog.modules.comment.model.dto.CommentDTO;
 import com.blog.modules.message.service.MessageVerificationService;
 import com.blog.modules.comment.model.vo.CommentVO;
 import com.blog.modules.comment.service.CommentPublicService;
-import com.blog.plugin.components.comment.CommentProviderFactory;
-import com.blog.plugin.components.comment.CommentProviderPlugin;
 import com.blog.plugin.components.location.LocationInfo;
 import com.blog.plugin.components.location.LocationProviderFactory;
 import com.blog.plugin.components.location.LocationProviderPlugin;
@@ -17,9 +15,18 @@ import com.blog.shared.model.UserAgentInfo;
 import com.blog.shared.util.UserAgentUtil;
 import com.blog.shared.util.RequestUtil;
 import com.blog.modules.article.mapper.ArticleMapper;
+import com.blog.modules.comment.mapper.CommentMapper;
 import com.blog.modules.talk.mapper.TalkMapper;
 import com.blog.modules.article.model.entity.Article;
+import com.blog.modules.comment.model.entity.Comment;
 import com.blog.modules.talk.model.entity.Talk;
+import com.blog.modules.user.mapper.UserMapper;
+import com.blog.modules.user.model.entity.User;
+import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.JsonUtil;
+import com.blog.shared.util.PageUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -27,14 +34,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import cn.dev33.satoken.stp.StpUtil;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Service
 public class CommentPublicServiceImpl implements CommentPublicService {
-    @Autowired(required = false)
-    private CommentProviderFactory commentProviderFactory;
-
     @Autowired(required = false)
     private LocationProviderFactory locationProviderFactory;
 
@@ -46,6 +52,12 @@ public class CommentPublicServiceImpl implements CommentPublicService {
     
     @Autowired
     private TalkMapper talkMapper;
+
+    @Autowired
+    private CommentMapper commentMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Autowired
     private MessageVerificationService messageVerificationService;
@@ -64,14 +76,6 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             throw new BusinessException(400, "Email verification code is required");
         }
         messageVerificationService.validateEmailCode(dto.getEmail(), dto.getCaptcha());
-
-        if (commentProviderFactory == null) {
-            throw new BusinessException("未配置评论插件工厂");
-        }
-        CommentProviderPlugin provider = commentProviderFactory.getActiveProvider();
-        if (provider == null) {
-            throw new BusinessException("没有可用的评论插件");
-        }
 
         // 设置IP和位置信息
         String ip = RequestUtil.getClientIp();
@@ -130,12 +134,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             dto.setBrowser(userAgent);
         }
 
-        CommentVO vo;
-        try {
-            vo = provider.createComment(dto);
-        } catch (Exception e) {
-            throw new BusinessException("评论创建失败: " + e.getMessage());
-        }
+        CommentVO vo = createAndPersist(dto);
 
         Long commentId = vo != null ? vo.getId() : null;
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentCreatedEvent(this, commentId, null)));
@@ -144,23 +143,51 @@ public class CommentPublicServiceImpl implements CommentPublicService {
 
     @Override
     public PageResult<CommentVO> list(Long targetId, String targetType, Long page, Long size) {
-        CommentProviderPlugin provider = getProvider();
-        try {
-            return provider.getComments(targetId, targetType, page, size);
-        } catch (Exception e) {
-            throw new BusinessException("获取评论失败: " + e.getMessage());
-        }
+        return list(targetId, targetType, null, null, null, page, size);
     }
 
-    private CommentProviderPlugin getProvider() {
-        if (commentProviderFactory == null) {
-            throw new BusinessException("未配置评论插件工厂");
+    @Override
+    public PageResult<CommentVO> list(Long targetId, String targetType, Long parentId, String sort, String ownerToken, Long page, Long size) {
+        Page<Comment> pageParam = PageUtil.buildPage(page, size);
+        LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Comment::getDeleted, 0);
+        wrapper.and(w -> w
+                .eq(Comment::getStatus, 1).eq(Comment::getIsVisible, 0)
+                .or(ownerToken != null && !ownerToken.isEmpty(), w2 -> w2.eq(Comment::getOwnerToken, ownerToken)));
+
+        if (targetId != null) {
+            wrapper.eq(Comment::getTargetId, targetId);
         }
-        CommentProviderPlugin provider = commentProviderFactory.getActiveProvider();
-        if (provider == null) {
-            throw new BusinessException("没有可用的评论插件");
+        if (targetType != null) {
+            wrapper.eq(Comment::getTargetType, targetType);
         }
-        return provider;
+        if (parentId != null) {
+            wrapper.eq(Comment::getParentId, parentId);
+        } else {
+            wrapper.and(w -> w.isNull(Comment::getParentId).or().eq(Comment::getParentId, 0));
+        }
+
+        if ("time".equalsIgnoreCase(sort) || sort == null || sort.isEmpty()) {
+            wrapper.orderByDesc(Comment::getCreateTime);
+        } else {
+            wrapper.orderByDesc(Comment::getCreateTime);
+        }
+
+        Page<Comment> result = commentMapper.selectPage(pageParam, wrapper);
+        List<Comment> records = result.getRecords();
+
+        List<Long> idsNeedingCount = new ArrayList<>();
+        if (parentId == null || parentId == 0) {
+            idsNeedingCount = records.stream().map(Comment::getId).collect(java.util.stream.Collectors.toList());
+        }
+
+        List<CommentVO> voList = new ArrayList<>();
+        for (Comment c : records) {
+            boolean withCount = idsNeedingCount.contains(c.getId());
+            voList.add(convertToVO(c, ownerToken, withCount));
+        }
+
+        return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
     }
 
     private void publishEventAfterCommit(Runnable runnable) {
@@ -198,5 +225,90 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             throw new BusinessException("不支持的评论目标类型: " + dto.getTargetType());
         }
     }
-}
 
+    private CommentVO createAndPersist(CommentDTO dto) {
+        // 文本处理插件已移除，后续可在此处添加敏感词校验等逻辑
+
+        Comment comment = BeanUtil.copyProperties(dto, Comment.class);
+
+        if (StpUtil.isLogin()) {
+            Long userId = StpUtil.getLoginIdAsLong();
+            comment.setUserId(userId);
+            comment.setType("1");
+        } else {
+            comment.setType("2");
+        }
+
+        if (dto.getParentId() != null && dto.getParentId() > 0) {
+            Comment parent = commentMapper.selectById(dto.getParentId());
+            if (parent == null || parent.getDeleted() == 1) {
+                throw new BusinessException("父评论不存在");
+            }
+            comment.setParentId(dto.getParentId());
+            comment.setRootId(parent.getRootId() != null && parent.getRootId() > 0 ? parent.getRootId() : parent.getId());
+        } else {
+            comment.setParentId(0L);
+            comment.setRootId(0L);
+        }
+
+        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+            comment.setImages(JsonUtil.toJson(dto.getImages()));
+        } else {
+            comment.setImages("[]");
+        }
+        comment.setOwnerToken(dto.getOwnerToken());
+        comment.setIsVisible(0);
+
+        // 默认待审核；如需通过审核，可在此处加入自定义规则
+        if (comment.getStatus() == null) {
+            comment.setStatus(0);
+        }
+
+        commentMapper.insert(comment);
+
+        if ("ARTICLE".equalsIgnoreCase(dto.getTargetType())) {
+            Article article = articleMapper.selectById(dto.getTargetId());
+            article.setCommentCount((article.getCommentCount() != null ? article.getCommentCount() : 0) + 1);
+            articleMapper.updateById(article);
+        } else if ("TALK".equalsIgnoreCase(dto.getTargetType())) {
+            Talk talk = talkMapper.selectById(dto.getTargetId());
+            talk.setCommentCount((talk.getCommentCount() != null ? talk.getCommentCount() : 0) + 1);
+            talkMapper.updateById(talk);
+        }
+
+        Comment savedComment = commentMapper.selectById(comment.getId());
+        return convertToVO(savedComment, dto.getOwnerToken(), false);
+    }
+
+    private CommentVO convertToVO(Comment comment, String ownerToken, boolean withReplyCount) {
+        CommentVO vo = BeanUtil.copyProperties(comment, CommentVO.class);
+        if (comment.getUserId() != null) {
+            User user = userMapper.selectById(comment.getUserId());
+            if (user != null) {
+                vo.setUserName(user.getUsername());
+                vo.setUserNickname(user.getNickname());
+                vo.setUserAvatar(user.getAvatar());
+            }
+        }
+        if (comment.getImages() != null && !comment.getImages().isEmpty()) {
+            try {
+                List<String> images = JsonUtil.fromJson(comment.getImages(), List.class);
+                vo.setImages(images);
+            } catch (Exception e) {
+                vo.setImages(new ArrayList<>());
+            }
+        }
+        vo.setIsOwner(ownerToken != null && !ownerToken.isEmpty() && ownerToken.equals(comment.getOwnerToken()));
+
+        if (withReplyCount) {
+            LambdaQueryWrapper<Comment> countWrapper = new LambdaQueryWrapper<>();
+            countWrapper.eq(Comment::getDeleted, 0);
+            countWrapper.eq(Comment::getParentId, comment.getId());
+            countWrapper.and(w -> w.eq(Comment::getStatus, 1).eq(Comment::getIsVisible, 0)
+                    .or(ownerToken != null && !ownerToken.isEmpty(), w2 -> w2.eq(Comment::getOwnerToken, ownerToken)));
+            Long count = commentMapper.selectCount(countWrapper);
+            vo.setReplyCount(count != null ? count.intValue() : 0);
+        }
+        return vo;
+    }
+}

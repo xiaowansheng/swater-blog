@@ -1,18 +1,53 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { AnimeCommentProps, AnimeCommentConfig, CommentFormData } from './types';
 import { DEFAULT_COMMENT_CONFIG } from './constants';
 import AnimeCommentForm from './AnimeCommentForm';
 import AnimeCommentList from './AnimeCommentList';
-import { UserInfoProvider } from './UserInfoContext';
+import { UserInfoProvider, useUserInfo } from './UserInfoContext';
 import { commentApi } from '@/lib/api/comment';
+import type { CommentVO } from '@/types';
+
+const COMMENT_PAGE_SIZE = 10;
+const REPLY_PAGE_SIZE = 5;
+
+interface ReplyState {
+  items: CommentVO[];
+  page: number;
+  pages: number;
+  loading: boolean;
+  expanded: boolean;
+}
 
 /**
- * 二次元评论容器组件
+ * 仅发布者可见的特殊状态判定
  */
-export default function AnimeComment({
+function useVisibilityChecker() {
+  const { userInfo } = useUserInfo();
+
+  const isOwner = (comment: CommentVO) => {
+    if (comment.isOwner) return true;
+    if (comment.email && userInfo.email && comment.email === userInfo.email) return true;
+    if (comment.nickname && userInfo.nickname && comment.nickname === userInfo.nickname) return true;
+    return false;
+  };
+
+  const isVisible = (comment: CommentVO) => {
+    const status = comment.status;
+    const published = status === 1 || status === 'published';
+    if (published) return true;
+    return isOwner(comment);
+  };
+
+  return { isOwner, isVisible };
+}
+
+/**
+ * 两阶段查询 + 两级展示的评论容器
+ */
+function AnimeCommentInner({
   postId,
   momentId,
   config: userConfig,
@@ -20,51 +55,110 @@ export default function AnimeComment({
   className = '',
 }: AnimeCommentProps) {
   const t = useTranslations('comment');
+  const { isOwner, isVisible } = useVisibilityChecker();
   const [config, setConfig] = useState<AnimeCommentConfig>(DEFAULT_COMMENT_CONFIG);
-  const [comments, setComments] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [topComments, setTopComments] = useState<CommentVO[]>([]);
+  const [topPage, setTopPage] = useState(1);
+  const [topPages, setTopPages] = useState(1);
+  const [loadingTop, setLoadingTop] = useState(false);
+  const [loadingMoreTop, setLoadingMoreTop] = useState(false);
+  const [replies, setReplies] = useState<Record<number, ReplyState>>({});
   const [activeReplyFormId, setActiveReplyFormId] = useState<number | null>(null);
+
   const targetType: CommentFormData['targetType'] = postId ? 'ARTICLE' : 'TALK';
   const targetId = postId ?? momentId;
 
   // 加载评论配置
   useEffect(() => {
-    // TODO: 从API加载评论配置
-    // const loadConfig = async () => {
-    //   const siteConfig = await getPublicConfig();
-    //   setConfig({ ...DEFAULT_COMMENT_CONFIG, ...siteConfig.comment, ...userConfig });
-    // };
-    // loadConfig();
-
-    // 临时使用传入配置或默认配置
     setConfig({ ...DEFAULT_COMMENT_CONFIG, ...userConfig });
   }, [userConfig]);
 
-  // 加载评论列表
-  useEffect(() => {
+  // 过滤并标记“自己”的评论
+  const normalize = (records: CommentVO[] = []) =>
+    records
+      .filter(isVisible)
+      .map((item) => ({
+        ...item,
+        isOwner: isOwner(item),
+      }));
+
+  const loadTopComments = async (page = 1, append = false) => {
     if (!targetId) return;
+    page === 1 ? setLoadingTop(true) : setLoadingMoreTop(true);
+    try {
+      const result = await commentApi.getTopComments({
+        targetId,
+        targetType,
+        page,
+        size: COMMENT_PAGE_SIZE,
+        sort: 'time',
+      });
+      const normalized = normalize(result.records || []);
+      setTopComments((prev) => (append ? [...prev, ...normalized] : normalized));
+      setTopPage(result.current || page);
+      setTopPages(result.pages || 1);
+    } catch (error) {
+      console.error('Failed to load comments:', error);
+    } finally {
+      setLoadingTop(false);
+      setLoadingMoreTop(false);
+    }
+  };
 
-    const loadComments = async () => {
-      setLoading(true);
-      try {
-        const result = await commentApi.getList({
-          targetId,
-          targetType,
-          page: 1,
-          size: 100,
-        });
-        setComments(result.records || []);
-      } catch (error) {
-        console.error('Failed to load comments:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadReplies = async (parentId: number, page = 1, append = false) => {
+    setReplies((prev) => ({
+      ...prev,
+      [parentId]: {
+        items: append ? prev[parentId]?.items || [] : [],
+        page: prev[parentId]?.page || 0,
+        pages: prev[parentId]?.pages || 1,
+        loading: true,
+        expanded: true,
+      },
+    }));
+    try {
+      const result = await commentApi.getReplies({
+        parentId,
+        page,
+        size: REPLY_PAGE_SIZE,
+        sort: 'time',
+      });
+      const normalized = normalize(result.records || []);
+      setReplies((prev) => {
+        const prevItems = append ? prev[parentId]?.items || [] : [];
+        const nextPage = result.current || page;
+        const totalPages = result.pages || 1;
+        return {
+          ...prev,
+          [parentId]: {
+            items: [...prevItems, ...normalized],
+            page: nextPage,
+            pages: totalPages,
+            loading: false,
+            expanded: true,
+          },
+        };
+      });
+    } catch (error) {
+      console.error('Failed to load replies:', error);
+      setReplies((prev) => ({
+        ...prev,
+        [parentId]: {
+          ...(prev[parentId] || { items: [] }),
+          loading: false,
+          expanded: false,
+        },
+      }));
+    }
+  };
 
-    loadComments();
+  useEffect(() => {
+    loadTopComments(1);
+    setReplies({});
+    setActiveReplyFormId(null);
   }, [postId, momentId]);
 
-  // 处理评论提交
+  // 处理评论提交（一级）
   const handleSubmit = async (data: CommentFormData) => {
     try {
       await commentApi.submit({
@@ -76,67 +170,69 @@ export default function AnimeComment({
         captcha: data.captcha,
         content: data.content,
       });
-
-      // 重新加载评论列表
-      const result = await commentApi.getList({
-        targetId,
-        targetType,
-        page: 1,
-        size: 100,
-      });
-      setComments(result.records || []);
-
+      await loadTopComments(1);
+      setReplies({});
       return true;
     } catch (error) {
-      // 全局拦截器已经处理了错误提示
       return false;
     }
   };
 
-  // 处理回复（打开回复表单）
+  // 打开/关闭回复表单
   const handleReply = (commentId: number) => {
-    // 如果点击的是当前已展开的评论，则关闭
-    if (activeReplyFormId === commentId) {
-      setActiveReplyFormId(null);
-    } else {
-      // 否则，展开该评论的回复表单（自动关闭其他）
-      setActiveReplyFormId(commentId);
+    setActiveReplyFormId((prev) => (prev === commentId ? null : commentId));
+  };
+
+  const handleCloseReplyForm = () => setActiveReplyFormId(null);
+
+  // 回复提交成功后刷新对应楼层 + 顶部列表计数
+  const handleReplySubmitSuccess = (parentId: number) => {
+    loadReplies(parentId, 1);
+    loadTopComments(1);
+    setActiveReplyFormId(null);
+  };
+
+  const handleToggleReplies = (commentId: number, replyCount?: number) => {
+    if (!replyCount) return;
+    const current = replies[commentId];
+    if (!current || (!current.items.length && replyCount > 0)) {
+      loadReplies(commentId, 1);
+      return;
     }
+    setReplies((prev) => ({
+      ...prev,
+      [commentId]: {
+        ...prev[commentId],
+        expanded: !prev[commentId].expanded,
+      },
+    }));
   };
 
-  // 关闭回复表单
-  const handleCloseReplyForm = () => {
-    setActiveReplyFormId(null);
+  const handleLoadMoreReplies = (commentId: number) => {
+    const state = replies[commentId];
+    if (!state) {
+      loadReplies(commentId, 1);
+      return;
+    }
+    if (state.loading) return;
+    const nextPage = state.page + 1;
+    if (nextPage > state.pages) return;
+    loadReplies(commentId, nextPage, true);
   };
 
-  // 回复提交成功后的回调
-  const handleReplySubmitSuccess = () => {
-    // 重新加载评论列表
-    commentApi.getList({
-      targetId,
-      targetType,
-      page: 1,
-      size: 100,
-    }).then(result => {
-      setComments(result.records || []);
-    });
-    // 关闭回复表单
-    setActiveReplyFormId(null);
-  };
+  const hasMoreTop = topPage < topPages;
 
   return (
-    <UserInfoProvider>
-      <div className={`anime-comment ${className}`}>
+    <div className={`anime-comment ${className}`}>
       {showTitle && (
         <div className="mb-8">
           <h3 className="text-2xl font-bold gradient-text mb-2">
-            {t('title', { count: comments.length })}
+            {t('title', { count: topComments.length })}
           </h3>
           <div className="h-1 w-20 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
         </div>
       )}
 
-      {/* 评论表单 */}
       {targetId && (
         <AnimeCommentForm
           config={config}
@@ -146,21 +242,33 @@ export default function AnimeComment({
         />
       )}
 
-      {/* 评论列表 */}
       {targetId && (
         <AnimeCommentList
-          comments={comments}
-          loading={loading}
+          comments={topComments}
+          loading={loadingTop}
+          loadingMore={loadingMoreTop}
+          hasMore={hasMoreTop}
+          onLoadMore={() => loadTopComments(topPage + 1, true)}
           onReply={handleReply}
           activeReplyFormId={activeReplyFormId}
           onCloseReplyForm={handleCloseReplyForm}
           onReplySubmitSuccess={handleReplySubmitSuccess}
+          onToggleReplies={handleToggleReplies}
+          onLoadMoreReplies={handleLoadMoreReplies}
+          replies={replies}
           targetType={targetType}
           targetId={targetId}
           config={config}
         />
       )}
     </div>
+  );
+}
+
+export default function AnimeComment(props: AnimeCommentProps) {
+  return (
+    <UserInfoProvider>
+      <AnimeCommentInner {...props} />
     </UserInfoProvider>
   );
 }

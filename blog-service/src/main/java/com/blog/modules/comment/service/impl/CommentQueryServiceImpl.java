@@ -77,7 +77,8 @@ public class CommentQueryServiceImpl implements CommentQueryService {
                 vo.setImages(new ArrayList<>());
             }
         }
+        vo.setIsOwner(false);
+        vo.setReplyCount(0);
         return vo;
     }
 }
-
