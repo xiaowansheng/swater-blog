@@ -206,10 +206,14 @@ export default function ReplyForm({
 
   return (
     <div className="mt-4 ml-8 md:ml-12">
-      <div className="bg-gradient-to-br from-purple-50/80 to-pink-50/80 backdrop-blur-sm rounded-2xl p-5 border-2 border-purple-100/50 shadow-md">
+      <div className="bg-gradient-to-br from-pink-50/80 to-purple-50/80 backdrop-blur-sm rounded-3xl p-5 border-2 border-pink-100/50 shadow-lg relative overflow-hidden">
+        {/* 装饰元素 */}
+        <div className="absolute top-2 right-2 text-2xl opacity-20 animate-float">✨</div>
+        <div className="absolute bottom-2 left-2 text-xl opacity-20 animate-float-delay">❀</div>
+
         {/* 回复提示 */}
-        <div className="mb-4 p-3 bg-purple-100/80 rounded-xl flex items-center justify-between">
-          <div className="flex items-center gap-2 text-purple-700">
+        <div className="mb-4 p-3 bg-pink-100/80 rounded-xl flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-2 text-pink-700">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
             </svg>
@@ -218,7 +222,7 @@ export default function ReplyForm({
           <button
             type="button"
             onClick={onCancel}
-            className="text-purple-600 hover:text-purple-800 transition-colors"
+            className="text-pink-600 hover:text-pink-800 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -226,9 +230,9 @@ export default function ReplyForm({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
           {/* 基础信息 */}
-          <div className="flex flex-col md:flex-row gap-3">
+          <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <input
                 type="text"
@@ -236,7 +240,7 @@ export default function ReplyForm({
                 value={userInfo.nickname}
                 onChange={handleChange}
                 placeholder="昵称 *"
-                className="w-full px-3 py-2 rounded-lg border-2 border-purple-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all bg-white/80 backdrop-blur-sm text-sm"
+                className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80 backdrop-blur-sm"
                 maxLength={50}
               />
             </div>
@@ -247,14 +251,14 @@ export default function ReplyForm({
                 value={userInfo.qq}
                 onChange={handleChange}
                 placeholder="QQ（可选）"
-                className="w-full px-3 py-2 rounded-lg border-2 border-purple-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all bg-white/80 backdrop-blur-sm text-sm"
+                className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80 backdrop-blur-sm"
                 maxLength={50}
               />
             </div>
           </div>
 
           {/* 邮箱和验证码 */}
-          <div className="flex flex-col md:flex-row gap-3">
+          <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <input
                 type="email"
@@ -262,7 +266,7 @@ export default function ReplyForm({
                 value={userInfo.email}
                 onChange={handleChange}
                 placeholder="邮箱 *"
-                className="w-full px-3 py-2 rounded-lg border-2 border-purple-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all bg-white/80 backdrop-blur-sm text-sm"
+                className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80 backdrop-blur-sm"
                 maxLength={100}
                 required
               />
@@ -275,7 +279,7 @@ export default function ReplyForm({
                   value={captcha}
                   onChange={handleChange}
                   placeholder="邮箱验证码"
-                  className="flex-1 px-3 py-2 rounded-lg border-2 border-purple-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all bg-white/80 backdrop-blur-sm text-sm"
+                  className="flex-1 px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80 backdrop-blur-sm"
                   maxLength={20}
                   required
                 />
@@ -283,7 +287,7 @@ export default function ReplyForm({
                   type="button"
                   onClick={handleSendEmailCode}
                   disabled={sendingCode || cooldown > 0 || !userInfo.email?.trim()}
-                  className="px-3 py-2 bg-gradient-to-r from-purple-400 to-pink-400 text-white rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
+                  className="px-4 py-3 bg-gradient-to-r from-pink-400 to-purple-400 text-white rounded-xl hover:from-pink-500 hover:to-purple-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
                 >
                   {cooldown > 0
                     ? `${cooldown}s`
@@ -303,13 +307,13 @@ export default function ReplyForm({
               value={content}
               onChange={handleChange}
               placeholder="写下你的回复... ✨"
-              className="w-full px-3 py-2 rounded-lg border-2 border-purple-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 outline-none transition-all bg-white/80 backdrop-blur-sm min-h-[100px] resize-none text-sm"
+              className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80 backdrop-blur-sm min-h-[120px] resize-none"
               maxLength={1000}
             />
           </div>
 
           {/* 工具栏和提交按钮 */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             {/* 左侧：表情按钮和图片上传按钮 */}
             <div className="flex items-center gap-2">
               <EmojiPicker onEmojiSelect={handleInsertEmoji} />
@@ -321,10 +325,10 @@ export default function ReplyForm({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={images.length >= config.maxImages}
-                    className="p-2 rounded-lg hover:bg-purple-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+                    className="p-2 rounded-lg hover:bg-pink-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
                     title="上传图片"
                   >
-                    <svg className="w-5 h-5 text-purple-400 group-hover:text-purple-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-pink-400 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </button>
@@ -344,7 +348,7 @@ export default function ReplyForm({
             <button
               type="submit"
               disabled={submitting}
-              className="px-6 py-2 bg-gradient-to-r from-purple-400 to-pink-400 text-white text-sm font-medium rounded-lg hover:from-purple-500 hover:to-pink-500 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-3 bg-gradient-to-r from-pink-400 to-purple-400 text-white font-medium rounded-xl hover:from-pink-500 hover:to-purple-500 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
             >
               {submitting ? '发送中...' : '发送回复 ✨'}
             </button>
@@ -352,20 +356,20 @@ export default function ReplyForm({
 
           {/* 图片预览 */}
           {previewImages.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               {previewImages.map((src, index) => (
                 <div key={index} className="relative group">
                   <img
                     src={src}
                     alt={`预览 ${index + 1}`}
-                    className="w-16 h-16 object-cover rounded-lg border-2 border-purple-200"
+                    className="w-20 h-20 object-cover rounded-xl border-2 border-pink-200"
                   />
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(index)}
-                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
