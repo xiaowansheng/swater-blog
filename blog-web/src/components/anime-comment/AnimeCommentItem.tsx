@@ -81,6 +81,7 @@ export default function AnimeCommentItem({
               <span className="font-bold text-gray-800 text-base">
                 {comment.nickname}
               </span>
+              <span className="text-xs text-gray-400">#{comment.id}</span>
               <span className="text-xs text-gray-400">
                 {formatDate(comment.createTime, 'YYYY-MM-DD HH:mm')}
               </span>
@@ -182,6 +183,12 @@ export default function AnimeCommentItem({
                 <div className="flex-1">
                   <div className="flex items-center gap-2 text-sm">
                     <span className="font-semibold text-gray-800">{child.nickname}</span>
+                    <span className="text-xs text-gray-400">
+                      #{child.id}
+                      {child.replyToUser && (child.replyToUser.id || child.replyToUser.nickname) && (
+                        <> → #{child.replyToUser.id ?? child.parentId}</>
+                      )}
+                    </span>
                     <span className="text-xs text-gray-400">
                       {formatDate(child.createTime, 'YYYY-MM-DD HH:mm')}
                     </span>
