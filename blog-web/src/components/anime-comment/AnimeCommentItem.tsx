@@ -59,6 +59,9 @@ export default function AnimeCommentItem({
   const replies = replyState?.items || [];
   const expanded = replyState?.expanded;
   const hasMoreReplies = replyState ? replyState.page < replyState.pages : false;
+  const rootId = comment.rootId && comment.rootId > 0 ? comment.rootId : comment.id;
+  const isDirectChild = !comment.parentId || comment.parentId === 0 || comment.parentId === rootId;
+  const parentId = comment.parentId ?? 0;
 
   return (
     <div className="animate-fade-in">
@@ -81,7 +84,12 @@ export default function AnimeCommentItem({
               <span className="font-bold text-gray-800 text-base">
                 {comment.nickname}
               </span>
-              <span className="text-xs text-gray-400">#{comment.id}</span>
+              <span className="text-xs text-gray-400">
+                #{comment.id}
+                {!isDirectChild && comment.parentId && comment.parentId > 0 && (
+                  <> → #{comment.parentId}</>
+                )}
+              </span>
               <span className="text-xs text-gray-400">
                 {formatDate(comment.createTime, 'YYYY-MM-DD HH:mm')}
               </span>
@@ -185,8 +193,8 @@ export default function AnimeCommentItem({
                     <span className="font-semibold text-gray-800">{child.nickname}</span>
                     <span className="text-xs text-gray-400">
                       #{child.id}
-                      {child.replyToUser && (child.replyToUser.id || child.replyToUser.nickname) && (
-                        <> → #{child.replyToUser.id ?? child.parentId}</>
+                      {child.parentId && child.parentId !== child.rootId && (
+                        <> → #{child.parentId}</>
                       )}
                     </span>
                     <span className="text-xs text-gray-400">
@@ -220,7 +228,7 @@ export default function AnimeCommentItem({
                   {activeReplyFormId === child.id && (
                     <div className="mt-3">
                       <ReplyForm
-                        parentId={comment.id}
+                        parentId={child.id}
                         parentNickname={child.nickname}
                         targetType={targetType}
                         targetId={targetId}

@@ -1,8 +1,5 @@
 package com.blog.modules.comment.model.dto;
 
-
-
-import com.blog.shared.model.dto.BaseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.NotBlank;
@@ -19,6 +16,8 @@ public class CommentDTO extends com.blog.shared.model.dto.BaseDTO {
     private Long targetId;
 
     private String targetType;
+    
+    private Long rootId;
 
     private Long parentId;
 

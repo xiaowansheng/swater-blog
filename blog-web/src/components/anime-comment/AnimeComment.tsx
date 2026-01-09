@@ -105,7 +105,7 @@ function AnimeCommentInner({
     }
   };
 
-  const loadReplies = async (parentId: number, page = 1, append = false) => {
+  const loadReplies = async (parentId: number, rootId: number, page = 1, append = false) => {
     setReplies((prev) => ({
       ...prev,
       [parentId]: {
@@ -119,6 +119,7 @@ function AnimeCommentInner({
     try {
       const result = await commentApi.getReplies({
         parentId,
+        rootId,
         page,
         size: REPLY_PAGE_SIZE,
         sort: 'time',
@@ -186,8 +187,8 @@ function AnimeCommentInner({
   const handleCloseReplyForm = () => setActiveReplyFormId(null);
 
   // 回复提交成功后刷新对应楼层 + 顶部列表计数
-  const handleReplySubmitSuccess = (parentId: number) => {
-    loadReplies(parentId, 1);
+  const handleReplySubmitSuccess = (rootId: number) => {
+    loadReplies(rootId, rootId, 1);
     loadTopComments(1);
     setActiveReplyFormId(null);
   };
@@ -196,7 +197,7 @@ function AnimeCommentInner({
     if (!replyCount) return;
     const current = replies[commentId];
     if (!current || (!current.items.length && replyCount > 0)) {
-      loadReplies(commentId, 1);
+      loadReplies(commentId, commentId, 1);
       return;
     }
     setReplies((prev) => ({
@@ -211,13 +212,13 @@ function AnimeCommentInner({
   const handleLoadMoreReplies = (commentId: number) => {
     const state = replies[commentId];
     if (!state) {
-      loadReplies(commentId, 1);
+      loadReplies(commentId, commentId, 1);
       return;
     }
     if (state.loading) return;
     const nextPage = state.page + 1;
     if (nextPage > state.pages) return;
-    loadReplies(commentId, nextPage, true);
+    loadReplies(commentId, commentId, nextPage, true);
   };
 
   const hasMoreTop = topPage < topPages;

@@ -138,6 +138,7 @@ export interface CommentVO {
   postId?: number;
   momentId?: number;
   parentId?: number;
+  rootId?: number;
   nickname: string;
   email?: string;
   avatar?: string;
