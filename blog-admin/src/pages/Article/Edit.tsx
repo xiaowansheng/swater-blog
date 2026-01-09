@@ -199,7 +199,7 @@ const ArticleEdit: React.FC = () => {
       setArticleStatus(article.status)
       
       // 初始化自动保存的文章ID和版本号
-      initArticle(article.id, (article as any).version || 1)
+      initArticle(article.id, (article as any).version || 1, (article as any).articleKey)
       
       form.setFieldsValue({
         ...article,

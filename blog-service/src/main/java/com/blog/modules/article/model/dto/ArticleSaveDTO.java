@@ -98,6 +98,11 @@ public class ArticleSaveDTO {
     private List<String> tagNames;
 
     /**
+     * æ–‡ç« é”®ï¼Œç”¨äºŽå¼±é…ç½®åˆ›å»ºæ—¶é¿å…é‡å¤
+     */
+    private String articleKey;
+
+    /**
      * 是否为自动保存
      */
     private Boolean autoSave;

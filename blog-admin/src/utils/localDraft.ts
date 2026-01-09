@@ -21,13 +21,14 @@ export interface LocalDraft {
   tagNames?: string[]
   savedAt: number
   version?: number
+  articleKey?: string
 }
 
 /**
  * 保存草稿到本地存储
  */
 export function saveLocalDraft(articleId: number | undefined, draft: Omit<LocalDraft, 'savedAt'>): void {
-  const key = getDraftKey(articleId)
+  const key = getDraftKey(articleId, draft.articleKey)
   const draftData: LocalDraft = {
     ...draft,
     savedAt: Date.now(),
@@ -35,7 +36,7 @@ export function saveLocalDraft(articleId: number | undefined, draft: Omit<LocalD
   
   try {
     localStorage.setItem(key, JSON.stringify(draftData))
-    updateDraftList(articleId)
+    updateDraftList(articleId, draft.articleKey)
   } catch (error) {
     console.error('保存本地草稿失败:', error)
   }
@@ -44,8 +45,8 @@ export function saveLocalDraft(articleId: number | undefined, draft: Omit<LocalD
 /**
  * 获取本地草稿
  */
-export function getLocalDraft(articleId: number | undefined): LocalDraft | null {
-  const key = getDraftKey(articleId)
+export function getLocalDraft(articleId: number | undefined, articleKey?: string): LocalDraft | null {
+  const key = getDraftKey(articleId, articleKey)
   
   try {
     const data = localStorage.getItem(key)
@@ -62,12 +63,12 @@ export function getLocalDraft(articleId: number | undefined): LocalDraft | null 
 /**
  * 删除本地草稿
  */
-export function removeLocalDraft(articleId: number | undefined): void {
-  const key = getDraftKey(articleId)
+export function removeLocalDraft(articleId: number | undefined, articleKey?: string): void {
+  const key = getDraftKey(articleId, articleKey)
   
   try {
     localStorage.removeItem(key)
-    removeDraftFromList(articleId)
+    removeDraftFromList(articleId, articleKey)
   } catch (error) {
     console.error('删除本地草稿失败:', error)
   }
@@ -145,12 +146,18 @@ export function formatDraftTime(savedAt: number): string {
 
 // 内部辅助函数
 
-function getDraftKey(articleId: number | undefined): string {
-  return `${DRAFT_KEY_PREFIX}${articleId || 'new'}`
+function getDraftKey(articleId: number | undefined, articleKey?: string): string {
+  if (articleKey) {
+    return `${DRAFT_KEY_PREFIX}${articleKey}`
+  }
+  if (articleId) {
+    return `${DRAFT_KEY_PREFIX}${articleId}`
+  }
+  return `${DRAFT_KEY_PREFIX}new`
 }
 
-function updateDraftList(articleId: number | undefined): void {
-  const key = getDraftKey(articleId)
+function updateDraftList(articleId: number | undefined, articleKey?: string): void {
+  const key = getDraftKey(articleId, articleKey)
   
   try {
     const listData = localStorage.getItem(DRAFT_LIST_KEY)
@@ -165,8 +172,8 @@ function updateDraftList(articleId: number | undefined): void {
   }
 }
 
-function removeDraftFromList(articleId: number | undefined): void {
-  const key = getDraftKey(articleId)
+function removeDraftFromList(articleId: number | undefined, articleKey?: string): void {
+  const key = getDraftKey(articleId, articleKey)
   
   try {
     const listData = localStorage.getItem(DRAFT_LIST_KEY)

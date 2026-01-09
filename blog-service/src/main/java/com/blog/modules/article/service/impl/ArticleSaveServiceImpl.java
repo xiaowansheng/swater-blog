@@ -2,6 +2,7 @@ package com.blog.modules.article.service.impl;
 
 
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.modules.article.event.ArticleCreatedEvent;
 import com.blog.modules.article.event.ArticleUpdatedEvent;
 import com.blog.shared.exception.BusinessException;
@@ -81,8 +82,28 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
             dto.setCategoryId(categoryService.findOrCreateByName(dto.getCategoryName()));
         }
 
+        String articleKey = dto.getArticleKey();
+        if (articleKey == null || articleKey.trim().isEmpty()) {
+            articleKey = KeyUtil.generateKey("article");
+        }
+
+        Article existed = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
+                .eq(Article::getArticleKey, articleKey));
+        if (existed != null) {
+            return ArticleSaveResultVO.builder()
+                    .id(existed.getId())
+                    .articleKey(existed.getArticleKey())
+                    .updateTime(existed.getUpdateTime() != null ? existed.getUpdateTime() : LocalDateTime.now())
+                    .version(existed.getVersion())
+                    .isNew(false)
+                    .autoSave(dto.getAutoSave())
+                    .status(existed.getStatus())
+                    .hasConflict(false)
+                    .build();
+        }
+
         Article article = new Article();
-        article.setArticleKey(KeyUtil.generateKey("article"));
+        article.setArticleKey(articleKey);
         article.setTitle(dto.getTitle());
         article.setSlug(dto.getSlug());
         article.setContent(dto.getContent());

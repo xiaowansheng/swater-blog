@@ -36,6 +36,7 @@ export interface ArticleSaveDTO {
   isTop?: number
   tagIds?: number[]
   tagNames?: string[]
+  articleKey?: string
   autoSave?: boolean
   clientVersion?: number
 }

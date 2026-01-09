@@ -79,6 +79,19 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
   const autoSaveTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const lastContentRef = useRef<string>('')
   const isOnlineRef = useRef(navigator.onLine)
+  const latestArticleIdRef = useRef<number | null>(null)
+  const latestVersionRef = useRef<number | null>(null)
+  const articleKeyRef = useRef<string | null>(null)
+
+  const ensureArticleKey = useCallback(() => {
+    if (!articleKeyRef.current) {
+      const uuid = typeof crypto !== 'undefined' && (crypto as any).randomUUID
+        ? (crypto as any).randomUUID()
+        : `article_${Date.now()}_${Math.random().toString(16).slice(2)}`
+      articleKeyRef.current = uuid
+    }
+    return articleKeyRef.current
+  }, [])
 
   // 监听网络状态
   useEffect(() => {
@@ -117,6 +130,12 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
 
     // 取出最新的保存请求（合并之前的请求）
     const latestData = saveQueueRef.current[saveQueueRef.current.length - 1]
+    const payload: ArticleSaveDTO = {
+      ...latestData,
+      id: latestArticleIdRef.current ?? latestData.id,
+      clientVersion: latestVersionRef.current ?? latestData.clientVersion,
+      articleKey: latestData.articleKey || ensureArticleKey(),
+    }
 
     if (!isOnlineRef.current) {
       setSaveState(prev => ({ 
@@ -127,20 +146,21 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
       
       // 离线时保存到本地
       if (config.enableLocalDraft && latestData) {
-        saveLocalDraft(latestData.id, {
-          id: latestData.id,
-          title: latestData.title,
-          content: latestData.content,
-          excerpt: latestData.excerpt,
-          cover: latestData.cover,
-          categoryId: latestData.categoryId,
-          categoryName: latestData.categoryName,
-          type: latestData.type,
-          status: latestData.status,
-          isTop: latestData.isTop,
-          tagIds: latestData.tagIds,
-          tagNames: latestData.tagNames,
-          version: latestData.clientVersion,
+        saveLocalDraft(payload.id, {
+          id: payload.id,
+          title: payload.title,
+          content: payload.content,
+          excerpt: payload.excerpt,
+          cover: payload.cover,
+          categoryId: payload.categoryId,
+          categoryName: payload.categoryName,
+          type: payload.type,
+          status: payload.status,
+          isTop: payload.isTop,
+          tagIds: payload.tagIds,
+          tagNames: payload.tagNames,
+          version: payload.clientVersion,
+          articleKey: payload.articleKey,
         })
         message.info('已保存到本地草稿')
       }
@@ -153,7 +173,11 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
     setSaveState(prev => ({ ...prev, status: SaveStatus.SAVING, errorMessage: null }))
 
     try {
-      const result = await saveArticle(latestData)
+      const result = await saveArticle(payload)
+
+      latestArticleIdRef.current = result.id ?? latestArticleIdRef.current
+      latestVersionRef.current = result.version ?? latestVersionRef.current
+      articleKeyRef.current = result.articleKey || articleKeyRef.current
 
       if (result.hasConflict) {
         // 处理版本冲突
@@ -184,7 +208,8 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
         
         // 保存成功后删除本地草稿
         if (config.enableLocalDraft) {
-          removeLocalDraft(latestData.id)
+          const key = articleKeyRef.current || ensureArticleKey()
+          removeLocalDraft(result.id, key)
         }
         
         if (!latestData.autoSave) {
@@ -202,20 +227,21 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
       
       // 保存失败时保存到本地草稿
       if (config.enableLocalDraft) {
-        saveLocalDraft(latestData.id, {
-          id: latestData.id,
-          title: latestData.title,
-          content: latestData.content,
-          excerpt: latestData.excerpt,
-          cover: latestData.cover,
-          categoryId: latestData.categoryId,
-          categoryName: latestData.categoryName,
-          type: latestData.type,
-          status: latestData.status,
-          isTop: latestData.isTop,
-          tagIds: latestData.tagIds,
-          tagNames: latestData.tagNames,
-          version: latestData.clientVersion,
+        saveLocalDraft(payload.id, {
+          id: payload.id,
+          title: payload.title,
+          content: payload.content,
+          excerpt: payload.excerpt,
+          cover: payload.cover,
+          categoryId: payload.categoryId,
+          categoryName: payload.categoryName,
+          type: payload.type,
+          status: payload.status,
+          isTop: payload.isTop,
+          tagIds: payload.tagIds,
+          tagNames: payload.tagNames,
+          version: payload.clientVersion,
+          articleKey: payload.articleKey,
         })
       }
       
@@ -232,35 +258,43 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
         processQueue()
       }
     }
-  }, [config])
+  }, [config, ensureArticleKey])
 
   // 添加到保存队列
   const addToQueue = useCallback((data: ArticleSaveDTO) => {
+    const normalized: ArticleSaveDTO = {
+      ...data,
+      id: latestArticleIdRef.current ?? data.id,
+      clientVersion: latestVersionRef.current ?? data.clientVersion,
+      articleKey: data.articleKey || ensureArticleKey(),
+    }
+
     // 如果有相同文章的请求在队列中，替换它
     const existingIndex = saveQueueRef.current.findIndex(
-      item => item.id === data.id || (!item.id && !data.id)
+      item => item.id === normalized.id || (!item.id && !normalized.id)
     )
     
     if (existingIndex >= 0) {
-      saveQueueRef.current[existingIndex] = data
+      saveQueueRef.current[existingIndex] = normalized
     } else {
-      saveQueueRef.current.push(data)
+      saveQueueRef.current.push(normalized)
     }
 
     setSaveState(prev => ({ ...prev, status: SaveStatus.PENDING }))
     processQueue()
-  }, [processQueue])
+  }, [processQueue, ensureArticleKey])
 
   // 手动保存
   const save = useCallback((data: Omit<ArticleSaveDTO, 'autoSave' | 'clientVersion'>) => {
     const saveData: ArticleSaveDTO = {
       ...data,
-      id: saveState.articleId || data.id,
+      id: latestArticleIdRef.current || saveState.articleId || data.id,
       autoSave: false,
-      clientVersion: saveState.version || undefined,
+      clientVersion: latestVersionRef.current || saveState.version || undefined,
+      articleKey: ensureArticleKey(),
     }
     addToQueue(saveData)
-  }, [addToQueue, saveState.articleId, saveState.version])
+  }, [addToQueue, ensureArticleKey, saveState.articleId, saveState.version])
 
   // 自动保存
   const autoSave = useCallback((data: Omit<ArticleSaveDTO, 'autoSave' | 'clientVersion'>) => {
@@ -268,12 +302,13 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
 
     const saveData: ArticleSaveDTO = {
       ...data,
-      id: saveState.articleId || data.id,
+      id: latestArticleIdRef.current || saveState.articleId || data.id,
       autoSave: true,
-      clientVersion: saveState.version || undefined,
+      clientVersion: latestVersionRef.current || saveState.version || undefined,
+      articleKey: ensureArticleKey(),
     }
     addToQueue(saveData)
-  }, [addToQueue, config.enableAutoSave, saveState.articleId, saveState.version])
+  }, [addToQueue, config.enableAutoSave, ensureArticleKey, saveState.articleId, saveState.version])
 
   // 内容变更触发的防抖自动保存
   const debouncedAutoSave = useCallback((data: Omit<ArticleSaveDTO, 'autoSave' | 'clientVersion'>) => {
@@ -348,26 +383,33 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
   }, [save])
 
   // 初始化文章ID和版本号（编辑已有文章时使用）
-  const initArticle = useCallback((id: number, version: number) => {
+  const initArticle = useCallback((id: number, version: number, articleKey?: string) => {
     setSaveState(prev => ({
       ...prev,
       articleId: id,
       version: version,
     }))
+    latestArticleIdRef.current = id
+    latestVersionRef.current = version
+    if (articleKey) {
+      articleKeyRef.current = articleKey
+    }
   }, [])
 
   // 检查并恢复本地草稿
   const checkLocalDraft = useCallback((articleId: number | undefined): LocalDraft | null => {
     if (!config.enableLocalDraft) return null
-    return getLocalDraft(articleId)
-  }, [config.enableLocalDraft])
+    const key = articleKeyRef.current || ensureArticleKey()
+    return getLocalDraft(articleId, key)
+  }, [config.enableLocalDraft, ensureArticleKey])
 
   // 清除本地草稿
   const clearLocalDraft = useCallback((articleId: number | undefined) => {
     if (config.enableLocalDraft) {
-      removeLocalDraft(articleId)
+      const key = articleKeyRef.current || ensureArticleKey()
+      removeLocalDraft(articleId, key)
     }
-  }, [config.enableLocalDraft])
+  }, [config.enableLocalDraft, ensureArticleKey])
 
   // 清理
   useEffect(() => {
