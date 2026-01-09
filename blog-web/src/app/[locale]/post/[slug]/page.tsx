@@ -135,7 +135,7 @@ export default async function PostDetailPage({
             {/* 主要内容 */}
             <article className="flex-1 bg-card border border-border rounded-2xl p-8 md:p-12 shadow-sm">
               {/* <ArticleMeta article={article} /> */}
-              <div className="vditor-reset">
+              <div className="vditor-reset" data-reading-target>
                 <MarkdownRenderer content={article.content} />
               </div>
               <ArticleLike article={article} />

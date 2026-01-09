@@ -10,9 +10,12 @@ export default function ReadingProgress() {
   useEffect(() => {
     // 查找文章内容元素
     const findArticleElement = () => {
-      const article = document.querySelector('article');
-      if (article) {
-        articleRef.current = article as HTMLElement;
+      const target =
+        document.querySelector('[data-reading-target]') ||
+        document.querySelector('article');
+
+      if (target) {
+        articleRef.current = target as HTMLElement;
       }
     };
 
