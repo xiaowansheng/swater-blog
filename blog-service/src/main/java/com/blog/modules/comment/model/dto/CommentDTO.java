@@ -6,6 +6,7 @@ import com.blog.shared.model.dto.BaseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.NotBlank;
+import java.math.BigDecimal;
 import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -28,5 +29,23 @@ public class CommentDTO extends com.blog.shared.model.dto.BaseDTO {
     private String email;
 
     private String qq;
+
+    private String ip;
+
+    private String country;
+
+    private String province;
+
+    private String city;
+
+    private BigDecimal latitude;
+
+    private BigDecimal longitude;
+
+    private String location;
+
+    private String device;
+
+    private String browser;
 }
 

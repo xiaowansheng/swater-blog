@@ -13,15 +13,23 @@ import com.blog.modules.user.model.entity.User;
 import com.blog.modules.guestbook.model.vo.GuestbookVO;
 import com.blog.modules.guestbook.service.GuestbookPublicService;
 import com.blog.modules.message.service.MessageVerificationService;
+import com.blog.plugin.components.location.LocationInfo;
+import com.blog.shared.model.UserAgentInfo;
+import com.blog.shared.util.UserAgentUtil;
+import com.blog.plugin.components.location.LocationProviderFactory;
+import com.blog.plugin.components.location.LocationProviderPlugin;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
+import com.blog.shared.util.RequestUtil;
 import com.blog.shared.exception.BusinessException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+@Slf4j
 @Service
 public class GuestbookPublicServiceImpl implements GuestbookPublicService {
     @Autowired
@@ -31,6 +39,9 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
     private UserMapper userMapper;
     @Autowired
     private MessageVerificationService messageVerificationService;
+
+    @Autowired(required = false)
+    private LocationProviderFactory locationProviderFactory;
 
     @Override
     public PageResult<GuestbookVO> list(Long page, Long size) {
@@ -59,15 +70,73 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
         messageVerificationService.validateEmailCode(dto.getEmail(), dto.getEmailCode());
 
         Guestbook guestbook = BeanUtil.copyProperties(dto, Guestbook.class);
-        
+
         // Set default values
         guestbook.setIsVisible(1); // Visible by default
         guestbook.setReviewStatus(0); // Pending review
+
         // Convert images list to JSON string if present
         if (dto.getImages() != null && !dto.getImages().isEmpty()) {
             guestbook.setImages(JsonUtil.toJson(dto.getImages()));
         }
-        
+
+        // 设置IP和位置信息
+        String ip = RequestUtil.getClientIp();
+        guestbook.setIp(ip);
+        if (locationProviderFactory != null && ip != null) {
+            try {
+                List<LocationProviderPlugin> providers = locationProviderFactory.getProviders();
+                LocationInfo locationInfo = null;
+                for (LocationProviderPlugin locationProvider : providers) {
+                    locationInfo = locationProvider.getLocationInfo(ip);
+                    if (locationInfo != null) {
+                        break;
+                    }
+                }
+                if (locationInfo != null) {
+                    guestbook.setCountry(locationInfo.getCountry());
+                    guestbook.setProvince(locationInfo.getProvince());
+                    guestbook.setCity(locationInfo.getCity());
+                    guestbook.setLatitude(locationInfo.getLatitude());
+                    guestbook.setLongitude(locationInfo.getLongitude());
+                    guestbook.setLocation(locationInfo.getLocation());
+                    if (locationInfo.getIp() != null && !locationInfo.getIp().isEmpty()) {
+                        guestbook.setIp(locationInfo.getIp());
+                    } else {
+                        guestbook.setIp(ip);
+                    }
+                    guestbook.setLocation(locationInfo.getLocation() != null ? locationInfo.getLocation() :
+                            (locationInfo.getProvince() != null && locationInfo.getCity() != null ?
+                                    locationInfo.getProvince() + locationInfo.getCity() : null));
+                } else {
+                    guestbook.setIp(ip);
+                }
+            } catch (Exception e) {
+                log.warn("留言IP定位失败，IP: {}", ip, e);
+                guestbook.setIp(ip);
+            }
+        } else {
+            guestbook.setIp(ip);
+        }
+
+        // 设置设备和浏览器信息
+        String userAgent = RequestUtil.getUserAgent();
+        UserAgentInfo userAgentInfo = UserAgentUtil.parse(userAgent);
+
+        // 设置设备信息（设备类型+品牌+型号）
+        if (userAgentInfo.getDeviceType() != null) {
+            guestbook.setDevice(userAgentInfo.getDeviceDescription());
+        } else {
+            guestbook.setDevice(userAgent);
+        }
+
+        // 设置浏览器信息（浏览器名称+版本）
+        if (userAgentInfo.getBrowserName() != null) {
+            guestbook.setBrowser(userAgentInfo.getBrowserDescription());
+        } else {
+            guestbook.setBrowser(userAgent);
+        }
+
         // Save to database
         guestbookMapper.insert(guestbook);
         

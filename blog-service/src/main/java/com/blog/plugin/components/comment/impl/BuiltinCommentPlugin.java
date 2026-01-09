@@ -18,13 +18,9 @@ import com.blog.plugin.components.comment.processor.CommentProcessorFactory;
 import com.blog.plugin.components.comment.processor.CommentProcessorPlugin;
 import com.blog.plugin.core.Plugin;
 import com.blog.plugin.core.ProcessResult;
-import com.blog.plugin.components.location.LocationInfo;
-import com.blog.plugin.components.location.LocationProviderFactory;
-import com.blog.plugin.components.location.LocationProviderPlugin;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
-import com.blog.shared.util.RequestUtil;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -52,10 +48,7 @@ public class BuiltinCommentPlugin implements CommentProviderPlugin, Plugin {
     
     @Autowired
     private UserMapper userMapper;
-    
-    @Autowired(required = false)
-    private LocationProviderFactory locationProviderFactory;
-    
+
     @Autowired(required = false)
     private CommentProcessorFactory commentProcessorFactory;
     
@@ -72,24 +65,7 @@ public class BuiltinCommentPlugin implements CommentProviderPlugin, Plugin {
     @Override
     @Transactional
     public CommentVO createComment(CommentDTO dto) throws Exception {
-        if (dto.getTargetId() == null || dto.getTargetType() == null) {
-            throw new IllegalArgumentException("评论目标ID和类型不能为空");
-        }
-        
-        if ("ARTICLE".equalsIgnoreCase(dto.getTargetType())) {
-            Article article = articleMapper.selectById(dto.getTargetId());
-            if (article == null || article.getDeleted() == 1) {
-                throw new IllegalArgumentException("文章不存在");
-            }
-        } else if ("TALK".equalsIgnoreCase(dto.getTargetType())) {
-            Talk talk = talkMapper.selectById(dto.getTargetId());
-            if (talk == null || talk.getDeleted() == 1) {
-                throw new IllegalArgumentException("说说不存在");
-            }
-        } else {
-            throw new IllegalArgumentException("不支持的评论目标类型: " + dto.getTargetType());
-        }
-        
+        // 处理评论内容
         ProcessResult processResult = null;
         if (commentProcessorFactory != null) {
             try {
@@ -107,47 +83,9 @@ public class BuiltinCommentPlugin implements CommentProviderPlugin, Plugin {
                 log.warn("评论处理失败", e);
             }
         }
-        
+
         Comment comment = BeanUtil.copyProperties(dto, Comment.class);
-        String ip = RequestUtil.getClientIp();
-        comment.setIp(ip != null ? ip : "");
-        
-        if (locationProviderFactory != null && ip != null) {
-            try {
-                List<LocationProviderPlugin> providers = locationProviderFactory.getProviders();
-                LocationInfo locationInfo = null;
-                for (LocationProviderPlugin locationProvider : providers) {
-                    locationInfo = locationProvider.getLocationInfo(ip);
-                    if (locationInfo != null) {
-                        break;
-                    }
-                }
-                if (locationInfo != null) {
-                    comment.setCountry(locationInfo.getCountry());
-                    comment.setProvince(locationInfo.getProvince());
-                    comment.setCity(locationInfo.getCity());
-                    comment.setLatitude(locationInfo.getLatitude());
-                    comment.setLongitude(locationInfo.getLongitude());
-                    comment.setLocation(locationInfo.getLocation());
-                    if (locationInfo.getIp() != null && !locationInfo.getIp().isEmpty()) {
-                        comment.setIp(locationInfo.getIp());
-                    } else {
-                        comment.setIp(ip);
-                    }
-                    comment.setLocation(locationInfo.getLocation() != null ? locationInfo.getLocation() : 
-                            (locationInfo.getProvince() != null && locationInfo.getCity() != null ? 
-                                    locationInfo.getProvince() + locationInfo.getCity() : null));
-                } else {
-                    comment.setIp(ip);
-                }
-            } catch (Exception e) {
-                log.warn("IP定位失败，IP: {}", ip, e);
-                comment.setIp(ip);
-            }
-        } else {
-            comment.setIp(ip != null ? ip : "");
-        }
-        
+
         if (StpUtil.isLogin()) {
             Long userId = StpUtil.getLoginIdAsLong();
             comment.setUserId(userId);
