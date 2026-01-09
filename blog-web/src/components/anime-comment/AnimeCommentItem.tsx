@@ -204,12 +204,25 @@ export default function AnimeCommentItem({
                   </div>
                   <div className="mt-2">
                     <button
-                      onClick={() => onReply(comment.id)}
+                      onClick={() => onReply(child.id)}
                       className="text-xs text-purple-500 hover:text-purple-600"
                     >
                       回复
                     </button>
                   </div>
+                  {activeReplyFormId === child.id && (
+                    <div className="mt-3">
+                      <ReplyForm
+                        parentId={comment.id}
+                        parentNickname={child.nickname}
+                        targetType={targetType}
+                        targetId={targetId}
+                        config={config}
+                        onSubmitSuccess={() => onReplySubmitSuccess(comment.id)}
+                        onCancel={onCloseReplyForm}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
