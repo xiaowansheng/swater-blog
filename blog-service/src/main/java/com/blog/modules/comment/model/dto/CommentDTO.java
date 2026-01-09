@@ -30,6 +30,8 @@ public class CommentDTO extends com.blog.shared.model.dto.BaseDTO {
 
     private String qq;
 
+    private String captcha;
+
     private String ip;
 
     private String country;

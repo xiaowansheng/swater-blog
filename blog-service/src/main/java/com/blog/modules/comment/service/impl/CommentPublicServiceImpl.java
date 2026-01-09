@@ -4,6 +4,7 @@ package com.blog.modules.comment.service.impl;
 import com.blog.shared.PageResult;
 import com.blog.shared.exception.BusinessException;
 import com.blog.modules.comment.model.dto.CommentDTO;
+import com.blog.modules.message.service.MessageVerificationService;
 import com.blog.modules.comment.model.vo.CommentVO;
 import com.blog.modules.comment.service.CommentPublicService;
 import com.blog.plugin.components.comment.CommentProviderFactory;
@@ -46,12 +47,24 @@ public class CommentPublicServiceImpl implements CommentPublicService {
     @Autowired
     private TalkMapper talkMapper;
 
+    @Autowired
+    private MessageVerificationService messageVerificationService;
+
     @Override
     @Transactional
     public CommentVO create(CommentDTO dto) {
         // 验证评论目标
         validateCommentTarget(dto);
-        
+
+        // 验证邮箱验证码
+        if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+            throw new BusinessException(400, "Email is required");
+        }
+        if (dto.getCaptcha() == null || dto.getCaptcha().trim().isEmpty()) {
+            throw new BusinessException(400, "Email verification code is required");
+        }
+        messageVerificationService.validateEmailCode(dto.getEmail(), dto.getCaptcha());
+
         if (commentProviderFactory == null) {
             throw new BusinessException("未配置评论插件工厂");
         }
