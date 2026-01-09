@@ -21,19 +21,15 @@ public interface TextProcessorPlugin extends Plugin {
      * 检查是否为垃圾信息
      *
      * @param content 内容
-     * @param ip      IP地址
-     * @param userId  用户ID
      * @return 是否为垃圾信息
      */
-    boolean isSpam(String content, String ip, Long userId);
+    boolean isSpam(String content);
 
     /**
      * 处理文本内容并返回处理结果
      *
      * @param content 内容
-     * @param ip      IP地址
-     * @param userId  用户ID
      * @return 处理结果
      */
-    ProcessResult process(String content, String ip, Long userId);
+    ProcessResult process(String content);
 }

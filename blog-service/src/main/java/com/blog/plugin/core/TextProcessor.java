@@ -26,11 +26,11 @@ public class TextProcessor {
         return processed;
     }
     
-    public static boolean isSpam(String content, String ip, Long userId) {
+    public static boolean isSpam(String content) {
         if (content == null || content.trim().isEmpty()) {
             return false;
         }
-        
+
         int urlCount = 0;
         java.util.regex.Matcher matcher = URL_PATTERN.matcher(content);
         while (matcher.find()) {
@@ -39,16 +39,16 @@ public class TextProcessor {
         if (urlCount > MAX_URL_COUNT) {
             return true;
         }
-        
+
         if (content.length() < MIN_CONTENT_LENGTH) {
             return true;
         }
-        
+
         String spamPattern = "(?i)(广告|推广|加微信|加qq|点击|链接|www\\.|http)";
         if (Pattern.compile(spamPattern).matcher(content).find()) {
             return true;
         }
-        
+
         return false;
     }
     

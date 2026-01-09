@@ -46,15 +46,13 @@ public class GuestbookProcessorFactory {
             }
 
             @Override
-            public boolean isSpam(String content, String ip, Long userId) {
-                return processor.isSpam(content, ip, userId);
+            public boolean isSpam(String content) {
+                return processor.isSpam(content);
             }
 
             @Override
             public com.blog.plugin.core.ProcessResult process(com.blog.modules.guestbook.model.dto.GuestbookDTO dto) {
-                String ip = dto.getIp();
-                Long userId = dto.getUserId();
-                return processor.process(dto.getContent(), ip, userId);
+                return processor.process(dto.getContent());
             }
         });
     }

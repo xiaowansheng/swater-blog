@@ -8,7 +8,7 @@ import com.blog.plugin.core.ProcessResult;
 public interface GuestbookProcessorPlugin extends Plugin {
     String processContent(String content);
 
-    boolean isSpam(String content, String ip, Long userId);
+    boolean isSpam(String content);
 
     ProcessResult process(GuestbookDTO dto);
 }

@@ -37,12 +37,12 @@ public class BuiltinTextProcessorPlugin implements TextProcessorPlugin, Plugin {
     }
 
     @Override
-    public boolean isSpam(String content, String ip, Long userId) {
-        return TextProcessor.isSpam(content, ip, userId);
+    public boolean isSpam(String content) {
+        return TextProcessor.isSpam(content);
     }
 
     @Override
-    public ProcessResult process(String content, String ip, Long userId) {
+    public ProcessResult process(String content) {
         ProcessResult result = new ProcessResult();
 
         if (content == null || content.isEmpty()) {
@@ -56,7 +56,7 @@ public class BuiltinTextProcessorPlugin implements TextProcessorPlugin, Plugin {
         String processedContent = processContent(content);
         result.setProcessedContent(processedContent);
 
-        boolean spam = isSpam(processedContent, ip, userId);
+        boolean spam = isSpam(processedContent);
         result.setSpam(spam);
 
         if (spam) {
@@ -70,7 +70,6 @@ public class BuiltinTextProcessorPlugin implements TextProcessorPlugin, Plugin {
 
         result.addMetadata("originalLength", content.length());
         result.addMetadata("processedLength", processedContent.length());
-        result.addMetadata("ip", ip);
 
         return result;
     }
