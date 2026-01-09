@@ -93,14 +93,14 @@ SHOW GLOBAL STATUS LIKE 'Slow_queries';
 -- 已在01-index-optimization.sql中创建了 idx_status_published_top 索引
 
 -- 优化前：评论查询（N+1问题）
--- SELECT * FROM comment WHERE post_id = ? ORDER BY create_time ASC;
+-- SELECT * FROM comment WHERE target_id = ? AND target_type = ? ORDER BY create_time ASC;
 -- 然后为每个评论查询用户信息
 
 -- 优化后：使用JOIN一次性获取
 -- SELECT c.*, u.nickname, u.avatar
 -- FROM comment c
 -- LEFT JOIN user u ON c.user_id = u.id
--- WHERE c.post_id = ? AND c.status = 1 AND c.deleted = 0
+-- WHERE c.target_id = ? AND c.target_type = ? AND c.status = 1 AND c.deleted = 0
 -- ORDER BY c.create_time ASC;
 
 -- ========================================

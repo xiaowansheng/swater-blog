@@ -22,7 +22,7 @@ ALTER TABLE `article` ADD FULLTEXT INDEX `ft_title_content` (`title`, `content`)
 
 -- 2. 评论表索引优化
 -- 文章评论查询优化
-ALTER TABLE `comment` ADD INDEX `idx_post_status_time` (`post_id`, `status`, `create_time` DESC);
+ALTER TABLE `comment` ADD INDEX `idx_target_status_time` (`target_id`, `target_type`, `status`, `create_time` DESC);
 
 -- 用户评论查询优化
 ALTER TABLE `comment` ADD INDEX `idx_user_status_time` (`user_id`, `status`, `create_time` DESC);
