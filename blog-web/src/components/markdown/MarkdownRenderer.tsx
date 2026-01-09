@@ -23,8 +23,8 @@ export default function MarkdownRenderer({ content, onRendered }: MarkdownRender
       // 使用 Vditor.preview 渲染 Markdown
       Vditor.preview(containerRef.current, content, {
         // 跟随站点主题
-        mode: currentTheme,
-        theme: currentTheme,
+        mode: currentTheme as any,
+        theme: currentTheme as any,
         anchor: 1,
         hljs: {
           enable: true,
