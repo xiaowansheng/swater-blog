@@ -62,6 +62,7 @@ export default function AnimeCommentItem({
   const rootId = comment.rootId && comment.rootId > 0 ? comment.rootId : comment.id;
   const isDirectChild = !comment.parentId || comment.parentId === 0 || comment.parentId === rootId;
   const parentId = comment.parentId ?? 0;
+  const isHiddenByModeration = comment.isVisible === 0;
 
   return (
     <div className="animate-fade-in">
@@ -107,6 +108,7 @@ export default function AnimeCommentItem({
 
             {/* 内容 */}
             <div className="text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+              {isHiddenByModeration && <span className="text-gray-400 italic">评论已被隐藏 </span>}
               {comment.replyToUser?.nickname && (
                 <span className="text-purple-500">@{comment.replyToUser.nickname} </span>
               )}
@@ -213,6 +215,7 @@ export default function AnimeCommentItem({
                     )}
                   </div>
                   <div className="text-gray-700 whitespace-pre-wrap break-words mt-1">
+                    {child.isVisible === 0 && <span className="text-gray-400 italic">评论已被隐藏 </span>}
                     {child.replyToUser?.nickname && (
                       <span className="text-purple-500">@{child.replyToUser.nickname} </span>
                     )}

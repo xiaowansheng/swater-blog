@@ -117,7 +117,9 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         Page<Comment> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Comment::getDeleted, 0);
-        wrapper.and(w -> w.eq(Comment::getStatus, 1).eq(Comment::getIsVisible, 1)
+        // 公开：所有 status=1 的评论都返回（包含 is_visible=0 的隐藏评论，内容会在 VO 里被置空）
+        // 私有：若携带邮箱会话 token，则额外返回该邮箱自己的非公开评论（例如待审核）
+        wrapper.and(w -> w.eq(Comment::getStatus, 1)
                 .or(ownerEmail != null && !ownerEmail.isBlank(), w2 -> w2.eq(Comment::getEmail, ownerEmail)));
 
         if (targetId != null) {
@@ -311,12 +313,18 @@ public class CommentPublicServiceImpl implements CommentPublicService {
                 && ownerEmail.equalsIgnoreCase(comment.getEmail());
         vo.setIsOwner(isOwner);
 
+        // 隐藏评论：非发布者仍返回记录，但内容/图片置空，前端用 isVisible=0 渲染“已被隐藏”提示
+        if (!isOwner && comment.getIsVisible() != null && comment.getIsVisible() == 0) {
+            vo.setContent("");
+            vo.setImages(new ArrayList<>());
+        }
+
         if (withReplyCount) {
             LambdaQueryWrapper<Comment> countWrapper = new LambdaQueryWrapper<>();
             countWrapper.eq(Comment::getDeleted, 0);
             countWrapper.eq(Comment::getRootId, comment.getId());
             countWrapper.ne(Comment::getParentId, 0);
-            countWrapper.and(w -> w.eq(Comment::getStatus, 1).eq(Comment::getIsVisible, 1)
+            countWrapper.and(w -> w.eq(Comment::getStatus, 1)
                     .or(ownerEmail != null && !ownerEmail.isBlank(), w2 -> w2.eq(Comment::getEmail, ownerEmail)));
             Long count = commentMapper.selectCount(countWrapper);
             vo.setReplyCount(count != null ? count.intValue() : 0);

@@ -144,6 +144,7 @@ export interface CommentVO {
   avatar?: string;
   content: string;
   status: number;
+  isVisible?: number;
   statusText?: string;
   replyCount?: number;
   likeCount?: number;
