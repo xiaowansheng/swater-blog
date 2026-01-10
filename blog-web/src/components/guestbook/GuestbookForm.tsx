@@ -5,10 +5,14 @@ import { useTranslations } from 'next-intl';
 import { guestbookApi } from '@/lib/api/guestbook';
 import type { GuestbookVO } from '@/types';
 import toast from 'react-hot-toast';
+import { authApi } from '@/lib/api/auth';
+import { clearVerifyToken, getVerifyToken, isVerifyTokenValidForEmail, saveVerifyToken } from '@/lib/auth/emailSession';
 
 interface GuestbookFormProps {
   onSuccess?: (message: GuestbookVO) => void;
 }
+
+const COMMENT_STORAGE_PREFIX = 'comment_';
 
 export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
   const t = useTranslations('comment');
@@ -18,10 +22,39 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
   const [qq, setQq] = useState('');
   const [content, setContent] = useState('');
   const [emailCode, setEmailCode] = useState('');
+  const [emailVerified, setEmailVerified] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState('');
+
+  // 从评论区的 localStorage 自动填充（comment_nickname/comment_email/comment_qq）
+  useEffect(() => {
+    const savedNickname = localStorage.getItem(`${COMMENT_STORAGE_PREFIX}nickname`);
+    const savedEmail = localStorage.getItem(`${COMMENT_STORAGE_PREFIX}email`);
+    const savedQQ = localStorage.getItem(`${COMMENT_STORAGE_PREFIX}qq`);
+
+    if (!nickname && savedNickname) setNickname(savedNickname);
+    if (!email && savedEmail) setEmail(savedEmail);
+    if (!qq && savedQQ) setQq(savedQQ);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 与评论区保持同一份用户信息存储，方便跨页面复用
+  useEffect(() => {
+    if (nickname) localStorage.setItem(`${COMMENT_STORAGE_PREFIX}nickname`, nickname);
+    else localStorage.removeItem(`${COMMENT_STORAGE_PREFIX}nickname`);
+  }, [nickname]);
+
+  useEffect(() => {
+    if (email) localStorage.setItem(`${COMMENT_STORAGE_PREFIX}email`, email);
+    else localStorage.removeItem(`${COMMENT_STORAGE_PREFIX}email`);
+  }, [email]);
+
+  useEffect(() => {
+    if (qq) localStorage.setItem(`${COMMENT_STORAGE_PREFIX}qq`, qq);
+    else localStorage.removeItem(`${COMMENT_STORAGE_PREFIX}qq`);
+  }, [qq]);
 
   // 初始化倒计时状态
   useEffect(() => {
@@ -56,6 +89,11 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
     return () => window.clearInterval(timer);
   }, [cooldown]);
 
+  useEffect(() => {
+    const token = getVerifyToken();
+    setEmailVerified(isVerifyTokenValidForEmail(token, email.trim()));
+  }, [email]);
+
   const handleSendCode = async () => {
     if (!email.trim()) {
       setError(tGuestbook('emailRequired'));
@@ -77,6 +115,24 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
     }
   };
 
+  const ensureEmailVerified = async () => {
+    const trimmedEmail = email.trim();
+    const token = getVerifyToken();
+    if (isVerifyTokenValidForEmail(token, trimmedEmail)) {
+      setEmailVerified(true);
+      return true;
+    }
+    if (!emailCode.trim()) {
+      setError(tGuestbook('emailCodeRequired'));
+      return false;
+    }
+    const result = await authApi.verifyEmail(trimmedEmail, emailCode.trim());
+    saveVerifyToken(result.token);
+    setEmailVerified(true);
+    setEmailCode('');
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nickname.trim()) {
@@ -91,21 +147,20 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
       setError(tGuestbook('emailRequired'));
       return;
     }
-    if (!emailCode.trim()) {
-      setError(tGuestbook('emailCodeRequired'));
-      return;
-    }
 
     setSubmitting(true);
     setError('');
 
     try {
+      const ok = await ensureEmailVerified();
+      if (!ok) return;
+
       const message = await guestbookApi.submit({
         nickname: nickname.trim(),
         email: email.trim(),
         qq: qq.trim() || undefined,
         content: content.trim(),
-        emailCode: emailCode.trim(),
+        emailCode: emailCode.trim() || undefined,
         type: '2',
       });
       setNickname('');
@@ -156,30 +211,45 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
         />
       </div>
       <div>
-        <div className="flex gap-3 items-end">
-          <div className="flex-1">
-            <input
-              type="text"
-              value={emailCode}
-              onChange={(e) => setEmailCode(e.target.value)}
-              placeholder={tGuestbook('emailCodePlaceholder')}
-              required
-              className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
-            />
+        {emailVerified ? (
+          <div className="flex items-center justify-between rounded-xl border border-border bg-card/50 px-5 py-3">
+            <span className="text-sm text-primary/80">邮箱已验证</span>
+            <button
+              type="button"
+              onClick={() => {
+                clearVerifyToken();
+                setEmailVerified(false);
+              }}
+              className="text-xs text-primary hover:underline"
+            >
+              更换/重新验证
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleSendCode}
-            disabled={sendingCode || cooldown > 0}
-            className="px-4 py-3 border border-border rounded-xl hover:bg-muted/50 transition-all text-sm disabled:opacity-50"
-          >
-            {cooldown > 0
-              ? tGuestbook('resendCode', { seconds: cooldown })
-              : sendingCode
-                ? tGuestbook('sendingCode')
-                : tGuestbook('sendCode')}
-          </button>
-        </div>
+        ) : (
+          <div className="flex gap-3 items-end">
+            <div className="flex-1">
+              <input
+                type="text"
+                value={emailCode}
+                onChange={(e) => setEmailCode(e.target.value)}
+                placeholder={tGuestbook('emailCodePlaceholder')}
+                className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleSendCode}
+              disabled={sendingCode || cooldown > 0}
+              className="px-4 py-3 border border-border rounded-xl hover:bg-muted/50 transition-all text-sm disabled:opacity-50"
+            >
+              {cooldown > 0
+                ? tGuestbook('resendCode', { seconds: cooldown })
+                : sendingCode
+                  ? tGuestbook('sendingCode')
+                  : tGuestbook('sendCode')}
+            </button>
+          </div>
+        )}
       </div>
       <div>
         <input

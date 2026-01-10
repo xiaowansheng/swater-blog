@@ -14,6 +14,7 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
   const locale = pathname?.split('/')[1] || 'zh';
   const displayName = message.nickname || message.userName || 'Guest';
   const initial = displayName.charAt(0).toUpperCase();
+  const isHidden = message.isVisible === 0;
 
   return (
     <div className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
@@ -33,7 +34,10 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
               {formatDate(message.createTime, 'YYYY-MM-DD HH:mm', locale)}
             </span>
           </div>
-          <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed">{message.content}</p>
+          <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed">
+            {isHidden && <span className="text-muted italic">留言已被隐藏 </span>}
+            {message.content}
+          </p>
           {message.images && message.images.length > 0 && (
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {message.images.map((src, index) => (
