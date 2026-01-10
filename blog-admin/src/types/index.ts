@@ -376,12 +376,26 @@ export interface Guestbook {
   email?: string
   avatar?: string
   content: string
+  images?: string[]
   ip?: string
   location?: string
-  status: number
+  country?: string
+  province?: string
+  city?: string
+  latitude?: number
+  longitude?: number
+  device?: string
+  browser?: string
+  qq?: string
+  userId?: number
+  type?: string
+  status?: number
+  reviewStatus?: number
+  isVisible?: number
   parentId?: number
   replyTo?: string
   createTime: string
+  updateTime?: string
   children?: Guestbook[]
 }
 

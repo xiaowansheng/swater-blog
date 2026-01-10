@@ -155,6 +155,7 @@ const GuestbookPage: React.FC = () => {
       1: { color: 'success', text: '已通过' },
       2: { color: 'error', text: '已拒绝' },
     }
+    
     const { color, text } = statusMap[status] || { color: 'default', text: '未知' }
     return <Tag color={color}>{text}</Tag>
   }
@@ -267,7 +268,7 @@ const GuestbookPage: React.FC = () => {
       width: 120,
       render: (_: any, record: Guestbook) => (
         <Space direction="vertical" size="small">
-          {getStatusTag(record.reviewStatus || record.status)}
+          {getStatusTag(record.reviewStatus ?? record.status)}
           <Tag
             icon={record.isVisible === 1 ? <EyeOutlined /> : <EyeInvisibleOutlined />}
             color={record.isVisible === 1 ? 'success' : 'default'}
@@ -304,7 +305,7 @@ const GuestbookPage: React.FC = () => {
               onClick={() => showDetail(record)}
             />
           </Tooltip>
-          {(record.reviewStatus || record.status) === 0 && (
+          {(record.reviewStatus === 0 || record.status === 0) && (
             <>
               <Tooltip title="通过">
                 <Button
@@ -507,7 +508,7 @@ const GuestbookPage: React.FC = () => {
                 </Descriptions.Item>
               )}
               <Descriptions.Item label="审核状态">
-                {getStatusTag(currentGuestbook.reviewStatus || currentGuestbook.status)}
+                {getStatusTag(currentGuestbook.reviewStatus)}
               </Descriptions.Item>
               {currentGuestbook.isVisible !== undefined && (
                 <Descriptions.Item label="可见状态">
@@ -555,7 +556,7 @@ const GuestbookPage: React.FC = () => {
                   {currentGuestbook.isVisible === 1 ? '设置为隐藏' : '设置为可见'}
                 </Button>
               )}
-              {(currentGuestbook.reviewStatus || currentGuestbook.status) === 0 && (
+              {(currentGuestbook.reviewStatus === 0 || currentGuestbook.status === 0) && (
                 <>
                   <Button
                     type="primary"
