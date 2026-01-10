@@ -89,13 +89,17 @@ export default function ReadingProgress() {
     };
   }, []);
 
+  // 当没有进度或超过100%时，不展示进度条
+  if (!isVisible || progress <= 0 || progress >= 100) {
+    return null;
+  }
+
   return (
     <div className="fixed top-0 left-0 right-0 h-1 bg-background/50 z-50">
       <div
         className="h-full bg-gradient-to-r from-deco-pink via-primary to-deco-blue transition-all duration-150 ease-out"
         style={{
-          width: isVisible ? `${progress}%` : '0%',
-          opacity: isVisible ? 1 : 0
+          width: `${progress}%`
         }}
       />
     </div>
