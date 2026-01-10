@@ -7,19 +7,20 @@ import type { GuestbookVO } from '@/types';
 import toast from 'react-hot-toast';
 import { authApi } from '@/lib/api/auth';
 import { clearVerifyToken, getVerifyToken, isVerifyTokenValidForEmail, saveVerifyToken } from '@/lib/auth/emailSession';
+import { useUserInfoStore } from '@/store/userInfo';
 
 interface GuestbookFormProps {
   onSuccess?: (message: GuestbookVO) => void;
 }
 
-const COMMENT_STORAGE_PREFIX = 'comment_';
-
 export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
   const t = useTranslations('comment');
   const tGuestbook = useTranslations('guestbook');
-  const [nickname, setNickname] = useState('');
-  const [email, setEmail] = useState('');
-  const [qq, setQq] = useState('');
+
+  // 从全局store获取用户信息
+  const userInfo = useUserInfoStore();
+  const setUserInfo = useUserInfoStore((state) => state.setUserInfo);
+
   const [content, setContent] = useState('');
   const [emailCode, setEmailCode] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
@@ -27,34 +28,6 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
   const [sendingCode, setSendingCode] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState('');
-
-  // 从评论区的 localStorage 自动填充（comment_nickname/comment_email/comment_qq）
-  useEffect(() => {
-    const savedNickname = localStorage.getItem(`${COMMENT_STORAGE_PREFIX}nickname`);
-    const savedEmail = localStorage.getItem(`${COMMENT_STORAGE_PREFIX}email`);
-    const savedQQ = localStorage.getItem(`${COMMENT_STORAGE_PREFIX}qq`);
-
-    if (!nickname && savedNickname) setNickname(savedNickname);
-    if (!email && savedEmail) setEmail(savedEmail);
-    if (!qq && savedQQ) setQq(savedQQ);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // 与评论区保持同一份用户信息存储，方便跨页面复用
-  useEffect(() => {
-    if (nickname) localStorage.setItem(`${COMMENT_STORAGE_PREFIX}nickname`, nickname);
-    else localStorage.removeItem(`${COMMENT_STORAGE_PREFIX}nickname`);
-  }, [nickname]);
-
-  useEffect(() => {
-    if (email) localStorage.setItem(`${COMMENT_STORAGE_PREFIX}email`, email);
-    else localStorage.removeItem(`${COMMENT_STORAGE_PREFIX}email`);
-  }, [email]);
-
-  useEffect(() => {
-    if (qq) localStorage.setItem(`${COMMENT_STORAGE_PREFIX}qq`, qq);
-    else localStorage.removeItem(`${COMMENT_STORAGE_PREFIX}qq`);
-  }, [qq]);
 
   // 初始化倒计时状态
   useEffect(() => {
@@ -91,18 +64,18 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
 
   useEffect(() => {
     const token = getVerifyToken();
-    setEmailVerified(isVerifyTokenValidForEmail(token, email.trim()));
-  }, [email]);
+    setEmailVerified(isVerifyTokenValidForEmail(token, userInfo.email?.trim() || ''));
+  }, [userInfo.email]);
 
   const handleSendCode = async () => {
-    if (!email.trim()) {
+    if (!userInfo.email?.trim()) {
       setError(tGuestbook('emailRequired'));
       return;
     }
     setSendingCode(true);
     setError('');
     try {
-      await guestbookApi.sendEmailCode(email.trim());
+      await guestbookApi.sendEmailCode(userInfo.email.trim());
       toast.success(tGuestbook('emailCodeSent'));
       // 保存倒计时结束时间到 localStorage
       const endTime = Date.now() + 60 * 1000; // 60秒后
@@ -116,7 +89,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
   };
 
   const ensureEmailVerified = async () => {
-    const trimmedEmail = email.trim();
+    const trimmedEmail = userInfo.email?.trim() || '';
     const token = getVerifyToken();
     if (isVerifyTokenValidForEmail(token, trimmedEmail)) {
       setEmailVerified(true);
@@ -135,7 +108,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nickname.trim()) {
+    if (!userInfo.nickname?.trim()) {
       setError(tGuestbook('nicknameRequired'));
       return;
     }
@@ -143,7 +116,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
       setError('Please enter content');
       return;
     }
-    if (!email.trim()) {
+    if (!userInfo.email?.trim()) {
       setError(tGuestbook('emailRequired'));
       return;
     }
@@ -156,18 +129,18 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
       if (!ok) return;
 
       const message = await guestbookApi.submit({
-        nickname: nickname.trim(),
-        email: email.trim(),
-        qq: qq.trim() || undefined,
+        nickname: userInfo.nickname.trim(),
+        email: userInfo.email.trim(),
+        qq: userInfo.qq?.trim() || undefined,
         content: content.trim(),
         emailCode: emailCode.trim() || undefined,
         type: '2',
       });
-      setNickname('');
-      setEmail('');
-      setQq('');
+
+      // 清空内容，保留用户信息
       setContent('');
       setEmailCode('');
+
       toast.success(t('success'));
       onSuccess?.(message);
     } catch (err) {
@@ -193,8 +166,8 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
       <div>
         <input
           type="text"
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
+          value={userInfo.nickname || ''}
+          onChange={(e) => setUserInfo({ nickname: e.target.value })}
           placeholder={t('namePlaceholder')}
           required
           className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
@@ -203,8 +176,8 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
       <div>
         <input
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={userInfo.email || ''}
+          onChange={(e) => setUserInfo({ email: e.target.value })}
           placeholder={t('emailPlaceholder')}
           required
           className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
@@ -254,8 +227,8 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
       <div>
         <input
           type="text"
-          value={qq}
-          onChange={(e) => setQq(e.target.value)}
+          value={userInfo.qq || ''}
+          onChange={(e) => setUserInfo({ qq: e.target.value })}
           placeholder={t('qqPlaceholder')}
           className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
         />

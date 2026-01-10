@@ -15,6 +15,18 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
   const displayName = message.nickname || message.userName || 'Guest';
   const initial = displayName.charAt(0).toUpperCase();
   const isHidden = message.isVisible === 0;
+  const isPending = message.reviewStatus === 0;
+  const isRejected = message.reviewStatus === 2;
+
+  const getStatusBadge = () => {
+    if (isPending) {
+      return <span className="inline-block px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">待审核</span>;
+    }
+    if (isRejected) {
+      return <span className="inline-block px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded-full">已拒绝</span>;
+    }
+    return null;
+  };
 
   return (
     <div className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
@@ -27,6 +39,7 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-2 flex-wrap">
             <span className="font-semibold text-foreground">{displayName}</span>
+            {getStatusBadge()}
             <span className="text-sm text-muted flex items-center gap-1">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
