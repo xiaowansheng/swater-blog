@@ -143,11 +143,11 @@ public class CommentPublicServiceImpl implements CommentPublicService {
 
     @Override
     public PageResult<CommentVO> list(Long targetId, String targetType, Long page, Long size) {
-        return list(targetId, targetType, null, null, null, page, size);
+        return list(targetId, targetType, null, null, null, null, page, size);
     }
 
     @Override
-    public PageResult<CommentVO> list(Long targetId, String targetType, Long parentId, String sort, String ownerToken, Long page, Long size) {
+    public PageResult<CommentVO> list(Long targetId, String targetType, Long parentId, Long rootId, String sort, String ownerToken, Long page, Long size) {
         Page<Comment> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Comment::getDeleted, 0);
@@ -161,10 +161,13 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         if (targetType != null) {
             wrapper.eq(Comment::getTargetType, targetType);
         }
-        if (parentId != null) {
+        if (rootId != null) {
+            wrapper.eq(Comment::getRootId, rootId);
+        }
+
+        // 当 rootId 存在时，按整棵楼层返回，不再按 parentId 过滤单层
+        if (rootId == null && parentId != null) {
             wrapper.eq(Comment::getParentId, parentId);
-        } else {
-            wrapper.and(w -> w.isNull(Comment::getParentId).or().eq(Comment::getParentId, 0));
         }
 
         if ("time".equalsIgnoreCase(sort) || sort == null || sort.isEmpty()) {
@@ -177,7 +180,8 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         List<Comment> records = result.getRecords();
 
         List<Long> idsNeedingCount = new ArrayList<>();
-        if (parentId == null || parentId == 0) {
+        // 仅顶级列表时需要统计子回复数量；按 rootId 查询全楼层时不统计
+        if ((parentId == null || parentId == 0) && rootId == null) {
             idsNeedingCount = records.stream().map(Comment::getId).collect(java.util.stream.Collectors.toList());
         }
 
@@ -245,10 +249,14 @@ public class CommentPublicServiceImpl implements CommentPublicService {
                 throw new BusinessException("父评论不存在");
             }
             comment.setParentId(dto.getParentId());
-            comment.setRootId(parent.getRootId() != null && parent.getRootId() > 0 ? parent.getRootId() : parent.getId());
+            Long rootId = dto.getRootId();
+            if (rootId == null || rootId == 0) {
+                rootId = parent.getRootId() != null && parent.getRootId() > 0 ? parent.getRootId() : parent.getId();
+            }
+            comment.setRootId(rootId);
         } else {
             comment.setParentId(0L);
-            comment.setRootId(0L);
+            comment.setRootId(0L); // will be updated after insert
         }
 
         if (dto.getImages() != null && !dto.getImages().isEmpty()) {
@@ -265,6 +273,12 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         }
 
         commentMapper.insert(comment);
+
+        // 如果是顶级评论，插入后更新 rootId=自身ID
+        if (comment.getParentId() == 0) {
+            comment.setRootId(comment.getId());
+            commentMapper.updateById(comment);
+        }
 
         if ("ARTICLE".equalsIgnoreCase(dto.getTargetType())) {
             Article article = articleMapper.selectById(dto.getTargetId());
@@ -303,7 +317,8 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         if (withReplyCount) {
             LambdaQueryWrapper<Comment> countWrapper = new LambdaQueryWrapper<>();
             countWrapper.eq(Comment::getDeleted, 0);
-            countWrapper.eq(Comment::getParentId, comment.getId());
+            countWrapper.eq(Comment::getRootId, comment.getId());
+            countWrapper.ne(Comment::getParentId, 0);
             countWrapper.and(w -> w.eq(Comment::getStatus, 1).eq(Comment::getIsVisible, 0)
                     .or(ownerToken != null && !ownerToken.isEmpty(), w2 -> w2.eq(Comment::getOwnerToken, ownerToken)));
             Long count = commentMapper.selectCount(countWrapper);

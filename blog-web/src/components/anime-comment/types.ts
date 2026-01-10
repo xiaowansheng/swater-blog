@@ -36,6 +36,8 @@ export interface CommentFormData {
   images?: File[];
   targetType: 'ARTICLE' | 'TALK';
   targetId?: number;
+  parentId?: number;
+  rootId?: number;
 }
 
 /**

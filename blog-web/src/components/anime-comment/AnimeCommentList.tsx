@@ -21,7 +21,7 @@ interface AnimeCommentListProps {
   onReply: (commentId: number) => void;
   activeReplyFormId: number | null;
   onCloseReplyForm: () => void;
-  onReplySubmitSuccess: (parentId: number) => void;
+  onReplySubmitSuccess: (rootId: number) => void;
   onToggleReplies: (commentId: number, replyCount?: number) => void;
   onLoadMoreReplies: (commentId: number) => void;
   replies: Record<number, ReplyState>;

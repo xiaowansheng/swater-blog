@@ -105,20 +105,20 @@ function AnimeCommentInner({
     }
   };
 
-  const loadReplies = async (parentId: number, rootId: number, page = 1, append = false) => {
+  const loadReplies = async (rootId: number, page = 1, append = false) => {
     setReplies((prev) => ({
       ...prev,
-      [parentId]: {
-        items: append ? prev[parentId]?.items || [] : [],
-        page: prev[parentId]?.page || 0,
-        pages: prev[parentId]?.pages || 1,
+      [rootId]: {
+        items: append ? prev[rootId]?.items || [] : [],
+        page: prev[rootId]?.page || 0,
+        pages: prev[rootId]?.pages || 1,
         loading: true,
         expanded: true,
       },
     }));
     try {
       const result = await commentApi.getReplies({
-        parentId,
+        parentId: rootId,
         rootId,
         page,
         size: REPLY_PAGE_SIZE,
@@ -126,12 +126,12 @@ function AnimeCommentInner({
       });
       const normalized = normalize(result.records || []);
       setReplies((prev) => {
-        const prevItems = append ? prev[parentId]?.items || [] : [];
+        const prevItems = append ? prev[rootId]?.items || [] : [];
         const nextPage = result.current || page;
         const totalPages = result.pages || 1;
         return {
           ...prev,
-          [parentId]: {
+          [rootId]: {
             items: [...prevItems, ...normalized],
             page: nextPage,
             pages: totalPages,
@@ -144,8 +144,8 @@ function AnimeCommentInner({
       console.error('Failed to load replies:', error);
       setReplies((prev) => ({
         ...prev,
-        [parentId]: {
-          ...(prev[parentId] || { items: [] }),
+        [rootId]: {
+          ...(prev[rootId] || { items: [] }),
           loading: false,
           expanded: false,
         },
@@ -188,7 +188,7 @@ function AnimeCommentInner({
 
   // 回复提交成功后刷新对应楼层 + 顶部列表计数
   const handleReplySubmitSuccess = (rootId: number) => {
-    loadReplies(rootId, rootId, 1);
+    loadReplies(rootId, 1);
     loadTopComments(1);
     setActiveReplyFormId(null);
   };
@@ -197,7 +197,7 @@ function AnimeCommentInner({
     if (!replyCount) return;
     const current = replies[commentId];
     if (!current || (!current.items.length && replyCount > 0)) {
-      loadReplies(commentId, commentId, 1);
+      loadReplies(commentId, 1);
       return;
     }
     setReplies((prev) => ({
@@ -212,13 +212,13 @@ function AnimeCommentInner({
   const handleLoadMoreReplies = (commentId: number) => {
     const state = replies[commentId];
     if (!state) {
-      loadReplies(commentId, commentId, 1);
+      loadReplies(commentId, 1);
       return;
     }
     if (state.loading) return;
     const nextPage = state.page + 1;
     if (nextPage > state.pages) return;
-    loadReplies(commentId, commentId, nextPage, true);
+    loadReplies(commentId, nextPage, true);
   };
 
   const hasMoreTop = topPage < topPages;

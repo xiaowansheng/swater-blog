@@ -141,8 +141,19 @@ export interface Comment {
   postTitle?: string
   parentId?: number
   replyToId?: number
+  rootId?: number
+  images?: string[]
+  qq?: string
+  isVisible?: number
+  replyCount?: number
   ip?: string
   userAgent?: string
+  country?: string
+  province?: string
+  city?: string
+  location?: string
+  device?: string
+  browser?: string
   createTime: string
   children?: Comment[]
 }

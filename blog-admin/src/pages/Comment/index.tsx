@@ -1,13 +1,34 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Select, Tag, Avatar, Tooltip, Input } from 'antd'
+import {
+  Table,
+  Button,
+  Space,
+  Popconfirm,
+  message,
+  Select,
+  Tag,
+  Avatar,
+  Tooltip,
+  Input,
+  Drawer,
+  Image,
+  Divider,
+  Descriptions,
+} from 'antd'
 import {
   CheckOutlined,
   CloseOutlined,
   DeleteOutlined,
   UserOutlined,
   SearchOutlined,
+  EyeOutlined,
+  EyeInvisibleOutlined,
+  EnvironmentOutlined,
+  MobileOutlined,
+  CommentOutlined,
+  FileImageOutlined,
 } from '@ant-design/icons'
-import { getCommentList, approveComment, rejectComment, deleteComment } from '@/api/comment'
+import { getCommentList, approveComment, rejectComment, deleteComment, setVisibleComment, setHiddenComment } from '@/api/comment'
 import { Comment } from '@/types'
 import { getFullUrl } from '@/utils/format'
 
@@ -20,6 +41,8 @@ const CommentPage: React.FC = () => {
     status: undefined,
     keyword: '',
   })
+  const [detailVisible, setDetailVisible] = useState(false)
+  const [currentComment, setCurrentComment] = useState<Comment | null>(null)
 
   useEffect(() => {
     loadComments()
@@ -72,6 +95,21 @@ const CommentPage: React.FC = () => {
     }
   }
 
+  const handleToggleVisible = async (id: number, visible: number) => {
+    try {
+      if (visible === 1) {
+        await setHiddenComment(id)
+        message.success('已隐藏')
+      } else {
+        await setVisibleComment(id)
+        message.success('已设置为可见')
+      }
+      loadComments()
+    } catch (error) {
+      message.error('操作失败')
+    }
+  }
+
   const getStatusTag = (status: number) => {
     const statusMap: Record<number, { color: string; text: string }> = {
       0: { color: 'warning', text: '待审核' },
@@ -82,43 +120,148 @@ const CommentPage: React.FC = () => {
     return <Tag color={color}>{text}</Tag>
   }
 
+  const showDetail = (comment: Comment) => {
+    setCurrentComment(comment)
+    setDetailVisible(true)
+  }
+
   const columns = [
     {
       title: '评论者',
       key: 'author',
-      width: 180,
+      width: 220,
       render: (_: any, record: Comment) => (
         <div className="flex gap-2 items-center">
-          <Avatar src={getFullUrl(record.authorAvatar)} icon={<UserOutlined />} size={32} />
-          <div>
-            <div className="text-sm font-medium">{record.authorName}</div>
-            <div className="text-xs text-gray-400">{record.authorEmail}</div>
+          <Avatar src={getFullUrl(record.authorAvatar)} icon={<UserOutlined />} size={40} />
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-medium truncate">{record.authorName || '匿名'}</div>
+            <div className="text-xs text-gray-400 truncate">{record.authorEmail || '暂无邮箱'}</div>
+            {record.qq && (
+              <Tooltip title={`QQ: ${record.qq}`}>
+                <div className="text-xs text-blue-500 flex items-center gap-1">
+                  <span>QQ: {record.qq}</span>
+                </div>
+              </Tooltip>
+            )}
           </div>
         </div>
       ),
     },
     {
       title: '评论内容',
-      dataIndex: 'content',
       key: 'content',
-      ellipsis: true,
+      width: 250,
+      render: (_: any, record: Comment) => (
+        <div>
+          <div className="truncate mb-1">{record.content}</div>
+          <div className="flex gap-1 items-center">
+            {record.images && record.images.length > 0 && (
+              <Tag icon={<FileImageOutlined />} color="blue">
+                {record.images.length}张图片
+              </Tag>
+            )}
+            {record.parentId && (
+              <Tag icon={<CommentOutlined />} color="purple">
+                回复
+              </Tag>
+            )}
+            {record.replyCount !== undefined && record.replyCount > 0 && (
+              <Tag color="cyan">{record.replyCount} 条回复</Tag>
+            )}
+          </div>
+        </div>
+      ),
     },
     {
-      title: '评论文章',
-      dataIndex: 'postTitle',
-      key: 'postTitle',
-      width: 200,
-      ellipsis: true,
-      render: (title: string) => (
-        <span className="text-blue-500 cursor-pointer hover:underline">{title}</span>
+      title: '评论目标',
+      key: 'target',
+      width: 180,
+      render: (_: any, record: Comment) => {
+        const title = record.targetTitle || record.postTitle || '未知'
+        const targetType = record.targetType || 'ARTICLE'
+
+        return (
+          <Tooltip title={title}>
+            <div>
+              <Tag color={targetType === 'ARTICLE' ? 'blue' : 'purple'}>
+                {targetType === 'ARTICLE' ? '文章' : '说说'}
+              </Tag>
+              <span className="text-blue-500 cursor-pointer hover:underline ml-1">
+                {title}
+              </span>
+            </div>
+          </Tooltip>
+        )
+      },
+    },
+    {
+      title: '位置',
+      key: 'location',
+      width: 150,
+      render: (_: any, record: Comment) => (
+        <div className="text-xs">
+          {record.country || record.province || record.city ? (
+            <div className="flex items-center gap-1" title={`${record.country || ''} ${record.province || ''} ${record.city || ''}`}>
+              <EnvironmentOutlined className="text-gray-400" />
+              <span className="truncate">
+                {[record.city, record.province, record.country]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
+            </div>
+          ) : (
+            <span className="text-gray-400">-</span>
+          )}
+          {record.ip && (
+            <div className="text-gray-400 truncate mt-1" title={record.ip}>
+              {record.ip}
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: '设备',
+      key: 'device',
+      width: 120,
+      render: (_: any, record: Comment) => (
+        <div className="text-xs">
+          {record.device || record.browser ? (
+            <div>
+              {record.device && (
+                <div className="flex items-center gap-1 truncate">
+                  <MobileOutlined className="text-gray-400" />
+                  <span>{record.device}</span>
+                </div>
+              )}
+              {record.browser && (
+                <div className="text-gray-500 truncate mt-1">{record.browser}</div>
+              )}
+            </div>
+          ) : (
+            <span className="text-gray-400">-</span>
+          )}
+        </div>
       ),
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      width: 100,
-      render: getStatusTag,
+      width: 120,
+      render: (_: any, record: Comment) => (
+        <Space direction="vertical" size="small">
+          {getStatusTag(record.status)}
+          {record.isVisible !== undefined && (
+            <Tag
+              icon={record.isVisible === 1 ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+              color={record.isVisible === 1 ? 'success' : 'default'}
+            >
+              {record.isVisible === 1 ? '可见' : '隐藏'}
+            </Tag>
+          )}
+        </Space>
+      ),
     },
     {
       title: '评论时间',
@@ -129,9 +272,25 @@ const CommentPage: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      width: 180,
+      width: 200,
       render: (_: any, record: Comment) => (
-        <Space>
+        <Space size="small">
+          <Tooltip title="查看详情">
+            <Button
+              type="text"
+              icon={<EyeOutlined />}
+              onClick={() => showDetail(record)}
+            />
+          </Tooltip>
+          {record.isVisible !== undefined && (
+            <Tooltip title={record.isVisible === 1 ? '设置为隐藏' : '设置为可见'}>
+              <Button
+                type="text"
+                icon={record.isVisible === 1 ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                onClick={() => handleToggleVisible(record.id, record.isVisible!)}
+              />
+            </Tooltip>
+          )}
           {record.status === 0 && (
             <>
               <Tooltip title="通过">
@@ -211,8 +370,172 @@ const CommentPage: React.FC = () => {
             onChange: (page, pageSize) =>
               setPagination({ ...pagination, current: page, pageSize }),
           }}
+          scroll={{ x: 1400 }}
         />
       </div>
+
+      <Drawer
+        title="评论详情"
+        placement="right"
+        width={600}
+        open={detailVisible}
+        onClose={() => setDetailVisible(false)}
+      >
+        {currentComment && (
+          <div>
+            <Descriptions bordered column={1}>
+              <Descriptions.Item label="评论ID">{currentComment.id}</Descriptions.Item>
+              <Descriptions.Item label="评论者信息">
+                <div className="flex items-start gap-3">
+                  <Avatar
+                    src={getFullUrl(currentComment.authorAvatar)}
+                    icon={<UserOutlined />}
+                    size={48}
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium mb-1">{currentComment.authorName || '匿名'}</div>
+                    <div className="text-sm text-gray-500 mb-1">
+                      {currentComment.authorEmail || '暂无邮箱'}
+                    </div>
+                    {currentComment.qq && (
+                      <div className="text-sm text-blue-500">
+                        QQ: {currentComment.qq}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Descriptions.Item>
+              <Descriptions.Item label="评论内容">
+                <div className="whitespace-pre-wrap">{currentComment.content}</div>
+              </Descriptions.Item>
+              {currentComment.images && currentComment.images.length > 0 && (
+                <Descriptions.Item label="图片">
+                  <Image.PreviewGroup>
+                    <Space wrap>
+                      {currentComment.images.map((img, index) => (
+                        <Image
+                          key={index}
+                          src={getFullUrl(img)}
+                          width={100}
+                          height={100}
+                          style={{ objectFit: 'cover' }}
+                        />
+                      ))}
+                    </Space>
+                  </Image.PreviewGroup>
+                </Descriptions.Item>
+              )}
+              <Descriptions.Item label="评论目标">
+                <div>
+                  <Tag color={currentComment.targetType === 'ARTICLE' ? 'blue' : 'purple'}>
+                    {currentComment.targetType === 'ARTICLE' ? '文章' : '说说'}
+                  </Tag>
+                  <span className="ml-2">
+                    {currentComment.targetTitle || currentComment.postTitle || '未知'}
+                  </span>
+                  <div className="text-xs text-gray-400 mt-1">
+                    ID: {currentComment.targetId}
+                  </div>
+                </div>
+              </Descriptions.Item>
+              <Descriptions.Item label="评论状态">
+                {getStatusTag(currentComment.status)}
+              </Descriptions.Item>
+              {currentComment.isVisible !== undefined && (
+                <Descriptions.Item label="可见状态">
+                  <Tag
+                    icon={currentComment.isVisible === 1 ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+                    color={currentComment.isVisible === 1 ? 'success' : 'default'}
+                  >
+                    {currentComment.isVisible === 1 ? '可见' : '隐藏'}
+                  </Tag>
+                </Descriptions.Item>
+              )}
+              {currentComment.parentId && (
+                <Descriptions.Item label="父评论ID">{currentComment.parentId}</Descriptions.Item>
+              )}
+              {currentComment.rootId && (
+                <Descriptions.Item label="根评论ID">{currentComment.rootId}</Descriptions.Item>
+              )}
+              {currentComment.replyCount !== undefined && currentComment.replyCount > 0 && (
+                <Descriptions.Item label="回复数量">
+                  <Tag color="cyan">{currentComment.replyCount} 条</Tag>
+                </Descriptions.Item>
+              )}
+              {currentComment.ip && (
+                <Descriptions.Item label="IP地址">{currentComment.ip}</Descriptions.Item>
+              )}
+              {(currentComment.country || currentComment.province || currentComment.city) && (
+                <Descriptions.Item label="地理位置">
+                  <div>
+                    {currentComment.country && <div>国家: {currentComment.country}</div>}
+                    {currentComment.province && <div>省份: {currentComment.province}</div>}
+                    {currentComment.city && <div>城市: {currentComment.city}</div>}
+                    {currentComment.location && <div>详细位置: {currentComment.location}</div>}
+                  </div>
+                </Descriptions.Item>
+              )}
+              {currentComment.device && (
+                <Descriptions.Item label="设备">{currentComment.device}</Descriptions.Item>
+              )}
+              {currentComment.browser && (
+                <Descriptions.Item label="浏览器">{currentComment.browser}</Descriptions.Item>
+              )}
+              <Descriptions.Item label="评论时间">{currentComment.createTime}</Descriptions.Item>
+            </Descriptions>
+
+            <Divider />
+
+            <Space>
+              {currentComment.isVisible !== undefined && (
+                <Button
+                  icon={currentComment.isVisible === 1 ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                  onClick={() => {
+                    handleToggleVisible(currentComment.id, currentComment.isVisible!)
+                    setDetailVisible(false)
+                  }}
+                >
+                  {currentComment.isVisible === 1 ? '设置为隐藏' : '设置为可见'}
+                </Button>
+              )}
+              {currentComment.status === 0 && (
+                <>
+                  <Button
+                    type="primary"
+                    icon={<CheckOutlined />}
+                    onClick={() => {
+                      handleApprove(currentComment.id)
+                      setDetailVisible(false)
+                    }}
+                  >
+                    审核通过
+                  </Button>
+                  <Button
+                    icon={<CloseOutlined />}
+                    onClick={() => {
+                      handleReject(currentComment.id)
+                      setDetailVisible(false)
+                    }}
+                  >
+                    审核拒绝
+                  </Button>
+                </>
+              )}
+              <Popconfirm
+                title="确定删除这条评论吗？"
+                onConfirm={() => {
+                  handleDelete(currentComment.id)
+                  setDetailVisible(false)
+                }}
+              >
+                <Button danger icon={<DeleteOutlined />}>
+                  删除评论
+                </Button>
+              </Popconfirm>
+            </Space>
+          </div>
+        )}
+      </Drawer>
     </div>
   )
 }

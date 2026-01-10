@@ -23,3 +23,11 @@ export const deleteComment = (id: number): Promise<void> => {
   return request.delete(`/admin/comment/${id}`)
 }
 
+export const setVisibleComment = (id: number): Promise<void> => {
+  return request.post(`/admin/comment/${id}/visible`)
+}
+
+export const setHiddenComment = (id: number): Promise<void> => {
+  return request.post(`/admin/comment/${id}/hidden`)
+}
+

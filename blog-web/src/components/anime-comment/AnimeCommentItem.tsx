@@ -23,7 +23,7 @@ interface AnimeCommentItemProps {
   onReply: (commentId: number) => void;
   activeReplyFormId: number | null;
   onCloseReplyForm: () => void;
-  onReplySubmitSuccess: (parentId: number) => void;
+  onReplySubmitSuccess: (rootId: number) => void;
   targetType: 'ARTICLE' | 'TALK';
   targetId: number;
   config: AnimeCommentConfig;
@@ -159,11 +159,12 @@ export default function AnimeCommentItem({
       {showReplyForm && (
         <ReplyForm
           parentId={comment.id}
+          rootId={rootId}
           parentNickname={comment.nickname}
           targetType={targetType}
           targetId={targetId}
           config={config}
-          onSubmitSuccess={() => onReplySubmitSuccess(comment.id)}
+          onSubmitSuccess={() => onReplySubmitSuccess(rootId)}
           onCancel={onCloseReplyForm}
         />
       )}
@@ -229,11 +230,12 @@ export default function AnimeCommentItem({
                     <div className="mt-3">
                       <ReplyForm
                         parentId={child.id}
+                        rootId={rootId}
                         parentNickname={child.nickname}
                         targetType={targetType}
                         targetId={targetId}
                         config={config}
-                        onSubmitSuccess={() => onReplySubmitSuccess(comment.id)}
+                        onSubmitSuccess={() => onReplySubmitSuccess(rootId)}
                         onCancel={onCloseReplyForm}
                       />
                     </div>

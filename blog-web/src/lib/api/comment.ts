@@ -6,6 +6,7 @@ export interface CommentSubmitDTO {
   targetId?: number;
   targetType?: 'ARTICLE' | 'TALK';
   parentId?: number;
+  rootId?: number;
   parentNickname?: string;
   nickname: string;
   email?: string;
@@ -48,8 +49,8 @@ export const commentApi = {
   },
 
   getReplies: (params: {
-    parentId: number;
-    rootId?: number;
+    parentId?: number;
+    rootId: number;
     page?: number;
     size?: number;
     sort?: 'time' | 'hot';

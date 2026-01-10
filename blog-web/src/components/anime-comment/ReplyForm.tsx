@@ -8,11 +8,12 @@ import { useUserInfo } from './UserInfoContext';
 
 interface ReplyFormProps {
   parentId: number;
+  rootId: number;
   parentNickname: string;
   targetType: 'ARTICLE' | 'TALK';
   targetId: number;
   config: any;
-  onSubmitSuccess: (parentId: number) => void;
+  onSubmitSuccess: (rootId: number) => void;
   onCancel: () => void;
 }
 
@@ -21,6 +22,7 @@ interface ReplyFormProps {
  */
 export default function ReplyForm({
   parentId,
+  rootId,
   parentNickname,
   targetType,
   targetId,
@@ -188,6 +190,7 @@ export default function ReplyForm({
         targetId,
         targetType,
         parentId,
+        rootId,
         nickname: userInfo.nickname,
         email: userInfo.email,
         qq: userInfo.qq,
@@ -196,7 +199,7 @@ export default function ReplyForm({
       });
 
       toast.success('回复发布成功！');
-      onSubmitSuccess(parentId);
+      onSubmitSuccess(rootId);
     } catch (error) {
       // 全局拦截器已经处理了错误提示
     } finally {

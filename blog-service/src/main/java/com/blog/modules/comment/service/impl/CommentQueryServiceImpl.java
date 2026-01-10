@@ -6,18 +6,26 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.shared.PageResult;
 import com.blog.modules.comment.mapper.CommentMapper;
 import com.blog.modules.user.mapper.UserMapper;
+import com.blog.modules.article.mapper.ArticleMapper;
+import com.blog.modules.talk.mapper.TalkMapper;
 import com.blog.modules.comment.model.entity.Comment;
 import com.blog.modules.user.model.entity.User;
+import com.blog.modules.article.model.entity.Article;
+import com.blog.modules.talk.model.entity.Talk;
+import com.blog.modules.comment.model.enums.TargetType;
 import com.blog.modules.comment.model.vo.CommentVO;
 import com.blog.modules.comment.service.CommentQueryService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+@Slf4j
 @Service
 public class CommentQueryServiceImpl implements CommentQueryService {
     @Autowired
@@ -25,6 +33,12 @@ public class CommentQueryServiceImpl implements CommentQueryService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired(required = false)
+    private ArticleMapper articleMapper;
+
+    @Autowired(required = false)
+    private TalkMapper talkMapper;
 
     @Override
     public PageResult<CommentVO> list(Long page, Long size, Integer status, Long targetId, String targetType) {
@@ -75,6 +89,35 @@ public class CommentQueryServiceImpl implements CommentQueryService {
                 vo.setImages(images);
             } catch (Exception e) {
                 vo.setImages(new ArrayList<>());
+            }
+        }
+        // 设置目标对象标题
+        if (comment.getTargetId() != null) {
+            TargetType targetType = TargetType.fromCode(comment.getTargetType());
+            log.debug("评论ID: {}, 目标类型: {}, 目标ID: {}", comment.getId(), comment.getTargetType(), comment.getTargetId());
+
+            if (targetType == TargetType.ARTICLE && articleMapper != null) {
+                Article article = articleMapper.selectById(comment.getTargetId());
+                if (article != null) {
+                    vo.setTargetTitle(article.getTitle());
+                    log.debug("找到文章标题: {}", article.getTitle());
+                } else {
+                    log.warn("未找到ID为 {} 的文章", comment.getTargetId());
+                }
+            } else if (targetType == TargetType.TALK && talkMapper != null) {
+                Talk talk = talkMapper.selectById(comment.getTargetId());
+                if (talk != null) {
+                    // 说说取内容的前20个字符作为标题
+                    String content = talk.getContent();
+                    if (content != null && content.length() > 20) {
+                        vo.setTargetTitle(content.substring(0, 20) + "...");
+                    } else {
+                        vo.setTargetTitle(content);
+                    }
+                    log.debug("找到说说内容: {}", vo.getTargetTitle());
+                } else {
+                    log.warn("未找到ID为 {} 的说说", comment.getTargetId());
+                }
             }
         }
         vo.setIsOwner(false);

@@ -24,11 +24,12 @@ public class CommentPublicController {
             @RequestParam(required = false) Long targetId,
             @RequestParam(required = false) String targetType,
             @RequestParam(required = false) Long parentId,
+            @RequestParam(required = false) Long rootId,
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) String ownerToken,
             @RequestParam(required = false) Long page,
             @RequestParam(required = false) Long size) {
-        PageResult<CommentVO> result = commentPublicService.list(targetId, targetType, parentId, sort, ownerToken, page, size);
+        PageResult<CommentVO> result = commentPublicService.list(targetId, targetType, parentId, rootId, sort, ownerToken, page, size);
         return Result.success(result);
     }
 
