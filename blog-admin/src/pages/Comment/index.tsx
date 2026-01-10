@@ -127,6 +127,15 @@ const CommentPage: React.FC = () => {
 
   const columns = [
     {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: 80,
+      render: (id: number) => (
+        <span className="text-sm font-mono text-gray-600">{id}</span>
+      ),
+    },
+    {
       title: '评论者',
       key: 'author',
       width: 220,
@@ -150,22 +159,25 @@ const CommentPage: React.FC = () => {
     {
       title: '评论内容',
       key: 'content',
-      width: 250,
+      width: 280,
       render: (_: any, record: Comment) => (
         <div>
           <div className="truncate mb-1">{record.content}</div>
-          <div className="flex gap-1 items-center">
+          <div className="flex gap-1 items-center flex-wrap">
             {record.images && record.images.length > 0 && (
               <Tag icon={<FileImageOutlined />} color="blue">
                 {record.images.length}张图片
               </Tag>
             )}
-            {record.parentId && (
+            {record.parentId?  record.rootId && (
+              <Tag color="orange">根#{record.rootId}</Tag>
+            ):''}
+            {record.parentId ? (
               <Tag icon={<CommentOutlined />} color="purple">
-                回复
+                回复 #{record.parentId}
               </Tag>
-            )}
-            {record.replyCount !== undefined && record.replyCount > 0 && (
+            ):''}
+            {record.replyCount > 0 && (
               <Tag color="cyan">{record.replyCount} 条回复</Tag>
             )}
           </div>
@@ -175,20 +187,31 @@ const CommentPage: React.FC = () => {
     {
       title: '评论目标',
       key: 'target',
-      width: 180,
+      width: 250,
       render: (_: any, record: Comment) => {
         const title = record.targetTitle || record.postTitle || '未知'
         const targetType = record.targetType || 'ARTICLE'
+        const isTalk = targetType === 'TALK'
+        const targetId = record.targetId
 
         return (
-          <Tooltip title={title}>
-            <div>
-              <Tag color={targetType === 'ARTICLE' ? 'blue' : 'purple'}>
-                {targetType === 'ARTICLE' ? '文章' : '说说'}
+          <Tooltip title={`${title} #${targetId}`}>
+            <div className="flex items-center gap-1">
+              <Tag color={isTalk ? 'purple' : 'blue'}>
+                {isTalk ? '说说' : '文章'}
               </Tag>
-              <span className="text-blue-500 cursor-pointer hover:underline ml-1">
-                {title}
+              <span className="text-xs text-gray-500">
+                #{targetId}
               </span>
+              {isTalk ? (
+                <span className="text-gray-600 truncate">
+                  {title}
+                </span>
+              ) : (
+                <span className="text-blue-500 cursor-pointer hover:underline truncate">
+                  {title}
+                </span>
+              )}
             </div>
           </Tooltip>
         )
@@ -370,7 +393,7 @@ const CommentPage: React.FC = () => {
             onChange: (page, pageSize) =>
               setPagination({ ...pagination, current: page, pageSize }),
           }}
-          scroll={{ x: 1400 }}
+          scroll={{ x: 1500 }}
         />
       </div>
 
@@ -427,14 +450,27 @@ const CommentPage: React.FC = () => {
               )}
               <Descriptions.Item label="评论目标">
                 <div>
-                  <Tag color={currentComment.targetType === 'ARTICLE' ? 'blue' : 'purple'}>
-                    {currentComment.targetType === 'ARTICLE' ? '文章' : '说说'}
-                  </Tag>
-                  <span className="ml-2">
-                    {currentComment.targetTitle || currentComment.postTitle || '未知'}
-                  </span>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Tag color={currentComment.targetType === 'ARTICLE' ? 'blue' : 'purple'}>
+                      {currentComment.targetType === 'ARTICLE' ? '文章' : '说说'}
+                    </Tag>
+                    <span className="text-sm text-gray-500">
+                      #{currentComment.targetId}
+                    </span>
+                  </div>
+                  <div>
+                    {currentComment.targetType === 'TALK' ? (
+                      <span className="text-gray-700">
+                        {currentComment.targetTitle || currentComment.postTitle || '未知'}
+                      </span>
+                    ) : (
+                      <span className="text-blue-500">
+                        {currentComment.targetTitle || currentComment.postTitle || '未知'}
+                      </span>
+                    )}
+                  </div>
                   <div className="text-xs text-gray-400 mt-1">
-                    ID: {currentComment.targetId}
+                    类型: {currentComment.targetType}
                   </div>
                 </div>
               </Descriptions.Item>
@@ -452,12 +488,18 @@ const CommentPage: React.FC = () => {
                 </Descriptions.Item>
               )}
               {currentComment.parentId && (
-                <Descriptions.Item label="父评论ID">{currentComment.parentId}</Descriptions.Item>
+                <Descriptions.Item label="回复对象">
+                  <Tag color="purple" icon={<CommentOutlined />}>
+                    父评论 #{currentComment.parentId}
+                  </Tag>
+                </Descriptions.Item>
               )}
               {currentComment.rootId && (
-                <Descriptions.Item label="根评论ID">{currentComment.rootId}</Descriptions.Item>
+                <Descriptions.Item label="根评论ID">
+                  <Tag color="orange">#{currentComment.rootId}</Tag>
+                </Descriptions.Item>
               )}
-              {currentComment.replyCount !== undefined && currentComment.replyCount > 0 && (
+              {currentComment.replyCount > 0 && (
                 <Descriptions.Item label="回复数量">
                   <Tag color="cyan">{currentComment.replyCount} 条</Tag>
                 </Descriptions.Item>

@@ -94,34 +94,33 @@ public class CommentQueryServiceImpl implements CommentQueryService {
         // 设置目标对象标题
         if (comment.getTargetId() != null) {
             TargetType targetType = TargetType.fromCode(comment.getTargetType());
-            log.debug("评论ID: {}, 目标类型: {}, 目标ID: {}", comment.getId(), comment.getTargetType(), comment.getTargetId());
-
             if (targetType == TargetType.ARTICLE && articleMapper != null) {
                 Article article = articleMapper.selectById(comment.getTargetId());
                 if (article != null) {
                     vo.setTargetTitle(article.getTitle());
-                    log.debug("找到文章标题: {}", article.getTitle());
-                } else {
-                    log.warn("未找到ID为 {} 的文章", comment.getTargetId());
                 }
             } else if (targetType == TargetType.TALK && talkMapper != null) {
                 Talk talk = talkMapper.selectById(comment.getTargetId());
                 if (talk != null) {
-                    // 说说取内容的前20个字符作为标题
+                    // 说说取内容的前30个字符作为标题
                     String content = talk.getContent();
-                    if (content != null && content.length() > 20) {
-                        vo.setTargetTitle(content.substring(0, 20) + "...");
+                    if (content != null && !content.isEmpty()) {
+                        // 移除HTML标签（如果有的话）
+                        String plainText = content.replaceAll("<[^>]*>", "").trim();
+                        String preview = plainText.length() > 30
+                            ? plainText.substring(0, 30) + "..."
+                            : plainText;
+                        vo.setTargetTitle(preview);
                     } else {
-                        vo.setTargetTitle(content);
+                        vo.setTargetTitle("(空说说)");
                     }
-                    log.debug("找到说说内容: {}", vo.getTargetTitle());
-                } else {
-                    log.warn("未找到ID为 {} 的说说", comment.getTargetId());
                 }
             }
         }
         vo.setIsOwner(false);
-        vo.setReplyCount(0);
+        // 查询回复数量
+        int replyCount = commentMapper.countReplies(comment.getId());
+        vo.setReplyCount(replyCount);
         return vo;
     }
 }
