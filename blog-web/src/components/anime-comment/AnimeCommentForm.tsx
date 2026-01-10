@@ -275,49 +275,33 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
             />
           </div>
 
-          {config.allowImage && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageSelect}
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={images.length >= config.maxImages}
-                  className="px-4 py-2 rounded-xl border border-pink-200 text-pink-600 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  添加图片
-                </button>
-                <EmojiPicker onEmojiSelect={handleInsertEmoji} />
-              </div>
-
-              {previewImages.length > 0 && (
-                <div className="flex flex-wrap gap-3">
-                  {previewImages.map((url, idx) => (
-                    <div key={url} className="relative">
-                      <img src={url} alt={`preview-${idx}`} className="w-20 h-20 object-cover rounded-xl border" />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage(idx)}
-                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white text-xs"
-                        title="删除"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-0">
+              {config.allowImage && (
+                <>
+                  <EmojiPicker onEmojiSelect={handleInsertEmoji} />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={images.length >= config.maxImages}
+                    className="p-2 rounded-lg hover:bg-pink-50 transition-colors duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="添加图片"
+                  >
+                    <svg className="w-6 h-6 text-pink-400 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                </>
               )}
             </div>
-          )}
-
-          <div className="flex justify-end">
             <button
               type="submit"
               disabled={submitting}
@@ -326,6 +310,24 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
               {submitting ? '提交中...' : '发布评论'}
             </button>
           </div>
+
+          {config.allowImage && previewImages.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {previewImages.map((url, idx) => (
+                <div key={url} className="relative">
+                  <img src={url} alt={`preview-${idx}`} className="w-20 h-20 object-cover rounded-xl border" />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(idx)}
+                    className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white text-xs"
+                    title="删除"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </form>
