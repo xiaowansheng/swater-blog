@@ -152,7 +152,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Comment::getDeleted, 0);
         wrapper.and(w -> w
-                .eq(Comment::getStatus, 1).eq(Comment::getIsVisible, 0)
+                .eq(Comment::getStatus, 1).eq(Comment::getIsVisible, 1)
                 .or(ownerToken != null && !ownerToken.isEmpty(), w2 -> w2.eq(Comment::getOwnerToken, ownerToken)));
 
         if (targetId != null) {
