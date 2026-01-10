@@ -316,7 +316,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             countWrapper.eq(Comment::getDeleted, 0);
             countWrapper.eq(Comment::getRootId, comment.getId());
             countWrapper.ne(Comment::getParentId, 0);
-            countWrapper.and(w -> w.eq(Comment::getStatus, 1).eq(Comment::getIsVisible, 0)
+            countWrapper.and(w -> w.eq(Comment::getStatus, 1).eq(Comment::getIsVisible, 1)
                     .or(ownerEmail != null && !ownerEmail.isBlank(), w2 -> w2.eq(Comment::getEmail, ownerEmail)));
             Long count = commentMapper.selectCount(countWrapper);
             vo.setReplyCount(count != null ? count.intValue() : 0);
