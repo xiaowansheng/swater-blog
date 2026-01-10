@@ -27,6 +27,7 @@ import {
   MobileOutlined,
   CommentOutlined,
   FileImageOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons'
 import { getCommentList, approveComment, rejectComment, deleteComment, setVisibleComment, setHiddenComment } from '@/api/comment'
 import { Comment } from '@/types'
@@ -105,8 +106,9 @@ const CommentPage: React.FC = () => {
         message.success('已设置为可见')
       }
       loadComments()
-    } catch (error) {
-      message.error('操作失败')
+    } catch (error: any) {
+      console.error('切换可见状态失败:', error)
+      message.error(error?.response?.data?.message || error?.message || '操作失败')
     }
   }
 
@@ -275,14 +277,25 @@ const CommentPage: React.FC = () => {
       render: (_: any, record: Comment) => (
         <Space direction="vertical" size="small">
           {getStatusTag(record.status)}
-          {record.isVisible !== undefined && (
-            <Tag
-              icon={record.isVisible === 1 ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-              color={record.isVisible === 1 ? 'success' : 'default'}
-            >
-              {record.isVisible === 1 ? '可见' : '隐藏'}
-            </Tag>
-          )}
+          <Tag
+            icon={record.isVisible === 1 ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+            color={record.isVisible === 1 ? 'success' : 'default'}
+            style={{ cursor: 'pointer', transition: 'all 0.3s' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '0.7'
+              e.currentTarget.style.transform = 'scale(1.05)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '1'
+              e.currentTarget.style.transform = 'scale(1)'
+            }}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleToggleVisible(record.id, record.isVisible!)
+            }}
+          >
+            {record.isVisible === 1 ? '可见' : '隐藏'}
+          </Tag>
         </Space>
       ),
     },
@@ -301,19 +314,10 @@ const CommentPage: React.FC = () => {
           <Tooltip title="查看详情">
             <Button
               type="text"
-              icon={<EyeOutlined />}
+              icon={<InfoCircleOutlined />}
               onClick={() => showDetail(record)}
             />
           </Tooltip>
-          {record.isVisible !== undefined && (
-            <Tooltip title={record.isVisible === 1 ? '设置为隐藏' : '设置为可见'}>
-              <Button
-                type="text"
-                icon={record.isVisible === 1 ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-                onClick={() => handleToggleVisible(record.id, record.isVisible!)}
-              />
-            </Tooltip>
-          )}
           {record.status === 0 && (
             <>
               <Tooltip title="通过">

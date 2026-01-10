@@ -81,9 +81,9 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         if (comment == null) {
             throw new BusinessException("评论不存在");
         }
-        comment.setIsVisible(0);
+        comment.setIsVisible(1);
         commentMapper.updateById(comment);
-        
+
         Comment updatedComment = commentMapper.selectById(id);
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
     }
@@ -95,9 +95,9 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         if (comment == null) {
             throw new BusinessException("评论不存在");
         }
-        comment.setIsVisible(1);
+        comment.setIsVisible(0);
         commentMapper.updateById(comment);
-        
+
         Comment updatedComment = commentMapper.selectById(id);
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
     }
