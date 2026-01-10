@@ -10,6 +10,7 @@ import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.guestbook.model.entity.Guestbook;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.guestbook.model.vo.GuestbookVO;
+import com.blog.modules.guestbook.model.dto.GuestbookQueryDTO;
 import com.blog.modules.guestbook.service.GuestbookQueryService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.JsonUtil;
@@ -27,12 +28,46 @@ public class GuestbookQueryServiceImpl implements GuestbookQueryService {
     private UserMapper userMapper;
 
     @Override
-    public PageResult<GuestbookVO> list(Long page, Long size, Integer reviewStatus) {
-        Page<Guestbook> pageParam = PageUtil.buildPage(page, size);
+    public PageResult<GuestbookVO> list(GuestbookQueryDTO queryDTO) {
+        Page<Guestbook> pageParam = PageUtil.buildPage(queryDTO.getPage(), queryDTO.getSize());
         LambdaQueryWrapper<Guestbook> wrapper = new LambdaQueryWrapper<>();
 
-        if (reviewStatus != null) {
-            wrapper.eq(Guestbook::getReviewStatus, reviewStatus);
+        if (queryDTO.getReviewStatus() != null) {
+            wrapper.eq(Guestbook::getReviewStatus, queryDTO.getReviewStatus());
+        }
+        if (queryDTO.getId() != null) {
+            wrapper.eq(Guestbook::getId, queryDTO.getId());
+        }
+        if (queryDTO.getUserId() != null) {
+            wrapper.eq(Guestbook::getUserId, queryDTO.getUserId());
+        }
+        if (queryDTO.getNickname() != null && !queryDTO.getNickname().trim().isEmpty()) {
+            wrapper.like(Guestbook::getNickname, queryDTO.getNickname());
+        }
+        if (queryDTO.getEmail() != null && !queryDTO.getEmail().trim().isEmpty()) {
+            wrapper.like(Guestbook::getEmail, queryDTO.getEmail());
+        }
+        if (queryDTO.getQq() != null && !queryDTO.getQq().trim().isEmpty()) {
+            wrapper.like(Guestbook::getQq, queryDTO.getQq());
+        }
+        if (queryDTO.getIsVisible() != null) {
+            wrapper.eq(Guestbook::getIsVisible, queryDTO.getIsVisible());
+        }
+        if (queryDTO.getKeyword() != null && !queryDTO.getKeyword().trim().isEmpty()) {
+            wrapper.and(w -> w.like(Guestbook::getContent, queryDTO.getKeyword())
+                    .or()
+                    .like(Guestbook::getNickname, queryDTO.getKeyword())
+                    .or()
+                    .like(Guestbook::getEmail, queryDTO.getKeyword()));
+        }
+        if (queryDTO.getCountry() != null && !queryDTO.getCountry().trim().isEmpty()) {
+            wrapper.eq(Guestbook::getCountry, queryDTO.getCountry());
+        }
+        if (queryDTO.getProvince() != null && !queryDTO.getProvince().trim().isEmpty()) {
+            wrapper.eq(Guestbook::getProvince, queryDTO.getProvince());
+        }
+        if (queryDTO.getCity() != null && !queryDTO.getCity().trim().isEmpty()) {
+            wrapper.eq(Guestbook::getCity, queryDTO.getCity());
         }
 
         wrapper.orderByDesc(Guestbook::getCreateTime);
