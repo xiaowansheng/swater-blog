@@ -4,6 +4,8 @@ package com.blog.modules.guestbook.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.blog.modules.auth.config.EmailSessionProperties;
+import com.blog.modules.auth.util.EmailSessionTokenUtil;
 import com.blog.shared.PageResult;
 import com.blog.modules.guestbook.mapper.GuestbookMapper;
 import com.blog.modules.user.mapper.UserMapper;
@@ -23,6 +25,7 @@ import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
 import com.blog.shared.util.RequestUtil;
 import com.blog.shared.exception.BusinessException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,20 +43,25 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
     @Autowired
     private MessageVerificationService messageVerificationService;
 
+    @Autowired
+    private EmailSessionProperties emailSessionProperties;
+
     @Autowired(required = false)
     private LocationProviderFactory locationProviderFactory;
 
     @Override
     public PageResult<GuestbookVO> list(Long page, Long size) {
+        String ownerEmail = getOwnerEmailFromRequest();
         Page<Guestbook> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Guestbook> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Guestbook::getIsVisible, 1)
-                .eq(Guestbook::getReviewStatus, 1)
-                .orderByDesc(Guestbook::getCreateTime);
+        wrapper.eq(Guestbook::getDeleted, 0);
+        wrapper.and(w -> w.eq(Guestbook::getReviewStatus, 1)
+                .or(ownerEmail != null && !ownerEmail.isBlank(), w2 -> w2.eq(Guestbook::getEmail, ownerEmail)));
+        wrapper.orderByDesc(Guestbook::getCreateTime);
 
         Page<Guestbook> result = guestbookMapper.selectPage(pageParam, wrapper);
         List<GuestbookVO> voList = result.getRecords().stream()
-                .map(this::convertToVO)
+                .map(g -> convertToVO(g, ownerEmail))
                 .collect(Collectors.toList());
 
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
@@ -64,10 +72,15 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
         if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
             throw new BusinessException(400, "Email is required");
         }
-        if (dto.getEmailCode() == null || dto.getEmailCode().trim().isEmpty()) {
-            throw new BusinessException(400, "Email code is required");
+
+        String ownerEmail = getOwnerEmailFromRequest();
+        boolean emailVerifiedBySession = ownerEmail != null && ownerEmail.equalsIgnoreCase(dto.getEmail());
+        if (!emailVerifiedBySession) {
+            if (dto.getEmailCode() == null || dto.getEmailCode().trim().isEmpty()) {
+                throw new BusinessException(400, "Email code is required");
+            }
+            messageVerificationService.validateEmailCode(dto.getEmail(), dto.getEmailCode());
         }
-        messageVerificationService.validateEmailCode(dto.getEmail(), dto.getEmailCode());
 
         Guestbook guestbook = BeanUtil.copyProperties(dto, Guestbook.class);
 
@@ -141,10 +154,10 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
         guestbookMapper.insert(guestbook);
         
         // Convert to VO and return
-        return convertToVO(guestbook);
+        return convertToVO(guestbook, emailVerifiedBySession ? ownerEmail : dto.getEmail());
     }
 
-    private GuestbookVO convertToVO(Guestbook guestbook) {
+    private GuestbookVO convertToVO(Guestbook guestbook, String ownerEmail) {
         GuestbookVO vo = BeanUtil.copyProperties(guestbook, GuestbookVO.class);
         if (guestbook.getUserId() != null) {
             User user = userMapper.selectById(guestbook.getUserId());
@@ -160,7 +173,22 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
                 vo.setImages(List.of());
             }
         }
+
+        boolean isOwner = ownerEmail != null && !ownerEmail.isBlank()
+                && guestbook.getEmail() != null
+                && ownerEmail.equalsIgnoreCase(guestbook.getEmail());
+        if (!isOwner && guestbook.getIsVisible() != null && guestbook.getIsVisible() == 0) {
+            vo.setContent("");
+            vo.setImages(List.of());
+        }
         return vo;
+    }
+
+    private String getOwnerEmailFromRequest() {
+        HttpServletRequest request = RequestUtil.getRequest();
+        if (request == null || emailSessionProperties == null) return null;
+        String token = request.getHeader(emailSessionProperties.getHeaderName());
+        return EmailSessionTokenUtil.getEmail(token, emailSessionProperties);
     }
 }
 

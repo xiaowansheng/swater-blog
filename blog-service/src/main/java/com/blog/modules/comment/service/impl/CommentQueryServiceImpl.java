@@ -14,6 +14,7 @@ import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.comment.model.enums.TargetType;
 import com.blog.modules.comment.model.vo.CommentVO;
+import com.blog.modules.comment.model.dto.CommentQueryDTO;
 import com.blog.modules.comment.service.CommentQueryService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.JsonUtil;
@@ -41,26 +42,45 @@ public class CommentQueryServiceImpl implements CommentQueryService {
     private TalkMapper talkMapper;
 
     @Override
-    public PageResult<CommentVO> list(Long page, Long size, Integer status, Long targetId, String targetType) {
-        Page<Comment> pageParam = PageUtil.buildPage(page, size);
+    public PageResult<CommentVO> list(CommentQueryDTO queryDTO) {
+        Page<Comment> pageParam = PageUtil.buildPage(queryDTO.getPage(), queryDTO.getSize());
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
 
-        if (status != null) {
-            wrapper.eq(Comment::getStatus, status);
+        if (queryDTO.getStatus() != null) {
+            wrapper.eq(Comment::getStatus, queryDTO.getStatus());
         }
-        if (targetId != null) {
-            wrapper.eq(Comment::getTargetId, targetId);
+        if (queryDTO.getTargetId() != null) {
+            wrapper.eq(Comment::getTargetId, queryDTO.getTargetId());
         }
-        if (targetType != null) {
-            wrapper.eq(Comment::getTargetType, targetType);
+        if (queryDTO.getTargetType() != null) {
+            wrapper.eq(Comment::getTargetType, queryDTO.getTargetType());
+        }
+        if (queryDTO.getId() != null) {
+            wrapper.eq(Comment::getId, queryDTO.getId());
+        }
+        if (queryDTO.getParentId() != null) {
+            wrapper.eq(Comment::getParentId, queryDTO.getParentId());
+        }
+        if (queryDTO.getRootId() != null) {
+            wrapper.eq(Comment::getRootId, queryDTO.getRootId());
+        }
+        if (queryDTO.getIsVisible() != null) {
+            wrapper.eq(Comment::getIsVisible, queryDTO.getIsVisible());
+        }
+        if (queryDTO.getKeyword() != null && !queryDTO.getKeyword().trim().isEmpty()) {
+            wrapper.and(w -> w.like(Comment::getContent, queryDTO.getKeyword())
+                    .or()
+                    .like(Comment::getNickname, queryDTO.getKeyword())
+                    .or()
+                    .like(Comment::getEmail, queryDTO.getKeyword()));
         }
         wrapper.orderByDesc(Comment::getCreateTime);
-        
+
         Page<Comment> result = commentMapper.selectPage(pageParam, wrapper);
         List<CommentVO> voList = result.getRecords().stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
-        
+
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
     }
 

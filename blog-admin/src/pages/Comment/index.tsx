@@ -38,16 +38,29 @@ const CommentPage: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
-  const [filters, setFilters] = useState<{ status: number | undefined; keyword: string }>({
+  const [filters, setFilters] = useState<{
+    status: number | undefined
+    keyword: string
+    id: number | undefined
+    parentId: number | undefined
+    rootId: number | undefined
+    targetType: string | undefined
+    isVisible: number | undefined
+  }>({
     status: undefined,
     keyword: '',
+    id: undefined,
+    parentId: undefined,
+    rootId: undefined,
+    targetType: undefined,
+    isVisible: undefined,
   })
   const [detailVisible, setDetailVisible] = useState(false)
   const [currentComment, setCurrentComment] = useState<Comment | null>(null)
 
   useEffect(() => {
     loadComments()
-  }, [pagination.current, pagination.pageSize, filters.status])
+  }, [pagination.current, pagination.pageSize])
 
   const loadComments = async () => {
     setLoading(true)
@@ -56,6 +69,12 @@ const CommentPage: React.FC = () => {
         page: pagination.current,
         size: pagination.pageSize,
         status: filters.status,
+        id: filters.id,
+        parentId: filters.parentId,
+        rootId: filters.rootId,
+        targetType: filters.targetType,
+        isVisible: filters.isVisible,
+        keyword: filters.keyword,
       })
       setComments(result.records)
       setPagination((prev) => ({ ...prev, total: result.total }))
@@ -280,19 +299,6 @@ const CommentPage: React.FC = () => {
           <Tag
             icon={record.isVisible === 1 ? <EyeOutlined /> : <EyeInvisibleOutlined />}
             color={record.isVisible === 1 ? 'success' : 'default'}
-            style={{ cursor: 'pointer', transition: 'all 0.3s' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '0.7'
-              e.currentTarget.style.transform = 'scale(1.05)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '1'
-              e.currentTarget.style.transform = 'scale(1)'
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              handleToggleVisible(record.id, record.isVisible!)
-            }}
           >
             {record.isVisible === 1 ? '可见' : '隐藏'}
           </Tag>
@@ -308,9 +314,17 @@ const CommentPage: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      width: 200,
+      width: 250,
       render: (_: any, record: Comment) => (
         <Space size="small">
+          <Tooltip title={record.isVisible === 1 ? '设置为隐藏' : '设置为可见'}>
+            <Button
+              type="text"
+              icon={record.isVisible === 1 ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+              className={record.isVisible === 1 ? 'text-gray-500' : 'text-green-500'}
+              onClick={() => handleToggleVisible(record.id, record.isVisible!)}
+            />
+          </Tooltip>
           <Tooltip title="查看详情">
             <Button
               type="text"
@@ -351,25 +365,69 @@ const CommentPage: React.FC = () => {
   return (
     <div className="page-container">
       <div className="search-bar">
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-4 items-center flex-wrap">
           <Input
             placeholder="搜索评论内容"
             prefix={<SearchOutlined className="text-gray-400" />}
             value={filters.keyword}
             onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
-            style={{ width: 240 }}
+            style={{ width: 200 }}
+            allowClear
+          />
+          <Input
+            placeholder="评论ID"
+            value={filters.id || ''}
+            onChange={(e) => setFilters({ ...filters, id: e.target.value ? Number(e.target.value) : undefined })}
+            style={{ width: 120 }}
+            type="number"
+            allowClear
+          />
+          <Input
+            placeholder="父评论ID"
+            value={filters.parentId || ''}
+            onChange={(e) => setFilters({ ...filters, parentId: e.target.value ? Number(e.target.value) : undefined })}
+            style={{ width: 120 }}
+            type="number"
+            allowClear
+          />
+          <Input
+            placeholder="根评论ID"
+            value={filters.rootId || ''}
+            onChange={(e) => setFilters({ ...filters, rootId: e.target.value ? Number(e.target.value) : undefined })}
+            style={{ width: 120 }}
+            type="number"
             allowClear
           />
           <Select
             placeholder="评论状态"
             value={filters.status}
             onChange={(value) => setFilters({ ...filters, status: value })}
-            style={{ width: 140 }}
+            style={{ width: 120 }}
             allowClear
           >
             <Select.Option value={0}>待审核</Select.Option>
             <Select.Option value={1}>已通过</Select.Option>
             <Select.Option value={2}>已拒绝</Select.Option>
+          </Select>
+          <Select
+            placeholder="评论类型"
+            value={filters.targetType}
+            onChange={(value) => setFilters({ ...filters, targetType: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value="ARTICLE">文章</Select.Option>
+            <Select.Option value="TALK">说说</Select.Option>
+          </Select>
+          <Select
+            placeholder="可见状态"
+            value={filters.isVisible}
+            onChange={(value) => setFilters({ ...filters, isVisible: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value={1}>可见</Select.Option>
+            <Select.Option value={0}>隐藏</Select.Option>
           </Select>
           <Button type="primary" icon={<SearchOutlined />} onClick={loadComments}>
             搜索

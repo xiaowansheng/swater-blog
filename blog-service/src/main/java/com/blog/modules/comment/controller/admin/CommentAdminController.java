@@ -6,6 +6,7 @@ import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.comment.model.vo.CommentVO;
+import com.blog.modules.comment.model.dto.CommentQueryDTO;
 import com.blog.modules.comment.service.CommentCommandService;
 import com.blog.modules.comment.service.CommentQueryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +24,8 @@ public class CommentAdminController {
     @GetMapping("/list")
     @ApiOperation(name = "查询评论列表", type = ApiOperationType.QUERY,
             description = "分页查询评论列表")
-    public Result<PageResult<CommentVO>> list(
-            @RequestParam(required = false) Long page,
-            @RequestParam(required = false) Long size,
-            @RequestParam(required = false) Integer status,
-            @RequestParam(required = false) Long targetId,
-            @RequestParam(required = false) String targetType) {
-        PageResult<CommentVO> result = commentQueryService.list(page, size, status, targetId, targetType);
+    public Result<PageResult<CommentVO>> list(CommentQueryDTO queryDTO) {
+        PageResult<CommentVO> result = commentQueryService.list(queryDTO);
         return Result.success(result);
     }
 

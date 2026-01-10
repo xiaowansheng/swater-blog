@@ -7,6 +7,12 @@ export const getCommentList = (params: {
   status?: number
   postId?: number
   momentId?: number
+  id?: number
+  parentId?: number
+  rootId?: number
+  targetType?: string
+  isVisible?: number
+  keyword?: string
 }): Promise<PageResult<Comment>> => {
   return request.get('/admin/comment/list', { params })
 }
