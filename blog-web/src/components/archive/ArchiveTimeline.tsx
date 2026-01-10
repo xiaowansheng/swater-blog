@@ -274,6 +274,9 @@ export default function ArchiveTimeline() {
                                     👁️ {article.viewCount || 0}
                                   </span>
                                   <span className="flex items-center gap-1">
+                                    👍 {article.likeCount || 0}
+                                  </span>
+                                  <span className="flex items-center gap-1">
                                     💬 {article.commentCount || 0}
                                   </span>
                                 </div>
