@@ -318,7 +318,11 @@ public class SecurityFilter implements Filter {
             {"localhost:3000", "localhost:8888"},  // 前端开发服务器 -> 后端开发服务器
             {"127.0.0.1:3000", "127.0.0.1:8888"}, // 本地IP访问
             {"localhost:3000", "127.0.0.1:8888"},  // 混合访问
-            {"127.0.0.1:3000", "localhost:8888"}   // 混合访问
+            {"127.0.0.1:3000", "localhost:8888"},  // 混合访问
+            {"localhost:3001", "localhost:8888"},  // 前端开发服务器(3001端口) -> 后端开发服务器
+            {"127.0.0.1:3001", "127.0.0.1:8888"}, // 本地IP访问(3001端口)
+            {"localhost:3001", "127.0.0.1:8888"},  // 混合访问(3001端口)
+            {"127.0.0.1:3001", "localhost:8888"}   // 混合访问(3001端口)
         };
         
         for (String[] combination : allowedDevCombinations) {

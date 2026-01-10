@@ -5,8 +5,10 @@ import com.blog.shared.annotation.ApiDocumentation;
 import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.annotation.RateLimit;
 import com.blog.shared.Result;
+import com.blog.modules.auth.model.dto.EmailVerifyDTO;
 import com.blog.modules.auth.model.dto.LoginDTO;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.modules.auth.model.vo.EmailVerifyVO;
 import com.blog.modules.auth.model.vo.LoginVO;
 import com.blog.modules.user.model.vo.UserVO;
 import com.blog.modules.auth.service.AuthService;
@@ -281,6 +283,12 @@ public class AuthController {
         loginVO.setToken(newToken);
         // 设置其他必要的字段
         return Result.success(loginVO);
+    }
+
+    @PostMapping("/email/verify")
+    @ApiOperation(name = "邮箱验证会话", type = ApiOperationType.OTHER, description = "校验邮箱验证码并签发会话凭证token")
+    public Result<EmailVerifyVO> verifyEmail(@Valid @RequestBody EmailVerifyDTO dto) {
+        return Result.success(authService.verifyEmail(dto));
     }
 
     @GetMapping("/current")

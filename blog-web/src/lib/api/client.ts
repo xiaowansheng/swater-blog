@@ -1,6 +1,7 @@
 import type { ApiResponse } from '@/types';
 import { getMockResponse, createMockResponse } from './mock';
 import toast from 'react-hot-toast';
+import { getVerifyToken, VERIFY_TOKEN_HEADER } from '../auth/emailSession';
 
 const API_BASE_URL = typeof window !== 'undefined' 
   ? process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8888'
@@ -16,10 +17,12 @@ export async function fetchClient<T>(
   }
 
   try {
+    const verifyToken = getVerifyToken();
     const response = await fetch(`${API_BASE_URL}${url}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
+        ...(verifyToken ? { [VERIFY_TOKEN_HEADER]: verifyToken } : {}),
         ...options?.headers,
       },
     });

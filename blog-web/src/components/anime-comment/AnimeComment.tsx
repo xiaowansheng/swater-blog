@@ -36,7 +36,7 @@ function useVisibilityChecker() {
 
   const isVisible = (comment: CommentVO) => {
     const status = comment.status;
-    const published = status === 1 || status === 'published';
+    const published = status === 1;
     if (published) return true;
     return isOwner(comment);
   };

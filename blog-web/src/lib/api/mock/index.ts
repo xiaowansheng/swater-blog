@@ -104,15 +104,15 @@ const mockHandlers: MockHandler[] = [
         records = records.filter((c) => c.postId === parseInt(targetId));
       }
       if (targetId && targetType === 'TALK') {
-        records = records.filter((c) => c.momentId === parseInt(targetId));
+        records = records.filter((c: any) => c.momentId === parseInt(targetId));
       }
 
       if (parentIdParam !== null) {
         const parentId = parseInt(parentIdParam);
         if (parentId === 0) {
-          records = records.filter((c) => !c.parentId);
+          records = records.filter((c: any) => !c.parentId);
         } else {
-          records = records.filter((c) => c.parentId === parentId);
+          records = records.filter((c: any) => c.parentId === parentId);
         }
       }
 

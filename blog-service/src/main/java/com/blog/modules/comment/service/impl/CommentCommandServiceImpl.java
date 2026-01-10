@@ -41,8 +41,9 @@ public class CommentCommandServiceImpl implements CommentCommandService {
             throw new BusinessException("评论不存在");
         }
         comment.setStatus(1);
+        comment.setIsVisible(1); // 审核通过时同时设置为可见
         commentMapper.updateById(comment);
-        
+
         Comment approvedComment = commentMapper.selectById(id);
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentApprovedEvent(this, id, approvedComment)));
     }

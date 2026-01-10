@@ -37,9 +37,6 @@ public class Comment extends com.blog.shared.model.entity.BaseEntity {
 
     private String qq;
 
-    @TableField("owner_token")
-    private String ownerToken;
-
     private Integer status;
 
     @TableField("is_visible")

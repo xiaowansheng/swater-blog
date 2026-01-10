@@ -8,13 +8,18 @@ import com.blog.bootstrap.context.UserContext;
 import com.blog.shared.exception.BusinessException;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.auth.model.dto.LoginDTO;
+import com.blog.modules.auth.model.dto.EmailVerifyDTO;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.auth.model.vo.LoginVO;
+import com.blog.modules.auth.model.vo.EmailVerifyVO;
 import com.blog.modules.system.role.model.vo.RoleVO;
 import com.blog.modules.user.model.vo.UserVO;
 import com.blog.modules.user.event.user.UserLoggedInEvent;
 import com.blog.modules.user.event.user.UserLoggedOutEvent;
 import com.blog.modules.auth.service.AuthService;
+import com.blog.modules.auth.config.EmailSessionProperties;
+import com.blog.modules.auth.util.EmailSessionTokenUtil;
+import com.blog.modules.message.service.MessageVerificationService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.PasswordUtil;
 import com.blog.shared.util.RequestUtil;
@@ -37,6 +42,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private MessageVerificationService messageVerificationService;
+
+    @Autowired
+    private EmailSessionProperties emailSessionProperties;
 
     @Override
     public LoginVO login(LoginDTO dto) {
@@ -85,6 +96,18 @@ public class AuthServiceImpl implements AuthService {
         eventPublisher.publishEvent(new UserLoggedInEvent(this, user.getId(), ip != null ? ip : ""));
         
         return loginVO;
+    }
+
+    @Override
+    public EmailVerifyVO verifyEmail(EmailVerifyDTO dto) {
+        messageVerificationService.validateEmailCode(dto.getEmail(), dto.getCode());
+        String token = EmailSessionTokenUtil.createToken(dto.getEmail(), emailSessionProperties);
+
+        EmailVerifyVO vo = new EmailVerifyVO();
+        vo.setToken(token);
+        vo.setEmail(dto.getEmail());
+        vo.setExpiresIn(emailSessionProperties.getTtlSeconds());
+        return vo;
     }
 
     @Override
