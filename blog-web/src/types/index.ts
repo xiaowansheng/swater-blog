@@ -216,6 +216,8 @@ export interface FriendLinkApplicationDTO {
   logo?: string;
   description?: string;
   author: string;
+  email: string;
+  emailCode?: string;
 }
 
 export interface SearchVO {

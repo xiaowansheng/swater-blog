@@ -22,4 +22,9 @@ public class FriendLinkApplicationDTO {
     private String description;
 
     private String author;
+
+    @NotBlank(message = "联系邮箱不能为空")
+    private String email;
+
+    private String emailCode;
 }

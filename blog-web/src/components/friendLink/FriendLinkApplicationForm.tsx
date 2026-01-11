@@ -1,8 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { friendLinkApi } from '@/lib/api/friendLink';
+import { guestbookApi } from '@/lib/api/guestbook';
+import { authApi } from '@/lib/api/auth';
 import type { FriendLinkApplicationDTO } from '@/types';
+import toast from 'react-hot-toast';
+import { clearVerifyToken, getVerifyToken, isVerifyTokenValidForEmail, saveVerifyToken } from '@/lib/auth/emailSession';
+import { useUserInfoStore } from '@/store/userInfo';
 
 interface FriendLinkApplicationFormProps {
   onSuccess?: () => void;
@@ -11,21 +16,120 @@ interface FriendLinkApplicationFormProps {
 export default function FriendLinkApplicationForm({
   onSuccess,
 }: FriendLinkApplicationFormProps) {
+  // 从全局store获取用户信息
+  const userInfo = useUserInfoStore();
+  const setUserInfo = useUserInfoStore((state) => state.setUserInfo);
+
   const [formData, setFormData] = useState<FriendLinkApplicationDTO>({
     name: '',
-    author: '',
+    author: userInfo.nickname || '',
     url: '',
     logo: '',
     description: '',
+    email: userInfo.email || '',
   });
+  const [emailCode, setEmailCode] = useState('');
+  const [emailVerified, setEmailVerified] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  // 初始化倒计时状态
+  useEffect(() => {
+    const savedEndTime = localStorage.getItem('emailCodeEndTime');
+    if (savedEndTime) {
+      const endTime = parseInt(savedEndTime, 10);
+      const now = Date.now();
+      const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+      if (remaining > 0) {
+        setCooldown(remaining);
+      } else {
+        localStorage.removeItem('emailCodeEndTime');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (cooldown <= 0) {
+      localStorage.removeItem('emailCodeEndTime');
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setCooldown((prev) => {
+        const newValue = prev > 0 ? prev - 1 : 0;
+        if (newValue <= 0) {
+          localStorage.removeItem('emailCodeEndTime');
+        }
+        return newValue;
+      });
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [cooldown]);
+
+  useEffect(() => {
+    const token = getVerifyToken();
+    const trimmedEmail = formData.email?.trim() || '';
+    setEmailVerified(isVerifyTokenValidForEmail(token, trimmedEmail));
+  }, [formData.email]);
+
+  const handleSendCode = async () => {
+    const trimmedEmail = formData.email?.trim() || '';
+    if (!trimmedEmail) {
+      setError('请输入联系邮箱');
+      return;
+    }
+    setSendingCode(true);
+    setError('');
+    try {
+      await guestbookApi.sendEmailCode(trimmedEmail);
+      toast.success('验证码已发送');
+      const endTime = Date.now() + 60 * 1000;
+      localStorage.setItem('emailCodeEndTime', endTime.toString());
+      setCooldown(60);
+    } catch (err) {
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const ensureEmailVerified = async () => {
+    const trimmedEmail = formData.email?.trim() || '';
+    const token = getVerifyToken();
+    if (isVerifyTokenValidForEmail(token, trimmedEmail)) {
+      setEmailVerified(true);
+      return true;
+    }
+    if (!emailCode.trim()) {
+      setError('请输入邮箱验证码');
+      return false;
+    }
+    const result = await authApi.verifyEmail(trimmedEmail, emailCode.trim());
+    saveVerifyToken(result.token);
+    setEmailVerified(true);
+    setEmailCode('');
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.author.trim() || !formData.url.trim()) {
-      setError('请填写必填项（网站名称、您的昵称、网站地址）');
+
+    if (!formData.name.trim()) {
+      setError('请填写网站名称');
+      return;
+    }
+    if (!formData.author.trim()) {
+      setError('请填写您的昵称');
+      return;
+    }
+    if (!formData.url.trim()) {
+      setError('请填写网站地址');
+      return;
+    }
+    if (!formData.email?.trim()) {
+      setError('请填写联系邮箱');
       return;
     }
 
@@ -34,20 +138,26 @@ export default function FriendLinkApplicationForm({
     setSuccess(false);
 
     try {
+      const ok = await ensureEmailVerified();
+      if (!ok) return;
+
       await friendLinkApi.apply({
         name: formData.name.trim(),
         author: formData.author.trim(),
         url: formData.url.trim(),
         logo: formData.logo?.trim() || undefined,
         description: formData.description?.trim() || undefined,
+        email: formData.email.trim(),
+        emailCode: emailCode.trim() || undefined,
       });
       setSuccess(true);
       setFormData({
         name: '',
-        author: '',
+        author: userInfo.nickname || '',
         url: '',
         logo: '',
         description: '',
+        email: userInfo.email || '',
       });
       setTimeout(() => {
         onSuccess?.();
@@ -100,20 +210,6 @@ export default function FriendLinkApplicationForm({
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-foreground">
-            您的昵称 <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.author}
-            onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-            placeholder="请输入您的昵称"
-            required
-            className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-foreground">
             网站地址 <span className="text-red-500">*</span>
           </label>
           <input
@@ -124,6 +220,87 @@ export default function FriendLinkApplicationForm({
             required
             className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
           />
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-foreground">
+            您的昵称 <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={formData.author}
+            onChange={(e) => {
+              const newAuthor = e.target.value;
+              setFormData({ ...formData, author: newAuthor });
+              setUserInfo({ nickname: newAuthor });
+            }}
+            placeholder="请输入您的昵称"
+            required
+            className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-foreground">
+            联系邮箱 <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="email"
+            value={formData.email}
+            onChange={(e) => {
+              const newEmail = e.target.value;
+              setFormData({ ...formData, email: newEmail });
+              setUserInfo({ email: newEmail });
+            }}
+            placeholder="请输入联系邮箱"
+            required
+            className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-foreground">
+            邮箱验证 <span className="text-red-500">*</span>
+          </label>
+          {emailVerified ? (
+            <div className="flex items-center justify-between rounded-xl border border-border bg-card/50 px-5 py-3">
+              <span className="text-sm text-primary/80">邮箱已验证</span>
+              <button
+                type="button"
+                onClick={() => {
+                  clearVerifyToken();
+                  setEmailVerified(false);
+                }}
+                className="text-xs text-primary hover:underline"
+              >
+                更换/重新验证
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-3 items-end">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={emailCode}
+                  onChange={(e) => setEmailCode(e.target.value)}
+                  placeholder="请输入邮箱验证码"
+                  className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleSendCode}
+                disabled={sendingCode || cooldown > 0}
+                className="px-4 py-3 border border-border rounded-xl hover:bg-muted/50 transition-all text-sm disabled:opacity-50"
+              >
+                {cooldown > 0
+                  ? `${cooldown}秒后重发`
+                  : sendingCode
+                    ? '发送中...'
+                    : '发送验证码'}
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
