@@ -196,6 +196,7 @@ export interface MomentVO {
   authorId: number;
   authorName?: string;
   authorAvatar?: string;
+  viewCount?: number;
   likeCount: number;
   commentCount: number;
   createTime: string;

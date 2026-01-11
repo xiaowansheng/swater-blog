@@ -63,6 +63,20 @@ export const articleApi = {
     getByKey: (key: string) => {
       return fetchClient<PostVO>(`/api/public/post/key/${key}`);
     },
+
+    getStats: (ids: number[]) => {
+      const param = ids.filter(Boolean).join(',');
+      return fetchClient<Array<{ id: number; viewCount: number; likeCount: number; commentCount: number }>>(
+        `/api/public/post/stats?ids=${encodeURIComponent(param)}`,
+        { method: 'GET', silent: true }
+      );
+    },
+
+    getStatsById: (id: number) => {
+      return fetchClient<{ id: number; viewCount: number; likeCount: number; commentCount: number }>(
+        `/api/public/post/${id}/stats`,
+        { method: 'GET', silent: true }
+      );
+    },
   },
 };
-

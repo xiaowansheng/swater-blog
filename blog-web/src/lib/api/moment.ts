@@ -1,4 +1,5 @@
 import { fetchServer } from './server';
+import { fetchClient } from './client';
 import type { MomentVO, PageResult } from '@/types';
 
 export const momentApi = {
@@ -15,5 +16,21 @@ export const momentApi = {
   getByKey: (key: string) => {
     return fetchServer<MomentVO>(`/api/public/moment/key/${key}`);
   },
-};
 
+  client: {
+    getStats: (ids: number[]) => {
+      const param = ids.filter(Boolean).join(',');
+      return fetchClient<Array<{ id: number; viewCount: number; likeCount: number; commentCount: number }>>(
+        `/api/public/moment/stats?ids=${encodeURIComponent(param)}`,
+        { method: 'GET', silent: true }
+      );
+    },
+
+    getStatsById: (id: number) => {
+      return fetchClient<{ id: number; viewCount: number; likeCount: number; commentCount: number }>(
+        `/api/public/moment/${id}/stats`,
+        { method: 'GET', silent: true }
+      );
+    },
+  },
+};

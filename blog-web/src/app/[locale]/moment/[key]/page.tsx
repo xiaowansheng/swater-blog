@@ -5,6 +5,7 @@ import Image from '@/components/common/ImageWithPreview';
 import MomentImages from '@/components/moment/MomentImages';
 import { AnimeComment } from '@/components/anime-comment';
 import ContentTracker from '@/components/visitor/ContentTracker';
+import LiveViewCount from '@/components/common/LiveViewCount';
 import { momentApi } from '@/lib/api/moment';
 import { formatDate } from '@/lib/utils/format';
 import { ISR_REVALIDATE } from '@/lib/constants';
@@ -84,6 +85,12 @@ export default async function MomentDetailPage({
             )}
 
             <div className="flex gap-6 items-center pt-6 mt-6 border-t border-border text-sm text-muted-foreground">
+              <div className="flex gap-1 items-center">
+                <span>👀</span>
+                <span>
+                  <LiveViewCount type="TALK" id={moment.id} initialCount={moment.viewCount || 0} />
+                </span>
+              </div>
               <div className="flex gap-1 items-center">
                 <span>❤️</span>
                 <span>{moment.likeCount || 0}</span>

@@ -70,6 +70,12 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
               </svg>
               {article.likeCount}
             </span>
+            <span className="flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5 text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h8m-8 4h6m-9 7l-3 3V5a2 2 0 012-2h16a2 2 0 012 2v10a2 2 0 01-2 2H9l-4 4z" />
+              </svg>
+              {article.commentCount}
+            </span>
           </div>
 
           <p className="leading-relaxed text-foreground/70 line-clamp-3 text-sm sm:text-base mb-4">
