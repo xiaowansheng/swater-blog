@@ -104,9 +104,9 @@ public class TrackServiceImpl implements TrackService {
             visitor.setDeviceType(uaInfo.getDeviceType());
             visitor.setDeviceBrand(uaInfo.getDeviceBrand());
             visitor.setDeviceModel(uaInfo.getDeviceModel());
-            visitor.setBrowserName(uaInfo.getBrowser());
+            visitor.setBrowserName(uaInfo.getBrowserName());
             visitor.setBrowserVersion(uaInfo.getBrowserVersion());
-            visitor.setOsName(uaInfo.getOs());
+            visitor.setOsName(uaInfo.getOsName());
             visitor.setOsVersion(uaInfo.getOsVersion());
         }
 
