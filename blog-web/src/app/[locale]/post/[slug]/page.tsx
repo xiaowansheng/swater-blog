@@ -10,7 +10,7 @@ import ArticleMenuMobile from '@/components/article/ArticleMenuMobile';
 import ReadingProgress from '@/components/widgets/ReadingProgress';
 import { AnimeComment } from '@/components/anime-comment';
 import ContentTracker from '@/components/visitor/ContentTracker';
-import LiveViewCount from '@/components/common/LiveViewCount';
+import ArticleLiveStats from '@/components/article/ArticleLiveStats';
 import { articleApi } from '@/lib/api/article';
 import { getAuthorInfo } from '@/lib/api/config.server';
 import { ISR_REVALIDATE } from '@/lib/constants';
@@ -114,9 +114,14 @@ export default async function PostDetailPage({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
               </div>
-              <span>
-                <LiveViewCount type="ARTICLE" id={article.id} initialCount={article.viewCount || 0} /> 次阅读
-              </span>
+              <ArticleLiveStats
+                id={article.id}
+                initial={{
+                  viewCount: article.viewCount || 0,
+                  likeCount: article.likeCount || 0,
+                  commentCount: article.commentCount || 0,
+                }}
+              />
             </div>
           </div>
 

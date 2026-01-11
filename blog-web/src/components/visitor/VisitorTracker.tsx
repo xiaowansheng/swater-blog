@@ -12,19 +12,19 @@ function getOrCreateId(key: string, storage: Storage) {
   return id;
 }
 
-function fnv1a64Hex(input: string) {
-  let hash = 14695981039346656037n;
-  const prime = 1099511628211n;
+function fnv1a32Hex(input: string) {
+  let hash = 0x811c9dc5;
   for (let i = 0; i < input.length; i++) {
-    hash ^= BigInt(input.charCodeAt(i));
-    hash = BigInt.asUintN(64, hash * prime);
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+    hash >>>= 0;
   }
-  return hash.toString(16).padStart(16, '0');
+  return hash.toString(16).padStart(8, '0');
 }
 
 function normalizePageId(rawId: string) {
   if (rawId.length <= 255) return rawId;
-  return `h_${fnv1a64Hex(rawId)}`;
+  return `h_${fnv1a32Hex(rawId)}_${rawId.length}`;
 }
 
 function stripLocalePrefix(pathname: string) {

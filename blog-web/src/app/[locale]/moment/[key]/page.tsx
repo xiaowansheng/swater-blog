@@ -5,7 +5,7 @@ import Image from '@/components/common/ImageWithPreview';
 import MomentImages from '@/components/moment/MomentImages';
 import { AnimeComment } from '@/components/anime-comment';
 import ContentTracker from '@/components/visitor/ContentTracker';
-import LiveViewCount from '@/components/common/LiveViewCount';
+import MomentLiveStats from '@/components/moment/MomentLiveStats';
 import { momentApi } from '@/lib/api/moment';
 import { formatDate } from '@/lib/utils/format';
 import { ISR_REVALIDATE } from '@/lib/constants';
@@ -39,12 +39,12 @@ export default async function MomentDetailPage({
   params: Promise<{ locale: string; key: string }>;
 }) {
   const { key } = await params;
-  const t = await getTranslations('common');
+  await getTranslations('common');
 
   try {
     const [moment, author] = await Promise.all([
       momentApi.getByKey(key),
-      getAuthorInfo()
+      getAuthorInfo(),
     ]);
 
     return (
@@ -66,9 +66,7 @@ export default async function MomentDetailPage({
               )}
               <div className="flex-1">
                 <div className="text-lg font-medium mb-1">{author.name || '博主'}</div>
-                <div className="text-xs text-muted-foreground/70">
-                  {formatDate(moment.createTime)}
-                </div>
+                <div className="text-xs text-muted-foreground/70">{formatDate(moment.createTime)}</div>
               </div>
             </div>
 
@@ -78,36 +76,23 @@ export default async function MomentDetailPage({
             />
 
             {moment.images && moment.images.length > 0 && (
-              <MomentImages
-                images={moment.images}
-                alt={moment.content.substring(0, 20)}
-              />
+              <MomentImages images={moment.images} alt={moment.content.substring(0, 20)} />
             )}
 
-            <div className="flex gap-6 items-center pt-6 mt-6 border-t border-border text-sm text-muted-foreground">
-              <div className="flex gap-1 items-center">
-                <span>👀</span>
-                <span>
-                  <LiveViewCount type="TALK" id={moment.id} initialCount={moment.viewCount || 0} />
-                </span>
-              </div>
-              <div className="flex gap-1 items-center">
-                <span>❤️</span>
-                <span>{moment.likeCount || 0}</span>
-              </div>
-              <div className="flex gap-1 items-center">
-                <span>💬</span>
-                <span>{moment.commentCount || 0}</span>
-              </div>
-            </div>
+            <MomentLiveStats
+              id={moment.id}
+              initial={{
+                viewCount: moment.viewCount || 0,
+                likeCount: moment.likeCount || 0,
+                commentCount: moment.commentCount || 0,
+              }}
+            />
 
-            {/* 二次元评论组件 */}
             <div className="mt-12">
               <AnimeComment momentId={moment.id} />
             </div>
           </article>
         </main>
-        
       </>
     );
   } catch (error) {

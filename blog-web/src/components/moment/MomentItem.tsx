@@ -168,6 +168,10 @@ export default function MomentItem({ moment }: MomentItemProps) {
 
       <div className="flex items-center gap-6 pt-4 text-sm border-t border-border text-muted-foreground">
         <div className="flex items-center gap-1">
+          <span>👀</span>
+          <span>{moment.viewCount || 0}</span>
+        </div>
+        <div className="flex items-center gap-1">
           <span>❤️</span>
           <span>{moment.likeCount || 0}</span>
         </div>

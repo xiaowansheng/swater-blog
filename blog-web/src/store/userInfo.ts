@@ -68,6 +68,7 @@ export const useUserInfoStore = create<UserInfoStore>()(
       }),
       // 水合完成后设置标记
       onRehydrateStorage: () => (state) => {
+        if (!state) return;
         state.isHydrated = true;
       },
     }
