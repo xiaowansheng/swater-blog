@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import Image from '@/components/common/ImageWithPreview';
 import MomentImages from '@/components/moment/MomentImages';
 import { AnimeComment } from '@/components/anime-comment';
+import ContentTracker from '@/components/visitor/ContentTracker';
 import { momentApi } from '@/lib/api/moment';
 import { formatDate } from '@/lib/utils/format';
 import { ISR_REVALIDATE } from '@/lib/constants';
@@ -47,7 +48,8 @@ export default async function MomentDetailPage({
 
     return (
       <>
-        
+        <ContentTracker contentType="TALK" contentId={moment.id} />
+
         <main className="container mx-auto px-4 py-12 flex-1">
           <article className="bg-card border border-border rounded-2xl p-8 md:p-12 shadow-sm max-w-4xl mx-auto">
             <div className="flex items-start gap-3 mb-6">

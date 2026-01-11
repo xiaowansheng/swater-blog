@@ -45,7 +45,6 @@ public class TalkPublicServiceImpl implements TalkPublicService {
     }
 
     @Override
-    @Cacheable(value = "talk", key = "#id")
     public TalkVO getById(Long id) {
         Talk talk = talkMapper.selectOne(new LambdaQueryWrapper<Talk>()
                 .eq(Talk::getId, id)
@@ -57,7 +56,6 @@ public class TalkPublicServiceImpl implements TalkPublicService {
     }
 
     @Override
-    @Cacheable(value = "talk", key = "'key:' + #key")
     public TalkVO getByKey(String key) {
         Talk talk = talkMapper.selectOne(new LambdaQueryWrapper<Talk>()
                 .eq(Talk::getTalkKey, key)
@@ -87,4 +85,3 @@ public class TalkPublicServiceImpl implements TalkPublicService {
         return vo;
     }
 }
-

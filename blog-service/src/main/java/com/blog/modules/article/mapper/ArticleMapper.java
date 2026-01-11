@@ -6,6 +6,7 @@ import com.blog.shared.model.BaseMapper;
 import com.blog.modules.article.model.entity.Article;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 import java.util.List;
 import java.util.Map;
 @Mapper
@@ -19,5 +20,7 @@ public interface ArticleMapper extends com.blog.shared.model.BaseMapper<Article>
     List<Map<String, Object>> selectArchiveStatistics();
 
     List<Map<String, Object>> selectAllArchiveStatistics();
-}
 
+    @Update("UPDATE article SET view_count = IFNULL(view_count, 0) + 1 WHERE id = #{id} AND deleted = 0")
+    int incrementViewCount(@Param("id") Long id);
+}

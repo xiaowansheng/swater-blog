@@ -26,6 +26,9 @@ public class Talk extends com.blog.shared.model.entity.BaseEntity {
     @TableField("comment_count")
     private Integer commentCount;
 
+    @TableField("view_count")
+    private Integer viewCount;
+
     private String status;
 
     @TableField("is_top")
@@ -49,4 +52,3 @@ public class Talk extends com.blog.shared.model.entity.BaseEntity {
 
     private String browser;
 }
-

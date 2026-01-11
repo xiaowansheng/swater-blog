@@ -9,6 +9,7 @@ import ArticleMenu from '@/components/article/ArticleMenu';
 import ArticleMenuMobile from '@/components/article/ArticleMenuMobile';
 import ReadingProgress from '@/components/widgets/ReadingProgress';
 import { AnimeComment } from '@/components/anime-comment';
+import ContentTracker from '@/components/visitor/ContentTracker';
 import { articleApi } from '@/lib/api/article';
 import { getAuthorInfo } from '@/lib/api/config.server';
 import { ISR_REVALIDATE } from '@/lib/constants';
@@ -52,6 +53,7 @@ export default async function PostDetailPage({
 
     return (
       <>
+        <ContentTracker contentType="ARTICLE" contentId={article.id} />
         <ReadingProgress />
         {/* 文章头部 */}
         <PageHeader>

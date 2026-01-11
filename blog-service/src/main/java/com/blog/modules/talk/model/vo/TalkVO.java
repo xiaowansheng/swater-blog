@@ -24,6 +24,8 @@ public class TalkVO extends com.blog.shared.model.vo.BaseVO {
 
     private Integer commentCount;
 
+    private Integer viewCount;
+
     private String status;
 
     private Integer isTop;
@@ -46,4 +48,3 @@ public class TalkVO extends com.blog.shared.model.vo.BaseVO {
 
     private String browser;
 }
-

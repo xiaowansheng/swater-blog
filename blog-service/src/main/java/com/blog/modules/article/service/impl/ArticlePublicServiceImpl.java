@@ -77,7 +77,6 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
     }
 
     @Override
-    @Cacheable(value = "article", key = "#id")
     public ArticleVO getById(Long id) {
         Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
                 .eq(Article::getId, id)
@@ -89,7 +88,6 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
     }
 
     @Override
-    @Cacheable(value = "article:slug", key = "#slug")
     public ArticleVO getBySlug(String slug) {
         Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
                 .eq(Article::getSlug, slug)
@@ -101,7 +99,6 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
     }
 
     @Override
-    @Cacheable(value = "article:key", key = "#key")
     public ArticleVO getByKey(String key) {
         Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
                 .eq(Article::getArticleKey, key)

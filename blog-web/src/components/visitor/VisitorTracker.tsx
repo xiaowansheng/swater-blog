@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { recordVisitorAccess } from '@/lib/api/visitor';
+import { trackEnter } from '@/lib/api/track';
 
 function getOrCreateId(key: string, storage: Storage) {
   const existing = storage.getItem(key);
@@ -10,6 +10,33 @@ function getOrCreateId(key: string, storage: Storage) {
   const id = crypto.randomUUID();
   storage.setItem(key, id);
   return id;
+}
+
+function fnv1a64Hex(input: string) {
+  let hash = 14695981039346656037n;
+  const prime = 1099511628211n;
+  for (let i = 0; i < input.length; i++) {
+    hash ^= BigInt(input.charCodeAt(i));
+    hash = BigInt.asUintN(64, hash * prime);
+  }
+  return hash.toString(16).padStart(16, '0');
+}
+
+function normalizePageId(rawId: string) {
+  if (rawId.length <= 255) return rawId;
+  return `h_${fnv1a64Hex(rawId)}`;
+}
+
+function stripLocalePrefix(pathname: string) {
+  const segments = pathname.split('/').filter(Boolean);
+  const locale = segments[0];
+  const startIndex = locale === 'zh' || locale === 'en' ? 1 : 0;
+  return '/' + segments.slice(startIndex).join('/');
+}
+
+function isContentRoute(pathname: string) {
+  const normalized = stripLocalePrefix(pathname);
+  return normalized.startsWith('/post/') || normalized.startsWith('/moment/');
 }
 
 export default function VisitorTracker() {
@@ -24,21 +51,21 @@ export default function VisitorTracker() {
     lastPathRef.current = fullPath;
 
     const visitorKey = 'visitor_uuid';
-    const sessionKey = 'visitor_session_id';
     const visitorUuid = getOrCreateId(visitorKey, window.localStorage);
-    const sessionId = getOrCreateId(sessionKey, window.sessionStorage);
 
     const url = window.location.href;
     const referer = document.referrer || undefined;
     const params = new URL(url).searchParams;
+    if (isContentRoute(pathname)) return;
 
-    recordVisitorAccess({
+    const normalizedPath = stripLocalePrefix(pathname) || '/';
+    const pageKey = `PAGE:${normalizePageId(normalizedPath)}`;
+
+    trackEnter({
       visitorUuid,
-      pageType: 'PAGE',
-      pageId: pathname,
+      pageKey,
       pageUrl: url,
       referer,
-      sessionId,
       utmSource: params.get('utm_source'),
       utmMedium: params.get('utm_medium'),
       utmCampaign: params.get('utm_campaign'),
@@ -49,10 +76,9 @@ export default function VisitorTracker() {
         }
       })
       .catch(() => {
-        // 静默失败，避免影响前台体验
+        // Silent failure to avoid impacting UX.
       });
   }, [pathname, searchParams]);
 
   return null;
 }
-
