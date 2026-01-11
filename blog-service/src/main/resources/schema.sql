@@ -777,4 +777,24 @@ CREATE TABLE IF NOT EXISTS `content_read` (
   KEY `idx_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='内容阅读去重（V2）';
 
+-- 内容指标事件（趋势/Top 内容用，不影响展示累计值）
+CREATE TABLE IF NOT EXISTS `content_metric_event` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '事件ID',
+  `visitor_id` BIGINT DEFAULT NULL COMMENT '访客ID(可空)',
+  `metric` VARCHAR(16) NOT NULL COMMENT '指标(READ/LIKE/COMMENT)',
+  `content_type` VARCHAR(16) NOT NULL COMMENT '内容类型(ARTICLE/TALK)',
+  `content_id` BIGINT NOT NULL COMMENT '内容ID',
+  `delta` INT NOT NULL COMMENT '增量(+1/-1)',
+  `occurred_at` DATETIME NOT NULL COMMENT '发生时间',
+  `deleted` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否已删除',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_time` (`occurred_at`),
+  KEY `idx_metric_time` (`metric`, `occurred_at`),
+  KEY `idx_content_metric_time` (`content_type`, `content_id`, `metric`, `occurred_at`),
+  KEY `idx_visitor_time` (`visitor_id`, `occurred_at`),
+  KEY `idx_deleted` (`deleted`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='内容指标事件（V2）';
+
 

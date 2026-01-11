@@ -4,10 +4,12 @@ package com.blog.modules.statistics.track.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.statistics.track.mapper.ContentReadMapper;
+import com.blog.modules.statistics.track.mapper.ContentMetricEventMapper;
 import com.blog.modules.statistics.track.mapper.PageViewMapper;
 import com.blog.modules.statistics.track.mapper.VisitorSessionMapper;
 import com.blog.modules.statistics.track.model.dto.TrackEnterDTO;
 import com.blog.modules.statistics.track.model.entity.ContentRead;
+import com.blog.modules.statistics.track.model.entity.ContentMetricEvent;
 import com.blog.modules.statistics.track.model.entity.PageView;
 import com.blog.modules.statistics.track.model.entity.VisitorSession;
 import com.blog.modules.statistics.track.model.vo.TrackEnterResultVO;
@@ -45,6 +47,9 @@ public class TrackServiceImpl implements TrackService {
 
     @Autowired
     private ContentReadMapper contentReadMapper;
+
+    @Autowired
+    private ContentMetricEventMapper contentMetricEventMapper;
 
     @Autowired(required = false)
     private ArticleMapper articleMapper;
@@ -220,6 +225,7 @@ public class TrackServiceImpl implements TrackService {
 
         if (counted) {
             incrementContentViewCount(contentType, dto.getContentId());
+            recordMetricEvent(visitorId, "READ", contentType, dto.getContentId(), 1, now);
         }
         return counted;
     }
@@ -235,6 +241,21 @@ public class TrackServiceImpl implements TrackService {
             }
         } catch (Exception e) {
             log.warn("Failed to increment view count: type={}, id={}", contentType, contentId, e);
+        }
+    }
+
+    private void recordMetricEvent(Long visitorId, String metric, String contentType, Long contentId, int delta, LocalDateTime now) {
+        try {
+            ContentMetricEvent event = new ContentMetricEvent();
+            event.setVisitorId(visitorId);
+            event.setMetric(metric);
+            event.setContentType(contentType);
+            event.setContentId(contentId);
+            event.setDelta(delta);
+            event.setOccurredAt(now);
+            contentMetricEventMapper.insert(event);
+        } catch (Exception e) {
+            log.warn("Failed to record metric event: metric={}, type={}, id={}", metric, contentType, contentId, e);
         }
     }
 

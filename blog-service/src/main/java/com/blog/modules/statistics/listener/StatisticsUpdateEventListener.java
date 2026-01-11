@@ -7,11 +7,14 @@ import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.talk.mapper.TalkMapper;
 import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.talk.model.entity.Talk;
+import com.blog.modules.statistics.track.mapper.ContentMetricEventMapper;
+import com.blog.modules.statistics.track.model.entity.ContentMetricEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import java.time.LocalDateTime;
 @Slf4j
 @Component
 public class StatisticsUpdateEventListener {
@@ -21,6 +24,9 @@ public class StatisticsUpdateEventListener {
 
     @Autowired
     private TalkMapper talkMapper;
+
+    @Autowired
+    private ContentMetricEventMapper contentMetricEventMapper;
 
     /**
      * 评论创建事件
@@ -46,6 +52,7 @@ public class StatisticsUpdateEventListener {
                     if (article != null && article.getDeleted() == 0) {
                         article.setCommentCount(Math.max(0, (article.getCommentCount() != null ? article.getCommentCount() : 0) - 1));
                         articleMapper.updateById(article);
+                        recordContentMetricEvent("COMMENT", "ARTICLE", comment.getTargetId(), -1);
                     }
                 }
                 if (comment.getTargetId() != null && "TALK".equalsIgnoreCase(comment.getTargetType())) {
@@ -53,6 +60,7 @@ public class StatisticsUpdateEventListener {
                     if (talk != null && talk.getDeleted() == 0) {
                         talk.setCommentCount(Math.max(0, (talk.getCommentCount() != null ? talk.getCommentCount() : 0) - 1));
                         talkMapper.updateById(talk);
+                        recordContentMetricEvent("COMMENT", "TALK", comment.getTargetId(), -1);
                     }
                 }
             }
@@ -78,6 +86,7 @@ public class StatisticsUpdateEventListener {
                     if (article != null && article.getDeleted() == 0) {
                         article.setCommentCount((article.getCommentCount() != null ? article.getCommentCount() : 0) + 1);
                         articleMapper.updateById(article);
+                        recordContentMetricEvent("COMMENT", "ARTICLE", comment.getTargetId(), 1);
                         log.info("文章评论统计已增加，文章ID: {}, 评论ID: {}", comment.getTargetId(), event.getCommentId());
                     }
                 }
@@ -86,6 +95,7 @@ public class StatisticsUpdateEventListener {
                     if (talk != null && talk.getDeleted() == 0) {
                         talk.setCommentCount((talk.getCommentCount() != null ? talk.getCommentCount() : 0) + 1);
                         talkMapper.updateById(talk);
+                        recordContentMetricEvent("COMMENT", "TALK", comment.getTargetId(), 1);
                         log.info("说说评论统计已增加，说说ID: {}, 评论ID: {}", comment.getTargetId(), event.getCommentId());
                     }
                 }
@@ -112,6 +122,7 @@ public class StatisticsUpdateEventListener {
                         comment.getStatus() != null && comment.getStatus() == 1) {
                         article.setCommentCount(Math.max(0, (article.getCommentCount() != null ? article.getCommentCount() : 0) - 1));
                         articleMapper.updateById(article);
+                        recordContentMetricEvent("COMMENT", "ARTICLE", comment.getTargetId(), -1);
                         log.info("文章评论统计已减少（隐藏），文章ID: {}, 评论ID: {}", comment.getTargetId(), event.getCommentId());
                     }
                     // 如果评论被设为可见且已审核通过，增加统计
@@ -119,12 +130,14 @@ public class StatisticsUpdateEventListener {
                              comment.getStatus() != null && comment.getStatus() == 1) {
                         article.setCommentCount((article.getCommentCount() != null ? article.getCommentCount() : 0) + 1);
                         articleMapper.updateById(article);
+                        recordContentMetricEvent("COMMENT", "ARTICLE", comment.getTargetId(), 1);
                         log.info("文章评论统计已增加（可见），文章ID: {}, 评论ID: {}", comment.getTargetId(), event.getCommentId());
                     }
                     // 如果评论被拒绝，减少统计
                     else if (comment.getStatus() != null && comment.getStatus() == 0) {
                         article.setCommentCount(Math.max(0, (article.getCommentCount() != null ? article.getCommentCount() : 0) - 1));
                         articleMapper.updateById(article);
+                        recordContentMetricEvent("COMMENT", "ARTICLE", comment.getTargetId(), -1);
                         log.info("文章评论统计已减少（拒绝），文章ID: {}, 评论ID: {}", comment.getTargetId(), event.getCommentId());
                     }
                 }
@@ -137,6 +150,7 @@ public class StatisticsUpdateEventListener {
                         comment.getStatus() != null && comment.getStatus() == 1) {
                         talk.setCommentCount(Math.max(0, (talk.getCommentCount() != null ? talk.getCommentCount() : 0) - 1));
                         talkMapper.updateById(talk);
+                        recordContentMetricEvent("COMMENT", "TALK", comment.getTargetId(), -1);
                         log.info("说说评论统计已减少（隐藏），说说ID: {}, 评论ID: {}", comment.getTargetId(), event.getCommentId());
                     }
                     // 如果评论被设为可见且已审核通过，增加统计
@@ -144,18 +158,34 @@ public class StatisticsUpdateEventListener {
                              comment.getStatus() != null && comment.getStatus() == 1) {
                         talk.setCommentCount((talk.getCommentCount() != null ? talk.getCommentCount() : 0) + 1);
                         talkMapper.updateById(talk);
+                        recordContentMetricEvent("COMMENT", "TALK", comment.getTargetId(), 1);
                         log.info("说说评论统计已增加（可见），说说ID: {}, 评论ID: {}", comment.getTargetId(), event.getCommentId());
                     }
                     // 如果评论被拒绝，减少统计
                     else if (comment.getStatus() != null && comment.getStatus() == 0) {
                         talk.setCommentCount(Math.max(0, (talk.getCommentCount() != null ? talk.getCommentCount() : 0) - 1));
                         talkMapper.updateById(talk);
+                        recordContentMetricEvent("COMMENT", "TALK", comment.getTargetId(), -1);
                         log.info("说说评论统计已减少（拒绝），说说ID: {}, 评论ID: {}", comment.getTargetId(), event.getCommentId());
                     }
                 }
             }
         } catch (Exception e) {
             log.error("更新评论统计失败，评论ID: {}", event.getCommentId(), e);
+        }
+    }
+
+    private void recordContentMetricEvent(String metric, String contentType, Long contentId, int delta) {
+        try {
+            ContentMetricEvent event = new ContentMetricEvent();
+            event.setMetric(metric);
+            event.setContentType(contentType);
+            event.setContentId(contentId);
+            event.setDelta(delta);
+            event.setOccurredAt(LocalDateTime.now());
+            contentMetricEventMapper.insert(event);
+        } catch (Exception e) {
+            log.warn("记录内容指标事件失败: metric={}, type={}, id={}", metric, contentType, contentId, e);
         }
     }
 }
