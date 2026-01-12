@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMusicStore, Song } from '@/lib/store/musicStore';
 import Image from 'next/image';
+import DraggableButton from '@/components/common/DraggableButton';
 
 export default function AnimeMusicPlayer() {
   const {
@@ -29,6 +30,7 @@ export default function AnimeMusicPlayer() {
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 200 });
 
   // 初始化默认播放列表
   useEffect(() => {
@@ -164,30 +166,36 @@ export default function AnimeMusicPlayer() {
       )}
 
       {/* 浮动按钮 */}
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={togglePlayer}
-        className="fixed bottom-24 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 shadow-lg shadow-pink-500/30 flex items-center justify-center cursor-pointer border-2 border-white/20 backdrop-blur-sm"
+      <DraggableButton
+        initialPosition={{ x: window.innerWidth - 90, y: 200 }}
+        onPositionChange={setButtonPosition}
       >
-        {isPlaying ? (
-          <motion.div
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ repeat: Infinity, duration: 0.5 }}
-            className="flex items-center gap-0.5"
-          >
-            <span className="w-1 h-3 bg-white rounded-full animate-pulse" />
-            <span className="w-1 h-5 bg-white rounded-full animate-pulse delay-75" />
-            <span className="w-1 h-3 bg-white rounded-full animate-pulse delay-150" />
-          </motion.div>
-        ) : (
-          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-        )}
-      </motion.button>
+        <motion.button
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={togglePlayer}
+          className="w-14 h-14 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 shadow-lg shadow-pink-500/30 flex items-center justify-center cursor-pointer border-2 border-white/20 backdrop-blur-sm"
+          style={{ pointerEvents: 'auto' }}
+        >
+          {isPlaying ? (
+            <motion.div
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ repeat: Infinity, duration: 0.5 }}
+              className="flex items-center gap-0.5"
+            >
+              <span className="w-1 h-3 bg-white rounded-full animate-pulse" />
+              <span className="w-1 h-5 bg-white rounded-full animate-pulse delay-75" />
+              <span className="w-1 h-3 bg-white rounded-full animate-pulse delay-150" />
+            </motion.div>
+          ) : (
+            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          )}
+        </motion.button>
+      </DraggableButton>
 
       {/* 主播放器 */}
       <AnimatePresence>

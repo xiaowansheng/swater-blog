@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+import DraggableButton from '@/components/common/DraggableButton';
 
 export default function FloatingToolbar() {
   const t = useTranslations('common');
   const [isOpen, setIsOpen] = useState(false);
   const [show, setShow] = useState(false);
+  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 100 });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,7 +28,11 @@ export default function FloatingToolbar() {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-center">
+    <DraggableButton
+      initialPosition={{ x: window.innerWidth - 90, y: 100 }}
+      onPositionChange={setButtonPosition}
+    >
+      <div className="relative flex flex-col items-center">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -229,13 +235,14 @@ export default function FloatingToolbar() {
           scale: [1, 1.2, 1],
           opacity: [0.3, 0.6, 0.3]
         }}
-        transition={{ 
+        transition={{
           duration: 2,
           repeat: Infinity,
           ease: "easeInOut"
         }}
       />
-    </div>
+      </div>
+    </DraggableButton>
   );
 }
 
