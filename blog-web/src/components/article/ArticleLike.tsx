@@ -1,11 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { PostVO } from '@/types';
+import { likeApi } from '@/lib/api/like';
 
 interface ArticleLikeProps {
   article: PostVO;
+}
+
+function getOrCreateId(key: string, storage: Storage) {
+  const existing = storage.getItem(key);
+  if (existing) return existing;
+  const id = crypto.randomUUID();
+  storage.setItem(key, id);
+  return id;
 }
 
 export default function ArticleLike({ article }: ArticleLikeProps) {
@@ -13,12 +22,68 @@ export default function ArticleLike({ article }: ArticleLikeProps) {
   const [likes, setLikes] = useState(article.likeCount || 0);
   const [showHearts, setShowHearts] = useState(false);
 
-  const handleLike = () => {
-    if (liked) return;
-    setLiked(true);
-    setLikes(prev => prev + 1);
-    setShowHearts(true);
-    setTimeout(() => setShowHearts(false), 1000);
+  useEffect(() => {
+    if (!article?.id) return;
+
+    const visitorKey = 'visitor_uuid';
+    const visitorUuid = getOrCreateId(visitorKey, window.localStorage);
+    const localKey = `liked:ARTICLE:${article.id}`;
+
+    const local = window.localStorage.getItem(localKey);
+    if (local === '1') {
+      setLiked(true);
+    }
+
+    likeApi
+      .status({ visitorUuid, contentType: 'ARTICLE', contentId: article.id })
+      .then((res) => {
+        setLiked(!!res?.liked);
+        if (typeof res?.likeCount === 'number') setLikes(res.likeCount);
+        window.localStorage.setItem(localKey, res?.liked ? '1' : '0');
+      })
+      .catch(() => {});
+  }, [article?.id]);
+
+  const handleToggleLike = async () => {
+    if (!article?.id) return;
+
+    const visitorKey = 'visitor_uuid';
+    const visitorUuid = getOrCreateId(visitorKey, window.localStorage);
+    const localKey = `liked:ARTICLE:${article.id}`;
+
+    const nextLiked = !liked;
+    setLiked(nextLiked);
+    setLikes((prev) => {
+      const next = nextLiked ? prev + 1 : Math.max(0, prev - 1);
+      return next;
+    });
+
+    try {
+      const res = await likeApi.action({
+        visitorUuid,
+        contentType: 'ARTICLE',
+        contentId: article.id,
+        action: nextLiked ? 'LIKE' : 'UNLIKE',
+      });
+      setLiked(!!res?.liked);
+      if (typeof res?.likeCount === 'number') setLikes(res.likeCount);
+      window.localStorage.setItem(localKey, res?.liked ? '1' : '0');
+      if (res?.visitorUuid && res.visitorUuid !== visitorUuid) {
+        window.localStorage.setItem(visitorKey, res.visitorUuid);
+      }
+
+      if (res?.liked) {
+        setShowHearts(true);
+        setTimeout(() => setShowHearts(false), 1000);
+      }
+    } catch {
+      // rollback best-effort
+      setLiked(liked);
+      setLikes((prev) => {
+        const rollback = liked ? prev + 1 : Math.max(0, prev - 1);
+        return rollback;
+      });
+    }
   };
 
   return (
@@ -28,8 +93,7 @@ export default function ArticleLike({ article }: ArticleLikeProps) {
         whileHover={{ scale: 1.05 }}
       >
         <motion.button
-          onClick={handleLike}
-          disabled={liked}
+          onClick={handleToggleLike}
           className={`
             relative px-8 py-4 rounded-full font-medium text-lg transition-all duration-300 overflow-hidden
             ${liked 
@@ -72,7 +136,7 @@ export default function ArticleLike({ article }: ArticleLikeProps) {
 
             {/* 文字和数量 */}
             <div className="flex items-center gap-2">
-              <span>{liked ? '感谢支持' : '点个赞吧'}</span>
+              <span>{liked ? '已点赞' : '点个赞吧'}</span>
               <motion.span 
                 className="font-bold"
                 animate={liked ? { scale: [1, 1.2, 1] } : {}}
