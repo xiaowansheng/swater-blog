@@ -1,5 +1,6 @@
 import request from './request'
-import { ArticleStatistics, VisitorStatistics, DashboardStatistics, TrendData, ChartData, Article, PageResult, Talk, Category, Tag, Comment } from '@/types'
+import { ArticleStatistics, VisitorStatistics, DashboardStatistics, TrendData, ChartData, Article, PageResult, Talk, Category, Tag, Comment, StatisticsOverview, DailyTrendData, TopPageItem } from '@/types'
+import dayjs from 'dayjs'
 
 export const getArticleStatistics = (): Promise<ArticleStatistics> => {
   return request.get('/admin/post/statistics')
@@ -32,29 +33,50 @@ export const getRecentComments = (params: { page?: number; size?: number }): Pro
   return request.get('/admin/comment/list', { params })
 }
 
-export const getDashboardStatistics = async (): Promise<DashboardStatistics> => {
+export const getDashboardStatistics = async (params?: {
+  start?: string
+  end?: string
+  topPagesOrderBy?: 'pv' | 'uv' | 'sessions'
+}): Promise<DashboardStatistics> => {
   try {
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
-    const todayEnd = new Date()
-    todayEnd.setHours(23, 59, 59, 999)
+    const end = params?.end ? dayjs(params.end) : dayjs().endOf('day')
+    const start = params?.start ? dayjs(params.start) : dayjs().subtract(29, 'day').startOf('day')
+    const startStr = start.format('YYYY-MM-DDTHH:mm:ss')
+    const endStr = end.format('YYYY-MM-DDTHH:mm:ss')
+    const topPagesOrderBy = params?.topPagesOrderBy || 'pv'
 
     const [
       articleStats,
-      visitorStats,
       categories,
       tags,
       articlesResp,
       talksResp,
-      todayVisitorStats,
+      overview,
+      pvTrendResp,
+      uvTrendResp,
+      sessionsTrendResp,
+      newUvTrendResp,
+      articleReadsTrendResp,
+      talkReadsTrendResp,
+      articleCommentsTrendResp,
+      talkCommentsTrendResp,
+      topPages,
     ] = await Promise.all([
       getArticleStatistics(),
-      getVisitorStatistics(),
       getCategoryList(),
       getTagList(),
       getArticleList({ page: 1, size: 200 }),
       getTalkList({ page: 1, size: 200 }),
-      getVisitorStatistics({ startDate: todayStart.toISOString(), endDate: todayEnd.toISOString() }),
+      getStatisticsOverview({ start: startStr, end: endStr }),
+      getStatisticsTrendDaily({ metric: 'pv', start: startStr, end: endStr }),
+      getStatisticsTrendDaily({ metric: 'uv', start: startStr, end: endStr }),
+      getStatisticsTrendDaily({ metric: 'sessions', start: startStr, end: endStr }),
+      getStatisticsTrendDaily({ metric: 'newUv', start: startStr, end: endStr }),
+      getStatisticsTrendDaily({ metric: 'articleReads', start: startStr, end: endStr }),
+      getStatisticsTrendDaily({ metric: 'talkReads', start: startStr, end: endStr }),
+      getStatisticsTrendDaily({ metric: 'articleComments', start: startStr, end: endStr }),
+      getStatisticsTrendDaily({ metric: 'talkComments', start: startStr, end: endStr }),
+      getStatisticsTopPages({ start: startStr, end: endStr, limit: 10, orderBy: topPagesOrderBy }),
     ])
 
     const articles = articlesResp.records || []
@@ -73,22 +95,24 @@ export const getDashboardStatistics = async (): Promise<DashboardStatistics> => 
     const recentMonthArticleTrend = buildMonthlyTrend(articles.map((a) => a.publishedAt || a.createTime))
     const recentMonthTalkTrend = buildMonthlyTrend(talks.map((t) => t.createTime))
 
-    const visitTrend = buildVisitTrend(visitorStats.visitorsByDate || {})
-    const visitorTrend = buildVisitTrend(visitorStats.visitorsByDate || {})
+    const totalReadsTrend = mergeTrendSum(articleReadsTrendResp.points || [], talkReadsTrendResp.points || [])
+    const totalCommentsTrend = mergeTrendSum(articleCommentsTrendResp.points || [], talkCommentsTrendResp.points || [])
 
     return {
       articleCount: articleStats.totalCount,
       categoryCount: categories.length,
       tagCount: tags.length,
-      totalVisitCount: visitorStats.totalPageViews,
-      totalVisitorCount: visitorStats.totalVisitors,
       commentCount: articleStats.totalCommentCount,
-      todayVisit: todayVisitorStats.totalPageViews,
-      todayVisitor: todayVisitorStats.uniqueVisitors,
       articleTrend: recentMonthArticleTrend,
       talkTrend: recentMonthTalkTrend,
-      visitTrend,
-      visitorTrend,
+      overview,
+      pvTrend: pvTrendResp.points || [],
+      uvTrend: uvTrendResp.points || [],
+      sessionsTrend: sessionsTrendResp.points || [],
+      newUvTrend: newUvTrendResp.points || [],
+      totalReadsTrend,
+      totalCommentsTrend,
+      topPages: topPages || [],
       topViewedArticles,
       topLikedArticles,
       categoryDistribution: [],
@@ -102,14 +126,32 @@ export const getDashboardStatistics = async (): Promise<DashboardStatistics> => 
       articleCount: 0,
       categoryCount: 0,
       tagCount: 0,
-      totalVisitCount: 0,
-      totalVisitorCount: 0,
       commentCount: 0,
-      todayVisit: 0,
-      todayVisitor: 0,
       articleTrend: [],
       talkTrend: [],
-      visitTrend: [],
+      overview: {
+        uv: 0,
+        newUv: 0,
+        sessions: 0,
+        pv: 0,
+        pagesPerSession: 0,
+        articleReads: 0,
+        talkReads: 0,
+        totalReads: 0,
+        articleLikes: 0,
+        talkLikes: 0,
+        totalLikes: 0,
+        articleComments: 0,
+        talkComments: 0,
+        totalComments: 0,
+      },
+      pvTrend: [],
+      uvTrend: [],
+      sessionsTrend: [],
+      newUvTrend: [],
+      totalReadsTrend: [],
+      totalCommentsTrend: [],
+      topPages: [],
       topViewedArticles: [],
       topLikedArticles: [],
       categoryDistribution: [],
@@ -135,14 +177,6 @@ function buildMonthlyTrend(dates: (string | undefined)[]): TrendData[] {
   return dayKeys.map((date) => ({ date, value: buckets[date] || 0 }))
 }
 
-function buildVisitTrend(visitorsByDate: Record<string, number>): TrendData[] {
-  const dayKeys = generateLastNDays(30)
-  return dayKeys.map((date) => ({
-    date,
-    value: visitorsByDate[date] || 0,
-  }))
-}
-
 function generateLastNDays(days: number): string[] {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -153,4 +187,47 @@ function generateLastNDays(days: number): string[] {
     result.push(d.toISOString().split('T')[0])
   }
   return result
+}
+
+function mergeTrendSum(a: TrendData[], b: TrendData[]): TrendData[] {
+  const map: Record<string, number> = {}
+  for (const item of a) {
+    map[item.date] = (map[item.date] || 0) + (item.value || 0)
+  }
+  for (const item of b) {
+    map[item.date] = (map[item.date] || 0) + (item.value || 0)
+  }
+  return Object.keys(map)
+    .sort()
+    .map((date) => ({ date, value: map[date] || 0 }))
+}
+
+
+// ========== 新统计接口 ==========
+
+// 获取统计总览
+export const getStatisticsOverview = (params: {
+  start: string
+  end: string
+}): Promise<StatisticsOverview> => {
+  return request.get('/admin/statistics/overview', { params })
+}
+
+// 获取每日趋势
+export const getStatisticsTrendDaily = (params: {
+  metric: string
+  start: string
+  end: string
+}): Promise<DailyTrendData> => {
+  return request.get('/admin/statistics/trend/daily', { params })
+}
+
+// 获取Top页面
+export const getStatisticsTopPages = (params: {
+  start: string
+  end: string
+  limit?: number
+  orderBy?: 'pv' | 'uv' | 'sessions'
+}): Promise<TopPageItem[]> => {
+  return request.get('/admin/statistics/pages/top', { params })
 }

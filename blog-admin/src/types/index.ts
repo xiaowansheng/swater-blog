@@ -425,15 +425,17 @@ export interface DashboardStatistics {
   articleCount: number
   categoryCount: number
   tagCount: number
-  totalVisitCount: number
-  totalVisitorCount: number
   commentCount: number
-  todayVisit: number
-  todayVisitor: number
   articleTrend: TrendData[]
   talkTrend: TrendData[]
-  visitTrend: TrendData[]
-  visitorTrend: TrendData[]
+  overview: StatisticsOverview
+  pvTrend: TrendData[]
+  uvTrend: TrendData[]
+  sessionsTrend: TrendData[]
+  newUvTrend: TrendData[]
+  totalReadsTrend: TrendData[]
+  totalCommentsTrend: TrendData[]
+  topPages: TopPageItem[]
   topViewedArticles: ChartData[]
   topLikedArticles: ChartData[]
   categoryDistribution: ChartData[]
@@ -450,4 +452,42 @@ export interface TrendData {
 export interface ChartData {
   name: string
   value: number
+}
+
+// 统计总览数据
+export interface StatisticsOverview {
+  uv: number
+  newUv: number
+  sessions: number
+  pv: number
+  pagesPerSession: number
+  articleReads: number
+  talkReads: number
+  totalReads: number
+  articleLikes: number
+  talkLikes: number
+  totalLikes: number
+  articleComments: number
+  talkComments: number
+  totalComments: number
+}
+
+// 每日趋势数据点
+export interface DailyTrendPoint {
+  date: string
+  value: number
+}
+
+// 每日趋势数据
+export interface DailyTrendData {
+  metric: string
+  points: DailyTrendPoint[]
+}
+
+// Top页面数据
+export interface TopPageItem {
+  pageKey: string
+  pv: number
+  uv: number
+  sessions: number
 }

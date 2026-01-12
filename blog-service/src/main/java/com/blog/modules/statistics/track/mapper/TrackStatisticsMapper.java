@@ -72,8 +72,8 @@ public interface TrackStatisticsMapper {
             WHERE deleted = 0
               AND occurred_at >= #{start}
               AND occurred_at <= #{end}
-            GROUP BY DATE(occurred_at)
-            ORDER BY DATE(occurred_at)
+            GROUP BY DATE_FORMAT(occurred_at, '%Y-%m-%d')
+            ORDER BY DATE_FORMAT(occurred_at, '%Y-%m-%d')
             """)
     List<AdminStatisticsTrendPointVO> pvDaily(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
@@ -84,8 +84,8 @@ public interface TrackStatisticsMapper {
             WHERE deleted = 0
               AND occurred_at >= #{start}
               AND occurred_at <= #{end}
-            GROUP BY DATE(occurred_at)
-            ORDER BY DATE(occurred_at)
+            GROUP BY DATE_FORMAT(occurred_at, '%Y-%m-%d')
+            ORDER BY DATE_FORMAT(occurred_at, '%Y-%m-%d')
             """)
     List<AdminStatisticsTrendPointVO> uvDaily(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
@@ -96,8 +96,8 @@ public interface TrackStatisticsMapper {
             WHERE deleted = 0
               AND started_at >= #{start}
               AND started_at <= #{end}
-            GROUP BY DATE(started_at)
-            ORDER BY DATE(started_at)
+            GROUP BY DATE_FORMAT(started_at, '%Y-%m-%d')
+            ORDER BY DATE_FORMAT(started_at, '%Y-%m-%d')
             """)
     List<AdminStatisticsTrendPointVO> sessionsDaily(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
@@ -108,8 +108,8 @@ public interface TrackStatisticsMapper {
             WHERE deleted = 0
               AND first_visit_time >= #{start}
               AND first_visit_time <= #{end}
-            GROUP BY DATE(first_visit_time)
-            ORDER BY DATE(first_visit_time)
+            GROUP BY DATE_FORMAT(first_visit_time, '%Y-%m-%d')
+            ORDER BY DATE_FORMAT(first_visit_time, '%Y-%m-%d')
             """)
     List<AdminStatisticsTrendPointVO> newUvDaily(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
@@ -122,8 +122,8 @@ public interface TrackStatisticsMapper {
               AND content_type = #{contentType}
               AND occurred_at >= #{start}
               AND occurred_at <= #{end}
-            GROUP BY DATE(occurred_at)
-            ORDER BY DATE(occurred_at)
+            GROUP BY DATE_FORMAT(occurred_at, '%Y-%m-%d')
+            ORDER BY DATE_FORMAT(occurred_at, '%Y-%m-%d')
             """)
     List<AdminStatisticsTrendPointVO> contentMetricDaily(
             @Param("metric") String metric,
@@ -189,4 +189,3 @@ public interface TrackStatisticsMapper {
             @Param("limit") Integer limit
     );
 }
-

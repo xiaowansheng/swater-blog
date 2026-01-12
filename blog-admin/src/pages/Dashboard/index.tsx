@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Row, Col, Card, Spin, List, Avatar, Tag, Space, Typography } from 'antd'
+import { Row, Col, Card, Spin, List, Avatar, Tag, Space, Typography, DatePicker, Radio, Table } from 'antd'
 import {
   FileTextOutlined,
   FolderOpenOutlined,
@@ -10,7 +10,6 @@ import {
   TeamOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
-  LikeOutlined,
 } from '@ant-design/icons'
 import { getDashboardStatistics } from '@/api/statistics'
 import { DashboardStatistics } from '@/types'
@@ -19,6 +18,7 @@ import BarChart from '@/components/Chart/BarChart'
 import dayjs from 'dayjs'
 
 const { Title, Text } = Typography
+const { RangePicker } = DatePicker
 
 interface StatCardProps {
   title: string
@@ -53,15 +53,22 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, trend, t
 const Dashboard: React.FC = () => {
   const [statistics, setStatistics] = useState<DashboardStatistics | null>(null)
   const [loading, setLoading] = useState(true)
+  const [range, setRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>(() => [
+    dayjs().subtract(29, 'day'),
+    dayjs(),
+  ])
+  const [topPagesOrderBy, setTopPagesOrderBy] = useState<'pv' | 'uv' | 'sessions'>('pv')
 
   useEffect(() => {
     loadStatistics()
-  }, [])
+  }, [range, topPagesOrderBy])
 
   const loadStatistics = async () => {
     setLoading(true)
     try {
-      const data = await getDashboardStatistics()
+      const start = range[0].startOf('day').format('YYYY-MM-DDTHH:mm:ss')
+      const end = range[1].endOf('day').format('YYYY-MM-DDTHH:mm:ss')
+      const data = await getDashboardStatistics({ start, end, topPagesOrderBy })
       setStatistics(data)
     } catch (error) {
       console.error('加载统计数据失败', error)
@@ -78,37 +85,82 @@ const Dashboard: React.FC = () => {
     )
   }
 
+  const overview = statistics?.overview
+
   return (
     <div className="page-container fade-in">
+      <div className="flex items-center justify-between mb-6">
+        <Title level={3} className="mb-0">
+          仪表盘
+        </Title>
+        <Space>
+          <RangePicker
+            value={range}
+            allowClear={false}
+            onChange={(next) => {
+              if (!next || !next[0] || !next[1]) return
+              setRange([next[0], next[1]])
+            }}
+          />
+        </Space>
+      </div>
+
       {/* 统计卡片 */}
       <Row gutter={[16, 16]} className="mb-6">
         {[
           {
-            title: '总访问量',
-            value: statistics?.totalVisitCount || 0,
-            icon: <EyeOutlined />,
+            title: '访问量（会话）',
+            value: overview?.sessions || 0,
+            icon: <RiseOutlined />,
             color: '#fa8c16',
           },
           {
-            title: '总访客数',
-            value: statistics?.totalVisitorCount || 0,
+            title: '访客数（UV）',
+            value: overview?.uv || 0,
             icon: <TeamOutlined />,
             color: '#8c8c8c',
           },
           {
-            title: '今日访问量',
-            value: statistics?.todayVisit || 0,
-            icon: <RiseOutlined />,
+            title: '页面浏览量（PV）',
+            value: overview?.pv || 0,
+            icon: <EyeOutlined />,
             color: '#52c41a',
           },
           {
-            title: '今日访客数',
-            value: statistics?.todayVisitor || 0,
+            title: '新访客',
+            value: overview?.newUv || 0,
             icon: <TeamOutlined />,
             color: '#d46b08',
           },
         ].map((item) => (
           <Col xs={24} sm={12} lg={6} key={item.title}>
+            <StatCard {...item} />
+          </Col>
+        ))}
+      </Row>
+
+      <Row gutter={[16, 16]} className="mb-6">
+        {[
+          {
+            title: '人均页数',
+            value: Number((overview?.pagesPerSession || 0).toFixed(2)),
+            icon: <RiseOutlined />,
+            color: '#722ed1',
+          },
+          {
+            title: '阅读增量',
+            value: overview?.totalReads || 0,
+            icon: <FileTextOutlined />,
+            color: '#1890ff',
+          },
+          {
+            title: '评论增量',
+            value: overview?.totalComments || 0,
+            icon: <CommentOutlined />,
+            color: '#52c41a',
+          },
+        ].map((item) => (
+          <Col xs={24} sm={12} lg={8} key={item.title}>
             <StatCard {...item} />
           </Col>
         ))}
@@ -150,11 +202,75 @@ const Dashboard: React.FC = () => {
       {/* 图表区域 */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={24}>
-          <Card title="访问量 / 访客趋势" className="chart-card" variant="borderless">
+          <Card title="PV / UV / 会话趋势" className="chart-card" variant="borderless">
             <LineChart
               seriesList={[
-                { name: '访问量', data: statistics?.visitTrend || [], color: '#1890ff' },
-                { name: '访客数', data: statistics?.visitorTrend || [], color: '#ff7875' },
+                { name: 'PV', data: statistics?.pvTrend || [], color: '#1890ff' },
+                { name: 'UV', data: statistics?.uvTrend || [], color: '#ff7875' },
+                { name: '会话', data: statistics?.sessionsTrend || [], color: '#52c41a' },
+              ]}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} className="mt-4">
+        <Col xs={24} lg={24}>
+          <Card title="阅读 / 评论增量趋势" className="chart-card" variant="borderless">
+            <LineChart
+              seriesList={[
+                { name: '阅读增量', data: statistics?.totalReadsTrend || [], color: '#1890ff' },
+                { name: '评论增量', data: statistics?.totalCommentsTrend || [], color: '#52c41a' },
+              ]}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} className="mt-4">
+        <Col xs={24} lg={24}>
+          <Card
+            title="Top 页面"
+            className="chart-card"
+            variant="borderless"
+            extra={
+              <Radio.Group
+                value={topPagesOrderBy}
+                optionType="button"
+                buttonStyle="solid"
+                onChange={(e) => setTopPagesOrderBy(e.target.value)}
+                options={[
+                  { label: '按 PV', value: 'pv' },
+                  { label: '按 UV', value: 'uv' },
+                  { label: '按 会话', value: 'sessions' },
+                ]}
+              />
+            }
+          >
+            <Table
+              rowKey="pageKey"
+              pagination={false}
+              size="small"
+              dataSource={statistics?.topPages || []}
+              columns={[
+                {
+                  title: '页面',
+                  dataIndex: 'pageKey',
+                  render: (pageKey: string) => {
+                    const [type, ...rest] = String(pageKey || '').split(':')
+                    const key = rest.join(':')
+                    const tagColor = type === 'ARTICLE' ? 'blue' : type === 'TALK' ? 'gold' : 'default'
+                    return (
+                      <Space>
+                        <Tag color={tagColor}>{type || 'PAGE'}</Tag>
+                        <Text>{key || pageKey}</Text>
+                      </Space>
+                    )
+                  },
+                },
+                { title: 'PV', dataIndex: 'pv', width: 120 },
+                { title: 'UV', dataIndex: 'uv', width: 120 },
+                { title: '会话', dataIndex: 'sessions', width: 120 },
               ]}
             />
           </Card>
@@ -180,9 +296,7 @@ const Dashboard: React.FC = () => {
             <List
               dataSource={statistics?.topViewedArticles || []}
               renderItem={(item, index) => (
-                <List.Item
-                  actions={[<Tag color="blue" key="view">浏览 {item.value}</Tag>]}
-                >
+                <List.Item actions={[<Tag color="blue" key="view">浏览 {item.value}</Tag>]}>
                   <List.Item.Meta
                     avatar={<Avatar>{index + 1}</Avatar>}
                     title={<Text strong>{item.name}</Text>}
@@ -197,9 +311,7 @@ const Dashboard: React.FC = () => {
             <List
               dataSource={statistics?.topLikedArticles || []}
               renderItem={(item, index) => (
-                <List.Item
-                  actions={[<Tag color="green" key="like">点赞 {item.value}</Tag>]}
-                >
+                <List.Item actions={[<Tag color="green" key="like">点赞 {item.value}</Tag>]}>
                   <List.Item.Meta
                     avatar={<Avatar>{index + 1}</Avatar>}
                     title={<Text strong>{item.name}</Text>}
