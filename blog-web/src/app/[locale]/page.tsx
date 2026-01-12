@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import Sidebar from '@/components/layout/Sidebar';
 import ArticleList from '@/components/article/ArticleList';
 import HeroSection from '@/components/home/HeroSection';
+import Pagination from '@/components/common/Pagination';
 import { articleApi } from '@/lib/api/article';
 import { categoryApi } from '@/lib/api/category';
 import { tagApi } from '@/lib/api/tag';
@@ -9,8 +10,14 @@ import { ISR_REVALIDATE } from '@/lib/constants';
 
 export const revalidate = ISR_REVALIDATE.HOME;
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   const t = await getTranslations('common');
+  const { page = '1' } = await searchParams;
+  const currentPage = parseInt(page, 10) || 1;
 
   let articleList: any = { records: [], total: 0, size: 10, current: 1, pages: 0 };
   let hotArticles: any[] = [];
@@ -18,7 +25,7 @@ export default async function HomePage() {
   let tags: any[] = [];
 
   try {
-    articleList = await articleApi.getList({ page: 1, size: 10 });
+    articleList = await articleApi.getList({ page: currentPage, size: 10 });
   } catch (error) {
     console.warn('Failed to load articles (API server may not be running):', error);
   }
@@ -52,7 +59,19 @@ export default async function HomePage() {
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           <div className="flex-1 w-full">
             {articleList.records.length > 0 ? (
-              <ArticleList articles={articleList.records} />
+              <>
+                <ArticleList articles={articleList.records} />
+                {/* 分页组件 */}
+                {articleList.pages > 1 && (
+                  <Pagination
+                    current={articleList.current}
+                    total={articleList.pages}
+                    totalCount={articleList.total}
+                    basePath="/"
+                    pageSize={articleList.size}
+                  />
+                )}
+              </>
             ) : (
               <div className="overflow-hidden relative p-8 sm:p-12 md:p-16 text-center modern-card">
                 <div className="absolute inset-0 bg-gradient-to-br via-transparent from-primary/5 to-accent/5"></div>

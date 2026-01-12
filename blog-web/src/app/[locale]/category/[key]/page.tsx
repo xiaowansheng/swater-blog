@@ -50,7 +50,9 @@ export default async function CategoryPage({
               <Pagination
                 current={articleList.current}
                 total={articleList.pages}
+                totalCount={articleList.total}
                 basePath={`/category/${key}`}
+                pageSize={articleList.size}
               />
             </>
           ) : (

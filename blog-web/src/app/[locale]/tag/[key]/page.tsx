@@ -50,7 +50,9 @@ export default async function TagPage({
               <Pagination
                 current={articleList.current}
                 total={articleList.pages}
+                totalCount={articleList.total}
                 basePath={`/tag/${key}`}
+                pageSize={articleList.size}
               />
             </>
           ) : (

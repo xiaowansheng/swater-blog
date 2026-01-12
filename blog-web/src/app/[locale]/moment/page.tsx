@@ -36,7 +36,9 @@ export default async function MomentPage({
                 <Pagination
                   current={momentList.current}
                   total={momentList.pages}
+                  totalCount={momentList.total}
                   basePath="/moment"
+                  pageSize={momentList.size}
                 />
               </>
             ) : (
