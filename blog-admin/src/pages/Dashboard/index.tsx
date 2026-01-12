@@ -143,6 +143,39 @@ const Dashboard: React.FC = () => {
             </Card>
           </Col>
         </Row>
+
+        <Row gutter={[16, 16]} className="mt-4">
+          <Col xs={24} lg={12}>
+            <Card title="访问量 Top10 文章" className="chart-card" variant="borderless">
+              <List
+                dataSource={statistics?.topViewedArticles || []}
+                renderItem={(item, index) => (
+                  <List.Item actions={[<Tag color="blue" key="view">浏览 {item.value}</Tag>]}>
+                    <List.Item.Meta
+                      avatar={<Avatar>{index + 1}</Avatar>}
+                      title={<Text strong>{item.name}</Text>}
+                    />
+                  </List.Item>
+                )}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} lg={12}>
+            <Card title="点赞 Top10 文章" className="chart-card" variant="borderless">
+              <List
+                dataSource={statistics?.topLikedArticles || []}
+                renderItem={(item, index) => (
+                  <List.Item actions={[<Tag color="green" key="like">点赞 {item.value}</Tag>]}>
+                    <List.Item.Meta
+                      avatar={<Avatar>{index + 1}</Avatar>}
+                      title={<Text strong>{item.name}</Text>}
+                    />
+                  </List.Item>
+                )}
+              />
+            </Card>
+          </Col>
+        </Row>
       </div>
 
       {/* 数据区 */}
@@ -306,38 +339,6 @@ const Dashboard: React.FC = () => {
         </Row>
       </div>
 
-      <Row gutter={[16, 16]} className="mt-4">
-        <Col xs={24} lg={12}>
-          <Card title="访问量 Top10 文章" className="chart-card" variant="borderless">
-            <List
-              dataSource={statistics?.topViewedArticles || []}
-              renderItem={(item, index) => (
-                <List.Item actions={[<Tag color="blue" key="view">浏览 {item.value}</Tag>]}>
-                  <List.Item.Meta
-                    avatar={<Avatar>{index + 1}</Avatar>}
-                    title={<Text strong>{item.name}</Text>}
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title="点赞 Top10 文章" className="chart-card" variant="borderless">
-            <List
-              dataSource={statistics?.topLikedArticles || []}
-              renderItem={(item, index) => (
-                <List.Item actions={[<Tag color="green" key="like">点赞 {item.value}</Tag>]}>
-                  <List.Item.Meta
-                    avatar={<Avatar>{index + 1}</Avatar>}
-                    title={<Text strong>{item.name}</Text>}
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
-      </Row>
     </div>
   )
 }
