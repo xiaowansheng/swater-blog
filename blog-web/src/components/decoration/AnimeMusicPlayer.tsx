@@ -26,7 +26,6 @@ export default function AnimeMusicPlayer() {
     setVolume,
     toggleMute,
     togglePlayer,
-    togglePlaylist,
     setPlayMode,
     seekTo,
   } = useMusicStore();
@@ -38,6 +37,8 @@ export default function AnimeMusicPlayer() {
   const [playlistPosition, setPlaylistPosition] = useState({ top: 0, left: 0 });
   const playerPanelRef = useRef<HTMLDivElement>(null);
   const [playerPosition, setPlayerPosition] = useState({ top: 0, left: 0 });
+  const openPlaylist = () => useMusicStore.setState({ isPlaylistOpen: true });
+  const closePlaylist = () => useMusicStore.setState({ isPlaylistOpen: false });
 
   // 初始化默认播放列表
   useEffect(() => {
@@ -447,7 +448,7 @@ export default function AnimeMusicPlayer() {
 
                     {/* 播放列表 */}
                     <button
-                      onClick={togglePlaylist}
+                      onClick={() => (isPlaylistOpen ? closePlaylist() : openPlaylist())}
                       className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
                       title="播放列表"
                     >
@@ -505,8 +506,8 @@ export default function AnimeMusicPlayer() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={togglePlaylist}
-                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+                onClick={closePlaylist}
+                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[70]"
               />
 
               {/* 播放列表卡片 */}
@@ -522,7 +523,7 @@ export default function AnimeMusicPlayer() {
                   maxHeight: Math.max(200, window.innerHeight - 32),
                 }}
                 ref={playlistPanelRef}
-                className="fixed z-[60] bg-white/10 dark:bg-black/30 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl overflow-hidden"
+                className="fixed z-[80] bg-white/10 dark:bg-black/30 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl overflow-hidden"
               >
                 {/* 头部 */}
                 <div className="p-4 border-b border-white/10 flex items-center justify-between">
@@ -533,7 +534,7 @@ export default function AnimeMusicPlayer() {
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={togglePlaylist}
+                    onClick={closePlaylist}
                     className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
