@@ -10,6 +10,7 @@ import {
   TeamOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
+  LikeOutlined,
 } from '@ant-design/icons'
 import { getDashboardStatistics } from '@/api/statistics'
 import { DashboardStatistics } from '@/types'
@@ -154,13 +155,19 @@ const Dashboard: React.FC = () => {
             color: '#1890ff',
           },
           {
+            title: '点赞增量',
+            value: overview?.totalLikes || 0,
+            icon: <LikeOutlined />,
+            color: '#eb2f96',
+          },
+          {
             title: '评论增量',
             value: overview?.totalComments || 0,
             icon: <CommentOutlined />,
             color: '#52c41a',
           },
         ].map((item) => (
-          <Col xs={24} sm={12} lg={8} key={item.title}>
+          <Col xs={24} sm={12} lg={6} key={item.title}>
             <StatCard {...item} />
           </Col>
         ))}
@@ -187,8 +194,8 @@ const Dashboard: React.FC = () => {
             color: '#722ed1',
           },
           {
-            title: '评论总数',
-            value: statistics?.commentCount || 0,
+            title: '说说总数',
+            value: statistics?.talkCount || 0,
             icon: <CommentOutlined />,
             color: '#52c41a',
           },

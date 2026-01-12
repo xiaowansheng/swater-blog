@@ -425,7 +425,7 @@ export interface DashboardStatistics {
   articleCount: number
   categoryCount: number
   tagCount: number
-  commentCount: number
+  talkCount: number
   articleTrend: TrendData[]
   talkTrend: TrendData[]
   overview: StatisticsOverview

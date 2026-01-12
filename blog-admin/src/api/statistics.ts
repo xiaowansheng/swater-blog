@@ -102,7 +102,7 @@ export const getDashboardStatistics = async (params?: {
       articleCount: articleStats.totalCount,
       categoryCount: categories.length,
       tagCount: tags.length,
-      commentCount: articleStats.totalCommentCount,
+      talkCount: talksResp.total || talks.length,
       articleTrend: recentMonthArticleTrend,
       talkTrend: recentMonthTalkTrend,
       overview,
@@ -126,7 +126,7 @@ export const getDashboardStatistics = async (params?: {
       articleCount: 0,
       categoryCount: 0,
       tagCount: 0,
-      commentCount: 0,
+      talkCount: 0,
       articleTrend: [],
       talkTrend: [],
       overview: {
