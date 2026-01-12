@@ -35,6 +35,7 @@ export default function DraggableButton({
   const dragStartTime = useRef<number>(0);
   const dragStartPosition = useRef<Position>({ x: 0, y: 0 });
   const dragOffset = useRef<Position>({ x: 0, y: 0 });
+  const suppressClickRef = useRef(false);
   const buttonRef = useRef<HTMLDivElement>(null);
 
   const setPositionSafe = useCallback((next: Position) => {
@@ -135,12 +136,14 @@ export default function DraggableButton({
         );
 
         if (dragDuration < 200 && dragDistance < 5) {
+          suppressClickRef.current = false;
           setIsDragging(false);
           document.removeEventListener('mousemove', handleMouseMove);
           document.removeEventListener('mouseup', handleMouseUp);
           return;
         }
 
+        suppressClickRef.current = true;
         setIsDragging(false);
 
         // Snap left/right only; keep y unchanged.
@@ -210,6 +213,7 @@ export default function DraggableButton({
           );
 
           if (dragDuration < 200 && dragDistance < 5) {
+            suppressClickRef.current = false;
             setIsDragging(false);
             document.removeEventListener('touchmove', handleTouchMove);
             document.removeEventListener('touchend', handleTouchEnd);
@@ -217,6 +221,7 @@ export default function DraggableButton({
           }
         }
 
+        suppressClickRef.current = true;
         setIsDragging(false);
 
         // Snap left/right only; keep y unchanged.
@@ -250,6 +255,13 @@ export default function DraggableButton({
     [clampToViewport, disabled, onPositionChange, savePosition, setPositionSafe]
   );
 
+  const handleClickCapture = useCallback((e: React.MouseEvent) => {
+    if (!suppressClickRef.current) return;
+    suppressClickRef.current = false;
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
   return (
     <motion.div
       ref={buttonRef}
@@ -257,6 +269,7 @@ export default function DraggableButton({
       style={getPositionStyle()}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
+      onClickCapture={handleClickCapture}
       whileDrag={{ scale: 1.05 }}
       animate={{
         scale: isDragging ? 1.05 : 1,
