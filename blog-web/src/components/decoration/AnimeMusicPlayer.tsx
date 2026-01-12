@@ -139,21 +139,24 @@ export default function AnimeMusicPlayer() {
     const updatePosition = () => {
       const margin = 16;
       const buttonSize = 56;
+      const gap = 12;
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
       const availableWidth = Math.max(200, viewportWidth - margin * 2);
       const availableHeight = Math.max(200, viewportHeight - margin * 2);
-      const panelWidth = Math.min(320, availableWidth);
-      const panelHeight = Math.min(360, availableHeight);
+      const measuredWidth = playerPanelRef.current?.offsetWidth;
+      const measuredHeight = playerPanelRef.current?.offsetHeight;
+      const panelWidth = Math.min(measuredWidth || 320, availableWidth);
+      const panelHeight = Math.min(measuredHeight || 360, availableHeight);
 
-      const preferredLeft = buttonPosition.x - panelWidth + buttonSize;
-      const preferredRight = buttonPosition.x + buttonSize;
+      const preferredLeft = buttonPosition.x - panelWidth - gap;
+      const preferredRight = buttonPosition.x + buttonSize + gap;
       let left = preferredLeft < margin ? preferredRight : preferredLeft;
       left = Math.max(margin, Math.min(left, viewportWidth - panelWidth - margin));
 
-      const preferredTop = buttonPosition.y - panelHeight - margin;
-      const preferredBottom = buttonPosition.y + buttonSize + margin;
+      const preferredTop = buttonPosition.y - panelHeight - gap;
+      const preferredBottom = buttonPosition.y + buttonSize + gap;
       let top = preferredTop < margin ? preferredBottom : preferredTop;
       top = Math.max(margin, Math.min(top, viewportHeight - panelHeight - margin));
 
@@ -180,16 +183,21 @@ export default function AnimeMusicPlayer() {
 
       const availableWidth = Math.max(200, viewportWidth - margin * 2);
       const availableHeight = Math.max(200, viewportHeight - margin * 2);
-      const panelWidth = Math.min(320, availableWidth);
-      const panelHeight = Math.min(Math.min(viewportHeight * 0.5, 360), availableHeight);
+      const measuredWidth = playlistPanelRef.current?.offsetWidth;
+      const measuredHeight = playlistPanelRef.current?.offsetHeight;
+      const panelWidth = Math.min(measuredWidth || 320, availableWidth);
+      const panelHeight = Math.min(
+        measuredHeight || Math.min(viewportHeight * 0.5, 360),
+        availableHeight
+      );
 
-      const preferredLeft = buttonPosition.x - panelWidth + buttonSize;
-      const preferredRight = buttonPosition.x + buttonSize;
+      const preferredLeft = buttonPosition.x - panelWidth - gap;
+      const preferredRight = buttonPosition.x + buttonSize + gap;
       let left = preferredLeft < margin ? preferredRight : preferredLeft;
       left = Math.max(margin, Math.min(left, viewportWidth - panelWidth - margin));
 
-      const preferredTop = buttonPosition.y - panelHeight - margin;
-      const preferredBottom = buttonPosition.y + buttonSize + margin;
+      const preferredTop = buttonPosition.y - panelHeight - gap;
+      const preferredBottom = buttonPosition.y + buttonSize + gap;
       let top = preferredTop < margin ? preferredBottom : preferredTop;
       top = Math.max(margin, Math.min(top, viewportHeight - panelHeight - margin));
 
