@@ -12,8 +12,8 @@ import {
   ArrowDownOutlined,
   LikeOutlined,
 } from '@ant-design/icons'
-import { getDashboardStatistics } from '@/api/statistics'
-import { DashboardStatistics } from '@/types'
+import { getDashboardStatistics, getStatisticsTopPages } from '@/api/statistics'
+import { DashboardStatistics, TopPageItem } from '@/types'
 import LineChart from '@/components/Chart/LineChart'
 import BarChart from '@/components/Chart/BarChart'
 import dayjs from 'dayjs'
@@ -54,6 +54,8 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, trend, t
 const Dashboard: React.FC = () => {
   const [statistics, setStatistics] = useState<DashboardStatistics | null>(null)
   const [loading, setLoading] = useState(true)
+  const [topPages, setTopPages] = useState<TopPageItem[]>([])
+  const [topPagesLoading, setTopPagesLoading] = useState(false)
   const [range, setRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>(() => [
     dayjs().subtract(29, 'day'),
     dayjs(),
@@ -62,7 +64,11 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     loadStatistics()
-  }, [range, topPagesOrderBy])
+  }, [range])
+
+  useEffect(() => {
+    loadTopPages()
+  }, [topPagesOrderBy, range])
 
   const loadStatistics = async () => {
     setLoading(true)
@@ -71,10 +77,25 @@ const Dashboard: React.FC = () => {
       const end = range[1].endOf('day').format('YYYY-MM-DDTHH:mm:ss')
       const data = await getDashboardStatistics({ start, end, topPagesOrderBy })
       setStatistics(data)
+      setTopPages(data.topPages || [])
     } catch (error) {
       console.error('加载统计数据失败', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadTopPages = async () => {
+    setTopPagesLoading(true)
+    try {
+      const start = range[0].startOf('day').format('YYYY-MM-DDTHH:mm:ss')
+      const end = range[1].endOf('day').format('YYYY-MM-DDTHH:mm:ss')
+      const data = await getStatisticsTopPages({ start, end, limit: 10, orderBy: topPagesOrderBy })
+      setTopPages(data || [])
+    } catch (error) {
+      console.error('加载 Top 页面失败', error)
+    } finally {
+      setTopPagesLoading(false)
     }
   }
 
@@ -312,7 +333,8 @@ const Dashboard: React.FC = () => {
                 rowKey="pageKey"
                 pagination={false}
                 size="small"
-                dataSource={statistics?.topPages || []}
+                loading={topPagesLoading}
+                dataSource={topPages}
                 columns={[
                   {
                     title: '页面',
