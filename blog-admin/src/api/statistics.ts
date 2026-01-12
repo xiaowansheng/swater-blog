@@ -58,6 +58,8 @@ export const getDashboardStatistics = async (params?: {
       newUvTrendResp,
       articleReadsTrendResp,
       talkReadsTrendResp,
+      articleLikesTrendResp,
+      talkLikesTrendResp,
       articleCommentsTrendResp,
       talkCommentsTrendResp,
       topPages,
@@ -74,6 +76,8 @@ export const getDashboardStatistics = async (params?: {
       getStatisticsTrendDaily({ metric: 'newUv', start: startStr, end: endStr }),
       getStatisticsTrendDaily({ metric: 'articleReads', start: startStr, end: endStr }),
       getStatisticsTrendDaily({ metric: 'talkReads', start: startStr, end: endStr }),
+      getStatisticsTrendDaily({ metric: 'articleLikes', start: startStr, end: endStr }),
+      getStatisticsTrendDaily({ metric: 'talkLikes', start: startStr, end: endStr }),
       getStatisticsTrendDaily({ metric: 'articleComments', start: startStr, end: endStr }),
       getStatisticsTrendDaily({ metric: 'talkComments', start: startStr, end: endStr }),
       getStatisticsTopPages({ start: startStr, end: endStr, limit: 10, orderBy: topPagesOrderBy }),
@@ -96,6 +100,7 @@ export const getDashboardStatistics = async (params?: {
     const recentMonthTalkTrend = buildMonthlyTrend(talks.map((t) => t.createTime))
 
     const totalReadsTrend = mergeTrendSum(articleReadsTrendResp.points || [], talkReadsTrendResp.points || [])
+    const totalLikesTrend = mergeTrendSum(articleLikesTrendResp.points || [], talkLikesTrendResp.points || [])
     const totalCommentsTrend = mergeTrendSum(articleCommentsTrendResp.points || [], talkCommentsTrendResp.points || [])
 
     return {
@@ -111,6 +116,7 @@ export const getDashboardStatistics = async (params?: {
       sessionsTrend: sessionsTrendResp.points || [],
       newUvTrend: newUvTrendResp.points || [],
       totalReadsTrend,
+      totalLikesTrend,
       totalCommentsTrend,
       topPages: topPages || [],
       topViewedArticles,
@@ -150,6 +156,7 @@ export const getDashboardStatistics = async (params?: {
       sessionsTrend: [],
       newUvTrend: [],
       totalReadsTrend: [],
+      totalLikesTrend: [],
       totalCommentsTrend: [],
       topPages: [],
       topViewedArticles: [],

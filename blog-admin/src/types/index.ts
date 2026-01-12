@@ -434,6 +434,7 @@ export interface DashboardStatistics {
   sessionsTrend: TrendData[]
   newUvTrend: TrendData[]
   totalReadsTrend: TrendData[]
+  totalLikesTrend: TrendData[]
   totalCommentsTrend: TrendData[]
   topPages: TopPageItem[]
   topViewedArticles: ChartData[]
