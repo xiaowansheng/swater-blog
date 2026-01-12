@@ -4,6 +4,7 @@ import { categoryApi } from '@/lib/api/category';
 import { tagApi } from '@/lib/api/tag';
 import { Link } from '@/lib/i18n/routing';
 import { ISR_REVALIDATE } from '@/lib/constants';
+import { getCoverConfig } from '@/lib/api/config.server';
 import ArchiveTimeline from '@/components/archive/ArchiveTimeline';
 
 export const revalidate = ISR_REVALIDATE.ARCHIVE;
@@ -16,14 +17,15 @@ export default async function ArchiveListPage({
   const t = await getTranslations('common');
 
   try {
-    const [categories, tags] = await Promise.all([
+    const [categories, tags, cover] = await Promise.all([
       categoryApi.getList().catch(() => []),
       tagApi.getList().catch(() => []),
+      getCoverConfig()
     ]);
 
     return (
       <>
-        <PageHeader title={t('archives')} description="文章归档、分类与标签" />
+        <PageHeader title={t('archives')} description="文章归档、分类与标签" coverImage={cover.archive} />
         <main className="container flex-1 px-4 py-12 mx-auto space-y-12">
           {/* 分类和标签 */}
           <section>
@@ -99,9 +101,10 @@ export default async function ArchiveListPage({
     );
   } catch (error) {
     console.error('Failed to load archives:', error);
+    const cover = await getCoverConfig();
     return (
       <>
-        <PageHeader title={t('archives')} description="文章归档" />
+        <PageHeader title={t('archives')} description="文章归档" coverImage={cover.archive} />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>

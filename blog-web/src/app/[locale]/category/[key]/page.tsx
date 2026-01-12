@@ -5,6 +5,7 @@ import Pagination from '@/components/common/Pagination';
 import { articleApi } from '@/lib/api/article';
 import { categoryApi } from '@/lib/api/category';
 import { ISR_REVALIDATE } from '@/lib/constants';
+import { getCoverConfig } from '@/lib/api/config.server';
 
 export const revalidate = ISR_REVALIDATE.CATEGORY;
 
@@ -22,16 +23,18 @@ export default async function CategoryPage({
   try {
     const category = await categoryApi.getByKey(key);
     const currentPage = parseInt(page, 10) || 1;
-    const articleList = await articleApi.getList({
-      page: currentPage,
-      size: 10,
-      categoryId: category.id,
-    });
+    const [articleList, cover] = await Promise.all([
+      articleApi.getList({
+        page: currentPage,
+        size: 10,
+        categoryId: category.id,
+      }),
+      getCoverConfig()
+    ]);
 
     return (
       <>
-        
-        <PageHeader title={category.name} description={category.description || undefined} />
+        <PageHeader title={category.name} description={category.description || undefined} coverImage={cover.category} />
         <main className="container flex-1 px-4 py-12 mx-auto">
           {articleList.records.length > 0 ? (
             <>
@@ -70,10 +73,10 @@ export default async function CategoryPage({
     );
   } catch (error) {
     console.error('Failed to load category:', error);
+    const cover = await getCoverConfig();
     return (
       <>
-        
-        <PageHeader title={t('categories')} />
+        <PageHeader title={t('categories')} coverImage={cover.category} />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>

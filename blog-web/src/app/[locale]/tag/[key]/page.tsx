@@ -5,6 +5,7 @@ import Pagination from '@/components/common/Pagination';
 import { articleApi } from '@/lib/api/article';
 import { tagApi } from '@/lib/api/tag';
 import { ISR_REVALIDATE } from '@/lib/constants';
+import { getCoverConfig } from '@/lib/api/config.server';
 
 export const revalidate = ISR_REVALIDATE.TAG;
 
@@ -22,16 +23,18 @@ export default async function TagPage({
   try {
     const tag = await tagApi.getByKey(key);
     const currentPage = parseInt(page, 10) || 1;
-    const articleList = await articleApi.getList({
-      page: currentPage,
-      size: 10,
-      tagId: tag.id,
-    });
+    const [articleList, cover] = await Promise.all([
+      articleApi.getList({
+        page: currentPage,
+        size: 10,
+        tagId: tag.id,
+      }),
+      getCoverConfig()
+    ]);
 
     return (
       <>
-        
-        <PageHeader title={tag.name} />
+        <PageHeader title={tag.name} coverImage={cover.tag} />
         <main className="container flex-1 px-4 py-12 mx-auto">
           {articleList.records.length > 0 ? (
             <>
@@ -70,10 +73,10 @@ export default async function TagPage({
     );
   } catch (error) {
     console.error('Failed to load tag:', error);
+    const cover = await getCoverConfig();
     return (
       <>
-        
-        <PageHeader title={t('tags')} />
+        <PageHeader title={t('tags')} coverImage={cover.tag} />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>

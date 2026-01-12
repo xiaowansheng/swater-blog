@@ -3,6 +3,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import { categoryApi } from '@/lib/api/category';
 import { Link } from '@/lib/i18n/routing';
 import { ISR_REVALIDATE } from '@/lib/constants';
+import { getCoverConfig } from '@/lib/api/config.server';
 
 export const revalidate = ISR_REVALIDATE.CATEGORY;
 
@@ -14,11 +15,14 @@ export default async function CategoryListPage({
   const t = await getTranslations('common');
 
   try {
-    const categories = await categoryApi.getList();
+    const [categories, cover] = await Promise.all([
+      categoryApi.getList(),
+      getCoverConfig()
+    ]);
 
     return (
       <>
-        <PageHeader title={t('categories')} description="文章分类" />
+        <PageHeader title={t('categories')} description="文章分类" coverImage={cover.category} />
         <main className="container flex-1 px-3 sm:px-4 py-8 sm:py-12 mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {categories.map((category) => (
@@ -46,9 +50,10 @@ export default async function CategoryListPage({
     );
   } catch (error) {
     console.error('Failed to load categories:', error);
+    const cover = await getCoverConfig();
     return (
       <>
-        <PageHeader title={t('categories')} description="文章分类" />
+        <PageHeader title={t('categories')} description="文章分类" coverImage={cover.category} />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>

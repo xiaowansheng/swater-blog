@@ -3,6 +3,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import { tagApi } from '@/lib/api/tag';
 import { Link } from '@/lib/i18n/routing';
 import { ISR_REVALIDATE } from '@/lib/constants';
+import { getCoverConfig } from '@/lib/api/config.server';
 
 export const revalidate = ISR_REVALIDATE.TAG;
 
@@ -14,12 +15,14 @@ export default async function TagListPage({
   const t = await getTranslations('common');
 
   try {
-    const tags = await tagApi.getList();
+    const [tags, cover] = await Promise.all([
+      tagApi.getList(),
+      getCoverConfig()
+    ]);
 
     return (
       <>
-        
-        <PageHeader title={t('tags')} description="所有标签" />
+        <PageHeader title={t('tags')} description="所有标签" coverImage={cover.tag} />
         <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="flex flex-wrap gap-3">
             {tags.map((tag) => (
@@ -43,10 +46,10 @@ export default async function TagListPage({
     );
   } catch (error) {
     console.error('Failed to load tags:', error);
+    const cover = await getCoverConfig();
     return (
       <>
-        
-        <PageHeader title={t('tags')} description="所有标签" />
+        <PageHeader title={t('tags')} description="所有标签" coverImage={cover.tag} />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>

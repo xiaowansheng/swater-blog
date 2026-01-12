@@ -12,7 +12,7 @@ import { AnimeComment } from '@/components/anime-comment';
 import ContentTracker from '@/components/visitor/ContentTracker';
 import ArticleLiveStats from '@/components/article/ArticleLiveStats';
 import { articleApi } from '@/lib/api/article';
-import { getAuthorInfo } from '@/lib/api/config.server';
+import { getAuthorInfo, getCoverConfig } from '@/lib/api/config.server';
 import { ISR_REVALIDATE } from '@/lib/constants';
 import { generateArticleMetadata } from '@/lib/utils/seo';
 import { formatDate } from '@/lib/utils/format';
@@ -47,9 +47,10 @@ export default async function PostDetailPage({
   const { locale, slug } = await params;
 
   try {
-    const [article, author] = await Promise.all([
+    const [article, author, cover] = await Promise.all([
       articleApi.getByKey(slug),
-      getAuthorInfo()
+      getAuthorInfo(),
+      getCoverConfig()
     ]);
 
     return (
@@ -57,7 +58,7 @@ export default async function PostDetailPage({
         <ContentTracker contentType="ARTICLE" contentId={article.id} />
         <ReadingProgress />
         {/* 文章头部 */}
-        <PageHeader>
+        <PageHeader coverImage={cover.article}>
           {/* 文章标题 */}
           <h1 className="text-4xl md:text-6xl font-bold gradient-text leading-tight">
             {article.title}

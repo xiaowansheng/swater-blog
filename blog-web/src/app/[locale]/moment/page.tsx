@@ -4,6 +4,7 @@ import MomentList from '@/components/moment/MomentList';
 import Pagination from '@/components/common/Pagination';
 import { momentApi } from '@/lib/api/moment';
 import { ISR_REVALIDATE } from '@/lib/constants';
+import { getCoverConfig } from '@/lib/api/config.server';
 
 export const revalidate = ISR_REVALIDATE.HOME;
 
@@ -19,12 +20,14 @@ export default async function MomentPage({
 
   try {
     const currentPage = parseInt(page, 10) || 1;
-    const momentList = await momentApi.getList(currentPage, 10);
+    const [momentList, cover] = await Promise.all([
+      momentApi.getList(currentPage, 10),
+      getCoverConfig()
+    ]);
 
     return (
       <>
-        
-        <PageHeader title={t('moments')} description="记录生活的瞬间" />
+        <PageHeader title={t('moments')} description="记录生活的瞬间" coverImage={cover.talk} />
         <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="max-w-4xl mx-auto">
             {momentList.records.length > 0 ? (
@@ -57,10 +60,10 @@ export default async function MomentPage({
     );
   } catch (error) {
     console.error('Failed to load moments:', error);
+    const cover = await getCoverConfig();
     return (
       <>
-        
-        <PageHeader title={t('moments')} description="记录生活的瞬间" />
+        <PageHeader title={t('moments')} description="记录生活的瞬间" coverImage={cover.talk} />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>
