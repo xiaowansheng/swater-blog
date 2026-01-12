@@ -25,7 +25,7 @@ export default async function HomePage({
   let tags: any[] = [];
 
   try {
-    articleList = await articleApi.getList({ page: currentPage, size: 1 });
+    articleList = await articleApi.getList({ page: currentPage, size: 10 });
   } catch (error) {
     console.warn('Failed to load articles (API server may not be running):', error);
   }
