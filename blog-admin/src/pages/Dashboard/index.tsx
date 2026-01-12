@@ -92,16 +92,6 @@ const Dashboard: React.FC = () => {
     <div className="page-container fade-in">
       <div className="flex items-center justify-between mb-6">
         <Title level={3} className="mb-0">仪表盘</Title>
-        <Space>
-          <RangePicker
-            value={range}
-            allowClear={false}
-            onChange={(next) => {
-              if (!next || !next[0] || !next[1]) return
-              setRange([next[0], next[1]])
-            }}
-          />
-        </Space>
       </div>
 
       {/* 内容区 */}
@@ -157,7 +147,19 @@ const Dashboard: React.FC = () => {
 
       {/* 数据区 */}
       <div className="mb-6">
-        <Title level={4} className="mb-3">数据</Title>
+        <div className="flex items-center justify-between mb-3">
+          <Title level={4} className="mb-0">数据</Title>
+          <Space>
+            <RangePicker
+              value={range}
+              allowClear={false}
+              onChange={(next) => {
+                if (!next || !next[0] || !next[1]) return
+                setRange([next[0], next[1]])
+              }}
+            />
+          </Space>
+        </div>
 
         <Row gutter={[16, 16]} className="mb-4">
           {[
