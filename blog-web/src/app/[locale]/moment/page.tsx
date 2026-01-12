@@ -29,7 +29,7 @@ export default async function MomentPage({
       <>
         <PageHeader title={t('moments')} description="记录生活的瞬间" coverImage={cover.talk} />
         <main className="container flex-1 px-4 py-12 mx-auto">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto" id="moment-list">
             {momentList.records.length > 0 ? (
               <>
                 <MomentList moments={momentList.records} />
@@ -39,6 +39,7 @@ export default async function MomentPage({
                   totalCount={momentList.total}
                   basePath="/moment"
                   pageSize={momentList.size}
+                  scrollToId="moment-list"
                 />
               </>
             ) : (

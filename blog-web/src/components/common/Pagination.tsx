@@ -9,9 +9,10 @@ interface PaginationProps {
   basePath: string;
   totalCount?: number;
   pageSize?: number;
+  scrollToId?: string; // 滚动到指定元素的 ID
 }
 
-export default function Pagination({ current, total, basePath, totalCount, pageSize = 10 }: PaginationProps) {
+export default function Pagination({ current, total, basePath, totalCount, pageSize = 10, scrollToId }: PaginationProps) {
   const router = useRouter();
   const [jumpInput, setJumpInput] = useState('');
   const [isJumpFocused, setIsJumpFocused] = useState(false);
@@ -56,28 +57,47 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
       setJumpInput('');
       setIsJumpFocused(false);
 
-      // 滚动到内容区域顶部
+      // 滚动到指定位置
       setTimeout(() => {
-        const articlesElement = document.getElementById('articles');
-        if (articlesElement) {
-          articlesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        scrollToTarget();
       }, 100);
     }
+  };
+
+  // 滚动到目标元素
+  const scrollToTarget = () => {
+    // 如果传入了 scrollToId，优先使用
+    if (scrollToId) {
+      const targetElement = document.getElementById(scrollToId);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+    }
+
+    // 默认降级策略：尝试滚动到常见的内容区域
+    const articleListElement = document.getElementById('article-list');
+    if (articleListElement) {
+      articleListElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    // 降级到 #articles
+    const articlesElement = document.getElementById('articles');
+    if (articlesElement) {
+      articlesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    // 最终降级：滚动到页面顶部
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // 页码切换时滚动到顶部
   const handlePageClick = (e: React.MouseEvent) => {
     // 不阻止默认行为，让 Link 正常导航
     setTimeout(() => {
-      const articlesElement = document.getElementById('articles');
-      if (articlesElement) {
-        articlesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+      scrollToTarget();
     }, 100);
   };
 

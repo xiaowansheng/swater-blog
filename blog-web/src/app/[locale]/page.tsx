@@ -25,7 +25,7 @@ export default async function HomePage({
   let tags: any[] = [];
 
   try {
-    articleList = await articleApi.getList({ page: currentPage, size: 10 });
+    articleList = await articleApi.getList({ page: currentPage, size: 1 });
   } catch (error) {
     console.warn('Failed to load articles (API server may not be running):', error);
   }
@@ -57,7 +57,7 @@ export default async function HomePage({
       />
       <main id="articles" className="container relative z-10 flex-1 px-3 sm:px-4 py-8 sm:py-12 md:py-16 mx-auto">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          <div className="flex-1 w-full">
+          <div className="flex-1 w-full" id="article-list">
             {articleList.records.length > 0 ? (
               <>
                 <ArticleList articles={articleList.records} />
@@ -69,6 +69,7 @@ export default async function HomePage({
                     totalCount={articleList.total}
                     basePath="/"
                     pageSize={articleList.size}
+                    scrollToId="article-list"
                   />
                 )}
               </>
