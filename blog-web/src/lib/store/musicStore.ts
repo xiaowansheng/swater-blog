@@ -21,6 +21,7 @@ interface MusicStore {
   volume: number;
   isMuted: boolean;
   isPlayerOpen: boolean;
+  isPlaylistOpen: boolean;
 
   // 播放模式
   playMode: 'sequential' | 'shuffle' | 'repeat';
@@ -37,6 +38,7 @@ interface MusicStore {
   setVolume: (volume: number) => void;
   toggleMute: () => void;
   togglePlayer: () => void;
+  togglePlaylist: () => void;
   setPlayMode: (mode: 'sequential' | 'shuffle' | 'repeat') => void;
   seekTo: (time: number) => void;
 }
@@ -51,6 +53,7 @@ export const useMusicStore = create<MusicStore>((set, get) => ({
   volume: 0.7,
   isMuted: false,
   isPlayerOpen: false,
+  isPlaylistOpen: false,
   playMode: 'sequential',
 
   // 设置播放列表
@@ -173,6 +176,12 @@ export const useMusicStore = create<MusicStore>((set, get) => ({
   togglePlayer: () =>
     set((state) => ({
       isPlayerOpen: !state.isPlayerOpen,
+    })),
+
+  // 切换播放列表打开/关闭
+  togglePlaylist: () =>
+    set((state) => ({
+      isPlaylistOpen: !state.isPlaylistOpen,
     })),
 
   // 设置播放模式

@@ -10,11 +10,13 @@ export default function AnimeMusicPlayer() {
   const {
     playlist,
     currentSong,
+    currentIndex,
     isPlaying,
     currentTime,
     volume,
     isMuted,
     isPlayerOpen,
+    isPlaylistOpen,
     playMode,
     playSong,
     playNext,
@@ -24,6 +26,7 @@ export default function AnimeMusicPlayer() {
     setVolume,
     toggleMute,
     togglePlayer,
+    togglePlaylist,
     setPlayMode,
     seekTo,
   } = useMusicStore();
@@ -31,6 +34,10 @@ export default function AnimeMusicPlayer() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 200 });
+  const playlistPanelRef = useRef<HTMLDivElement>(null);
+  const [playlistPosition, setPlaylistPosition] = useState({ top: 0, left: 0 });
+  const playerPanelRef = useRef<HTMLDivElement>(null);
+  const [playerPosition, setPlayerPosition] = useState({ top: 0, left: 0 });
 
   // 初始化默认播放列表
   useEffect(() => {
@@ -124,6 +131,78 @@ export default function AnimeMusicPlayer() {
     }
   }, [currentTime, isDragging]);
 
+  // Keep player panel within viewport and near the button.
+  useEffect(() => {
+    if (!isPlayerOpen) return;
+
+    const updatePosition = () => {
+      const margin = 16;
+      const buttonSize = 56;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      const availableWidth = Math.max(200, viewportWidth - margin * 2);
+      const availableHeight = Math.max(200, viewportHeight - margin * 2);
+      const panelWidth = Math.min(320, availableWidth);
+      const panelHeight = Math.min(360, availableHeight);
+
+      const preferredLeft = buttonPosition.x - panelWidth + buttonSize;
+      const preferredRight = buttonPosition.x + buttonSize;
+      let left = preferredLeft < margin ? preferredRight : preferredLeft;
+      left = Math.max(margin, Math.min(left, viewportWidth - panelWidth - margin));
+
+      const preferredTop = buttonPosition.y - panelHeight - margin;
+      const preferredBottom = buttonPosition.y + buttonSize + margin;
+      let top = preferredTop < margin ? preferredBottom : preferredTop;
+      top = Math.max(margin, Math.min(top, viewportHeight - panelHeight - margin));
+
+      setPlayerPosition({ top, left });
+    };
+
+    const frame = requestAnimationFrame(updatePosition);
+    window.addEventListener('resize', updatePosition);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [isPlayerOpen, buttonPosition.x, buttonPosition.y]);
+
+  // Keep playlist panel within viewport and near the button.
+  useEffect(() => {
+    if (!isPlaylistOpen) return;
+
+    const updatePosition = () => {
+      const margin = 16;
+      const buttonSize = 56;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      const availableWidth = Math.max(200, viewportWidth - margin * 2);
+      const availableHeight = Math.max(200, viewportHeight - margin * 2);
+      const panelWidth = Math.min(320, availableWidth);
+      const panelHeight = Math.min(Math.min(viewportHeight * 0.5, 360), availableHeight);
+
+      const preferredLeft = buttonPosition.x - panelWidth + buttonSize;
+      const preferredRight = buttonPosition.x + buttonSize;
+      let left = preferredLeft < margin ? preferredRight : preferredLeft;
+      left = Math.max(margin, Math.min(left, viewportWidth - panelWidth - margin));
+
+      const preferredTop = buttonPosition.y - panelHeight - margin;
+      const preferredBottom = buttonPosition.y + buttonSize + margin;
+      let top = preferredTop < margin ? preferredBottom : preferredTop;
+      top = Math.max(margin, Math.min(top, viewportHeight - panelHeight - margin));
+
+      setPlaylistPosition({ top, left });
+    };
+
+    const frame = requestAnimationFrame(updatePosition);
+    window.addEventListener('resize', updatePosition);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [isPlaylistOpen, buttonPosition.x, buttonPosition.y, playlist.length]);
+
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -134,22 +213,37 @@ export default function AnimeMusicPlayer() {
     switch (playMode) {
       case 'sequential':
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h5l.5 2.5L8 11H3l-1 4h12l-1-4H9l-1.5-4.5L8 4h5m4 0v6m0 0v6m0-6h6" />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         );
       case 'shuffle':
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h5l2.5 2.5L11 11H6l-1 4h12l-1-4h-3m-2-6.5L11 11l2.5 2.5M4 20h5l2.5-2.5L11 13H6l-1-4h12l-1 4h-3m-2 6.5L11 13l2.5-2.5" />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
           </svg>
         );
       case 'repeat':
         return (
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
         );
+      default:
+        return null;
+    }
+  };
+
+  const getPlayModeTitle = () => {
+    switch (playMode) {
+      case 'sequential':
+        return '顺序播放';
+      case 'shuffle':
+        return '随机播放';
+      case 'repeat':
+        return '单曲循环';
+      default:
+        return '';
     }
   };
 
@@ -216,8 +310,15 @@ export default function AnimeMusicPlayer() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 50 }}
               transition={{ type: 'spring', damping: 25 }}
-              className="fixed bottom-40 right-6 z-50 w-80 bg-white/10 dark:bg-black/30 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl overflow-hidden"
-            >
+              style={{
+                top: playerPosition.top,
+                left: playerPosition.left,
+                width: Math.min(320, Math.max(200, window.innerWidth - 32)),
+                maxHeight: Math.max(200, window.innerHeight - 32),
+              }}
+              ref={playerPanelRef}
+                className="fixed z-50 bg-white/10 dark:bg-black/30 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl overflow-hidden"
+              >
               {/* 专辑封面和歌曲信息 */}
               <div className="relative p-6">
                 {/* 背景装饰 */}
@@ -301,7 +402,7 @@ export default function AnimeMusicPlayer() {
                         setPlayMode(nextMode);
                       }}
                       className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
-                      title="播放模式"
+                      title={getPlayModeTitle()}
                     >
                       {getPlayModeIcon()}
                     </button>
@@ -346,9 +447,7 @@ export default function AnimeMusicPlayer() {
 
                     {/* 播放列表 */}
                     <button
-                      onClick={() => {
-                        /* 可以打开播放列表弹窗 */
-                      }}
+                      onClick={togglePlaylist}
                       className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
                       title="播放列表"
                     >
@@ -396,6 +495,138 @@ export default function AnimeMusicPlayer() {
             </motion.div>
           </>
         )}
+
+        {/* 播放列表弹窗 */}
+        <AnimatePresence>
+          {isPlaylistOpen && (
+            <>
+              {/* 背景遮罩 */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={togglePlaylist}
+                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+              />
+
+              {/* 播放列表卡片 */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: 'spring', damping: 25 }}
+                style={{
+                  top: playlistPosition.top,
+                  left: playlistPosition.left,
+                  width: Math.min(320, Math.max(200, window.innerWidth - 32)),
+                  maxHeight: Math.max(200, window.innerHeight - 32),
+                }}
+                ref={playlistPanelRef}
+                className="fixed z-[60] bg-white/10 dark:bg-black/30 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl overflow-hidden"
+              >
+                {/* 头部 */}
+                <div className="p-4 border-b border-white/10 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-white">播放列表</h3>
+                    <p className="text-sm text-white/60">{playlist.length} 首歌曲</p>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={togglePlaylist}
+                    className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </motion.button>
+                </div>
+
+                {/* 歌曲列表 */}
+                <div className="overflow-y-auto max-h-[50vh] p-2">
+                  {playlist.map((song, index) => (
+                    <motion.button
+                      key={song.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      onClick={() => {
+                        playSong(song);
+                        if (!isPlayerOpen) {
+                          togglePlayer();
+                        }
+                      }}
+                      className={`w-full p-3 rounded-xl flex items-center gap-3 transition-all ${
+                        currentIndex === index
+                          ? 'bg-gradient-to-r from-pink-400/30 to-purple-500/30 border border-pink-400/30'
+                          : 'hover:bg-white/10'
+                      }`}
+                    >
+                      {/* 序号/播放指示 */}
+                      <div className="relative w-8 h-8 flex-shrink-0">
+                        {currentIndex === index && isPlaying ? (
+                          <motion.div
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ repeat: Infinity, duration: 0.5 }}
+                            className="flex items-center gap-0.5"
+                          >
+                            <span className="w-0.5 h-3 bg-pink-400 rounded-full animate-pulse" />
+                            <span className="w-0.5 h-5 bg-pink-400 rounded-full animate-pulse delay-75" />
+                            <span className="w-0.5 h-3 bg-pink-400 rounded-full animate-pulse delay-150" />
+                          </motion.div>
+                        ) : (
+                          <span className={`text-sm font-medium ${
+                            currentIndex === index ? 'text-pink-400' : 'text-white/60'
+                          }`}>
+                            {index + 1}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* 专辑封面 */}
+                      <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                        <Image
+                          src={song.cover || 'https://picsum.photos/300/300'}
+                          alt={song.title}
+                          fill
+                          className="object-cover"
+                          sizes="40px"
+                        />
+                      </div>
+
+                      {/* 歌曲信息 */}
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className={`text-sm font-medium truncate ${
+                          currentIndex === index ? 'text-pink-400' : 'text-white'
+                        }`}>
+                          {song.title}
+                        </p>
+                        <p className="text-xs text-white/60 truncate">
+                          {song.artist}
+                        </p>
+                      </div>
+
+                      {/* 当前播放指示 */}
+                      {currentIndex === index && (
+                        <motion.div
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ repeat: Infinity, duration: 1 }}
+                          className="w-2 h-2 bg-pink-400 rounded-full flex-shrink-0"
+                        />
+                      )}
+                    </motion.button>
+                  ))}
+
+                  {playlist.length === 0 && (
+                    <div className="py-12 text-center text-white/60">
+                      <p>播放列表为空</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </AnimatePresence>
     </>
   );
