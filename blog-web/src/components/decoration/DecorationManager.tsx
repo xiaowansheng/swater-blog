@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useDecoration } from '@/lib/context/DecorationContext';
 import SakuraRain from '@/components/decoration/SakuraRain';
 import CornerDecoration from '@/components/decoration/CornerDecoration';
+import AnimeMusicPlayer from '@/components/decoration/AnimeMusicPlayer';
 // import Mascot from '@/components/decoration/Mascot';
 
 export default function DecorationManager() {
@@ -19,12 +20,18 @@ export default function DecorationManager() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  if (level === 'none' || isMobile) return null;
-
   return (
     <>
-      <CornerDecoration />
-      {level === 'full' && <SakuraRain />}
+      {/* 音乐播放器 - 不受装饰等级限制，始终可见 */}
+      <AnimeMusicPlayer />
+
+      {/* 装饰效果 - 根据装饰等级控制 */}
+      {level !== 'none' && !isMobile && (
+        <>
+          <CornerDecoration />
+          {level === 'full' && <SakuraRain />}
+        </>
+      )}
       {/* <Mascot /> */}
     </>
   );
