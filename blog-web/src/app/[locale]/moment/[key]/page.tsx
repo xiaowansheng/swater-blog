@@ -6,6 +6,7 @@ import MomentImages from '@/components/moment/MomentImages';
 import { AnimeComment } from '@/components/anime-comment';
 import ContentTracker from '@/components/visitor/ContentTracker';
 import MomentLiveStats from '@/components/moment/MomentLiveStats';
+import ContentLikeButton from '@/components/common/ContentLikeButton';
 import { momentApi } from '@/lib/api/moment';
 import { formatDate } from '@/lib/utils/format';
 import { ISR_REVALIDATE } from '@/lib/constants';
@@ -79,6 +80,12 @@ export default async function MomentDetailPage({
               <MomentImages images={moment.images} alt={moment.content.substring(0, 20)} />
             )}
 
+            <ContentLikeButton
+              contentType="TALK"
+              contentId={moment.id}
+              initialLikeCount={moment.likeCount || 0}
+            />
+
             <MomentLiveStats
               id={moment.id}
               initial={{
@@ -100,4 +107,3 @@ export default async function MomentDetailPage({
     notFound();
   }
 }
-

@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import PageHeader from '@/components/layout/PageHeader';
 import MarkdownRenderer from '@/components/markdown/MarkdownRenderer';
 // import ArticleMeta from '@/components/article/ArticleMeta';
-import ArticleLike from '@/components/article/ArticleLike';
+import ContentLikeButton from '@/components/common/ContentLikeButton';
 import ArticleCopyright from '@/components/article/ArticleCopyright';
 import ArticleMenu from '@/components/article/ArticleMenu';
 import ArticleMenuMobile from '@/components/article/ArticleMenuMobile';
@@ -149,7 +149,11 @@ export default async function PostDetailPage({
               <div className="vditor-reset" data-reading-target>
                 <MarkdownRenderer content={article.content} />
               </div>
-              <ArticleLike article={article} />
+              <ContentLikeButton
+                contentType="ARTICLE"
+                contentId={article.id}
+                initialLikeCount={article.likeCount || 0}
+              />
               <ArticleCopyright article={article} author={author} />
 
               {/* 二次元评论组件 */}

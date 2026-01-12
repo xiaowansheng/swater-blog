@@ -18,14 +18,9 @@ export default function MomentLiveStats({
         <span>{stats.viewCount.toLocaleString()}</span>
       </div>
       <div className="flex gap-1 items-center">
-        <span>❤</span>
-        <span>{stats.likeCount.toLocaleString()}</span>
-      </div>
-      <div className="flex gap-1 items-center">
         <span>💬</span>
         <span>{stats.commentCount.toLocaleString()}</span>
       </div>
     </div>
   );
 }
-
