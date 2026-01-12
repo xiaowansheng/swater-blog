@@ -44,6 +44,7 @@ export const getDashboardStatistics = async (params?: {
     const startStr = start.format('YYYY-MM-DDTHH:mm:ss')
     const endStr = end.format('YYYY-MM-DDTHH:mm:ss')
     const topPagesOrderBy = params?.topPagesOrderBy || 'pv'
+    const dayKeys = generateDaysBetween(startStr, endStr)
 
     const [
       articleStats,
@@ -99,9 +100,21 @@ export const getDashboardStatistics = async (params?: {
     const recentMonthArticleTrend = buildMonthlyTrend(articles.map((a) => a.publishedAt || a.createTime))
     const recentMonthTalkTrend = buildMonthlyTrend(talks.map((t) => t.createTime))
 
-    const totalReadsTrend = mergeTrendSum(articleReadsTrendResp.points || [], talkReadsTrendResp.points || [])
-    const totalLikesTrend = mergeTrendSum(articleLikesTrendResp.points || [], talkLikesTrendResp.points || [])
-    const totalCommentsTrend = mergeTrendSum(articleCommentsTrendResp.points || [], talkCommentsTrendResp.points || [])
+    const pvTrend = fillTrend(pvTrendResp.points || [], dayKeys)
+    const uvTrend = fillTrend(uvTrendResp.points || [], dayKeys)
+    const sessionsTrend = fillTrend(sessionsTrendResp.points || [], dayKeys)
+    const newUvTrend = fillTrend(newUvTrendResp.points || [], dayKeys)
+
+    const articleReadsTrend = fillTrend(articleReadsTrendResp.points || [], dayKeys)
+    const talkReadsTrend = fillTrend(talkReadsTrendResp.points || [], dayKeys)
+    const articleLikesTrend = fillTrend(articleLikesTrendResp.points || [], dayKeys)
+    const talkLikesTrend = fillTrend(talkLikesTrendResp.points || [], dayKeys)
+    const articleCommentsTrend = fillTrend(articleCommentsTrendResp.points || [], dayKeys)
+    const talkCommentsTrend = fillTrend(talkCommentsTrendResp.points || [], dayKeys)
+
+    const totalReadsTrend = mergeTrendSum(articleReadsTrend, talkReadsTrend)
+    const totalLikesTrend = mergeTrendSum(articleLikesTrend, talkLikesTrend)
+    const totalCommentsTrend = mergeTrendSum(articleCommentsTrend, talkCommentsTrend)
 
     return {
       articleCount: articleStats.totalCount,
@@ -111,10 +124,10 @@ export const getDashboardStatistics = async (params?: {
       articleTrend: recentMonthArticleTrend,
       talkTrend: recentMonthTalkTrend,
       overview,
-      pvTrend: pvTrendResp.points || [],
-      uvTrend: uvTrendResp.points || [],
-      sessionsTrend: sessionsTrendResp.points || [],
-      newUvTrend: newUvTrendResp.points || [],
+      pvTrend,
+      uvTrend,
+      sessionsTrend,
+      newUvTrend,
       totalReadsTrend,
       totalLikesTrend,
       totalCommentsTrend,
@@ -194,6 +207,25 @@ function generateLastNDays(days: number): string[] {
     result.push(d.toISOString().split('T')[0])
   }
   return result
+}
+
+function generateDaysBetween(start: string, end: string): string[] {
+  const startDay = dayjs(start).startOf('day')
+  const endDay = dayjs(end).startOf('day')
+  const days = endDay.diff(startDay, 'day')
+  const result: string[] = []
+  for (let i = 0; i <= days; i++) {
+    result.push(startDay.add(i, 'day').format('YYYY-MM-DD'))
+  }
+  return result
+}
+
+function fillTrend(points: TrendData[], dayKeys: string[]): TrendData[] {
+  const map: Record<string, number> = {}
+  for (const item of points) {
+    map[item.date] = item.value || 0
+  }
+  return dayKeys.map((date) => ({ date, value: map[date] || 0 }))
 }
 
 function mergeTrendSum(a: TrendData[], b: TrendData[]): TrendData[] {
