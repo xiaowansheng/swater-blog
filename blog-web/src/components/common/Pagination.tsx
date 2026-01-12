@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Link, useRouter } from '@/lib/i18n/routing';
+import { useEffect, useState } from 'react';
+import { Link, usePathname, useRouter } from '@/lib/i18n/routing';
 
 interface PaginationProps {
   current: number;
@@ -14,10 +14,30 @@ interface PaginationProps {
 
 export default function Pagination({ current, total, basePath, totalCount, pageSize = 10, scrollToId }: PaginationProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [jumpInput, setJumpInput] = useState('');
   const [isJumpFocused, setIsJumpFocused] = useState(false);
 
   const pages = Array.from({ length: total }, (_, i) => i + 1);
+
+  const pendingScrollStorageKey = 'pagination:pending-scroll-v1';
+
+  const queueScrollAfterNavigation = (targetPage: number) => {
+    if (typeof window === 'undefined') return;
+    const payload = { pathname, targetPage, scrollToId, ts: Date.now() };
+    window.sessionStorage.setItem(pendingScrollStorageKey, JSON.stringify(payload));
+  };
+
+  const normalizeJumpValue = (raw: string) => {
+    const digits = raw.replace(/[^\d]/g, '');
+    if (!digits) return '';
+
+    const numeric = Number.parseInt(digits, 10);
+    if (!Number.isFinite(numeric)) return '';
+
+    const clamped = Math.min(Math.max(numeric, 1), total);
+    return String(clamped);
+  };
 
   // 显示的页码范围（当前页前后各2页）
   const getVisiblePages = () => {
@@ -51,24 +71,21 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
   };
 
   const handleJump = () => {
-    const page = parseInt(jumpInput);
-    if (page >= 1 && page <= total) {
-      router.push(`${basePath}?page=${page}`);
-      setJumpInput('');
-      setIsJumpFocused(false);
+    const normalized = normalizeJumpValue(jumpInput);
+    if (!normalized) return;
 
-      // 滚动到指定位置
-      setTimeout(() => {
-        scrollToTarget();
-      }, 100);
-    }
+    const page = Number.parseInt(normalized, 10);
+    queueScrollAfterNavigation(page);
+    router.push(`${basePath}?page=${page}`, { scroll: false });
+    setJumpInput('');
+    setIsJumpFocused(false);
   };
 
   // 滚动到目标元素
-  const scrollToTarget = () => {
+  const scrollToTarget = (targetId?: string) => {
     // 如果传入了 scrollToId，优先使用
-    if (scrollToId) {
-      const targetElement = document.getElementById(scrollToId);
+    if (targetId) {
+      const targetElement = document.getElementById(targetId);
       if (targetElement) {
         targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
@@ -93,13 +110,25 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 页码切换时滚动到顶部
-  const handlePageClick = (e: React.MouseEvent) => {
-    // 不阻止默认行为，让 Link 正常导航
-    setTimeout(() => {
-      scrollToTarget();
-    }, 100);
-  };
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const raw = window.sessionStorage.getItem(pendingScrollStorageKey);
+    if (!raw) return;
+
+    try {
+      const pending: { pathname?: string; targetPage?: number; scrollToId?: string; ts?: number } = JSON.parse(raw);
+      const isExpired = typeof pending.ts === 'number' ? Date.now() - pending.ts > 15_000 : true;
+      const isForThisPage = pending.pathname === pathname && pending.targetPage === current;
+
+      if (isExpired || !isForThisPage) return;
+
+      window.sessionStorage.removeItem(pendingScrollStorageKey);
+      const id = pending.scrollToId ?? scrollToId;
+      window.setTimeout(() => scrollToTarget(id), 0);
+    } catch {
+      window.sessionStorage.removeItem(pendingScrollStorageKey);
+    }
+  }, [current, pathname, scrollToId]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -125,7 +154,8 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
         {current > 1 && (
           <Link
             href={`${basePath}?page=${current - 1}`}
-            onClick={handlePageClick}
+            scroll={false}
+            onClick={() => queueScrollAfterNavigation(current - 1)}
             className="px-4 py-2.5 border border-border rounded-xl hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 hover:border-primary/50 transition-all flex items-center gap-2 font-medium hover:scale-105 active:scale-95 relative overflow-hidden group"
           >
             <span className="relative z-10 flex items-center gap-2">
@@ -157,7 +187,8 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
               <Link
                 key={pageNum}
                 href={`${basePath}?page=${pageNum}`}
-                onClick={handlePageClick}
+                scroll={false}
+                onClick={() => queueScrollAfterNavigation(pageNum)}
                 className={`px-4 py-2.5 min-w-[2.75rem] text-center border rounded-xl transition-all font-medium relative overflow-hidden group ${
                   pageNum === current
                     ? 'bg-gradient-to-r from-primary to-accent text-white border-transparent shadow-lg shadow-primary/30 scale-110'
@@ -177,7 +208,8 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
         {current < total && (
           <Link
             href={`${basePath}?page=${current + 1}`}
-            onClick={handlePageClick}
+            scroll={false}
+            onClick={() => queueScrollAfterNavigation(current + 1)}
             className="px-4 py-2.5 border border-border rounded-xl hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 hover:border-primary/50 transition-all flex items-center gap-2 font-medium hover:scale-105 active:scale-95 relative overflow-hidden group"
           >
             <span className="relative z-10 flex items-center gap-2">
@@ -196,22 +228,22 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
         <span className="text-muted-foreground">跳转到</span>
         <div className="relative flex items-center">
           <input
-            type="number"
-            min={1}
-            max={total}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             value={jumpInput}
-            onChange={(e) => setJumpInput(e.target.value)}
+            onChange={(e) => setJumpInput(normalizeJumpValue(e.target.value))}
             onKeyDown={handleKeyPress}
             onFocus={() => setIsJumpFocused(true)}
             onBlur={() => {
               setTimeout(() => {
-                if (!jumpInput) {
-                  setIsJumpFocused(false);
-                }
+                const normalized = normalizeJumpValue(jumpInput);
+                setJumpInput(normalized);
+                if (!normalized) setIsJumpFocused(false);
               }, 200);
             }}
             placeholder={current.toString()}
-            className={`w-20 px-3 py-2 pr-10 border rounded-lg text-center transition-all ${
+            className={`w-28 px-3 py-2 pr-10 border rounded-lg text-center transition-all ${
               isJumpFocused
                 ? 'border-primary ring-2 ring-primary/20'
                 : 'border-border hover:border-primary/50'
