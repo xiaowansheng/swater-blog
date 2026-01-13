@@ -9,6 +9,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -43,9 +45,16 @@ public class MessageVerificationServiceImpl implements MessageVerificationServic
         redisTemplate.opsForValue().set(key, code, CODE_TTL_SECONDS, TimeUnit.SECONDS);
 
         String subject = "Message verification code";
-        String content = "Your verification code is: " + code + "\nIt expires in 5 minutes.";
+        String templateName = "email/notification_VERIFICATION_CODE";
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("title", subject);
+        variables.put("content", "You are using email verification feature. Please use the following verification code:");
+        variables.put("code", code);
+        variables.put("expiryText", "The verification code is valid for 5 minutes. Please use it as soon as possible.");
+
         try {
-            emailService.sendEmail(email, subject, content);
+            emailService.sendEmailWithTemplate(email, subject, templateName, variables);
         } catch (Exception e) {
             log.error("Failed to send verification email", e);
             throw new BusinessException(500, "Failed to send verification email");

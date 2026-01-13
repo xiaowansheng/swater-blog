@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">验证码通知</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+    <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f4f4f4;">
+        <tr>
+            <td align="center" style="padding: 20px 0;">
+                <table role="presentation" style="width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <tr>
+                        <td style="padding: 30px; background-color: #52c41a; border-radius: 8px 8px 0 0;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold;" th:text="${title}">验证码通知</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 30px;">
+                            <p style="margin: 0 0 20px 0; color: #333333; font-size: 16px; line-height: 1.6;" th:text="${content}">
+                                您正在使用邮箱验证功能
+                            </p>
+                            <div style="margin: 30px 0; padding: 25px; background-color: #f6ffed; border: 2px dashed #52c41a; border-radius: 8px; text-align: center;">
+                                <p style="margin: 0 0 10px 0; color: #666666; font-size: 14px;">
+                                    <strong style="color: #333333;">您的验证码是：</strong>
+                                </p>
+                                <p style="margin: 0; color: #52c41a; font-size: 36px; font-weight: bold; letter-spacing: 8px;" th:text="${code}">
+                                    123456
+                                </p>
+                            </div>
+                            <div style="margin: 20px 0; padding: 15px; background-color: #e6f7ff; border-left: 4px solid #1890ff; border-radius: 4px;">
+                                <p style="margin: 0 0 10px 0; color: #666666; font-size: 14px;">
+                                    <strong style="color: #333333;">有效期：</strong>
+                                </p>
+                                <p style="margin: 0; color: #666666; font-size: 14px;" th:text="${expiryText}">
+                                    验证码有效期为 5 分钟，请尽快使用。
+                                </p>
+                            </div>
+                            <div style="margin: 20px 0; padding: 15px; background-color: #fff7e6; border-left: 4px solid #faad14; border-radius: 4px;">
+                                <p style="margin: 0 0 10px 0; color: #666666; font-size: 14px;">
+                                    <strong style="color: #333333;">安全提示：</strong>
+                                </p>
+                                <p style="margin: 0; color: #666666; font-size: 14px;">
+                                    请勿将验证码告知他人，包括客服人员。如果这不是您本人的操作，请忽略此邮件。
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px 30px; background-color: #f8f9fa; border-radius: 0 0 8px 8px; border-top: 1px solid #e9ecef;">
+                            <p style="margin: 0; color: #999999; font-size: 12px; text-align: center;">
+                                此邮件由系统自动发送，请勿回复。
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
