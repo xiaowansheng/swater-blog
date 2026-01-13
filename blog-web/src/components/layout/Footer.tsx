@@ -26,18 +26,18 @@ export default async function Footer() {
       </div>
 
       <div className="container relative z-10 px-6 mx-auto max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-center">
           {/* Copyright Info */}
           <div className="text-center md:text-left space-y-2">
-            <div className="flex items-center gap-2 justify-center md:justify-start">
+            <div className="flex items-center gap-2 justify-center md:justify-start flex-wrap">
               <span className="text-xl font-bold font-title text-primary tracking-tight">{site.name}</span>
-              <span className="px-2 py-0.5 text-[10px] rounded-full bg-primary/10 text-primary font-medium uppercase tracking-wider">Fresh & Healing</span>
+              <span className="px-2 py-0.5 text-[10px] rounded-full bg-primary/10 text-primary font-medium uppercase tracking-wider whitespace-nowrap">Fresh & Healing</span>
             </div>
             <p className="text-sm text-muted-foreground/80 font-medium">
               {site.copyright || defaultCopyright}
             </p>
             {(site.icp || site.police) && (
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground/60">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground/60 justify-center md:justify-start">
                 {site.icp && <span className="hover:text-primary transition-colors cursor-default">{site.icp}</span>}
                 {site.police && <span className="hover:text-primary transition-colors cursor-default">{site.police}</span>}
               </div>
@@ -45,8 +45,8 @@ export default async function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div className="flex flex-col justify-center gap-6 items-center">
-            <div className="flex gap-8 items-center">
+          <div className="flex flex-col justify-center gap-4 sm:gap-6 items-center order-first md:order-none">
+            <div className="flex gap-6 sm:gap-8 items-center flex-wrap justify-center">
               <a href="/about" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
                 关于
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
@@ -62,7 +62,7 @@ export default async function Footer() {
             </div>
 
             {/* Visit Statistics */}
-            <div className="flex items-center gap-4 text-xs text-muted-foreground/70">
+            <div className="flex items-center gap-3 sm:gap-4 text-xs text-muted-foreground/70 flex-wrap justify-center">
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-deco-pink animate-pulse"></span>
                 <span className="font-medium">总访问量</span>
@@ -70,7 +70,7 @@ export default async function Footer() {
                   {visits.pv.toLocaleString()}
                 </span>
               </div>
-              <span className="w-px h-3 bg-border"></span>
+              <span className="w-px h-3 bg-border hidden sm:block"></span>
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-deco-yellow animate-pulse" style={{ animationDelay: '0.5s' }}></span>
                 <span className="font-medium">访客数</span>
