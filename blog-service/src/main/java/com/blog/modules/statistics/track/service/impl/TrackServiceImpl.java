@@ -16,12 +16,12 @@ import com.blog.modules.statistics.track.model.vo.TrackEnterResultVO;
 import com.blog.modules.statistics.track.service.TrackService;
 import com.blog.modules.statistics.visitor.mapper.VisitorMapper;
 import com.blog.modules.statistics.visitor.model.entity.Visitor;
-import com.blog.modules.statistics.visitor.util.VisitorUserAgentInfo;
-import com.blog.modules.statistics.visitor.util.VisitorUserAgentParser;
 import com.blog.plugin.components.location.LocationInfo;
 import com.blog.plugin.components.location.LocationProviderFactory;
 import com.blog.plugin.components.location.LocationProviderPlugin;
+import com.blog.shared.model.UserAgentInfo;
 import com.blog.shared.util.RequestUtil;
+import com.blog.shared.util.UserAgentUtil;
 import com.blog.modules.talk.mapper.TalkMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -114,16 +114,14 @@ public class TrackServiceImpl implements TrackService {
         visitor.setLastVisitTime(now);
         applyLocation(visitor, ip);
 
-        VisitorUserAgentInfo uaInfo = VisitorUserAgentParser.parse(userAgent);
-        if (uaInfo != null) {
-            visitor.setDeviceType(uaInfo.getDeviceType());
-            visitor.setDeviceBrand(uaInfo.getDeviceBrand());
-            visitor.setDeviceModel(uaInfo.getDeviceModel());
-            visitor.setBrowserName(uaInfo.getBrowserName());
-            visitor.setBrowserVersion(uaInfo.getBrowserVersion());
-            visitor.setOsName(uaInfo.getOsName());
-            visitor.setOsVersion(uaInfo.getOsVersion());
-        }
+        UserAgentInfo uaInfo = UserAgentUtil.parse(userAgent);
+        visitor.setDeviceType(uaInfo.getDeviceType());
+        visitor.setDeviceBrand(uaInfo.getDeviceBrand());
+        visitor.setDeviceModel(uaInfo.getDeviceModel());
+        visitor.setBrowserName(uaInfo.getBrowserName());
+        visitor.setBrowserVersion(uaInfo.getBrowserVersion());
+        visitor.setOsName(uaInfo.getOsName());
+        visitor.setOsVersion(uaInfo.getOsVersion());
 
         populateTraffic(visitor, dto.getReferer(), dto.getUtmSource(), dto.getUtmMedium(), dto.getUtmCampaign());
 
