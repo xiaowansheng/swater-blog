@@ -34,8 +34,7 @@ request.interceptors.response.use(
     if (res.code === 401) {
       if (!isShowingModal) {
         isShowingModal = true
-        useAuthStore.getState().setLoginModalOpen(true)
-        message.warning('登录已过期，请重新登录')
+        useAuthStore.getState().setLoginExpiredModalOpen(true)
         // 重置状态，允许下次触发
         setTimeout(() => {
           isShowingModal = false

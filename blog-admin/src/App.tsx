@@ -1,12 +1,22 @@
 import { BrowserRouter } from 'react-router-dom'
 import Router from './router'
 import ErrorBoundary from './components/common/ErrorBoundary'
+import LoginModal from './components/common/LoginModal'
+import LoginExpiredModal from './components/common/LoginExpiredModal'
+import { useAuthStore } from './store/auth'
 
 function App() {
+  const { isLoginExpiredModalOpen, setLoginExpiredModalOpen } = useAuthStore()
+
   return (
     <ErrorBoundary>
       <BrowserRouter>
         <Router />
+        <LoginModal />
+        <LoginExpiredModal
+          open={isLoginExpiredModalOpen}
+          onClose={() => setLoginExpiredModalOpen(false)}
+        />
       </BrowserRouter>
     </ErrorBoundary>
   )

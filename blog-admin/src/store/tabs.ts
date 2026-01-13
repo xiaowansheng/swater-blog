@@ -1,9 +1,11 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { TabItem } from '@/types'
 
 interface TabsState {
   tabs: TabItem[]
   activeKey: string
+  cachedTabs: TabItem[] // 缓存的标签页
   addTab: (tab: TabItem) => void
   removeTab: (key: string) => void
   setActiveTab: (key: string) => void
@@ -13,11 +15,17 @@ interface TabsState {
   closeAllTabs: () => void
   refreshTab: (key: string) => void
   getCachedTabs: () => string[]
+  cacheTabs: () => void // 缓存当前标签页
+  restoreTabs: () => void // 恢复缓存的标签页
+  clearCachedTabs: () => void // 清除缓存的标签页
 }
 
-export const useTabsStore = create<TabsState>((set, get) => ({
-  tabs: [],
-  activeKey: '',
+export const useTabsStore = create<TabsState>()(
+  persist(
+    (set, get) => ({
+      tabs: [],
+      activeKey: '',
+      cachedTabs: [],
   addTab: (tab) => {
     const { tabs } = get()
     const exists = tabs.find((t) => t.key === tab.key)
@@ -81,5 +89,32 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     const { tabs } = get()
     return tabs.filter((t) => t.keepAlive).map((t) => t.key)
   },
-}))
+  cacheTabs: () => {
+    const { tabs, activeKey } = get()
+    console.log('缓存标签页:', tabs, '当前活跃标签:', activeKey)
+    set({ cachedTabs: [...tabs] })
+  },
+  restoreTabs: () => {
+    const { cachedTabs } = get()
+    console.log('恢复标签页:', cachedTabs)
+    if (cachedTabs.length > 0) {
+      // 找到第一个标签作为默认活跃标签
+      const firstTab = cachedTabs[0]
+      set({ 
+        tabs: [...cachedTabs], 
+        activeKey: firstTab.key 
+      })
+    }
+  },
+  clearCachedTabs: () => {
+    set({ cachedTabs: [] })
+  },
+}),
+{
+  name: 'tabs-storage',
+  partialize: (state) => ({ 
+    cachedTabs: state.cachedTabs 
+  }),
+}
+))
 

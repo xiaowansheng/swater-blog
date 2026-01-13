@@ -2,12 +2,14 @@ import { Form, Input, Button, message, Checkbox } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth'
+import { useTabsStore } from '@/store/tabs'
 import { useState } from 'react'
 import ForgotPasswordModal from '@/components/common/ForgotPasswordModal'
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
   const { login } = useAuthStore()
+  const { restoreTabs, clearCachedTabs, cachedTabs } = useTabsStore()
   const [loading, setLoading] = useState(false)
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
 
@@ -22,7 +24,21 @@ const Login: React.FC = () => {
     try {
       await login(values.username, values.password)
       message.success('登录成功')
-      navigate('/dashboard')
+      
+      // 检查是否有缓存的标签页
+      if (cachedTabs.length > 0) {
+        console.log('发现缓存的标签页，准备恢复:', cachedTabs)
+        // 恢复标签页
+        restoreTabs()
+        // 跳转到第一个缓存的标签页
+        const firstTab = cachedTabs[0]
+        navigate(firstTab.path, { replace: true })
+        // 清除缓存
+        clearCachedTabs()
+      } else {
+        // 没有缓存的标签页，跳转到默认页面
+        navigate('/dashboard')
+      }
     } catch (error: any) {
       message.error(error.message || '登录失败')
     } finally {
