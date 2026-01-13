@@ -1,6 +1,7 @@
 import type { AuthorInfo } from '@/types';
 import { getFullUrl } from '@/lib/utils/format';
 import type { ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface AuthorCardProps {
   author: AuthorInfo;
@@ -8,6 +9,7 @@ interface AuthorCardProps {
 }
 
 export default function AuthorCard({ author, children }: AuthorCardProps) {
+  const t = useTranslations('common');
   const {
     name,
     avatar,
@@ -29,11 +31,11 @@ export default function AuthorCard({ author, children }: AuthorCardProps) {
 
   // 联系方式配置
   const contactLinks = [
-    { 
-      name: '邮箱', 
-      key: 'email', 
-      value: email, 
-      href: email ? `mailto:${email}` : undefined, 
+    {
+      name: t('email'),
+      key: 'email',
+      value: email,
+      href: email ? `mailto:${email}` : undefined,
       color: 'text-red-500 hover:bg-red-500 hover:text-white',
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,11 +43,11 @@ export default function AuthorCard({ author, children }: AuthorCardProps) {
         </svg>
       )
     },
-    { 
-      name: 'QQ', 
-      key: 'qq', 
-      value: qq, 
-      href: qq ? `tencent://message/?uin=${qq}` : undefined, 
+    {
+      name: t('qq'),
+      key: 'qq',
+      value: qq,
+      href: qq ? `tencent://message/?uin=${qq}` : undefined,
       color: 'text-blue-500 hover:bg-blue-500 hover:text-white',
       icon: (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -53,10 +55,10 @@ export default function AuthorCard({ author, children }: AuthorCardProps) {
         </svg>
       )
     },
-    { 
-      name: '微信', 
-      key: 'wechat', 
-      value: wechat, 
+    {
+      name: t('wechat'),
+      key: 'wechat',
+      value: wechat,
       color: 'text-green-500 hover:bg-green-500 hover:text-white',
       icon: (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -201,7 +203,7 @@ export default function AuthorCard({ author, children }: AuthorCardProps) {
                 {avatar ? (
                   <img
                     src={getFullUrl(avatar)}
-                    alt={name || '作者头像'}
+                    alt={name || t('authorAvatar')}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 ) : (
@@ -285,7 +287,7 @@ export default function AuthorCard({ author, children }: AuthorCardProps) {
             <div className="flex items-center gap-4">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-pink-300/50 to-transparent dark:via-pink-700/30" />
               <span className="text-sm font-medium text-purple-500 dark:text-purple-400 flex items-center gap-2">
-                <span>📝</span> 关于我
+                <span>📝</span> {t('aboutMe')}
               </span>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-pink-300/50 to-transparent dark:via-pink-700/30" />
             </div>

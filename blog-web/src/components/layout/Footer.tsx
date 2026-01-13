@@ -1,9 +1,12 @@
 import { getSiteInfo } from '@/lib/api/config.server';
 import { getTotalVisits } from '@/lib/api/statistics';
+import { getTranslations } from 'next-intl/server';
+import { Link } from '@/lib/i18n/routing';
 
 export default async function Footer() {
   const site = await getSiteInfo();
   const visits = await getTotalVisits();
+  const t = await getTranslations('common');
 
   const defaultCopyright = `© ${new Date().getFullYear()} ${site.name || 'Blog'}. All rights reserved.`;
 
@@ -47,25 +50,25 @@ export default async function Footer() {
           {/* Quick Links */}
           <div className="flex flex-col justify-center gap-4 sm:gap-6 items-center order-first md:order-none">
             <div className="flex gap-6 sm:gap-8 items-center flex-wrap justify-center">
-              <a href="/about" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
-                关于
+              <Link href="/about" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
+                {t('about')}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
-              </a>
-              <a href="/friend-link" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
-                友链
+              </Link>
+              <Link href="/friend-link" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
+                {t('friendLinks')}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
-              </a>
-              <a href="/guestbook" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
-                留言
+              </Link>
+              <Link href="/guestbook" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
+                {t('guestbook')}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
-              </a>
+              </Link>
             </div>
 
             {/* Visit Statistics */}
             <div className="flex items-center gap-3 sm:gap-4 text-xs text-muted-foreground/70 flex-wrap justify-center">
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-deco-pink animate-pulse"></span>
-                <span className="font-medium">总访问量</span>
+                <span className="font-medium">{t('totalVisits')}</span>
                 <span className="font-bold text-primary" title="Page Views">
                   {visits.pv.toLocaleString()}
                 </span>
@@ -73,7 +76,7 @@ export default async function Footer() {
               <span className="w-px h-3 bg-border hidden sm:block"></span>
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-deco-yellow animate-pulse" style={{ animationDelay: '0.5s' }}></span>
-                <span className="font-medium">访客数</span>
+                <span className="font-medium">{t('visitors')}</span>
                 <span className="font-bold text-primary" title="Unique Visitors">
                   {visits.uv.toLocaleString()}
                 </span>
@@ -84,7 +87,7 @@ export default async function Footer() {
           {/* Tech Stack / Extra Info */}
           <div className="text-center md:text-right">
             <div className="inline-flex flex-col items-center md:items-end gap-1">
-              <p className="text-xs font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">Powered by</p>
+              <p className="text-xs font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">{t('poweredBy')}</p>
               <div className="flex gap-3 items-center grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
                 <span className="text-sm font-semibold text-foreground/70">Next.js</span>
                 <span className="w-1 h-1 rounded-full bg-border"></span>

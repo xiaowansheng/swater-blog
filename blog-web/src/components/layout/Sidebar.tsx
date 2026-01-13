@@ -85,7 +85,7 @@ export default async function Sidebar({ categories = [], tags = [], hotArticles 
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </span>
-            <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">热门文章</span>
+            <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">{t('hotArticles')}</span>
           </h3>
           <ul className="space-y-2 sm:space-y-3">
             {hotArticles.map((article, index) => (
@@ -116,8 +116,8 @@ export default async function Sidebar({ categories = [], tags = [], hotArticles 
               </svg>
             </div>
             <div className="space-y-2">
-              <p className="text-sm sm:text-base font-medium text-foreground/70">暂无内容</p>
-              <p className="text-xs sm:text-sm text-foreground/50">网站内容正在整理中，敬请期待</p>
+              <p className="text-sm sm:text-base font-medium text-foreground/70">{t('noContent')}</p>
+              <p className="text-xs sm:text-sm text-foreground/50">{t('noContentHint')}</p>
             </div>
           </div>
         </div>

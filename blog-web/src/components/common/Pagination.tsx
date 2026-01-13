@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Link, usePathname, useRouter } from '@/lib/i18n/routing';
+import { useTranslations } from 'next-intl';
 
 interface PaginationProps {
   current: number;
@@ -13,6 +14,7 @@ interface PaginationProps {
 }
 
 export default function Pagination({ current, total, basePath, totalCount, pageSize = 10, scrollToId }: PaginationProps) {
+  const t = useTranslations('common');
   const router = useRouter();
   const pathname = usePathname();
   const [jumpInput, setJumpInput] = useState('');
@@ -143,8 +145,8 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
       {/* 统计信息 */}
       {totalCount !== undefined && (
         <div className="text-sm text-muted-foreground">
-          共 <span className="font-semibold text-primary">{totalCount}</span> 篇文章，
-          当前第 <span className="font-semibold text-primary">{current}</span> / {total} 页
+          {t('totalArticlesWithCount', { count: totalCount })}，
+          {t('currentPageInfo', { current, total })}
         </div>
       )}
 
@@ -162,7 +164,7 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              <span className="hidden sm:inline">上一页</span>
+              <span className="hidden sm:inline">{t('prev')}</span>
             </span>
             <span className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity"></span>
           </Link>
@@ -213,7 +215,7 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
             className="px-4 py-2.5 border border-border rounded-xl hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 hover:border-primary/50 transition-all flex items-center gap-2 font-medium hover:scale-105 active:scale-95 relative overflow-hidden group"
           >
             <span className="relative z-10 flex items-center gap-2">
-              <span className="hidden sm:inline">下一页</span>
+              <span className="hidden sm:inline">{t('next')}</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
@@ -225,7 +227,7 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
 
       {/* 跳转输入框 */}
       <div className="flex items-center gap-3 text-sm">
-        <span className="text-muted-foreground">跳转到</span>
+        <span className="text-muted-foreground">{t('jumpTo')}</span>
         <div className="relative flex items-center">
           <input
             type="text"
@@ -258,7 +260,7 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
             </button>
           )}
         </div>
-        <span className="text-muted-foreground">页</span>
+        <span className="text-muted-foreground">{t('page')}</span>
       </div>
     </nav>
   );

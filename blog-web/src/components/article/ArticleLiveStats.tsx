@@ -1,6 +1,7 @@
 'use client';
 
 import { useLiveStats } from '@/components/common/useLiveStats';
+import { useTranslations } from 'next-intl';
 
 export default function ArticleLiveStats({
   id,
@@ -9,12 +10,13 @@ export default function ArticleLiveStats({
   id: number;
   initial: { viewCount: number; likeCount: number; commentCount: number };
 }) {
+  const t = useTranslations('common');
   const stats = useLiveStats({ type: 'ARTICLE', id, initial });
 
   return (
     <span>
-      {stats.viewCount.toLocaleString()} 次阅读 · {stats.likeCount.toLocaleString()} 赞 ·{' '}
-      {stats.commentCount.toLocaleString()} 评论
+      {stats.viewCount.toLocaleString()} {t('readCount')} · {stats.likeCount.toLocaleString()} {t('like')} ·{' '}
+      {stats.commentCount.toLocaleString()} {t('comment')}
     </span>
   );
 }

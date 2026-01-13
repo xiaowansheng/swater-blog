@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import type { PostVO } from '@/types';
 
 interface ArticleStatsProps {
@@ -9,6 +10,7 @@ interface ArticleStatsProps {
 }
 
 export default function ArticleStats({ article }: ArticleStatsProps) {
+  const t = useTranslations('common');
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(article.likeCount || 0);
 
@@ -20,7 +22,7 @@ export default function ArticleStats({ article }: ArticleStatsProps) {
 
   const stats = [
     {
-      label: '字数',
+      label: t('wordCount'),
       value: article.content?.length || 0,
       icon: '📝',
       color: 'from-blue-400 to-indigo-500',
@@ -28,7 +30,7 @@ export default function ArticleStats({ article }: ArticleStatsProps) {
       borderColor: 'border-blue-200/50 dark:border-blue-700/50'
     },
     {
-      label: '阅读',
+      label: t('read'),
       value: article.viewCount || 0,
       icon: '👀',
       color: 'from-green-400 to-emerald-500',
@@ -36,7 +38,7 @@ export default function ArticleStats({ article }: ArticleStatsProps) {
       borderColor: 'border-green-200/50 dark:border-green-700/50'
     },
     {
-      label: '点赞',
+      label: t('like'),
       value: likes,
       icon: '❤️',
       color: 'from-pink-400 to-rose-500',
@@ -47,7 +49,7 @@ export default function ArticleStats({ article }: ArticleStatsProps) {
       isActive: liked
     },
     {
-      label: '评论',
+      label: t('comment'),
       value: article.commentCount || 0,
       icon: '💬',
       color: 'from-purple-400 to-violet-500',
@@ -77,13 +79,13 @@ export default function ArticleStats({ article }: ArticleStatsProps) {
           >
             {/* 装饰性背景 */}
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl" />
-            
+
             {/* 内容 */}
             <div className="relative text-center">
               {/* 图标 */}
-              <motion.div 
+              <motion.div
                 className="text-2xl mb-2"
-                animate={stat.isActive ? { 
+                animate={stat.isActive ? {
                   scale: [1, 1.2, 1],
                   rotate: [0, 10, -10, 0]
                 } : {}}
@@ -91,16 +93,16 @@ export default function ArticleStats({ article }: ArticleStatsProps) {
               >
                 {stat.icon}
               </motion.div>
-              
+
               {/* 数值 */}
-              <motion.div 
+              <motion.div
                 className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}
                 animate={stat.isActive ? { scale: [1, 1.1, 1] } : {}}
                 transition={{ duration: 0.3 }}
               >
                 {stat.value.toLocaleString()}
               </motion.div>
-              
+
               {/* 标签 */}
               <div className="text-sm text-muted-foreground font-medium">
                 {stat.label}
@@ -118,19 +120,19 @@ export default function ArticleStats({ article }: ArticleStatsProps) {
                       left: '50%',
                       top: '50%',
                     }}
-                    initial={{ 
+                    initial={{
                       scale: 0,
                       x: 0,
                       y: 0,
                       opacity: 1
                     }}
-                    animate={{ 
+                    animate={{
                       scale: [0, 1, 0],
                       x: Math.cos(i * 45 * Math.PI / 180) * 30,
                       y: Math.sin(i * 45 * Math.PI / 180) * 30,
                       opacity: [1, 1, 0]
                     }}
-                    transition={{ 
+                    transition={{
                       duration: 0.6,
                       ease: "easeOut"
                     }}
@@ -149,21 +151,21 @@ export default function ArticleStats({ article }: ArticleStatsProps) {
       </div>
 
       {/* 分享提示 */}
-      <motion.div 
+      <motion.div
         className="mt-6 text-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
         <p className="text-sm text-muted-foreground">
-          觉得文章不错？点个赞支持一下吧~ 
+          {t('likeHint')}
           <motion.span
             className="inline-block ml-1"
-            animate={{ 
+            animate={{
               rotate: [0, 10, -10, 0],
               scale: [1, 1.1, 1]
             }}
-            transition={{ 
+            transition={{
               duration: 2,
               repeat: Infinity,
               ease: "easeInOut"

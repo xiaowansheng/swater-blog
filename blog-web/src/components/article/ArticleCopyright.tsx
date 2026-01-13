@@ -13,12 +13,13 @@ interface ArticleCopyrightProps {
 
 export default function ArticleCopyright({ article, author }: ArticleCopyrightProps) {
   const t = useTranslations('article');
+  const tc = useTranslations('common');
   const pathname = usePathname();
   const locale = pathname?.split('/')[1] || 'zh';
   const { copyToClipboard, isCopied } = useCopyToClipboard();
 
   const articleUrl = typeof window !== 'undefined' ? window.location.origin + pathname : '';
-  const authorName = author?.name || article.authorName || '作者';
+  const authorName = author?.name || article.authorName || tc('authorName');
 
   const handleCopyLink = async () => {
     await copyToClipboard(articleUrl);
@@ -64,7 +65,7 @@ export default function ArticleCopyright({ article, author }: ArticleCopyrightPr
                 <button
                   onClick={handleCopyLink}
                   className="flex items-center gap-2 w-full p-2 bg-secondary rounded text-xs hover:bg-secondary/80 transition-colors group"
-                  title={isCopied ? '已复制' : '点击复制链接'}
+                  title={isCopied ? tc('copied') : tc('clickToCopy')}
                 >
                   <span className="flex-1 text-left truncate text-muted-foreground">
                     {articleUrl}
@@ -74,7 +75,7 @@ export default function ArticleCopyright({ article, author }: ArticleCopyrightPr
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      已复制
+                      {tc('copied')}
                     </span>
                   ) : (
                     <svg className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,7 +106,7 @@ export default function ArticleCopyright({ article, author }: ArticleCopyrightPr
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <span className="text-muted-foreground">
-                发布时间: {formatDate(article.publishedAt, 'YYYY-MM-DD HH:mm', locale)}
+                {tc('publishTime')}: {formatDate(article.publishedAt, 'YYYY-MM-DD HH:mm', locale)}
               </span>
             </div>
           )}

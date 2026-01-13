@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import ArticleCard from './ArticleCard';
 import type { PostVO } from '@/types';
 import { articleApi } from '@/lib/api/article';
@@ -12,6 +13,7 @@ interface ArticleListProps {
 }
 
 export default function ArticleList({ articles, variant }: ArticleListProps) {
+  const t = useTranslations('common');
   const [statsById, setStatsById] = useState<
     Record<number, { viewCount: number; likeCount: number; commentCount: number }>
   >({});
@@ -46,7 +48,7 @@ export default function ArticleList({ articles, variant }: ArticleListProps) {
   if (!articles || !Array.isArray(articles)) {
     return (
       <div className="space-y-6">
-        <div className="text-center text-gray-500 py-8">暂无文章数据</div>
+        <div className="text-center text-gray-500 py-8">{t('noArticleData')}</div>
       </div>
     );
   }

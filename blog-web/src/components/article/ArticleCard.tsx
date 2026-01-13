@@ -55,7 +55,7 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
               <svg className="w-3.5 h-3.5 text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              {article.publishedAt ? '更新于' : '发布于'} {formatDate(article.publishedAt || article.createTime, 'YYYY-MM-DD', locale)}
+              {article.publishedAt ? t('updatedAtShort') : t('publishedAtShort')} {formatDate(article.publishedAt || article.createTime, 'YYYY-MM-DD', locale)}
             </span>
             <span className="flex items-center gap-1.5">
               <svg className="w-3.5 h-3.5 text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
