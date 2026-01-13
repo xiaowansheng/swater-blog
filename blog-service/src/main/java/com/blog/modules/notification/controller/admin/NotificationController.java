@@ -1,19 +1,21 @@
 package com.blog.modules.notification.controller.admin;
 
-
-import com.blog.shared.annotation.ApiOperation;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
-import com.blog.shared.Result;
-import com.blog.shared.PageResult;
+import cn.dev33.satoken.stp.StpUtil;
 import com.blog.modules.notification.model.dto.NotificationDTO;
 import com.blog.modules.notification.model.vo.NotificationVO;
 import com.blog.modules.notification.service.NotificationService;
+import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.PageResult;
+import com.blog.shared.Result;
+import com.blog.shared.annotation.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 @RestController
 @RequestMapping("/api/admin/notification")
 @ApiOperation(name = "通知管理模块", description = "通知管理接口", open = false)
 public class NotificationController {
+
     @Autowired
     private NotificationService notificationService;
 
@@ -31,7 +33,8 @@ public class NotificationController {
             @RequestParam(defaultValue = "1") Long page,
             @RequestParam(defaultValue = "10") Long size,
             @RequestParam(required = false) Integer isRead) {
-        PageResult<NotificationVO> result = notificationService.list(userId, page, size, isRead);
+        Long resolvedUserId = userId != null ? userId : StpUtil.getLoginIdAsLong();
+        PageResult<NotificationVO> result = notificationService.list(resolvedUserId, page, size, isRead);
         return Result.success(result);
     }
 
@@ -50,8 +53,9 @@ public class NotificationController {
     }
 
     @PutMapping("/read-all")
-    @ApiOperation(name = "标记所有通知为已读", type = ApiOperationType.UPDATE, description = "标记用户的所有通知为已读")
-    public Result<Void> markAllAsRead(@RequestParam Long userId) {
+    @ApiOperation(name = "标记全部通知为已读", type = ApiOperationType.UPDATE, description = "标记当前用户的全部通知为已读")
+    public Result<Void> markAllAsRead() {
+        Long userId = StpUtil.getLoginIdAsLong();
         notificationService.markAllAsRead(userId);
         return Result.success();
     }
@@ -63,3 +67,4 @@ public class NotificationController {
         return Result.success();
     }
 }
+

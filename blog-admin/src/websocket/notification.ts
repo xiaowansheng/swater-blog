@@ -1,12 +1,12 @@
-import { useAuthStore } from '@/store/auth'
 import { useNotificationStore } from '@/store/notification'
 import config from '@/config'
 import { getToken } from '@/utils/storage'
+import * as notificationApi from '@/api/notification'
 
 class NotificationWebSocket {
   private ws: WebSocket | null = null
-  private reconnectTimer: NodeJS.Timeout | null = null
-  private heartbeatTimer: NodeJS.Timeout | null = null
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null
+  private heartbeatTimer: ReturnType<typeof setInterval> | null = null
   private reconnectAttempts = 0
   private maxReconnectAttempts = 5
   private reconnectDelay = 3000
@@ -16,18 +16,18 @@ class NotificationWebSocket {
     const token = getToken()
 
     if (!token) {
-      console.warn('未找到 Token，无法建立 WebSocket 连接')
+      console.warn('未找到Token，无法建立 WebSocket 连接')
       return
     }
 
-    // WebSocket 握手时通过 URL 参数传递 Token
-    const url = `${wsUrl}/ws/notification?token=${encodeURIComponent(token)}`
+    const normalizedBase = wsUrl.endsWith('/ws') ? wsUrl.slice(0, -3) : wsUrl
+    const url = `${normalizedBase}/ws/notification?token=${encodeURIComponent(token)}`
 
     try {
       this.ws = new WebSocket(url)
 
       this.ws.onopen = () => {
-        console.log('WebSocket连接已建立')
+        console.log('WebSocket 连接已建立')
         this.reconnectAttempts = 0
         this.startHeartbeat()
       }
@@ -37,19 +37,18 @@ class NotificationWebSocket {
           const data = JSON.parse(event.data)
           this.handleMessage(data)
         } catch (error) {
-          console.error('解析WebSocket消息失败', error)
+          console.error('解析 WebSocket 消息失败', error)
         }
       }
 
       this.ws.onerror = (error) => {
-        console.error('WebSocket错误', error)
+        console.error('WebSocket 错误', error)
       }
 
       this.ws.onclose = (event) => {
-        console.log('WebSocket连接已关闭', event.code, event.reason)
+        console.log('WebSocket 连接已关闭', event.code, event.reason)
         this.stopHeartbeat()
 
-        // 如果是认证失败（code 4001 或类似），不再重连
         if (event.code === 4001 || event.reason === 'Unauthorized') {
           console.error('WebSocket 认证失败，停止重连')
           return
@@ -58,21 +57,23 @@ class NotificationWebSocket {
         this.reconnect()
       }
     } catch (error) {
-      console.error('WebSocket连接失败', error)
+      console.error('WebSocket 连接失败', error)
       this.reconnect()
     }
   }
 
   private handleMessage(data: any) {
-    const { addNotification } = useNotificationStore.getState()
-    addNotification({
-      id: Date.now(),
-      type: data.type || 'system',
-      title: data.title || '通知',
-      content: data.content || '',
-      isRead: 0,
-      createTime: new Date().toISOString(),
-    })
+    if (data?.type === 'pong') return
+
+    notificationApi
+      .getNotifications({ page: 1, size: 10 })
+      .then((result) => {
+        const { setNotifications } = useNotificationStore.getState()
+        setNotifications(result.records)
+      })
+      .catch((error) => {
+        console.error('刷新通知失败', error)
+      })
   }
 
   private startHeartbeat() {
@@ -92,13 +93,13 @@ class NotificationWebSocket {
 
   private reconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('WebSocket重连次数已达上限')
+      console.error('WebSocket 重连次数已达上限')
       return
     }
 
     this.reconnectTimer = setTimeout(() => {
       this.reconnectAttempts++
-      console.log(`WebSocket重连尝试 ${this.reconnectAttempts}`)
+      console.log(`WebSocket 重连尝试 ${this.reconnectAttempts}`)
       this.connect()
     }, this.reconnectDelay)
   }
