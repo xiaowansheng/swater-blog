@@ -3,6 +3,7 @@
 import { usePathname } from '@/lib/i18n/routing';
 import { useRouter } from '@/lib/i18n/routing';
 import { useTheme } from '@/lib/utils/theme';
+import { useLocale } from 'next-intl';
 
 const locales = [
   { code: 'zh', name: '中文' },
@@ -17,8 +18,10 @@ export default function LanguageSwitcher({ scrolled = true }: LanguageSwitcherPr
   const pathname = usePathname();
   const router = useRouter();
   const { theme, mounted } = useTheme();
+  const currentLocale = useLocale();
 
   const handleChange = (locale: string) => {
+    if (locale === currentLocale) return;
     router.replace(pathname, { locale });
   };
 
@@ -41,6 +44,7 @@ export default function LanguageSwitcher({ scrolled = true }: LanguageSwitcherPr
 
   return (
     <select
+      value={currentLocale}
       onChange={(e) => handleChange(e.target.value)}
       className={`px-3 py-1.5 border rounded-lg backdrop-blur-sm text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer ${
         scrolled 
