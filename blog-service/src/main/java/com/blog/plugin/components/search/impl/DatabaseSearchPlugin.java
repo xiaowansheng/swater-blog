@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 @Component
-@ConditionalOnProperty(name = "search.provider.type", havingValue = "database", matchIfMissing = false)
+@ConditionalOnProperty(name = "plugin.search.active", havingValue = "database", matchIfMissing = false)
 public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
 
     @Autowired

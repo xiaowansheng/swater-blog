@@ -22,7 +22,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 @Component
-@ConditionalOnProperty(name = "file.storage.type", havingValue = "local", matchIfMissing = true)
+@ConditionalOnProperty(name = "plugin.storage.active", havingValue = "local", matchIfMissing = true)
 public class LocalStoragePlugin implements StoragePlugin, Plugin {
     
     private static final Logger logger = LoggerFactory.getLogger(LocalStoragePlugin.class);

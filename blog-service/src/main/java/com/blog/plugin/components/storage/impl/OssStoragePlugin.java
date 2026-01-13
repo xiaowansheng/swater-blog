@@ -18,7 +18,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 @Component
-@ConditionalOnProperty(name = "file.storage.type", havingValue = "oss")
+@ConditionalOnProperty(name = "plugin.storage.active", havingValue = "oss")
 public class OssStoragePlugin implements StoragePlugin, Plugin {
     
     @Value("${file.storage.oss.endpoint:}")

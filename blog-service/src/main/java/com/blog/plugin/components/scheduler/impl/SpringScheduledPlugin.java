@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "scheduler.provider.type", havingValue = "spring", matchIfMissing = true)
+@ConditionalOnProperty(name = "plugin.scheduler.active", havingValue = "spring", matchIfMissing = true)
 public class SpringScheduledPlugin implements SchedulerPlugin, Plugin {
     
     private final TaskScheduler taskScheduler;

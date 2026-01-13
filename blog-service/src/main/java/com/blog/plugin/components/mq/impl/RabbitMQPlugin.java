@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 @Component
-@ConditionalOnProperty(name = "mq.provider.type", havingValue = "rabbitmq", matchIfMissing = false)
+@ConditionalOnProperty(name = "plugin.mq.active", havingValue = "rabbitmq", matchIfMissing = false)
 public class RabbitMQPlugin implements MessageQueuePlugin, Plugin {
     
     @Autowired(required = false)

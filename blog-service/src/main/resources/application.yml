@@ -94,7 +94,6 @@ spring:
 
 file:
   storage:
-    type: local
     local:
       path: uploads
     oss:
@@ -129,21 +128,6 @@ location:
     api-url: https://api.map.baidu.com/location/ip
   ip2location:
     db-path:
-
-# 搜索引擎插件配置
-search:
-  provider:
-    type: database  # database/elasticsearch/mysql-fulltext/solr
-
-# 消息队列插件配置
-mq:
-  provider:
-    type: rabbitmq  # rabbitmq/kafka/rocketmq
-
-# 定时任务插件配置
-scheduler:
-  provider:
-    type: spring  # spring/quartz
 
 # 评论系统插件配置
 comment:
@@ -346,10 +330,6 @@ plugin:
   mq:
     active: rabbitmq
     fallback: memory
-  notification:
-    enabled:
-      - websocket
-      - email
   search:
     active: database
     fallback:

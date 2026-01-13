@@ -22,7 +22,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 @Component
-@ConditionalOnProperty(name = "file.storage.type", havingValue = "qiniu")
+@ConditionalOnProperty(name = "plugin.storage.active", havingValue = "qiniu")
 public class QiniuStoragePlugin implements StoragePlugin, Plugin {
     
     @Value("${file.storage.qiniu.access-key:}")
