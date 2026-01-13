@@ -25,6 +25,7 @@ import com.blog.shared.PageResult;
 import com.blog.shared.exception.BusinessException;
 import com.blog.shared.model.UserAgentInfo;
 import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
 import com.blog.shared.util.RequestUtil;
@@ -35,8 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +98,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         CommentVO vo = createAndPersist(dto, emailVerifiedBySession ? sessionEmail : dto.getEmail());
         if (vo != null && vo.getId() != null) {
             Long commentId = vo.getId();
-            publishEventAfterCommit(() -> {
+            EventUtil.publishEventAfterCommit(() -> {
                 // 在事件发布时重新查询最新的评论数据
                 Comment comment = commentMapper.selectById(commentId);
                 if (comment != null) {
@@ -170,19 +169,6 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         }
 
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
-    }
-
-    private void publishEventAfterCommit(Runnable runnable) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-                @Override
-                public void afterCommit() {
-                    runnable.run();
-                }
-            });
-        } else {
-            runnable.run();
-        }
     }
 
     private void validateCommentTarget(CommentDTO dto) {

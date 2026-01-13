@@ -13,12 +13,11 @@ import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.comment.model.entity.Comment;
 import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.comment.service.CommentCommandService;
+import com.blog.shared.util.EventUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 @Service
 public class CommentCommandServiceImpl implements CommentCommandService {
     @Autowired
@@ -45,7 +44,7 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         commentMapper.updateById(comment);
 
         Comment approvedComment = commentMapper.selectById(id);
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentApprovedEvent(this, id, approvedComment)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentApprovedEvent(this, id, approvedComment)));
     }
 
     @Override
@@ -59,7 +58,7 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         commentMapper.updateById(comment);
         
         Comment updatedComment = commentMapper.selectById(id);
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
     }
 
     @Override
@@ -72,7 +71,7 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         
         commentMapper.deleteById(id);
         
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentDeletedEvent(this, id, comment)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentDeletedEvent(this, id, comment)));
     }
 
     @Override
@@ -86,7 +85,7 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         commentMapper.updateById(comment);
 
         Comment updatedComment = commentMapper.selectById(id);
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
     }
 
     @Override
@@ -100,20 +99,7 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         commentMapper.updateById(comment);
 
         Comment updatedComment = commentMapper.selectById(id);
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
-    }
-
-    private void publishEventAfterCommit(Runnable runnable) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-                @Override
-                public void afterCommit() {
-                    runnable.run();
-                }
-            });
-        } else {
-            runnable.run();
-        }
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
     }
 }
 

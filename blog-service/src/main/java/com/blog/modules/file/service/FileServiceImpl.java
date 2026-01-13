@@ -20,13 +20,12 @@ import com.blog.modules.file.event.file.FileUploadedEvent;
 import com.blog.plugin.components.storage.StoragePlugin;
 import com.blog.plugin.components.storage.StoragePluginFactory;
 import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -142,7 +141,7 @@ public class FileServiceImpl implements FileService {
             fileMetaMapper.deleteById(id);
             fileReferenceMapper.deleteByFileId(id);
             
-            publishEventAfterCommit(() -> eventPublisher.publishEvent(new FileDeletedEvent(this, id)));
+            EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new FileDeletedEvent(this, id)));
         } else {
             fileMetaMapper.updateById(fileMeta);
         }
@@ -169,7 +168,7 @@ public class FileServiceImpl implements FileService {
         fileMetaMapper.insert(fileMeta);
         
         FileMeta savedFileMeta = fileMetaMapper.selectById(fileMeta.getId());
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new FileUploadedEvent(this, fileMeta.getId(), savedFileMeta)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new FileUploadedEvent(this, fileMeta.getId(), savedFileMeta)));
         
         return fileMeta;
     }
@@ -201,18 +200,5 @@ public class FileServiceImpl implements FileService {
             }
         }
         return vo;
-    }
-
-    private void publishEventAfterCommit(Runnable runnable) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-                @Override
-                public void afterCommit() {
-                    runnable.run();
-                }
-            });
-        } else {
-            runnable.run();
-        }
     }
 }

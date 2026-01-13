@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.modules.auth.config.EmailSessionProperties;
 import com.blog.modules.auth.util.EmailSessionTokenUtil;
 import com.blog.shared.PageResult;
+import com.blog.modules.guestbook.event.GuestbookCreatedEvent;
 import com.blog.modules.guestbook.mapper.GuestbookMapper;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.guestbook.model.dto.GuestbookDTO;
@@ -21,6 +22,7 @@ import com.blog.shared.util.UserAgentUtil;
 import com.blog.plugin.components.location.LocationProviderFactory;
 import com.blog.plugin.components.location.LocationProviderPlugin;
 import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
 import com.blog.shared.util.RequestUtil;
@@ -28,7 +30,9 @@ import com.blog.shared.exception.BusinessException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,6 +44,10 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
 
     @Autowired
     private UserMapper userMapper;
+    
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+    
     @Autowired
     private MessageVerificationService messageVerificationService;
 
@@ -68,6 +76,7 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
     }
 
     @Override
+    @Transactional
     public GuestbookVO submit(GuestbookDTO dto) {
         if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
             throw new BusinessException(400, "Email is required");
@@ -153,8 +162,22 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
         // Save to database
         guestbookMapper.insert(guestbook);
         
-        // Convert to VO and return
-        return convertToVO(guestbook, emailVerifiedBySession ? ownerEmail : dto.getEmail());
+        // Convert to VO
+        GuestbookVO vo = convertToVO(guestbook, emailVerifiedBySession ? ownerEmail : dto.getEmail());
+        
+        // Publish event after transaction commit
+        if (guestbook.getId() != null) {
+            Long guestbookId = guestbook.getId();
+            EventUtil.publishEventAfterCommit(() -> {
+                // Re-query the latest guestbook data for the event
+                Guestbook savedGuestbook = guestbookMapper.selectById(guestbookId);
+                if (savedGuestbook != null) {
+                    eventPublisher.publishEvent(new GuestbookCreatedEvent(this, guestbookId, savedGuestbook));
+                }
+            });
+        }
+        
+        return vo;
     }
 
     private GuestbookVO convertToVO(Guestbook guestbook, String ownerEmail) {

@@ -13,6 +13,7 @@ import com.blog.plugin.components.location.LocationProviderFactory;
 import com.blog.plugin.components.location.LocationProviderPlugin;
 import com.blog.modules.talk.service.TalkCommandService;
 import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.KeyUtil;
 import com.blog.shared.util.RequestUtil;
@@ -22,8 +23,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.util.List;
 @Slf4j
 @Service
@@ -109,7 +108,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
         talkMapper.insert(talk);
         
         Talk savedTalk = talkMapper.selectById(talk.getId());
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new TalkCreatedEvent(this, talk.getId(), savedTalk)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new TalkCreatedEvent(this, talk.getId(), savedTalk)));
         
         return talk.getId();
     }
@@ -138,7 +137,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
         talkMapper.updateById(talk);
         
         Talk updatedTalk = talkMapper.selectById(id);
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new TalkUpdatedEvent(this, id, updatedTalk)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new TalkUpdatedEvent(this, id, updatedTalk)));
     }
 
     @Override
@@ -151,7 +150,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
         }
         talkMapper.deleteById(id);
         
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new TalkDeletedEvent(this, id)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new TalkDeletedEvent(this, id)));
     }
 
     @Override
@@ -176,19 +175,6 @@ public class TalkCommandServiceImpl implements TalkCommandService {
         }
         talk.setIsTop(0);
         talkMapper.updateById(talk);
-    }
-
-    private void publishEventAfterCommit(Runnable runnable) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-                @Override
-                public void afterCommit() {
-                    runnable.run();
-                }
-            });
-        } else {
-            runnable.run();
-        }
     }
 }
 

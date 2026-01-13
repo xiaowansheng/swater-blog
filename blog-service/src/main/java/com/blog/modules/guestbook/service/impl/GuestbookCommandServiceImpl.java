@@ -5,12 +5,11 @@ import com.blog.modules.guestbook.event.*;
 import com.blog.modules.guestbook.mapper.GuestbookMapper;
 import com.blog.modules.guestbook.model.entity.Guestbook;
 import com.blog.modules.guestbook.service.GuestbookCommandService;
+import com.blog.shared.util.EventUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 @Service
 public class GuestbookCommandServiceImpl implements GuestbookCommandService {
     @Autowired
@@ -30,7 +29,7 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
         guestbookMapper.updateById(guestbook);
         
         Guestbook approvedGuestbook = guestbookMapper.selectById(id);
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new GuestbookApprovedEvent(this, id, approvedGuestbook)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new GuestbookApprovedEvent(this, id, approvedGuestbook)));
     }
 
     @Override
@@ -44,7 +43,7 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
         guestbookMapper.updateById(guestbook);
         
         Guestbook rejectedGuestbook = guestbookMapper.selectById(id);
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new GuestbookRejectedEvent(this, id, rejectedGuestbook)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new GuestbookRejectedEvent(this, id, rejectedGuestbook)));
     }
 
     @Override
@@ -56,7 +55,7 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
         }
         guestbookMapper.deleteById(id);
         
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new GuestbookDeletedEvent(this, id)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new GuestbookDeletedEvent(this, id)));
     }
 
     @Override
@@ -70,20 +69,7 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
         guestbookMapper.updateById(guestbook);
         
         Guestbook updatedGuestbook = guestbookMapper.selectById(id);
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new GuestbookVisibilityChangedEvent(this, id, updatedGuestbook, isVisible)));
-    }
-
-    private void publishEventAfterCommit(Runnable runnable) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-                @Override
-                public void afterCommit() {
-                    runnable.run();
-                }
-            });
-        } else {
-            runnable.run();
-        }
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new GuestbookVisibilityChangedEvent(this, id, updatedGuestbook, isVisible)));
     }
 }
 

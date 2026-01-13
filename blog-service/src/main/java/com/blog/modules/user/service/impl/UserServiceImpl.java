@@ -18,6 +18,7 @@ import com.blog.modules.user.model.vo.UserVO;
 import com.blog.modules.system.role.service.RoleService;
 import com.blog.modules.user.service.UserService;
 import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.PageUtil;
 import com.blog.shared.util.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +27,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -106,7 +105,7 @@ public class UserServiceImpl implements UserService {
         userMapper.insert(user);
         
         User savedUser = userMapper.selectById(user.getId());
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserCreatedEvent(this, user.getId(), savedUser)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserCreatedEvent(this, user.getId(), savedUser)));
         
         return user.getId();
     }
@@ -152,7 +151,7 @@ public class UserServiceImpl implements UserService {
         userMapper.updateById(user);
         
         User updatedUser = userMapper.selectById(id);
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserUpdatedEvent(this, id, updatedUser)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserUpdatedEvent(this, id, updatedUser)));
     }
 
     @Override
@@ -165,7 +164,7 @@ public class UserServiceImpl implements UserService {
         }
         userMapper.deleteById(id);
         
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserDeletedEvent(this, id)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserDeletedEvent(this, id)));
     }
 
     @Override
@@ -179,7 +178,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(PasswordUtil.encode(dto.getPassword()));
         userMapper.updateById(user);
         
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserPasswordResetEvent(this, id)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserPasswordResetEvent(this, id)));
     }
 
     @Override
@@ -208,7 +207,7 @@ public class UserServiceImpl implements UserService {
         }
         
         User updatedUser = userMapper.selectById(id);
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserUpdatedEvent(this, id, updatedUser)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserUpdatedEvent(this, id, updatedUser)));
     }
 
     private UserVO convertToVO(User user) {
@@ -221,19 +220,6 @@ public class UserServiceImpl implements UserService {
             }
         }
         return vo;
-    }
-
-    private void publishEventAfterCommit(Runnable runnable) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-                @Override
-                public void afterCommit() {
-                    runnable.run();
-                }
-            });
-        } else {
-            runnable.run();
-        }
     }
 }
 
