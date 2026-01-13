@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMusicStore, Song } from '@/lib/store/musicStore';
 import Image from 'next/image';
+import { getMusicConfig } from '@/lib/api/music';
+import { musicConfig as defaultMusicConfig } from '@/lib/constants/music';
 
 export default function AnimeMusicPlayer() {
   const {
@@ -38,33 +40,29 @@ export default function AnimeMusicPlayer() {
 
   // 初始化默认播放列表
   useEffect(() => {
-    if (playlist.length === 0) {
-      const defaultSongs: Song[] = [
-        {
-          id: '1',
-          title: '樱花树下的约定',
-          artist: 'ACG音乐',
-          url: 'https://music.163.com/song/media/outer/url?id=1397105803.mp3',
-          cover: 'https://picsum.photos/seed/sakura/300/300',
-        },
-        {
-          id: '2',
-          title: '穿越时空的思念',
-          artist: '犬夜叉ED',
-          url: 'https://music.163.com/song/media/outer/url?id=1387581250.mp3',
-          cover: 'https://picsum.photos/seed/time/300/300',
-        },
-        {
-          id: '3',
-          title: '千本樱',
-          artist: '钢琴版',
-          url: 'https://music.163.com/song/media/outer/url?id=1387593479.mp3',
-          cover: 'https://picsum.photos/seed/cherry/300/300',
-        },
-      ];
+    const initPlaylist = async () => {
+      if (playlist.length === 0) {
+        try {
+          // 动态加载配置文件
+          const musicConfig = await getMusicConfig();
+          useMusicStore.getState().setPlaylist(musicConfig.defaultPlaylist);
 
-      useMusicStore.getState().setPlaylist(defaultSongs);
-    }
+          // 设置初始音量和播放模式
+          if (musicConfig.defaultVolume !== undefined) {
+            useMusicStore.getState().setVolume(musicConfig.defaultVolume);
+          }
+          if (musicConfig.defaultPlayMode) {
+            useMusicStore.getState().setPlayMode(musicConfig.defaultPlayMode);
+          }
+        } catch (error) {
+          console.error('Failed to load music config, using default:', error);
+          // 使用硬编码的默认配置作为fallback
+          useMusicStore.getState().setPlaylist(defaultMusicConfig.defaultPlaylist);
+        }
+      }
+    };
+
+    initPlaylist();
   }, []);
 
   // 音频播放控制

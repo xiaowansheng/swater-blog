@@ -266,3 +266,23 @@ export interface AboutVO {
   content: string;
 }
 
+// 音乐播放器配置相关类型
+export interface Song {
+  id: string;
+  title: string;
+  artist: string;
+  cover?: string;
+  url: string;
+  duration?: number;
+}
+
+export interface MusicConfig {
+  /** 默认播放列表 */
+  defaultPlaylist: Song[];
+  /** 是否自动播放 */
+  autoPlay?: boolean;
+  /** 默认音量 0-1 */
+  defaultVolume?: number;
+  /** 默认播放模式 */
+  defaultPlayMode?: 'sequential' | 'shuffle' | 'repeat';
+}

@@ -1,0 +1,28 @@
+{
+  "defaultPlaylist": [
+    {
+      "id": "1",
+      "title": "樱花树下的约定",
+      "artist": "ACG音乐",
+      "url": "https://music.163.com/song/media/outer/url?id=1397105803.mp3",
+      "cover": "https://picsum.photos/seed/sakura/300/300"
+    },
+    {
+      "id": "2",
+      "title": "穿越时空的思念",
+      "artist": "犬夜叉ED",
+      "url": "https://music.163.com/song/media/outer/url?id=1387581250.mp3",
+      "cover": "https://picsum.photos/seed/time/300/300"
+    },
+    {
+      "id": "3",
+      "title": "千本樱",
+      "artist": "钢琴版",
+      "url": "https://music.163.com/song/media/outer/url?id=1387593479.mp3",
+      "cover": "https://picsum.photos/seed/cherry/300/300"
+    }
+  ],
+  "autoPlay": false,
+  "defaultVolume": 0.7,
+  "defaultPlayMode": "sequential"
+}
