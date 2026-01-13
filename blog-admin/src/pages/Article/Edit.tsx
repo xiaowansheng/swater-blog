@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Form, Input, Button, message, Switch, Card, Row, Col, Space, Breadcrumb, Modal, Radio } from 'antd'
-import { useNavigate, useParams, Link } from 'react-router-dom'
-import { ArrowLeftOutlined, SaveOutlined, SendOutlined, CloudSyncOutlined } from '@ant-design/icons'
+import { useNavigate, useParams, Link, useLocation } from 'react-router-dom'
+import { ArrowLeftOutlined, SaveOutlined, SendOutlined } from '@ant-design/icons'
 import { getArticleById, ArticleSaveDTO } from '@/api/article'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
@@ -17,6 +17,7 @@ import useArticleAutoSave from '@/hooks/useArticleAutoSave'
 const ArticleEdit: React.FC = () => {
   const navigate = useNavigate()
   const { id } = useParams()
+  const location = useLocation()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -161,16 +162,29 @@ const ArticleEdit: React.FC = () => {
   }, [isPublishing, saveState.status])
 
   useEffect(() => {
+    console.log('📝 ArticleEdit useEffect - 组件挂载/路径变化:', {
+      id,
+      pathname: location.pathname,
+      timestamp: new Date().toISOString()
+    })
+    
     loadCategories()
     loadTags()
     if (id) {
+      console.log('📝 编辑文章模式 - 加载文章数据:', id)
       loadArticle()
     } else {
+      console.log('📝 新建文章模式 - 启动自动保存')
       // 新建文章时启动自动保存定时器
       startAutoSaveTimer(getFormData)
     }
 
     return () => {
+      console.log('📝 ArticleEdit cleanup - 组件卸载:', {
+        id,
+        pathname: location.pathname,
+        timestamp: new Date().toISOString()
+      })
       stopAutoSaveTimer()
     }
   }, [id])
@@ -250,17 +264,6 @@ const ArticleEdit: React.FC = () => {
       await form.validateFields(['title', 'content'])
       const formData = getFormData()
       save({ ...formData, status: ArticleStatus.DRAFT })
-    } catch (error) {
-      // 验证失败
-    }
-  }
-
-  // 手动保存到服务器
-  const handleSaveToServer = async () => {
-    try {
-      await form.validateFields(['title', 'content'])
-      const formData = getFormData()
-      save(formData)
     } catch (error) {
       // 验证失败
     }
