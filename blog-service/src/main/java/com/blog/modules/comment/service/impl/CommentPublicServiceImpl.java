@@ -97,8 +97,16 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         dto.setBrowser(userAgentInfo.getBrowserDescription() != null ? userAgentInfo.getBrowserDescription() : userAgent);
 
         CommentVO vo = createAndPersist(dto, emailVerifiedBySession ? sessionEmail : dto.getEmail());
-        Long commentId = vo != null ? vo.getId() : null;
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentCreatedEvent(this, commentId, null)));
+        if (vo != null && vo.getId() != null) {
+            Long commentId = vo.getId();
+            publishEventAfterCommit(() -> {
+                // 在事件发布时重新查询最新的评论数据
+                Comment comment = commentMapper.selectById(commentId);
+                if (comment != null) {
+                    eventPublisher.publishEvent(new CommentCreatedEvent(this, commentId, comment));
+                }
+            });
+        }
         return vo;
     }
 
@@ -321,7 +329,6 @@ public class CommentPublicServiceImpl implements CommentPublicService {
 
         if (withReplyCount) {
             LambdaQueryWrapper<Comment> countWrapper = new LambdaQueryWrapper<>();
-            countWrapper.eq(Comment::getDeleted, 0);
             countWrapper.eq(Comment::getRootId, comment.getId());
             countWrapper.ne(Comment::getParentId, 0);
             countWrapper.and(w -> w.eq(Comment::getStatus, 1)
