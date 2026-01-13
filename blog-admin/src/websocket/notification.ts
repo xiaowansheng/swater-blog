@@ -1,4 +1,5 @@
 import { useNotificationStore } from '@/store/notification'
+import { useWebSocketStore } from '@/store/websocket'
 import config from '@/config'
 import { getToken } from '@/utils/storage'
 import * as notificationApi from '@/api/notification'
@@ -14,9 +15,11 @@ class NotificationWebSocket {
   connect() {
     const wsUrl = config.wsBaseUrl
     const token = getToken()
+    const { setStatus, setReconnectAttempts } = useWebSocketStore.getState()
 
     if (!token) {
       console.warn('未找到Token，无法建立 WebSocket 连接')
+      setStatus('disconnected')
       return
     }
 
@@ -24,11 +27,17 @@ class NotificationWebSocket {
     const url = `${normalizedBase}/ws/notification?token=${encodeURIComponent(token)}`
 
     try {
+      setStatus(this.reconnectAttempts > 0 ? 'reconnecting' : 'connecting')
       this.ws = new WebSocket(url)
 
       this.ws.onopen = () => {
         console.log('WebSocket 连接已建立')
         this.reconnectAttempts = 0
+        setReconnectAttempts(0)
+        setStatus('connected')
+        const timestamp = Date.now()
+        useWebSocketStore.getState().setConnectedAt(timestamp)
+        useWebSocketStore.getState().setLastError(null)
         this.startHeartbeat()
       }
 
@@ -43,14 +52,17 @@ class NotificationWebSocket {
 
       this.ws.onerror = (error) => {
         console.error('WebSocket 错误', error)
+        useWebSocketStore.getState().setLastError('连接错误')
       }
 
       this.ws.onclose = (event) => {
         console.log('WebSocket 连接已关闭', event.code, event.reason)
         this.stopHeartbeat()
+        setStatus('disconnected')
 
         if (event.code === 4001 || event.reason === 'Unauthorized') {
           console.error('WebSocket 认证失败，停止重连')
+          useWebSocketStore.getState().setLastError('认证失败')
           return
         }
 
@@ -58,6 +70,8 @@ class NotificationWebSocket {
       }
     } catch (error) {
       console.error('WebSocket 连接失败', error)
+      setStatus('disconnected')
+      useWebSocketStore.getState().setLastError('连接失败')
       this.reconnect()
     }
   }
@@ -92,13 +106,18 @@ class NotificationWebSocket {
   }
 
   private reconnect() {
+    const { setStatus, setReconnectAttempts } = useWebSocketStore.getState()
+
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error('WebSocket 重连次数已达上限')
+      setStatus('disconnected')
+      useWebSocketStore.getState().setLastError('重连次数已达上限')
       return
     }
 
     this.reconnectTimer = setTimeout(() => {
       this.reconnectAttempts++
+      setReconnectAttempts(this.reconnectAttempts)
       console.log(`WebSocket 重连尝试 ${this.reconnectAttempts}`)
       this.connect()
     }, this.reconnectDelay)
@@ -114,6 +133,7 @@ class NotificationWebSocket {
       this.ws.close()
       this.ws = null
     }
+    useWebSocketStore.getState().reset()
   }
 }
 

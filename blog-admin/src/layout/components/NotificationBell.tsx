@@ -1,6 +1,7 @@
-import { Badge, Dropdown, List, Empty, Button, Spin } from 'antd'
-import { BellOutlined, CheckOutlined } from '@ant-design/icons'
+import { Badge, Dropdown, List, Empty, Button, Spin, Tooltip } from 'antd'
+import { BellOutlined, CheckOutlined, WifiOutlined, DisconnectOutlined, LoadingOutlined } from '@ant-design/icons'
 import { useNotificationStore } from '@/store/notification'
+import { useWebSocketStore } from '@/store/websocket'
 import { formatDate } from '@/utils/format'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -9,12 +10,24 @@ import * as notificationApi from '@/api/notification'
 const NotificationBell: React.FC = () => {
   const navigate = useNavigate()
   const { notifications, unreadCount, setNotifications, markAsRead, markAllAsRead } = useNotificationStore()
+  const { status, connectedAt, reconnectAttempts, lastError } = useWebSocketStore()
   const [loading, setLoading] = useState(false)
   const [hasNew, setHasNew] = useState(false)
+  const [, setTick] = useState(0) // 用于触发实时时间更新
 
   useEffect(() => {
     loadNotifications()
   }, [])
+
+  // 实时更新连接时长显示
+  useEffect(() => {
+    if (status === 'connected' && connectedAt) {
+      const timer = setInterval(() => {
+        setTick(prev => prev + 1)
+      }, 1000)
+      return () => clearInterval(timer)
+    }
+  }, [status, connectedAt])
 
   useEffect(() => {
     if (unreadCount > 0) {
@@ -64,6 +77,53 @@ const NotificationBell: React.FC = () => {
     return iconMap[type] || '📢'
   }
 
+  const getStatusConfig = () => {
+    switch (status) {
+      case 'connected':
+        return {
+          icon: <WifiOutlined className="text-green-500 text-xs" />,
+          text: '已连接',
+          textColor: 'text-green-600',
+          iconColor: undefined, // 使用默认灰色
+        }
+      case 'connecting':
+      case 'reconnecting':
+        return {
+          icon: <LoadingOutlined className="text-yellow-500 text-xs" />,
+          text: status === 'connecting' ? '连接中' : '重连中',
+          textColor: 'text-yellow-600',
+          iconColor: '#eab308', // yellow-500
+        }
+      case 'disconnected':
+      default:
+        return {
+          icon: <DisconnectOutlined className="text-red-500 text-xs" />,
+          text: '未连接',
+          textColor: 'text-red-600',
+          iconColor: '#ef4444', // red-500
+        }
+    }
+  }
+
+  const getConnectionInfo = () => {
+    if (status === 'connected' && connectedAt) {
+      const duration = Math.floor((Date.now() - connectedAt) / 1000)
+      if (duration < 60) return `已连接 ${duration} 秒`
+      if (duration < 3600) return `已连接 ${Math.floor(duration / 60)} 分钟`
+      return `已连接 ${Math.floor(duration / 3600)} 小时`
+    }
+    if (status === 'reconnecting' && reconnectAttempts > 0) {
+      return `重连尝试 ${reconnectAttempts}/5`
+    }
+    if (lastError) {
+      return lastError
+    }
+    return ''
+  }
+
+  const statusConfig = getStatusConfig()
+  const connectionInfo = getConnectionInfo()
+
   const dropdownContent = (
     <div className="w-80 bg-white rounded-lg border shadow-lg">
       <div className="flex justify-between items-center p-3 border-b">
@@ -79,6 +139,19 @@ const NotificationBell: React.FC = () => {
           </Button>
         )}
       </div>
+
+      {/* WebSocket 状态显示 */}
+      <div className={`flex items-center gap-2 px-3 py-2 border-b ${statusConfig.textColor} bg-gray-50`}>
+        {statusConfig.icon}
+        <span className="text-sm font-medium">{statusConfig.text}</span>
+        {connectionInfo && (
+          <>
+            <span className="text-gray-300">|</span>
+            <span className="text-xs text-gray-500">{connectionInfo}</span>
+          </>
+        )}
+      </div>
+
       {loading ? (
         <div className="p-8 text-center">
           <Spin />
@@ -128,13 +201,16 @@ const NotificationBell: React.FC = () => {
       placement="bottomRight"
       trigger={['click']}
     >
-      <div className="relative p-2 rounded-lg transition-colors cursor-pointer hover:bg-gray-100">
-        <Badge count={unreadCount} size="small" offset={[-2, 2]}>
-          <BellOutlined
-            className={`text-xl text-gray-500 ${hasNew ? 'bell-ring' : ''}`}
-          />
-        </Badge>
-      </div>
+      <Tooltip title={`通知系统: ${statusConfig.text}${connectionInfo ? ` (${connectionInfo})` : ''}`}>
+        <div className="relative p-2 rounded-lg transition-colors cursor-pointer hover:bg-gray-100">
+          <Badge count={unreadCount} size="small" offset={[-2, 2]}>
+            <BellOutlined
+              className={`text-xl ${statusConfig.iconColor ? '' : 'text-gray-500'} ${hasNew ? 'bell-ring' : ''}`}
+              style={statusConfig.iconColor ? { color: statusConfig.iconColor } : undefined}
+            />
+          </Badge>
+        </div>
+      </Tooltip>
     </Dropdown>
   )
 }
