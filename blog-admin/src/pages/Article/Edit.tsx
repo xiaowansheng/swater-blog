@@ -16,8 +16,9 @@ import useArticleAutoSave from '@/hooks/useArticleAutoSave'
 
 const ArticleEdit: React.FC = () => {
   const navigate = useNavigate()
-  const { id } = useParams()
+  const { id: routeId } = useParams()
   const location = useLocation()
+  const [pageId, setPageId] = useState<string | undefined>(routeId)
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -50,7 +51,7 @@ const ArticleEdit: React.FC = () => {
     enableAutoSave: true,
     enableContentChangeAutoSave: true,
     onSaveSuccess: (result) => {
-      if (result.isNew && !id) {
+      if (result.isNew && !pageId) {
         // 新建文章成功后，更新URL但不跳转
         window.history.replaceState(null, '', `/article/edit/${result.id}`)
       }
@@ -60,6 +61,12 @@ const ArticleEdit: React.FC = () => {
       setShowConflictModal(true)
     },
   })
+
+  useEffect(() => {
+    if (!pageId && routeId) {
+      setPageId(routeId)
+    }
+  }, [pageId, routeId])
 
   // 文章类型选项
   const articleTypeOptions = [
@@ -103,7 +110,7 @@ const ArticleEdit: React.FC = () => {
     }
 
     return {
-      id: saveState.articleId || (id ? Number(id) : undefined),
+      id: saveState.articleId || (pageId ? Number(pageId) : undefined),
       title: values.title || '',
       slug: values.slug,
       content: values.content || '',
@@ -120,7 +127,7 @@ const ArticleEdit: React.FC = () => {
       tagIds,
       tagNames,
     }
-  }, [form, id, saveState.articleId])
+  }, [form, pageId, saveState.articleId])
 
   // 监听保存状态，发布成功后跳转到文章列表
   useEffect(() => {
@@ -163,15 +170,15 @@ const ArticleEdit: React.FC = () => {
 
   useEffect(() => {
     console.log('📝 ArticleEdit useEffect - 组件挂载/路径变化:', {
-      id,
+      id: pageId,
       pathname: location.pathname,
       timestamp: new Date().toISOString()
     })
     
     loadCategories()
     loadTags()
-    if (id) {
-      console.log('📝 编辑文章模式 - 加载文章数据:', id)
+    if (pageId) {
+      console.log('📝 编辑文章模式 - 加载文章数据:', pageId)
       loadArticle()
     } else {
       console.log('📝 新建文章模式 - 启动自动保存')
@@ -181,13 +188,13 @@ const ArticleEdit: React.FC = () => {
 
     return () => {
       console.log('📝 ArticleEdit cleanup - 组件卸载:', {
-        id,
+        id: pageId,
         pathname: location.pathname,
         timestamp: new Date().toISOString()
       })
       stopAutoSaveTimer()
     }
-  }, [id])
+  }, [pageId])
 
   const loadCategories = async () => {
     try {
@@ -209,7 +216,7 @@ const ArticleEdit: React.FC = () => {
 
   const loadArticle = async () => {
     try {
-      const article = await getArticleById(Number(id))
+      const article = await getArticleById(Number(pageId))
       setArticleStatus(article.status)
       
       // 初始化自动保存的文章ID和版本号
@@ -291,7 +298,7 @@ const ArticleEdit: React.FC = () => {
     resolveConflictWithServer()
     setShowConflictModal(false)
     // 重新加载文章获取最新版本号
-    if (id) {
+    if (pageId) {
       loadArticle()
     }
   }
@@ -310,7 +317,7 @@ const ArticleEdit: React.FC = () => {
   }
 
   const getStatusTag = () => {
-    if (!id && !saveState.articleId) return null
+    if (!pageId && !saveState.articleId) return null
     const statusMap: Record<number, { bg: string; text: string; label: string }> = {
       [ArticleStatus.DRAFT]: { bg: 'bg-orange-100', text: 'text-orange-600', label: '草稿' },
       [ArticleStatus.PUBLISHED]: { bg: 'bg-green-100', text: 'text-green-600', label: '已发布' },
@@ -330,7 +337,7 @@ const ArticleEdit: React.FC = () => {
         <Breadcrumb items={[
           { title: <Link to="/">首页</Link> },
           { title: <Link to="/article">文章管理</Link> },
-          { title: id ? '编辑文章' : '新建文章' },
+          { title: pageId ? '编辑文章' : '新建文章' },
         ]} />
       </div>
 
@@ -344,7 +351,7 @@ const ArticleEdit: React.FC = () => {
             返回列表
           </Button>
           <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold m-0">{id ? '编辑文章' : '新建文章'}</h2>
+            <h2 className="text-2xl font-bold m-0">{pageId ? '编辑文章' : '新建文章'}</h2>
             {getStatusTag()}
           </div>
         </div>

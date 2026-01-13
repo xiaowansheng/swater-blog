@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Form, Button, message, Card, Switch, Radio, Space } from 'antd'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { ArrowLeftOutlined, SendOutlined, SaveOutlined } from '@ant-design/icons'
 import { createTalk, updateTalk, getTalkById } from '@/api/talk'
 import { TalkStatus } from '@/types'
@@ -11,8 +11,10 @@ import TalkSaveStatus from '@/components/talk/TalkSaveStatus'
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
 const TalkEdit: React.FC = () => {
-  const { id } = useParams<{ id: string }>()
+  const { id: routeId } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
+  const [pageId, setPageId] = useState<string | undefined>(routeId)
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -23,7 +25,13 @@ const TalkEdit: React.FC = () => {
   const [lastSavedTime, setLastSavedTime] = useState<Date>()
   const [errorMessage, setErrorMessage] = useState<string>()
 
-  const isEdit = !!id
+  const isEdit = !!pageId
+
+  useEffect(() => {
+    if (!pageId && routeId) {
+      setPageId(routeId)
+    }
+  }, [pageId, routeId])
 
   useEffect(() => {
     if (isEdit) {
@@ -35,12 +43,12 @@ const TalkEdit: React.FC = () => {
         images: []
       })
     }
-  }, [id])
+  }, [pageId])
 
   const loadTalk = async () => {
     setLoading(true)
     try {
-      const talk = await getTalkById(Number(id))
+      const talk = await getTalkById(Number(pageId))
       form.setFieldsValue({
         ...talk,
         isTop: talk.isTop === 1,
@@ -67,7 +75,7 @@ const TalkEdit: React.FC = () => {
       }
 
       if (isEdit) {
-        await updateTalk(Number(id), data)
+        await updateTalk(Number(pageId), data)
         message.success('更新成功')
       } else {
         await createTalk(data)
@@ -105,13 +113,13 @@ const TalkEdit: React.FC = () => {
       }
 
       if (isEdit) {
-        await updateTalk(Number(id), data)
+        await updateTalk(Number(pageId), data)
         message.success('保存成功')
       } else {
         const newId = await createTalk(data)
         message.success('保存成功')
         // 保存后跳转到编辑页面，以便继续编辑
-        if (!id && newId) {
+        if (!pageId && newId) {
           navigate(`/talk/edit/${newId}`, { replace: true })
         }
       }
@@ -131,7 +139,7 @@ const TalkEdit: React.FC = () => {
     } finally {
       setSubmitting(false)
     }
-  }, [form, isEdit, id, navigate])
+  }, [form, isEdit, pageId, navigate])
 
   // 快捷键保存 Ctrl+S 或 Cmd+S
   useEffect(() => {
