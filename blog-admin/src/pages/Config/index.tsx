@@ -74,12 +74,31 @@ const ConfigPage: React.FC = () => {
         // configApi.getUploadConfig(),
         // configApi.getEmailConfig(),
       ]);
-      siteForm.setFieldsValue(site);
-      authorForm.setFieldsValue(author);
-      coverForm.setFieldsValue(cover);
-      privacyForm.setFieldsValue(privacy);
-      commentForm.setFieldsValue(comment);
-      notifyForm.setFieldsValue(notify);
+
+      // 处理配置数据：将null和undefined转换为合适的默认值
+      const processConfig = (config: any) => {
+        return Object.keys(config).reduce((acc, key) => {
+          const value = config[key];
+          if (value === null || value === undefined) {
+            // 对于contactMethods和socialLinks，初始化为空对象
+            if (key === 'contactMethods' || key === 'socialLinks') {
+              acc[key] = {};
+            } else {
+              acc[key] = '';
+            }
+          } else {
+            acc[key] = value;
+          }
+          return acc;
+        }, {} as any);
+      };
+
+      siteForm.setFieldsValue(processConfig(site));
+      authorForm.setFieldsValue(processConfig(author));
+      coverForm.setFieldsValue(processConfig(cover));
+      privacyForm.setFieldsValue(processConfig(privacy));
+      commentForm.setFieldsValue(processConfig(comment));
+      notifyForm.setFieldsValue(processConfig(notify));
       // uploadForm.setFieldsValue(upload);
       // emailForm.setFieldsValue(email);
     } catch (error) {
@@ -161,7 +180,24 @@ const ConfigPage: React.FC = () => {
     setSaving(true);
     try {
       const values = await form.validateFields();
-      await updateFn(values);
+
+      // 处理表单数据：确保嵌套对象被正确初始化
+      const processedValues = Object.keys(values).reduce((acc, key) => {
+        const value = values[key];
+        if (value === undefined || value === null) {
+          // 对于contactMethods和socialLinks，初始化为空对象
+          if (key === 'contactMethods' || key === 'socialLinks') {
+            acc[key] = {};
+          } else {
+            acc[key] = '';
+          }
+        } else {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as any);
+
+      await updateFn(processedValues);
       message.success("保存成功");
     } catch (error) {
       console.error("保存失败", error);
@@ -241,49 +277,191 @@ const ConfigPage: React.FC = () => {
           <Form.Item name="introduction" label="详细介绍">
             <TextArea rows={4} placeholder="详细的自我介绍" />
           </Form.Item>
+
           <Divider>联系方式</Divider>
-          <Form.Item name="email" label="邮箱">
+
+          {/* 邮箱 */}
+          <Form.Item
+            name={['contactMethods', 'email', 'value']}
+            label="邮箱"
+          >
             <Input placeholder="联系邮箱" />
           </Form.Item>
           <Form.Item
-            name="showEmail"
+            name={['contactMethods', 'email', 'visible']}
             label="前台显示邮箱"
             valuePropName="checked"
           >
             <Switch />
           </Form.Item>
-          <Form.Item name="qq" label="QQ">
+
+          {/* QQ */}
+          <Form.Item
+            name={['contactMethods', 'qq', 'value']}
+            label="QQ"
+          >
             <Input placeholder="QQ号码" />
           </Form.Item>
-          <Form.Item name="showQq" label="前台显示QQ" valuePropName="checked">
+          <Form.Item
+            name={['contactMethods', 'qq', 'visible']}
+            label="前台显示QQ"
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
-          <Form.Item name="wechat" label="微信">
+
+          {/* 微信 */}
+          <Form.Item
+            name={['contactMethods', 'wechat', 'value']}
+            label="微信"
+          >
             <Input placeholder="微信号" />
           </Form.Item>
           <Form.Item
-            name="showWechat"
+            name={['contactMethods', 'wechat', 'visible']}
             label="前台显示微信"
             valuePropName="checked"
           >
             <Switch />
           </Form.Item>
+
           <Divider>社交链接</Divider>
-          <Form.Item name="github" label="GitHub">
+
+          {/* GitHub */}
+          <Form.Item
+            name={['socialLinks', 'github', 'value']}
+            label="GitHub"
+          >
             <Input placeholder="GitHub主页链接" />
           </Form.Item>
-          <Form.Item name="gitee" label="Gitee">
+          <Form.Item
+            name={['socialLinks', 'github', 'visible']}
+            label="前台显示GitHub"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+
+          {/* Gitee */}
+          <Form.Item
+            name={['socialLinks', 'gitee', 'value']}
+            label="Gitee"
+          >
             <Input placeholder="Gitee主页链接" />
           </Form.Item>
-          <Form.Item name="weibo" label="微博">
+          <Form.Item
+            name={['socialLinks', 'gitee', 'visible']}
+            label="前台显示Gitee"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+
+          {/* 微博 */}
+          <Form.Item
+            name={['socialLinks', 'weibo', 'value']}
+            label="微博"
+          >
             <Input placeholder="微博主页链接" />
           </Form.Item>
-          <Form.Item name="zhihu" label="知乎">
+          <Form.Item
+            name={['socialLinks', 'weibo', 'visible']}
+            label="前台显示微博"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+
+          {/* 知乎 */}
+          <Form.Item
+            name={['socialLinks', 'zhihu', 'value']}
+            label="知乎"
+          >
             <Input placeholder="知乎主页链接" />
           </Form.Item>
-          <Form.Item name="bilibili" label="B站">
+          <Form.Item
+            name={['socialLinks', 'zhihu', 'visible']}
+            label="前台显示知乎"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+
+          {/* B站 */}
+          <Form.Item
+            name={['socialLinks', 'bilibili', 'value']}
+            label="B站"
+          >
             <Input placeholder="B站主页链接" />
           </Form.Item>
+          <Form.Item
+            name={['socialLinks', 'bilibili', 'visible']}
+            label="前台显示B站"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+
+          {/* Twitter */}
+          <Form.Item
+            name={['socialLinks', 'twitter', 'value']}
+            label="Twitter"
+          >
+            <Input placeholder="Twitter主页链接" />
+          </Form.Item>
+          <Form.Item
+            name={['socialLinks', 'twitter', 'visible']}
+            label="前台显示Twitter"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+
+          {/* Telegram */}
+          <Form.Item
+            name={['socialLinks', 'telegram', 'value']}
+            label="Telegram"
+          >
+            <Input placeholder="Telegram频道链接" />
+          </Form.Item>
+          <Form.Item
+            name={['socialLinks', 'telegram', 'visible']}
+            label="前台显示Telegram"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+
+          {/* Facebook */}
+          <Form.Item
+            name={['socialLinks', 'facebook', 'value']}
+            label="Facebook"
+          >
+            <Input placeholder="Facebook主页链接" />
+          </Form.Item>
+          <Form.Item
+            name={['socialLinks', 'facebook', 'visible']}
+            label="前台显示Facebook"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+
+          {/* YouTube */}
+          <Form.Item
+            name={['socialLinks', 'youtube', 'value']}
+            label="YouTube"
+          >
+            <Input placeholder="YouTube频道链接" />
+          </Form.Item>
+          <Form.Item
+            name={['socialLinks', 'youtube', 'visible']}
+            label="前台显示YouTube"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+
           <Form.Item>
             <Button
               type="primary"
@@ -404,9 +582,17 @@ const ConfigPage: React.FC = () => {
       children: (
         <Form form={commentForm} layout="vertical" className="config-form">
           <Form.Item
-            name="enableAudit"
+            name="enabled"
+            label="启用评论功能"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+          <Form.Item
+            name="needApproval"
             label="开启评论审核"
             valuePropName="checked"
+            tooltip="新评论需要管理员审核后才能显示"
           >
             <Switch />
           </Form.Item>
@@ -414,23 +600,31 @@ const ConfigPage: React.FC = () => {
             name="allowAnonymous"
             label="允许匿名评论"
             valuePropName="checked"
+            tooltip="允许未登录用户发表评论"
           >
             <Switch />
           </Form.Item>
           <Form.Item
-            name="allowGuest"
-            label="允许游客评论"
+            name="maxLength"
+            label="评论最大长度"
+            tooltip="评论内容的最大字符数限制"
+          >
+            <InputNumber min={0} max={10000} style={{ width: 200 }} placeholder="不限制则留空" />
+          </Form.Item>
+          <Form.Item
+            name="emailNotification"
+            label="邮件通知"
             valuePropName="checked"
-            tooltip="游客需填写昵称和邮箱"
+            tooltip="收到新评论时发送邮件通知"
           >
             <Switch />
           </Form.Item>
           <Form.Item
-            name="showEmail"
-            label="显示评论者邮箱"
-            valuePropName="checked"
+            name="sensitiveWords"
+            label="敏感词过滤"
+            tooltip="多个敏感词用逗号分隔，包含敏感词的评论将被拦截"
           >
-            <Switch />
+            <TextArea rows={2} placeholder="例如：垃圾,广告,违法" />
           </Form.Item>
           <Form.Item>
             <Button

@@ -14,22 +14,32 @@ export interface SiteConfig {
   notice: string
 }
 
+export interface ContactMethod {
+  value: string
+  visible: boolean
+}
+
 export interface AuthorConfig {
   name: string
   avatar: string
   signature: string
   introduction: string
-  email: string
-  qq: string
-  wechat: string
-  github: string
-  gitee: string
-  weibo: string
-  zhihu: string
-  bilibili: string
-  showEmail: boolean
-  showQq: boolean
-  showWechat: boolean
+  contactMethods: {
+    email?: ContactMethod
+    qq?: ContactMethod
+    wechat?: ContactMethod
+  }
+  socialLinks: {
+    github?: ContactMethod
+    gitee?: ContactMethod
+    weibo?: ContactMethod
+    zhihu?: ContactMethod
+    bilibili?: ContactMethod
+    twitter?: ContactMethod
+    telegram?: ContactMethod
+    facebook?: ContactMethod
+    youtube?: ContactMethod
+  }
 }
 
 export interface CoverConfig {
@@ -64,10 +74,12 @@ export interface PrivacyConfig {
 }
 
 export interface CommentConfig {
-  enableAudit: boolean
+  enabled: boolean
+  needApproval: boolean
   allowAnonymous: boolean
-  allowGuest: boolean
-  showEmail: boolean
+  maxLength?: number
+  emailNotification?: boolean
+  sensitiveWords?: string
 }
 
 export interface NotifyConfig {
