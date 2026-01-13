@@ -7,9 +7,11 @@ import {
   FullscreenExitOutlined,
   GithubOutlined,
   QuestionCircleOutlined,
+  LockOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth'
+import { useLockscreenStore } from '@/store/lockscreen'
 import NotificationBell from './NotificationBell'
 import type { MenuProps } from 'antd'
 import { useState } from 'react'
@@ -20,11 +22,16 @@ const { Header: AntHeader } = Layout
 const Header: React.FC = () => {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
+  const { lockScreen } = useLockscreenStore()
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   const handleLogout = async () => {
     await logout()
     navigate('/login')
+  }
+
+  const handleLockScreen = () => {
+    lockScreen()
   }
 
   const toggleFullscreen = () => {
@@ -94,6 +101,14 @@ const Header: React.FC = () => {
             }
             className="flex items-center justify-center"
             onClick={toggleFullscreen}
+          />
+        </Tooltip>
+        <Tooltip title="锁屏">
+          <Button
+            type="text"
+            icon={<LockOutlined className="text-gray-500" />}
+            className="flex items-center justify-center"
+            onClick={handleLockScreen}
           />
         </Tooltip>
         <NotificationBell />
