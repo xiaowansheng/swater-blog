@@ -1,7 +1,9 @@
 import { getSiteInfo } from '@/lib/api/config.server';
+import { getTotalVisits } from '@/lib/api/statistics';
 
 export default async function Footer() {
   const site = await getSiteInfo();
+  const visits = await getTotalVisits();
 
   const defaultCopyright = `© ${new Date().getFullYear()} ${site.name || 'Blog'}. All rights reserved.`;
 
@@ -43,19 +45,40 @@ export default async function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div className="flex justify-center gap-8 items-center">
-            <a href="/about" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
-              关于
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
-            </a>
-            <a href="/friend-link" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
-              友链
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
-            </a>
-            <a href="/guestbook" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
-              留言
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
-            </a>
+          <div className="flex flex-col justify-center gap-6 items-center">
+            <div className="flex gap-8 items-center">
+              <a href="/about" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
+                关于
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
+              </a>
+              <a href="/friend-link" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
+                友链
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
+              </a>
+              <a href="/guestbook" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
+                留言
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
+              </a>
+            </div>
+
+            {/* Visit Statistics */}
+            <div className="flex items-center gap-4 text-xs text-muted-foreground/70">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-deco-pink animate-pulse"></span>
+                <span className="font-medium">总访问量</span>
+                <span className="font-bold text-primary" title="Page Views">
+                  {visits.pv.toLocaleString()}
+                </span>
+              </div>
+              <span className="w-px h-3 bg-border"></span>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-deco-yellow animate-pulse" style={{ animationDelay: '0.5s' }}></span>
+                <span className="font-medium">访客数</span>
+                <span className="font-bold text-primary" title="Unique Visitors">
+                  {visits.uv.toLocaleString()}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Tech Stack / Extra Info */}

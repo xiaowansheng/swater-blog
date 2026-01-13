@@ -188,4 +188,18 @@ public interface TrackStatisticsMapper {
             @Param("end") LocalDateTime end,
             @Param("limit") Integer limit
     );
+
+    @Select("""
+            SELECT COUNT(*)
+            FROM page_view
+            WHERE deleted = 0
+            """)
+    Long countTotalPv();
+
+    @Select("""
+            SELECT COUNT(DISTINCT visitor_id)
+            FROM page_view
+            WHERE deleted = 0
+            """)
+    Long countTotalUv();
 }
