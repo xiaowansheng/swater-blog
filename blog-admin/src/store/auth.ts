@@ -10,6 +10,7 @@ interface AuthState {
   isLoginModalOpen: boolean
   setLoginModalOpen: (open: boolean) => void
   login: (username: string, password: string) => Promise<void>
+  loginWithEmail: (email: string, code: string) => Promise<void>
   logout: () => Promise<void>
   getCurrentUser: () => Promise<void>
   isAuthenticated: () => boolean
@@ -24,6 +25,11 @@ export const useAuthStore = create<AuthState>()(
       setLoginModalOpen: (open: boolean) => set({ isLoginModalOpen: open }),
       login: async (username: string, password: string) => {
         const { token, user } = await authApi.login({ username, password })
+        setToken(token)
+        set({ token, user })
+      },
+      loginWithEmail: async (email: string, code: string) => {
+        const { token, user } = await authApi.loginWithEmail({ email, code })
         setToken(token)
         set({ token, user })
       },

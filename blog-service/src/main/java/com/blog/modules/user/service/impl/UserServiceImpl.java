@@ -175,7 +175,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
-        user.setPassword(PasswordUtil.encode(dto.getPassword()));
+        user.setPassword(PasswordUtil.encode(dto.getNewPassword()));
         userMapper.updateById(user);
         
         EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserPasswordResetEvent(this, id)));

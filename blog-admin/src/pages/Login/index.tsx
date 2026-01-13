@@ -3,11 +3,19 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth'
 import { useState } from 'react'
+import ForgotPasswordModal from '@/components/common/ForgotPasswordModal'
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
   const { login } = useAuthStore()
   const [loading, setLoading] = useState(false)
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
+
+  const handleForgotPassword = (e: React.MouseEvent) => {
+    e.preventDefault()
+    console.log('登录页面 - 忘记密码被点击')
+    setForgotPasswordOpen(true)
+  }
 
   const onFinish = async (values: { username: string; password: string }) => {
     setLoading(true)
@@ -64,7 +72,10 @@ const Login: React.FC = () => {
               <Form.Item name="remember" valuePropName="checked" noStyle>
                 <Checkbox>记住我</Checkbox>
               </Form.Item>
-              <a className="text-blue-500 hover:text-blue-600" href="#">
+              <a 
+                className="text-blue-500 hover:text-blue-600 cursor-pointer" 
+                onClick={handleForgotPassword}
+              >
                 忘记密码？
               </a>
             </div>
@@ -85,6 +96,11 @@ const Login: React.FC = () => {
           © 2024 Blog Admin. All rights reserved.
         </div>
       </div>
+
+      <ForgotPasswordModal
+        open={forgotPasswordOpen}
+        onClose={() => setForgotPasswordOpen(false)}
+      />
     </div>
   )
 }

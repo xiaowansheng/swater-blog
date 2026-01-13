@@ -7,6 +7,8 @@ import com.blog.shared.annotation.RateLimit;
 import com.blog.shared.Result;
 import com.blog.modules.auth.model.dto.EmailVerifyDTO;
 import com.blog.modules.auth.model.dto.LoginDTO;
+import com.blog.modules.auth.model.dto.SendCodeDTO;
+import com.blog.modules.auth.model.dto.ResetPasswordDTO;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.modules.auth.model.vo.EmailVerifyVO;
 import com.blog.modules.auth.model.vo.LoginVO;
@@ -303,6 +305,51 @@ public class AuthController {
     public Result<String> refreshToken() {
         String token = authService.refreshToken();
         return Result.success(token);
+    }
+
+    @PostMapping("/login/email")
+    @ApiOperation(name = "邮箱验证码登录", type = ApiOperationType.LOGIN, description = "使用邮箱验证码登录")
+    @Operation(summary = "邮箱验证码登录", description = "使用邮箱和验证码进行登录")
+    @RateLimit(
+        type = RateLimit.Type.SLIDING_WINDOW,
+        dimension = RateLimit.Dimension.IP,
+        window = 300,
+        limit = 10,
+        message = "登录尝试过于频繁，请5分钟后再试"
+    )
+    public Result<LoginVO> loginWithEmail(@Valid @RequestBody EmailVerifyDTO dto) {
+        LoginVO loginVO = authService.loginWithEmail(dto.getEmail(), dto.getCode());
+        return Result.success(loginVO);
+    }
+
+    @PostMapping("/send-code")
+    @ApiOperation(name = "发送邮箱验证码", type = ApiOperationType.OTHER, description = "发送邮箱验证码")
+    @Operation(summary = "发送邮箱验证码", description = "发送登录或重置密码的邮箱验证码")
+    @RateLimit(
+        type = RateLimit.Type.SLIDING_WINDOW,
+        dimension = RateLimit.Dimension.IP,
+        window = 300,
+        limit = 5,
+        message = "验证码发送过于频繁，请5分钟后再试"
+    )
+    public Result<Void> sendCode(@Valid @RequestBody SendCodeDTO dto) {
+        authService.sendCode(dto);
+        return Result.success();
+    }
+
+    @PostMapping("/reset-password")
+    @ApiOperation(name = "重置密码", type = ApiOperationType.OTHER, description = "通过邮箱验证码重置密码")
+    @Operation(summary = "重置密码", description = "使用邮箱验证码重置密码")
+    @RateLimit(
+        type = RateLimit.Type.SLIDING_WINDOW,
+        dimension = RateLimit.Dimension.IP,
+        window = 300,
+        limit = 3,
+        message = "重置密码请求过于频繁，请5分钟后再试"
+    )
+    public Result<Void> resetPassword(@Valid @RequestBody ResetPasswordDTO dto) {
+        authService.resetPassword(dto);
+        return Result.success();
     }
 }
 
