@@ -18,6 +18,9 @@ import com.blog.modules.statistics.visitor.mapper.VisitorMapper;
 import com.blog.modules.statistics.visitor.model.entity.Visitor;
 import com.blog.modules.statistics.visitor.util.VisitorUserAgentInfo;
 import com.blog.modules.statistics.visitor.util.VisitorUserAgentParser;
+import com.blog.plugin.components.location.LocationInfo;
+import com.blog.plugin.components.location.LocationProviderFactory;
+import com.blog.plugin.components.location.LocationProviderPlugin;
 import com.blog.shared.util.RequestUtil;
 import com.blog.modules.talk.mapper.TalkMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -38,6 +42,9 @@ public class TrackServiceImpl implements TrackService {
 
     @Autowired
     private VisitorMapper visitorMapper;
+
+    @Autowired(required = false)
+    private LocationProviderFactory locationProviderFactory;
 
     @Autowired
     private VisitorSessionMapper visitorSessionMapper;
@@ -88,6 +95,7 @@ public class TrackServiceImpl implements TrackService {
                 .last("LIMIT 1"));
 
         boolean isNewVisitor = false;
+        boolean within24h = false;
         if (visitor == null) {
             isNewVisitor = true;
             visitor = new Visitor();
@@ -95,14 +103,16 @@ public class TrackServiceImpl implements TrackService {
             visitor.setFirstVisitTime(now);
             visitor.setVisitCount(1);
             visitor.setStatus("ACTIVE");
+        } else {
+            within24h = visitor.getLastVisitTime() != null
+                    && !visitor.getLastVisitTime().isBefore(now.minusHours(24));
+            if (!within24h) {
+                visitor.setVisitCount((visitor.getVisitCount() != null ? visitor.getVisitCount() : 0) + 1);
+            }
         }
 
         visitor.setLastVisitTime(now);
-        if (isNewVisitor) {
-            visitor.setIp(StringUtils.hasText(ip) ? ip : "UNKNOWN");
-        } else if (StringUtils.hasText(ip)) {
-            visitor.setIp(ip);
-        }
+        applyLocation(visitor, ip);
 
         VisitorUserAgentInfo uaInfo = VisitorUserAgentParser.parse(userAgent);
         if (uaInfo != null) {
@@ -115,6 +125,8 @@ public class TrackServiceImpl implements TrackService {
             visitor.setOsVersion(uaInfo.getOsVersion());
         }
 
+        populateTraffic(visitor, dto.getReferer(), dto.getUtmSource(), dto.getUtmMedium(), dto.getUtmCampaign());
+
         if (isNewVisitor) {
             visitorMapper.insert(visitor);
         } else {
@@ -122,6 +134,116 @@ public class TrackServiceImpl implements TrackService {
         }
 
         return new VisitorResolveResult(visitor, isNewVisitor);
+    }
+
+    private void applyLocation(Visitor visitor, String ip) {
+        if (!StringUtils.hasText(ip)) {
+            if (!StringUtils.hasText(visitor.getIp())) {
+                visitor.setIp("UNKNOWN");
+            }
+            return;
+        }
+
+        if (locationProviderFactory == null) {
+            visitor.setIp(ip);
+            return;
+        }
+
+        try {
+            List<LocationProviderPlugin> providers = locationProviderFactory.getProviders();
+            LocationInfo locationInfo = null;
+            for (LocationProviderPlugin locationProvider : providers) {
+                locationInfo = locationProvider.getLocationInfo(ip);
+                if (locationInfo != null) {
+                    break;
+                }
+            }
+
+            if (locationInfo != null) {
+                visitor.setCountry(firstNonBlank(locationInfo.getCountry(), visitor.getCountry()));
+                visitor.setProvince(firstNonBlank(locationInfo.getProvince(), visitor.getProvince()));
+                visitor.setCity(firstNonBlank(locationInfo.getCity(), visitor.getCity()));
+                visitor.setDistrict(firstNonBlank(locationInfo.getDistrict(), visitor.getDistrict()));
+                visitor.setLatitude(locationInfo.getLatitude());
+                visitor.setLongitude(locationInfo.getLongitude());
+                visitor.setLocation(firstNonBlank(locationInfo.getLocation(), visitor.getLocation()));
+                visitor.setIsp(firstNonBlank(locationInfo.getIsp(), visitor.getIsp()));
+                visitor.setTimezone(firstNonBlank(locationInfo.getTimezone(), visitor.getTimezone()));
+                visitor.setIp(firstNonBlank(locationInfo.getIp(), ip));
+            } else {
+                visitor.setIp(ip);
+            }
+        } catch (Exception e) {
+            log.warn("IP定位失败，IP: {}", ip, e);
+            visitor.setIp(ip);
+        }
+    }
+
+    private void populateTraffic(Visitor visitor, String referer, String utmSource, String utmMedium, String utmCampaign) {
+        visitor.setRefererUrl(firstNonBlank(referer, visitor.getRefererUrl()));
+        visitor.setUtmSource(firstNonBlank(utmSource, visitor.getUtmSource()));
+        visitor.setUtmMedium(firstNonBlank(utmMedium, visitor.getUtmMedium()));
+        visitor.setUtmCampaign(firstNonBlank(utmCampaign, visitor.getUtmCampaign()));
+
+        if (StringUtils.hasText(utmSource)) {
+            visitor.setTrafficSource("UTM");
+            return;
+        }
+        if (!StringUtils.hasText(referer)) {
+            visitor.setTrafficSource("DIRECT");
+            return;
+        }
+        String lower = referer.toLowerCase();
+        if (lower.contains("google.") || lower.contains("bing.") || lower.contains("baidu.") || lower.contains("yahoo.")) {
+            visitor.setTrafficSource("SEARCH");
+            visitor.setSearchEngine(resolveSearchEngine(referer));
+            visitor.setSearchKeywords(extractQueryParam(referer, "q"));
+        } else {
+            visitor.setTrafficSource("REFERRAL");
+        }
+    }
+
+    private String resolveSearchEngine(String referer) {
+        if (!StringUtils.hasText(referer)) {
+            return null;
+        }
+        String lower = referer.toLowerCase();
+        if (lower.contains("google.")) {
+            return "Google";
+        }
+        if (lower.contains("bing.")) {
+            return "Bing";
+        }
+        if (lower.contains("baidu.")) {
+            return "Baidu";
+        }
+        if (lower.contains("yahoo.")) {
+            return "Yahoo";
+        }
+        return null;
+    }
+
+    private String extractQueryParam(String url, String param) {
+        if (!StringUtils.hasText(url) || !StringUtils.hasText(param)) {
+            return null;
+        }
+        int queryStart = url.indexOf("?");
+        if (queryStart < 0 || queryStart == url.length() - 1) {
+            return null;
+        }
+        String query = url.substring(queryStart + 1);
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            String[] kv = pair.split("=", 2);
+            if (kv.length == 2 && param.equalsIgnoreCase(kv[0])) {
+                return kv[1];
+            }
+        }
+        return null;
+    }
+
+    private String firstNonBlank(String candidate, String fallback) {
+        return StringUtils.hasText(candidate) ? candidate : fallback;
     }
 
     private SessionResolveResult resolveSession(Long visitorId, TrackEnterDTO dto, LocalDateTime now) {

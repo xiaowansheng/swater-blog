@@ -183,7 +183,7 @@ const VisitorPage: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card className="stat-card" loading={statsLoading}>
             <Statistic
-              title="总访客数"
+              title="新增访客数"
               value={statistics?.totalVisitors || 0}
               prefix={<UserOutlined className="text-blue-500" />}
             />
@@ -192,7 +192,7 @@ const VisitorPage: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card className="stat-card" loading={statsLoading}>
             <Statistic
-              title="总浏览量"
+              title="PV"
               value={statistics?.totalPageViews || 0}
               prefix={<EyeOutlined className="text-green-500" />}
             />
@@ -201,7 +201,7 @@ const VisitorPage: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card className="stat-card" loading={statsLoading}>
             <Statistic
-              title="独立访客(24h)"
+              title="UV"
               value={statistics?.uniqueVisitors || 0}
               prefix={<GlobalOutlined className="text-purple-500" />}
             />
