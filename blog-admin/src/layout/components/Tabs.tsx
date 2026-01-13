@@ -1,5 +1,6 @@
 import { Tabs as AntTabs, Dropdown } from 'antd'
 import type { MenuProps } from 'antd'
+import { ReloadOutlined } from '@ant-design/icons'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTabsStore } from '@/store/tabs'
 import { useEffect, useState } from 'react'
@@ -7,7 +8,7 @@ import { useEffect, useState } from 'react'
 const Tabs: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { tabs, activeKey, setActiveTab, removeTab, closeOtherTabs, closeLeftTabs, closeRightTabs, closeAllTabs } = useTabsStore()
+  const { tabs, activeKey, setActiveTab, removeTab, closeOtherTabs, closeLeftTabs, closeRightTabs, closeAllTabs, refreshTab } = useTabsStore()
   const [contextMenuKey, setContextMenuKey] = useState<string | null>(null)
 
   useEffect(() => {
@@ -86,7 +87,7 @@ const Tabs: React.FC = () => {
     if (action === 'remove' && typeof targetKey === 'string') {
       const currentIndex = tabs.findIndex((tab) => tab.key === targetKey)
       removeTab(targetKey)
-      
+
       // 如果关闭的是当前标签，跳转到相邻标签
       if (targetKey === activeKey && tabs.length > 1) {
         const newIndex = currentIndex === 0 ? 1 : currentIndex - 1
@@ -96,6 +97,11 @@ const Tabs: React.FC = () => {
         }
       }
     }
+  }
+
+  const handleRefresh = (e: React.MouseEvent, key: string) => {
+    e.stopPropagation() // 阻止事件冒泡，避免触发标签切换
+    refreshTab(key)
   }
 
   if (tabs.length === 0) {
@@ -122,7 +128,15 @@ const Tabs: React.FC = () => {
                 }
               }}
             >
-              <span>{tab.label}</span>
+              <span className="flex items-center gap-2">
+                {tab.label}
+                {activeKey === tab.key && (
+                  <ReloadOutlined
+                    className="hover:text-blue-500 transition-colors"
+                    onClick={(e) => handleRefresh(e, tab.key)}
+                  />
+                )}
+              </span>
             </Dropdown>
           ),
           closable: tab.closable !== false && tabs.length > 1,
