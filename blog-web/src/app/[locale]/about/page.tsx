@@ -1,8 +1,9 @@
 import { getTranslations } from 'next-intl/server';
 import PageHeader from '@/components/layout/PageHeader';
 import MarkdownRenderer from '@/components/markdown/MarkdownRenderer';
+import AuthorCard from '@/components/author/AuthorCard';
 import { ISR_REVALIDATE } from '@/lib/constants';
-import { getAboutContent, getCoverConfig } from '@/lib/api/config.server';
+import { getAboutContent, getCoverConfig, getAuthorInfo } from '@/lib/api/config.server';
 
 export const revalidate = ISR_REVALIDATE.ABOUT;
 
@@ -12,15 +13,19 @@ export default async function AboutPage({
   params: Promise<{ locale: string }>;
 }) {
   const t = await getTranslations('common');
-  const [aboutContent, cover] = await Promise.all([
+  const [aboutContent, cover, author] = await Promise.all([
     getAboutContent(),
-    getCoverConfig()
+    getCoverConfig(),
+    getAuthorInfo()
   ]);
 
   return (
     <>
       <PageHeader title={t('about')} description="关于我" coverImage={cover.about} />
       <main className="container flex-1 px-4 py-12 mx-auto">
+        {/* 作者信息卡片 */}
+        <AuthorCard author={author} />
+
         <div className="bg-card border border-border rounded-2xl p-8 md:p-12 shadow-sm">
           {aboutContent ? (
             <div className="vditor-reset">

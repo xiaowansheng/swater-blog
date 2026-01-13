@@ -41,6 +41,36 @@ export interface AuthorInfo {
   weibo?: string;
   zhihu?: string;
   bilibili?: string;
+  twitter?: string;
+  telegram?: string;
+  facebook?: string;
+  youtube?: string;
+}
+
+/**
+ * 后台管理的作者配置类型（包含所有配置项）
+ */
+export interface AuthorConfig {
+  name: string;
+  avatar: string;
+  signature: string;
+  introduction: string;
+  contactMethods: {
+    email?: { value: string; visible: boolean };
+    qq?: { value: string; visible: boolean };
+    wechat?: { value: string; visible: boolean };
+  };
+  socialLinks: {
+    github?: { value: string; visible: boolean };
+    gitee?: { value: string; visible: boolean };
+    weibo?: { value: string; visible: boolean };
+    zhihu?: { value: string; visible: boolean };
+    bilibili?: { value: string; visible: boolean };
+    twitter?: { value: string; visible: boolean };
+    telegram?: { value: string; visible: boolean };
+    facebook?: { value: string; visible: boolean };
+    youtube?: { value: string; visible: boolean };
+  };
 }
 
 export interface CoverConfig {
