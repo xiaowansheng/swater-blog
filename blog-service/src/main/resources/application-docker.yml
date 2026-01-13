@@ -246,8 +246,9 @@ mybatis-plus:
 # Sa-Token配置 - Docker环境
 sa-token:
   token-name: Authorization
-  timeout: 2592000  # 30天
-  active-timeout: -1
+  timeout: -1
+  active-timeout: 86400
+  is-read-timeout: true
   is-concurrent: true
   is-share: true
   token-style: uuid

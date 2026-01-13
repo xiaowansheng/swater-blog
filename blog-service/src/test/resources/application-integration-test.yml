@@ -70,8 +70,9 @@ mybatis-plus:
 # Sa-Token配置
 sa-token:
   token-name: Authorization
-  timeout: 2592000
-  active-timeout: -1
+  timeout: -1
+  active-timeout: 86400
+  is-read-timeout: true
   is-concurrent: true
   is-share: true
   token-style: uuid
