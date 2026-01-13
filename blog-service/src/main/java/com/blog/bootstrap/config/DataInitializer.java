@@ -1,6 +1,7 @@
 package com.blog.bootstrap.config;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.blog.infrastructure.mail.EmailService;
 import com.blog.modules.system.role.mapper.RoleMapper;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.system.role.model.entity.Role;
@@ -22,6 +23,9 @@ public class DataInitializer implements ApplicationRunner {
     
     @Autowired
     private RoleMapper roleMapper;
+
+    @Autowired
+    private EmailService emailService;
 
     @Override
     @Transactional
@@ -54,7 +58,7 @@ public class DataInitializer implements ApplicationRunner {
             admin.setUsername("admin");
             admin.setPassword(PasswordUtil.encode("123456"));
             admin.setNickname("管理员");
-            admin.setEmail("admin@blog.com");
+            admin.setEmail(emailService.getFrom());
             admin.setIpAddressSignup("127.0.0.1");
             admin.setIpSourceSignup("本地");
             admin.setRoleKey("admin");

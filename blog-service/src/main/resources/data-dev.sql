@@ -14,7 +14,7 @@ INSERT INTO `role` (`id`, `name`, `role_key`, `description`, `status`) VALUES
 -- 2. 插入用户数据
 -- 密码均为: 123456 (hash: $2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi)
 INSERT INTO `user` (`id`, `username`, `email`, `password`, `nickname`, `avatar`, `role_key`, `status`, `disabled`, `ip_address_signup`, `ip_source_signup`) VALUES
-(1, 'admin', 'admin@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '超级管理员', '/uploads/avatar/admin.jpg', 'admin', 1, 0, '127.0.0.1', '本地'),
+(1, 'admin', 'xiaowansheng@foxmail.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '超级管理员', '/uploads/avatar/admin.jpg', 'admin', 1, 0, '127.0.0.1', '本地'),
 (2, 'editor', 'editor@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '内容编辑', '/uploads/avatar/editor.jpg', 'editor', 1, 0, '127.0.0.1', '本地'),
 (3, 'author1', 'author1@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '技术作者', '/uploads/avatar/author1.jpg', 'author', 1, 0, '127.0.0.1', '本地'),
 (4, 'author2', 'author2@blog.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', '生活博主', '/uploads/avatar/author2.jpg', 'author', 1, 0, '127.0.0.1', '本地'),

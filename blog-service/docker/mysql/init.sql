@@ -13,7 +13,7 @@ INSERT INTO `user` (
     `role_key`, `status`, `disabled`, `create_time`, `update_time`
 ) VALUES (
     'admin',
-    'admin@blog.com',
+    'xiaowansheng@foxmail.com',
     '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', -- 密码: 123456
     '管理员',
     '/uploads/avatar/default-admin.jpg',

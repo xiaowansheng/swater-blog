@@ -1,5 +1,6 @@
 package com.blog.infrastructure.mail;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,9 +24,11 @@ public class EmailService {
     @Autowired(required = false)
     private TemplateEngine templateEngine;
 
+    @Getter
     @Value("${spring.mail.username:}")
     private String from;
 
+    @Getter
     @Value("${spring.mail.from-name:Swater Blog}")
     private String fromName;
 

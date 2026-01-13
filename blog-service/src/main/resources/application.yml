@@ -114,7 +114,7 @@ notification:
     - websocket
     - email
   email:
-    enabled: false
+    enabled: true
   websocket:
     enabled: true
 

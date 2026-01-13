@@ -96,7 +96,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         dto.setBrowser(userAgentInfo.getBrowserDescription() != null ? userAgentInfo.getBrowserDescription() : userAgent);
 
         CommentVO vo = createAndPersist(dto, emailVerifiedBySession ? sessionEmail : dto.getEmail());
-        if (vo != null && vo.getId() != null) {
+        if (vo.getId() != null) {
             Long commentId = vo.getId();
             EventUtil.publishEventAfterCommit(() -> {
                 // 在事件发布时重新查询最新的评论数据
@@ -159,7 +159,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
 
         List<Long> idsNeedingCount = new ArrayList<>();
         if ((parentId == null || parentId == 0) && (rootId == null || rootId == 0)) {
-            idsNeedingCount = records.stream().map(Comment::getId).collect(Collectors.toList());
+            idsNeedingCount = records.stream().map(Comment::getId).toList();
         }
 
         List<CommentVO> voList = new ArrayList<>();

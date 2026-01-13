@@ -72,8 +72,8 @@ public class OpenApiConfig {
                 .version("v1.0.0")
                 .contact(new Contact()
                         .name("Blog Team")
-                        .email("admin@blog.com")
-                        .url("https://github.com/your-username/blog"))
+                        .email("xiaowansheng@foxmail.com")
+                        .url("https://github.com/xiaowansheng/swater-blog"))
                 .license(new License()
                         .name("MIT License")
                         .url("https://opensource.org/licenses/MIT"));

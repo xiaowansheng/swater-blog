@@ -290,7 +290,7 @@ A: 配置Elasticsearch连接信息，设置 `search.provider.type=elasticsearch`
 
 - 项目地址: https://github.com/your-username/blog
 - 问题反馈: https://github.com/your-username/blog/issues
-- 邮箱: admin@blog.com
+- 邮箱: xiaowansheng@foxmail.com
 
 ## 许可证
 
