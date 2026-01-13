@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMusicStore, Song } from '@/lib/store/musicStore';
 import Image from 'next/image';
-import DraggableButton from '@/components/common/DraggableButton';
 
 export default function AnimeMusicPlayer() {
   const {
@@ -32,11 +31,8 @@ export default function AnimeMusicPlayer() {
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 200 });
   const playlistPanelRef = useRef<HTMLDivElement>(null);
-  const [playlistPosition, setPlaylistPosition] = useState({ top: 0, left: 0 });
   const playerPanelRef = useRef<HTMLDivElement>(null);
-  const [playerPosition, setPlayerPosition] = useState({ top: 0, left: 0 });
   const openPlaylist = () => useMusicStore.setState({ isPlaylistOpen: true });
   const closePlaylist = () => useMusicStore.setState({ isPlaylistOpen: false });
 
@@ -132,86 +128,6 @@ export default function AnimeMusicPlayer() {
     }
   }, [currentTime, isDragging]);
 
-  // Keep player panel within viewport and near the button.
-  useEffect(() => {
-    if (!isPlayerOpen) return;
-
-    const updatePosition = () => {
-      const margin = 16;
-      const buttonSize = 56;
-      const gap = 12;
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      const availableWidth = Math.max(200, viewportWidth - margin * 2);
-      const availableHeight = Math.max(200, viewportHeight - margin * 2);
-      const measuredWidth = playerPanelRef.current?.offsetWidth;
-      const measuredHeight = playerPanelRef.current?.offsetHeight;
-      const panelWidth = Math.min(measuredWidth || 320, availableWidth);
-      const panelHeight = Math.min(measuredHeight || 360, availableHeight);
-
-      const preferredLeft = buttonPosition.x - panelWidth - gap;
-      const preferredRight = buttonPosition.x + buttonSize + gap;
-      let left = preferredLeft < margin ? preferredRight : preferredLeft;
-      left = Math.max(margin, Math.min(left, viewportWidth - panelWidth - margin));
-
-      const preferredTop = buttonPosition.y - panelHeight - gap;
-      const preferredBottom = buttonPosition.y + buttonSize + gap;
-      let top = preferredTop < margin ? preferredBottom : preferredTop;
-      top = Math.max(margin, Math.min(top, viewportHeight - panelHeight - margin));
-
-      setPlayerPosition({ top, left });
-    };
-
-    const frame = requestAnimationFrame(updatePosition);
-    window.addEventListener('resize', updatePosition);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener('resize', updatePosition);
-    };
-  }, [isPlayerOpen, buttonPosition.x, buttonPosition.y]);
-
-  // Keep playlist panel within viewport and near the button.
-  useEffect(() => {
-    if (!isPlaylistOpen) return;
-
-    const updatePosition = () => {
-      const margin = 16;
-      const buttonSize = 56;
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      const availableWidth = Math.max(200, viewportWidth - margin * 2);
-      const availableHeight = Math.max(200, viewportHeight - margin * 2);
-      const measuredWidth = playlistPanelRef.current?.offsetWidth;
-      const measuredHeight = playlistPanelRef.current?.offsetHeight;
-      const panelWidth = Math.min(measuredWidth || 320, availableWidth);
-      const panelHeight = Math.min(
-        measuredHeight || Math.min(viewportHeight * 0.5, 360),
-        availableHeight
-      );
-
-      const preferredLeft = buttonPosition.x - panelWidth - gap;
-      const preferredRight = buttonPosition.x + buttonSize + gap;
-      let left = preferredLeft < margin ? preferredRight : preferredLeft;
-      left = Math.max(margin, Math.min(left, viewportWidth - panelWidth - margin));
-
-      const preferredTop = buttonPosition.y - panelHeight - gap;
-      const preferredBottom = buttonPosition.y + buttonSize + gap;
-      let top = preferredTop < margin ? preferredBottom : preferredTop;
-      top = Math.max(margin, Math.min(top, viewportHeight - panelHeight - margin));
-
-      setPlaylistPosition({ top, left });
-    };
-
-    const frame = requestAnimationFrame(updatePosition);
-    window.addEventListener('resize', updatePosition);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener('resize', updatePosition);
-    };
-  }, [isPlaylistOpen, buttonPosition.x, buttonPosition.y, playlist.length]);
-
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -268,38 +184,6 @@ export default function AnimeMusicPlayer() {
         />
       )}
 
-      {/* 浮动按钮 */}
-      <DraggableButton
-        initialPosition={{ x: window.innerWidth - 90, y: 200 }}
-        onPositionChange={setButtonPosition}
-      >
-        <motion.button
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={togglePlayer}
-          className="w-14 h-14 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 shadow-lg shadow-pink-500/30 flex items-center justify-center cursor-pointer border-2 border-white/20 backdrop-blur-sm"
-          style={{ pointerEvents: 'auto' }}
-        >
-          {isPlaying ? (
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ repeat: Infinity, duration: 0.5 }}
-              className="flex items-center gap-0.5"
-            >
-              <span className="w-1 h-3 bg-white rounded-full animate-pulse" />
-              <span className="w-1 h-5 bg-white rounded-full animate-pulse delay-75" />
-              <span className="w-1 h-3 bg-white rounded-full animate-pulse delay-150" />
-            </motion.div>
-          ) : (
-            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          )}
-        </motion.button>
-      </DraggableButton>
-
       {/* 主播放器 */}
       <AnimatePresence>
         {isPlayerOpen && currentSong && (
@@ -320,14 +204,12 @@ export default function AnimeMusicPlayer() {
               exit={{ opacity: 0, scale: 0.8, y: 50 }}
               transition={{ type: 'spring', damping: 25 }}
               style={{
-                top: playerPosition.top,
-                left: playerPosition.left,
                 width: Math.min(320, Math.max(200, window.innerWidth - 32)),
                 maxHeight: Math.max(200, window.innerHeight - 32),
               }}
               ref={playerPanelRef}
-                className="fixed z-50 bg-white/10 dark:bg-black/30 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl overflow-hidden"
-              >
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white/10 dark:bg-black/30 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl overflow-hidden"
+            >
               {/* 专辑封面和歌曲信息 */}
               <div className="relative p-6">
                 {/* 背景装饰 */}
@@ -525,13 +407,11 @@ export default function AnimeMusicPlayer() {
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 transition={{ type: 'spring', damping: 25 }}
                 style={{
-                  top: playlistPosition.top,
-                  left: playlistPosition.left,
                   width: Math.min(320, Math.max(200, window.innerWidth - 32)),
                   maxHeight: Math.max(200, window.innerHeight - 32),
                 }}
                 ref={playlistPanelRef}
-                className="fixed z-[80] bg-white/10 dark:bg-black/30 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl overflow-hidden"
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[80] bg-white/10 dark:bg-black/30 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl overflow-hidden"
               >
                 {/* 头部 */}
                 <div className="p-4 border-b border-white/10 flex items-center justify-between">
