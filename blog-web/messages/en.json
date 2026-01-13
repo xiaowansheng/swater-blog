@@ -41,7 +41,8 @@
     "noGuestbookHint": "Be the first to leave a message",
     "apiNotConnected": "API server not connected, please ensure the backend service is running",
     "author": "Author",
-    "totalArticles": "Total Articles"
+    "totalArticles": "Total Articles",
+    "welcomeToBlog": "Welcome to my blog"
   },
   "guestbook": {
     "title": "Guestbook",

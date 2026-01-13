@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { getFullUrl } from '@/lib/utils/format';
 
 interface HeroSectionClientProps {
@@ -24,6 +25,7 @@ export default function HeroSectionClient({
   tagCount,
   categoryCount,
 }: HeroSectionClientProps) {
+  const t = useTranslations('common');
   const [scrollY, setScrollY] = useState(0);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -92,7 +94,7 @@ export default function HeroSectionClient({
             <div className="inline-block px-4 py-2 mb-4 rounded-full border backdrop-blur-sm transition-all bg-primary/10 border-primary/20 hover:bg-primary/20">
               <span className="flex gap-2 items-center text-sm font-medium text-primary">
                 <span className="w-2 h-2 rounded-full animate-pulse bg-primary"></span>
-                {siteNotice || '欢迎来到我的博客'}
+                {siteNotice || t('welcomeToBlog')}
               </span>
             </div>
           </div>

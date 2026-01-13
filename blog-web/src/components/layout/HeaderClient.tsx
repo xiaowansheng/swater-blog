@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import MobileMenu from './MobileMenu';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 import { useDecoration } from '@/lib/context/DecorationContext';
+import MusicPlayerButton from '../decoration/MusicPlayerButton';
 
 interface NavItem {
   href: string;
@@ -132,6 +133,9 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
 
         <div className="flex gap-1.5 sm:gap-2 items-center">
           <LanguageSwitcher scrolled={scrolled} />
+
+          {/* Music Player Toggle */}
+          <MusicPlayerButton scrolled={scrolled} />
 
           {/* Decoration Level Toggle */}
           <button

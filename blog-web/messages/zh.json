@@ -41,7 +41,8 @@
     "noGuestbookHint": "成为第一个留言的人吧",
     "apiNotConnected": "API服务器未连接，请确保后端服务正在运行",
     "author": "作者",
-    "totalArticles": "文章总数"
+    "totalArticles": "文章总数",
+    "welcomeToBlog": "欢迎来到我的博客"
   },
   "guestbook": {
     "title": "留言板",
