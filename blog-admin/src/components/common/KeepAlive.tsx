@@ -1,89 +1,114 @@
-import { useEffect, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
 
 interface KeepAliveProps {
   children: React.ReactNode
   cacheKey: string
   maxCache?: number
+  shouldCache?: boolean
 }
 
-const cacheMap = new Map<string, { element: React.ReactNode; scrollTop: number }>()
+// 全局缓存 Map
+const cacheComponents = new Map<string, React.ReactNode>()
+const activeCacheKeys = new Set<string>()
 const MAX_CACHE = 10
 
-export const KeepAlive: React.FC<KeepAliveProps> = ({ children, cacheKey, maxCache = MAX_CACHE }) => {
-  const location = useLocation()
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [cacheKeyState, setCacheKeyState] = useState(cacheKey)
+export const KeepAlive: React.FC<KeepAliveProps> = ({ 
+  children, 
+  cacheKey, 
+  maxCache = MAX_CACHE,
+  shouldCache = true 
+}) => {
+  const [, forceUpdate] = useState({})
+
+  console.log('🎯 KeepAlive Render:', {
+    cacheKey,
+    shouldCache,
+    hasCached: cacheComponents.has(cacheKey),
+    cacheSize: cacheComponents.size,
+    activeCacheKeys: Array.from(activeCacheKeys),
+    allCacheKeys: Array.from(cacheComponents.keys())
+  })
+
+  // 如果不需要缓存，直接渲染
+  if (!shouldCache) {
+    return <div style={{ height: '100%' }}>{children}</div>
+  }
+
+  // 添加到活跃缓存
+  activeCacheKeys.add(cacheKey)
 
   useEffect(() => {
-    if (cacheKey !== cacheKeyState) {
-      if (cacheMap.has(cacheKeyState)) {
-        const cache = cacheMap.get(cacheKeyState)!
-        if (containerRef.current) {
-          containerRef.current.scrollTop = cache.scrollTop
-        }
+    // 缓存当前组件
+    if (!cacheComponents.has(cacheKey)) {
+      // 清理超出限制的缓存
+      if (cacheComponents.size >= maxCache) {
+        const keysToDelete = Array.from(cacheComponents.keys()).slice(0, cacheComponents.size - maxCache + 1)
+        keysToDelete.forEach(key => {
+          cacheComponents.delete(key)
+          activeCacheKeys.delete(key)
+        })
       }
-      setCacheKeyState(cacheKey)
-    }
-  }, [cacheKey, cacheKeyState])
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (containerRef.current && cacheMap.has(cacheKeyState)) {
-        const cache = cacheMap.get(cacheKeyState)!
-        cache.scrollTop = containerRef.current.scrollTop
-      }
-    }
-
-    const container = containerRef.current
-    if (container) {
-      container.addEventListener('scroll', handleScroll)
-      return () => {
-        container.removeEventListener('scroll', handleScroll)
-      }
-    }
-  }, [cacheKeyState])
-
-  useEffect(() => {
-    if (!cacheMap.has(cacheKey)) {
-      if (cacheMap.size >= maxCache) {
-        const firstKey = cacheMap.keys().next().value
-        cacheMap.delete(firstKey)
-      }
-      cacheMap.set(cacheKey, { element: children, scrollTop: 0 })
+      cacheComponents.set(cacheKey, children)
     } else {
-      const cache = cacheMap.get(cacheKey)!
-      cache.element = children
+      // 更新缓存的组件
+      cacheComponents.set(cacheKey, children)
     }
   }, [children, cacheKey, maxCache])
 
+  // 监听标签页移除事件
   useEffect(() => {
-    const handleRefresh = (event: CustomEvent) => {
+    const handleRemove = (event: CustomEvent) => {
       if (event.detail.key === cacheKey) {
-        cacheMap.delete(cacheKey)
-        setCacheKeyState(cacheKey)
+        cacheComponents.delete(cacheKey)
+        activeCacheKeys.delete(cacheKey)
       }
     }
 
+    const handleRefresh = (event: CustomEvent) => {
+      if (event.detail.key === cacheKey) {
+        cacheComponents.delete(cacheKey)
+        activeCacheKeys.delete(cacheKey)
+        forceUpdate({})
+      }
+    }
+
+    window.addEventListener('tab-remove', handleRemove as EventListener)
     window.addEventListener('tab-refresh', handleRefresh as EventListener)
+    
     return () => {
+      window.removeEventListener('tab-remove', handleRemove as EventListener)
       window.removeEventListener('tab-refresh', handleRefresh as EventListener)
     }
   }, [cacheKey])
 
-  const cache = cacheMap.get(cacheKeyState)
-  const isActive = cacheKeyState === cacheKey
+  // 清理非活跃的缓存键
+  useEffect(() => {
+    return () => {
+      activeCacheKeys.delete(cacheKey)
+    }
+  }, [cacheKey])
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        display: isActive ? 'block' : 'none',
-        height: '100%',
-        overflow: 'auto',
-      }}
-    >
-      {cache?.element || children}
+    <div style={{ height: '100%' }}>
+      {/* 渲染所有缓存的组件，但只显示当前的 */}
+      {Array.from(cacheComponents.entries()).map(([key, component]) => (
+        <div
+          key={key}
+          style={{
+            display: key === cacheKey ? 'block' : 'none',
+            height: '100%',
+          }}
+        >
+          {component}
+        </div>
+      ))}
+      
+      {/* 如果当前组件还没有缓存，直接渲染 */}
+      {!cacheComponents.has(cacheKey) && (
+        <div style={{ height: '100%' }}>
+          {children}
+        </div>
+      )}
     </div>
   )
 }

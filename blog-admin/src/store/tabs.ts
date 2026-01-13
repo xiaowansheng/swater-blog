@@ -49,18 +49,34 @@ export const useTabsStore = create<TabsState>()(
       }
     }
     set({ tabs: newTabs, activeKey: newActiveKey })
+    
+    // 清理 KeepAlive 缓存
+    const event = new CustomEvent('tab-remove', { detail: { key } })
+    window.dispatchEvent(event)
   },
   setActiveTab: (key) => {
     set({ activeKey: key })
   },
   closeOtherTabs: (key) => {
     const { tabs } = get()
+    // 清理其他标签页的缓存
+    tabs.forEach(tab => {
+      if (tab.key !== key) {
+        const event = new CustomEvent('tab-remove', { detail: { key: tab.key } })
+        window.dispatchEvent(event)
+      }
+    })
     const newTabs = tabs.filter((t) => t.key === key)
     set({ tabs: newTabs, activeKey: key })
   },
   closeLeftTabs: (key) => {
     const { tabs, activeKey } = get()
     const index = tabs.findIndex((t) => t.key === key)
+    // 清理左侧标签页的缓存
+    tabs.slice(0, index).forEach(tab => {
+      const event = new CustomEvent('tab-remove', { detail: { key: tab.key } })
+      window.dispatchEvent(event)
+    })
     const newTabs = tabs.slice(index)
     let newActiveKey = activeKey
     if (!newTabs.find((t) => t.key === activeKey)) {
@@ -71,6 +87,11 @@ export const useTabsStore = create<TabsState>()(
   closeRightTabs: (key) => {
     const { tabs, activeKey } = get()
     const index = tabs.findIndex((t) => t.key === key)
+    // 清理右侧标签页的缓存
+    tabs.slice(index + 1).forEach(tab => {
+      const event = new CustomEvent('tab-remove', { detail: { key: tab.key } })
+      window.dispatchEvent(event)
+    })
     const newTabs = tabs.slice(0, index + 1)
     let newActiveKey = activeKey
     if (!newTabs.find((t) => t.key === activeKey)) {
@@ -79,6 +100,12 @@ export const useTabsStore = create<TabsState>()(
     set({ tabs: newTabs, activeKey: newActiveKey })
   },
   closeAllTabs: () => {
+    const { tabs } = get()
+    // 清理所有标签页的缓存
+    tabs.forEach(tab => {
+      const event = new CustomEvent('tab-remove', { detail: { key: tab.key } })
+      window.dispatchEvent(event)
+    })
     set({ tabs: [], activeKey: '' })
   },
   refreshTab: (key) => {

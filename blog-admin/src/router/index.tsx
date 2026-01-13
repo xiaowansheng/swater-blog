@@ -38,16 +38,16 @@ const NotFound = lazy(() => import('@/pages/404'))
 const routeConfig = [
   { path: '/dashboard', component: Dashboard, title: '仪表盘', keepAlive: true },
   { path: '/article', component: ArticleList, title: '文章管理', keepAlive: true },
-  { path: '/article/edit/:id', component: ArticleEdit, title: '编辑文章', keepAlive: false },
-  { path: '/article/create', component: ArticleEdit, title: '创建文章', keepAlive: false },
+  { path: '/article/edit/:id', component: ArticleEdit, title: '编辑文章', keepAlive: true },
+  { path: '/article/create', component: ArticleEdit, title: '创建文章', keepAlive: true },
   { path: '/category', component: Category, title: '分类管理', keepAlive: true },
   { path: '/tag', component: Tag, title: '标签管理', keepAlive: true },
   { path: '/archive', component: Archive, title: '归档管理', keepAlive: true },
   { path: '/comment', component: Comment, title: '评论管理', keepAlive: true },
   { path: '/talk', component: Talk, title: '说说管理', keepAlive: true },
-  { path: '/talk/edit/:id', component: TalkEdit, title: '编辑说说', keepAlive: false },
-  { path: '/talk/create', component: TalkEdit, title: '发布说说', keepAlive: false },
-  { path: '/talk/detail/:id', component: TalkDetail, title: '说说详情', keepAlive: false },
+  { path: '/talk/edit/:id', component: TalkEdit, title: '编辑说说', keepAlive: true },
+  { path: '/talk/create', component: TalkEdit, title: '发布说说', keepAlive: true },
+  { path: '/talk/detail/:id', component: TalkDetail, title: '说说详情', keepAlive: true },
   { path: '/user', component: User, title: '用户管理', keepAlive: true },
   { path: '/role', component: Role, title: '角色管理', keepAlive: true },
   { path: '/menu', component: Menu, title: '菜单管理', keepAlive: true },
@@ -123,36 +123,7 @@ const Router: React.FC = () => {
     <RouteGuard>
       <Routes>
         <Route path="/login" element={<Suspense fallback={<PageLoading />}><Login /></Suspense>} />
-        <Route path="/" element={<BasicLayout />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<Suspense fallback={<PageLoading />}><Dashboard /></Suspense>} />
-          <Route path="article" element={<Suspense fallback={<PageLoading />}><ArticleList /></Suspense>} />
-          <Route path="article/edit/:id" element={<Suspense fallback={<PageLoading />}><ArticleEdit /></Suspense>} />
-          <Route path="article/create" element={<Suspense fallback={<PageLoading />}><ArticleEdit /></Suspense>} />
-          <Route path="category" element={<Suspense fallback={<PageLoading />}><Category /></Suspense>} />
-          <Route path="tag" element={<Suspense fallback={<PageLoading />}><Tag /></Suspense>} />
-          <Route path="archive" element={<Suspense fallback={<PageLoading />}><Archive /></Suspense>} />
-          <Route path="comment" element={<Suspense fallback={<PageLoading />}><Comment /></Suspense>} />
-          <Route path="talk" element={<Suspense fallback={<PageLoading />}><Talk /></Suspense>} />
-          <Route path="talk/edit/:id" element={<Suspense fallback={<PageLoading />}><TalkEdit /></Suspense>} />
-          <Route path="talk/create" element={<Suspense fallback={<PageLoading />}><TalkEdit /></Suspense>} />
-          <Route path="talk/detail/:id" element={<Suspense fallback={<PageLoading />}><TalkDetail /></Suspense>} />
-          <Route path="user" element={<Suspense fallback={<PageLoading />}><User /></Suspense>} />
-          <Route path="role" element={<Suspense fallback={<PageLoading />}><Role /></Suspense>} />
-          <Route path="menu" element={<Suspense fallback={<PageLoading />}><Menu /></Suspense>} />
-          <Route path="resource" element={<Suspense fallback={<PageLoading />}><Resource /></Suspense>} />
-          <Route path="config" element={<Suspense fallback={<PageLoading />}><Config /></Suspense>} />
-          <Route path="file" element={<Suspense fallback={<PageLoading />}><File /></Suspense>} />
-          <Route path="visitor" element={<Suspense fallback={<PageLoading />}><Visitor /></Suspense>} />
-          <Route path="log/operation" element={<Suspense fallback={<PageLoading />}><LogOperation /></Suspense>} />
-          <Route path="log/error" element={<Suspense fallback={<PageLoading />}><LogError /></Suspense>} />
-          <Route path="friend-link" element={<Suspense fallback={<PageLoading />}><FriendLink /></Suspense>} />
-          <Route path="notification" element={<Suspense fallback={<PageLoading />}><Notification /></Suspense>} />
-          <Route path="album" element={<Suspense fallback={<PageLoading />}><Album /></Suspense>} />
-          <Route path="guestbook" element={<Suspense fallback={<PageLoading />}><Guestbook /></Suspense>} />
-          <Route path="about" element={<Suspense fallback={<PageLoading />}><About /></Suspense>} />
-          <Route path="*" element={<Suspense fallback={<PageLoading />}><NotFound /></Suspense>} />
-        </Route>
+        <Route path="/*" element={<BasicLayout />} />
       </Routes>
     </RouteGuard>
   )
