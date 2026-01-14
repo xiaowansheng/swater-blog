@@ -16,6 +16,7 @@ import com.blog.modules.system.role.service.RoleService;
 import com.blog.shared.util.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -31,6 +32,9 @@ import java.util.List;
 @Configuration
 public class SaTokenConfig implements WebMvcConfigurer {
 
+    @Value("${server.servlet.context-path:}")
+    private String contextPath;
+
     @Autowired
     private UserMapper userMapper;
 
@@ -45,8 +49,12 @@ public class SaTokenConfig implements WebMvcConfigurer {
         // SaToken 登录拦截器 - 负责用户认证和设置用户上下文
         registry.addInterceptor(new SaInterceptor(handler -> {
             // 登录校验 -- 拦截所有 admin 接口和需要认证的auth接口
-            SaRouter.match("/api/admin/**", "/api/auth/current", "/api/auth/userinfo", "/api/auth/refresh")
-                    .check(r -> {
+            SaRouter.match(
+                     "/admin/**",
+                     "/auth/current",
+                     "/auth/userinfo",
+                     "/auth/refresh"
+                ).check(r -> {
                         // 放行 OPTIONS 请求（CORS 预检请求）
                         if (HttpMethod.OPTIONS.matches(SaHolder.getRequest().getMethod())) {
                             return;
@@ -86,9 +94,10 @@ public class SaTokenConfig implements WebMvcConfigurer {
           .order(1); // 设置拦截器顺序，先执行
 
         // API权限拦截器 - 负责接口权限验证
+        // 注意：addPathPatterns 和 excludePathPatterns 中的路径也不需要contextPath前缀
         registry.addInterceptor(apiPermissionInterceptor)
-                .addPathPatterns("/api/**")
-                .excludePathPatterns("/api/auth/**")
+                .addPathPatterns("/**")
+                .excludePathPatterns("/auth/**")
                 .order(2); // 在登录拦截器之后执行
     }
 

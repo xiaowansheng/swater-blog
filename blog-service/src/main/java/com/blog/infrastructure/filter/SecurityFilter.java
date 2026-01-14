@@ -23,18 +23,18 @@ import java.util.Map;
  */
 @Component
 public class SecurityFilter implements Filter {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(SecurityFilter.class);
     
     @Autowired
     private SqlInjectionProtector sqlInjectionProtector;
-    
+
     @Autowired
     private ObjectMapper objectMapper;
-    
-    // 需要跳过安全检查的路径
-    private static final String[] SKIP_PATHS = {
-        "/actuator/", "/swagger-", "/v3/api-docs", "/favicon.ico", "/api/uploads/"
+
+    // 需要跳过安全检查的路径（基础路径，不包含context-path）
+    private static final String[] SKIP_PATHS_BASE = {
+        "/actuator/", "/swagger-", "/v3/api-docs", "/favicon.ico", "/uploads/"
     };
     
     // 标准HTTP请求头（这些请求头通常包含安全的值）
@@ -67,7 +67,7 @@ public class SecurityFilter implements Filter {
         }
         
         // 跳过特定路径
-        if (shouldSkipSecurity(requestUri)) {
+        if (shouldSkipSecurity(requestUri, httpRequest.getContextPath())) {
             chain.doFilter(request, response);
             return;
         }
@@ -112,10 +112,18 @@ public class SecurityFilter implements Filter {
     /**
      * 检查是否需要跳过安全检查
      */
-    private boolean shouldSkipSecurity(String requestUri) {
-        for (String skipPath : SKIP_PATHS) {
+    private boolean shouldSkipSecurity(String requestUri, String requestContextPath) {
+        for (String skipPath : SKIP_PATHS_BASE) {
+            // 检查是否匹配基础路径（如 /uploads/）
             if (requestUri.contains(skipPath)) {
                 return true;
+            }
+            // 检查是否匹配完整路径（如 /api/uploads/）
+            if (requestContextPath != null && !requestContextPath.isEmpty()) {
+                String fullPath = requestContextPath + skipPath;
+                if (requestUri.contains(fullPath)) {
+                    return true;
+                }
             }
         }
         return false;

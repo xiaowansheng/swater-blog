@@ -9,6 +9,7 @@ import com.blog.infrastructure.security.RateLimitManager;
 import com.blog.infrastructure.security.SqlInjectionProtector;
 import com.blog.shared.util.IpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -20,7 +21,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("security-test")
 public class SecurityTestController {
-    
+
+    @Value("${server.servlet.context-path:}")
+    private String contextPath;
+
     @Autowired
     private RateLimitManager rateLimitManager;
     
@@ -133,8 +137,8 @@ public class SecurityTestController {
         RateLimitManager.RateLimitResult ipResult = 
             rateLimitManager.ipRateLimit(ip, 60, 100);
         
-        RateLimitManager.RateLimitResult apiResult = 
-            rateLimitManager.apiRateLimit("/api/security-test/rate-limit/status", 60, 50);
+        RateLimitManager.RateLimitResult apiResult =
+            rateLimitManager.apiRateLimit(contextPath + "/security-test/rate-limit/status", 60, 50);
         
         Map<String, Object> status = new HashMap<>();
         status.put("ip", ip);
