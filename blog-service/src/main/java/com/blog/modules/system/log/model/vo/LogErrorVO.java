@@ -18,21 +18,15 @@ public class LogErrorVO extends com.blog.shared.model.vo.BaseVO {
 
     private String stackTrace;
 
-    private String method;
-
-    private String path;
-
-    private String params;
-
     private String ip;
 
     private String version;
 
-    private String requestUrl;
+    private String requestUri;
 
     private String requestMethod;
 
-    private String requestParam;
+    private String requestParams;
 
     private String module;
 

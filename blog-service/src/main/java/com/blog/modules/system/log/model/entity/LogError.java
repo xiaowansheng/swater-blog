@@ -27,24 +27,18 @@ public class LogError extends com.blog.shared.model.entity.BaseEntity {
     @TableField("stack_trace")
     private String stackTrace;
 
-    private String method;
-
-    private String path;
-
-    private String params;
-
     private String ip;
 
     private String version;
 
     @TableField("request_url")
-    private String requestUrl;
+    private String requestUri;
 
     @TableField("request_method")
     private String requestMethod;
 
     @TableField("request_param")
-    private String requestParam;
+    private String requestParams;
 
     private String module;
 
@@ -70,14 +64,11 @@ public class LogError extends com.blog.shared.model.entity.BaseEntity {
     public void setExceptionType(String exceptionType) { this.exceptionType = exceptionType; }
     public void setExceptionMsg(String exceptionMsg) { this.exceptionMsg = exceptionMsg; }
     public void setStackTrace(String stackTrace) { this.stackTrace = stackTrace; }
-    public void setMethod(String method) { this.method = method; }
-    public void setPath(String path) { this.path = path; }
-    public void setParams(String params) { this.params = params; }
     public void setIp(String ip) { this.ip = ip; }
     public void setVersion(String version) { this.version = version; }
-    public void setRequestUrl(String requestUrl) { this.requestUrl = requestUrl; }
+    public void setRequestUri(String requestUri) { this.requestUri = requestUri; }
     public void setRequestMethod(String requestMethod) { this.requestMethod = requestMethod; }
-    public void setRequestParam(String requestParam) { this.requestParam = requestParam; }
+    public void setRequestParams(String requestParams) { this.requestParams = requestParams; }
     public void setModule(String module) { this.module = module; }
     public void setCallingMethod(String callingMethod) { this.callingMethod = callingMethod; }
     public void setErrorName(String errorName) { this.errorName = errorName; }

@@ -14,17 +14,9 @@ public class LogOperationVO extends com.blog.shared.model.vo.BaseVO {
 
     private String operation;
 
-    private String method;
-
-    private String path;
-
-    private String params;
-
-    private String result;
-
     private String ip;
 
-    private Long duration;
+    private Long elapsedTime;
 
     private Integer status;
 
@@ -40,15 +32,13 @@ public class LogOperationVO extends com.blog.shared.model.vo.BaseVO {
 
     private String description;
 
-    private String requestUrl;
+    private String requestUri;
 
     private String requestMethod;
 
-    private String requestParam;
+    private String requestParams;
 
     private String responseData;
-
-    private Long elapsedTime;
 
     private String device;
 

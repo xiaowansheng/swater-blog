@@ -73,6 +73,16 @@ const LogErrorPage: React.FC = () => {
       ellipsis: true,
     },
     {
+      title: '错误名',
+      dataIndex: 'errorName',
+      key: 'errorName',
+      width: 150,
+      ellipsis: true,
+      render: (name: string) => (
+        <span className="text-orange-500 font-medium">{name || '-'}</span>
+      ),
+    },
+    {
       title: '错误信息',
       dataIndex: 'errorMessage',
       key: 'errorMessage',
@@ -86,7 +96,12 @@ const LogErrorPage: React.FC = () => {
       dataIndex: 'username',
       key: 'username',
       width: 100,
-      render: (name: string) => name || '-',
+      render: (name: string) => {
+        if (name === 'visitor') {
+          return <Tag color="default">访客</Tag>
+        }
+        return name || '-'
+      },
     },
     {
       title: 'IP地址',
@@ -104,14 +119,18 @@ const LogErrorPage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 80,
+      fixed: 'right',
+      align: 'center',
       render: (_: any, record: LogError) => (
-        <Button
-          type="text"
-          icon={<EyeOutlined />}
-          onClick={() => showDetail(record)}
-        >
-          详情
-        </Button>
+        <div style={{ textAlign: 'center' }}>
+          <Button
+            type="link"
+            icon={<EyeOutlined />}
+            onClick={() => showDetail(record)}
+          >
+            详情
+          </Button>
+        </div>
       ),
     },
   ]
@@ -168,8 +187,16 @@ const LogErrorPage: React.FC = () => {
         width={800}
       >
         {selectedLog && (
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
             <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-gray-500 text-sm">日志ID</label>
+                <p className="font-medium">{selectedLog.id}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">请求模块</label>
+                <p className="font-medium">{selectedLog.module || '-'}</p>
+              </div>
               <div>
                 <label className="text-gray-500 text-sm">请求方法</label>
                 <p className="font-medium">{selectedLog.requestMethod}</p>
@@ -180,11 +207,33 @@ const LogErrorPage: React.FC = () => {
               </div>
               <div>
                 <label className="text-gray-500 text-sm">操作人</label>
-                <p className="font-medium">{selectedLog.username || '-'}</p>
+                <p className="font-medium">
+                  {selectedLog.username === 'visitor' ? '访客' : (selectedLog.username || '-')}
+                </p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">用户ID</label>
+                <p className="font-medium">{selectedLog.userId || '-'}</p>
               </div>
               <div>
                 <label className="text-gray-500 text-sm">IP地址</label>
                 <p className="font-medium">{selectedLog.ip}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">IP归属地</label>
+                <p className="font-medium">{selectedLog.ipSource || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">设备</label>
+                <p className="font-medium">{selectedLog.device || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">浏览器</label>
+                <p className="font-medium">{selectedLog.browser || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">版本</label>
+                <p className="font-medium">{selectedLog.version || '-'}</p>
               </div>
               <div>
                 <label className="text-gray-500 text-sm">发生时间</label>
@@ -192,10 +241,28 @@ const LogErrorPage: React.FC = () => {
               </div>
             </div>
             <div>
+              <label className="text-gray-500 text-sm">调用方法</label>
+              <p className="font-medium break-all text-sm">{selectedLog.callingMethod || '-'}</p>
+            </div>
+            <div>
+              <label className="text-gray-500 text-sm">异常类型</label>
+              <p className="font-medium break-all text-sm">{selectedLog.exceptionType || '-'}</p>
+            </div>
+            <div>
+              <label className="text-gray-500 text-sm">错误名</label>
+              <p className="font-medium text-orange-500">{selectedLog.errorName || '-'}</p>
+            </div>
+            <div>
               <label className="text-gray-500 text-sm">请求参数</label>
-              <pre className="bg-gray-50 p-3 rounded text-sm overflow-auto max-h-32">
-                {selectedLog.requestParams || '无'}
+              <pre className="bg-gray-50 p-3 rounded text-sm overflow-auto max-h-64">
+                {selectedLog.requestParams
+                  ? JSON.stringify(JSON.parse(selectedLog.requestParams), null, 2)
+                  : '无'}
               </pre>
+            </div>
+            <div>
+              <label className="text-gray-500 text-sm">异常信息</label>
+              <p className="text-red-500 font-medium">{selectedLog.exceptionMsg || '-'}</p>
             </div>
             <div>
               <label className="text-gray-500 text-sm">错误信息</label>
@@ -203,7 +270,7 @@ const LogErrorPage: React.FC = () => {
             </div>
             <div>
               <label className="text-gray-500 text-sm">堆栈信息</label>
-              <pre className="bg-gray-900 text-green-400 p-3 rounded text-xs overflow-auto max-h-64">
+              <pre className="bg-gray-900 text-green-400 p-3 rounded text-xs overflow-auto max-h-96">
                 {selectedLog.stackTrace || '无堆栈信息'}
               </pre>
             </div>

@@ -280,34 +280,49 @@ export interface VisitorStatistics {
 export interface LogOperation {
   id: number
   module: string
+  type?: string
   operation: string
-  method: string
+  description?: string
   requestUri: string
   requestMethod: string
   requestParams?: string
-  responseResult?: string
+  responseData?: string
   userId?: number
   username?: string
   ip: string
-  location?: string
+  ipSource?: string
+  device?: string
+  browser?: string
   userAgent?: string
-  executionTime: number
+  elapsedTime: number
   status: number
+  callingMethod?: string
+  version?: string
+  errorMsg?: string
   errorMessage?: string
   createTime: string
 }
 
 export interface LogError {
   id: number
+  module?: string
   requestUri: string
   requestMethod: string
   requestParams?: string
   userId?: number
   username?: string
   ip: string
+  ipSource?: string
+  device?: string
+  browser?: string
   userAgent?: string
+  exceptionType?: string
+  exceptionMsg?: string
+  errorName?: string
+  callingMethod?: string
   errorMessage: string
   stackTrace?: string
+  version?: string
   createTime: string
 }
 

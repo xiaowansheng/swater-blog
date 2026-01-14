@@ -88,34 +88,35 @@ public class LogAspect {
                 }
             }
 
+            // 如果没有用户名，设置为 visitor
+            if (username == null || username.isEmpty()) {
+                username = "visitor";
+            }
+
             // 构建操作日志对象
-            logOperation = buildLogOperation(point, apiOperation, request, userId, username, ip, startTime);
+            logOperation = buildLogOperation(point, apiOperation, request, userId, username, ip);
 
             // 执行目标方法
             Object result = point.proceed();
 
             // 计算执行时间
             long endTime = System.currentTimeMillis();
-            long duration = endTime - startTime;
+            long elapsedTime = endTime - startTime;
 
             // 更新操作日志（成功）
-            logOperation.setDuration(duration);
-            logOperation.setElapsedTime(duration);
+            logOperation.setElapsedTime(elapsedTime);
             logOperation.setStatus(1); // 1-成功
             if (result != null) {
                 try {
                     // 限制响应数据长度，避免数据过大
                     String responseData = JsonUtil.toJson(result);
-                    if (responseData != null && responseData.length() > 5000) {
-                        responseData = responseData.substring(0, 5000) + "...";
+                    if (responseData != null && responseData.length() > 10000) {
+                        responseData = responseData.substring(0, 10000) + "...";
                     }
                     logOperation.setResponseData(responseData);
-                    logOperation.setResult("SUCCESS");
                 } catch (Exception e) {
-                    logOperation.setResult("SUCCESS");
+                    log.warn("序列化响应数据失败", e);
                 }
-            } else {
-                logOperation.setResult("SUCCESS");
             }
 
             // 异步保存操作日志
@@ -125,24 +126,22 @@ public class LogAspect {
                 log.error("保存操作日志失败", e);
             }
 
-            log.info("操作日志: 用户={}, 操作={}, 耗时={}ms", username, apiOperation.name(), duration);
+            log.info("操作日志: 用户={}, 操作={}, 耗时={}ms", username, apiOperation.name(), elapsedTime);
             return result;
 
         } catch (Exception e) {
             // 计算执行时间
             long endTime = System.currentTimeMillis();
-            long duration = endTime - startTime;
+            long elapsedTime = endTime - startTime;
 
             // 构建异常日志
-            LogError logError = buildLogError(point, apiOperation, request, userId, username, ip, e, duration);
+            LogError logError = buildLogError(point, apiOperation, request, userId, username, ip, e, elapsedTime);
 
             // 更新操作日志（失败）
             if (logOperation != null) {
-                logOperation.setDuration(duration);
-                logOperation.setElapsedTime(duration);
+                logOperation.setElapsedTime(elapsedTime);
                 logOperation.setStatus(0); // 0-失败
                 logOperation.setErrorMsg(e.getMessage());
-                logOperation.setResult("FAILED");
 
                 // 异步保存操作日志
                 try {
@@ -162,7 +161,7 @@ public class LogAspect {
             }
 
             log.error("异常日志: 用户={}, 操作={}, 耗时={}ms, 异常={}",
-                    username, apiOperation.name(), duration, e.getMessage(), e);
+                    username, apiOperation.name(), elapsedTime, e.getMessage(), e);
 
             // 重新抛出异常
             throw e;
@@ -174,7 +173,7 @@ public class LogAspect {
      */
     private LogOperation buildLogOperation(ProceedingJoinPoint point, ApiOperation apiOperation,
                                            HttpServletRequest request, Long userId, String username,
-                                           String ip, long startTime) {
+                                           String ip) {
         LogOperation logOperation = new LogOperation();
 
         // 用户信息
@@ -185,20 +184,25 @@ public class LogAspect {
         logOperation.setOperation(apiOperation.name());
         logOperation.setType(apiOperation.type().name());
         logOperation.setDescription(apiOperation.description());
-        logOperation.setModule(apiOperation.name());
-
-        // 请求信息
-        logOperation.setRequestUrl(request.getRequestURI());
-        logOperation.setRequestMethod(request.getMethod());
-        logOperation.setPath(request.getRequestURI());
-        logOperation.setIp(ip);
 
         // 方法信息
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
+        Class<?> targetClass = method.getDeclaringClass();
 
-        // method 存储 HTTP 方法（GET/POST/PUT/DELETE）
-        logOperation.setMethod(request.getMethod());
+        // 从类上的 @ApiOperation 注解获取模块信息
+        com.blog.shared.annotation.ApiOperation classAnnotation =
+            targetClass.getAnnotation(com.blog.shared.annotation.ApiOperation.class);
+        if (classAnnotation != null) {
+            logOperation.setModule(classAnnotation.name());
+        } else {
+            logOperation.setModule(targetClass.getSimpleName());
+        }
+
+        // 请求信息
+        logOperation.setRequestUri(request.getRequestURI());
+        logOperation.setRequestMethod(request.getMethod());
+        logOperation.setIp(ip);
 
         // calling_method 存储完整的 Java 方法签名（包名 + 类名 + 方法名）
         String fullMethod = method.getDeclaringClass().getName() + "." + method.getName();
@@ -210,11 +214,10 @@ public class LogAspect {
             if (args != null && args.length > 0) {
                 String params = JsonUtil.toJson(args);
                 // 限制参数长度，避免数据过大
-                if (params != null && params.length() > 2000) {
-                    params = params.substring(0, 2000) + "...";
+                if (params != null && params.length() > 10000) {
+                    params = params.substring(0, 10000) + "...";
                 }
-                logOperation.setRequestParam(params);
-                logOperation.setParams(params);
+                logOperation.setRequestParams(params);
             }
         } catch (Exception e) {
             log.warn("序列化请求参数失败", e);
@@ -228,7 +231,7 @@ public class LogAspect {
      */
     private LogError buildLogError(ProceedingJoinPoint point, ApiOperation apiOperation,
                                    HttpServletRequest request, Long userId, String username,
-                                   String ip, Exception e, long duration) {
+                                   String ip, Exception e, long elapsedTime) {
         LogError logError = new LogError();
 
         // 用户信息
@@ -252,21 +255,24 @@ public class LogAspect {
         }
         logError.setStackTrace(stackTrace);
 
-        // 操作信息
-        logError.setModule(apiOperation.name());
-
-        // 请求信息
-        logError.setRequestUrl(request.getRequestURI());
-        logError.setRequestMethod(request.getMethod());
-        logError.setPath(request.getRequestURI());
-        logError.setIp(ip);
-
         // 方法信息
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
+        Class<?> targetClass = method.getDeclaringClass();
 
-        // method 存储 HTTP 方法（GET/POST/PUT/DELETE）
-        logError.setMethod(request.getMethod());
+        // 从类上的 @ApiOperation 注解获取模块信息
+        com.blog.shared.annotation.ApiOperation classAnnotation =
+            targetClass.getAnnotation(com.blog.shared.annotation.ApiOperation.class);
+        if (classAnnotation != null) {
+            logError.setModule(classAnnotation.name());
+        } else {
+            logError.setModule(targetClass.getSimpleName());
+        }
+
+        // 请求信息
+        logError.setRequestUri(request.getRequestURI());
+        logError.setRequestMethod(request.getMethod());
+        logError.setIp(ip);
 
         // calling_method 存储完整的 Java 方法签名（包名 + 类名 + 方法名）
         String fullMethod = method.getDeclaringClass().getName() + "." + method.getName();
@@ -285,8 +291,7 @@ public class LogAspect {
                 if (params != null && params.length() > 2000) {
                     params = params.substring(0, 2000) + "...";
                 }
-                logError.setRequestParam(params);
-                logError.setParams(params);
+                logError.setRequestParams(params);
             }
         } catch (Exception ex) {
             log.warn("序列化请求参数失败", ex);

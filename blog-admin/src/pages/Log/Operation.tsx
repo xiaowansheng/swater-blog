@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Table, Tag, Input, Select, Button, DatePicker, Space } from 'antd'
-import { SearchOutlined, ReloadOutlined } from '@ant-design/icons'
+import { Table, Tag, Input, Select, Button, DatePicker, Space, Modal } from 'antd'
+import { SearchOutlined, ReloadOutlined, EyeOutlined } from '@ant-design/icons'
 import { getOperationLogList } from '@/api/log'
 import { LogOperation } from '@/types'
+import { formatDate } from '@/utils/format'
 
 const { RangePicker } = DatePicker
 
@@ -11,6 +12,8 @@ const LogOperationPage: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
   const [filters, setFilters] = useState<{ module?: string; keyword?: string }>({})
+  const [detailVisible, setDetailVisible] = useState(false)
+  const [selectedLog, setSelectedLog] = useState<LogOperation | null>(null)
 
   useEffect(() => {
     loadLogs()
@@ -44,6 +47,11 @@ const LogOperationPage: React.FC = () => {
     loadLogs()
   }
 
+  const showDetail = (log: LogOperation) => {
+    setSelectedLog(log)
+    setDetailVisible(true)
+  }
+
   const columns = [
     {
       title: '操作模块',
@@ -51,6 +59,23 @@ const LogOperationPage: React.FC = () => {
       key: 'module',
       width: 120,
       render: (module: string) => <Tag color="blue">{module}</Tag>,
+    },
+    {
+      title: '操作类型',
+      dataIndex: 'type',
+      key: 'type',
+      width: 100,
+      render: (type: string) => {
+        const colorMap: Record<string, string> = {
+          '新增': 'green',
+          '修改': 'blue',
+          '删除': 'red',
+          '查询': 'default',
+          '导出': 'orange',
+          '导入': 'purple',
+        }
+        return <Tag color={colorMap[type] || 'default'}>{type || '-'}</Tag>
+      },
     },
     {
       title: '操作描述',
@@ -84,6 +109,12 @@ const LogOperationPage: React.FC = () => {
       dataIndex: 'username',
       key: 'username',
       width: 100,
+      render: (name: string) => {
+        if (name === 'visitor') {
+          return <Tag color="default">访客</Tag>
+        }
+        return name || '-'
+      },
     },
     {
       title: 'IP地址',
@@ -100,8 +131,8 @@ const LogOperationPage: React.FC = () => {
     },
     {
       title: '耗时',
-      dataIndex: 'executionTime',
-      key: 'executionTime',
+      dataIndex: 'elapsedTime',
+      key: 'elapsedTime',
       width: 100,
       render: (time: number) => (
         <span className={time > 1000 ? 'text-red-500' : time > 500 ? 'text-orange-500' : 'text-green-500'}>
@@ -125,6 +156,24 @@ const LogOperationPage: React.FC = () => {
       dataIndex: 'createTime',
       key: 'createTime',
       width: 160,
+    },
+    {
+      title: '操作',
+      key: 'action',
+      width: 80,
+      fixed: 'right',
+      align: 'center',
+      render: (_: any, record: LogOperation) => (
+        <div style={{ textAlign: 'center' }}>
+          <Button
+            type="link"
+            icon={<EyeOutlined />}
+            onClick={() => showDetail(record)}
+          >
+            详情
+          </Button>
+        </div>
+      ),
     },
   ]
 
@@ -182,6 +231,124 @@ const LogOperationPage: React.FC = () => {
           }}
         />
       </div>
+
+      {/* 详情弹窗 */}
+      <Modal
+        title="操作详情"
+        open={detailVisible}
+        onCancel={() => setDetailVisible(false)}
+        footer={null}
+        width={800}
+      >
+        {selectedLog && (
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-gray-500 text-sm">日志ID</label>
+                <p className="font-medium">{selectedLog.id}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">操作模块</label>
+                <p className="font-medium">{selectedLog.module || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">操作类型</label>
+                <p className="font-medium">{selectedLog.type || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">操作描述</label>
+                <p className="font-medium">{selectedLog.operation || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">详细描述</label>
+                <p className="font-medium">{selectedLog.description || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">请求方法</label>
+                <p className="font-medium">{selectedLog.requestMethod || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">请求路径</label>
+                <p className="font-medium break-all">{selectedLog.requestUri || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">操作人</label>
+                <p className="font-medium">
+                  {selectedLog.username === 'visitor' ? '访客' : (selectedLog.username || '-')}
+                </p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">用户ID</label>
+                <p className="font-medium">{selectedLog.userId || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">IP地址</label>
+                <p className="font-medium">{selectedLog.ip || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">IP归属地</label>
+                <p className="font-medium">{selectedLog.ipSource || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">设备</label>
+                <p className="font-medium">{selectedLog.device || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">浏览器</label>
+                <p className="font-medium">{selectedLog.browser || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">耗时</label>
+                <p className="font-medium">{selectedLog.elapsedTime || 0}ms</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">状态</label>
+                <p className="font-medium">
+                  {selectedLog.status === 1 ? (
+                    <Tag color="success">成功</Tag>
+                  ) : (
+                    <Tag color="error">失败</Tag>
+                  )}
+                </p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">版本</label>
+                <p className="font-medium">{selectedLog.version || '-'}</p>
+              </div>
+              <div>
+                <label className="text-gray-500 text-sm">操作时间</label>
+                <p className="font-medium">{formatDate(selectedLog.createTime)}</p>
+              </div>
+            </div>
+            <div>
+              <label className="text-gray-500 text-sm">调用方法</label>
+              <p className="font-medium break-all text-sm">{selectedLog.callingMethod || '-'}</p>
+            </div>
+            <div>
+              <label className="text-gray-500 text-sm">请求参数</label>
+              <pre className="bg-gray-50 p-3 rounded text-sm overflow-auto max-h-64">
+                {selectedLog.requestParams
+                  ? JSON.stringify(JSON.parse(selectedLog.requestParams), null, 2)
+                  : '无'}
+              </pre>
+            </div>
+            {selectedLog.responseData && (
+              <div>
+                <label className="text-gray-500 text-sm">响应数据</label>
+                <pre className="bg-gray-50 p-3 rounded text-sm overflow-auto max-h-64">
+                  {JSON.stringify(JSON.parse(selectedLog.responseData), null, 2)}
+                </pre>
+              </div>
+            )}
+            {selectedLog.status === 0 && selectedLog.errorMsg && (
+              <div>
+                <label className="text-gray-500 text-sm">错误信息</label>
+                <p className="text-red-500 font-medium">{selectedLog.errorMsg}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }
