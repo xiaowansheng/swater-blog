@@ -118,7 +118,7 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
         return {
           title: api.name,
           key: String(api.id),
-          children: buildTreeData(api.children)
+          children: buildTreeData(api.children || [])
         }
       } else if (isApi) {
         const title = (

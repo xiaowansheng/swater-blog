@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Tooltip } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, SettingOutlined, ApiOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, ApiOutlined } from '@ant-design/icons'
 import { getRoleList, createRole, updateRole, deleteRole } from '@/api/role'
 import { Role } from '@/types'
 import ApiAuthModal from './ApiAuthModal'
