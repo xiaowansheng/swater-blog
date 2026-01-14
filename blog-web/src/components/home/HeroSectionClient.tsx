@@ -102,9 +102,11 @@ export default function HeroSectionClient({
             {siteName}
             <span className="absolute -bottom-4 left-1/2 w-32 h-1 bg-gradient-to-r rounded-full opacity-60 -translate-x-1/2 from-primary via-accent to-primary"></span>
           </h1>
-          <p className="mb-8 text-xl leading-relaxed md:text-2xl text-muted animate-fadeIn" style={{ animationDelay: '0.4s' }}>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground via-foreground/90 to-foreground/70">
-              {authorSignature || siteDescription || '分享技术，记录生活'}
+          <p className="mb-8 text-xl leading-relaxed md:text-2xl animate-fadeIn drop-shadow-lg" style={{ animationDelay: '0.4s' }}>
+            <span className="inline-block px-6 py-2 rounded-lg bg-white/10 dark:bg-black/30 backdrop-blur-sm border border-white/20 dark:border-white/10">
+              <span className={fullCoverImage ? "text-white font-medium" : "text-transparent bg-clip-text bg-gradient-to-r from-foreground via-foreground/95 to-foreground/90 font-medium"}>
+                {authorSignature || siteDescription || '分享技术，记录生活'}
+              </span>
             </span>
           </p>
           <div className="flex flex-wrap gap-4 justify-center text-sm text-muted animate-fadeIn" style={{ animationDelay: '0.6s' }}>
