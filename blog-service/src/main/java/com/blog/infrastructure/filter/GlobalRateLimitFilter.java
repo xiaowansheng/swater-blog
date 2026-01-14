@@ -96,8 +96,8 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
             secondResult = rateLimitManager.slidingWindowRateLimit(secondKey, 1, ipPerSecond);
             applySecondHeaders(response, secondResult);
             if (!secondResult.isAllowed()) {
-                log.warn("Rate limit exceeded (per second) - IP: {}, URI: {}, Limit: {}, Current: {}", 
-                         ip, request.getRequestURI(), ipPerSecond, secondResult.getCurrentCount());
+                log.warn("Rate limit exceeded (per second) - IP: {}, URI: {}, Limit: {}, Remaining: {}", 
+                         ip, request.getRequestURI(), ipPerSecond, secondResult.getRemaining());
                 applyStandardHeaders(response, secondResult, ipPerSecond);
                 writeRateLimitResponse(response);
                 return;
@@ -109,8 +109,8 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
             minuteResult = rateLimitManager.slidingWindowRateLimit(minuteKey, 60, ipPerMinute);
             applyMinuteHeaders(response, minuteResult);
             if (!minuteResult.isAllowed()) {
-                log.warn("Rate limit exceeded (per minute) - IP: {}, URI: {}, Limit: {}, Current: {}", 
-                         ip, request.getRequestURI(), ipPerMinute, minuteResult.getCurrentCount());
+                log.warn("Rate limit exceeded (per minute) - IP: {}, URI: {}, Limit: {}, Remaining: {}", 
+                         ip, request.getRequestURI(), ipPerMinute, minuteResult.getRemaining());
                 applyStandardHeaders(response, minuteResult, ipPerMinute);
                 writeRateLimitResponse(response);
                 return;
