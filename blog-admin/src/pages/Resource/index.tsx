@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, InputNumber, Tag, Tooltip, Select, Switch, TreeSelect } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
-import { getApiList, createApi, updateApi, deleteApi } from '@/api/api'
+import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons'
+import { getApiList, createApi, updateApi, deleteApi, refreshApi } from '@/api/api'
 import { ApiVO } from '@/types/api'
 
 const ApiPage: React.FC = () => {
@@ -76,6 +76,20 @@ const ApiPage: React.FC = () => {
       loadApis()
     } catch (error) {
       console.error('提交失败', error)
+    }
+  }
+
+  const handleRefresh = async () => {
+    setLoading(true)
+    try {
+      await refreshApi()
+      message.success('接口刷新成功')
+      loadApis()
+    } catch (error) {
+      console.error('刷新接口失败', error)
+      message.error('刷新接口失败')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -173,9 +187,14 @@ const ApiPage: React.FC = () => {
     <div className="page-container">
       <div className="search-bar flex justify-between items-center mb-4">
         <h2 className="text-lg font-medium">接口管理</h2>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => handleCreate()}>
-          新建接口
-        </Button>
+        <Space>
+          <Button icon={<ReloadOutlined />} onClick={handleRefresh}>
+            刷新接口
+          </Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => handleCreate()}>
+            新建接口
+          </Button>
+        </Space>
       </div>
 
       <div className="table-container">
