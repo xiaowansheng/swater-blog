@@ -3,30 +3,30 @@ import type { MenuProps } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTabsStore } from '@/store/tabs'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 const Tabs: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { tabs, activeKey, setActiveTab, removeTab, closeOtherTabs, closeLeftTabs, closeRightTabs, closeAllTabs, refreshTab } = useTabsStore()
-  const [contextMenuKey, setContextMenuKey] = useState<string | null>(null)
 
   useEffect(() => {
     setActiveTab(location.pathname)
   }, [location.pathname, setActiveTab])
 
   const getContextMenus = (key: string): MenuProps => {
+    const isDashboard = key === '/dashboard'
     return {
       items: [
         {
           key: 'closeOther',
           label: '关闭其他',
-          disabled: tabs.length <= 1,
+          disabled: tabs.length <= 1 || (tabs.length === 2 && isDashboard),
         },
         {
           key: 'closeLeft',
           label: '关闭左侧',
-          disabled: tabs.indexOf(tabs.find((t) => t.key === key)!) === 0,
+          disabled: isDashboard || tabs.indexOf(tabs.find((t) => t.key === key)!) === 0 || (tabs.indexOf(tabs.find((t) => t.key === key)!) === 1 && tabs[0].key === '/dashboard'),
         },
         {
           key: 'closeRight',
@@ -39,7 +39,7 @@ const Tabs: React.FC = () => {
         {
           key: 'closeAll',
           label: '关闭全部',
-          disabled: tabs.length === 0,
+          disabled: tabs.length === 0 || (tabs.length === 1 && isDashboard),
         },
       ],
       onClick: ({ key: menuKey }) => {
@@ -71,8 +71,7 @@ const Tabs: React.FC = () => {
             navigate('/dashboard')
             break
         }
-        setContextMenuKey(null)
-      },
+      }
     }
   }
 
@@ -85,6 +84,9 @@ const Tabs: React.FC = () => {
     action: 'add' | 'remove'
   ) => {
     if (action === 'remove' && typeof targetKey === 'string') {
+      // 不允许关闭仪表盘标签
+      if (targetKey === '/dashboard') return
+      
       const currentIndex = tabs.findIndex((tab) => tab.key === targetKey)
       removeTab(targetKey)
 
@@ -108,6 +110,13 @@ const Tabs: React.FC = () => {
     return null
   }
 
+  // 确保仪表盘标签始终在第一个位置
+  const sortedTabs = [...tabs].sort((a, b) => {
+    if (a.key === '/dashboard') return -1
+    if (b.key === '/dashboard') return 1
+    return 0
+  })
+
   return (
     <div className="tabs-container">
       <AntTabs
@@ -116,17 +125,12 @@ const Tabs: React.FC = () => {
         activeKey={activeKey}
         onChange={handleChange}
         onEdit={handleEdit}
-        items={tabs.map((tab) => ({
+        items={sortedTabs.map((tab) => ({
           key: tab.key,
           label: (
             <Dropdown
               menu={getContextMenus(tab.key)}
               trigger={['contextMenu']}
-              onOpenChange={(open) => {
-                if (open) {
-                  setContextMenuKey(tab.key)
-                }
-              }}
             >
               <span className="flex items-center gap-2">
                 {tab.label}
@@ -139,7 +143,7 @@ const Tabs: React.FC = () => {
               </span>
             </Dropdown>
           ),
-          closable: tab.closable !== false && tabs.length > 1,
+          closable: tab.closable !== false,
         }))}
         size="small"
         tabBarStyle={{
