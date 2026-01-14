@@ -25,12 +25,13 @@ public class MonitoringAspect {
     /**
      * 监控所有Service层的查询方法
      */
-    @Around("execution(* com.blog.service..*Query*.*(..))")
+    @Around("execution(* com.blog.modules..*.service..*Query*.*(..))")
     public Object monitorQueryMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         Instant start = Instant.now();
         Timer.Sample sample = blogMetrics.startTimer();
 
         try {
+
             Object result = joinPoint.proceed();
 
             // 记录查询耗时
@@ -56,7 +57,7 @@ public class MonitoringAspect {
     /**
      * 监控所有Mapper层的数据库操作
      */
-    @Around("execution(* com.blog.mapper..*(..))")
+    @Around("execution(* com.blog.modules..*.mapper..*(..))")
     public Object monitorMapperMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         Instant start = Instant.now();
 
@@ -102,7 +103,7 @@ public class MonitoringAspect {
     /**
      * 监控Controller层的HTTP请求
      */
-    @Around("execution(* com.blog.controller..*(..))")
+    @Around("execution(* com.blog.modules..*.controller..*(..)) || execution(* com.blog.ops.controller..*(..))")
     public Object monitorControllerMethods(ProceedingJoinPoint joinPoint) throws Throwable {
         Instant start = Instant.now();
 
