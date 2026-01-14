@@ -5,6 +5,7 @@ import com.blog.shared.annotation.ApiOperation;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.shared.Result;
 import com.blog.modules.system.api.model.dto.ApiDTO;
+import com.blog.modules.system.api.model.vo.ApiRefreshResultVO;
 import com.blog.modules.system.api.model.vo.ApiVO;
 import com.blog.modules.system.api.service.ApiResourceService;
 import jakarta.validation.Valid;
@@ -85,8 +86,8 @@ public class ApiResourceController {
      */
     @PostMapping("/refresh")
     @ApiOperation(name = "刷新接口资源", type = ApiOperationType.OTHER, description = "自动扫描并刷新系统中的接口资源")
-    public Result<Void> refresh() {
-        apiResourceService.refresh();
-        return Result.success();
+    public Result<ApiRefreshResultVO> refresh() {
+        ApiRefreshResultVO result = apiResourceService.refresh();
+        return Result.success(result);
     }
 }

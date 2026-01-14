@@ -25,3 +25,13 @@ export interface ApiDTO {
   perms?: string
   sort?: number
 }
+
+export interface ApiRefreshResultVO {
+  createdModules: number
+  updatedModules: number
+  createdApis: number
+  updatedApis: number
+  total: number
+  executionTime: number
+  message: string
+}

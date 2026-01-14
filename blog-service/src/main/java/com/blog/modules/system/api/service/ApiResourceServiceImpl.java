@@ -6,6 +6,7 @@ import com.blog.infrastructure.cache.ApiResourceCache;
 import com.blog.modules.system.api.mapper.SysApiMapper;
 import com.blog.modules.system.api.model.dto.ApiDTO;
 import com.blog.modules.system.api.model.entity.SysApi;
+import com.blog.modules.system.api.model.vo.ApiRefreshResultVO;
 import com.blog.modules.system.api.model.vo.ApiVO;
 import com.blog.shared.exception.BusinessException;
 import com.blog.shared.util.ApiResourceScanner;
@@ -141,31 +142,67 @@ public class ApiResourceServiceImpl implements ApiResourceService {
 
     @Override
     @Transactional
-    public void refresh() {
+    public ApiRefreshResultVO refresh() {
+        long startTime = System.currentTimeMillis();
+
+        // 统计计数器
+        int createdModules = 0;
+        int updatedModules = 0;
+        int createdApis = 0;
+        int updatedApis = 0;
+
         // 获取树形结构的模块列表
         List<ApiResourceScanner.ModuleNode> modules = apiResourceScanner.scanApiResources();
 
         // 遍历每个模块及其子接口
         for (ApiResourceScanner.ModuleNode moduleNode : modules) {
-            // 第一步：处理模块（插入或更新），获取模块ID
-            Long moduleId = processModule(moduleNode);
+            // 第一步：处理模块（插入或更新），获取模块ID和操作类型
+            ProcessResult moduleResult = processModule(moduleNode);
+            if (moduleResult.created) {
+                createdModules++;
+            } else {
+                updatedModules++;
+            }
 
             // 第二步：处理该模块下的所有接口，使用模块ID作为parentId
             if (moduleNode.getApis() != null && !moduleNode.getApis().isEmpty()) {
                 for (ApiResourceScanner.ApiNode apiNode : moduleNode.getApis()) {
-                    processApi(apiNode, moduleId);
+                    ProcessResult apiResult = processApi(apiNode, moduleResult.id);
+                    if (apiResult.created) {
+                        createdApis++;
+                    } else {
+                        updatedApis++;
+                    }
                 }
             }
         }
 
         // 清除缓存，等待下一次访问时重新加载
         apiResourceCache.clear();
+
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
+
+        return new ApiRefreshResultVO(createdModules, updatedModules, createdApis, updatedApis, executionTime);
     }
 
     /**
-     * 处理模块：插入或更新，返回模块ID
+     * 处理结果
      */
-    private Long processModule(ApiResourceScanner.ModuleNode moduleNode) {
+    private static class ProcessResult {
+        Long id;
+        boolean created;
+
+        ProcessResult(Long id, boolean created) {
+            this.id = id;
+            this.created = created;
+        }
+    }
+
+    /**
+     * 处理模块：插入或更新，返回处理结果
+     */
+    private ProcessResult processModule(ApiResourceScanner.ModuleNode moduleNode) {
         LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysApi::getApiKey, moduleNode.getApiKey());
 
@@ -183,7 +220,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
             module.setSort(0);
             module.setParentId(0L); // 模块的parentId设为0
             sysApiMapper.insert(module);
-            return module.getId();
+            return new ProcessResult(module.getId(), true);
         } else {
             // 更新模块
             existingModule.setName(moduleNode.getName());
@@ -193,14 +230,14 @@ public class ApiResourceServiceImpl implements ApiResourceService {
             existingModule.setIsOpen(moduleNode.getIsOpen());
             existingModule.setParentId(0L); // 确保模块的parentId为0
             sysApiMapper.updateById(existingModule);
-            return existingModule.getId();
+            return new ProcessResult(existingModule.getId(), false);
         }
     }
 
     /**
      * 处理接口：插入或更新，使用指定的模块ID作为parentId
      */
-    private void processApi(ApiResourceScanner.ApiNode apiNode, Long parentId) {
+    private ProcessResult processApi(ApiResourceScanner.ApiNode apiNode, Long parentId) {
         LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysApi::getPath, apiNode.getPath());
         wrapper.eq(SysApi::getMethod, apiNode.getMethod());
@@ -219,6 +256,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
             api.setSort(0);
             api.setParentId(parentId); // 直接使用模块ID
             sysApiMapper.insert(api);
+            return new ProcessResult(api.getId(), true);
         } else {
             // 更新接口
             existingApi.setApiKey(apiNode.getApiKey());
@@ -229,6 +267,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
             existingApi.setIsOpen(apiNode.getIsOpen());
             existingApi.setParentId(parentId); // 更新parentId为模块ID
             sysApiMapper.updateById(existingApi);
+            return new ProcessResult(existingApi.getId(), false);
         }
     }
 

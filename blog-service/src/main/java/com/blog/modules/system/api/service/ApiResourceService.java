@@ -2,6 +2,7 @@ package com.blog.modules.system.api.service;
 
 
 import com.blog.modules.system.api.model.dto.ApiDTO;
+import com.blog.modules.system.api.model.vo.ApiRefreshResultVO;
 import com.blog.modules.system.api.model.vo.ApiVO;
 import java.util.List;
 /**
@@ -42,7 +43,8 @@ public interface ApiResourceService {
     /**
      * 刷新接口资源
      * 自动扫描系统中的所有接口并同步到数据库
+     * @return 刷新结果统计信息
      */
-    void refresh();
+    ApiRefreshResultVO refresh();
 }
 

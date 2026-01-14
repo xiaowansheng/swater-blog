@@ -1,5 +1,5 @@
 import request from './request'
-import { ApiVO, ApiDTO } from '@/types/resource'
+import { ApiVO, ApiDTO, ApiRefreshResultVO } from '@/types/api'
 
 export const getApiList = (): Promise<ApiVO[]> => {
   return request.get('/admin/api-resource/tree')
@@ -21,6 +21,6 @@ export const deleteApi = (id: number): Promise<void> => {
   return request.delete(`/admin/api-resource/${id}`)
 }
 
-export const refreshApi = (): Promise<void> => {
+export const refreshApi = (): Promise<ApiRefreshResultVO> => {
   return request.post('/admin/api-resource/refresh')
 }
