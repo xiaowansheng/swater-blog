@@ -118,7 +118,7 @@ public class SecurityFilter implements Filter {
             if (requestUri.contains(skipPath)) {
                 return true;
             }
-            // 检查是否匹配完整路径（如 /api/uploads/）
+            // 检查是否匹配完整路径（如 /uploads/）
             if (requestContextPath != null && !requestContextPath.isEmpty()) {
                 String fullPath = requestContextPath + skipPath;
                 if (requestUri.contains(fullPath)) {

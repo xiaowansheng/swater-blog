@@ -12,7 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/admin/album")
+@RequestMapping("/api/admin/album")
 @ApiOperation(name = "相册管理模块", description = "相册管理接口", open = false)
 public class AlbumController {
     @Autowired

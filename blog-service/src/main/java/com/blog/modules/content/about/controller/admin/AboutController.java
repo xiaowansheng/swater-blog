@@ -11,7 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/admin/about")
+@RequestMapping("/api/admin/about")
 @ApiOperation(name = "关于管理模块", description = "关于页面管理接口", open = false)
 public class AboutController {
     @Autowired

@@ -13,7 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/admin/moment")
+@RequestMapping("/api/admin/moment")
 @ApiOperation(name = "说说管理模块", description = "说说管理接口", open = false)
 public class TalkAdminController {
     @Autowired

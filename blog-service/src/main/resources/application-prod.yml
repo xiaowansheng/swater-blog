@@ -9,10 +9,6 @@ server:
 spring:
   application:
     name: blog-prod
-
-  mvc:
-    servlet:
-      path: /api
   tomcat:
     # 生产环境连接器配置
     threads:

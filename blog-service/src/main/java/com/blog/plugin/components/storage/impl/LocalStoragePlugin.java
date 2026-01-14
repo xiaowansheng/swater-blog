@@ -5,10 +5,12 @@ package com.blog.plugin.components.storage.impl;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
+import com.blog.bootstrap.config.WebMvcConfig;
 import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.storage.StoragePlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -24,14 +26,17 @@ import java.util.UUID;
 @Component
 @ConditionalOnProperty(name = "plugin.storage.active", havingValue = "local", matchIfMissing = true)
 public class LocalStoragePlugin implements StoragePlugin, Plugin {
+
+    @Autowired
+    private WebMvcConfig webMvcConfig;
     
     private static final Logger logger = LoggerFactory.getLogger(LocalStoragePlugin.class);
     
-    @Value("${file.storage.local.path:uploads}")
-    private String uploadDir;
-    
-    @Value("${file.storage.local.url-prefix:}")
-    private String urlPrefix;
+//    @Value("${file.storage.local.path:uploads}")
+//    private String uploadDir;
+//
+//    @Value("${file.storage.local.url-prefix:}")
+//    private String urlPrefix;
     
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
     
@@ -47,7 +52,7 @@ public class LocalStoragePlugin implements StoragePlugin, Plugin {
     
     @Override
     public String upload(MultipartFile file, String filePath) throws Exception {
-        Path uploadPath = Paths.get(uploadDir).toAbsolutePath().resolve(filePath);
+        Path uploadPath = Paths.get(webMvcConfig.getUploadDir()).toAbsolutePath().resolve(filePath);
         logger.info("正在上传文件到本地: {}", uploadPath);
         Files.createDirectories(uploadPath.getParent());
         Files.copy(file.getInputStream(), uploadPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
@@ -56,7 +61,7 @@ public class LocalStoragePlugin implements StoragePlugin, Plugin {
     
     @Override
     public String upload(InputStream inputStream, String filePath, long contentLength, String contentType) throws Exception {
-        Path uploadPath = Paths.get(uploadDir).toAbsolutePath().resolve(filePath);
+        Path uploadPath = Paths.get(webMvcConfig.getUploadDir()).toAbsolutePath().resolve(filePath);
         logger.info("正在上传文件流到本地: {}", uploadPath);
         Files.createDirectories(uploadPath.getParent());
         Files.copy(inputStream, uploadPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
@@ -66,7 +71,7 @@ public class LocalStoragePlugin implements StoragePlugin, Plugin {
     @Override
     public void delete(String filePath) throws Exception {
         if (StrUtil.isNotBlank(filePath)) {
-            Path path = Paths.get(uploadDir).toAbsolutePath().resolve(filePath);
+            Path path = Paths.get(webMvcConfig.getUploadDir()).toAbsolutePath().resolve(filePath);
             Files.deleteIfExists(path);
         }
     }
@@ -77,13 +82,13 @@ public class LocalStoragePlugin implements StoragePlugin, Plugin {
             return null;
         }
         String normalizedPath = filePath.replace("\\", "/");
-        if (StrUtil.isBlank(urlPrefix)) {
+        if (StrUtil.isBlank(webMvcConfig.getUrlPrefix())) {
             return normalizedPath;
         }
         if (!normalizedPath.startsWith("/")) {
             normalizedPath = "/" + normalizedPath;
         }
-        return urlPrefix + normalizedPath;
+        return webMvcConfig.getUrlPrefix() + normalizedPath;
     }
     
     @Override
@@ -107,7 +112,7 @@ public class LocalStoragePlugin implements StoragePlugin, Plugin {
     
     @Override
     public boolean exists(String filePath) throws Exception {
-        Path path = Paths.get(uploadDir).toAbsolutePath().resolve(filePath);
+        Path path = Paths.get(webMvcConfig.getUploadDir()).toAbsolutePath().resolve(filePath);
         return Files.exists(path);
     }
 }

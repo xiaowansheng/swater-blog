@@ -12,7 +12,7 @@ import com.blog.modules.guestbook.service.GuestbookQueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/admin/guestbook")
+@RequestMapping("/api/admin/guestbook")
 @ApiOperation(name = "留言簿管理模块", description = "留言簿管理接口", open = false)
 public class GuestbookAdminController {
     @Autowired

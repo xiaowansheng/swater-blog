@@ -17,11 +17,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private static final Logger logger = LoggerFactory.getLogger(WebMvcConfig.class);
 
+    @Getter
     @Value("${file.storage.local.path:uploads}")
     private String uploadDir;
 
-    @Value("${file.storage.local.url-prefix:/uploads}")
     @Getter
+    @Value("${file.storage.local.url-prefix:/uploads}")
     private String urlPrefix;
 
     @Override

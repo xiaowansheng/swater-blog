@@ -19,7 +19,7 @@ import java.util.Map;
  * 用于测试各种安全功能
  */
 @RestController
-@RequestMapping("/security-test")
+@RequestMapping("/api/security-test")
 public class SecurityTestController {
 
     @Value("${spring.mvc.servlet.path:}")

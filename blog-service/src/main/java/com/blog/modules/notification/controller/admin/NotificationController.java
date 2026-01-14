@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin/notification")
+@RequestMapping("/api/admin/notification")
 @ApiOperation(name = "通知管理模块", description = "通知管理接口", open = false)
 public class NotificationController {
 

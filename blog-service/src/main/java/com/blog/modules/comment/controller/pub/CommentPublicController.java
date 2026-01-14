@@ -12,7 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/public/comment")
+@RequestMapping("/api/public/comment")
 @ApiOperation(name = "评论公开接口", description = "评论相关接口", open = true)
 public class CommentPublicController {
     @Autowired

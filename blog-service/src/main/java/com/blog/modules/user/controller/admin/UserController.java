@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
-@RequestMapping("/admin/user")
+@RequestMapping("/api/admin/user")
 @ApiOperation(name = "用户管理模块", description = "用户的增删改查和权限管理", open = false)
 public class UserController {
     @Autowired

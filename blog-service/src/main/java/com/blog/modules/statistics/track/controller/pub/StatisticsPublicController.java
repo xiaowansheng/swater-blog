@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/public/statistics")
+@RequestMapping("/api/public/statistics")
 @ApiOperation(name = "公开统计", description = "公开统计接口", open = true)
 public class StatisticsPublicController {
 

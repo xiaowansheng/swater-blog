@@ -51,64 +51,54 @@ public class SaTokenConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // SaToken 登录拦截器 - 负责用户认证和设置用户上下文
+        // 直接在 addPathPatterns 中指定需要拦截的路径，避免重复匹配
         registry.addInterceptor(new SaInterceptor(handler -> {
-                    // 登录校验 -- 拦截所有 admin 接口和需要认证的auth接口
-                    SaRouter.match(
-                            "/admin/**",
-                            "/auth/current",
-                            "/auth/userinfo",
-                            "/auth/refresh"
-                    ).check(r -> {
-                        // 放行 OPTIONS 请求（CORS 预检请求）
-                        if (HttpMethod.OPTIONS.matches(SaHolder.getRequest().getMethod())) {
-                            return;
+                    // 放行 OPTIONS 请求（CORS 预检请求）
+                    if (HttpMethod.OPTIONS.matches(SaHolder.getRequest().getMethod())) {
+                        return;
+                    }
+
+                    // 检查登录状态
+                    StpUtil.checkLogin();
+
+                    // 设置用户上下文（每个请求只查一次数据库）
+                    try {
+                        Long userId = StpUtil.getLoginIdAsLong();
+                        User user = userMapper.selectById(userId);
+
+                        if (user == null || user.getDeleted() == 1) {
+                            log.warn("用户不存在或已删除: userId={}", userId);
+                            StpUtil.logout();
+                            throw new com.blog.shared.exception.BusinessException("用户不存在");
                         }
 
-                        // 检查登录状态
-                        StpUtil.checkLogin();
-
-                        // 设置用户上下文（每个请求只查一次数据库）
-                        try {
-                            Long userId = StpUtil.getLoginIdAsLong();
-                            User user = userMapper.selectById(userId);
-
-                            if (user == null || user.getDeleted() == 1) {
-                                log.warn("用户不存在或已删除: userId={}", userId);
-                                StpUtil.logout();
-                                throw new com.blog.shared.exception.BusinessException("用户不存在");
-                            }
-
-                            if (user.getStatus() != null && user.getStatus() == 0) {
-                                log.warn("用户已被禁用: userId={}", userId);
-                                StpUtil.logout();
-                                throw new com.blog.shared.exception.BusinessException("用户已被禁用");
-                            }
-
-                            // 转换为 VO 并设置到上下文
-                            UserVO userVO = convertToVO(user);
-                            UserContext.setCurrentUser(userVO);
-
-                            log.debug("用户上下文已设置: userId={}, role={}", userId, user.getRoleKey());
-                        } catch (Exception e) {
-                            log.error("设置用户上下文失败", e);
-                            throw e;
+                        if (user.getStatus() != null && user.getStatus() == 0) {
+                            log.warn("用户已被禁用: userId={}", userId);
+                            StpUtil.logout();
+                            throw new com.blog.shared.exception.BusinessException("用户已被禁用");
                         }
-                    });
-                })).addPathPatterns("/**")
+
+                        // 转换为 VO 并设置到上下文
+                        UserVO userVO = convertToVO(user);
+                        UserContext.setCurrentUser(userVO);
+
+                        log.debug("用户上下文已设置: userId={}, role={}", userId, user.getRoleKey());
+                    } catch (Exception e) {
+                        log.error("设置用户上下文失败", e);
+                        throw e;
+                    }
+                }))
+                .addPathPatterns(
+                        "/api/admin/**",
+                        "/api/auth/current",
+                        "/api/auth/userinfo",
+                        "/api/auth/refresh"
+                )
                 .order(1); // 设置拦截器顺序，先执行
 
-        // API权限拦截器 - 负责接口权限验证
-        // 注意：拦截器路径是相对于 servlet path 之后的路径
-        // 如果 servlet path 是 /api，则这里的路径不需要包含 /api
-        String uploadsPath = webMvcConfig.getUrlPrefix();
-        // 去除 servlet path 前缀（如果存在）
-        if (servletPath != null && !servletPath.isEmpty() && uploadsPath.startsWith(servletPath)) {
-            uploadsPath = uploadsPath.substring(servletPath.length());
-        }
-        
         registry.addInterceptor(apiPermissionInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns("/auth/**", uploadsPath + "/**")
+                .addPathPatterns("/api/**")
+                .excludePathPatterns("/api/auth/**")
                 .order(2); // 在登录拦截器之后执行
     }
 

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/public/post")
+@RequestMapping("/api/public/post")
 @ApiOperation(name = "文章统计接口（V2）", description = "批量读取文章统计字段（不自增）", open = true)
 public class ArticleStatsPublicController {
     @Autowired

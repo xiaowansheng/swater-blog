@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/statistics")
+@RequestMapping("/api/admin/statistics")
 @ApiOperation(name = "统计", description = "统计后台接口", open = false)
 public class AdminStatisticsController {
     @Autowired

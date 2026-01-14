@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
-@RequestMapping("/admin/role")
+@RequestMapping("/api/admin/role")
 @ApiOperation(name = "角色管理模块", description = "角色管理接口", open = false)
 public class RoleController {
     @Autowired

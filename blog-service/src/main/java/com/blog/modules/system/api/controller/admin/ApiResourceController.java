@@ -20,7 +20,7 @@ import java.util.List;
  * </p>
  */
 @RestController
-@RequestMapping("/admin/api-resource")
+@RequestMapping("/api/admin/api-resource")
 @ApiOperation(name = "接口资源管理模块", description = "接口资源管理接口", open = false)
 public class ApiResourceController {
 

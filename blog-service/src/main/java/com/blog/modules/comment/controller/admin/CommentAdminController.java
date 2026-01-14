@@ -12,7 +12,7 @@ import com.blog.modules.comment.service.CommentQueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/admin/comment")
+@RequestMapping("/api/admin/comment")
 @ApiOperation(name = "评论管理模块", description = "评论管理接口", open = false)
 public class CommentAdminController {
     @Autowired

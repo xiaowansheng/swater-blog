@@ -10,7 +10,7 @@ import com.blog.modules.talk.service.TalkPublicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/public/moment")
+@RequestMapping("/api/public/moment")
 @ApiOperation(name = "说说公开接口", description = "说说相关接口", open = true)
 public class TalkPublicController {
     @Autowired

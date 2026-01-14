@@ -15,7 +15,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 @RestController
-@RequestMapping("/admin/log")
+@RequestMapping("/api/admin/log")
 @ApiOperation(name = "日志管理模块", description = "日志管理接口", open = false)
 public class LogController {
     @Autowired

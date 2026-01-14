@@ -12,7 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/public/guestbook")
+@RequestMapping("/api/public/guestbook")
 @ApiOperation(name = "留言簿公开接口", description = "留言簿相关接口", open = true)
 public class GuestbookPublicController {
     @Autowired

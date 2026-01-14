@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
-@RequestMapping("/admin/tag")
+@RequestMapping("/api/admin/tag")
 @ApiOperation(name = "标签管理模块", description = "标签管理接口", open = false)
 public class TagController {
     @Autowired

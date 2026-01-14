@@ -17,7 +17,7 @@ import java.util.Map;
  * 用于测试监控指标收集
  */
 @RestController
-@RequestMapping("/monitoring")
+@RequestMapping("/api/monitoring")
 @ApiOperation(name = "监控模块", description = "监控测试接口", open = false)
 public class MonitoringController {
 

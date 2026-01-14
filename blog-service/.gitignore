@@ -40,5 +40,5 @@ out/
 .DS_Store
 
 ### Config ###
-config/application.yml
-/config/
+config/
+../uploads/

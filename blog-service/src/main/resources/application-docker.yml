@@ -11,10 +11,6 @@ spring:
     name: blog-docker
   profiles:
     active: docker
-
-  mvc:
-    servlet:
-      path: /
   tomcat:
     # Docker环境连接器配置
     threads:

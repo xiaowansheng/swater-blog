@@ -57,7 +57,7 @@ export function getFullUrl(path: string | undefined): string {
   }
   
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-  const prefix = '/api/uploads'; // 假设 web 端也需要这个前缀，或者根据后端配置
+  const prefix = ''; // 假设 web 端也需要这个前缀，或者根据后端配置
   
   // 标准化路径，确保以 / 开头
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;

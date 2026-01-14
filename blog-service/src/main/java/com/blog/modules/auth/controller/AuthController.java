@@ -25,7 +25,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @ApiOperation(name = "认证模块", description = "用户认证相关接口", open = true)
 @Tag(name = "认证管理", description = "用户认证相关接口，包括登录、登出、token刷新等")
 @ApiDocumentation.PublicApi

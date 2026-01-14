@@ -30,9 +30,6 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
     @Autowired
     private ApiResourceCache apiResourceCache;
 
-    @Value("${spring.mvc.servlet.path:}")
-    private String servletPath;
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 放行 OPTIONS 请求（CORS 预检请求）
@@ -43,11 +40,6 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
         // 获取当前请求的路径和方法
         String requestPath = request.getRequestURI();
         String requestMethod = request.getMethod();
-
-        // 去除 servlet path 前缀，再进行接口匹配
-        if (servletPath != null && !servletPath.isEmpty() && requestPath.startsWith(servletPath)) {
-            requestPath = requestPath.substring(servletPath.length());
-        }
 
         // 执行接口权限验证
         return checkApiPermission(requestPath, requestMethod);

@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
-@RequestMapping("/admin/menu")
+@RequestMapping("/api/admin/menu")
 @ApiOperation(name = "菜单管理模块", description = "菜单管理接口", open = false)
 public class MenuController {
     @Autowired
