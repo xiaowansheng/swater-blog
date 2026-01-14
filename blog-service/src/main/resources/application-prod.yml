@@ -346,6 +346,32 @@ security:
     enabled: true
     default-window: 60
     default-limit: 100
+    ip-per-second: 10
+    ip-per-minute: 600
+    message: "????????????"
+    whitelist:
+      - /favicon.ico
+      - /uploads/**
+      - /static/**
+      - /public/**
+      - /webjars/**
+      - /swagger-ui/**
+      - /swagger-ui.html
+      - /swagger-**
+      - /v3/api-docs/**
+      - /actuator/**
+      - /**/*.css
+      - /**/*.js
+      - /**/*.map
+      - /**/*.png
+      - /**/*.jpg
+      - /**/*.jpeg
+      - /**/*.gif
+      - /**/*.svg
+      - /**/*.ico
+      - /**/*.woff
+      - /**/*.woff2
+      - /**/*.ttf
   sql-injection:
     enabled: true
     log-attacks: true
