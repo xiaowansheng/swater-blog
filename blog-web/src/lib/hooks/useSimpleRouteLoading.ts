@@ -1,51 +1,109 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
+type LoadingListener = (loading: boolean) => void;
+
+let globalLoading = false;
+const listeners = new Set<LoadingListener>();
+let timeoutId: NodeJS.Timeout | undefined;
+let clickListenerAttached = false;
+
+const notify = () => {
+  listeners.forEach((listener) => listener(globalLoading));
+};
+
+const setGlobalLoading = (value: boolean, minDuration = 1000) => {
+  globalLoading = value;
+  notify();
+
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+    timeoutId = undefined;
+  }
+
+  if (value && minDuration > 0) {
+    timeoutId = setTimeout(() => {
+      globalLoading = false;
+      notify();
+      timeoutId = undefined;
+    }, minDuration);
+  }
+};
+
+const shouldStartLoadingFromClick = (event: MouseEvent) => {
+  if (event.defaultPrevented || event.button !== 0) return false;
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
+
+  const target = event.target as Element | null;
+  const anchor = target?.closest('a[href]') as HTMLAnchorElement | null;
+  if (!anchor) return false;
+
+  if (anchor.target && anchor.target !== '_self') return false;
+  if (anchor.hasAttribute('download')) return false;
+
+  const href = anchor.getAttribute('href');
+  if (!href || href.startsWith('#') || href.startsWith('javascript:')) return false;
+
+  try {
+    const url = new URL(href, window.location.href);
+    if (url.origin !== window.location.origin) return false;
+    if (
+      url.pathname === window.location.pathname &&
+      url.search === window.location.search &&
+      url.hash
+    ) {
+      return false;
+    }
+  } catch {
+    return false;
+  }
+
+  return true;
+};
+
+const ensureClickListener = () => {
+  if (clickListenerAttached || typeof window === 'undefined') return;
+  document.addEventListener(
+    'click',
+    (event) => {
+      if (shouldStartLoadingFromClick(event)) {
+        setGlobalLoading(true);
+      }
+    },
+    true
+  );
+  clickListenerAttached = true;
+};
+
 export function useSimpleRouteLoading() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(globalLoading);
   const pathname = usePathname();
   const prevPathnameRef = useRef<string | undefined>(undefined);
-  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
-    // 如果路径发生变化且不是首次加载
-    if (prevPathnameRef.current && prevPathnameRef.current !== pathname) {
-      // 立即显示加载状态
-      setIsLoading(true);
-      
-      // 清除之前的定时器
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      // 设置最小显示时间
-      timeoutRef.current = setTimeout(() => {
-        setIsLoading(false);
-      }, 1000); // 1秒确保能看到
-    }
-
-    // 更新上一次的路径
-    prevPathnameRef.current = pathname;
-
-    // 清理函数
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+    const listener: LoadingListener = (loading) => {
+      setIsLoading(loading);
     };
+
+    listeners.add(listener);
+    ensureClickListener();
+
+    return () => {
+      listeners.delete(listener);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (prevPathnameRef.current && prevPathnameRef.current !== pathname) {
+      setGlobalLoading(true);
+    }
+    prevPathnameRef.current = pathname;
   }, [pathname]);
 
-  // 手动触发加载状态的函数
-  const startLoading = () => {
-    setIsLoading(true);
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+  const startLoading = (minDuration = 1000) => {
+    setGlobalLoading(true, minDuration);
   };
 
   return { isLoading, startLoading };
