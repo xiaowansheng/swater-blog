@@ -190,7 +190,8 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
 
   return (
     <form id="comment-form" onSubmit={handleSubmit} className="mb-12">
-      <div className="bg-gradient-to-br from-pink-50/80 to-purple-50/80 backdrop-blur-sm rounded-3xl p-6 md:p-8 border-2 border-pink-100/50 shadow-lg">
+      <div className="modern-card p-6 md:p-8 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-30"></div>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col md:flex-row gap-4">
             <input
@@ -199,7 +200,7 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
               value={userInfo.nickname}
               onChange={(e) => updateUserInfo({ nickname: e.target.value })}
               placeholder="昵称 *"
-              className="flex-1 px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80"
+              className="flex-1 px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
               maxLength={50}
             />
             <input
@@ -208,7 +209,7 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
               value={userInfo.qq}
               onChange={(e) => updateUserInfo({ qq: e.target.value })}
               placeholder="QQ（可选）"
-              className="flex-1 px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80"
+              className="flex-1 px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
               maxLength={50}
             />
           </div>
@@ -220,22 +221,22 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
               value={userInfo.email}
               onChange={(e) => updateUserInfo({ email: e.target.value })}
               placeholder="邮箱 *"
-              className="flex-1 px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80"
+              className="flex-1 px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
               maxLength={100}
               required
             />
 
             <div className="flex-1">
               {emailVerified ? (
-                <div className="h-full flex items-center justify-between px-4 py-3 rounded-xl border-2 border-green-200 bg-white/80">
-                  <span className="text-sm text-green-700">邮箱已验证</span>
+                <div className="h-full flex items-center justify-between rounded-xl border border-border bg-card/50 px-4 py-3">
+                  <span className="text-sm text-primary/80">邮箱已验证</span>
                   <button
                     type="button"
                     onClick={() => {
                       clearVerifyToken();
                       setEmailVerified(false);
                     }}
-                    className="text-xs text-pink-600 hover:text-pink-700"
+                    className="text-xs text-primary hover:underline"
                   >
                     更换/重新验证
                   </button>
@@ -248,14 +249,14 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
                     value={captcha}
                     onChange={(e) => setCaptcha(e.target.value)}
                     placeholder="邮箱验证码 *"
-                    className="flex-1 px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80"
+                    className="flex-1 px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
                     maxLength={20}
                   />
                   <button
                     type="button"
                     onClick={handleSendEmailCode}
                     disabled={sendingCode || cooldown > 0 || !normalizedEmail}
-                    className="px-4 py-3 bg-gradient-to-r from-pink-400 to-purple-400 text-white rounded-xl hover:from-pink-500 hover:to-purple-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
+                    className="px-4 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm whitespace-nowrap"
                   >
                     {cooldown > 0 ? `${cooldown}s` : sendingCode ? '发送中...' : '发送验证码'}
                   </button>
@@ -270,7 +271,7 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder={t('placeholder') || '写下你的评论...'}
-              className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80 min-h-[120px] resize-none"
+              className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none shadow-sm focus:shadow-md min-h-[120px]"
               maxLength={1000}
             />
           </div>
@@ -292,10 +293,10 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={images.length >= config.maxImages}
-                    className="p-2 rounded-lg hover:bg-pink-50 transition-colors duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 rounded-lg hover:bg-muted/50 transition-colors duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
                     title="添加图片"
                   >
-                    <svg className="w-6 h-6 text-pink-400 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-primary group-hover:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </button>
@@ -305,7 +306,7 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
             <button
               type="submit"
               disabled={submitting}
-              className="px-8 py-3 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 text-white font-medium hover:from-pink-500 hover:to-purple-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-3 rounded-full bg-gradient-to-r from-primary to-accent text-white font-medium hover:shadow-lg hover:shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {submitting ? '提交中...' : '发布评论'}
             </button>

@@ -197,10 +197,10 @@ export default function ReplyForm({
 
   return (
     <div className="mt-4 ml-8 md:ml-12">
-      <div className="bg-gradient-to-br from-pink-50/80 to-purple-50/80 backdrop-blur-sm rounded-3xl p-5 border-2 border-pink-100/50 shadow-lg">
-        <div className="mb-4 p-3 bg-pink-100/80 rounded-xl flex items-center justify-between">
-          <div className="text-pink-700 text-sm font-medium">正在回复 {parentNickname}</div>
-          <button type="button" onClick={onCancel} className="text-pink-600 hover:text-pink-800">
+      <div className="modern-card p-5 relative overflow-hidden">
+        <div className="mb-4 p-3 bg-secondary/50 rounded-xl flex items-center justify-between">
+          <div className="text-secondary-foreground text-sm font-medium">正在回复 {parentNickname}</div>
+          <button type="button" onClick={onCancel} className="text-secondary-foreground hover:text-foreground transition-colors">
             ×
           </button>
         </div>
@@ -213,7 +213,7 @@ export default function ReplyForm({
               value={userInfo.nickname}
               onChange={(e) => updateUserInfo({ nickname: e.target.value })}
               placeholder="昵称 *"
-              className="flex-1 px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80"
+              className="flex-1 px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
               maxLength={50}
             />
             <input
@@ -222,7 +222,7 @@ export default function ReplyForm({
               value={userInfo.qq}
               onChange={(e) => updateUserInfo({ qq: e.target.value })}
               placeholder="QQ（可选）"
-              className="flex-1 px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80"
+              className="flex-1 px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
               maxLength={50}
             />
           </div>
@@ -234,22 +234,22 @@ export default function ReplyForm({
               value={userInfo.email}
               onChange={(e) => updateUserInfo({ email: e.target.value })}
               placeholder="邮箱 *"
-              className="flex-1 px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80"
+              className="flex-1 px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
               maxLength={100}
               required
             />
 
             <div className="flex-1">
               {emailVerified ? (
-                <div className="h-full flex items-center justify-between px-4 py-3 rounded-xl border-2 border-green-200 bg-white/80">
-                  <span className="text-sm text-green-700">邮箱已验证</span>
+                <div className="h-full flex items-center justify-between rounded-xl border border-border bg-card/50 px-4 py-3">
+                  <span className="text-sm text-primary/80">邮箱已验证</span>
                   <button
                     type="button"
                     onClick={() => {
                       clearVerifyToken();
                       setEmailVerified(false);
                     }}
-                    className="text-xs text-pink-600 hover:text-pink-700"
+                    className="text-xs text-primary hover:underline"
                   >
                     更换/重新验证
                   </button>
@@ -262,14 +262,14 @@ export default function ReplyForm({
                     value={captcha}
                     onChange={(e) => setCaptcha(e.target.value)}
                     placeholder="邮箱验证码 *"
-                    className="flex-1 px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80"
+                    className="flex-1 px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
                     maxLength={20}
                   />
                   <button
                     type="button"
                     onClick={handleSendEmailCode}
                     disabled={sendingCode || cooldown > 0 || !normalizedEmail}
-                    className="px-4 py-3 bg-gradient-to-r from-pink-400 to-purple-400 text-white rounded-xl hover:from-pink-500 hover:to-purple-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
+                    className="px-4 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm whitespace-nowrap"
                   >
                     {cooldown > 0 ? `${cooldown}s` : sendingCode ? '发送中...' : '发送验证码'}
                   </button>
@@ -285,7 +285,7 @@ export default function ReplyForm({
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="写下你的回复..."
-              className="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 outline-none transition-all bg-white/80 min-h-[100px] resize-none"
+              className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none shadow-sm focus:shadow-md min-h-[100px]"
               maxLength={1000}
             />
           </div>
@@ -307,10 +307,10 @@ export default function ReplyForm({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={images.length >= config.maxImages}
-                    className="p-2 rounded-lg hover:bg-pink-50 transition-colors duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 rounded-lg hover:bg-muted/50 transition-colors duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
                     title="添加图片"
                   >
-                    <svg className="w-6 h-6 text-pink-400 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-primary group-hover:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </button>
@@ -321,14 +321,14 @@ export default function ReplyForm({
               <button
                 type="button"
                 onClick={onCancel}
-                className="px-4 py-2 rounded-full border border-pink-200 text-pink-600 hover:bg-pink-50"
+                className="px-4 py-2 rounded-full border border-border text-primary hover:bg-muted/50 transition-all"
               >
                 取消
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-6 py-2 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 text-white hover:from-pink-500 hover:to-purple-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 rounded-full bg-gradient-to-r from-primary to-accent text-white hover:shadow-lg hover:shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {submitting ? '提交中...' : '发布回复'}
               </button>

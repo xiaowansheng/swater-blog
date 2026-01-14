@@ -52,19 +52,19 @@ export default function EmojiPicker({ onEmojiSelect, trigger }: EmojiPickerProps
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-lg hover:bg-pink-50 transition-colors duration-200 group"
+        className="p-2 rounded-lg hover:bg-muted/50 transition-colors duration-200 group"
         title="选择表情"
       >
         {trigger || (
-          <svg className="w-6 h-6 text-pink-400 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 text-primary group-hover:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 bottom-full left-0 mb-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border-2 border-pink-100 overflow-hidden animate-fade-in">
-          <div className="flex gap-1 p-2 bg-gradient-to-r from-pink-50 to-purple-50 overflow-x-auto scrollbar-thin scrollbar-thumb-pink-300 scrollbar-track-pink-100">
+        <div className="absolute z-50 bottom-full left-0 mb-2 w-80 sm:w-96 bg-card rounded-2xl shadow-2xl border border-card-border overflow-hidden animate-fade-in">
+          <div className="flex gap-1 p-2 bg-secondary/30 overflow-x-auto scrollbar-thin">
             {categories.map((category) => (
               <button
                 key={category}
@@ -72,8 +72,8 @@ export default function EmojiPicker({ onEmojiSelect, trigger }: EmojiPickerProps
                 onClick={() => setActiveCategory(category)}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
                   activeCategory === category
-                    ? 'bg-gradient-to-r from-pink-400 to-purple-400 text-white shadow-md'
-                    : 'hover:bg-pink-100 text-gray-600'
+                    ? 'bg-gradient-to-r from-primary to-accent text-white shadow-md'
+                    : 'hover:bg-muted/50 text-muted-foreground'
                 }`}
               >
                 {category}
@@ -81,14 +81,14 @@ export default function EmojiPicker({ onEmojiSelect, trigger }: EmojiPickerProps
             ))}
           </div>
 
-          <div className="p-4 max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-pink-300 scrollbar-track-pink-100">
+          <div className="p-4 max-h-72 overflow-y-auto scrollbar-thin">
             <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
               {filteredEmojis.map((emoji) => (
                 <button
                   key={emoji.id}
                   type="button"
                   onClick={() => handleEmojiClick(emoji.name)}
-                  className="w-12 h-12 sm:w-14 sm:h-14 p-2 text-xl sm:text-2xl hover:bg-pink-50 rounded-lg transition-all duration-200 text-center hover:scale-105 transform flex items-center justify-center leading-none overflow-hidden"
+                  className="w-12 h-12 sm:w-14 sm:h-14 p-2 text-xl sm:text-2xl hover:bg-muted/30 rounded-lg transition-all duration-200 text-center hover:scale-105 transform flex items-center justify-center leading-none overflow-hidden"
                   title={emoji.category}
                 >
                   <span className={`block origin-center ${getScaleClass(emoji.name)}`}>{emoji.name}</span>

@@ -54,12 +54,12 @@ export default function AnimeCommentList({
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <div className="relative">
-          <div className="w-16 h-16 border-4 border-pink-200 border-t-pink-500 rounded-full animate-spin"></div>
+          <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center text-2xl animate-bounce">
             ✨
           </div>
         </div>
-        <p className="mt-4 text-gray-500">加载评论中...</p>
+        <p className="mt-4 text-muted-foreground">加载评论中...</p>
       </div>
     );
   }
@@ -68,7 +68,7 @@ export default function AnimeCommentList({
     return (
       <div className="text-center py-12">
         <div className="text-6xl mb-4 animate-float">٩(◕‿◕｡)۶</div>
-        <p className="text-gray-500 text-lg">还没有评论哦，快来抢沙发吧~</p>
+        <p className="text-muted-foreground text-lg">还没有评论哦，快来抢沙发吧~</p>
       </div>
     );
   }
@@ -98,7 +98,7 @@ export default function AnimeCommentList({
             type="button"
             onClick={onLoadMore}
             disabled={loadingMore}
-            className="px-6 py-2 rounded-full border border-pink-200 text-pink-600 hover:bg-pink-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 rounded-full border border-border text-primary hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loadingMore ? '加载中...' : '加载更多评论'}
           </button>
