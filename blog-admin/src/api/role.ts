@@ -34,3 +34,7 @@ export const assignMenus = (roleId: number, menuIds: number[]): Promise<void> =>
 export const assignApis = (roleId: number, apiIds: number[]): Promise<void> => {
   return request.post(`/admin/role/${roleId}/apis`, apiIds)
 }
+
+export const getRoleApiIds = (roleId: number): Promise<number[]> => {
+  return request.get(`/admin/role/${roleId}/apis`)
+}

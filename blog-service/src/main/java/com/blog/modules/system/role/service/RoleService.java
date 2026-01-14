@@ -20,5 +20,7 @@ public interface RoleService {
     void delete(Long id);
 
     void assignApis(Long id, List<Long> apiIds);
+
+    List<Long> getApiIdsByRoleId(Long id);
 }
 

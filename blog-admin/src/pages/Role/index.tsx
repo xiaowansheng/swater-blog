@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Tooltip } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, SettingOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, SettingOutlined, ApiOutlined } from '@ant-design/icons'
 import { getRoleList, createRole, updateRole, deleteRole } from '@/api/role'
 import { Role } from '@/types'
+import ApiAuthModal from './ApiAuthModal'
 
 const RolePage: React.FC = () => {
   const [roles, setRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
+  const [apiAuthVisible, setApiAuthVisible] = useState(false)
+  const [currentRole, setCurrentRole] = useState<Role | null>(null)
   const [editingRole, setEditingRole] = useState<Role | null>(null)
   const [form] = Form.useForm()
 
@@ -47,6 +50,15 @@ const RolePage: React.FC = () => {
     } catch (error) {
       message.error('删除失败')
     }
+  }
+
+  const handleApiAuth = (role: Role) => {
+    setCurrentRole(role)
+    setApiAuthVisible(true)
+  }
+
+  const handleApiAuthSuccess = () => {
+    loadRoles()
   }
 
   const handleSubmit = async () => {
@@ -110,11 +122,11 @@ const RolePage: React.FC = () => {
               onClick={() => handleEdit(record)}
             />
           </Tooltip>
-          <Tooltip title="权限配置">
+          <Tooltip title="API授权">
             <Button
               type="text"
-              icon={<SettingOutlined />}
-              onClick={() => message.info('权限配置功能开发中')}
+              icon={<ApiOutlined />}
+              onClick={() => handleApiAuth(record)}
             />
           </Tooltip>
           <Popconfirm
@@ -176,6 +188,14 @@ const RolePage: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
+
+      <ApiAuthModal
+        visible={apiAuthVisible}
+        roleId={currentRole?.id || null}
+        roleName={currentRole?.name || ''}
+        onCancel={() => setApiAuthVisible(false)}
+        onSuccess={handleApiAuthSuccess}
+      />
     </div>
   )
 }

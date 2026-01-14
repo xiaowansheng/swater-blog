@@ -146,6 +146,11 @@ public class RoleServiceImpl implements RoleService {
         }
     }
 
+    @Override
+    public List<Long> getApiIdsByRoleId(Long id) {
+        return roleApiMapper.selectApiIdsByRoleId(id);
+    }
+
     private void saveRoleApis(Long roleId, List<Long> apiIds) {
         for (Long apiId : apiIds) {
             RoleApi roleApi = new RoleApi();

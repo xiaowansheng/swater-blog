@@ -62,5 +62,12 @@ public class RoleController {
         roleService.assignApis(id, apiIds);
         return Result.success();
     }
+
+    @GetMapping("/{id}/apis")
+    @ApiOperation(name = "获取角色接口权限", type = ApiOperationType.QUERY, description = "获取角色已分配的接口权限ID列表")
+    public Result<List<Long>> getApiIds(@PathVariable Long id) {
+        List<Long> apiIds = roleService.getApiIdsByRoleId(id);
+        return Result.success(apiIds);
+    }
 }
 
