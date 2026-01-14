@@ -35,30 +35,38 @@ export default function AnimeMusicPlayer() {
   const [isDragging, setIsDragging] = useState(false);
   const playlistPanelRef = useRef<HTMLDivElement>(null);
   const playerPanelRef = useRef<HTMLDivElement>(null);
+  const initializingRef = useRef(false);
   const openPlaylist = () => useMusicStore.setState({ isPlaylistOpen: true });
   const closePlaylist = () => useMusicStore.setState({ isPlaylistOpen: false });
 
   // 初始化默认播放列表
   useEffect(() => {
     const initPlaylist = async () => {
-      if (playlist.length === 0) {
-        try {
-          // 动态加载配置文件
-          const musicConfig = await getMusicConfig();
-          useMusicStore.getState().setPlaylist(musicConfig.defaultPlaylist);
+      // 防止重复初始化
+      if (initializingRef.current || playlist.length > 0) {
+        return;
+      }
 
-          // 设置初始音量和播放模式
-          if (musicConfig.defaultVolume !== undefined) {
-            useMusicStore.getState().setVolume(musicConfig.defaultVolume);
-          }
-          if (musicConfig.defaultPlayMode) {
-            useMusicStore.getState().setPlayMode(musicConfig.defaultPlayMode);
-          }
-        } catch (error) {
-          console.error('Failed to load music config, using default:', error);
-          // 使用硬编码的默认配置作为fallback
-          useMusicStore.getState().setPlaylist(defaultMusicConfig.defaultPlaylist);
+      initializingRef.current = true;
+
+      try {
+        // 动态加载配置文件（现在带缓存）
+        const musicConfig = await getMusicConfig();
+        useMusicStore.getState().setPlaylist(musicConfig.defaultPlaylist);
+
+        // 设置初始音量和播放模式
+        if (musicConfig.defaultVolume !== undefined) {
+          useMusicStore.getState().setVolume(musicConfig.defaultVolume);
         }
+        if (musicConfig.defaultPlayMode) {
+          useMusicStore.getState().setPlayMode(musicConfig.defaultPlayMode);
+        }
+      } catch (error) {
+        console.error('Failed to load music config, using default:', error);
+        // 使用硬编码的默认配置作为fallback
+        useMusicStore.getState().setPlaylist(defaultMusicConfig.defaultPlaylist);
+      } finally {
+        initializingRef.current = false;
       }
     };
 
