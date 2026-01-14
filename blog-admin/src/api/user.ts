@@ -37,3 +37,22 @@ export const assignRoles = (id: number, roleIds: number[]): Promise<void> => {
   return request.post(`/admin/user/${id}/roles`, roleIds)
 }
 
+export interface UpdateProfileDTO {
+  nickname: string
+  avatar?: string
+  email?: string
+  phone?: string
+  qq?: string
+  signature?: string
+  website?: string
+  introduction?: string
+}
+
+export const updateCurrentUser = (data: UpdateProfileDTO): Promise<void> => {
+  return request.put('/admin/user/profile', data)
+}
+
+export const updatePassword = (data: { oldPassword: string; newPassword: string }): Promise<void> => {
+  return request.post('/admin/user/password', data)
+}
+

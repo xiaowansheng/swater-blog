@@ -49,11 +49,13 @@ const Header: React.FC = () => {
       key: 'profile',
       icon: <UserOutlined />,
       label: '个人中心',
+      onClick: () => navigate('/profile'),
     },
     {
       key: 'settings',
       icon: <SettingOutlined />,
       label: '账户设置',
+      onClick: () => navigate('/profile?tab=edit'),
     },
     {
       type: 'divider',

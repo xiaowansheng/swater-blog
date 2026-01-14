@@ -32,6 +32,7 @@ const Notification = lazy(() => import('@/pages/Notification'))
 const Album = lazy(() => import('@/pages/Album'))
 const Guestbook = lazy(() => import('@/pages/Guestbook'))
 const About = lazy(() => import('@/pages/About'))
+const Profile = lazy(() => import('@/pages/Profile'))
 const NotFound = lazy(() => import('@/pages/404'))
 
 // 路由配置
@@ -62,6 +63,7 @@ const routeConfig = [
   { path: '/album', component: Album, title: '相册管理', keepAlive: true },
   { path: '/guestbook', component: Guestbook, title: '留言管理', keepAlive: true },
   { path: '/about', component: About, title: '关于页面', keepAlive: true },
+  { path: '/profile', component: Profile, title: '个人中心', keepAlive: true },
 ]
 
 // 加载中组件
@@ -151,6 +153,7 @@ const Router: React.FC = () => {
           <Route path="album" element={<Suspense fallback={<PageLoading />}><Album /></Suspense>} />
           <Route path="guestbook" element={<Suspense fallback={<PageLoading />}><Guestbook /></Suspense>} />
           <Route path="about" element={<Suspense fallback={<PageLoading />}><About /></Suspense>} />
+          <Route path="profile" element={<Suspense fallback={<PageLoading />}><Profile /></Suspense>} />
           <Route path="*" element={<Suspense fallback={<PageLoading />}><NotFound /></Suspense>} />
         </Route>
       </Routes>

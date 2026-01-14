@@ -40,6 +40,7 @@ const Notification = lazy(() => import('@/pages/Notification'))
 const Album = lazy(() => import('@/pages/Album'))
 const Guestbook = lazy(() => import('@/pages/Guestbook'))
 const About = lazy(() => import('@/pages/About'))
+const Profile = lazy(() => import('@/pages/Profile'))
 const NotFound = lazy(() => import('@/pages/404'))
 const TestCache = lazy(() => import('@/pages/TestCache'))
 
@@ -79,6 +80,7 @@ const routeConfig = [
   { path: '/album', component: Album, title: '相册管理', keepAlive: true },
   { path: '/guestbook', component: Guestbook, title: '留言管理', keepAlive: true },
   { path: '/about', component: About, title: '关于页面', keepAlive: true },
+  { path: '/profile', component: Profile, title: '个人中心', keepAlive: true },
   { path: '/test-cache', component: TestCache, title: '缓存测试', keepAlive: true },
 ]
 
