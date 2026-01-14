@@ -17,6 +17,8 @@ import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.KeyUtil;
 import com.blog.shared.util.RequestUtil;
+import com.blog.shared.util.UserAgentUtil;
+import com.blog.shared.model.UserAgentInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -94,10 +96,11 @@ public class TalkCommandServiceImpl implements TalkCommandService {
             talk.setIp(ip);
         }
 
-        // 设置设备信息
-        String userAgent = RequestUtil.getUserAgent();
-        talk.setDevice(userAgent);
-        
+        // 设置设备和浏览器信息
+        UserAgentInfo userAgentInfo = UserAgentUtil.parseFromRequest();
+        talk.setDevice(userAgentInfo.getDeviceDescription());
+        talk.setBrowser(userAgentInfo.getBrowserDescription());
+
         if (dto.getStatus() == null) {
             talk.setStatus("1");
         }

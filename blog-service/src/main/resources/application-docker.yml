@@ -5,8 +5,16 @@
 
 server:
   port: 8888
-  servlet:
-    context-path: /
+
+spring:
+  application:
+    name: blog-docker
+  profiles:
+    active: docker
+
+  mvc:
+    servlet:
+      path: /
   tomcat:
     # Docker环境连接器配置
     threads:
@@ -23,13 +31,6 @@ server:
       file-date-format: .yyyy-MM-dd
       prefix: access_log
       suffix: .log
-
-spring:
-  application:
-    name: blog-docker
-  profiles:
-    active: docker
-
   # Thymeleaf 模板配置
   thymeleaf:
     prefix: classpath:templates/

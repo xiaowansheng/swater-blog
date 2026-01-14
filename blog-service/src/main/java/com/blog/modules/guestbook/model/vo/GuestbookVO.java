@@ -5,6 +5,7 @@ package com.blog.modules.guestbook.model.vo;
 import com.blog.shared.model.vo.BaseVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import java.math.BigDecimal;
 import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -32,6 +33,16 @@ public class GuestbookVO extends com.blog.shared.model.vo.BaseVO {
     private String province;
 
     private String city;
+
+    private BigDecimal latitude;
+
+    private BigDecimal longitude;
+
+    private String location;
+
+    private String device;
+
+    private String browser;
 
     private Integer isVisible;
 

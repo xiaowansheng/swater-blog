@@ -26,7 +26,7 @@ public class OpenApiConfig {
     @Value("${spring.application.name:blog-service}")
     private String applicationName;
     
-    @Value("${server.servlet.context-path:}")
+    @Value("${spring.mvc.servlet.path:}")
     private String contextPath;
     
     @Bean

@@ -2,6 +2,7 @@ package com.blog.bootstrap.config;
 
 
 
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private String uploadDir;
 
     @Value("${file.storage.local.url-prefix:/uploads}")
+    @Getter
     private String urlPrefix;
 
     @Override

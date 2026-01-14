@@ -5,8 +5,14 @@
 
 server:
   port: ${SERVER_PORT:8888}
-  servlet:
-    context-path: /api
+
+spring:
+  application:
+    name: blog-prod
+
+  mvc:
+    servlet:
+      path: /api
   tomcat:
     # 生产环境连接器配置
     threads:
@@ -24,11 +30,6 @@ server:
       prefix: access_log
       suffix: .log
       rotate: true
-
-spring:
-  application:
-    name: blog-prod
-
   # Thymeleaf 模板配置
   thymeleaf:
     prefix: classpath:templates/

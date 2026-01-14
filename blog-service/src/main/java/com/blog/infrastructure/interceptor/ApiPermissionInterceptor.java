@@ -10,8 +10,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.util.AntPathMatcher;
 /**
  * API接口权限拦截器
  * <p>
@@ -28,6 +30,9 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
     @Autowired
     private ApiResourceCache apiResourceCache;
 
+    @Value("${spring.mvc.servlet.path:}")
+    private String servletPath;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 放行 OPTIONS 请求（CORS 预检请求）
@@ -39,10 +44,9 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
         String requestPath = request.getRequestURI();
         String requestMethod = request.getMethod();
 
-        // 去除context-path前缀，再进行接口匹配
-        String contextPath = request.getContextPath();
-        if (contextPath != null && !contextPath.isEmpty() && requestPath.startsWith(contextPath)) {
-            requestPath = requestPath.substring(contextPath.length());
+        // 去除 servlet path 前缀，再进行接口匹配
+        if (servletPath != null && !servletPath.isEmpty() && requestPath.startsWith(servletPath)) {
+            requestPath = requestPath.substring(servletPath.length());
         }
 
         // 执行接口权限验证

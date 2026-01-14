@@ -22,7 +22,7 @@ import java.util.Map;
 @RequestMapping("/security-test")
 public class SecurityTestController {
 
-    @Value("${server.servlet.context-path:}")
+    @Value("${spring.mvc.servlet.path:}")
     private String contextPath;
 
     @Autowired

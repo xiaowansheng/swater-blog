@@ -1,7 +1,6 @@
 package com.blog.bootstrap.config;
 
 
-
 import cn.dev33.satoken.context.SaHolder;
 import cn.dev33.satoken.interceptor.SaInterceptor;
 import cn.dev33.satoken.router.SaRouter;
@@ -21,7 +20,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
 import java.util.List;
+
 /**
  * SaToken 配置类
  * <p>
@@ -32,8 +33,8 @@ import java.util.List;
 @Configuration
 public class SaTokenConfig implements WebMvcConfigurer {
 
-    @Value("${server.servlet.context-path:}")
-    private String contextPath;
+    @Autowired
+    private WebMvcConfig webMvcConfig;
 
     @Autowired
     private UserMapper userMapper;
@@ -44,17 +45,20 @@ public class SaTokenConfig implements WebMvcConfigurer {
     @Autowired
     private ApiPermissionInterceptor apiPermissionInterceptor;
 
+    @Value("${spring.mvc.servlet.path:}")
+    private String servletPath;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // SaToken 登录拦截器 - 负责用户认证和设置用户上下文
         registry.addInterceptor(new SaInterceptor(handler -> {
-            // 登录校验 -- 拦截所有 admin 接口和需要认证的auth接口
-            SaRouter.match(
-                     "/admin/**",
-                     "/auth/current",
-                     "/auth/userinfo",
-                     "/auth/refresh"
-                ).check(r -> {
+                    // 登录校验 -- 拦截所有 admin 接口和需要认证的auth接口
+                    SaRouter.match(
+                            "/admin/**",
+                            "/auth/current",
+                            "/auth/userinfo",
+                            "/auth/refresh"
+                    ).check(r -> {
                         // 放行 OPTIONS 请求（CORS 预检请求）
                         if (HttpMethod.OPTIONS.matches(SaHolder.getRequest().getMethod())) {
                             return;
@@ -90,14 +94,21 @@ public class SaTokenConfig implements WebMvcConfigurer {
                             throw e;
                         }
                     });
-        })).addPathPatterns("/**")
-          .order(1); // 设置拦截器顺序，先执行
+                })).addPathPatterns("/**")
+                .order(1); // 设置拦截器顺序，先执行
 
         // API权限拦截器 - 负责接口权限验证
-        // 注意：addPathPatterns 和 excludePathPatterns 中的路径也不需要contextPath前缀
+        // 注意：拦截器路径是相对于 servlet path 之后的路径
+        // 如果 servlet path 是 /api，则这里的路径不需要包含 /api
+        String uploadsPath = webMvcConfig.getUrlPrefix();
+        // 去除 servlet path 前缀（如果存在）
+        if (servletPath != null && !servletPath.isEmpty() && uploadsPath.startsWith(servletPath)) {
+            uploadsPath = uploadsPath.substring(servletPath.length());
+        }
+        
         registry.addInterceptor(apiPermissionInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/auth/**")
+                .excludePathPatterns("/auth/**", uploadsPath + "/**")
                 .order(2); // 在登录拦截器之后执行
     }
 

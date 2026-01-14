@@ -142,22 +142,9 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
         }
 
         // 设置设备和浏览器信息
-        String userAgent = RequestUtil.getUserAgent();
-        UserAgentInfo userAgentInfo = UserAgentUtil.parse(userAgent);
-
-        // 设置设备信息（设备类型+品牌+型号）
-        if (userAgentInfo.getDeviceType() != null) {
-            guestbook.setDevice(userAgentInfo.getDeviceDescription());
-        } else {
-            guestbook.setDevice(userAgent);
-        }
-
-        // 设置浏览器信息（浏览器名称+版本）
-        if (userAgentInfo.getBrowserName() != null) {
-            guestbook.setBrowser(userAgentInfo.getBrowserDescription());
-        } else {
-            guestbook.setBrowser(userAgent);
-        }
+        UserAgentInfo userAgentInfo = UserAgentUtil.parseFromRequest();
+        guestbook.setDevice(userAgentInfo.getDeviceDescription());
+        guestbook.setBrowser(userAgentInfo.getBrowserDescription());
 
         // Save to database
         guestbookMapper.insert(guestbook);
