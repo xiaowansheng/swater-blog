@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface PageLoadingProps {
   onComplete?: () => void;
   minDuration?: number;
+  maxDuration?: number;
 }
 
 interface Petal {
@@ -24,7 +25,11 @@ interface Star {
   scale: number;
 }
 
-export default function PageLoading({ onComplete, minDuration = 800 }: PageLoadingProps) {
+export default function PageLoading({ 
+  onComplete, 
+  minDuration = 800,
+  maxDuration = 3000 
+}: PageLoadingProps) {
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentScene, setCurrentScene] = useState(0);
@@ -95,6 +100,8 @@ export default function PageLoading({ onComplete, minDuration = 800 }: PageLoadi
     }));
     setStars(generatedStars);
 
+    const startTime = Date.now();
+
     // 进度条动画
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -111,21 +118,26 @@ export default function PageLoading({ onComplete, minDuration = 800 }: PageLoadi
       setCurrentScene((prev) => (prev + 1) % loadingScenes.length);
     }, 1200);
 
-    // 完成加载
+    // 完成加载（使用 maxDuration 作为最大等待时间）
     const timer = setTimeout(() => {
       setProgress(100);
+      
+      // 确保至少显示 minDuration
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, minDuration - elapsed);
+      
       setTimeout(() => {
         setIsLoading(false);
         onComplete?.();
-      }, 500);
-    }, minDuration);
+      }, remaining);
+    }, maxDuration);
 
     return () => {
       clearInterval(interval);
       clearInterval(sceneInterval);
       clearTimeout(timer);
     };
-  }, [minDuration, onComplete, loadingScenes.length]);
+  }, [minDuration, maxDuration, onComplete, loadingScenes.length]);
 
   // 在挂载前不渲染内容，避免 hydration mismatch
   if (!mounted) {
