@@ -1,11 +1,12 @@
 import { Badge, Dropdown, List, Empty, Button, Spin, Tooltip } from 'antd'
-import { BellOutlined, CheckOutlined, WifiOutlined, DisconnectOutlined, LoadingOutlined } from '@ant-design/icons'
+import { BellOutlined, CheckOutlined, WifiOutlined, DisconnectOutlined, LoadingOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useNotificationStore } from '@/store/notification'
 import { useWebSocketStore } from '@/store/websocket'
 import { formatDate } from '@/utils/format'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as notificationApi from '@/api/notification'
+import { notificationWebSocket } from '@/websocket/notification'
 
 const NotificationBell: React.FC = () => {
   const navigate = useNavigate()
@@ -65,6 +66,14 @@ const NotificationBell: React.FC = () => {
     } catch (error) {
       console.error('标记全部已读失败', error)
     }
+  }
+
+  const handleManualReconnect = () => {
+    notificationWebSocket.manualReconnect()
+  }
+
+  const shouldShowReconnectButton = () => {
+    return status === 'disconnected' && lastError === '重连次数已达上限'
   }
 
   const getNotificationIcon = (type: string) => {
@@ -141,14 +150,27 @@ const NotificationBell: React.FC = () => {
       </div>
 
       {/* WebSocket 状态显示 */}
-      <div className={`flex items-center gap-2 px-3 py-2 border-b ${statusConfig.textColor} bg-gray-50`}>
-        {statusConfig.icon}
-        <span className="text-sm font-medium">{statusConfig.text}</span>
-        {connectionInfo && (
-          <>
-            <span className="text-gray-300">|</span>
-            <span className="text-xs text-gray-500">{connectionInfo}</span>
-          </>
+      <div className={`flex items-center justify-between px-3 py-2 border-b ${statusConfig.textColor} bg-gray-50`}>
+        <div className="flex items-center gap-2">
+          {statusConfig.icon}
+          <span className="text-sm font-medium">{statusConfig.text}</span>
+          {connectionInfo && (
+            <>
+              <span className="text-gray-300">|</span>
+              <span className="text-xs text-gray-500">{connectionInfo}</span>
+            </>
+          )}
+        </div>
+        {shouldShowReconnectButton() && (
+          <Button
+            type="primary"
+            size="small"
+            icon={<ReloadOutlined />}
+            onClick={handleManualReconnect}
+            className="text-xs"
+          >
+            重连
+          </Button>
         )}
       </div>
 

@@ -123,6 +123,25 @@ class NotificationWebSocket {
     }, this.reconnectDelay)
   }
 
+  manualReconnect() {
+    const { setStatus, setReconnectAttempts } = useWebSocketStore.getState()
+
+    // 清除现有的重连定时器
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer)
+      this.reconnectTimer = null
+    }
+
+    // 重置重连计数
+    this.reconnectAttempts = 0
+    setReconnectAttempts(0)
+    setStatus('connecting')
+    useWebSocketStore.getState().setLastError(null)
+
+    console.log('手动重连 WebSocket')
+    this.connect()
+  }
+
   disconnect() {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer)
