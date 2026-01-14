@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
-@RequestMapping("public/tag")
+@RequestMapping("/public/tag")
 @ApiOperation(name = "标签公开接口", description = "文章标签相关接口", open = true)
 public class TagPublicController {
     @Autowired

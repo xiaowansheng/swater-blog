@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("public/track")
+@RequestMapping("/public/track")
 @ApiOperation(name = "访问追踪（V2）", description = "访客/会话/页面PV/内容阅读统计（V2）", open = true)
 public class TrackPublicController {
     @Autowired

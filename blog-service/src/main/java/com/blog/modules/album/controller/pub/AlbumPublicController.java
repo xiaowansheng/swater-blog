@@ -10,7 +10,7 @@ import com.blog.modules.album.service.AlbumPublicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("public/album")
+@RequestMapping("/public/album")
 @ApiOperation(name = "相册公开接口", description = "相册相关接口", open = true)
 public class AlbumPublicController {
     @Autowired

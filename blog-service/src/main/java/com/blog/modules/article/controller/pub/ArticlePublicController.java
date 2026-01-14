@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
-@RequestMapping("public/post")
+@RequestMapping("/public/post")
 @ApiOperation(name = "文章公开接口", description = "文章相关接口", open = true)
 @Tag(name = "文章公开接口", description = "文章相关的公开API，无需认证即可访问")
 @ApiDocumentation.PublicApi

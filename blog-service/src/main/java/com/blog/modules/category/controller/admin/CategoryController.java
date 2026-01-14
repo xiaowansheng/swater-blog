@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
-@RequestMapping("admin/category")
+@RequestMapping("/admin/category")
 @ApiOperation(name = "分类管理模块", description = "分类管理接口", open = false)
 public class CategoryController {
     @Autowired

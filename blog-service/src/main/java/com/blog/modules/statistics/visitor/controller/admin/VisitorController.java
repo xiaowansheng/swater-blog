@@ -13,7 +13,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 @RestController
-@RequestMapping("admin/visitor")
+@RequestMapping("/admin/visitor")
 @ApiOperation(name = "访客管理模块", description = "访客管理接口", open = false)
 public class VisitorController {
     @Autowired

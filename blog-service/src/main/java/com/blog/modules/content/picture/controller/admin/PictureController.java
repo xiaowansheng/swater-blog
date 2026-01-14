@@ -12,7 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("admin/picture")
+@RequestMapping("/admin/picture")
 @ApiOperation(name = "图片管理模块", description = "图片管理接口", open = false)
 public class PictureController {
     @Autowired

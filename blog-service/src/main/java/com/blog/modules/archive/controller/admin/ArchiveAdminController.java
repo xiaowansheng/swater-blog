@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
-@RequestMapping("admin/archive")
+@RequestMapping("/admin/archive")
 @ApiOperation(name = "归档管理模块", description = "归档管理接口", open = false)
 public class ArchiveAdminController {
     @Autowired

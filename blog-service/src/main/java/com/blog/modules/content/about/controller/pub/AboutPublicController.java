@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 @RestController
-@RequestMapping("public/about")
+@RequestMapping("/public/about")
 @ApiOperation(name = "关于公开接口", description = "关于页面相关接口", open = true)
 public class AboutPublicController {
     @Autowired

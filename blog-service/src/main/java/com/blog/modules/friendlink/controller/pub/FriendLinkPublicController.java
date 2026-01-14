@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("public/friend-link")
+@RequestMapping("/public/friend-link")
 @ApiOperation(name = "友链公开接口", description = "友情链接相关接口", open = true)
 public class FriendLinkPublicController {
     @Autowired

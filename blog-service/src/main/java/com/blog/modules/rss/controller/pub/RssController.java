@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 @RestController
-@RequestMapping("public/rss")
+@RequestMapping("/public/rss")
 @ApiOperation(name = "RSS订阅接口", description = "RSS订阅相关接口", open = true)
 public class RssController {
     

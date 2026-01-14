@@ -10,7 +10,7 @@ import com.blog.modules.content.picture.service.PicturePublicQueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("public/picture")
+@RequestMapping("/public/picture")
 @ApiOperation(name = "图片公开接口", description = "图片相关接口", open = true)
 public class PicturePublicController {
     @Autowired
