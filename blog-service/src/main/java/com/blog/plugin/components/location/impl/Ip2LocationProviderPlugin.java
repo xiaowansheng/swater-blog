@@ -25,7 +25,7 @@ public class Ip2LocationProviderPlugin implements LocationProviderPlugin, Plugin
     }
     
     @Override
-    public LocationInfo getLocationInfo(String ip) throws Exception {
+    public LocationInfo getLocationInfo(String ip) {
         throw new UnsupportedOperationException("IP2Location插件需要额外实现，请参考IP2Location Java SDK文档");
     }
 }

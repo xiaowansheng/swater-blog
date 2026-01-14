@@ -8,9 +8,11 @@ import cn.hutool.json.JSONUtil;
 import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.location.LocationInfo;
 import com.blog.plugin.components.location.LocationProviderPlugin;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+@Slf4j
 @Component
 @ConditionalOnProperty(name = "location.provider.type", havingValue = "amap", matchIfMissing = true)
 public class AmapLocationProviderPlugin implements LocationProviderPlugin, Plugin {
@@ -32,30 +34,37 @@ public class AmapLocationProviderPlugin implements LocationProviderPlugin, Plugi
     }
     
     @Override
-    public LocationInfo getLocationInfo(String ip) throws Exception {
+    public LocationInfo getLocationInfo(String ip) {
         if (StrUtil.isBlank(apiKey)) {
-            throw new IllegalStateException("高德地图API Key未配置");
+            log.warn("高德地图API Key未配置");
+            return null;
         }
-        
-        String url = apiUrl + "?key=" + apiKey + "&ip=" + ip;
-        String response = HttpUtil.get(url);
-        
-        JSONObject jsonObject = JSONUtil.parseObj(response);
-        
-        if (!"1".equals(jsonObject.getStr("status"))) {
-            throw new Exception("高德地图API调用失败: " + jsonObject.getStr("info"));
+
+        try {
+            String url = apiUrl + "?key=" + apiKey + "&ip=" + ip;
+            String response = HttpUtil.get(url);
+
+            JSONObject jsonObject = JSONUtil.parseObj(response);
+
+            if (!"1".equals(jsonObject.getStr("status"))) {
+                log.warn("高德地图API调用失败: {}, IP: {}", jsonObject.getStr("info"), ip);
+                return null;
+            }
+
+            LocationInfo locationInfo = new LocationInfo();
+            locationInfo.setCountry("中国");
+            locationInfo.setProvince(jsonObject.getStr("province", ""));
+            locationInfo.setCity(jsonObject.getStr("city", ""));
+            locationInfo.setDistrict(jsonObject.getStr("district", ""));
+            locationInfo.setLocation(jsonObject.getStr("province", "") +
+                    jsonObject.getStr("city", "") +
+                    jsonObject.getStr("district", ""));
+            locationInfo.setIp(locationInfo.getLocation());
+
+            return locationInfo;
+        } catch (Exception e) {
+            log.warn("高德地图IP定位异常: {}, IP: {}", e.getMessage(), ip);
+            return null;
         }
-        
-        LocationInfo locationInfo = new LocationInfo();
-        locationInfo.setCountry("中国");
-        locationInfo.setProvince(jsonObject.getStr("province", ""));
-        locationInfo.setCity(jsonObject.getStr("city", ""));
-        locationInfo.setDistrict(jsonObject.getStr("district", ""));
-        locationInfo.setLocation(jsonObject.getStr("province", "") + 
-                jsonObject.getStr("city", "") + 
-                jsonObject.getStr("district", ""));
-        locationInfo.setIp(locationInfo.getLocation());
-        
-        return locationInfo;
     }
 }
