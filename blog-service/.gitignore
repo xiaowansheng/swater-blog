@@ -40,4 +40,5 @@ out/
 .DS_Store
 
 ### Config ###
-**/application-test.yml
+config/application.yml
+/config/

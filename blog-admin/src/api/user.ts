@@ -53,6 +53,6 @@ export const updateCurrentUser = (data: UpdateProfileDTO): Promise<void> => {
 }
 
 export const updatePassword = (data: { oldPassword: string; newPassword: string }): Promise<void> => {
-  return request.post('/admin/user/password', data)
+  return request.put('/admin/user/password', data)
 }
 

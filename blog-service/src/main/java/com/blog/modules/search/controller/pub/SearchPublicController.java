@@ -10,7 +10,7 @@ import com.blog.modules.search.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/api/public/search")
+@RequestMapping("public/search")
 @ApiOperation(name = "搜索接口", description = "搜索相关接口", open = true)
 public class SearchPublicController {
     @Autowired

@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.*;
  * 网站配置管理控制器
  */
 @RestController
-@RequestMapping("/api/admin/site-config")
+@RequestMapping("admin/site-config")
 @ApiOperation(name = "网站配置管理模块", description = "网站配置管理接口", open = false)
 public class SiteConfigController {
 

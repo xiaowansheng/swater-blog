@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/public/like")
+@RequestMapping("public/like")
 @ApiOperation(name = "点赞公开接口", description = "内容点赞/取消赞接口", open = true)
 public class ContentLikePublicController {
     @Autowired

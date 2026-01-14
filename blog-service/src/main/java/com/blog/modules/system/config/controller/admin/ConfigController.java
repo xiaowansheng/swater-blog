@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 @RestController
-@RequestMapping("/api/admin/config")
+@RequestMapping("admin/config")
 @ApiOperation(name = "配置管理模块", description = "配置管理接口", open = false)
 public class ConfigController {
     @Autowired

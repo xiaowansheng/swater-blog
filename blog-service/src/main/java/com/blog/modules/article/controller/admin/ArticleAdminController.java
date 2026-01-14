@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
-@RequestMapping("/api/admin/post")
+@RequestMapping("admin/post")
 @ApiOperation(name = "文章管理模块", description = "文章的增删改查和发布管理", open = false)
 public class ArticleAdminController {
     @Autowired

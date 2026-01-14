@@ -4,6 +4,8 @@ import com.blog.modules.auth.model.dto.ResetPasswordDTO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.shared.PageResult;
+import com.blog.modules.user.model.dto.UpdatePasswordDTO;
+import com.blog.modules.user.model.dto.UpdateProfileDTO;
 import com.blog.modules.user.model.dto.UserDTO;
 import com.blog.modules.user.model.vo.UserVO;
 import com.blog.modules.user.model.entity.User;
@@ -21,6 +23,7 @@ import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.PageUtil;
 import com.blog.shared.util.PasswordUtil;
+import com.blog.bootstrap.context.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -220,6 +223,77 @@ public class UserServiceImpl implements UserService {
             }
         }
         return vo;
+    }
+
+    @Override
+    @Transactional
+    public void updateProfile(UpdateProfileDTO dto) {
+        Long userId = UserContext.getCurrentUserId();
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        // 更新邮箱时检查是否重复
+        if (dto.getEmail() != null && !dto.getEmail().isEmpty() && !dto.getEmail().equals(user.getEmail())) {
+            LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(User::getEmail, dto.getEmail()).ne(User::getId, userId);
+            if (userMapper.selectCount(wrapper) > 0) {
+                throw new BusinessException("邮箱已被其他用户使用");
+            }
+        }
+
+        // 只更新允许修改的字段
+        if (dto.getNickname() != null && !dto.getNickname().isEmpty()) {
+            user.setNickname(dto.getNickname());
+        }
+        if (dto.getEmail() != null) {
+            user.setEmail(dto.getEmail());
+        }
+        if (dto.getAvatar() != null) {
+            user.setAvatar(dto.getAvatar());
+        }
+        if (dto.getPhone() != null) {
+            user.setPhone(dto.getPhone());
+        }
+        if (dto.getQq() != null) {
+            user.setQq(dto.getQq());
+        }
+        if (dto.getSignature() != null) {
+            user.setSignature(dto.getSignature());
+        }
+        if (dto.getWebsite() != null) {
+            user.setWebsite(dto.getWebsite());
+        }
+        if (dto.getIntroduction() != null) {
+            user.setIntroduction(dto.getIntroduction());
+        }
+
+        userMapper.updateById(user);
+
+        User updatedUser = userMapper.selectById(userId);
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserUpdatedEvent(this, userId, updatedUser)));
+    }
+
+    @Override
+    @Transactional
+    public void updatePassword(UpdatePasswordDTO dto) {
+        Long userId = UserContext.getCurrentUserId();
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        // 验证旧密码
+        if (!PasswordUtil.matches(dto.getOldPassword(), user.getPassword())) {
+            throw new BusinessException("当前密码不正确");
+        }
+
+        // 更新密码
+        user.setPassword(PasswordUtil.encode(dto.getNewPassword()));
+        userMapper.updateById(user);
+
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserPasswordResetEvent(this, userId)));
     }
 }
 

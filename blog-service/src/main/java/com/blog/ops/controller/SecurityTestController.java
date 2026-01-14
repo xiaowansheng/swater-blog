@@ -18,7 +18,7 @@ import java.util.Map;
  * 用于测试各种安全功能
  */
 @RestController
-@RequestMapping("/api/security-test")
+@RequestMapping("security-test")
 public class SecurityTestController {
     
     @Autowired

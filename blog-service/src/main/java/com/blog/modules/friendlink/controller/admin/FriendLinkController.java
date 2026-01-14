@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
-@RequestMapping("/api/admin/friend-link")
+@RequestMapping("admin/friend-link")
 @ApiOperation(name = "友链管理模块", description = "友链管理接口", open = false)
 public class FriendLinkController {
     @Autowired

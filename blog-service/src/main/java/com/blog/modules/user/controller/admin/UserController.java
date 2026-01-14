@@ -5,6 +5,8 @@ import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.auth.model.dto.ResetPasswordDTO;
+import com.blog.modules.user.model.dto.UpdatePasswordDTO;
+import com.blog.modules.user.model.dto.UpdateProfileDTO;
 import com.blog.modules.user.model.dto.UserDTO;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.modules.user.model.vo.UserVO;
@@ -79,6 +81,22 @@ public class UserController {
             description = "为用户分配角色")
     public Result<Void> assignRoles(@PathVariable Long id, @RequestBody List<Long> roleIds) {
         userService.assignRoles(id, roleIds);
+        return Result.success();
+    }
+
+    @PutMapping("/profile")
+    @ApiOperation(name = "更新个人资料", type = ApiOperationType.UPDATE,
+            description = "更新当前登录用户的个人信息")
+    public Result<Void> updateProfile(@Valid @RequestBody UpdateProfileDTO dto) {
+        userService.updateProfile(dto);
+        return Result.success();
+    }
+
+    @PutMapping("/password")
+    @ApiOperation(name = "修改密码", type = ApiOperationType.UPDATE,
+            description = "修改当前登录用户的密码")
+    public Result<Void> updatePassword(@Valid @RequestBody UpdatePasswordDTO dto) {
+        userService.updatePassword(dto);
         return Result.success();
     }
 }

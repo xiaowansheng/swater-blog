@@ -8,6 +8,7 @@ import {
   QqOutlined,
   EditOutlined,
   SaveOutlined,
+  LockOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/auth";
@@ -34,8 +35,10 @@ const ProfilePage: React.FC = () => {
   const { user, getCurrentUser } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("view");
   const [profileForm] = Form.useForm();
+  const [passwordForm] = Form.useForm();
 
   useEffect(() => {
     if (user) {
@@ -97,6 +100,37 @@ const ProfilePage: React.FC = () => {
       });
     }
     setActiveTab("view");
+  };
+
+  const handleChangePassword = async () => {
+    try {
+      const values = await passwordForm.validateFields();
+      setChangingPassword(true);
+
+      await userApi.updatePassword({
+        oldPassword: values.oldPassword,
+        newPassword: values.newPassword,
+      });
+
+      message.success("密码修改成功，请重新登录");
+      passwordForm.resetFields();
+
+      // 延迟1.5秒后登出，让用户看到成功提示
+      setTimeout(async () => {
+        const { logout } = useAuthStore.getState();
+        await logout();
+        navigate('/login');
+      }, 1500);
+    } catch (error: any) {
+      console.error("修改密码失败", error);
+      if (error?.errorFields) {
+        // 表单验证错误，不显示message
+        return;
+      }
+      message.error(error?.message || "修改密码失败");
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
   const viewTabContent = (
@@ -241,6 +275,84 @@ const ProfilePage: React.FC = () => {
     </div>
   );
 
+  const passwordTabContent = (
+    <div className="max-w-xl">
+      <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <p className="text-blue-800 text-sm">
+          <LockOutlined className="mr-2" />
+          为了您的账户安全，修改密码后需要重新登录。
+        </p>
+      </div>
+
+      <Form
+        form={passwordForm}
+        layout="vertical"
+        className="password-form"
+      >
+        <Form.Item
+          name="oldPassword"
+          label="当前密码"
+          rules={[
+            { required: true, message: "请输入当前密码" },
+          ]}
+        >
+          <Input.Password
+            placeholder="请输入当前密码"
+            prefix={<LockOutlined />}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="newPassword"
+          label="新密码"
+          rules={[
+            { required: true, message: "请输入新密码" },
+            { min: 6, message: "密码长度至少6位" },
+          ]}
+        >
+          <Input.Password
+            placeholder="请输入新密码（至少6位）"
+            prefix={<LockOutlined />}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="confirmPassword"
+          label="确认新密码"
+          dependencies={['newPassword']}
+          rules={[
+            { required: true, message: "请再次输入新密码" },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue('newPassword') === value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(new Error('两次输入的密码不一致'));
+              },
+            }),
+          ]}
+        >
+          <Input.Password
+            placeholder="请再次输入新密码"
+            prefix={<LockOutlined />}
+          />
+        </Form.Item>
+
+        <Form.Item>
+          <Button
+            type="primary"
+            icon={<SaveOutlined />}
+            loading={changingPassword}
+            onClick={handleChangePassword}
+            danger
+          >
+            修改密码
+          </Button>
+        </Form.Item>
+      </Form>
+    </div>
+  );
+
   const tabItems = [
     {
       key: "view",
@@ -251,6 +363,11 @@ const ProfilePage: React.FC = () => {
       key: "edit",
       label: "编辑资料",
       children: editTabContent,
+    },
+    {
+      key: "password",
+      label: "修改密码",
+      children: passwordTabContent,
     },
   ];
 
@@ -273,6 +390,8 @@ const ProfilePage: React.FC = () => {
         }
         .profile-form { padding: 16px 0; }
         .profile-form .ant-form-item { margin-bottom: 20px; }
+        .password-form { padding: 16px 0; }
+        .password-form .ant-form-item { margin-bottom: 20px; }
         .ant-descriptions-item-label {
           width: 140px;
           font-weight: 500;

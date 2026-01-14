@@ -1,6 +1,6 @@
 server:
   servlet:
-    context-path: /
+    context-path: /api
   # 配置上传文件大小限制
   tomcat:
     max-swallow-size: 10MB
@@ -26,8 +26,6 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-  profiles:
-    active: test
   
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

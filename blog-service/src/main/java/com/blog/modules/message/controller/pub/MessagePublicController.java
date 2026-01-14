@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/public/message")
+@RequestMapping("public/message")
 @ApiOperation(name = "消息公开接口", description = "消息相关接口", open = true)
 public class MessagePublicController {
     @Autowired

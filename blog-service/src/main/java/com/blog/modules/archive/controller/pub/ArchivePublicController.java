@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
-@RequestMapping("/api/public/archive")
+@RequestMapping("public/archive")
 @ApiOperation(name = "归档公开接口", description = "文章归档相关接口", open = true)
 public class ArchivePublicController {
     @Autowired

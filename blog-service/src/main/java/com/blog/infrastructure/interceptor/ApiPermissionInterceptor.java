@@ -38,6 +38,13 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
         // 获取当前请求的路径和方法
         String requestPath = request.getRequestURI();
         String requestMethod = request.getMethod();
+
+        // 去除context-path前缀，再进行接口匹配
+        String contextPath = request.getContextPath();
+        if (contextPath != null && !contextPath.isEmpty() && requestPath.startsWith(contextPath)) {
+            requestPath = requestPath.substring(contextPath.length());
+        }
+
         // 执行接口权限验证
         return checkApiPermission(requestPath, requestMethod);
     }

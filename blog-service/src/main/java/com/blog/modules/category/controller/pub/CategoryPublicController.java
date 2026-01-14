@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
-@RequestMapping("/api/public/category")
+@RequestMapping("public/category")
 @ApiOperation(name = "分类公开接口", description = "文章分类相关接口", open = true)
 public class CategoryPublicController {
     @Autowired

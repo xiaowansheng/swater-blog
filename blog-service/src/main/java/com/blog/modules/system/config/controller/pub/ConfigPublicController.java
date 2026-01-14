@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 @RestController
-@RequestMapping("/api/public/config")
+@RequestMapping("public/config")
 @ApiOperation(name = "配置公开接口", description = "网站配置相关接口", open = true)
 public class ConfigPublicController {
     

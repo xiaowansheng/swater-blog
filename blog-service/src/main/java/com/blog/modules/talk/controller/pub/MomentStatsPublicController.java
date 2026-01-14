@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/public/moment")
+@RequestMapping("public/moment")
 @ApiOperation(name = "说说统计接口（V2）", description = "批量读取说说统计字段（不自增）", open = true)
 public class MomentStatsPublicController {
     @Autowired
