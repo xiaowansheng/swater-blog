@@ -21,11 +21,20 @@ interface TabsState {
   clearCachedTabs: () => void // 清除缓存的标签页
 }
 
+// 默认仪表盘标签
+const DASHBOARD_TAB: TabItem = {
+  key: '/dashboard',
+  path: '/dashboard',
+  label: '仪表盘',
+  closable: false,
+  keepAlive: true,
+}
+
 export const useTabsStore = create<TabsState>()(
   persist(
     (set, get) => ({
-      tabs: [],
-      activeKey: '',
+      tabs: [DASHBOARD_TAB],
+      activeKey: '/dashboard',
       cachedTabs: [],
   addTab: (tab) => {
     const { tabs } = get()
@@ -44,6 +53,9 @@ export const useTabsStore = create<TabsState>()(
   },
   removeTab: (key) => {
     const { tabs, activeKey } = get()
+    // 不允许关闭仪表盘标签
+    if (key === '/dashboard') return
+    
     const newTabs = tabs.filter((t) => t.key !== key)
     let newActiveKey = activeKey
     if (activeKey === key) {
@@ -69,23 +81,27 @@ export const useTabsStore = create<TabsState>()(
     const { tabs } = get()
     // 清理其他标签页的缓存
     tabs.forEach(tab => {
-      if (tab.key !== key) {
+      if (tab.key !== key && tab.key !== '/dashboard') {
         const event = new CustomEvent('tab-remove', { detail: { key: tab.key } })
         window.dispatchEvent(event)
       }
     })
-    const newTabs = tabs.filter((t) => t.key === key)
+    // 保留仪表盘和当前标签
+    const newTabs = tabs.filter((t) => t.key === key || t.key === '/dashboard')
     set({ tabs: newTabs, activeKey: key })
   },
   closeLeftTabs: (key) => {
     const { tabs, activeKey } = get()
     const index = tabs.findIndex((t) => t.key === key)
-    // 清理左侧标签页的缓存
+    // 清理左侧标签页的缓存（除了仪表盘）
     tabs.slice(0, index).forEach(tab => {
-      const event = new CustomEvent('tab-remove', { detail: { key: tab.key } })
-      window.dispatchEvent(event)
+      if (tab.key !== '/dashboard') {
+        const event = new CustomEvent('tab-remove', { detail: { key: tab.key } })
+        window.dispatchEvent(event)
+      }
     })
-    const newTabs = tabs.slice(index)
+    // 保留仪表盘和当前位置及右侧的标签
+    const newTabs = tabs.filter((t, i) => i >= index || t.key === '/dashboard')
     let newActiveKey = activeKey
     if (!newTabs.find((t) => t.key === activeKey)) {
       newActiveKey = key
@@ -95,12 +111,15 @@ export const useTabsStore = create<TabsState>()(
   closeRightTabs: (key) => {
     const { tabs, activeKey } = get()
     const index = tabs.findIndex((t) => t.key === key)
-    // 清理右侧标签页的缓存
+    // 清理右侧标签页的缓存（除了仪表盘）
     tabs.slice(index + 1).forEach(tab => {
-      const event = new CustomEvent('tab-remove', { detail: { key: tab.key } })
-      window.dispatchEvent(event)
+      if (tab.key !== '/dashboard') {
+        const event = new CustomEvent('tab-remove', { detail: { key: tab.key } })
+        window.dispatchEvent(event)
+      }
     })
-    const newTabs = tabs.slice(0, index + 1)
+    // 保留仪表盘和当前位置及左侧的标签
+    const newTabs = tabs.filter((t, i) => i <= index || t.key === '/dashboard')
     let newActiveKey = activeKey
     if (!newTabs.find((t) => t.key === activeKey)) {
       newActiveKey = key
@@ -109,12 +128,15 @@ export const useTabsStore = create<TabsState>()(
   },
   closeAllTabs: () => {
     const { tabs } = get()
-    // 清理所有标签页的缓存
+    // 清理所有标签页的缓存（除了仪表盘）
     tabs.forEach(tab => {
-      const event = new CustomEvent('tab-remove', { detail: { key: tab.key } })
-      window.dispatchEvent(event)
+      if (tab.key !== '/dashboard') {
+        const event = new CustomEvent('tab-remove', { detail: { key: tab.key } })
+        window.dispatchEvent(event)
+      }
     })
-    set({ tabs: [], activeKey: '' })
+    // 只保留仪表盘标签
+    set({ tabs: [DASHBOARD_TAB], activeKey: '/dashboard' })
   },
   refreshTab: (key) => {
     const event = new CustomEvent('tab-refresh', { detail: { key } })
