@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Form, Button, message, Card, Switch, Radio, Space } from 'antd'
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeftOutlined, SendOutlined, SaveOutlined } from '@ant-design/icons'
 import { createTalk, updateTalk, getTalkById } from '@/api/talk'
 import { TalkStatus } from '@/types'
+import { usePageTab } from '@/hooks/usePageTab'
 import RichTextEditor from '@/components/common/RichTextEditor'
 import MultiImageUpload from '@/components/common/MultiImageUpload'
 import TalkSaveStatus from '@/components/talk/TalkSaveStatus'
@@ -13,7 +14,7 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 const TalkEdit: React.FC = () => {
   const { id: routeId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const location = useLocation()
+  const { setTabLabel } = usePageTab()
   const [pageId, setPageId] = useState<string | undefined>(routeId)
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
@@ -26,6 +27,11 @@ const TalkEdit: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>()
 
   const isEdit = !!pageId
+
+  useEffect(() => {
+    if (!routeId) return
+    setTabLabel(`[${routeId}]编辑说说`)
+  }, [routeId, setTabLabel])
 
   useEffect(() => {
     if (!pageId && routeId) {

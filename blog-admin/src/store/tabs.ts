@@ -7,6 +7,7 @@ interface TabsState {
   activeKey: string
   cachedTabs: TabItem[] // 缓存的标签页
   addTab: (tab: TabItem) => void
+  updateTabLabel: (key: string, label: string) => void
   removeTab: (key: string) => void
   setActiveTab: (key: string) => void
   closeOtherTabs: (key: string) => void
@@ -33,6 +34,13 @@ export const useTabsStore = create<TabsState>()(
       set({ tabs: [...tabs, tab] })
     }
     set({ activeKey: tab.key })
+  },
+  updateTabLabel: (key, label) => {
+    const { tabs } = get()
+    const current = tabs.find((t) => t.key === key)
+    if (!current) return
+    if (current.label === label) return
+    set({ tabs: tabs.map((t) => (t.key === key ? { ...t, label } : t)) })
   },
   removeTab: (key) => {
     const { tabs, activeKey } = get()

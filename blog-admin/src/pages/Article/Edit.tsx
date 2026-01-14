@@ -6,6 +6,7 @@ import { getArticleById, ArticleSaveDTO } from '@/api/article'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
 import { Category, Tag, ArticleStatus, ArticleType } from '@/types'
+import { usePageTab } from '@/hooks/usePageTab'
 import MarkdownEditor from '@/components/common/MarkdownEditor'
 import CategorySelector from './components/CategorySelector'
 import TagSelector from './components/TagSelector'
@@ -18,6 +19,7 @@ const ArticleEdit: React.FC = () => {
   const navigate = useNavigate()
   const { id: routeId } = useParams()
   const location = useLocation()
+  const { setTabLabel } = usePageTab()
   const [pageId, setPageId] = useState<string | undefined>(routeId)
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
@@ -28,6 +30,7 @@ const ArticleEdit: React.FC = () => {
   const [articleStatus, setArticleStatus] = useState<number>(ArticleStatus.DRAFT)
   const [showConflictModal, setShowConflictModal] = useState(false)
   const type = Form.useWatch('type', form)
+  const title = Form.useWatch('title', form)
   
   // 用于跟踪内容变化
   const contentRef = useRef<string>('')
@@ -61,6 +64,20 @@ const ArticleEdit: React.FC = () => {
       setShowConflictModal(true)
     },
   })
+
+  useEffect(() => {
+    const articleId = saveState.articleId ?? (pageId ? Number(pageId) : null)
+    if (!articleId) return
+
+    const rawTitle = String(title || '').trim()
+    if (!rawTitle) return
+
+    const titleChars = Array.from(rawTitle)
+    const shortTitle =
+      titleChars.length > 7 ? `${titleChars.slice(0, 7).join('')}...` : rawTitle
+
+    setTabLabel(`[${articleId}]${shortTitle}`)
+  }, [pageId, saveState.articleId, setTabLabel, title])
 
   useEffect(() => {
     if (!pageId && routeId) {
