@@ -21,10 +21,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
+import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class GlobalRateLimitFilter extends OncePerRequestFilter {
@@ -59,18 +61,32 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
         whitelist = Binder.get(environment)
             .bind("security.rate-limit.whitelist", Bindable.listOf(String.class))
             .orElseGet(Collections::emptyList);
+        log.info("GlobalRateLimitFilter initialized - enabled: {}, ipPerSecond: {}, ipPerMinute: {}, whitelist: {}", 
+                 enabled, ipPerSecond, ipPerMinute, whitelist);
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        if (!enabled || isWhitelisted(request) || isPreflight(request)) {
+        if (!enabled) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (isWhitelisted(request)) {
+            log.debug("Request whitelisted: {} {}", request.getMethod(), request.getRequestURI());
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (isPreflight(request)) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String ip = IpUtil.getClientIp(request);
+        log.debug("Rate limit check for IP: {} - {} {}", ip, request.getMethod(), request.getRequestURI());
 
         RateLimitManager.RateLimitResult secondResult = null;
         RateLimitManager.RateLimitResult minuteResult = null;
@@ -80,6 +96,8 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
             secondResult = rateLimitManager.slidingWindowRateLimit(secondKey, 1, ipPerSecond);
             applySecondHeaders(response, secondResult);
             if (!secondResult.isAllowed()) {
+                log.warn("Rate limit exceeded (per second) - IP: {}, URI: {}, Limit: {}, Current: {}", 
+                         ip, request.getRequestURI(), ipPerSecond, secondResult.getCurrentCount());
                 applyStandardHeaders(response, secondResult, ipPerSecond);
                 writeRateLimitResponse(response);
                 return;
@@ -91,6 +109,8 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
             minuteResult = rateLimitManager.slidingWindowRateLimit(minuteKey, 60, ipPerMinute);
             applyMinuteHeaders(response, minuteResult);
             if (!minuteResult.isAllowed()) {
+                log.warn("Rate limit exceeded (per minute) - IP: {}, URI: {}, Limit: {}, Current: {}", 
+                         ip, request.getRequestURI(), ipPerMinute, minuteResult.getCurrentCount());
                 applyStandardHeaders(response, minuteResult, ipPerMinute);
                 writeRateLimitResponse(response);
                 return;
@@ -125,6 +145,7 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
 
         for (String pattern : whitelist) {
             if (pathMatcher.match(pattern, requestUri) || pathMatcher.match(pattern, normalizedUri)) {
+                log.debug("URI matched whitelist pattern: {} -> {}", requestUri, pattern);
                 return true;
             }
         }
