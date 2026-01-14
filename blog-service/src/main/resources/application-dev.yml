@@ -35,6 +35,19 @@ spring:
     mode: HTML
     encoding: UTF-8
     cache: false  # 开发时禁用缓存
+  
+  # Jackson 日期格式化配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-dates-as-timestamps: false
+  
+  # 配置多部分上传限制
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 
   # 开发环境数据源配置
   datasource:
@@ -86,6 +99,8 @@ spring:
       schema-locations: classpath:schema.sql
       data-locations: classpath:data-dev.sql
       continue-on-error: true  # 开发时忽略错误
+      separator: ";"
+      encoding: utf-8
   
   # 开发环境Redis配置
   data:
@@ -157,6 +172,7 @@ spring:
 # 文件存储配置 - 开发环境
 file:
   storage:
+    type: local
     local:
       path: uploads
     oss:
@@ -165,12 +181,14 @@ file:
       access-key-secret: 
       bucket-name: 
       domain: 
+    qiniu:
+      access-key: 
+      secret-key: 
+      bucket: 
+      domain: 
 
 # 通知配置 - 开发环境
 notification:
-  channels:
-    - websocket
-    - email
   email:
     enabled: true
   websocket:
@@ -188,6 +206,26 @@ location:
   amap:
     key: your-amap-key
     api-url: https://restapi.amap.com/v3/ip
+  baidu:
+    ak: 
+    api-url: https://api.map.baidu.com/location/ip
+  ip2location:
+    db-path:
+
+# 搜索引擎配置
+search:
+  provider:
+    type: database  # 开发时使用数据库搜索
+
+# 消息队列配置
+mq:
+  provider:
+    type: rabbitmq
+
+# 定时任务配置
+scheduler:
+  provider:
+    type: spring
 
 # 评论系统配置
 comment:
@@ -234,6 +272,7 @@ mybatis-plus:
 # Sa-Token配置 - 开发环境
 sa-token:
   token-name: Authorization
+  token-prefix: Bearer
   timeout: -1
   active-timeout: 86400
   is-read-timeout: true
@@ -242,6 +281,17 @@ sa-token:
   token-style: uuid
   is-log: true  # 开发时启用日志
   jwt-secret-key: dev-secret-key-change-in-production
+
+# 认证配置 - 开发环境
+auth:
+  email-session:
+    secret: ${AUTH_EMAIL_SESSION_SECRET:dev-change-me}
+    ttl-seconds: 2592000
+    header-name: X-Verify-Token
+
+# API 资源配置 - 开发环境
+api-resource:
+  auto-refresh-on-startup: true
 
 # 日志配置 - 开发环境详细日志
 logging:
@@ -393,6 +443,12 @@ plugin:
   mq:
     active: rabbitmq  # RabbitMQ
     fallback: memory  # 降级到内存MQ
+
+  # 通知渠道插件配置
+  notification:
+    enabled:
+      - websocket  # WebSocket通知
+      - email      # 邮件通知
 
   # 搜索插件配置
   search:
