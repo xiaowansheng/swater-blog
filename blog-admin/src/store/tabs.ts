@@ -7,6 +7,7 @@ interface TabsState {
   activeKey: string
   cachedTabs: TabItem[] // 缓存的标签页
   addTab: (tab: TabItem) => void
+  updateTab: (key: string, patch: Partial<TabItem>) => void
   updateTabLabel: (key: string, label: string) => void
   removeTab: (key: string) => void
   setActiveTab: (key: string) => void
@@ -43,6 +44,24 @@ export const useTabsStore = create<TabsState>()(
       set({ tabs: [...tabs, tab] })
     }
     set({ activeKey: tab.key })
+  },
+  updateTab: (key, patch) => {
+    const { tabs } = get()
+    const current = tabs.find((t) => t.key === key)
+    if (!current) return
+
+    // 不允许修改 key
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { key: _ignoredKey, ...rest } = patch as any
+
+    const patchKeys = Object.keys(rest)
+    if (patchKeys.length === 0) return
+    const isSame = patchKeys.every((k) => (current as any)[k] === (rest as any)[k])
+    if (isSame) return
+
+    set({
+      tabs: tabs.map((t) => (t.key === key ? { ...t, ...rest } : t)),
+    })
   },
   updateTabLabel: (key, label) => {
     const { tabs } = get()

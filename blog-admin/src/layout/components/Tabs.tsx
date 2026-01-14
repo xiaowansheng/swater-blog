@@ -3,12 +3,14 @@ import type { MenuProps } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTabsStore } from '@/store/tabs'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
+import { getNextPathAfterClose, sortTabsForDisplay } from '@/utils/tabNavigation'
 
 const Tabs: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { tabs, activeKey, setActiveTab, removeTab, closeOtherTabs, closeLeftTabs, closeRightTabs, closeAllTabs, refreshTab } = useTabsStore()
+  const sortedTabs = useMemo(() => sortTabsForDisplay(tabs), [tabs])
 
   useEffect(() => {
     setActiveTab(location.pathname)
@@ -16,22 +18,23 @@ const Tabs: React.FC = () => {
 
   const getContextMenus = (key: string): MenuProps => {
     const isDashboard = key === '/dashboard'
+    const currentIndex = sortedTabs.findIndex((t) => t.key === key)
     return {
       items: [
         {
           key: 'closeOther',
           label: '关闭其他',
-          disabled: tabs.length <= 1 || (tabs.length === 2 && isDashboard),
+          disabled: sortedTabs.length <= 1 || (sortedTabs.length === 2 && isDashboard),
         },
         {
           key: 'closeLeft',
           label: '关闭左侧',
-          disabled: isDashboard || tabs.indexOf(tabs.find((t) => t.key === key)!) === 0 || (tabs.indexOf(tabs.find((t) => t.key === key)!) === 1 && tabs[0].key === '/dashboard'),
+          disabled: isDashboard || currentIndex === 0 || (currentIndex === 1 && sortedTabs[0].key === '/dashboard'),
         },
         {
           key: 'closeRight',
           label: '关闭右侧',
-          disabled: tabs.indexOf(tabs.find((t) => t.key === key)!) === tabs.length - 1,
+          disabled: currentIndex === sortedTabs.length - 1,
         },
         {
           type: 'divider',
@@ -39,7 +42,7 @@ const Tabs: React.FC = () => {
         {
           key: 'closeAll',
           label: '关闭全部',
-          disabled: tabs.length === 0 || (tabs.length === 1 && isDashboard),
+          disabled: sortedTabs.length === 0 || (sortedTabs.length === 1 && isDashboard),
         },
       ],
       onClick: ({ key: menuKey }) => {
@@ -52,7 +55,7 @@ const Tabs: React.FC = () => {
             break
           case 'closeLeft':
             closeLeftTabs(key)
-            if (!tabs.slice(0, tabs.indexOf(tabs.find((t) => t.key === key)!)).find((t) => t.key === activeKey)) {
+            if (!sortedTabs.slice(0, currentIndex).find((t) => t.key === activeKey)) {
               if (key !== activeKey) {
                 navigate(key)
               }
@@ -60,7 +63,7 @@ const Tabs: React.FC = () => {
             break
           case 'closeRight':
             closeRightTabs(key)
-            if (!tabs.slice(tabs.indexOf(tabs.find((t) => t.key === key)!) + 1).find((t) => t.key === activeKey)) {
+            if (!sortedTabs.slice(currentIndex + 1).find((t) => t.key === activeKey)) {
               if (key !== activeKey) {
                 navigate(key)
               }
@@ -87,16 +90,12 @@ const Tabs: React.FC = () => {
       // 不允许关闭仪表盘标签
       if (targetKey === '/dashboard') return
       
-      const currentIndex = tabs.findIndex((tab) => tab.key === targetKey)
+      const nextPath = getNextPathAfterClose(sortedTabs, targetKey, '/dashboard')
       removeTab(targetKey)
 
       // 如果关闭的是当前标签，跳转到相邻标签
-      if (targetKey === activeKey && tabs.length > 1) {
-        const newIndex = currentIndex === 0 ? 1 : currentIndex - 1
-        const newTab = tabs[newIndex]
-        if (newTab) {
-          navigate(newTab.path)
-        }
+      if (targetKey === activeKey && sortedTabs.length > 1) {
+        navigate(nextPath)
       }
     }
   }
@@ -111,11 +110,7 @@ const Tabs: React.FC = () => {
   }
 
   // 确保仪表盘标签始终在第一个位置
-  const sortedTabs = [...tabs].sort((a, b) => {
-    if (a.key === '/dashboard') return -1
-    if (b.key === '/dashboard') return 1
-    return 0
-  })
+
 
   return (
     <div className="tabs-container">

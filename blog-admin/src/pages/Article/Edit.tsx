@@ -19,7 +19,7 @@ const ArticleEdit: React.FC = () => {
   const navigate = useNavigate()
   const { id: routeId } = useParams()
   const location = useLocation()
-  const { setTabLabel } = usePageTab()
+  const { setTabLabel, closeSelf } = usePageTab()
   const [pageId, setPageId] = useState<string | undefined>(routeId)
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
@@ -153,10 +153,12 @@ const ArticleEdit: React.FC = () => {
       setIsModalOpen(false)
       setIsPublishing(false)
       setTimeout(() => {
+        // 关闭当前“新建/编辑文章”标签页，避免新增发布后标签残留
+        closeSelf({ navigateIfActive: false })
         navigate('/article')
       }, 100)
     }
-  }, [isPublishing, saveState.status, isSaving, navigate])
+  }, [closeSelf, isPublishing, saveState.status, isSaving, navigate])
 
   // 监听保存失败
   useEffect(() => {

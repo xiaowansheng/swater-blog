@@ -14,7 +14,7 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 const TalkEdit: React.FC = () => {
   const { id: routeId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { setTabLabel } = usePageTab()
+  const { setTabLabel, closeSelf } = usePageTab()
   const [pageId, setPageId] = useState<string | undefined>(routeId)
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
@@ -93,6 +93,7 @@ const TalkEdit: React.FC = () => {
 
       // 等待一小段时间让用户看到保存成功状态
       setTimeout(() => {
+        closeSelf({ navigateIfActive: false })
         navigate('/talk')
       }, 300)
     } catch (error) {
@@ -145,7 +146,7 @@ const TalkEdit: React.FC = () => {
     } finally {
       setSubmitting(false)
     }
-  }, [form, isEdit, pageId, navigate])
+  }, [closeSelf, form, isEdit, pageId, navigate])
 
   // 快捷键保存 Ctrl+S 或 Cmd+S
   useEffect(() => {
