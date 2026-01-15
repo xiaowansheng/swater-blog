@@ -97,25 +97,29 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
       {(message.location || message.ipLocation || message.country || message.province || message.city || message.device || message.browser) && (
         <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">
           {/* 左边：地址 */}
-          {formatLocation(message.country, message.province, message.city, message.location, message.ipLocation) && (
-            <div className="flex items-center gap-1">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span>{formatLocation(message.country, message.province, message.city, message.location, message.ipLocation)}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1 flex-1">
+            {formatLocation(message.country, message.province, message.city, message.location, message.ipLocation) && (
+              <>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>{formatLocation(message.country, message.province, message.city, message.location, message.ipLocation)}</span>
+              </>
+            )}
+          </div>
 
           {/* 右边：设备和浏览器 */}
-          {formatDeviceAndBrowser(message.device, message.browser) && (
-            <div className="flex items-center gap-1">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span>{formatDeviceAndBrowser(message.device, message.browser)}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1 flex-1 justify-end">
+            {formatDeviceAndBrowser(message.device, message.browser) && (
+              <>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span>{formatDeviceAndBrowser(message.device, message.browser)}</span>
+              </>
+            )}
+          </div>
         </div>
       )}
       {message.images && message.images.length > 0 && (
