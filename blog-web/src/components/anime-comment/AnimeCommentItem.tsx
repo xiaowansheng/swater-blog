@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { formatDate } from '@/lib/utils/format';
-import type { CommentVO } from '@/types';
+import type { CommentVO, PrivacyConfig } from '@/types';
 import { AnimeCommentConfig } from './types';
 import { getRandomAnimeAvatar } from './constants';
 import ReplyForm from './ReplyForm';
@@ -27,6 +27,7 @@ interface AnimeCommentItemProps {
   targetType: 'ARTICLE' | 'TALK';
   targetId: number;
   config: AnimeCommentConfig;
+  privacy: PrivacyConfig;
 }
 
 const STATUS_LABEL = {
@@ -88,6 +89,7 @@ export default function AnimeCommentItem({
   targetType,
   targetId,
   config,
+  privacy,
 }: AnimeCommentItemProps) {
   const avatar = comment.avatar || getRandomAnimeAvatar(comment.nickname);
   const showReplyForm = activeReplyFormId === comment.id;
@@ -154,11 +156,12 @@ export default function AnimeCommentItem({
         </div>
 
         {/* 第三部分：地址和设备信息 */}
-        {(comment.location || comment.ipLocation || comment.country || comment.province || comment.city || comment.device || comment.browser) && (
+        {(privacy.showLocation || privacy.showDevice || privacy.showBrowser) &&
+         (comment.location || comment.ipLocation || comment.country || comment.province || comment.city || comment.device || comment.browser) && (
           <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">
             {/* 左边：地址 */}
             <div className="flex items-center gap-1 flex-1">
-              {formatLocation(comment.country, comment.province, comment.city, comment.location, comment.ipLocation) && (
+              {privacy.showLocation && formatLocation(comment.country, comment.province, comment.city, comment.location, comment.ipLocation) && (
                 <>
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -171,12 +174,18 @@ export default function AnimeCommentItem({
 
             {/* 右边：设备和浏览器 */}
             <div className="flex items-center gap-1 flex-1 justify-end">
-              {formatDeviceAndBrowser(comment.device, comment.browser) && (
+              {(privacy.showDevice || privacy.showBrowser) && formatDeviceAndBrowser(
+                privacy.showDevice ? comment.device : undefined,
+                privacy.showBrowser ? comment.browser : undefined
+              ) && (
                 <>
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
-                  <span>{formatDeviceAndBrowser(comment.device, comment.browser)}</span>
+                  <span>{formatDeviceAndBrowser(
+                    privacy.showDevice ? comment.device : undefined,
+                    privacy.showBrowser ? comment.browser : undefined
+                  )}</span>
                 </>
               )}
             </div>
@@ -294,11 +303,12 @@ export default function AnimeCommentItem({
               </div>
 
               {/* 第三部分：地址和设备信息 */}
-              {(child.location || child.ipLocation || child.country || child.province || child.city || child.device || child.browser) && (
+              {(privacy.showLocation || privacy.showDevice || privacy.showBrowser) &&
+               (child.location || child.ipLocation || child.country || child.province || child.city || child.device || child.browser) && (
                 <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">
                   {/* 左边：地址 */}
                   <div className="flex items-center gap-1 flex-1">
-                    {formatLocation(child.country, child.province, child.city, child.location, child.ipLocation) && (
+                    {privacy.showLocation && formatLocation(child.country, child.province, child.city, child.location, child.ipLocation) && (
                       <>
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -311,12 +321,18 @@ export default function AnimeCommentItem({
 
                   {/* 右边：设备和浏览器 */}
                   <div className="flex items-center gap-1 flex-1 justify-end">
-                    {formatDeviceAndBrowser(child.device, child.browser) && (
+                    {(privacy.showDevice || privacy.showBrowser) && formatDeviceAndBrowser(
+                      privacy.showDevice ? child.device : undefined,
+                      privacy.showBrowser ? child.browser : undefined
+                    ) && (
                       <>
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
-                        <span>{formatDeviceAndBrowser(child.device, child.browser)}</span>
+                        <span>{formatDeviceAndBrowser(
+                          privacy.showDevice ? child.device : undefined,
+                          privacy.showBrowser ? child.browser : undefined
+                        )}</span>
                       </>
                     )}
                   </div>

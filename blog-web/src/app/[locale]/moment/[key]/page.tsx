@@ -11,7 +11,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import { momentApi } from '@/lib/api/moment';
 import { formatDate } from '@/lib/utils/format';
 import { ISR_REVALIDATE } from '@/lib/constants';
-import { getAuthorInfo } from '@/lib/api/config.server';
+import { getAuthorInfo, getServerConfig } from '@/lib/api/config.server';
 
 export const revalidate = ISR_REVALIDATE.HOME;
 
@@ -80,10 +80,12 @@ export default async function MomentDetailPage({
   await getTranslations('common');
 
   try {
-    const [moment, author] = await Promise.all([
+    const [moment, author, config] = await Promise.all([
       momentApi.getByKey(key),
       getAuthorInfo(),
+      getServerConfig(),
     ]);
+    const { privacy } = config;
 
     return (
       <>
@@ -123,11 +125,12 @@ export default async function MomentDetailPage({
             )}
 
             {/* 位置和设备信息 */}
-            {(moment.location || moment.ipLocation || moment.country || moment.province || moment.city || moment.device || moment.browser) && (
+            {(privacy.showLocation || privacy.showDevice || privacy.showBrowser) &&
+             (moment.location || moment.ipLocation || moment.country || moment.province || moment.city || moment.device || moment.browser) && (
               <div className="flex items-center justify-between mt-6 pt-4 text-xs text-muted-foreground border-t border-border/50">
                 {/* 左边：地址 */}
                 <div className="flex items-center gap-1 flex-1">
-                  {formatLocation(moment.country, moment.province, moment.city, moment.location, moment.ipLocation) && (
+                  {privacy.showLocation && formatLocation(moment.country, moment.province, moment.city, moment.location, moment.ipLocation) && (
                     <>
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -140,12 +143,18 @@ export default async function MomentDetailPage({
 
                 {/* 右边：设备和浏览器 */}
                 <div className="flex items-center gap-1 flex-1 justify-end">
-                  {formatDeviceAndBrowser(moment.device, moment.browser) && (
+                  {(privacy.showDevice || privacy.showBrowser) && formatDeviceAndBrowser(
+                    privacy.showDevice ? moment.device : undefined,
+                    privacy.showBrowser ? moment.browser : undefined
+                  ) && (
                     <>
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
-                      <span>{formatDeviceAndBrowser(moment.device, moment.browser)}</span>
+                      <span>{formatDeviceAndBrowser(
+                        privacy.showDevice ? moment.device : undefined,
+                        privacy.showBrowser ? moment.browser : undefined
+                      )}</span>
                     </>
                   )}
                 </div>

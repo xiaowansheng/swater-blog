@@ -4,6 +4,7 @@ import Image from '@/components/common/ImageWithPreview';
 import type { GuestbookVO } from '@/types';
 import { formatDate } from '@/lib/utils/format';
 import { usePathname } from '@/lib/i18n/routing';
+import { useSiteConfig } from '@/lib/context/SiteConfigContext';
 
 interface GuestbookItemProps {
   message: GuestbookVO;
@@ -47,6 +48,7 @@ function formatDeviceAndBrowser(device: string | undefined, browser: string | un
 
 export default function GuestbookItem({ message }: GuestbookItemProps) {
   const pathname = usePathname();
+  const { privacy } = useSiteConfig();
   const locale = pathname?.split('/')[1] || 'zh';
   const displayName = message.nickname || message.userName || 'Guest';
   const initial = displayName.charAt(0).toUpperCase();
@@ -94,11 +96,12 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
       </p>
 
       {/* 第三部分：地址和设备信息 */}
-      {(message.location || message.ipLocation || message.country || message.province || message.city || message.device || message.browser) && (
+      {(privacy.showLocation || privacy.showDevice || privacy.showBrowser) &&
+       (message.location || message.ipLocation || message.country || message.province || message.city || message.device || message.browser) && (
         <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">
           {/* 左边：地址 */}
           <div className="flex items-center gap-1 flex-1">
-            {formatLocation(message.country, message.province, message.city, message.location, message.ipLocation) && (
+            {privacy.showLocation && formatLocation(message.country, message.province, message.city, message.location, message.ipLocation) && (
               <>
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -111,12 +114,18 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
 
           {/* 右边：设备和浏览器 */}
           <div className="flex items-center gap-1 flex-1 justify-end">
-            {formatDeviceAndBrowser(message.device, message.browser) && (
+            {(privacy.showDevice || privacy.showBrowser) && formatDeviceAndBrowser(
+              privacy.showDevice ? message.device : undefined,
+              privacy.showBrowser ? message.browser : undefined
+            ) && (
               <>
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                <span>{formatDeviceAndBrowser(message.device, message.browser)}</span>
+                <span>{formatDeviceAndBrowser(
+                  privacy.showDevice ? message.device : undefined,
+                  privacy.showBrowser ? message.browser : undefined
+                )}</span>
               </>
             )}
           </div>

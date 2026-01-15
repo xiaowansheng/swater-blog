@@ -9,6 +9,7 @@ import AnimeCommentList from './AnimeCommentList';
 import { UserInfoProvider, useUserInfo } from './UserInfoContext';
 import { commentApi } from '@/lib/api/comment';
 import type { CommentVO } from '@/types';
+import { useSiteConfig } from '@/lib/context/SiteConfigContext';
 
 const COMMENT_PAGE_SIZE = 10;
 const REPLY_PAGE_SIZE = 5;
@@ -55,6 +56,7 @@ function AnimeCommentInner({
   className = '',
 }: AnimeCommentProps) {
   const t = useTranslations('comment');
+  const { privacy } = useSiteConfig();
   const { isOwner, isVisible } = useVisibilityChecker();
   const [config, setConfig] = useState<AnimeCommentConfig>(DEFAULT_COMMENT_CONFIG);
   const [topComments, setTopComments] = useState<CommentVO[]>([]);
@@ -260,6 +262,7 @@ function AnimeCommentInner({
           targetType={targetType}
           targetId={targetId}
           config={config}
+          privacy={privacy}
         />
       )}
     </div>

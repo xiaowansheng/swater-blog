@@ -1,6 +1,6 @@
 'use client';
 
-import type { CommentVO } from '@/types';
+import type { CommentVO, PrivacyConfig } from '@/types';
 import { AnimeCommentConfig } from './types';
 import AnimeCommentItem from './AnimeCommentItem';
 
@@ -28,6 +28,7 @@ interface AnimeCommentListProps {
   targetType: 'ARTICLE' | 'TALK';
   targetId: number;
   config: AnimeCommentConfig;
+  privacy: PrivacyConfig;
 }
 
 /**
@@ -49,6 +50,7 @@ export default function AnimeCommentList({
   targetType,
   targetId,
   config,
+  privacy,
 }: AnimeCommentListProps) {
   if (loading) {
     return (
@@ -89,6 +91,7 @@ export default function AnimeCommentList({
           targetType={targetType}
           targetId={targetId}
           config={config}
+          privacy={privacy}
         />
       ))}
 
