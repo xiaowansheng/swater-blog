@@ -8,6 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 public interface FileService {
     FileVO upload(MultipartFile file, FileUploadDTO dto);
 
+    FileVO uploadByUrl(String url, FileUploadDTO dto);
+
     PageResult<FileVO> list(Long page, Long size, String type);
 
     void delete(Long id);

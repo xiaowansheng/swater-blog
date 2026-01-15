@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Vditor from 'vditor'
 import 'vditor/dist/index.css'
-import { uploadFile } from '@/api/file'
+import { uploadFile, uploadExternalImage, uploadExternalWebpage, isExternalImageUrl, isExternalWebUrl, extractUrls } from '@/api/file'
 import { getFullUrl } from '@/utils/format'
 import { message } from 'antd'
 
@@ -109,6 +109,234 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       vditorInstance.current.setValue(value)
     }
   }, [value, isInit])
+
+  // 处理外部图片URL转换为内链
+  useEffect(() => {
+    if (!isInit || !vditorInstance.current) return
+
+    // ??????markdown??????????????????URL
+    const extractImageUrls = (text: string): string[] => {
+      const urlRegex = /!\[.*?\]\((.*?)\)/g
+      const urls: string[] = []
+      let match
+      while ((match = urlRegex.exec(text)) !== null) {
+        urls.push(match[1])
+      }
+      return urls
+    }
+
+    const extractExternalImagesFromHtml = (html: string): { src: string; alt: string }[] => {
+      const tempDiv = document.createElement('div')
+      tempDiv.innerHTML = html
+      const images = tempDiv.querySelectorAll('img')
+      const externalImages: { src: string; alt: string }[] = []
+      images.forEach((img) => {
+        const src = img.getAttribute('src')
+        if (src && isExternalImageUrl(src)) {
+          externalImages.push({ src, alt: img.getAttribute('alt') || '' })
+        }
+      })
+      return externalImages
+    }
+
+    const replaceExternalUrls = async (text: string): Promise<string | null> => {
+      const imageUrls = extractImageUrls(text)
+      const externalImageUrls = imageUrls.filter((url) => isExternalImageUrl(url))
+
+      const allUrls = extractUrls(text)
+      const externalWebUrls = allUrls.filter((url) => isExternalWebUrl(url))
+
+      if (externalImageUrls.length === 0 && externalWebUrls.length === 0) return null
+
+      let newText = text
+      const results: { oldUrl: string; newUrl: string; type: string; success: boolean }[] = []
+
+      if (externalImageUrls.length > 0) {
+        const loadingKey = 'uploading-external'
+        message.loading({ content: '????????????????????????...', key: loadingKey, duration: 0 })
+
+        const imagePromises = externalImageUrls.map(async (oldUrl) => {
+          try {
+            const res = await uploadExternalImage(oldUrl, category)
+            const newUrl = getFullUrl(res.url || res.storagePath)
+            return { oldUrl, newUrl, type: '??????', success: true }
+          } catch (error) {
+            console.error(`????????????????????????: ${oldUrl}`, error)
+            return { oldUrl, newUrl: oldUrl, type: '??????', success: false }
+          }
+        })
+
+        const imageResults = await Promise.all(imagePromises)
+        results.push(...imageResults)
+
+        message.success({ content: `???????????? ${imageResults.filter((r) => r.success).length} ?????????`, key: loadingKey })
+      }
+
+      if (externalWebUrls.length > 0) {
+        const webLoadingKey = 'uploading-webpage'
+        message.loading({ content: '????????????????????????...', key: webLoadingKey, duration: 0 })
+
+        const webPromises = externalWebUrls.map(async (oldUrl) => {
+          try {
+            const res = await uploadExternalWebpage(oldUrl, category)
+            const newUrl = getFullUrl(res.url || res.storagePath)
+            return { oldUrl, newUrl, type: '??????', success: true }
+          } catch (error) {
+            console.error(`????????????????????????: ${oldUrl}`, error)
+            return { oldUrl, newUrl: oldUrl, type: '??????', success: false }
+          }
+        })
+
+        const webResults = await Promise.all(webPromises)
+        results.push(...webResults)
+
+        const successWebCount = webResults.filter((r) => r.success).length
+        if (successWebCount > 0) {
+          message.success({ content: `???????????? ${successWebCount} ?????????`, key: webLoadingKey })
+        } else {
+          message.warning({ content: '??????????????????????????????CORS??????????????????????????????', key: webLoadingKey })
+        }
+      }
+
+      results.forEach(({ oldUrl, newUrl, success }) => {
+        if (success) {
+          newText = newText.replaceAll(oldUrl, newUrl)
+        }
+      })
+
+      return newText
+    }
+
+    const replaceExternalImagesInHtml = async (html: string, images: { src: string; alt: string }[]) => {
+      const loadingKey = 'uploading-external'
+      message.loading({ content: '????????????????????????...', key: loadingKey, duration: 0 })
+
+      const uploadPromises = images.map(async ({ src, alt }) => {
+        try {
+          const res = await uploadExternalImage(src, category)
+          const newUrl = getFullUrl(res.url || res.storagePath)
+          return { oldSrc: src, newSrc: newUrl, alt, success: true }
+        } catch (error) {
+          console.error(`????????????????????????: ${src}`, error)
+          return { oldSrc: src, newSrc: src, alt, success: false }
+        }
+      })
+
+      const results = await Promise.all(uploadPromises)
+      let newHtml = html
+      results.forEach(({ oldSrc, newSrc, success }) => {
+        if (success) {
+          newHtml = newHtml.replaceAll(`src="${oldSrc}"`, `src="${newSrc}"`)
+        }
+      })
+
+      const successCount = results.filter((r) => r.success).length
+      const failCount = results.filter((r) => !r.success).length
+
+      if (failCount === 0) {
+        message.success({ content: `???????????? ${successCount} ?????????`, key: loadingKey })
+      } else {
+        message.warning({ content: `???????????? ${successCount} ???????????? ${failCount} ???`, key: loadingKey })
+      }
+
+      return newHtml
+    }
+
+    const handlePaste = async (e: ClipboardEvent) => {
+      const clipboardData = e.clipboardData
+      if (!clipboardData) return
+
+      const html = clipboardData.getData('text/html')
+      if (html) {
+        const externalImages = extractExternalImagesFromHtml(html)
+        if (externalImages.length > 0) {
+          e.preventDefault()
+          const newHtml = await replaceExternalImagesInHtml(html, externalImages)
+          const newMarkdown = vditorInstance.current?.html2md(newHtml) || newHtml
+          vditorInstance.current?.insertValue(newMarkdown)
+          return
+        }
+      }
+
+      const text = clipboardData.getData('text/plain')
+      if (!text) return
+
+      const newText = await replaceExternalUrls(text)
+      if (!newText) return
+
+      e.preventDefault()
+      vditorInstance.current?.insertValue(newText)
+    }
+
+    const handleDrop = async (e: DragEvent) => {
+      const dataTransfer = e.dataTransfer
+      if (!dataTransfer) return
+      if (dataTransfer.files && dataTransfer.files.length > 0) return
+
+      const html = dataTransfer.getData('text/html')
+      if (html) {
+        const externalImages = extractExternalImagesFromHtml(html)
+        if (externalImages.length > 0) {
+          e.preventDefault()
+          const newHtml = await replaceExternalImagesInHtml(html, externalImages)
+          const newMarkdown = vditorInstance.current?.html2md(newHtml) || newHtml
+          vditorInstance.current?.insertValue(newMarkdown)
+          return
+        }
+      }
+
+      const text = dataTransfer.getData('text/uri-list') || dataTransfer.getData('text/plain')
+      if (!text) return
+
+      const newText = await replaceExternalUrls(text)
+      if (!newText) return
+
+      e.preventDefault()
+      vditorInstance.current?.insertValue(newText)
+    }
+
+    const handleDragOver = (e: DragEvent) => {
+      const dataTransfer = e.dataTransfer
+      if (!dataTransfer) return
+      if (dataTransfer.files && dataTransfer.files.length > 0) return
+
+      const types = Array.from(dataTransfer.types || [])
+      if (types.includes('text/uri-list') || types.includes('text/html') || types.includes('text/plain')) {
+        e.preventDefault()
+      }
+    }
+
+    const editorRoot = vditorInstance.current?.vditor?.element
+    const isInEditor = (target: EventTarget | null) => {
+      if (!editorRoot || !(target instanceof Node)) return false
+      return editorRoot.contains(target)
+    }
+
+    const handlePasteInEditor = async (e: ClipboardEvent) => {
+      if (!isInEditor(e.target)) return
+      await handlePaste(e)
+    }
+
+    const handleDropInEditor = async (e: DragEvent) => {
+      if (!isInEditor(e.target)) return
+      await handleDrop(e)
+    }
+
+    const handleDragOverInEditor = (e: DragEvent) => {
+      if (!isInEditor(e.target)) return
+      handleDragOver(e)
+    }
+
+    document.addEventListener('paste', handlePasteInEditor, true)
+    document.addEventListener('drop', handleDropInEditor, true)
+    document.addEventListener('dragover', handleDragOverInEditor, true)
+
+    return () => {
+      document.removeEventListener('paste', handlePasteInEditor, true)
+      document.removeEventListener('drop', handleDropInEditor, true)
+      document.removeEventListener('dragover', handleDragOverInEditor, true)
+    }
+  }, [isInit, category])
 
   return (
     <div className="overflow-hidden w-full rounded-md border vditor-container">

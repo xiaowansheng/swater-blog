@@ -22,13 +22,23 @@ import com.blog.plugin.components.storage.StoragePluginFactory;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.PageUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 @Service
 public class FileServiceImpl implements FileService {
@@ -98,6 +108,38 @@ public class FileServiceImpl implements FileService {
             return convertToVO(fileMeta);
         } catch (Exception e) {
             throw new BusinessException("文件上传失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public FileVO uploadByUrl(String url, FileUploadDTO dto) {
+        if (!StringUtils.hasText(url)) {
+            throw new BusinessException("URL????????????");
+        }
+
+        try {
+            URL parsedUrl = new URL(url);
+            String protocol = parsedUrl.getProtocol();
+            if (!"http".equalsIgnoreCase(protocol) && !"https".equalsIgnoreCase(protocol)) {
+                throw new BusinessException("?????????HTTP/HTTPS URL");
+            }
+
+            HttpResponse response = HttpRequest.get(url).timeout(10000).execute();
+            if (response.getStatus() >= 400) {
+                throw new BusinessException("??????????????????: " + response.getStatus());
+            }
+
+            byte[] bytes = response.bodyBytes();
+            String contentType = response.header("Content-Type");
+            String fileName = buildFileName(parsedUrl, contentType);
+
+            ByteArrayMultipartFile multipartFile = new ByteArrayMultipartFile("file", fileName, contentType, bytes);
+            return upload(multipartFile, dto);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new BusinessException("??????????????????: " + e.getMessage());
         }
     }
 
@@ -188,6 +230,109 @@ public class FileServiceImpl implements FileService {
             return "audio";
         } else {
             return "other";
+        }
+    }
+
+
+
+    private static class ByteArrayMultipartFile implements MultipartFile {
+        private final String name;
+        private final String originalFilename;
+        private final String contentType;
+        private final byte[] content;
+
+        private ByteArrayMultipartFile(String name, String originalFilename, String contentType, byte[] content) {
+            this.name = name;
+            this.originalFilename = originalFilename;
+            this.contentType = contentType;
+            this.content = content != null ? content : new byte[0];
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getOriginalFilename() {
+            return originalFilename;
+        }
+
+        @Override
+        public String getContentType() {
+            return contentType;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return content.length == 0;
+        }
+
+        @Override
+        public long getSize() {
+            return content.length;
+        }
+
+        @Override
+        public byte[] getBytes() {
+            return content;
+        }
+
+        @Override
+        public InputStream getInputStream() {
+            return new ByteArrayInputStream(content);
+        }
+
+        @Override
+        public void transferTo(File dest) throws IOException {
+            Files.write(dest.toPath(), content);
+        }
+    }
+
+    private String buildFileName(URL url, String contentType) {
+        String path = url.getPath();
+        String name = path != null ? path.substring(path.lastIndexOf('/') + 1) : "";
+        if (name == null || name.isEmpty()) {
+            name = "file";
+        }
+
+        boolean hasExtension = name.contains(".");
+        if (!hasExtension) {
+            String extension = extensionFromContentType(contentType);
+            if (!extension.isEmpty()) {
+                name = name + "." + extension;
+            }
+        }
+
+        return name;
+    }
+
+    private String extensionFromContentType(String contentType) {
+        if (contentType == null) {
+            return "";
+        }
+        String normalized = contentType.split(";")[0].trim().toLowerCase(Locale.ROOT);
+        switch (normalized) {
+            case "image/jpeg":
+                return "jpg";
+            case "image/png":
+                return "png";
+            case "image/gif":
+                return "gif";
+            case "image/webp":
+                return "webp";
+            case "image/bmp":
+                return "bmp";
+            case "image/svg+xml":
+                return "svg";
+            case "text/html":
+                return "html";
+            case "text/plain":
+                return "txt";
+            case "application/pdf":
+                return "pdf";
+            default:
+                return "";
         }
     }
 

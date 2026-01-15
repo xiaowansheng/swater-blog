@@ -33,6 +33,21 @@ public class FileController {
         return Result.success(vo);
     }
 
+    @PostMapping("/upload-by-url")
+    @ApiOperation(name = "上传外链文件", type = ApiOperationType.CREATE, description = "通过URL上传文件")
+    public Result<FileVO> uploadByUrl(
+            @RequestParam("url") String url,
+            @RequestParam(required = false) String refType,
+            @RequestParam(required = false) Long refId,
+            @RequestParam(required = false) String category) {
+        FileUploadDTO dto = new FileUploadDTO();
+        dto.setRefType(refType);
+        dto.setRefId(refId);
+        dto.setCategory(category);
+        FileVO vo = fileService.uploadByUrl(url, dto);
+        return Result.success(vo);
+    }
+
     @GetMapping("/list")
     @ApiOperation(name = "查询文件列表", type = ApiOperationType.QUERY, description = "分页查询文件列表")
     public Result<PageResult<FileVO>> list(
