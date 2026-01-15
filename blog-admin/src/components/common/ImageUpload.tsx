@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { Upload, message, Modal } from 'antd';
 import Image from '@/components/common/ImageWithPreview';
 import {
-  PlusOutlined, 
-  LoadingOutlined, 
-  DeleteOutlined, 
-  EyeOutlined, 
-  CloudUploadOutlined 
+  PlusOutlined,
+  LoadingOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  CloudUploadOutlined
 } from '@ant-design/icons';
 import type { RcFile } from 'antd/es/upload/interface';
 import { uploadFile } from '@/api/file';
+import { getFullUrl } from '@/utils/format';
 
 interface ImageUploadProps {
   value?: string;
@@ -67,8 +68,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     try {
       const res = await uploadFile(file as File, category);
       onSuccess(res);
-      // 后端返回的 res 是 FileMeta 对象，使用 url 或 storagePath
-      const path = res.url || res.storagePath;
+      // 使用 getFullUrl 拼接完整路径，优先使用 url 字段，其次使用 storagePath
+      const path = getFullUrl(res.url || res.storagePath);
       onChange?.(path);
       message.success('上传成功');
     } catch (error) {

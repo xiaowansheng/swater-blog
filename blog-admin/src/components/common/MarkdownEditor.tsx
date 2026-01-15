@@ -62,8 +62,9 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           if (files.length === 0) return null
           try {
             const res = await uploadFile(files[0], category)
-            const url = getFullUrl(res.fileUrl)
-            const name = res.fileName || files[0].name
+            // 使用 getFullUrl 拼接完整路径，优先使用 url 字段，其次使用 storagePath
+            const url = getFullUrl(res.url || res.storagePath)
+            const name = res.originalName || files[0].name
             // 插入图片到编辑器
             vditor.insertValue(`![${name}](${url})`)
           } catch (error) {

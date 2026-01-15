@@ -50,8 +50,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         async customUpload(file: File, insertFn: any) {
           try {
             const res = await uploadFile(file, category)
-            const url = getFullUrl(res.fileUrl)
-            insertFn(url, res.fileName, url)
+            // 使用 getFullUrl 拼接完整路径，优先使用 url 字段，其次使用 storagePath
+            const url = getFullUrl(res.url || res.storagePath)
+            const alt = res.originalName || file.name
+            insertFn(url, alt, url)
           } catch (error) {
             console.error('上传图片失败:', error)
             message.error('上传图片失败')
