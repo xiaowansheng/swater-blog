@@ -100,10 +100,18 @@ const shouldStartLoadingFromClick = (event: MouseEvent): boolean => {
   try {
     const url = new URL(href, window.location.href);
     if (url.origin !== window.location.origin) return false;
+    // 只改变了 hash（锚点）的情况
     if (
       url.pathname === window.location.pathname &&
       url.search === window.location.search &&
       url.hash
+    ) {
+      return false;
+    }
+    // 点击的是当前页面（pathname 和 search 都相同）的情况
+    if (
+      url.pathname === window.location.pathname &&
+      url.search === window.location.search
     ) {
       return false;
     }
