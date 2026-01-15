@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Card, Button, Space, message, Spin, Breadcrumb, Tag, Image, Descriptions, Divider } from 'antd'
-import { ArrowLeftOutlined, FilePdfOutlined, FileMarkdownOutlined, PrinterOutlined } from '@ant-design/icons'
+import { Card, Button, Space, message, Spin, Breadcrumb, Tag, Image, Descriptions, Divider, Modal } from 'antd'
+import { ArrowLeftOutlined, FilePdfOutlined, FileMarkdownOutlined, DownloadOutlined, EditOutlined } from '@ant-design/icons'
 import { getArticleById } from '@/api/article'
 import { Article, ArticleStatus, ArticleType, ARTICLE_STATUS_MAP, ARTICLE_TYPE_MAP } from '@/types'
 import { printMarkdownAsPdf } from '@/utils/printMarkdown'
+import { exportElementAsPdf } from '@/utils/exportPdf'
 import { getFullUrl } from '@/utils/format'
 import MarkdownPreview from '@/components/common/MarkdownPreview'
 
@@ -14,6 +15,7 @@ const ArticlePreview: React.FC = () => {
   const [article, setArticle] = useState<Article | null>(null)
   const [loading, setLoading] = useState(true)
   const loadedIdRef = useRef<string | null>(null)
+  const markdownContentRef = useRef<HTMLDivElement>(null)
 
   const loadArticle = async () => {
     if (!id) return
@@ -43,10 +45,53 @@ const ArticlePreview: React.FC = () => {
     if (!article) return
     try {
       await printMarkdownAsPdf(article.title || 'article', article.content || '')
-      message.success('正在打印 PDF...')
+      message.success('正在打开打印对话框...')
     } catch (error: any) {
-      message.error(error?.message || '打印 PDF 失败')
+      message.error(error?.message || '打印失败')
     }
+  }
+
+  const handleDownloadPdf = async () => {
+    if (!article) return
+
+    // 显示确认弹窗
+    Modal.confirm({
+      title: '确认导出 PDF',
+      content: (
+        <div>
+          <p>确定要将文章导出为 PDF 文件吗？</p>
+          <p style={{ color: '#666', fontSize: '14px', marginTop: '8px' }}>
+            文件名: <strong>{article.title || 'article'}.pdf</strong>
+          </p>
+        </div>
+      ),
+      okText: '确认导出',
+      cancelText: '取消',
+      width: 450,
+      onOk: async () => {
+        try {
+          // 获取渲染后的 Markdown 内容容器
+          const contentElement = markdownContentRef.current?.querySelector('.vditor-reset')
+          if (!contentElement) {
+            throw new Error('未找到要导出的内容')
+          }
+
+          console.log('找到内容元素:', {
+            element: contentElement,
+            innerHTML: contentElement.innerHTML?.substring(0, 200),
+            offsetWidth: contentElement.offsetWidth,
+            offsetHeight: contentElement.offsetHeight,
+          })
+
+          message.loading({ content: '正在生成 PDF...', key: 'exportPdf', duration: 0 })
+          await exportElementAsPdf(contentElement as HTMLElement, article.title || 'article')
+          message.success({ content: 'PDF 导出成功', key: 'exportPdf', duration: 2 })
+        } catch (error: any) {
+          console.error('导出 PDF 失败:', error)
+          message.error({ content: error?.message || '导出 PDF 失败', key: 'exportPdf', duration: 3 })
+        }
+      },
+    })
   }
 
   const handleExportMarkdown = () => {
@@ -64,15 +109,6 @@ const ArticlePreview: React.FC = () => {
       message.success('导出 Markdown 成功')
     } catch (error) {
       message.error('导出 Markdown 失败')
-    }
-  }
-
-  const handlePrint = async () => {
-    if (!article) return
-    try {
-      await printMarkdownAsPdf(article.title || 'article', article.content || '')
-    } catch (error: any) {
-      message.error(error?.message || '打印失败')
     }
   }
 
@@ -158,6 +194,12 @@ const ArticlePreview: React.FC = () => {
               <Space className="mb-4">
                 <Button
                   type="primary"
+                  icon={<DownloadOutlined />}
+                  onClick={handleDownloadPdf}
+                >
+                  下载 PDF
+                </Button>
+                <Button
                   icon={<FilePdfOutlined />}
                   onClick={handleExportPdf}
                 >
@@ -170,12 +212,7 @@ const ArticlePreview: React.FC = () => {
                   导出 Markdown
                 </Button>
                 <Button
-                  icon={<PrinterOutlined />}
-                  onClick={handlePrint}
-                >
-                  打印
-                </Button>
-                <Button
+                  icon={<EditOutlined />}
                   onClick={() => navigate(`/article/edit/${article.id}`)}
                 >
                   编辑文章
@@ -197,7 +234,9 @@ const ArticlePreview: React.FC = () => {
             </Card>
 
             <Card>
-              <MarkdownPreview value={article.content || ''} />
+              <div ref={markdownContentRef}>
+                <MarkdownPreview value={article.content || ''} />
+              </div>
             </Card>
           </>
         )}
