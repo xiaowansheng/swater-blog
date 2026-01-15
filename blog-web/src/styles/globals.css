@@ -751,3 +751,16 @@ button, a {
     min-width: 500px;
   }
 }
+
+/* 隐藏滚动条但保留滚动功能 */
+.scrollbar-hide {
+  /* Firefox */
+  scrollbar-width: none;
+  /* IE and Edge */
+  -ms-overflow-style: none;
+}
+
+/* Chrome, Safari, Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
