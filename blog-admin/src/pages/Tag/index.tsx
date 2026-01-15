@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag as AntTag, ColorPicker } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
 import { getTagList, createTag, updateTag, deleteTag } from '@/api/tag'
 import { Tag } from '@/types'
 
 const TagPage: React.FC = () => {
   const [tags, setTags] = useState<Tag[]>([])
+  const [allTags, setAllTags] = useState<Tag[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [editingTag, setEditingTag] = useState<Tag | null>(null)
   const [form] = Form.useForm()
+  const [filterName, setFilterName] = useState('')
 
   useEffect(() => {
     loadTags()
@@ -19,7 +21,15 @@ const TagPage: React.FC = () => {
     setLoading(true)
     try {
       const data = await getTagList()
-      setTags(data)
+      setAllTags(data)
+      if (filterName) {
+        const filtered = data.filter((tag: Tag) =>
+          tag.name.toLowerCase().includes(filterName.toLowerCase())
+        )
+        setTags(filtered)
+      } else {
+        setTags(data)
+      }
     } catch (error) {
       console.error('加载标签失败', error)
     } finally {
@@ -115,11 +125,31 @@ const TagPage: React.FC = () => {
 
   return (
     <div className="page-container">
-      <div className="search-bar flex justify-between items-center">
-        <h2 className="text-lg font-medium">标签管理</h2>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-          新建标签
-        </Button>
+      <div className="search-bar">
+        <div className="flex gap-4 items-center flex-wrap">
+          <Input
+            placeholder="搜索标签名称"
+            prefix={<SearchOutlined className="text-gray-400" />}
+            value={filterName}
+            onChange={(e) => {
+              setFilterName(e.target.value)
+              if (e.target.value) {
+                const filtered = allTags.filter((tag: Tag) =>
+                  tag.name.toLowerCase().includes(e.target.value.toLowerCase())
+                )
+                setTags(filtered)
+              } else {
+                setTags(allTags)
+              }
+            }}
+            style={{ width: 220 }}
+            allowClear
+          />
+          <div className="flex-1" />
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+            新建标签
+          </Button>
+        </div>
       </div>
 
       <div className="table-container">

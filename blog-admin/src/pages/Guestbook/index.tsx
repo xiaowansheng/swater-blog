@@ -339,28 +339,33 @@ const GuestbookPage: React.FC = () => {
     <div className="page-container">
       <div className="search-bar">
         <div className="flex gap-4 items-center flex-wrap">
+          <Select
+            placeholder="审核状态"
+            value={filters.status}
+            onChange={(value) => setFilters({ ...filters, status: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value={0}>待审核</Select.Option>
+            <Select.Option value={1}>已通过</Select.Option>
+            <Select.Option value={2}>已拒绝</Select.Option>
+          </Select>
+          <Select
+            placeholder="可见状态"
+            value={filters.isVisible}
+            onChange={(value) => setFilters({ ...filters, isVisible: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value={1}>可见</Select.Option>
+            <Select.Option value={0}>隐藏</Select.Option>
+          </Select>
           <Input
             placeholder="搜索留言内容"
             prefix={<SearchOutlined className="text-gray-400" />}
             value={filters.keyword}
             onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
             style={{ width: 200 }}
-            allowClear
-          />
-          <Input
-            placeholder="留言ID"
-            value={filters.id || ''}
-            onChange={(e) => setFilters({ ...filters, id: e.target.value ? Number(e.target.value) : undefined })}
-            style={{ width: 120 }}
-            type="number"
-            allowClear
-          />
-          <Input
-            placeholder="用户ID"
-            value={filters.userId || ''}
-            onChange={(e) => setFilters({ ...filters, userId: e.target.value ? Number(e.target.value) : undefined })}
-            style={{ width: 120 }}
-            type="number"
             allowClear
           />
           <Input
@@ -384,27 +389,22 @@ const GuestbookPage: React.FC = () => {
             style={{ width: 120 }}
             allowClear
           />
-          <Select
-            placeholder="审核状态"
-            value={filters.status}
-            onChange={(value) => setFilters({ ...filters, status: value })}
+          <Input
+            placeholder="留言ID"
+            value={filters.id || ''}
+            onChange={(e) => setFilters({ ...filters, id: e.target.value ? Number(e.target.value) : undefined })}
             style={{ width: 120 }}
+            type="number"
             allowClear
-          >
-            <Select.Option value={0}>待审核</Select.Option>
-            <Select.Option value={1}>已通过</Select.Option>
-            <Select.Option value={2}>已拒绝</Select.Option>
-          </Select>
-          <Select
-            placeholder="可见状态"
-            value={filters.isVisible}
-            onChange={(value) => setFilters({ ...filters, isVisible: value })}
+          />
+          <Input
+            placeholder="用户ID"
+            value={filters.userId || ''}
+            onChange={(e) => setFilters({ ...filters, userId: e.target.value ? Number(e.target.value) : undefined })}
             style={{ width: 120 }}
+            type="number"
             allowClear
-          >
-            <Select.Option value={1}>可见</Select.Option>
-            <Select.Option value={0}>隐藏</Select.Option>
-          </Select>
+          />
           <Input
             placeholder="国家"
             value={filters.country}

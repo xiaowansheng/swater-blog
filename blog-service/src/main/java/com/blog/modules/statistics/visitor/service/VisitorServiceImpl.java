@@ -29,23 +29,41 @@ public class VisitorServiceImpl implements VisitorService {
     private TrackStatisticsMapper trackStatisticsMapper;
 
     @Override
-    public PageResult<VisitorVO> list(Long page, Long size, String keyword) {
+    public PageResult<VisitorVO> list(Long page, Long size, String ip, String country, String province, String city, String deviceType, String osName, String browserName, String trafficSource) {
         Page<Visitor> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Visitor> wrapper = new LambdaQueryWrapper<>();
 
-        if (keyword != null && !keyword.isEmpty()) {
-            wrapper.and(w -> w.like(Visitor::getIp, keyword)
-                    .or().like(Visitor::getCountry, keyword)
-                    .or().like(Visitor::getCity, keyword)
-                    .or().like(Visitor::getVisitorUuid, keyword));
+        if (ip != null && !ip.isEmpty()) {
+            wrapper.like(Visitor::getIp, ip);
+        }
+        if (country != null && !country.isEmpty()) {
+            wrapper.like(Visitor::getCountry, country);
+        }
+        if (province != null && !province.isEmpty()) {
+            wrapper.like(Visitor::getProvince, province);
+        }
+        if (city != null && !city.isEmpty()) {
+            wrapper.like(Visitor::getCity, city);
+        }
+        if (deviceType != null && !deviceType.isEmpty()) {
+            wrapper.eq(Visitor::getDeviceType, deviceType);
+        }
+        if (osName != null && !osName.isEmpty()) {
+            wrapper.like(Visitor::getOsName, osName);
+        }
+        if (browserName != null && !browserName.isEmpty()) {
+            wrapper.like(Visitor::getBrowserName, browserName);
+        }
+        if (trafficSource != null && !trafficSource.isEmpty()) {
+            wrapper.eq(Visitor::getTrafficSource, trafficSource);
         }
         wrapper.orderByDesc(Visitor::getLastVisitTime);
-        
+
         Page<Visitor> result = visitorMapper.selectPage(pageParam, wrapper);
         List<VisitorVO> voList = result.getRecords().stream()
                 .map(visitor -> BeanUtil.copyProperties(visitor, VisitorVO.class))
                 .collect(Collectors.toList());
-        
+
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
     }
 

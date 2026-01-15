@@ -366,6 +366,37 @@ const CommentPage: React.FC = () => {
     <div className="page-container">
       <div className="search-bar">
         <div className="flex gap-4 items-center flex-wrap">
+          <Select
+            placeholder="评论状态"
+            value={filters.status}
+            onChange={(value) => setFilters({ ...filters, status: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value={0}>待审核</Select.Option>
+            <Select.Option value={1}>已通过</Select.Option>
+            <Select.Option value={2}>已拒绝</Select.Option>
+          </Select>
+          <Select
+            placeholder="评论类型"
+            value={filters.targetType}
+            onChange={(value) => setFilters({ ...filters, targetType: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value="ARTICLE">文章</Select.Option>
+            <Select.Option value="TALK">说说</Select.Option>
+          </Select>
+          <Select
+            placeholder="可见状态"
+            value={filters.isVisible}
+            onChange={(value) => setFilters({ ...filters, isVisible: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value={1}>可见</Select.Option>
+            <Select.Option value={0}>隐藏</Select.Option>
+          </Select>
           <Input
             placeholder="搜索评论内容"
             prefix={<SearchOutlined className="text-gray-400" />}
@@ -398,37 +429,6 @@ const CommentPage: React.FC = () => {
             type="number"
             allowClear
           />
-          <Select
-            placeholder="评论状态"
-            value={filters.status}
-            onChange={(value) => setFilters({ ...filters, status: value })}
-            style={{ width: 120 }}
-            allowClear
-          >
-            <Select.Option value={0}>待审核</Select.Option>
-            <Select.Option value={1}>已通过</Select.Option>
-            <Select.Option value={2}>已拒绝</Select.Option>
-          </Select>
-          <Select
-            placeholder="评论类型"
-            value={filters.targetType}
-            onChange={(value) => setFilters({ ...filters, targetType: value })}
-            style={{ width: 120 }}
-            allowClear
-          >
-            <Select.Option value="ARTICLE">文章</Select.Option>
-            <Select.Option value="TALK">说说</Select.Option>
-          </Select>
-          <Select
-            placeholder="可见状态"
-            value={filters.isVisible}
-            onChange={(value) => setFilters({ ...filters, isVisible: value })}
-            style={{ width: 120 }}
-            allowClear
-          >
-            <Select.Option value={1}>可见</Select.Option>
-            <Select.Option value={0}>隐藏</Select.Option>
-          </Select>
           <Button type="primary" icon={<SearchOutlined />} onClick={loadComments}>
             搜索
           </Button>

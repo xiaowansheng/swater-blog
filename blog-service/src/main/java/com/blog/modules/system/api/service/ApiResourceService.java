@@ -18,7 +18,7 @@ public interface ApiResourceService {
     /**
      * 查询所有接口列表（树形结构）
      */
-    List<ApiVO> tree();
+    List<ApiVO> tree(String name, String path, String method, Integer isOpen);
 
     /**
      * 根据ID获取接口详情

@@ -107,19 +107,10 @@ const TalkPage: React.FC = () => {
   }
 
   return (
-    <div className="page-container">
+    <div>
       {/* 搜索栏 */}
       <div className="search-bar">
         <div className="flex flex-wrap items-center gap-4">
-          <Input
-            placeholder="搜索说说内容"
-            prefix={<SearchOutlined className="text-gray-400" />}
-            value={filters.keyword}
-            onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
-            style={{ width: 200 }}
-            allowClear
-            onPressEnter={handleSearch}
-          />
           <Select
             placeholder="发布状态"
             value={filters.status}
@@ -141,11 +132,28 @@ const TalkPage: React.FC = () => {
             <Select.Option value={1}>已置顶</Select.Option>
             <Select.Option value={0}>未置顶</Select.Option>
           </Select>
+          <Input
+            placeholder="搜索说说内容"
+            prefix={<SearchOutlined className="text-gray-400" />}
+            value={filters.keyword}
+            onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
+            style={{ width: 200 }}
+            allowClear
+            onPressEnter={handleSearch}
+          />
           <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
             搜索
           </Button>
           <Button onClick={handleReset}>重置</Button>
-          <div className="flex-1" />
+        </div>
+      </div>
+
+      {/* 操作栏 */}
+      <div className="action-bar mb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            {/* 左侧操作区域 - 可扩展其他操作按钮 */}
+          </div>
           <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
             发布说说
           </Button>

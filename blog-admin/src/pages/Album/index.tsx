@@ -13,6 +13,7 @@ import {
   Row,
   Col,
   Tag,
+  Select,
 } from 'antd'
 import Image from '@/components/common/ImageWithPreview'
 import {
@@ -21,32 +22,54 @@ import {
   DeleteOutlined,
   PictureOutlined,
   UploadOutlined,
+  SearchOutlined,
 } from '@ant-design/icons'
 import { getAlbumList, createAlbum, updateAlbum, deleteAlbum, AlbumDTO } from '@/api/album'
-import { Album } from '@/types'
+import { Album, AlbumStatus, ALBUM_STATUS_MAP } from '@/types'
 
 const AlbumPage: React.FC = () => {
   const [albums, setAlbums] = useState<Album[]>([])
+  const [allAlbums, setAllAlbums] = useState<Album[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [editingAlbum, setEditingAlbum] = useState<Album | null>(null)
   const [form] = Form.useForm()
+  const [filters, setFilters] = useState<{
+    name: string
+    status: string | undefined
+  }>({
+    name: '',
+    status: undefined,
+  })
 
-  useEffect(() => {
-    loadAlbums()
-  }, [])
 
   const loadAlbums = async () => {
     setLoading(true)
     try {
       const result = await getAlbumList()
-      setAlbums(result.records || [])
+      const allAlbumData = result.records || []
+      setAllAlbums(allAlbumData)
+
+      let filtered = allAlbumData
+      if (filters.name) {
+        filtered = filtered.filter((album: Album) =>
+          album.name.toLowerCase().includes(filters.name.toLowerCase())
+        )
+      }
+      if (filters.status) {
+        filtered = filtered.filter((album: Album) => album.status === filters.status)
+      }
+      setAlbums(filtered)
     } catch (error) {
       console.error('加载相册失败', error)
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    loadAlbums()
+  }, [filters])
 
   const handleCreate = () => {
     setEditingAlbum(null)
@@ -89,11 +112,32 @@ const AlbumPage: React.FC = () => {
 
   return (
     <div className="page-container">
-      <div className="search-bar flex justify-between items-center">
-        <h2 className="text-lg font-medium">相册管理</h2>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-          新建相册
-        </Button>
+      <div className="search-bar">
+        <div className="flex gap-4 items-center flex-wrap">
+          <Input
+            placeholder="相册名称"
+            prefix={<SearchOutlined className="text-gray-400" />}
+            value={filters.name}
+            onChange={(e) => setFilters({ ...filters, name: e.target.value })}
+            style={{ width: 200 }}
+            allowClear
+          />
+          <Select
+            placeholder="状态"
+            value={filters.status}
+            onChange={(value) => setFilters({ ...filters, status: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value={AlbumStatus.PUBLISHED}>已发布</Select.Option>
+            <Select.Option value={AlbumStatus.DRAFT}>草稿</Select.Option>
+            <Select.Option value={AlbumStatus.PRIVATE}>私密</Select.Option>
+          </Select>
+          <div className="flex-1" />
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+            新建相册
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -144,8 +188,8 @@ const AlbumPage: React.FC = () => {
                   title={
                     <div className="flex items-center justify-between">
                       <span>{album.name}</span>
-                      <Tag color={album.status === 1 ? 'success' : 'default'}>
-                        {album.status === 1 ? '公开' : '私密'}
+                      <Tag color={ALBUM_STATUS_MAP[album.status as AlbumStatus]?.color || 'default'}>
+                        {ALBUM_STATUS_MAP[album.status as AlbumStatus]?.label || '未知'}
                       </Tag>
                     </div>
                   }

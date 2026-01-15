@@ -31,9 +31,13 @@ public class ApiResourceController {
      * 查询接口树形列表
      */
     @GetMapping("/tree")
-    @ApiOperation(name = "查询接口树", type = ApiOperationType.QUERY, description = "查询所有接口（树形结构）")
-    public Result<List<ApiVO>> tree() {
-        List<ApiVO> tree = apiResourceService.tree();
+    @ApiOperation(name = "查询接口树", type = ApiOperationType.QUERY, description = "查询所有接口（树形结构），支持筛选")
+    public Result<List<ApiVO>> tree(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String path,
+            @RequestParam(required = false) String method,
+            @RequestParam(required = false) Integer isOpen) {
+        List<ApiVO> tree = apiResourceService.tree(name, path, method, isOpen);
         return Result.success(tree);
     }
 

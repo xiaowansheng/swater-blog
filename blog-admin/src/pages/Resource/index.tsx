@@ -1,27 +1,59 @@
 import { useState, useEffect } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, InputNumber, Tag, Tooltip, Select, Switch, TreeSelect, ModalProps, Empty } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, InfoCircleOutlined, CheckCircleOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, InfoCircleOutlined, CheckCircleOutlined, SearchOutlined } from '@ant-design/icons'
 import { getApiList, createApi, updateApi, deleteApi, refreshApi } from '@/api/api'
 import { ApiVO, ApiRefreshResultVO } from '@/types/api'
 
 const ApiPage: React.FC = () => {
   const [apis, setApis] = useState<ApiVO[]>([])
+  const [allApis, setAllApis] = useState<ApiVO[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [editingApi, setEditingApi] = useState<ApiVO | null>(null)
   const [refreshResultVisible, setRefreshResultVisible] = useState(false)
   const [refreshResult, setRefreshResult] = useState<ApiRefreshResultVO | null>(null)
   const [form] = Form.useForm()
+  const [filters, setFilters] = useState<{
+    name: string
+    path: string
+    method: string | undefined
+    isOpen: number | undefined
+  }>({
+    name: '',
+    path: '',
+    method: undefined,
+    isOpen: undefined,
+  })
 
-  useEffect(() => {
-    loadApis()
-  }, [])
 
   const loadApis = async () => {
     setLoading(true)
     try {
       const data = await getApiList()
-      setApis(data)
+      setAllApis(data)
+
+      const filterApi = (api: ApiVO) => {
+        if (filters.name && !api.name.toLowerCase().includes(filters.name.toLowerCase())) {
+          return false
+        }
+        if (filters.path && !api.path?.toLowerCase().includes(filters.path.toLowerCase())) {
+          return false
+        }
+        if (filters.method && api.method?.toUpperCase() !== filters.method.toUpperCase()) {
+          return false
+        }
+        if (filters.isOpen !== undefined && api.isOpen !== filters.isOpen) {
+          return false
+        }
+        return true
+      }
+
+      const filteredApis = data.filter(filterApi).map(api => ({
+        ...api,
+        children: api.children?.filter(filterApi)
+      }))
+
+      setApis(filteredApis)
     } catch (error) {
       console.error('加载接口失败', error)
       message.error('加载接口失败')
@@ -29,6 +61,10 @@ const ApiPage: React.FC = () => {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    loadApis()
+  }, [filters])
 
   const handleCreate = (parentId?: number) => {
     setEditingApi(null)
@@ -205,27 +241,66 @@ const ApiPage: React.FC = () => {
 
   return (
     <div className="page-container">
-      <div className="search-bar flex justify-between items-center mb-4">
-        <h2 className="text-lg font-medium">接口管理</h2>
-        <Space>
-          <Tooltip title="自动扫描并同步系统接口到数据库（重要操作）">
-            <Button
-              icon={<ReloadOutlined spin={loading} />}
-              onClick={handleRefresh}
-              type="default"
-              style={{
-                borderColor: '#faad14',
-                color: '#faad14',
-                fontWeight: 500
-              }}
-            >
-              刷新接口
+      <div className="search-bar">
+        <div className="flex gap-4 items-center flex-wrap">
+          <Input
+            placeholder="接口名称"
+            prefix={<SearchOutlined className="text-gray-400" />}
+            value={filters.name}
+            onChange={(e) => setFilters({ ...filters, name: e.target.value })}
+            style={{ width: 180 }}
+            allowClear
+          />
+          <Input
+            placeholder="接口路径"
+            value={filters.path}
+            onChange={(e) => setFilters({ ...filters, path: e.target.value })}
+            style={{ width: 200 }}
+            allowClear
+          />
+          <Select
+            placeholder="请求方式"
+            value={filters.method}
+            onChange={(value) => setFilters({ ...filters, method: value })}
+            style={{ width: 100 }}
+            allowClear
+          >
+            <Select.Option value="GET">GET</Select.Option>
+            <Select.Option value="POST">POST</Select.Option>
+            <Select.Option value="PUT">PUT</Select.Option>
+            <Select.Option value="DELETE">DELETE</Select.Option>
+          </Select>
+          <Select
+            placeholder="是否公开"
+            value={filters.isOpen}
+            onChange={(value) => setFilters({ ...filters, isOpen: value })}
+            style={{ width: 110 }}
+            allowClear
+          >
+            <Select.Option value={1}>是</Select.Option>
+            <Select.Option value={0}>否</Select.Option>
+          </Select>
+          <div className="flex-1" />
+          <Space>
+            <Tooltip title="自动扫描并同步系统接口到数据库（重要操作）">
+              <Button
+                icon={<ReloadOutlined spin={loading} />}
+                onClick={handleRefresh}
+                type="default"
+                style={{
+                  borderColor: '#faad14',
+                  color: '#faad14',
+                  fontWeight: 500
+                }}
+              >
+                刷新接口
+              </Button>
+            </Tooltip>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => handleCreate()}>
+              新建接口
             </Button>
-          </Tooltip>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => handleCreate()}>
-            新建接口
-          </Button>
-        </Space>
+          </Space>
+        </div>
       </div>
 
       <div className="table-container">

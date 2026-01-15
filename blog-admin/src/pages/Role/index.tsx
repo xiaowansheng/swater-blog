@@ -1,34 +1,61 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Tooltip } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, ApiOutlined } from '@ant-design/icons'
+import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Tooltip, Select } from 'antd'
+import { PlusOutlined, EditOutlined, DeleteOutlined, ApiOutlined, SearchOutlined } from '@ant-design/icons'
 import { getRoleList, createRole, updateRole, deleteRole } from '@/api/role'
 import { Role } from '@/types'
 import ApiAuthModal from './ApiAuthModal'
 
 const RolePage: React.FC = () => {
   const [roles, setRoles] = useState<Role[]>([])
+  const [allRoles, setAllRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [apiAuthVisible, setApiAuthVisible] = useState(false)
   const [currentRole, setCurrentRole] = useState<Role | null>(null)
   const [editingRole, setEditingRole] = useState<Role | null>(null)
   const [form] = Form.useForm()
+  const [filters, setFilters] = useState<{
+    name: string
+    roleKey: string
+    status: number | undefined
+  }>({
+    name: '',
+    roleKey: '',
+    status: undefined,
+  })
 
-  useEffect(() => {
-    loadRoles()
-  }, [])
 
   const loadRoles = async () => {
     setLoading(true)
     try {
       const data = await getRoleList()
-      setRoles(data)
+      setAllRoles(data)
+
+      let filtered = data
+      if (filters.name) {
+        filtered = filtered.filter((role: Role) =>
+          role.name.toLowerCase().includes(filters.name.toLowerCase())
+        )
+      }
+      if (filters.roleKey) {
+        filtered = filtered.filter((role: Role) =>
+          role.roleKey.toLowerCase().includes(filters.roleKey.toLowerCase())
+        )
+      }
+      if (filters.status !== undefined) {
+        filtered = filtered.filter((role: Role) => role.status === filters.status)
+      }
+      setRoles(filtered)
     } catch (error) {
       console.error('加载角色失败', error)
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    loadRoles()
+  }, [filters])
 
   const handleCreate = () => {
     setEditingRole(null)
@@ -144,11 +171,38 @@ const RolePage: React.FC = () => {
 
   return (
     <div className="page-container">
-      <div className="search-bar flex justify-between items-center">
-        <h2 className="text-lg font-medium">角色管理</h2>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-          新建角色
-        </Button>
+      <div className="search-bar">
+        <div className="flex gap-4 items-center flex-wrap">
+          <Input
+            placeholder="角色名称"
+            prefix={<SearchOutlined className="text-gray-400" />}
+            value={filters.name}
+            onChange={(e) => setFilters({ ...filters, name: e.target.value })}
+            style={{ width: 160 }}
+            allowClear
+          />
+          <Input
+            placeholder="角色标签"
+            value={filters.roleKey}
+            onChange={(e) => setFilters({ ...filters, roleKey: e.target.value })}
+            style={{ width: 140 }}
+            allowClear
+          />
+          <Select
+            placeholder="状态"
+            value={filters.status}
+            onChange={(value) => setFilters({ ...filters, status: value })}
+            style={{ width: 100 }}
+            allowClear
+          >
+            <Select.Option value={1}>启用</Select.Option>
+            <Select.Option value={0}>禁用</Select.Option>
+          </Select>
+          <div className="flex-1" />
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+            新建角色
+          </Button>
+        </div>
       </div>
 
       <div className="table-container">

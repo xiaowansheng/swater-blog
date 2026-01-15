@@ -9,7 +9,7 @@ import com.blog.modules.user.model.dto.UserDTO;
 import com.blog.modules.user.model.vo.UserVO;
 import java.util.List;
 public interface UserService {
-    PageResult<UserVO> list(Long page, Long size, String keyword);
+    PageResult<UserVO> list(Long page, Long size, String username, String nickname, String email, Long roleId, Integer status);
 
     UserVO getById(Long id);
 

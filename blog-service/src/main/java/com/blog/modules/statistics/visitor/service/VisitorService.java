@@ -7,7 +7,7 @@ import com.blog.modules.statistics.visitor.model.vo.VisitorStatisticsVO;
 import com.blog.modules.statistics.visitor.model.vo.VisitorVO;
 import java.time.LocalDateTime;
 public interface VisitorService {
-    PageResult<VisitorVO> list(Long page, Long size, String keyword);
+    PageResult<VisitorVO> list(Long page, Long size, String ip, String country, String province, String city, String deviceType, String osName, String browserName, String trafficSource);
 
     VisitorStatisticsVO getStatistics(LocalDateTime startDate, LocalDateTime endDate);
 }

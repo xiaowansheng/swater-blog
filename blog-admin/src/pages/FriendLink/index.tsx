@@ -1,31 +1,58 @@
 import { useState, useEffect } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Avatar, Tooltip, InputNumber, Select } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined, SearchOutlined } from '@ant-design/icons'
 import { getFriendLinkList, createFriendLink, updateFriendLink, deleteFriendLink } from '@/api/friendLink'
 import { FriendLink } from '@/types'
 
 const FriendLinkPage: React.FC = () => {
   const [links, setLinks] = useState<FriendLink[]>([])
+  const [allLinks, setAllLinks] = useState<FriendLink[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [editingLink, setEditingLink] = useState<FriendLink | null>(null)
   const [form] = Form.useForm()
+  const [filters, setFilters] = useState<{
+    name: string
+    author: string
+    status: number | undefined
+  }>({
+    name: '',
+    author: '',
+    status: undefined,
+  })
 
-  useEffect(() => {
-    loadLinks()
-  }, [])
 
   const loadLinks = async () => {
     setLoading(true)
     try {
       const data = await getFriendLinkList()
-      setLinks(data)
+      setAllLinks(data)
+
+      let filtered = data
+      if (filters.name) {
+        filtered = filtered.filter((link: FriendLink) =>
+          link.name.toLowerCase().includes(filters.name.toLowerCase())
+        )
+      }
+      if (filters.author) {
+        filtered = filtered.filter((link: FriendLink) =>
+          link.author?.toLowerCase().includes(filters.author.toLowerCase())
+        )
+      }
+      if (filters.status !== undefined) {
+        filtered = filtered.filter((link: FriendLink) => link.status === filters.status)
+      }
+      setLinks(filtered)
     } catch (error) {
       console.error('加载友链失败', error)
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    loadLinks()
+  }, [filters])
 
   const handleCreate = () => {
     setEditingLink(null)
@@ -145,11 +172,38 @@ const FriendLinkPage: React.FC = () => {
 
   return (
     <div className="page-container">
-      <div className="search-bar flex justify-between items-center">
-        <h2 className="text-lg font-medium">友链管理</h2>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-          新建友链
-        </Button>
+      <div className="search-bar">
+        <div className="flex gap-4 items-center flex-wrap">
+          <Input
+            placeholder="网站名称"
+            prefix={<SearchOutlined className="text-gray-400" />}
+            value={filters.name}
+            onChange={(e) => setFilters({ ...filters, name: e.target.value })}
+            style={{ width: 180 }}
+            allowClear
+          />
+          <Input
+            placeholder="作者"
+            value={filters.author}
+            onChange={(e) => setFilters({ ...filters, author: e.target.value })}
+            style={{ width: 140 }}
+            allowClear
+          />
+          <Select
+            placeholder="状态"
+            value={filters.status}
+            onChange={(value) => setFilters({ ...filters, status: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value={1}>已审核</Select.Option>
+            <Select.Option value={0}>待审核</Select.Option>
+          </Select>
+          <div className="flex-1" />
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+            新建友链
+          </Button>
+        </div>
       </div>
 
       <div className="table-container">

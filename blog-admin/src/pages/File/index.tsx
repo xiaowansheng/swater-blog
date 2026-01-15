@@ -300,14 +300,6 @@ const FilePage: React.FC = () => {
     <div className="page-container">
       <div className="search-bar">
         <div className="flex flex-wrap items-center gap-4">
-          <Input
-            placeholder="搜索文件名"
-            prefix={<SearchOutlined className="text-gray-400" />}
-            value={filters.keyword}
-            onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
-            style={{ width: 200 }}
-            allowClear
-          />
           <Select
             placeholder="文件类型"
             value={filters.fileType}
@@ -319,6 +311,14 @@ const FilePage: React.FC = () => {
             <Select.Option value="video">视频</Select.Option>
             <Select.Option value="document">文档</Select.Option>
           </Select>
+          <Input
+            placeholder="搜索文件名"
+            prefix={<SearchOutlined className="text-gray-400" />}
+            value={filters.keyword}
+            onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
+            style={{ width: 200 }}
+            allowClear
+          />
           <Button type="primary" icon={<SearchOutlined />} onClick={loadFiles}>
             搜索
           </Button>

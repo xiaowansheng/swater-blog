@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Table, Card, Row, Col, Statistic, Tag, DatePicker, Space, Tooltip } from 'antd'
+import { Table, Card, Row, Col, Statistic, Tag, DatePicker, Space, Tooltip, Input, Select } from 'antd'
 import {
   UserOutlined,
   EyeOutlined,
@@ -7,6 +7,7 @@ import {
   DesktopOutlined,
   ApartmentOutlined,
   ChromeOutlined,
+  SearchOutlined,
 } from '@ant-design/icons'
 import { getVisitorList, getVisitorStatistics } from '@/api/visitor'
 import { Visitor, VisitorStatistics } from '@/types'
@@ -22,11 +23,35 @@ const VisitorPage: React.FC = () => {
   const [statsLoading, setStatsLoading] = useState(false)
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
   const [statRange, setStatRange] = useState<[string | null, string | null]>([null, null])
+  const [filters, setFilters] = useState<{
+    ip: string
+    country: string
+    province: string
+    city: string
+    deviceType: string | undefined
+    osName: string
+    browserName: string
+    trafficSource: string | undefined
+  }>({
+    ip: '',
+    country: '',
+    province: '',
+    city: '',
+    deviceType: undefined,
+    osName: '',
+    browserName: '',
+    trafficSource: undefined,
+  })
 
   useEffect(() => {
     loadVisitors()
     loadStatistics()
   }, [pagination.current, pagination.pageSize])
+
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, current: 1 }))
+    loadVisitors()
+  }, [filters])
 
   useEffect(() => {
     loadStatistics()
@@ -38,6 +63,14 @@ const VisitorPage: React.FC = () => {
       const result = await getVisitorList({
         page: pagination.current,
         size: pagination.pageSize,
+        ip: filters.ip || undefined,
+        country: filters.country || undefined,
+        province: filters.province || undefined,
+        city: filters.city || undefined,
+        deviceType: filters.deviceType,
+        osName: filters.osName || undefined,
+        browserName: filters.browserName || undefined,
+        trafficSource: filters.trafficSource,
       })
       setVisitors(result.records)
       setPagination((prev) => ({ ...prev, total: result.total }))
@@ -260,7 +293,80 @@ const VisitorPage: React.FC = () => {
       </Row>
 
       {/* 访客列表 */}
-      <Card title="访客列表" className="chart-card">
+      <Card
+        title="访客列表"
+        className="chart-card"
+        extra={
+          <Space wrap>
+            <Input
+              placeholder="IP地址"
+              prefix={<SearchOutlined className="text-gray-400" />}
+              value={filters.ip}
+              onChange={(e) => setFilters({ ...filters, ip: e.target.value })}
+              style={{ width: 140 }}
+              allowClear
+            />
+            <Input
+              placeholder="国家"
+              value={filters.country}
+              onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+              style={{ width: 100 }}
+              allowClear
+            />
+            <Input
+              placeholder="省份"
+              value={filters.province}
+              onChange={(e) => setFilters({ ...filters, province: e.target.value })}
+              style={{ width: 100 }}
+              allowClear
+            />
+            <Input
+              placeholder="城市"
+              value={filters.city}
+              onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+              style={{ width: 100 }}
+              allowClear
+            />
+            <Select
+              placeholder="设备类型"
+              value={filters.deviceType}
+              onChange={(value) => setFilters({ ...filters, deviceType: value })}
+              style={{ width: 120 }}
+              allowClear
+            >
+              <Select.Option value="Desktop">桌面</Select.Option>
+              <Select.Option value="Mobile">移动</Select.Option>
+              <Select.Option value="Tablet">平板</Select.Option>
+            </Select>
+            <Input
+              placeholder="操作系统"
+              value={filters.osName}
+              onChange={(e) => setFilters({ ...filters, osName: e.target.value })}
+              style={{ width: 120 }}
+              allowClear
+            />
+            <Input
+              placeholder="浏览器"
+              value={filters.browserName}
+              onChange={(e) => setFilters({ ...filters, browserName: e.target.value })}
+              style={{ width: 120 }}
+              allowClear
+            />
+            <Select
+              placeholder="来源"
+              value={filters.trafficSource}
+              onChange={(value) => setFilters({ ...filters, trafficSource: value })}
+              style={{ width: 120 }}
+              allowClear
+            >
+              <Select.Option value="DIRECT">直接访问</Select.Option>
+              <Select.Option value="SEARCH">搜索引擎</Select.Option>
+              <Select.Option value="EXTERNAL">外部链接</Select.Option>
+              <Select.Option value="SOCIAL">社交媒体</Select.Option>
+            </Select>
+          </Space>
+        }
+      >
         <Table
           columns={columns}
           dataSource={visitors}

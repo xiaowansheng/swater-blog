@@ -20,7 +20,7 @@ import {
   unpublishArticle,
 } from '@/api/article'
 import { getCategoryList } from '@/api/category'
-import { Article, Category, ArticleStatus, ARTICLE_STATUS_MAP, ARTICLE_TYPE_MAP } from '@/types'
+import { Article, Category, ArticleStatus, ArticleType, ARTICLE_STATUS_MAP, ARTICLE_TYPE_MAP } from '@/types'
 
 const ArticleList: React.FC = () => {
   const navigate = useNavigate()
@@ -31,9 +31,13 @@ const ArticleList: React.FC = () => {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
   const [filters, setFilters] = useState<{
     keyword: string
+    id: string
+    articleKey: string
     status: number | undefined
     categoryId: number | undefined
-  }>({ keyword: '', status: undefined, categoryId: undefined })
+    type: string | undefined
+    isTop: number | undefined
+  }>({ keyword: '', id: '', articleKey: '', status: undefined, categoryId: undefined, type: undefined, isTop: undefined })
 
   useEffect(() => {
     loadCategories()
@@ -119,7 +123,7 @@ const ArticleList: React.FC = () => {
     {
       title: '文章信息',
       key: 'info',
-      width: 400,
+      width: 500,
       render: (_: any, record: Article) => (
         <div className="flex items-center gap-3">
           {record.cover ? (
@@ -136,6 +140,13 @@ const ArticleList: React.FC = () => {
             </div>
           )}
           <div className="flex-1 min-w-0">
+            {/* ID和Key作为小字在标题上方 */}
+            <div className="text-xs text-gray-400 mb-1 flex items-center gap-2">
+              <span className="text-gray-500">ID: {record.id}</span>
+              {record.articleKey && (
+                <span className="text-gray-500">Key: {record.articleKey}</span>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               {record.isTop === 1 && (
                 <Tag color="red" className="flex items-center gap-1">
@@ -146,7 +157,7 @@ const ArticleList: React.FC = () => {
               <span className="font-medium text-gray-800 truncate">{record.title}</span>
             </div>
             <div className="text-xs text-gray-400 mt-1 flex items-center gap-3">
-              <span>{record.categoryName}</span>
+              <Tag color="cyan" className="text-xs">{record.categoryName}</Tag>
               <span className="flex items-center gap-1">
                 <EyeOutlined /> {record.viewCount}
               </span>
@@ -249,13 +260,7 @@ const ArticleList: React.FC = () => {
   ]
 
   return (
-    <div className="page-container fade-in">
-      <div className="mb-4">
-        <Breadcrumb items={[
-          { title: <Link to="/">首页</Link> },
-          { title: '文章管理' },
-        ]} />
-      </div>
+    <div className="fade-in">
       {/* 搜索栏 */}
       <div className="search-bar">
         <div className="flex flex-wrap items-center gap-4">
@@ -264,7 +269,23 @@ const ArticleList: React.FC = () => {
             prefix={<SearchOutlined className="text-gray-400" />}
             value={filters.keyword}
             onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
-            style={{ width: 240 }}
+            style={{ width: 200 }}
+            onPressEnter={handleSearch}
+            allowClear
+          />
+          <Input
+            placeholder="文章ID"
+            value={filters.id}
+            onChange={(e) => setFilters({ ...filters, id: e.target.value })}
+            style={{ width: 120 }}
+            onPressEnter={handleSearch}
+            allowClear
+          />
+          <Input
+            placeholder="文章Key"
+            value={filters.articleKey}
+            onChange={(e) => setFilters({ ...filters, articleKey: e.target.value })}
+            style={{ width: 150 }}
             onPressEnter={handleSearch}
             allowClear
           />
@@ -272,7 +293,7 @@ const ArticleList: React.FC = () => {
             placeholder="文章状态"
             value={filters.status}
             onChange={(value) => setFilters({ ...filters, status: value })}
-            style={{ width: 140 }}
+            style={{ width: 120 }}
             allowClear
           >
             <Select.Option value={ArticleStatus.PUBLISHED}>已发布</Select.Option>
@@ -280,10 +301,32 @@ const ArticleList: React.FC = () => {
             <Select.Option value={ArticleStatus.PRIVATE}>私密</Select.Option>
           </Select>
           <Select
+            placeholder="文章类型"
+            value={filters.type}
+            onChange={(value) => setFilters({ ...filters, type: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value={ArticleType.ORIGINAL}>原创</Select.Option>
+            <Select.Option value={ArticleType.REPOST}>转载</Select.Option>
+            <Select.Option value={ArticleType.TRANSLATION}>翻译</Select.Option>
+            <Select.Option value={ArticleType.QUOTE}>引用</Select.Option>
+          </Select>
+          <Select
+            placeholder="是否置顶"
+            value={filters.isTop}
+            onChange={(value) => setFilters({ ...filters, isTop: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value={1}>置顶</Select.Option>
+            <Select.Option value={0}>普通</Select.Option>
+          </Select>
+          <Select
             placeholder="选择分类"
             value={filters.categoryId}
             onChange={(value) => setFilters({ ...filters, categoryId: value })}
-            style={{ width: 160 }}
+            style={{ width: 150 }}
             allowClear
           >
             {categories.map((cat) => (
@@ -295,15 +338,22 @@ const ArticleList: React.FC = () => {
           <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
             搜索
           </Button>
-          <div className="flex-1" />
-          {selectedRowKeys.length > 0 && (
-            <Popconfirm
-              title={`确定删除选中的 ${selectedRowKeys.length} 篇文章吗？`}
-              onConfirm={handleBatchDelete}
-            >
-              <Button danger>批量删除 ({selectedRowKeys.length})</Button>
-            </Popconfirm>
-          )}
+        </div>
+      </div>
+
+      {/* 操作栏 */}
+      <div className="action-bar mb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            {selectedRowKeys.length > 0 && (
+              <Popconfirm
+                title={`确定删除选中的 ${selectedRowKeys.length} 篇文章吗？`}
+                onConfirm={handleBatchDelete}
+              >
+                <Button danger>批量删除 ({selectedRowKeys.length})</Button>
+              </Popconfirm>
+            )}
+          </div>
           <Button
             type="primary"
             icon={<PlusOutlined />}

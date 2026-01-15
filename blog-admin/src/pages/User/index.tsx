@@ -19,6 +19,7 @@ import {
   DeleteOutlined,
   UserOutlined,
   KeyOutlined,
+  SearchOutlined,
 } from '@ant-design/icons'
 import { getUserList, createUser, updateUser, deleteUser, resetPassword } from '@/api/user'
 import { getRoleList } from '@/api/role'
@@ -38,6 +39,19 @@ const UserPage: React.FC = () => {
   const [form] = Form.useForm()
   const [passwordForm] = Form.useForm()
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
+  const [filters, setFilters] = useState<{
+    username: string
+    nickname: string
+    email: string
+    roleId: number | undefined
+    status: number | undefined
+  }>({
+    username: '',
+    nickname: '',
+    email: '',
+    roleId: undefined,
+    status: undefined,
+  })
 
   useEffect(() => {
     loadRoles()
@@ -46,6 +60,11 @@ const UserPage: React.FC = () => {
   useEffect(() => {
     loadUsers()
   }, [pagination.current, pagination.pageSize])
+
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, current: 1 }))
+    loadUsers()
+  }, [filters])
 
   const loadRoles = async () => {
     try {
@@ -62,6 +81,11 @@ const UserPage: React.FC = () => {
       const result = await getUserList({
         page: pagination.current,
         size: pagination.pageSize,
+        username: filters.username || undefined,
+        nickname: filters.nickname || undefined,
+        email: filters.email || undefined,
+        roleId: filters.roleId,
+        status: filters.status,
       })
       setUsers(result.records)
       setPagination((prev) => ({ ...prev, total: result.total }))
@@ -222,11 +246,58 @@ const UserPage: React.FC = () => {
 
   return (
     <div className="page-container">
-      <div className="search-bar flex justify-between items-center">
-        <h2 className="text-lg font-medium">用户管理</h2>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-          新建用户
-        </Button>
+      <div className="search-bar">
+        <div className="flex gap-4 items-center flex-wrap">
+          <Input
+            placeholder="用户名"
+            prefix={<SearchOutlined className="text-gray-400" />}
+            value={filters.username}
+            onChange={(e) => setFilters({ ...filters, username: e.target.value })}
+            style={{ width: 160 }}
+            allowClear
+          />
+          <Input
+            placeholder="昵称"
+            value={filters.nickname}
+            onChange={(e) => setFilters({ ...filters, nickname: e.target.value })}
+            style={{ width: 140 }}
+            allowClear
+          />
+          <Input
+            placeholder="邮箱"
+            value={filters.email}
+            onChange={(e) => setFilters({ ...filters, email: e.target.value })}
+            style={{ width: 180 }}
+            allowClear
+          />
+          <Select
+            placeholder="角色"
+            value={filters.roleId}
+            onChange={(value) => setFilters({ ...filters, roleId: value })}
+            style={{ width: 140 }}
+            allowClear
+          >
+            {roles.map((role) => (
+              <Select.Option key={role.id} value={role.id}>
+                {role.name}
+              </Select.Option>
+            ))}
+          </Select>
+          <Select
+            placeholder="状态"
+            value={filters.status}
+            onChange={(value) => setFilters({ ...filters, status: value })}
+            style={{ width: 100 }}
+            allowClear
+          >
+            <Select.Option value={1}>正常</Select.Option>
+            <Select.Option value={0}>禁用</Select.Option>
+          </Select>
+          <div className="flex-1" />
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+            新建用户
+          </Button>
+        </div>
       </div>
 
       <div className="table-container">

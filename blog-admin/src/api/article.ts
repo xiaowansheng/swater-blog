@@ -59,9 +59,13 @@ export interface ArticleSaveResult {
 export const getArticleList = (params: {
   page?: number
   size?: number
+  keyword?: string
+  id?: string
+  articleKey?: string
   status?: number
   categoryId?: number
-  keyword?: string
+  type?: string
+  isTop?: number
 }): Promise<PageResult<Article>> => {
   return request.get('/admin/post/list', { params })
 }

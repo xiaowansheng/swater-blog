@@ -40,8 +40,22 @@ public class ApiResourceServiceImpl implements ApiResourceService {
     private ApiResourceCache apiResourceCache;
 
     @Override
-    public List<ApiVO> tree() {
+    public List<ApiVO> tree(String name, String path, String method, Integer isOpen) {
         LambdaQueryWrapper<SysApi> wrapper = new LambdaQueryWrapper<>();
+
+        if (name != null && !name.isEmpty()) {
+            wrapper.like(SysApi::getName, name);
+        }
+        if (path != null && !path.isEmpty()) {
+            wrapper.like(SysApi::getPath, path);
+        }
+        if (method != null && !method.isEmpty()) {
+            wrapper.eq(SysApi::getMethod, method);
+        }
+        if (isOpen != null) {
+            wrapper.eq(SysApi::getIsOpen, isOpen);
+        }
+
         wrapper.orderByAsc(SysApi::getSort)
                 .orderByDesc(SysApi::getCreateTime);
 

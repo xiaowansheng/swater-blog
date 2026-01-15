@@ -24,12 +24,16 @@ public class UserController {
 
     @GetMapping("/list")
     @ApiOperation(name = "查询用户列表", type = ApiOperationType.QUERY,
-            description = "分页查询用户列表，支持按关键词搜索")
+            description = "分页查询用户列表，支持多条件筛选")
     public Result<PageResult<UserVO>> list(
             @RequestParam(required = false) Long page,
             @RequestParam(required = false) Long size,
-            @RequestParam(required = false) String keyword) {
-        PageResult<UserVO> result = userService.list(page, size, keyword);
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String nickname,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) Long roleId,
+            @RequestParam(required = false) Integer status) {
+        PageResult<UserVO> result = userService.list(page, size, username, nickname, email, roleId, status);
         return Result.success(result);
     }
 

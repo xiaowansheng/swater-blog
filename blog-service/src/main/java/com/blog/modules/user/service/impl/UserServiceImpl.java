@@ -45,22 +45,35 @@ public class UserServiceImpl implements UserService {
     private ApplicationEventPublisher eventPublisher;
 
     @Override
-    public PageResult<UserVO> list(Long page, Long size, String keyword) {
+    public PageResult<UserVO> list(Long page, Long size, String username, String nickname, String email, Long roleId, Integer status) {
         Page<User> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
 
-        if (keyword != null && !keyword.isEmpty()) {
-            wrapper.and(w -> w.like(User::getUsername, keyword)
-                    .or().like(User::getNickname, keyword)
-                    .or().like(User::getEmail, keyword));
+        if (username != null && !username.isEmpty()) {
+            wrapper.like(User::getUsername, username);
+        }
+        if (nickname != null && !nickname.isEmpty()) {
+            wrapper.like(User::getNickname, nickname);
+        }
+        if (email != null && !email.isEmpty()) {
+            wrapper.like(User::getEmail, email);
+        }
+        if (roleId != null) {
+            RoleVO role = roleService.getById(roleId);
+            if (role != null) {
+                wrapper.eq(User::getRoleKey, role.getRoleKey());
+            }
+        }
+        if (status != null) {
+            wrapper.eq(User::getStatus, status);
         }
         wrapper.orderByDesc(User::getCreateTime);
-        
+
         Page<User> result = userMapper.selectPage(pageParam, wrapper);
         List<UserVO> voList = result.getRecords().stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
-        
+
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
     }
 
