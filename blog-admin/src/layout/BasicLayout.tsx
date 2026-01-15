@@ -137,7 +137,7 @@ const BasicLayout: React.FC = () => {
             <div className="mb-4">
               <Breadcrumb items={getBreadcrumbItems(location.pathname)} />
             </div>
-            <KeepAlive name={location.pathname} when={shouldCache}>
+            <KeepAlive name={location.pathname} when={shouldCache} key={location.pathname}>
               <Suspense fallback={<PageLoading />}>{outlet}</Suspense>
             </KeepAlive>
           </div>
