@@ -14,11 +14,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(
-    name = "text.processor.type",
-    havingValue = "builtin",
-    matchIfMissing = true
-)
+@ConditionalOnProperty(name = "plugin.text.active", havingValue = "builtin", matchIfMissing = false)
 public class BuiltinTextProcessorPlugin implements TextProcessorPlugin, Plugin {
 
     @Override

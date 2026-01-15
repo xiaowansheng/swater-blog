@@ -21,7 +21,11 @@ public class RabbitMQPlugin implements MessageQueuePlugin, Plugin {
     
     @Override
     public boolean isEnabled() {
-        return rabbitTemplate != null && rabbitTemplate.getConnectionFactory() != null;
+        if (rabbitTemplate == null) {
+            return false;
+        }
+        rabbitTemplate.getConnectionFactory();
+        return true;
     }
     
     @Override

@@ -1,8 +1,6 @@
 package com.blog.plugin.components.search;
 
 
-import com.blog.plugin.components.search.config.SearchPluginProperties;
-import com.blog.plugin.core.PluginSelector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.util.List;
@@ -10,13 +8,10 @@ import java.util.stream.Collectors;
 
 @Component
 public class SearchPluginFactory {
-    
+
     @Autowired
     private List<SearchPlugin> searchPlugins;
 
-    @Autowired
-    private SearchPluginProperties searchPluginProperties;
-    
     public List<SearchPlugin> getPlugins() {
         return searchPlugins.stream()
                 .filter(plugin -> plugin instanceof com.blog.plugin.core.Plugin)
@@ -25,12 +20,17 @@ public class SearchPluginFactory {
     }
 
     public SearchPlugin getActivePlugin() {
-        List<SearchPlugin> enabled = getPlugins();
-        return PluginSelector.selectSingle(
-                enabled,
-                searchPluginProperties.getActive(),
-                searchPluginProperties.getFallback()
-        );
+        List<SearchPlugin> plugins = getPlugins();
+        if (plugins.isEmpty()) {
+            throw new IllegalStateException("No active search plugin found. Please configure plugin.search.active property.");
+        }
+        if (plugins.size() > 1) {
+            throw new IllegalStateException("Multiple search plugins are active: " +
+                    plugins.stream().map(p -> ((com.blog.plugin.core.Plugin) p).getName())
+                            .collect(Collectors.joining(", ")) +
+                    ". Only one should be active.");
+        }
+        return plugins.get(0);
     }
 }
 

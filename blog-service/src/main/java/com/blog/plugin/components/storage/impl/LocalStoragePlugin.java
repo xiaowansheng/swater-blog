@@ -24,7 +24,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 @Component
-@ConditionalOnProperty(name = "plugin.storage.active", havingValue = "local", matchIfMissing = true)
+@ConditionalOnProperty(name = "plugin.storage.active", havingValue = "local", matchIfMissing = false)
 public class LocalStoragePlugin implements StoragePlugin, Plugin {
 
     @Autowired

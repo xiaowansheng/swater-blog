@@ -157,7 +157,6 @@ spring:
 # 文件存储配置 - 生产环境
 file:
   storage:
-    type: ${FILE_STORAGE_TYPE:oss}
     local:
       path: ${FILE_STORAGE_PATH:/var/blog/uploads}
       url-prefix: /uploads
@@ -173,22 +172,8 @@ file:
       bucket: ${QINIU_BUCKET:}
       domain: ${QINIU_DOMAIN:}
 
-# 通知配置 - 生产环境
-notification:
-  email:
-    enabled: true
-  websocket:
-    enabled: true
-
-# 邮件插件配置
-email:
-  provider:
-    type: spring-mail
-
 # 位置服务配置 - 生产环境
 location:
-  provider:
-    type: ${LOCATION_PROVIDER:amap}
   amap:
     key: ${AMAP_KEY}
     api-url: https://restapi.amap.com/v3/ip
@@ -197,26 +182,6 @@ location:
     api-url: https://api.map.baidu.com/location/ip
   ip2location:
     db-path: ${IP2LOCATION_DB_PATH:}
-
-# 搜索引擎配置
-search:
-  provider:
-    type: ${SEARCH_TYPE:elasticsearch}  # 生产环境使用Elasticsearch
-
-# 消息队列配置
-mq:
-  provider:
-    type: ${MQ_TYPE:rabbitmq}
-
-# 定时任务配置
-scheduler:
-  provider:
-    type: spring
-
-# 评论系统配置
-comment:
-  provider:
-    type: ${COMMENT_PROVIDER:builtin}
 
 # 日志存储配置
 log:
@@ -448,31 +413,31 @@ health:
 plugin:
   # 存储插件配置
   storage:
-    active: ${FILE_STORAGE_TYPE:oss}  # 生产环境推荐使用OSS
-    fallback: local
+    active: ${FILE_STORAGE_TYPE:oss}  # local/oss/qiniu
 
   # 消息队列插件配置
   mq:
-    active: ${MQ_TYPE:rabbitmq}
-    fallback: memory
+    active: ${MQ_TYPE:rabbitmq}  # rabbitmq/memory
 
   # 通知渠道插件配置
   notification:
-    enabled:
-      - websocket  # WebSocket通知
-      - email      # 邮件通知
+    email:
+      active: email  # 邮件通知
+    websocket:
+      active: websocket  # WebSocket通知
 
   # 搜索插件配置
   search:
-    active: ${SEARCH_TYPE:elasticsearch}  # 生产环境推荐使用Elasticsearch
-    fallback: database
+    active: ${SEARCH_TYPE:elasticsearch}  # database/elasticsearch
 
-  # 评论插件配置
-  comment:
-    active: ${COMMENT_TYPE:builtin}
-    fallback:
+  # 文本处理插件配置
+  text:
+    active: builtin  # builtin
+
+  # 位置服务插件配置
+  location:
+    active: ${LOCATION_TYPE:amap}  # amap/baidu/ip2location
 
   # 定时任务插件配置
   scheduler:
-    active: spring
-    fallback:
+    active: spring  # spring/quartz

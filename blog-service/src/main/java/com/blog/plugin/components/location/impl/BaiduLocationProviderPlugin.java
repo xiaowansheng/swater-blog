@@ -14,7 +14,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "location.provider.type", havingValue = "baidu")
+@ConditionalOnProperty(name = "plugin.location.active", havingValue = "baidu", matchIfMissing = false)
 public class BaiduLocationProviderPlugin implements LocationProviderPlugin, Plugin {
     
     @Value("${location.baidu.ak:}")

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 @Component
-@ConditionalOnProperty(name = "location.provider.type", havingValue = "ip2location")
+@ConditionalOnProperty(name = "plugin.location.active", havingValue = "ip2location", matchIfMissing = false)
 public class Ip2LocationProviderPlugin implements LocationProviderPlugin, Plugin {
     
     @Value("${location.ip2location.db-path:}")

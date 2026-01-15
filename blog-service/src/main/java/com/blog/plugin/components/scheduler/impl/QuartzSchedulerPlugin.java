@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.Properties;
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "plugin.scheduler.active", havingValue = "quartz")
+@ConditionalOnProperty(name = "plugin.scheduler.active", havingValue = "quartz", matchIfMissing = false)
 public class QuartzSchedulerPlugin implements SchedulerPlugin, Plugin {
     
     private Scheduler scheduler;

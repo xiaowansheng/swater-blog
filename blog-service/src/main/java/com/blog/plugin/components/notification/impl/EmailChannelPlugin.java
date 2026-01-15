@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "notification.email.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "plugin.notification.email.active", havingValue = "email", matchIfMissing = false)
 public class EmailChannelPlugin implements NotificationChannelPlugin, Plugin {
 
     @Autowired

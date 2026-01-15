@@ -6,7 +6,7 @@ import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.mq.MessageQueuePlugin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -14,7 +14,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 @Component
-@ConditionalOnMissingBean(RabbitTemplate.class)
+@ConditionalOnProperty(name = "plugin.mq.active", havingValue = "memory", matchIfMissing = false)
 public class MemoryMQPlugin implements MessageQueuePlugin, Plugin {
     
     private final ConcurrentHashMap<String, BlockingQueue<Object>> queues = new ConcurrentHashMap<>();

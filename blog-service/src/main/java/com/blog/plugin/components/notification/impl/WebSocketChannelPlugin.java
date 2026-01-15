@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "notification.websocket.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "plugin.notification.websocket.active", havingValue = "websocket", matchIfMissing = false)
 public class WebSocketChannelPlugin implements NotificationChannelPlugin, Plugin {
 
     @Autowired
