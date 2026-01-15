@@ -39,6 +39,8 @@ public class Guestbook extends com.blog.shared.model.entity.BaseEntity {
 
     private String location;
 
+    private String ipLocation;
+
     private String device;
 
     private String browser;

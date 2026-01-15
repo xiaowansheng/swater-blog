@@ -185,7 +185,13 @@ export interface CommentVO {
     nickname?: string;
   };
   ip?: string;
-  userAgent?: string;
+  country?: string;
+  province?: string;
+  city?: string;
+  location?: string;
+  ipLocation?: string;
+  device?: string;
+  browser?: string;
   createTime: string;
   children?: CommentVO[];
 }
@@ -204,6 +210,10 @@ export interface GuestbookVO {
   country?: string;
   province?: string;
   city?: string;
+  location?: string;
+  ipLocation?: string;
+  device?: string;
+  browser?: string;
   isVisible?: number;
   reviewStatus?: number;
   createTime: string;
@@ -229,6 +239,14 @@ export interface MomentVO {
   viewCount?: number;
   likeCount: number;
   commentCount: number;
+  ip?: string;
+  country?: string;
+  province?: string;
+  city?: string;
+  location?: string;
+  ipLocation?: string;
+  device?: string;
+  browser?: string;
   createTime: string;
 }
 

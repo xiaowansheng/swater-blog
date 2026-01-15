@@ -40,6 +40,42 @@ function getStatusLabel(status: number | string | undefined) {
   return STATUS_LABEL.hidden;
 }
 
+// 格式化位置信息
+function formatLocation(
+  country: string | undefined,
+  province: string | undefined,
+  city: string | undefined,
+  location: string | undefined,
+  ipLocation: string | undefined
+): string {
+  // 优先使用经纬度解析的 location
+  if (location) return location;
+
+  // 其次使用 IP 解析的 ipLocation
+  if (ipLocation) return ipLocation;
+
+  // 最后才拼接 country, province, city
+  const parts = [];
+  if (country && country !== '中国') {
+    parts.push(country);
+  }
+  if (province) {
+    parts.push(province);
+  }
+  if (city && city !== province) {
+    parts.push(city);
+  }
+  return parts.length > 0 ? parts.join(' · ') : '';
+}
+
+// 格式化设备和浏览器信息
+function formatDeviceAndBrowser(device: string | undefined, browser: string | undefined): string {
+  const parts = [];
+  if (device) parts.push(device);
+  if (browser) parts.push(browser);
+  return parts.join(' · ');
+}
+
 export default function AnimeCommentItem({
   comment,
   replyState,
@@ -67,8 +103,8 @@ export default function AnimeCommentItem({
   return (
     <div className="animate-fade-in">
       <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-5 border border-card-border shadow-sm hover:shadow-md transition-all duration-300 relative group">
-        {/* 头部 */}
-        <div className="flex items-start gap-4">
+        {/* 第一部分：头像和作者信息 */}
+        <div className="flex items-center gap-3 mb-3">
           <div className="relative flex-shrink-0">
             <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-primary/30 shadow-md group-hover:scale-110 transition-transform duration-300">
               <img
@@ -80,8 +116,8 @@ export default function AnimeCommentItem({
             <div className="absolute -top-1 -right-1 text-xs animate-pulse">✨</div>
           </div>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="font-bold text-foreground text-base">
                 {comment.nickname}
               </span>
@@ -90,9 +126,6 @@ export default function AnimeCommentItem({
                 {!isDirectChild && comment.parentId && comment.parentId > 0 && (
                   <> → #{comment.parentId}</>
                 )}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {formatDate(comment.createTime, 'YYYY-MM-DD HH:mm')}
               </span>
               {comment.isAuthor && (
                 <span className="text-xs text-white bg-primary px-2 py-0.5 rounded-full">
@@ -105,55 +138,84 @@ export default function AnimeCommentItem({
                 </span>
               )}
             </div>
-
-            {/* 内容 */}
-            <div className="text-card-foreground leading-relaxed whitespace-pre-wrap break-words">
-              {isHiddenByModeration && <span className="text-muted-foreground italic">评论已被隐藏 </span>}
-              {comment.replyToUser?.nickname && (
-                <span className="text-primary">@{comment.replyToUser.nickname} </span>
-              )}
-              {comment.content}
-            </div>
-
-            {/* 操作 */}
-            <div className="flex items-center gap-4 mt-3">
-              <button
-                onClick={() => onReply(comment.id)}
-                className={`text-sm flex items-center gap-1 transition-colors group/btn ${
-                  showReplyForm
-                    ? 'text-primary hover:text-primary/80'
-                    : 'text-accent hover:text-accent/80'
-                }`}
-              >
-                <svg className="w-4 h-4 group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                </svg>
-                {showReplyForm ? '收起回复' : '回复'}
-              </button>
-              {typeof comment.replyCount === 'number' && comment.replyCount > 0 && (
-                <button
-                  onClick={() => onToggleReplies(comment.id, comment.replyCount)}
-                  className="text-sm text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
-                >
-                  {expanded ? (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                      收起 {comment.replyCount} 条回复
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                      展开 {comment.replyCount} 条回复
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
+            <span className="text-xs text-muted-foreground">
+              {formatDate(comment.createTime, 'YYYY-MM-DD HH:mm')}
+            </span>
           </div>
+        </div>
+
+        {/* 第二部分：评论内容 */}
+        <div className="text-card-foreground leading-relaxed whitespace-pre-wrap break-words mb-3">
+          {isHiddenByModeration && <span className="text-muted-foreground italic">评论已被隐藏 </span>}
+          {comment.replyToUser?.nickname && (
+            <span className="text-primary">@{comment.replyToUser.nickname} </span>
+          )}
+          {comment.content}
+        </div>
+
+        {/* 第三部分：地址和设备信息 */}
+        {(comment.location || comment.ipLocation || comment.country || comment.province || comment.city || comment.device || comment.browser) && (
+          <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">
+            {/* 左边：地址 */}
+            {formatLocation(comment.country, comment.province, comment.city, comment.location, comment.ipLocation) && (
+              <div className="flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>{formatLocation(comment.country, comment.province, comment.city, comment.location, comment.ipLocation)}</span>
+              </div>
+            )}
+
+            {/* 右边：设备和浏览器 */}
+            {formatDeviceAndBrowser(comment.device, comment.browser) && (
+              <div className="flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span>{formatDeviceAndBrowser(comment.device, comment.browser)}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 操作按钮 */}
+        <div className="flex items-center gap-4 mt-3">
+          <button
+            onClick={() => onReply(comment.id)}
+            className={`text-sm flex items-center gap-1 transition-colors group/btn ${
+              showReplyForm
+                ? 'text-primary hover:text-primary/80'
+                : 'text-accent hover:text-accent/80'
+            }`}
+          >
+            <svg className="w-4 h-4 group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            </svg>
+            {showReplyForm ? '收起回复' : '回复'}
+          </button>
+          {typeof comment.replyCount === 'number' && comment.replyCount > 0 && (
+            <button
+              onClick={() => onToggleReplies(comment.id, comment.replyCount)}
+              className="text-sm text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
+            >
+              {expanded ? (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                  收起 {comment.replyCount} 条回复
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                  展开 {comment.replyCount} 条回复
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
@@ -185,23 +247,21 @@ export default function AnimeCommentItem({
               key={child.id}
               className="bg-card/80 border border-card-border rounded-xl p-4 shadow-sm"
             >
-              <div className="flex items-start gap-3">
+              {/* 第一部分：头像和作者信息 */}
+              <div className="flex items-center gap-3 mb-3">
                 <img
                   src={child.avatar || getRandomAnimeAvatar(child.nickname)}
                   alt={child.nickname}
                   className="w-10 h-10 rounded-full border-2 border-primary/30"
                 />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="font-semibold text-foreground">{child.nickname}</span>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-foreground text-sm">{child.nickname}</span>
                     <span className="text-xs text-muted-foreground">
                       #{child.id}
                       {child.parentId && child.parentId !== child.rootId && (
                         <> → #{child.parentId}</>
                       )}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDate(child.createTime, 'YYYY-MM-DD HH:mm')}
                     </span>
                     {child.isAuthor && (
                       <span className="text-xs text-white bg-primary px-2 py-0.5 rounded-full">
@@ -214,36 +274,69 @@ export default function AnimeCommentItem({
                       </span>
                     )}
                   </div>
-                  <div className="text-card-foreground whitespace-pre-wrap break-words mt-1">
-                    {child.isVisible === 0 && <span className="text-muted-foreground italic">评论已被隐藏 </span>}
-                    {child.replyToUser?.nickname && (
-                      <span className="text-primary">@{child.replyToUser.nickname} </span>
-                    )}
-                    {child.content}
-                  </div>
-                  <div className="mt-2">
-                    <button
-                      onClick={() => onReply(child.id)}
-                      className="text-xs text-primary hover:text-primary/80"
-                    >
-                      回复
-                    </button>
-                  </div>
-                  {activeReplyFormId === child.id && (
-                    <div className="mt-3">
-                      <ReplyForm
-                        parentId={child.id}
-                        rootId={rootId}
-                        parentNickname={child.nickname}
-                        targetType={targetType}
-                        targetId={targetId}
-                        config={config}
-                        onSubmitSuccess={() => onReplySubmitSuccess(rootId)}
-                        onCancel={onCloseReplyForm}
-                      />
+                  <span className="text-xs text-muted-foreground">
+                    {formatDate(child.createTime, 'YYYY-MM-DD HH:mm')}
+                  </span>
+                </div>
+              </div>
+
+              {/* 第二部分：回复内容 */}
+              <div className="text-card-foreground whitespace-pre-wrap break-words mb-3">
+                {child.isVisible === 0 && <span className="text-muted-foreground italic">评论已被隐藏 </span>}
+                {child.replyToUser?.nickname && (
+                  <span className="text-primary">@{child.replyToUser.nickname} </span>
+                )}
+                {child.content}
+              </div>
+
+              {/* 第三部分：地址和设备信息 */}
+              {(child.location || child.ipLocation || child.country || child.province || child.city || child.device || child.browser) && (
+                <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">
+                  {/* 左边：地址 */}
+                  {formatLocation(child.country, child.province, child.city, child.location, child.ipLocation) && (
+                    <div className="flex items-center gap-1">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <span>{formatLocation(child.country, child.province, child.city, child.location, child.ipLocation)}</span>
+                    </div>
+                  )}
+
+                  {/* 右边：设备和浏览器 */}
+                  {formatDeviceAndBrowser(child.device, child.browser) && (
+                    <div className="flex items-center gap-1">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <span>{formatDeviceAndBrowser(child.device, child.browser)}</span>
                     </div>
                   )}
                 </div>
+              )}
+
+              {/* 回复按钮和表单 */}
+              <div className="mt-2">
+                <button
+                  onClick={() => onReply(child.id)}
+                  className="text-xs text-primary hover:text-primary/80"
+                >
+                  回复
+                </button>
+                {activeReplyFormId === child.id && (
+                  <div className="mt-3">
+                    <ReplyForm
+                      parentId={child.id}
+                      rootId={rootId}
+                      parentNickname={child.nickname}
+                      targetType={targetType}
+                      targetId={targetId}
+                      config={config}
+                      onSubmitSuccess={() => onReplySubmitSuccess(rootId)}
+                      onCancel={onCloseReplyForm}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ))}
