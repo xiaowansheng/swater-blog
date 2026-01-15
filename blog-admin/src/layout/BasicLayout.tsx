@@ -6,7 +6,7 @@ import Sidebar from './components/Sidebar'
 import Tabs from './components/Tabs'
 import LoginModal from '@/components/common/LoginModal'
 import Lockscreen from '@/components/common/Lockscreen'
-import { KeepAlive } from '@/components/common/KeepAlive'
+import { KeepAlive, useAliveController } from 'react-activation'
 import { useAuthStore } from '@/store/auth'
 import { useTabsStore } from '@/store/tabs'
 import { useWebSocket } from '@/hooks/useWebSocket'
@@ -88,6 +88,7 @@ const BasicLayout: React.FC = () => {
   const { tabs } = useTabsStore()
   const location = useLocation()
   const outlet = useOutlet()
+  const { drop, refresh } = useAliveController()
 
   useEffect(() => {
     if (isAuthenticated()) {
@@ -101,6 +102,30 @@ const BasicLayout: React.FC = () => {
   const currentTab = tabs.find((tab) => tab.key === location.pathname)
   const shouldCache = currentTab?.keepAlive ?? true
 
+  useEffect(() => {
+    const handleRemove = (event: CustomEvent) => {
+      const key = event.detail?.key
+      if (key) {
+        drop(key)
+      }
+    }
+
+    const handleRefresh = (event: CustomEvent) => {
+      const key = event.detail?.key
+      if (key) {
+        refresh(key)
+      }
+    }
+
+    window.addEventListener('tab-remove', handleRemove as EventListener)
+    window.addEventListener('tab-refresh', handleRefresh as EventListener)
+
+    return () => {
+      window.removeEventListener('tab-remove', handleRemove as EventListener)
+      window.removeEventListener('tab-refresh', handleRefresh as EventListener)
+    }
+  }, [drop, refresh])
+
   return (
     <Layout className="h-screen">
       <Sidebar />
@@ -112,7 +137,7 @@ const BasicLayout: React.FC = () => {
             <div className="mb-4">
               <Breadcrumb items={getBreadcrumbItems(location.pathname)} />
             </div>
-            <KeepAlive cacheKey={location.pathname} shouldCache={shouldCache}>
+            <KeepAlive name={location.pathname} when={shouldCache}>
               <Suspense fallback={<PageLoading />}>{outlet}</Suspense>
             </KeepAlive>
           </div>
@@ -125,4 +150,3 @@ const BasicLayout: React.FC = () => {
 }
 
 export default BasicLayout
-
