@@ -1,0 +1,145 @@
+.vditor-reset {
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  line-height: 1.7;
+  color: var(--foreground, #111827);
+  max-width: 100%;
+  width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  direction: ltr;
+  text-align: left;
+}
+
+.vditor-reset > * {
+  max-width: 100%;
+  width: 100%;
+}
+
+.vditor-reset pre,
+.vditor-reset table,
+.vditor-reset img,
+.vditor-reset .katex-display,
+.vditor-reset .vditor-mermaid {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.vditor-reset p,
+.vditor-reset li,
+.vditor-reset td,
+.vditor-reset th {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.vditor-reset * {
+  font-family: inherit;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.vditor-reset h1,
+.vditor-reset h2,
+.vditor-reset h3,
+.vditor-reset h4,
+.vditor-reset h5,
+.vditor-reset h6 {
+  color: var(--foreground, #111827);
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.vditor-reset h1 {
+  font-size: 2rem;
+  border-bottom: 2px solid var(--border, #e5e7eb);
+  padding-bottom: 0.5rem;
+}
+
+.vditor-reset h2 {
+  font-size: 1.5rem;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  padding-bottom: 0.25rem;
+}
+
+.vditor-reset h3 {
+  font-size: 1.25rem;
+}
+
+.vditor-reset h4 {
+  font-size: 1.1rem;
+}
+
+.vditor-reset p {
+  margin-bottom: 1rem;
+  color: var(--foreground, #111827);
+}
+
+.vditor-reset a {
+  color: var(--primary, #1677ff);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+  word-break: break-all;
+}
+
+.vditor-reset a:hover {
+  border-bottom-color: var(--primary, #1677ff);
+}
+
+.vditor-reset blockquote {
+  border-left: 4px solid var(--primary, #1677ff);
+  background: var(--secondary, #f3f4f6);
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.vditor-reset blockquote p {
+  margin: 0;
+  color: var(--secondary-foreground, #374151);
+}
+
+.vditor-reset code {
+  background: #f3f4f6;
+  border-radius: 4px;
+  padding: 0.2em 0.4em;
+  font-size: 0.9em;
+}
+
+.vditor-reset pre {
+  background: #111827;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.vditor-reset pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.vditor-reset ul,
+.vditor-reset ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.vditor-reset table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.vditor-reset th,
+.vditor-reset td {
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.75rem;
+}
+
+.vditor-reset img {
+  max-width: 100%;
+  border-radius: 6px;
+}

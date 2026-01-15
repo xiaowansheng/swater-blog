@@ -501,5 +501,10 @@ dev:
       - PUT
       - DELETE
       - OPTIONS
-    allowed-headers: '*'
+    allowed-headers:
+      - '*'
+    exposed-headers:
+      - Content-Disposition
+      - Content-Type
+      - Content-Length
     allow-credentials: true

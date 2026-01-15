@@ -77,6 +77,8 @@ dependencies {
     implementation("org.jsoup:jsoup:1.18.3")
     implementation("com.rometools:rome:2.1.0")
 
+    // --- PDF 导出库 ---
+
     // 第三方 SDK
     implementation("com.aliyun.oss:aliyun-sdk-oss:3.17.4")
     implementation("com.qiniu:qiniu-java-sdk:7.13.1")

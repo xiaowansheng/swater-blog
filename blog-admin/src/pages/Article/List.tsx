@@ -10,6 +10,7 @@ import {
   LikeOutlined,
   CommentOutlined,
   VerticalAlignTopOutlined,
+  EyeFilled,
 } from '@ant-design/icons'
 import { useNavigate, Link } from 'react-router-dom'
 import {
@@ -119,6 +120,10 @@ const ArticleList: React.FC = () => {
     }
   }
 
+  const handlePreview = (id: number) => {
+    navigate(`/article/preview/${id}`)
+  }
+
   const columns = [
     {
       title: '文章信息',
@@ -220,42 +225,53 @@ const ArticleList: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 200,
-      render: (_: any, record: Article) => (
-        <Space>
-          <Tooltip title="编辑">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => navigate(`/article/edit/${record.id}`)}
-            />
-          </Tooltip>
-          {record.status === ArticleStatus.PUBLISHED ? (
-            <Tooltip title="下架">
+      render: (_: any, record: Article) => {
+        return (
+          <Space>
+            <Tooltip title="预览">
               <Button
                 type="text"
-                onClick={() => handleUnpublish(record.id)}
+                icon={<EyeFilled />}
+                onClick={() => handlePreview(record.id)}
               >
-                下架
+                预览
               </Button>
             </Tooltip>
-          ) : (
-            <Tooltip title="发布">
+            <Tooltip title="编辑">
               <Button
                 type="text"
-                className="text-green-500"
-                onClick={() => handlePublish(record.id)}
-              >
-                发布
-              </Button>
+                icon={<EditOutlined />}
+                onClick={() => navigate(`/article/edit/${record.id}`)}
+              />
             </Tooltip>
-          )}
-          <Popconfirm title="确定删除这篇文章吗？" onConfirm={() => handleDelete(record.id)}>
-            <Tooltip title="删除">
-              <Button type="text" danger icon={<DeleteOutlined />} />
-            </Tooltip>
-          </Popconfirm>
-        </Space>
-      ),
+            {record.status === ArticleStatus.PUBLISHED ? (
+              <Tooltip title="下架">
+                <Button
+                  type="text"
+                  onClick={() => handleUnpublish(record.id)}
+                >
+                  下架
+                </Button>
+              </Tooltip>
+            ) : (
+              <Tooltip title="发布">
+                <Button
+                  type="text"
+                  className="text-green-500"
+                  onClick={() => handlePublish(record.id)}
+                >
+                  发布
+                </Button>
+              </Tooltip>
+            )}
+            <Popconfirm title="确定删除这篇文章吗？" onConfirm={() => handleDelete(record.id)}>
+              <Tooltip title="删除">
+                <Button type="text" danger icon={<DeleteOutlined />} />
+              </Tooltip>
+            </Popconfirm>
+          </Space>
+        )
+      },
     },
   ]
 

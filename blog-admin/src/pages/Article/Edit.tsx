@@ -310,11 +310,7 @@ const ArticleEdit: React.FC = () => {
         filePath: result.filePath,
       })
 
-      // 使用 url 字段，如果包含 /uploads 前缀则去掉（和ImageUpload组件保持一致）
-      let coverUrl = result.url;
-      // if (coverUrl && coverUrl.startsWith('/uploads/')) {
-      //   coverUrl = coverUrl.substring(8); // 去掉 /uploads 前缀
-      // }
+      const coverUrl = result.url || result.storagePath || result.filePath || ''
 
       // 设置封面URL并触发表单更新
       form.setFieldsValue({

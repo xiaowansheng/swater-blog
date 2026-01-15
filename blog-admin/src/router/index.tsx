@@ -11,6 +11,7 @@ const Login = lazy(() => import('@/pages/Login'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const ArticleList = lazy(() => import('@/pages/Article/List'))
 const ArticleEdit = lazy(() => import('@/pages/Article/Edit'))
+const ArticlePreview = lazy(() => import('@/pages/Article/Preview'))
 const Category = lazy(() => import('@/pages/Category'))
 const Tag = lazy(() => import('@/pages/Tag'))
 const Comment = lazy(() => import('@/pages/Comment'))
@@ -39,6 +40,7 @@ const NotFound = lazy(() => import('@/pages/404'))
 const routeConfig = [
   { path: '/dashboard', component: Dashboard, title: '仪表盘', keepAlive: true },
   { path: '/article', component: ArticleList, title: '文章管理', keepAlive: true },
+  { path: '/article/preview/:id', component: ArticlePreview, title: '预览文章', keepAlive: true },
   { path: '/article/edit/:id', component: ArticleEdit, title: '编辑文章', keepAlive: true },
   { path: '/article/create', component: ArticleEdit, title: '创建文章', keepAlive: true },
   { path: '/category', component: Category, title: '分类管理', keepAlive: true },
@@ -129,6 +131,7 @@ const Router: React.FC = () => {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Suspense fallback={<PageLoading />}><Dashboard /></Suspense>} />
           <Route path="article" element={<Suspense fallback={<PageLoading />}><ArticleList /></Suspense>} />
+          <Route path="article/preview/:id" element={<Suspense fallback={<PageLoading />}><ArticlePreview /></Suspense>} />
           <Route path="article/edit/:id" element={<Suspense fallback={<PageLoading />}><ArticleEdit /></Suspense>} />
           <Route path="article/create" element={<Suspense fallback={<PageLoading />}><ArticleEdit /></Suspense>} />
           <Route path="category" element={<Suspense fallback={<PageLoading />}><Category /></Suspense>} />
