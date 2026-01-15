@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Form, Input, Button, message, Switch, Card, Row, Col, Space, Breadcrumb, Modal, Radio } from 'antd'
 import { useNavigate, useParams, Link, useLocation } from 'react-router-dom'
-import { ArrowLeftOutlined, SaveOutlined, SendOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, SaveOutlined, SendOutlined, PlusOutlined } from '@ant-design/icons'
 import { getArticleById, ArticleSaveDTO } from '@/api/article'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
+import { uploadFile } from '@/api/file'
 import { Category, Tag, ArticleStatus, ArticleType } from '@/types'
 import { usePageTab } from '@/hooks/usePageTab'
 import MarkdownEditor from '@/components/common/MarkdownEditor'
@@ -13,6 +14,7 @@ import TagSelector from './components/TagSelector'
 import ImageUpload from '@/components/common/ImageUpload'
 import SaveStatusIndicator from '@/components/article/SaveStatusIndicator'
 import ConflictResolutionModal from '@/components/article/ConflictResolutionModal'
+import CoverGenerator from '@/components/article/CoverGenerator'
 import useArticleAutoSave from '@/hooks/useArticleAutoSave'
 
 const ArticleEdit: React.FC = () => {
@@ -29,9 +31,10 @@ const ArticleEdit: React.FC = () => {
   const [tags, setTags] = useState<Tag[]>([])
   const [articleStatus, setArticleStatus] = useState<number>(ArticleStatus.DRAFT)
   const [showConflictModal, setShowConflictModal] = useState(false)
+  const [showCoverGenerator, setShowCoverGenerator] = useState(false)
   const type = Form.useWatch('type', form)
   const title = Form.useWatch('title', form)
-  
+
   // 用于跟踪内容变化
   const contentRef = useRef<string>('')
 
@@ -277,12 +280,58 @@ const ArticleEdit: React.FC = () => {
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value
     form.setFieldValue('title', title)
-    
+
     const formData = getFormData()
     if (formData.content) {
       debouncedAutoSave(formData)
     }
   }, [form, getFormData, debouncedAutoSave])
+
+  // 处理生成的封面
+  const handleCoverGenerated = async (imageUrl: string) => {
+    try {
+      // 将base64转换为Blob
+      const response = await fetch(imageUrl)
+      const blob = await response.blob()
+
+      // 创建File对象，使用随机文件名避免重复
+      const timestamp = Date.now()
+      const random = Math.random().toString(36).substring(7)
+      const file = new File([blob], `cover_${timestamp}_${random}.png`, { type: 'image/png' })
+
+      // 上传文件
+      message.loading({ content: '正在上传封面...', key: 'uploadCover' })
+      const result = await uploadFile(file, 'article_cover')
+
+      // 打印调试信息，看看后端返回了什么
+      console.log('封面上传结果:', {
+        storagePath: result.storagePath,
+        url: result.url,
+        filePath: result.filePath,
+      })
+
+      // 使用 url 字段，如果包含 /uploads 前缀则去掉（和ImageUpload组件保持一致）
+      let coverUrl = result.url;
+      // if (coverUrl && coverUrl.startsWith('/uploads/')) {
+      //   coverUrl = coverUrl.substring(8); // 去掉 /uploads 前缀
+      // }
+
+      // 设置封面URL并触发表单更新
+      form.setFieldsValue({
+        cover: coverUrl
+      })
+
+      // 强制触发一次验证和更新
+      setTimeout(() => {
+        form.validateFields(['cover'])
+      }, 0)
+
+      message.success({ content: '封面已生成并上传成功', key: 'uploadCover' })
+    } catch (error) {
+      console.error('上传封面失败', error)
+      message.error({ content: '封面上传失败', key: 'uploadCover' })
+    }
+  }
 
   // 手动保存草稿
   const handleSaveDraft = async () => {
@@ -548,12 +597,21 @@ const ArticleEdit: React.FC = () => {
                 )}
               </Col>
               <Col span={12}>
-                <Form.Item name="cover" label="文章封面">
-                  <ImageUpload 
-                    placeholder="点击或拖拽上传文章封面" 
-                    category="article_cover"
-                  />
-                </Form.Item>
+                <div>
+                  <Form.Item name="cover" label="文章封面">
+                    <ImageUpload
+                      placeholder="点击或拖拽上传文章封面"
+                      category="article_cover"
+                    />
+                  </Form.Item>
+                  <Button
+                    icon={<PlusOutlined />}
+                    onClick={() => setShowCoverGenerator(true)}
+                    style={{ width: '100%' }}
+                  >
+                    生成封面
+                  </Button>
+                </div>
               </Col>
             </Row>
           </div>
@@ -569,6 +627,14 @@ const ArticleEdit: React.FC = () => {
         onUseServer={handleUseServerVersion}
         onUseLocal={handleUseLocalVersion}
         onCancel={() => setShowConflictModal(false)}
+      />
+
+      {/* 封面生成器 */}
+      <CoverGenerator
+        visible={showCoverGenerator}
+        onCancel={() => setShowCoverGenerator(false)}
+        onConfirm={handleCoverGenerated}
+        initialText={title || ''}
       />
     </div>
   )
