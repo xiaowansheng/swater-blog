@@ -13,6 +13,7 @@ import com.blog.modules.content.picture.mapper.PictureMapper;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.album.model.dto.AlbumDTO;
 import com.blog.modules.album.model.entity.Album;
+import com.blog.modules.album.model.enums.AlbumStatus;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.album.model.vo.AlbumVO;
 import com.blog.modules.album.service.AlbumService;
@@ -78,7 +79,7 @@ public class AlbumServiceImpl implements AlbumService {
         }
 
         if (album.getStatus() == null || album.getStatus().isEmpty()) {
-            album.setStatus("1");
+            album.setStatus(AlbumStatus.PUBLISHED.getCode());
         }
 
         albumMapper.insert(album);

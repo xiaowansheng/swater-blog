@@ -4,6 +4,7 @@ package com.blog.modules.search.listener;
 import com.blog.modules.article.event.*;
 import com.blog.modules.comment.event.*;
 import com.blog.modules.talk.event.talk.*;
+import com.blog.modules.talk.model.enums.TalkStatus;
 import com.blog.modules.search.service.SearchSyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +96,7 @@ public class SearchSyncEventListener {
             return;
         }
         try {
-            if ("1".equals(event.getTalk().getStatus())) {
+            if (TalkStatus.PUBLISHED.getCode().equals(event.getTalk().getStatus())) {
                 searchSyncService.syncMoment(event.getTalkId());
             }
         } catch (Exception e) {
@@ -110,7 +111,7 @@ public class SearchSyncEventListener {
             return;
         }
         try {
-            if ("1".equals(event.getTalk().getStatus())) {
+            if (TalkStatus.PUBLISHED.getCode().equals(event.getTalk().getStatus())) {
                 searchSyncService.syncMoment(event.getTalkId());
             } else {
                 searchSyncService.deleteMoment(event.getTalkId());

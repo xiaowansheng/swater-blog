@@ -9,6 +9,7 @@ import com.blog.modules.album.mapper.AlbumMapper;
 import com.blog.modules.content.picture.mapper.PictureMapper;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.album.model.entity.Album;
+import com.blog.modules.album.model.enums.AlbumStatus;
 import com.blog.modules.content.picture.model.entity.Picture;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.album.model.vo.AlbumVO;
@@ -35,7 +36,7 @@ public class AlbumPublicServiceImpl implements AlbumPublicService {
     public PageResult<AlbumVO> list(Long page, Long size) {
         Page<Album> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Album> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Album::getStatus, "1")
+        wrapper.eq(Album::getStatus, AlbumStatus.PUBLISHED.getCode())
                 .orderByDesc(Album::getCreateTime);
 
         Page<Album> result = albumMapper.selectPage(pageParam, wrapper);
@@ -50,7 +51,7 @@ public class AlbumPublicServiceImpl implements AlbumPublicService {
     public AlbumVO getById(Long id) {
         Album album = albumMapper.selectOne(new LambdaQueryWrapper<Album>()
                 .eq(Album::getId, id)
-                .eq(Album::getStatus, "1"));
+                .eq(Album::getStatus, AlbumStatus.PUBLISHED.getCode()));
         if (album == null) {
             return null;
         }
@@ -73,7 +74,7 @@ public class AlbumPublicServiceImpl implements AlbumPublicService {
     public AlbumVO getByKey(String key) {
         Album album = albumMapper.selectOne(new LambdaQueryWrapper<Album>()
                 .eq(Album::getAlbumKey, key)
-                .eq(Album::getStatus, "1"));
+                .eq(Album::getStatus, AlbumStatus.PUBLISHED.getCode()));
         if (album == null) {
             return null;
         }

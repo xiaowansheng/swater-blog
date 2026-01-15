@@ -6,6 +6,7 @@ import com.blog.shared.exception.BusinessException;
 import com.blog.modules.tag.mapper.TagMapper;
 import com.blog.modules.tag.model.dto.TagDTO;
 import com.blog.modules.tag.model.entity.Tag;
+import com.blog.modules.tag.model.enums.TagStatus;
 import com.blog.modules.tag.model.vo.TagVO;
 import com.blog.modules.tag.service.TagService;
 import com.blog.shared.util.BeanUtil;
@@ -29,7 +30,7 @@ public class TagServiceImpl implements TagService {
     @Override
     public List<TagVO> listPublic() {
         LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Tag::getStatus, "1");
+        wrapper.eq(Tag::getStatus, TagStatus.PUBLISHED.getCode());
         List<Tag> tags = tagMapper.selectList(wrapper);
         return BeanUtil.copyList(tags, TagVO.class);
     }
@@ -60,7 +61,7 @@ public class TagServiceImpl implements TagService {
         Tag tag = BeanUtil.copyProperties(dto, Tag.class);
         tag.setTagKey(KeyUtil.generateKey("tag"));
         if (dto.getStatus() == null) {
-            tag.setStatus("1");
+            tag.setStatus(TagStatus.PUBLISHED.getCode());
         }
         tagMapper.insert(tag);
         return tag.getId();

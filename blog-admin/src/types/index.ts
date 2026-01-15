@@ -121,6 +121,7 @@ export interface Tag {
   slug?: string
   color?: string
   description?: string
+  status?: string
   articleCount?: number
   createTime?: string
 }
@@ -369,7 +370,7 @@ export interface Album {
   name: string
   description?: string
   cover?: string
-  status: number
+  status: string
   sort?: number
   pictureCount?: number
   createTime: string
@@ -380,6 +381,7 @@ export interface Picture {
   albumId: number
   url: string
   description?: string
+  status?: string
   sort?: number
   createTime: string
 }

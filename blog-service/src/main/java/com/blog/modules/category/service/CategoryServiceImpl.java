@@ -6,6 +6,7 @@ import com.blog.shared.exception.BusinessException;
 import com.blog.modules.category.mapper.CategoryMapper;
 import com.blog.modules.category.model.dto.CategoryDTO;
 import com.blog.modules.category.model.entity.Category;
+import com.blog.modules.category.model.enums.CategoryStatus;
 import com.blog.modules.category.model.vo.CategoryVO;
 import com.blog.modules.category.service.CategoryService;
 import com.blog.shared.util.BeanUtil;
@@ -31,7 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryVO> listPublic() {
         LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Category::getStatus, "1");
+        wrapper.eq(Category::getStatus, CategoryStatus.PUBLISHED.getCode());
         wrapper.orderByAsc(Category::getSort);
         List<Category> categories = categoryMapper.selectList(wrapper);
         return buildTree(BeanUtil.copyList(categories, CategoryVO.class));
@@ -63,7 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = BeanUtil.copyProperties(dto, Category.class);
         category.setCategoryKey(KeyUtil.generateKey("category"));
         if (dto.getStatus() == null) {
-            category.setStatus("1");
+            category.setStatus(CategoryStatus.PUBLISHED.getCode());
         }
         if (dto.getParentId() == null) {
             category.setParentId(0L);

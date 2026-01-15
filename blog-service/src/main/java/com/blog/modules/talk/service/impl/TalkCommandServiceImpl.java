@@ -8,6 +8,7 @@ import com.blog.shared.exception.BusinessException;
 import com.blog.modules.talk.mapper.TalkMapper;
 import com.blog.modules.talk.model.dto.TalkDTO;
 import com.blog.modules.talk.model.entity.Talk;
+import com.blog.modules.talk.model.enums.TalkStatus;
 import com.blog.plugin.components.location.LocationInfo;
 import com.blog.plugin.components.location.LocationProviderFactory;
 import com.blog.plugin.components.location.LocationProviderPlugin;
@@ -102,7 +103,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
         talk.setBrowser(userAgentInfo.getBrowserDescription());
 
         if (dto.getStatus() == null) {
-            talk.setStatus("1");
+            talk.setStatus(TalkStatus.PUBLISHED.getCode());
         }
         if (dto.getIsTop() == null) {
             talk.setIsTop(0);

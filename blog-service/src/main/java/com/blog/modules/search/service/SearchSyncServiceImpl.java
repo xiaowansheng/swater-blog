@@ -13,6 +13,7 @@ import com.blog.modules.article.model.document.PostDocument;
 import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.comment.model.entity.Comment;
 import com.blog.modules.talk.model.entity.Talk;
+import com.blog.modules.talk.model.enums.TalkStatus;
 import com.blog.infrastructure.repository.CommentDocumentRepository;
 import com.blog.infrastructure.repository.MomentDocumentRepository;
 import com.blog.infrastructure.repository.PostDocumentRepository;
@@ -68,7 +69,7 @@ public class SearchSyncServiceImpl implements SearchSyncService {
             return;
         }
 
-        if ("1".equals(talk.getStatus())) {
+        if (TalkStatus.PUBLISHED.getCode().equals(talk.getStatus())) {
             MomentDocument doc = convertToMomentDocument(talk);
             momentDocumentRepository.save(doc);
         } else {
@@ -130,7 +131,7 @@ public class SearchSyncServiceImpl implements SearchSyncService {
     public void syncAllMoments() {
         List<Talk> talks = talkMapper.selectList(
                 new LambdaQueryWrapper<Talk>()
-                        .eq(Talk::getStatus, "1")
+                        .eq(Talk::getStatus, TalkStatus.PUBLISHED.getCode())
         );
 
         List<MomentDocument> documents = talks.stream()

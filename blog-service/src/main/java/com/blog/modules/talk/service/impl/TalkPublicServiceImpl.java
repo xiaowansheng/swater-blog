@@ -8,6 +8,7 @@ import com.blog.shared.PageResult;
 import com.blog.modules.talk.mapper.TalkMapper;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.talk.model.entity.Talk;
+import com.blog.modules.talk.model.enums.TalkStatus;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.talk.model.vo.TalkVO;
 import com.blog.modules.talk.service.TalkPublicService;
@@ -32,15 +33,15 @@ public class TalkPublicServiceImpl implements TalkPublicService {
     public PageResult<TalkVO> list(Long page, Long size) {
         Page<Talk> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Talk> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Talk::getStatus, "1");
+        wrapper.eq(Talk::getStatus, TalkStatus.PUBLISHED.getCode());
         wrapper.orderByDesc(Talk::getIsTop);
         wrapper.orderByDesc(Talk::getCreateTime);
-        
+
         Page<Talk> result = talkMapper.selectPage(pageParam, wrapper);
         List<TalkVO> voList = result.getRecords().stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
-        
+
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
     }
 
@@ -48,7 +49,7 @@ public class TalkPublicServiceImpl implements TalkPublicService {
     public TalkVO getById(Long id) {
         Talk talk = talkMapper.selectOne(new LambdaQueryWrapper<Talk>()
                 .eq(Talk::getId, id)
-                .eq(Talk::getStatus, "1"));
+                .eq(Talk::getStatus, TalkStatus.PUBLISHED.getCode()));
         if (talk == null) {
             return null;
         }
@@ -59,7 +60,7 @@ public class TalkPublicServiceImpl implements TalkPublicService {
     public TalkVO getByKey(String key) {
         Talk talk = talkMapper.selectOne(new LambdaQueryWrapper<Talk>()
                 .eq(Talk::getTalkKey, key)
-                .eq(Talk::getStatus, "1"));
+                .eq(Talk::getStatus, TalkStatus.PUBLISHED.getCode()));
         if (talk == null) {
             return null;
         }

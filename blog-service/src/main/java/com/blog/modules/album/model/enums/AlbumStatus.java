@@ -1,12 +1,12 @@
-package com.blog.modules.talk.model.enums;
-
+package com.blog.modules.album.model.enums;
 
 import lombok.Getter;
+
 /**
- * 说说状态枚举
+ * 相册状态枚举
  */
 @Getter
-public enum TalkStatus {
+public enum AlbumStatus {
     DRAFT("draft", "草稿"),
     PUBLISHED("published", "已发布"),
     PRIVATE("private", "私密");
@@ -14,7 +14,7 @@ public enum TalkStatus {
     private final String code;
     private final String description;
 
-    TalkStatus(String code, String description) {
+    AlbumStatus(String code, String description) {
         this.code = code;
         this.description = description;
     }

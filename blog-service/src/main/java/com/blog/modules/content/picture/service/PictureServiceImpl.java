@@ -14,6 +14,7 @@ import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.content.picture.model.dto.PictureDTO;
 import com.blog.modules.album.model.entity.Album;
 import com.blog.modules.content.picture.model.entity.Picture;
+import com.blog.modules.content.picture.model.enums.PictureStatus;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.content.picture.model.vo.PictureVO;
 import com.blog.modules.content.picture.service.PictureService;
@@ -79,7 +80,7 @@ public class PictureServiceImpl implements PictureService {
         }
 
         if (picture.getStatus() == null || picture.getStatus().isEmpty()) {
-            picture.setStatus("1");
+            picture.setStatus(PictureStatus.PUBLISHED.getCode());
         }
 
         pictureMapper.insert(picture);

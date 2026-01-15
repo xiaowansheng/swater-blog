@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.modules.talk.mapper.TalkMapper;
 import com.blog.modules.talk.model.entity.Talk;
+import com.blog.modules.talk.model.enums.TalkStatus;
 import com.blog.shared.Result;
 import com.blog.shared.annotation.ApiOperation;
 import lombok.Data;
@@ -39,7 +40,7 @@ public class MomentStatsPublicController {
                 .select(Talk::getId, Talk::getViewCount, Talk::getLikeCount, Talk::getCommentCount)
                 .in(Talk::getId, idList)
                 .eq(Talk::getDeleted, 0)
-                .eq(Talk::getStatus, "1"));
+                .eq(Talk::getStatus, TalkStatus.PUBLISHED.getCode()));
 
         List<MomentStatsVO> voList = talks.stream().map(t -> {
             MomentStatsVO vo = new MomentStatsVO();
@@ -64,7 +65,7 @@ public class MomentStatsPublicController {
                 .select(Talk::getId, Talk::getViewCount, Talk::getLikeCount, Talk::getCommentCount)
                 .eq(Talk::getId, id)
                 .eq(Talk::getDeleted, 0)
-                .eq(Talk::getStatus, "1")
+                .eq(Talk::getStatus, TalkStatus.PUBLISHED.getCode())
                 .last("LIMIT 1"));
         if (talk == null) {
             return Result.error(404, "说说不存在");

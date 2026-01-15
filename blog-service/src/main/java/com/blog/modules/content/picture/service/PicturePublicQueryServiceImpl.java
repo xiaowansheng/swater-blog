@@ -10,6 +10,7 @@ import com.blog.modules.content.picture.mapper.PictureMapper;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.album.model.entity.Album;
 import com.blog.modules.content.picture.model.entity.Picture;
+import com.blog.modules.content.picture.model.enums.PictureStatus;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.content.picture.model.vo.PictureVO;
 import com.blog.modules.content.picture.service.PicturePublicQueryService;
@@ -34,7 +35,7 @@ public class PicturePublicQueryServiceImpl implements PicturePublicQueryService 
     public PageResult<PictureVO> list(Long page, Long size, Long albumId) {
         Page<Picture> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Picture> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Picture::getStatus, "1");
+        wrapper.eq(Picture::getStatus, PictureStatus.PUBLISHED.getCode());
 
         if (albumId != null) {
             wrapper.eq(Picture::getAlbumId, albumId);
@@ -54,7 +55,7 @@ public class PicturePublicQueryServiceImpl implements PicturePublicQueryService 
     public PictureVO getById(Long id) {
         Picture picture = pictureMapper.selectOne(new LambdaQueryWrapper<Picture>()
                 .eq(Picture::getId, id)
-                .eq(Picture::getStatus, "1"));
+                .eq(Picture::getStatus, PictureStatus.PUBLISHED.getCode()));
         if (picture == null) {
             return null;
         }
