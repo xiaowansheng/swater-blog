@@ -1,6 +1,9 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/lib/i18n/routing';
 import type { CategoryVO, TagVO, PostVO } from '@/types';
+import { getAuthorInfo } from '@/lib/api/config.server';
+import { getFullUrl } from '@/lib/utils/format';
+import Image from 'next/image';
 
 interface SidebarProps {
   categories?: CategoryVO[];
@@ -10,17 +13,85 @@ interface SidebarProps {
 
 export default async function Sidebar({ categories = [], tags = [], hotArticles = [] }: SidebarProps) {
   const t = await getTranslations('common');
+  const author = await getAuthorInfo();
 
   return (
-    <aside
-      className="w-full lg:w-64 space-y-4 sm:space-y-6 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:scrollbar-hide lg:pe-2"
-      style={{
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none',
-        WebkitScrollbar: 'none',
-        scrollbarColor: 'transparent transparent'
-      }}
-    >
+    <aside className="w-full lg:w-64 space-y-4 sm:space-y-6">
+      {/* 作者信息卡片 */}
+      {(author.name || author.avatar) && (
+        <div className="modern-card p-4 sm:p-5 relative overflow-hidden">
+          {/* 装饰性背景 */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5"></div>
+          <div className="absolute top-2 right-2 w-16 h-16 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-2 left-2 w-12 h-12 bg-gradient-to-tr from-accent/10 to-primary/10 rounded-full blur-xl"></div>
+
+          {/* 星星装饰 */}
+          <div className="absolute top-3 right-3 text-primary/40 text-xs animate-twinkle">✦</div>
+          <div className="absolute top-12 right-8 text-accent/30 text-xs animate-twinkle" style={{ animationDelay: '0.5s' }}>✧</div>
+          <div className="absolute bottom-8 left-4 text-primary/30 text-xs animate-twinkle" style={{ animationDelay: '1s' }}>✦</div>
+
+          <div className="flex flex-col items-center text-center space-y-3 relative z-10">
+            {/* 头像 */}
+            {author.avatar && (
+              <div className="relative group">
+                {/* 头像光晕效果 */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/30 via-accent/30 to-primary/30 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse"></div>
+
+                {/* 头像边框装饰 */}
+                <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+                  {/* 外圈装饰 */}
+                  <div className="absolute inset-0 rounded-full border-2 border-dashed border-primary/30 animate-[spin_10s_linear_infinite]"></div>
+                  <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 blur-sm"></div>
+
+                  {/* 头像容器 */}
+                  <div className="relative w-full h-full rounded-full overflow-hidden ring-2 ring-primary/30 group-hover:ring-primary/50 transition-all duration-300 bg-gradient-to-br from-card to-secondary">
+                    <Image
+                      src={getFullUrl(author.avatar)}
+                      alt={author.name || 'Author'}
+                      width={96}
+                      height={96}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+
+                  {/* 装饰性小星星 */}
+                  <div className="absolute -top-1 -right-1 text-accent text-sm animate-bounce-soft">✦</div>
+                </div>
+              </div>
+            )}
+
+            {/* 昵称和签名 */}
+            <div className="space-y-2 w-full relative">
+              {/* 昵称 */}
+              {author.name && (
+                <div className="relative inline-block">
+                  <h3 className="font-bold text-base sm:text-lg bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient relative z-10">
+                    {author.name}
+                  </h3>
+                  {/* 文字下划线装饰 */}
+                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+                </div>
+              )}
+
+              {/* 签名 */}
+              {author.signature && (
+                <div className="relative">
+                  <p className="text-xs sm:text-sm text-muted-foreground/90 line-clamp-2 leading-relaxed px-3 py-2 bg-secondary/30 rounded-xl backdrop-blur-sm border border-primary/10">
+                    {author.signature}
+                  </p>
+                  {/* 签名框装饰 */}
+                  <div className="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-accent/40 rounded-tr-sm"></div>
+                  <div className="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-primary/40 rounded-bl-sm"></div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 底部装饰线 */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
+        </div>
+      )}
+
       {categories.length > 0 && (
         <div className="modern-card p-4 sm:p-5 relative">
           <h3 className="font-bold mb-3 sm:mb-4 text-base sm:text-lg flex items-center gap-2">
