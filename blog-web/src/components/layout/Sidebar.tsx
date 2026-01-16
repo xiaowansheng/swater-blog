@@ -12,7 +12,15 @@ export default async function Sidebar({ categories = [], tags = [], hotArticles 
   const t = await getTranslations('common');
 
   return (
-    <aside className="w-full lg:w-64 lg:sticky lg:top-20 lg:self-start space-y-4 sm:space-y-6 max-h-[calc(100vh-5rem)] lg:max-h-[calc(100vh-6rem)] overflow-y-auto scrollbar-hide">
+    <aside
+      className="w-full lg:w-64 space-y-4 sm:space-y-6 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:scrollbar-hide lg:pe-2"
+      style={{
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+        WebkitScrollbar: 'none',
+        scrollbarColor: 'transparent transparent'
+      }}
+    >
       {categories.length > 0 && (
         <div className="modern-card p-4 sm:p-5 md:p-6 relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-accent to-primary opacity-30"></div>
@@ -122,7 +130,6 @@ export default async function Sidebar({ categories = [], tags = [], hotArticles 
           </div>
         </div>
       )}
-
     </aside>
   );
 }

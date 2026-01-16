@@ -755,12 +755,36 @@ button, a {
 /* 隐藏滚动条但保留滚动功能 */
 .scrollbar-hide {
   /* Firefox */
-  scrollbar-width: none;
+  scrollbar-width: none !important;
   /* IE and Edge */
-  -ms-overflow-style: none;
+  -ms-overflow-style: none !important;
 }
 
 /* Chrome, Safari, Opera */
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
+
+/* 确保所有子元素的滚动条也被隐藏 */
+.scrollbar-hide *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* 专门针对侧边栏的滚动条隐藏 */
+aside[class*="scrollbar-hide"]::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  -webkit-appearance: none !important;
+}
+
+aside.lg\:overflow-y-auto::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
