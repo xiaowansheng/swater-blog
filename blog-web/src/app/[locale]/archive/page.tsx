@@ -25,7 +25,7 @@ export default async function ArchiveListPage({
 
     return (
       <>
-        <PageHeader title={t('archives')} description="文章归档、分类与标签" coverImage={cover.archive} />
+        <PageHeader title={t('archives')} description={t('archiveDescription')} coverImage={cover.archive} />
         <main className="container flex-1 px-4 py-12 mx-auto space-y-12">
           {/* 分类和标签 */}
           <section className="relative">
@@ -43,7 +43,7 @@ export default async function ArchiveListPage({
                   <span className="text-3xl">📁</span>
                   <div className="absolute inset-0 bg-primary/20 blur-md rounded-full"></div>
                 </span>
-                <span className="bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">文章分类</span>
+                <span className="bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">{t('categories')}</span>
               </h2>
               {categories.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -100,7 +100,7 @@ export default async function ArchiveListPage({
                   <span className="text-3xl">🏷️</span>
                   <div className="absolute inset-0 bg-accent/20 blur-md rounded-full"></div>
                 </span>
-                <span className="bg-gradient-to-r from-foreground via-accent to-foreground bg-clip-text text-transparent">所有标签</span>
+                <span className="bg-gradient-to-r from-foreground via-accent to-foreground bg-clip-text text-transparent">{t('allTags')}</span>
               </h2>
               {tags.length > 0 ? (
                 <div className="flex flex-wrap gap-3">
@@ -153,7 +153,7 @@ export default async function ArchiveListPage({
                   <span className="text-3xl">📅</span>
                   <div className="absolute inset-0 bg-primary/20 blur-md rounded-full animate-pulse"></div>
                 </span>
-                <span className="bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">时间归档</span>
+                <span className="bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">{t('timelineArchive')}</span>
               </h2>
               <ArchiveTimeline />
             </div>
@@ -166,7 +166,7 @@ export default async function ArchiveListPage({
     const cover = await getCoverConfig();
     return (
       <>
-        <PageHeader title={t('archives')} description="文章归档" coverImage={cover.archive} />
+        <PageHeader title={t('archives')} description={t('archiveDescriptionShort')} coverImage={cover.archive} />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>

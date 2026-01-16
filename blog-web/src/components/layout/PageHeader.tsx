@@ -39,7 +39,11 @@ export default function PageHeader({ title, description, children, coverImage }:
           ) : (
             <>
               {title && <h1 className="mb-4 text-5xl font-bold gradient-text">{title}</h1>}
-              {description && <p className="text-lg text-muted">{description}</p>}
+              {description && (
+                <p className="text-lg text-white dark:text-white/90 font-semibold drop-shadow-md">
+                  {description}
+                </p>
+              )}
             </>
           )}
         </div>

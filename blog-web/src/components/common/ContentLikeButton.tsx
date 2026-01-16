@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { likeApi, type LikeContentType } from '@/lib/api/like';
+import { useTranslations } from 'next-intl';
 
 function getOrCreateId(key: string, storage: Storage) {
   const existing = storage.getItem(key);
@@ -23,6 +24,7 @@ export default function ContentLikeButton({
   initialLikeCount?: number;
   className?: string;
 }) {
+  const t = useTranslations('common');
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState<number>(initialLikeCount || 0);
   const [dirty, setDirty] = useState(false);
@@ -143,7 +145,7 @@ export default function ContentLikeButton({
             </motion.div>
 
             <div className="flex items-center gap-2">
-              <span>{liked ? '已点赞' : '点个赞吧'}</span>
+              <span>{liked ? t('liked') : t('likeButton')}</span>
               <motion.span
                 className="font-bold"
                 animate={liked ? { scale: [1, 1.2, 1] } : {}}

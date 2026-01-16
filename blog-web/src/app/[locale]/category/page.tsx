@@ -22,7 +22,7 @@ export default async function CategoryListPage({
 
     return (
       <>
-        <PageHeader title={t('categories')} description="文章分类" coverImage={cover.category} />
+        <PageHeader title={t('categories')} description={t('categoryDescription')} coverImage={cover.category} />
         <main className="container flex-1 px-3 sm:px-4 py-8 sm:py-12 mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {categories.map((category) => (
@@ -53,7 +53,7 @@ export default async function CategoryListPage({
     const cover = await getCoverConfig();
     return (
       <>
-        <PageHeader title={t('categories')} description="文章分类" coverImage={cover.category} />
+        <PageHeader title={t('categories')} description={t('categoryDescription')} coverImage={cover.category} />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { articleApi } from '@/lib/api/article'
 import type { PostVO } from '@/types'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 interface MonthGroup {
   year: number
@@ -19,6 +20,7 @@ interface YearGroup {
 const PAGE_SIZE = 20
 
 export default function ArchiveTimeline() {
+  const t = useTranslations('common')
   const [allArticles, setAllArticles] = useState<PostVO[]>([])
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
@@ -149,7 +151,7 @@ export default function ArchiveTimeline() {
   if (totalPosts === 0) {
     return (
       <div className="bg-card border border-border rounded-xl p-8 text-center text-muted">
-        暂无文章
+        {t('noArticles')}
       </div>
     )
   }
@@ -163,7 +165,7 @@ export default function ArchiveTimeline() {
           <div className="absolute top-2 right-2 w-8 h-8 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-lg"></div>
           <div className="relative z-10">
             <div className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">{totalYears}</div>
-            <div className="text-muted text-sm">归档年数</div>
+            <div className="text-muted text-sm">{t('archiveYears')}</div>
           </div>
         </div>
         <div className="group relative bg-card border border-border rounded-xl p-6 text-center overflow-hidden">
@@ -171,7 +173,7 @@ export default function ArchiveTimeline() {
           <div className="absolute bottom-2 left-2 w-8 h-8 bg-gradient-to-tr from-accent/10 to-primary/10 rounded-full blur-lg"></div>
           <div className="relative z-10">
             <div className="text-3xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">{totalPosts}</div>
-            <div className="text-muted text-sm">已加载文章</div>
+            <div className="text-muted text-sm">{t('loadedArticles')}</div>
           </div>
         </div>
         <div className="group relative bg-card border border-border rounded-xl p-6 text-center overflow-hidden">
@@ -181,7 +183,7 @@ export default function ArchiveTimeline() {
             <div className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] group-hover:animate-gradient mb-2 group-hover:scale-110 transition-transform duration-300">
               {groupedData.reduce((sum, year) => sum + year.months.length, 0)}
             </div>
-            <div className="text-muted text-sm">归档月数</div>
+            <div className="text-muted text-sm">{t('archiveMonths')}</div>
           </div>
         </div>
       </div>
@@ -204,10 +206,10 @@ export default function ArchiveTimeline() {
                 <div className="absolute -top-2 -right-2 text-primary/40 text-xs animate-twinkle">✦</div>
               </div>
               <div>
-                <h3 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{yearGroup.year}年</h3>
+                <h3 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{yearGroup.year}{t('year')}</h3>
                 <p className="text-muted text-sm mt-1 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse"></span>
-                  共 {yearGroup.months.reduce((sum, m) => sum + m.articles.length, 0)} 篇文章
+                  {t('totalArticlesInYear', { count: yearGroup.months.reduce((sum, m) => sum + m.articles.length, 0) })}
                 </p>
               </div>
             </div>
@@ -224,9 +226,9 @@ export default function ArchiveTimeline() {
                     </div>
                     <div className="flex-1">
                       <h4 className="text-xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
-                        {monthGroup.month}月
+                        {monthGroup.month}{t('month')}
                         <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-primary/10 to-accent/10 text-primary rounded-full text-sm border border-primary/20">
-                          {monthGroup.articles.length} 篇
+                          {monthGroup.articles.length} {t('articlesUnit')}
                         </span>
                       </h4>
 
@@ -335,12 +337,12 @@ export default function ArchiveTimeline() {
               {loadingMore ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                  加载中...
+                  {t('loading')}
                 </>
               ) : (
                 <>
                   <span>✨</span>
-                  加载更多
+                  {t('loadMore')}
                 </>
               )}
             </span>

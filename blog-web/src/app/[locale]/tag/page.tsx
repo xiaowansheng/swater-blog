@@ -22,7 +22,7 @@ export default async function TagListPage({
 
     return (
       <>
-        <PageHeader title={t('tags')} description="所有标签" coverImage={cover.tag} />
+        <PageHeader title={t('tags')} description={t('tagDescription')} coverImage={cover.tag} />
         <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="flex flex-wrap gap-3">
             {tags.map((tag) => (
@@ -49,7 +49,7 @@ export default async function TagListPage({
     const cover = await getCoverConfig();
     return (
       <>
-        <PageHeader title={t('tags')} description="所有标签" coverImage={cover.tag} />
+        <PageHeader title={t('tags')} description={t('tagDescription')} coverImage={cover.tag} />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>

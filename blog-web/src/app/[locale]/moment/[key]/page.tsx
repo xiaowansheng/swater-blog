@@ -31,7 +31,7 @@ function formatLocation(
 
   // 最后才拼接 country, province, city
   const parts = [];
-  if (country && country !== '中国') {
+  if (country && country !== '中国' && country !== 'China') {
     parts.push(country);
   }
   if (province) {
@@ -56,17 +56,19 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string; key: string }>;
 }): Promise<Metadata> {
-  const { key } = await params;
+  const { key, locale } = await params;
+  const t = await getTranslations('common');
+
   try {
     const moment = await momentApi.getByKey(key);
     const content = moment.content.replace(/<[^>]*>/g, '').substring(0, 100);
     return {
-      title: `说说 - ${content}...`,
+      title: `${t('moments')} - ${content}...`,
       description: content,
     };
   } catch {
     return {
-      title: '说说详情',
+      title: t('momentDetail'),
     };
   }
 }
@@ -77,7 +79,7 @@ export default async function MomentDetailPage({
   params: Promise<{ locale: string; key: string }>;
 }) {
   const { key } = await params;
-  await getTranslations('common');
+  const t = await getTranslations('common');
 
   try {
     const [moment, author, config] = await Promise.all([
@@ -91,10 +93,7 @@ export default async function MomentDetailPage({
       <>
         <ContentTracker contentType="TALK" contentId={moment.id} />
 
-        <PageHeader
-          title="说说详情"
-          description={moment.content.replace(/<[^>]*>/g, '').substring(0, 100)}
-        />
+        <PageHeader title={t('momentDetail')} />
 
         <main className="container mx-auto px-4 py-12 flex-1">
           <article className="group relative bg-card border border-border rounded-2xl p-8 md:p-12 shadow-sm max-w-4xl mx-auto">
@@ -122,7 +121,7 @@ export default async function MomentDetailPage({
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Image
                         src={author.avatar}
-                        alt={author.name || '作者'}
+                        alt={author.name || t('author')}
                         width={64}
                         height={64}
                         className="rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300"
@@ -134,7 +133,7 @@ export default async function MomentDetailPage({
                 )}
                 <div className="flex-1 pt-2">
                   <div className="text-lg font-bold mb-1 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent bg-[length:200%_auto] group-hover:animate-gradient">
-                    {author.name || '博主'}
+                    {author.name || t('author')}
                   </div>
                   <div className="text-xs text-muted-foreground/70 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse"></span>
@@ -203,17 +202,8 @@ export default async function MomentDetailPage({
                 </div>
               )}
 
-              {/* 点赞按钮 */}
-              <div className="my-8">
-                <ContentLikeButton
-                  contentType="TALK"
-                  contentId={moment.id}
-                  initialLikeCount={moment.likeCount || 0}
-                />
-              </div>
-
               {/* 统计信息 */}
-              <div className="mb-8">
+              <div className="mt-8 mb-8">
                 <MomentLiveStats
                   id={moment.id}
                   initial={{
@@ -224,8 +214,17 @@ export default async function MomentDetailPage({
                 />
               </div>
 
+              {/* 点赞按钮 */}
+              <div className="mb-8">
+                <ContentLikeButton
+                  contentType="TALK"
+                  contentId={moment.id}
+                  initialLikeCount={moment.likeCount || 0}
+                />
+              </div>
+
               {/* 评论区 */}
-              <div className="mt-12 pt-8 border-t border-border/50 relative">
+              <div className="pt-8 border-t border-border/50 relative">
                 {/* 装饰星星 */}
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 text-primary/10 text-sm">✦</div>
                 <AnimeComment momentId={moment.id} />
