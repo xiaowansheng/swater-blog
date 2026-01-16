@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.shared.PageResult;
 import com.blog.modules.system.log.mapper.LogErrorMapper;
+import com.blog.modules.system.log.model.dto.LogErrorQueryDTO;
 import com.blog.modules.system.log.model.entity.LogError;
 import com.blog.modules.system.log.model.vo.LogErrorVO;
 import com.blog.modules.system.log.service.LogErrorService;
@@ -23,18 +24,58 @@ public class LogErrorServiceImpl implements LogErrorService {
     private LogErrorMapper logErrorMapper;
 
     @Override
-    public PageResult<LogErrorVO> list(Long page, Long size, Long userId, LocalDateTime startDate, LocalDateTime endDate) {
-        Page<LogError> pageParam = PageUtil.buildPage(page, size);
+    public PageResult<LogErrorVO> list(LogErrorQueryDTO queryDTO) {
+        Page<LogError> pageParam = PageUtil.buildPage(queryDTO.getPage(), queryDTO.getSize());
         LambdaQueryWrapper<LogError> wrapper = new LambdaQueryWrapper<>();
 
-        if (userId != null) {
-            wrapper.eq(LogError::getUserId, userId);
+        if (queryDTO.getUserId() != null) {
+            wrapper.eq(LogError::getUserId, queryDTO.getUserId());
         }
-        if (startDate != null) {
-            wrapper.ge(LogError::getCreateTime, startDate);
+        if (queryDTO.getModule() != null && !queryDTO.getModule().trim().isEmpty()) {
+            wrapper.eq(LogError::getModule, queryDTO.getModule().trim());
         }
-        if (endDate != null) {
-            wrapper.le(LogError::getCreateTime, endDate);
+        if (queryDTO.getRequestMethod() != null && !queryDTO.getRequestMethod().trim().isEmpty()) {
+            wrapper.eq(LogError::getRequestMethod, queryDTO.getRequestMethod().trim());
+        }
+        if (queryDTO.getRequestUri() != null && !queryDTO.getRequestUri().trim().isEmpty()) {
+            wrapper.like(LogError::getRequestUri, queryDTO.getRequestUri().trim());
+        }
+        if (queryDTO.getUsername() != null && !queryDTO.getUsername().trim().isEmpty()) {
+            wrapper.like(LogError::getUsername, queryDTO.getUsername().trim());
+        }
+        if (queryDTO.getIp() != null && !queryDTO.getIp().trim().isEmpty()) {
+            wrapper.eq(LogError::getIp, queryDTO.getIp().trim());
+        }
+        if (queryDTO.getErrorName() != null && !queryDTO.getErrorName().trim().isEmpty()) {
+            wrapper.like(LogError::getErrorName, queryDTO.getErrorName().trim());
+        }
+        if (queryDTO.getExceptionType() != null && !queryDTO.getExceptionType().trim().isEmpty()) {
+            wrapper.like(LogError::getExceptionType, queryDTO.getExceptionType().trim());
+        }
+        if (queryDTO.getDevice() != null && !queryDTO.getDevice().trim().isEmpty()) {
+            wrapper.like(LogError::getDevice, queryDTO.getDevice().trim());
+        }
+        if (queryDTO.getBrowser() != null && !queryDTO.getBrowser().trim().isEmpty()) {
+            wrapper.like(LogError::getBrowser, queryDTO.getBrowser().trim());
+        }
+        if (queryDTO.getIpSource() != null && !queryDTO.getIpSource().trim().isEmpty()) {
+            wrapper.like(LogError::getIpSource, queryDTO.getIpSource().trim());
+        }
+        if (queryDTO.getKeyword() != null && !queryDTO.getKeyword().trim().isEmpty()) {
+            String keyword = queryDTO.getKeyword().trim();
+            wrapper.and(w -> w.like(LogError::getErrorMessage, keyword)
+                    .or()
+                    .like(LogError::getErrorName, keyword)
+                    .or()
+                    .like(LogError::getExceptionType, keyword)
+                    .or()
+                    .like(LogError::getRequestUri, keyword));
+        }
+        if (queryDTO.getStartDate() != null) {
+            wrapper.ge(LogError::getCreateTime, queryDTO.getStartDate());
+        }
+        if (queryDTO.getEndDate() != null) {
+            wrapper.le(LogError::getCreateTime, queryDTO.getEndDate());
         }
         wrapper.orderByDesc(LogError::getCreateTime);
         
@@ -83,4 +124,3 @@ public class LogErrorServiceImpl implements LogErrorService {
         }
     }
 }
-

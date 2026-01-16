@@ -3,11 +3,11 @@ package com.blog.modules.system.log.service;
 
 
 import com.blog.shared.PageResult;
+import com.blog.modules.system.log.model.dto.LogOperationQueryDTO;
 import com.blog.modules.system.log.model.entity.LogOperation;
 import com.blog.modules.system.log.model.vo.LogOperationVO;
-import java.time.LocalDateTime;
 public interface LogOperationService {
-    PageResult<LogOperationVO> list(Long page, Long size, Long userId, LocalDateTime startDate, LocalDateTime endDate);
+    PageResult<LogOperationVO> list(LogOperationQueryDTO queryDTO);
 
     LogOperationVO getById(Long id);
 

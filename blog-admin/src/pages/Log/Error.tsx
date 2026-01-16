@@ -1,15 +1,29 @@
 import { useState, useEffect } from 'react'
-import { Table, Tag, Input, Button, Modal, Space } from 'antd'
+import { Table, Tag, Input, Button, Modal, Space, DatePicker, Select } from 'antd'
 import { SearchOutlined, ReloadOutlined, EyeOutlined } from '@ant-design/icons'
 import { getErrorLogList } from '@/api/log'
 import { LogError } from '@/types'
 import { formatDate } from '@/utils/format'
 
+const { RangePicker } = DatePicker
+
 const LogErrorPage: React.FC = () => {
   const [logs, setLogs] = useState<LogError[]>([])
   const [loading, setLoading] = useState(false)
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
-  const [filters, setFilters] = useState<{ keyword?: string }>({})
+  const [filters, setFilters] = useState<{
+    keyword?: string
+    module?: string
+    requestMethod?: string
+    requestUri?: string
+    username?: string
+    userId?: number
+    ip?: string
+    errorName?: string
+    exceptionType?: string
+    startDate?: string
+    endDate?: string
+  }>({})
   const [detailVisible, setDetailVisible] = useState(false)
   const [selectedLog, setSelectedLog] = useState<LogError | null>(null)
 
@@ -146,6 +160,81 @@ const LogErrorPage: React.FC = () => {
             onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
             style={{ width: 240 }}
             allowClear
+          />
+          <Select
+            placeholder="模块"
+            value={filters.module}
+            onChange={(value) => setFilters({ ...filters, module: value })}
+            style={{ width: 140 }}
+            allowClear
+          >
+            <Select.Option value="文章">文章</Select.Option>
+            <Select.Option value="用户">用户</Select.Option>
+            <Select.Option value="评论">评论</Select.Option>
+            <Select.Option value="系统">系统</Select.Option>
+          </Select>
+          <Select
+            placeholder="请求方法"
+            value={filters.requestMethod}
+            onChange={(value) => setFilters({ ...filters, requestMethod: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value="GET">GET</Select.Option>
+            <Select.Option value="POST">POST</Select.Option>
+            <Select.Option value="PUT">PUT</Select.Option>
+            <Select.Option value="DELETE">DELETE</Select.Option>
+          </Select>
+          <Input
+            placeholder="请求路径"
+            value={filters.requestUri}
+            onChange={(e) => setFilters({ ...filters, requestUri: e.target.value })}
+            style={{ width: 200 }}
+            allowClear
+          />
+          <Input
+            placeholder="错误名称"
+            value={filters.errorName}
+            onChange={(e) => setFilters({ ...filters, errorName: e.target.value })}
+            style={{ width: 180 }}
+            allowClear
+          />
+          <Input
+            placeholder="异常类型"
+            value={filters.exceptionType}
+            onChange={(e) => setFilters({ ...filters, exceptionType: e.target.value })}
+            style={{ width: 180 }}
+            allowClear
+          />
+          <Input
+            placeholder="操作人"
+            value={filters.username}
+            onChange={(e) => setFilters({ ...filters, username: e.target.value })}
+            style={{ width: 140 }}
+            allowClear
+          />
+          <Input
+            placeholder="用户ID"
+            value={filters.userId ?? ''}
+            onChange={(e) => setFilters({ ...filters, userId: e.target.value ? Number(e.target.value) : undefined })}
+            style={{ width: 120 }}
+            type="number"
+            allowClear
+          />
+          <Input
+            placeholder="IP地址"
+            value={filters.ip}
+            onChange={(e) => setFilters({ ...filters, ip: e.target.value })}
+            style={{ width: 140 }}
+            allowClear
+          />
+          <RangePicker
+            showTime
+            onChange={(values) => {
+              const startDate = values?.[0]?.toISOString()
+              const endDate = values?.[1]?.toISOString()
+              setFilters((prev) => ({ ...prev, startDate, endDate }))
+            }}
           />
           <Space>
             <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>

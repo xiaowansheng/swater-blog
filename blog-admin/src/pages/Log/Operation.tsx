@@ -11,7 +11,19 @@ const LogOperationPage: React.FC = () => {
   const [logs, setLogs] = useState<LogOperation[]>([])
   const [loading, setLoading] = useState(false)
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
-  const [filters, setFilters] = useState<{ module?: string; keyword?: string }>({})
+  const [filters, setFilters] = useState<{
+    module?: string
+    keyword?: string
+    type?: string
+    requestMethod?: string
+    requestUri?: string
+    username?: string
+    userId?: number
+    ip?: string
+    status?: number
+    startDate?: string
+    endDate?: string
+  }>({})
   const [detailVisible, setDetailVisible] = useState(false)
   const [selectedLog, setSelectedLog] = useState<LogOperation | null>(null)
 
@@ -201,6 +213,79 @@ const LogOperationPage: React.FC = () => {
             <Select.Option value="评论">评论</Select.Option>
             <Select.Option value="系统">系统</Select.Option>
           </Select>
+          <Select
+            placeholder="操作类型"
+            value={filters.type}
+            onChange={(value) => setFilters({ ...filters, type: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value="新增">新增</Select.Option>
+            <Select.Option value="修改">修改</Select.Option>
+            <Select.Option value="删除">删除</Select.Option>
+            <Select.Option value="查询">查询</Select.Option>
+            <Select.Option value="导出">导出</Select.Option>
+            <Select.Option value="导入">导入</Select.Option>
+          </Select>
+          <Select
+            placeholder="请求方法"
+            value={filters.requestMethod}
+            onChange={(value) => setFilters({ ...filters, requestMethod: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value="GET">GET</Select.Option>
+            <Select.Option value="POST">POST</Select.Option>
+            <Select.Option value="PUT">PUT</Select.Option>
+            <Select.Option value="DELETE">DELETE</Select.Option>
+          </Select>
+          <Select
+            placeholder="状态"
+            value={filters.status}
+            onChange={(value) => setFilters({ ...filters, status: value })}
+            style={{ width: 100 }}
+            allowClear
+          >
+            <Select.Option value={1}>成功</Select.Option>
+            <Select.Option value={0}>失败</Select.Option>
+          </Select>
+          <Input
+            placeholder="请求路径"
+            value={filters.requestUri}
+            onChange={(e) => setFilters({ ...filters, requestUri: e.target.value })}
+            style={{ width: 200 }}
+            allowClear
+          />
+          <Input
+            placeholder="操作人"
+            value={filters.username}
+            onChange={(e) => setFilters({ ...filters, username: e.target.value })}
+            style={{ width: 140 }}
+            allowClear
+          />
+          <Input
+            placeholder="用户ID"
+            value={filters.userId ?? ''}
+            onChange={(e) => setFilters({ ...filters, userId: e.target.value ? Number(e.target.value) : undefined })}
+            style={{ width: 120 }}
+            type="number"
+            allowClear
+          />
+          <Input
+            placeholder="IP地址"
+            value={filters.ip}
+            onChange={(e) => setFilters({ ...filters, ip: e.target.value })}
+            style={{ width: 140 }}
+            allowClear
+          />
+          <RangePicker
+            showTime
+            onChange={(values) => {
+              const startDate = values?.[0]?.toISOString()
+              const endDate = values?.[1]?.toISOString()
+              setFilters((prev) => ({ ...prev, startDate, endDate }))
+            }}
+          />
           <Space>
             <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
               搜索

@@ -4,8 +4,20 @@ import { LogOperation, LogError, PageResult } from '@/types'
 export const getOperationLogList = (params: {
   page?: number
   size?: number
+  userId?: number
   module?: string
+  type?: string
   keyword?: string
+  requestMethod?: string
+  requestUri?: string
+  username?: string
+  ip?: string
+  status?: number
+  device?: string
+  browser?: string
+  ipSource?: string
+  startDate?: string
+  endDate?: string
 }): Promise<PageResult<LogOperation>> => {
   return request.get('/admin/log/operation/list', { params })
 }
@@ -13,7 +25,20 @@ export const getOperationLogList = (params: {
 export const getErrorLogList = (params: {
   page?: number
   size?: number
+  userId?: number
+  module?: string
   keyword?: string
+  requestMethod?: string
+  requestUri?: string
+  username?: string
+  ip?: string
+  errorName?: string
+  exceptionType?: string
+  device?: string
+  browser?: string
+  ipSource?: string
+  startDate?: string
+  endDate?: string
 }): Promise<PageResult<LogError>> => {
   return request.get('/admin/log/exception/list', { params })
 }

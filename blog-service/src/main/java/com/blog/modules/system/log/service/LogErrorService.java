@@ -3,11 +3,11 @@ package com.blog.modules.system.log.service;
 
 
 import com.blog.shared.PageResult;
+import com.blog.modules.system.log.model.dto.LogErrorQueryDTO;
 import com.blog.modules.system.log.model.entity.LogError;
 import com.blog.modules.system.log.model.vo.LogErrorVO;
-import java.time.LocalDateTime;
 public interface LogErrorService {
-    PageResult<LogErrorVO> list(Long page, Long size, Long userId, LocalDateTime startDate, LocalDateTime endDate);
+    PageResult<LogErrorVO> list(LogErrorQueryDTO queryDTO);
 
     LogErrorVO getById(Long id);
 

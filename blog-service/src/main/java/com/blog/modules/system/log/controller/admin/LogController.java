@@ -6,14 +6,14 @@ import com.blog.shared.annotation.ApiOperation;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
+import com.blog.modules.system.log.model.dto.LogErrorQueryDTO;
+import com.blog.modules.system.log.model.dto.LogOperationQueryDTO;
 import com.blog.modules.system.log.model.vo.LogErrorVO;
 import com.blog.modules.system.log.model.vo.LogOperationVO;
 import com.blog.modules.system.log.service.LogErrorService;
 import com.blog.modules.system.log.service.LogOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
-import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/api/admin/log")
 @ApiOperation(name = "日志管理模块", description = "日志管理接口", open = false)
@@ -26,13 +26,8 @@ public class LogController {
 
     @GetMapping("/operation/list")
     @ApiOperation(name = "查询操作日志列表", type = ApiOperationType.QUERY, description = "分页查询操作日志")
-    public Result<PageResult<LogOperationVO>> getOperationLogList(
-            @RequestParam(required = false) Long page,
-            @RequestParam(required = false) Long size,
-            @RequestParam(required = false) Long userId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        PageResult<LogOperationVO> result = logOperationService.list(page, size, userId, startDate, endDate);
+    public Result<PageResult<LogOperationVO>> getOperationLogList(LogOperationQueryDTO queryDTO) {
+        PageResult<LogOperationVO> result = logOperationService.list(queryDTO);
         return Result.success(result);
     }
 
@@ -48,13 +43,8 @@ public class LogController {
 
     @GetMapping("/exception/list")
     @ApiOperation(name = "查询异常日志列表", type = ApiOperationType.QUERY, description = "分页查询异常日志")
-    public Result<PageResult<LogErrorVO>> getExceptionLogList(
-            @RequestParam(required = false) Long page,
-            @RequestParam(required = false) Long size,
-            @RequestParam(required = false) Long userId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        PageResult<LogErrorVO> result = logErrorService.list(page, size, userId, startDate, endDate);
+    public Result<PageResult<LogErrorVO>> getExceptionLogList(LogErrorQueryDTO queryDTO) {
+        PageResult<LogErrorVO> result = logErrorService.list(queryDTO);
         return Result.success(result);
     }
 
