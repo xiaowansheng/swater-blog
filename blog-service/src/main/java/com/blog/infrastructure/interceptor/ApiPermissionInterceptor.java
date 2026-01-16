@@ -30,6 +30,8 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
     @Autowired
     private ApiResourceCache apiResourceCache;
 
+    private final String ADMIN_ROLE_KEY="admin";
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 放行 OPTIONS 请求（CORS 预检请求）
@@ -79,7 +81,7 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
         if (authorizedRoleIds == null || authorizedRoleIds.isEmpty()) {
             log.debug("接口未配置授权角色，默认需要admin角色: path={}, method={}", path, method);
             // 检查用户是否是admin
-            if (!"admin".equals(currentUser.getRoleKey())) {
+            if (!ADMIN_ROLE_KEY.equalsIgnoreCase(currentUser.getRoleKey())) {
                 log.warn("用户无权限访问（非admin）: path={}, method={}, userRole={}",
                         path, method, currentUser.getRoleKey());
                 throw new NotPermissionException("无权限访问");
@@ -91,6 +93,9 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
         boolean hasPermission = false;
         if (currentUser.getRoles() != null) {
             for (RoleVO userRole : currentUser.getRoles()) {
+                if(ADMIN_ROLE_KEY.equalsIgnoreCase(currentUser.getRoleKey())){
+                    return true;
+                }
                 if (userRole != null && authorizedRoleIds.contains(userRole.getId())) {
                     hasPermission = true;
                     break;

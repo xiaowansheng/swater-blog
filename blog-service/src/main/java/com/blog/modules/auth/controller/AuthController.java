@@ -11,9 +11,11 @@ import com.blog.modules.auth.model.dto.SendCodeDTO;
 import com.blog.modules.auth.model.dto.ResetPasswordDTO;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.modules.auth.model.vo.EmailVerifyVO;
+import com.blog.modules.auth.model.vo.LoginNonceVO;
 import com.blog.modules.auth.model.vo.LoginVO;
 import com.blog.modules.user.model.vo.UserVO;
 import com.blog.modules.auth.service.AuthService;
+import com.blog.modules.auth.service.AuthCryptoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,6 +34,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private AuthCryptoService authCryptoService;
 
     @PostMapping("/login")
     @ApiOperation(name = "用户登录", type = ApiOperationType.LOGIN, description = "用户登录接口")
@@ -143,6 +148,12 @@ public class AuthController {
             @Valid @RequestBody LoginDTO dto) {
         LoginVO loginVO = authService.login(dto);
         return Result.success(loginVO);
+    }
+
+    @GetMapping("/login/nonce")
+    @ApiOperation(name = "登录随机数", type = ApiOperationType.QUERY, description = "获取登录公钥与随机数")
+    public Result<LoginNonceVO> loginNonce() {
+        return Result.success(authCryptoService.createLoginNonce());
     }
 
     @PostMapping("/logout")

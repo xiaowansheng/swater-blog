@@ -3,7 +3,9 @@ import { User } from '@/types'
 
 export interface LoginDTO {
   username: string
-  password: string
+  password?: string
+  encryptedPassword?: string
+  nonce?: string
 }
 
 export interface EmailLoginDTO {
@@ -27,8 +29,18 @@ export interface LoginVO {
   user: User
 }
 
+export interface LoginNonceVO {
+  publicKey: string
+  nonce: string
+  expiresIn: number
+}
+
 export const login = (data: LoginDTO): Promise<LoginVO> => {
   return request.post('/auth/login', data)
+}
+
+export const getLoginNonce = (): Promise<LoginNonceVO> => {
+  return request.get('/auth/login/nonce')
 }
 
 export const loginWithEmail = (data: EmailLoginDTO): Promise<LoginVO> => {

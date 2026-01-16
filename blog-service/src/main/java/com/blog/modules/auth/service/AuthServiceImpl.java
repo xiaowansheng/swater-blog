@@ -51,9 +51,21 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private EmailSessionProperties emailSessionProperties;
 
+    @Autowired
+    private AuthCryptoService authCryptoService;
+
     @Override
     public LoginVO login(LoginDTO dto) {
         log.info("用户尝试登录: {}", dto.getUsername());
+
+        String rawPassword = dto.getPassword();
+        if (dto.getEncryptedPassword() != null && !dto.getEncryptedPassword().isBlank()) {
+            rawPassword = authCryptoService.decryptPassword(dto.getEncryptedPassword(), dto.getNonce());
+        }
+
+        if (rawPassword == null || rawPassword.isBlank()) {
+            throw new BusinessException("用户名或密码错误");
+        }
         
         // 支持用户名或邮箱登录
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
@@ -75,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException("用户已被禁用");
         }
         
-        if (!PasswordUtil.matches(dto.getPassword(), user.getPassword())) {
+        if (!PasswordUtil.matches(rawPassword, user.getPassword())) {
             log.warn("登录失败: 用户 {} 密码不匹配", dto.getUsername());
             throw new BusinessException("用户名或密码错误");
         }

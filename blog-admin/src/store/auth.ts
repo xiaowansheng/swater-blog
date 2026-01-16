@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import { User } from '@/types'
 import * as authApi from '@/api/auth'
 import { getToken, setToken, removeToken } from '@/utils/storage'
+import { encryptPasswordRsaOaep } from '@/utils/crypto'
 
 interface AuthState {
   user: User | null
@@ -29,7 +30,9 @@ export const useAuthStore = create<AuthState>()(
       setLoginModalOpen: (open: boolean) => set({ isLoginModalOpen: open }),
       setLoginExpiredModalOpen: (open: boolean) => set({ isLoginExpiredModalOpen: open }),
       login: async (username: string, password: string) => {
-        const { token, user } = await authApi.login({ username, password })
+        const { publicKey, nonce } = await authApi.getLoginNonce()
+        const encryptedPassword = await encryptPasswordRsaOaep(publicKey, password)
+        const { token, user } = await authApi.login({ username, encryptedPassword, nonce })
         setToken(token)
         set({ token, user })
       },

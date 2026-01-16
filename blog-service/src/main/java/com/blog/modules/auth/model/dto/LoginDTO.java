@@ -8,7 +8,16 @@ public class LoginDTO {
     @NotBlank(message = "用户名不能为空")
     private String username;
 
-    @NotBlank(message = "密码不能为空")
     private String password;
+
+    /**
+     * 前端 RSA 加密后的密码（Base64）
+     */
+    private String encryptedPassword;
+
+    /**
+     * 登录随机数，用于防重放
+     */
+    private String nonce;
 }
 
