@@ -2,6 +2,7 @@ import { getSiteInfo } from '@/lib/api/config.server';
 import { getTotalVisits } from '@/lib/api/statistics';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/lib/i18n/routing';
+import SiteRunningTime from './SiteRunningTime';
 
 export default async function Footer() {
   const site = await getSiteInfo();
@@ -82,6 +83,13 @@ export default async function Footer() {
                 </span>
               </div>
             </div>
+
+            {/* Site Running Time */}
+            {site.createTime && (
+              <div className="flex items-center gap-3 sm:gap-4 text-xs text-muted-foreground/70 flex-wrap justify-center">
+                <SiteRunningTime createTime={site.createTime} />
+              </div>
+            )}
           </div>
 
           {/* Tech Stack / Extra Info */}

@@ -85,7 +85,12 @@
     "totalArticlesWithCount": "Total {count} articles",
     "currentPageInfo": "Page {current} / {total}",
     "jumpTo": "Jump to",
-    "page": "page"
+    "page": "page",
+    "siteRunningTime": "Site Running Time",
+    "day": "d",
+    "hour": "h",
+    "minute": "m",
+    "second": "s"
   },
   "guestbook": {
     "title": "Guestbook",

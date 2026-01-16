@@ -85,7 +85,12 @@
     "totalArticlesWithCount": "共 {count} 篇文章",
     "currentPageInfo": "当前第 {current} / {total} 页",
     "jumpTo": "跳转到",
-    "page": "页"
+    "page": "页",
+    "siteRunningTime": "网站运行时间",
+    "day": "天",
+    "hour": "小时",
+    "minute": "分钟",
+    "second": "秒"
   },
   "guestbook": {
     "title": "留言板",
