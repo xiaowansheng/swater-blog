@@ -8,7 +8,8 @@ export interface FriendLinkDTO {
   description: string
   author: string
   sort?: number
-  status?: number
+  reviewStatus?: number
+  isVisible?: number
 }
 
 export const getFriendLinkList = (): Promise<FriendLink[]> => {
@@ -25,5 +26,13 @@ export const updateFriendLink = (id: number, data: FriendLinkDTO): Promise<void>
 
 export const deleteFriendLink = (id: number): Promise<void> => {
   return request.delete(`/admin/friend-link/${id}`)
+}
+
+export const approveFriendLink = (id: number): Promise<void> => {
+  return request.post(`/admin/friend-link/${id}/approve`)
+}
+
+export const rejectFriendLink = (id: number): Promise<void> => {
+  return request.post(`/admin/friend-link/${id}/reject`)
 }
 

@@ -206,7 +206,8 @@ export interface FriendLink {
   description: string
   author: string
   sort?: number
-  status: number
+  isVisible?: number
+  reviewStatus: number
   createTime: string
 }
 

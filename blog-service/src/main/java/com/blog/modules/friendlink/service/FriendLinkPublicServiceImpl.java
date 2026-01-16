@@ -63,7 +63,6 @@ public class FriendLinkPublicServiceImpl implements FriendLinkPublicService {
 
         // 设置默认值
         friendLink.setUserId(userId);
-        friendLink.setStatus(1);           // 启用状态
         friendLink.setIsVisible(0);         // 未审核前不显示
         friendLink.setReviewStatus(0);      // 待审核状态
         friendLink.setSort(0);

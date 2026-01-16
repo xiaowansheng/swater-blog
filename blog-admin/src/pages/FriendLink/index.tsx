@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Avatar, Tooltip, InputNumber, Select } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined, SearchOutlined } from '@ant-design/icons'
-import { getFriendLinkList, createFriendLink, updateFriendLink, deleteFriendLink } from '@/api/friendLink'
+import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined, SearchOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons'
+import { getFriendLinkList, createFriendLink, updateFriendLink, deleteFriendLink, approveFriendLink, rejectFriendLink } from '@/api/friendLink'
 import { FriendLink } from '@/types'
 
 const FriendLinkPage: React.FC = () => {
@@ -14,11 +14,11 @@ const FriendLinkPage: React.FC = () => {
   const [filters, setFilters] = useState<{
     name: string
     author: string
-    status: number | undefined
+    reviewStatus: number | undefined
   }>({
     name: '',
     author: '',
-    status: undefined,
+    reviewStatus: undefined,
   })
 
 
@@ -39,8 +39,8 @@ const FriendLinkPage: React.FC = () => {
           link.author?.toLowerCase().includes(filters.author.toLowerCase())
         )
       }
-      if (filters.status !== undefined) {
-        filtered = filtered.filter((link: FriendLink) => link.status === filters.status)
+      if (filters.reviewStatus !== undefined) {
+        filtered = filtered.filter((link: FriendLink) => link.reviewStatus === filters.reviewStatus)
       }
       setLinks(filtered)
     } catch (error) {
@@ -76,6 +76,26 @@ const FriendLinkPage: React.FC = () => {
     }
   }
 
+  const handleApprove = async (id: number) => {
+    try {
+      await approveFriendLink(id)
+      message.success('审核通过')
+      loadLinks()
+    } catch (error) {
+      message.error('操作失败')
+    }
+  }
+
+  const handleReject = async (id: number) => {
+    try {
+      await rejectFriendLink(id)
+      message.success('已拒绝')
+      loadLinks()
+    } catch (error) {
+      message.error('操作失败')
+    }
+  }
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields()
@@ -94,6 +114,20 @@ const FriendLinkPage: React.FC = () => {
   }
 
   const columns = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: 80,
+      align: 'center' as const,
+    },
+    {
+      title: '序号',
+      key: 'index',
+      width: 60,
+      align: 'center' as const,
+      render: (_: any, __: any, index: number) => index + 1,
+    },
     {
       title: '友链信息',
       key: 'info',
@@ -129,12 +163,27 @@ const FriendLinkPage: React.FC = () => {
     },
     {
       title: '状态',
-      dataIndex: 'status',
-      key: 'status',
+      dataIndex: 'reviewStatus',
+      key: 'reviewStatus',
       width: 100,
-      render: (status: number) => (
-        <Tag color={status === 1 ? 'success' : 'warning'}>
-          {status === 1 ? '已审核' : '待审核'}
+      render: (reviewStatus: number) => {
+        const statusConfig = {
+          0: { text: '待审核', color: 'warning' },
+          1: { text: '已审核', color: 'success' },
+          2: { text: '已拒绝', color: 'error' },
+        }
+        const config = statusConfig[reviewStatus as keyof typeof statusConfig] || { text: '未知', color: 'default' }
+        return <Tag color={config.color}>{config.text}</Tag>
+      },
+    },
+    {
+      title: '可见状态',
+      dataIndex: 'isVisible',
+      key: 'isVisible',
+      width: 100,
+      render: (isVisible: number) => (
+        <Tag color={isVisible === 1 ? 'processing' : 'default'}>
+          {isVisible === 1 ? '可见' : '不可见'}
         </Tag>
       ),
     },
@@ -147,9 +196,9 @@ const FriendLinkPage: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      width: 150,
-      render: (_: any, record: FriendLink) => (
-        <Space>
+      width: 180,
+      render: (_: any, record: FriendLink, index: number) => (
+        <Space size="small">
           <Tooltip title="编辑">
             <Button
               type="text"
@@ -157,9 +206,62 @@ const FriendLinkPage: React.FC = () => {
               onClick={() => handleEdit(record)}
             />
           </Tooltip>
+
+          {record.reviewStatus === 0 && (
+            <>
+              <Popconfirm
+                title="确定通过这条友链申请吗？"
+                onConfirm={() => handleApprove(record.id)}
+                okText="确定"
+                cancelText="取消"
+              >
+                <Tooltip title="通过">
+                  <Button
+                    type="text"
+                    icon={<CheckOutlined />}
+                    style={{ color: 'rgb(82, 196, 26)' }}
+                  />
+                </Tooltip>
+              </Popconfirm>
+              <Popconfirm
+                title="确定拒绝这条友链申请吗？"
+                onConfirm={() => handleReject(record.id)}
+                okText="确定"
+                cancelText="取消"
+              >
+                <Tooltip title="拒绝">
+                  <Button
+                    type="text"
+                    danger
+                    icon={<CloseOutlined />}
+                  />
+                </Tooltip>
+              </Popconfirm>
+            </>
+          )}
+
+          {record.reviewStatus === 2 && (
+            <Popconfirm
+              title="确定通过这条友链申请吗？"
+              onConfirm={() => handleApprove(record.id)}
+              okText="确定"
+              cancelText="取消"
+            >
+              <Tooltip title="通过">
+                <Button
+                  type="text"
+                  icon={<CheckOutlined />}
+                  style={{ color: 'rgb(82, 196, 26)' }}
+                />
+              </Tooltip>
+            </Popconfirm>
+          )}
+
           <Popconfirm
             title="确定删除这个友链吗？"
             onConfirm={() => handleDelete(record.id)}
+            okText="确定"
+            cancelText="取消"
           >
             <Tooltip title="删除">
               <Button type="text" danger icon={<DeleteOutlined />} />
@@ -191,13 +293,14 @@ const FriendLinkPage: React.FC = () => {
           />
           <Select
             placeholder="状态"
-            value={filters.status}
-            onChange={(value) => setFilters({ ...filters, status: value })}
+            value={filters.reviewStatus}
+            onChange={(value) => setFilters({ ...filters, reviewStatus: value })}
             style={{ width: 120 }}
             allowClear
           >
-            <Select.Option value={1}>已审核</Select.Option>
             <Select.Option value={0}>待审核</Select.Option>
+            <Select.Option value={1}>已审核</Select.Option>
+            <Select.Option value={2}>已拒绝</Select.Option>
           </Select>
           <div className="flex-1" />
           <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
@@ -258,18 +361,29 @@ const FriendLinkPage: React.FC = () => {
           <Form.Item
             name="sort"
             label="排序"
-            initialValue={0}
+            initialValue={9999}
           >
             <InputNumber min={0} placeholder="请输入排序值，数字越小越靠前" style={{ width: '100%' }} />
           </Form.Item>
           <Form.Item
-            name="status"
-            label="状态"
-            initialValue={1}
+            name="reviewStatus"
+            label="审核状态"
+            initialValue={0}
           >
             <Select>
               <Select.Option value={0}>待审核</Select.Option>
               <Select.Option value={1}>已审核</Select.Option>
+              <Select.Option value={2}>已拒绝</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="isVisible"
+            label="可见状态"
+            initialValue={0}
+          >
+            <Select>
+              <Select.Option value={0}>不可见</Select.Option>
+              <Select.Option value={1}>可见</Select.Option>
             </Select>
           </Form.Item>
         </Form>

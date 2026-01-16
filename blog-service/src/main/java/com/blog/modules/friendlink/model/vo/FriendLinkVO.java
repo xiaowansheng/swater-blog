@@ -18,8 +18,6 @@ public class FriendLinkVO extends com.blog.shared.model.vo.BaseVO {
 
     private String author;
 
-    private Integer status;
-
     private Integer isVisible;
 
     private Integer reviewStatus;

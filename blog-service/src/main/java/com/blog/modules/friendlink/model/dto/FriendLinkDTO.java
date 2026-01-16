@@ -21,8 +21,6 @@ public class FriendLinkDTO extends com.blog.shared.model.dto.BaseDTO {
 
     private String author;
 
-    private Integer status;
-
     private Integer isVisible;
 
     private Integer reviewStatus;

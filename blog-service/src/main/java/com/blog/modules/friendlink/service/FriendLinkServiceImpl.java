@@ -26,7 +26,9 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     @Override
     public List<FriendLinkVO> list() {
         LambdaQueryWrapper<FriendLink> wrapper = new LambdaQueryWrapper<>();
-        wrapper.orderByAsc(FriendLink::getSort)
+        // 未审核优先（reviewStatus=0），然后按序号升序，最后按创建时间降序
+        wrapper.orderByAsc(FriendLink::getReviewStatus)
+                .orderByAsc(FriendLink::getSort)
                 .orderByDesc(FriendLink::getCreateTime);
 
         List<FriendLink> friendLinks = friendLinkMapper.selectList(wrapper);
@@ -48,17 +50,14 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     @Transactional
     public Long create(FriendLinkDTO dto) {
         FriendLink friendLink = BeanUtil.copyProperties(dto, FriendLink.class);
-        if (friendLink.getStatus() == null) {
-            friendLink.setStatus(1);
-        }
         if (friendLink.getIsVisible() == null) {
-            friendLink.setIsVisible(1);
+            friendLink.setIsVisible(0);
         }
         if (friendLink.getReviewStatus() == null) {
             friendLink.setReviewStatus(0);
         }
         if (friendLink.getSort() == null) {
-            friendLink.setSort(0);
+            friendLink.setSort(9999);
         }
         friendLinkMapper.insert(friendLink);
 
@@ -97,6 +96,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
             return;
         }
         friendLink.setReviewStatus(1);
+        friendLink.setIsVisible(1);
         friendLinkMapper.updateById(friendLink);
 
         // 发布友链审核通过事件
@@ -111,6 +111,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
             return;
         }
         friendLink.setReviewStatus(2);
+        friendLink.setIsVisible(0);
         friendLinkMapper.updateById(friendLink);
     }
 }

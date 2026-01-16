@@ -25,8 +25,6 @@ public class FriendLink extends com.blog.shared.model.entity.BaseEntity {
 
     private String email;
 
-    private Integer status;
-
     @TableField("is_visible")
     private Integer isVisible;
 

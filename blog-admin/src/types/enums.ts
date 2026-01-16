@@ -63,6 +63,15 @@ export enum PictureStatus {
 }
 
 /**
+ * 友链审核状态枚举
+ */
+export enum FriendLinkReviewStatus {
+  PENDING = 0,
+  APPROVED = 1,
+  REJECTED = 2,
+}
+
+/**
  * 状态映射表，用于显示
  */
 export const ARTICLE_STATUS_MAP = {
@@ -106,4 +115,10 @@ export const PICTURE_STATUS_MAP = {
   [PictureStatus.DRAFT]: { color: 'default', label: '草稿' },
   [PictureStatus.PUBLISHED]: { color: 'success', label: '已发布' },
   [PictureStatus.PRIVATE]: { color: 'warning', label: '私密' },
+}
+
+export const FRIEND_LINK_REVIEW_STATUS_MAP = {
+  [FriendLinkReviewStatus.PENDING]: { color: 'warning', label: '待审核' },
+  [FriendLinkReviewStatus.APPROVED]: { color: 'success', label: '已审核' },
+  [FriendLinkReviewStatus.REJECTED]: { color: 'error', label: '已拒绝' },
 }
