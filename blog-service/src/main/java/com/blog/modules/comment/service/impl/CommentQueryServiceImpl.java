@@ -74,6 +74,18 @@ public class CommentQueryServiceImpl implements CommentQueryService {
                     .or()
                     .like(Comment::getEmail, queryDTO.getKeyword()));
         }
+        if (queryDTO.getCountry() != null && !queryDTO.getCountry().trim().isEmpty()) {
+            wrapper.eq(Comment::getCountry, queryDTO.getCountry());
+        }
+        if (queryDTO.getProvince() != null && !queryDTO.getProvince().trim().isEmpty()) {
+            wrapper.eq(Comment::getProvince, queryDTO.getProvince());
+        }
+        if (queryDTO.getCity() != null && !queryDTO.getCity().trim().isEmpty()) {
+            wrapper.eq(Comment::getCity, queryDTO.getCity());
+        }
+        if (queryDTO.getLocation() != null && !queryDTO.getLocation().trim().isEmpty()) {
+            wrapper.like(Comment::getLocation, queryDTO.getLocation());
+        }
         wrapper.orderByDesc(Comment::getCreateTime);
 
         Page<Comment> result = commentMapper.selectPage(pageParam, wrapper);

@@ -57,4 +57,12 @@ public class CommentQueryDTO {
      * 关键词搜索（评论内容、昵称、邮箱）
      */
     private String keyword;
+
+    private String country;
+
+    private String province;
+
+    private String city;
+
+    private String location;
 }

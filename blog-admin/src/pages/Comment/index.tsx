@@ -47,6 +47,10 @@ const CommentPage: React.FC = () => {
     targetType: string | undefined
     targetId: number | undefined
     isVisible: number | undefined
+    country: string
+    province: string
+    city: string
+    location: string
   }>({
     status: undefined,
     keyword: '',
@@ -56,6 +60,10 @@ const CommentPage: React.FC = () => {
     targetType: undefined,
     targetId: undefined,
     isVisible: undefined,
+    country: '',
+    province: '',
+    city: '',
+    location: '',
   })
   const [detailVisible, setDetailVisible] = useState(false)
   const [currentComment, setCurrentComment] = useState<Comment | null>(null)
@@ -78,6 +86,10 @@ const CommentPage: React.FC = () => {
         targetType: filters.targetType,
         isVisible: filters.isVisible,
         keyword: filters.keyword,
+        country: filters.country,
+        province: filters.province,
+        city: filters.city,
+        location: filters.location,
       })
       setComments(result.records)
       setPagination((prev) => ({ ...prev, total: result.total }))
@@ -440,6 +452,34 @@ const CommentPage: React.FC = () => {
             onChange={(e) => setFilters({ ...filters, rootId: e.target.value ? Number(e.target.value) : undefined })}
             style={{ width: 120 }}
             type="number"
+            allowClear
+          />
+          <Input
+            placeholder="国家"
+            value={filters.country}
+            onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+            style={{ width: 120 }}
+            allowClear
+          />
+          <Input
+            placeholder="省份"
+            value={filters.province}
+            onChange={(e) => setFilters({ ...filters, province: e.target.value })}
+            style={{ width: 120 }}
+            allowClear
+          />
+          <Input
+            placeholder="城市"
+            value={filters.city}
+            onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+            style={{ width: 120 }}
+            allowClear
+          />
+          <Input
+            placeholder="位置"
+            value={filters.location}
+            onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+            style={{ width: 140 }}
             allowClear
           />
           <Button type="primary" icon={<SearchOutlined />} onClick={loadComments}>
