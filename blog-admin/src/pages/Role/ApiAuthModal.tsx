@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Modal, Tree, Input, Tag, Spin, message, Empty } from 'antd'
+import { Modal, Tree, Input, Tag, Spin, message, Empty, Button } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { getApiList } from '@/api/api'
 import { getRoleApiIds, assignApis } from '@/api/role'
@@ -50,7 +50,7 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
         roleId ? getRoleApiIds(roleId) : Promise.resolve([])
       ])
       setApis(apiData)
-      setCheckedKeys(roleApiIds)
+      setCheckedKeys(roleApiIds.map(String))
     } catch (error) {
       console.error('加载数据失败', error)
       message.error('加载数据失败')
@@ -64,7 +64,29 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
 
     setSaving(true)
     try {
-      await assignApis(roleId, checkedKeys as number[])
+      // 过滤掉父节点（模块）的key，只保存实际API的key
+      // 收集所有API节点的key（没有children属性的节点）
+      const getAllApiKeys = (nodes: any[]): string[] => {
+        let keys: string[] = []
+        nodes.forEach(node => {
+          if (node.children && node.children.length > 0) {
+            keys = keys.concat(getAllApiKeys(node.children))
+          } else {
+            // 是叶子节点（API），有method和path属性
+            if (node.method && node.path) {
+              keys.push(node.key)
+            }
+          }
+        })
+        return keys
+      }
+
+      const allValidApiKeys = getAllApiKeys(treeData)
+      const validCheckedKeys = checkedKeys.filter(key =>
+        allValidApiKeys.includes(key as string)
+      )
+
+      await assignApis(roleId, validCheckedKeys.map(Number))
       message.success('API权限分配成功')
       onSuccess()
       onCancel()
@@ -152,15 +174,96 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
     let count = 0
     const countByMethod = (list: ApiVO[]) => {
       list.forEach(api => {
+        // 优先判断是否有子节点（模块节点）
         if (api.children && api.children.length > 0) {
+          // 模块节点，递归统计子节点
           countByMethod(api.children)
-        } else if (api.method && api.method.toUpperCase() === method.toUpperCase()) {
-          count++
+        } else if (api.method && api.path) {
+          // 叶子节点（实际的API接口），根据方法过滤统计
+          if (!method || api.method.toUpperCase() === method.toUpperCase()) {
+            count++
+          }
         }
       })
     }
     countByMethod(apis)
     return count
+  }
+
+  // 自定义处理选中逻辑
+  const handleCheck = (checkedKeysValue: any, info: any) => {
+    const { checked, node, checkedNodes } = info
+
+    // 如果选中的是父节点（模块），需要只选择当前过滤后可见的子节点
+    if (node.children && node.children.length > 0) {
+      // 获取该父节点下所有可见的API节点ID
+      const getVisibleApiKeys = (nodes: any[]): string[] => {
+        let keys: string[] = []
+        nodes.forEach(child => {
+          if (child.children && child.children.length > 0) {
+            keys = keys.concat(getVisibleApiKeys(child.children))
+          } else {
+            // 是叶子节点（API）
+            keys.push(child.key)
+          }
+        })
+        return keys
+      }
+
+      const visibleApiKeys = getVisibleApiKeys(node.children)
+
+      // 合并或移除可见的API节点
+      setCheckedKeys((prevKeys: React.Key[]) => {
+        let newKeys = [...prevKeys]
+
+        if (checked) {
+          // 添加所有可见的API节点
+          visibleApiKeys.forEach(key => {
+            if (!newKeys.includes(key)) {
+              newKeys.push(key)
+            }
+          })
+        } else {
+          // 移除该模块下所有的API节点（包括被过滤的）
+          const getAllApiKeysUnderParent = (parentId: string, allNodes: any[]): string[] => {
+            let keys: string[] = []
+            allNodes.forEach(n => {
+              if (n.key === parentId && n.children) {
+                keys = keys.concat(getAllLeafKeys(n.children))
+              } else if (n.children) {
+                keys = keys.concat(getAllApiKeysUnderParent(parentId, n.children))
+              }
+            })
+            return keys
+          }
+
+          const getAllLeafKeys = (nodes: any[]): string[] => {
+            let keys: string[] = []
+            nodes.forEach(child => {
+              if (child.children && child.children.length > 0) {
+                keys = keys.concat(getAllLeafKeys(child.children))
+              } else {
+                keys.push(child.key)
+              }
+            })
+            return keys
+          }
+
+          const allApiKeysToRemove = getAllApiKeysUnderParent(node.key, treeData)
+          newKeys = newKeys.filter(key => !allApiKeysToRemove.includes(key))
+        }
+
+        return newKeys
+      })
+    } else {
+      // 选中的是叶子节点（API），直接更新
+      setCheckedKeys(checkedKeysValue as React.Key[])
+    }
+  }
+
+  // 清空所有选择
+  const handleClearAll = () => {
+    setCheckedKeys([])
   }
 
   return (
@@ -191,7 +294,7 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
             className="cursor-pointer"
             onClick={() => setMethodFilter('')}
           >
-            全部 ({apis.length})
+            全部 ({getMethodCount('')})
           </Tag>
           <Tag
             color={methodFilter === 'GET' ? 'blue' : 'default'}
@@ -228,7 +331,7 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
             <Tree
               checkable
               checkedKeys={checkedKeys}
-              onCheck={(keys) => setCheckedKeys(keys as React.Key[])}
+              onCheck={handleCheck}
               treeData={treeData}
               defaultExpandAll
               showLine={{ showLeafIcon: false }}
@@ -239,8 +342,19 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
           )}
         </div>
 
-        <div className="mt-3 text-sm text-gray-500">
-          已选择 {checkedKeys.length} 个接口
+        <div className="mt-3 flex items-center justify-between">
+          <div className="text-sm text-gray-500">
+            已选择 {checkedKeys.length} 个接口
+          </div>
+          {checkedKeys.length > 0 && (
+            <Button
+              size="small"
+              onClick={handleClearAll}
+              className="text-gray-600"
+            >
+              取消选择
+            </Button>
+          )}
         </div>
       </Spin>
     </Modal>
