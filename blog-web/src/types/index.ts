@@ -254,9 +254,10 @@ export interface FriendLinkVO {
   id: number;
   name: string;
   url: string;
-  avatar?: string;
+  logo?: string;
   description?: string;
   category?: string;
+  author?: string;
 }
 
 export interface FriendLinkApplicationDTO {

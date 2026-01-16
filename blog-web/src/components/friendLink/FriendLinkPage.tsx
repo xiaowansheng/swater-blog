@@ -12,12 +12,25 @@ interface FriendLinkPageProps {
 
 export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedLink, setSelectedLink] = useState<FriendLinkVO | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   const handleApplicationSuccess = () => {
     setSubmitted(true);
     setIsModalOpen(false);
     setTimeout(() => setSubmitted(false), 3000);
+  };
+
+  const handleLinkClick = (link: FriendLinkVO) => {
+    setSelectedLink(link);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleVisitWebsite = () => {
+    if (selectedLink?.url) {
+      window.open(selectedLink.url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -85,12 +98,10 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
             <>
               <div className="grid grid-cols-1 gap-3 sm:gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                 {friendLinks.map((link, index) => (
-                  <a
+                  <button
                     key={link.id}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group/link relative p-3 sm:p-4 transition-all duration-300 border rounded-xl bg-card border-border hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 overflow-hidden"
+                    onClick={() => handleLinkClick(link)}
+                    className="group/link relative p-3 sm:p-4 transition-all duration-300 border rounded-xl bg-card border-border hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 overflow-hidden text-left cursor-pointer"
                     style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     {/* 悬停背景 */}
@@ -103,13 +114,13 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
 
                     <div className="relative z-10">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                        {link.avatar ? (
+                        {link.logo ? (
                           <div className="relative shrink-0">
-                            {/* 头像光晕 */}
+                            {/* Logo光晕 */}
                             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/30 to-accent/30 blur-sm opacity-0 group-hover/link:opacity-100 transition-opacity duration-300"></div>
                             <div className="relative">
                               <Image
-                                src={link.avatar}
+                                src={link.logo}
                                 alt={link.name}
                                 width={48}
                                 height={48}
@@ -136,14 +147,15 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
                       )}
                       <div className="flex items-center gap-1.5 text-xs transition-all duration-300 opacity-0 group-hover/link:opacity-100 transform translate-y-1 group-hover/link:translate-y-0 text-primary">
                         <span className="flex items-center gap-1">
-                          访问网站
+                          查看详情
                           <svg className="w-3 h-3 group-hover/link:translate-x-0.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
                         </span>
                       </div>
                     </div>
-                  </a>
+                  </button>
                 ))}
               </div>
               <div className="flex justify-center mt-8">
@@ -174,6 +186,95 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
         <FriendLinkApplicationForm
           onSuccess={handleApplicationSuccess}
         />
+      </Modal>
+
+      <Modal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        title="友链详情"
+      >
+        {selectedLink && (
+          <div className="space-y-6">
+            {/* Logo和名称 */}
+            <div className="flex items-center gap-4">
+              {selectedLink.logo ? (
+                <div className="relative shrink-0">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/30 to-accent/30 blur-lg"></div>
+                  <Image
+                    src={selectedLink.logo}
+                    alt={selectedLink.name}
+                    width={80}
+                    height={80}
+                    className="relative w-20 h-20 border-4 rounded-full border-border ring-2 ring-primary/20"
+                    previewEnabled={false}
+                  />
+                </div>
+              ) : (
+                <div className="relative shrink-0">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/30 to-accent/30 blur-lg"></div>
+                  <div className="relative flex items-center justify-center w-20 h-20 border-4 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 border-border ring-2 ring-primary/20">
+                    <span className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                      {selectedLink.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+              )}
+              <div className="flex-1">
+                <h3 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-1">
+                  {selectedLink.name}
+                </h3>
+                {selectedLink.author && (
+                  <p className="text-sm text-foreground/70 mb-1 flex items-center gap-1.5">
+                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    {selectedLink.author}
+                  </p>
+                )}
+                {selectedLink.url && (
+                  <p className="text-xs text-foreground/60 break-all flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    {selectedLink.url}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* 描述 */}
+            {selectedLink.description && (
+              <div className="p-4 rounded-lg bg-muted/50 border border-border">
+                <h4 className="text-sm font-semibold mb-2 text-foreground/80">简介</h4>
+                <p className="text-sm text-foreground/70 leading-relaxed">
+                  {selectedLink.description}
+                </p>
+              </div>
+            )}
+
+            {/* 操作按钮 */}
+            <div className="flex gap-3">
+              <button
+                onClick={handleVisitWebsite}
+                className="flex-1 group relative px-6 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all font-medium flex items-center justify-center gap-2 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="relative z-10 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  访问网站
+                </span>
+              </button>
+              <button
+                onClick={() => setIsDetailModalOpen(false)}
+                className="px-6 py-3 border-2 rounded-xl border-border hover:border-primary hover:bg-primary/5 transition-all font-medium text-foreground/80 hover:text-primary"
+              >
+                关闭
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </>
   );
