@@ -6,43 +6,45 @@ import { FriendLink } from '@/types'
 
 const FriendLinkPage: React.FC = () => {
   const [links, setLinks] = useState<FriendLink[]>([])
-  const [allLinks, setAllLinks] = useState<FriendLink[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [editingLink, setEditingLink] = useState<FriendLink | null>(null)
   const [form] = Form.useForm()
   const [filters, setFilters] = useState<{
+    id: number | undefined
+    userId: number | undefined
     name: string
     author: string
+    email: string
+    url: string
     reviewStatus: number | undefined
+    isVisible: number | undefined
   }>({
+    id: undefined,
+    userId: undefined,
     name: '',
     author: '',
+    email: '',
+    url: '',
     reviewStatus: undefined,
+    isVisible: undefined,
   })
 
 
   const loadLinks = async () => {
     setLoading(true)
     try {
-      const data = await getFriendLinkList()
-      setAllLinks(data)
-
-      let filtered = data
-      if (filters.name) {
-        filtered = filtered.filter((link: FriendLink) =>
-          link.name.toLowerCase().includes(filters.name.toLowerCase())
-        )
-      }
-      if (filters.author) {
-        filtered = filtered.filter((link: FriendLink) =>
-          link.author?.toLowerCase().includes(filters.author.toLowerCase())
-        )
-      }
-      if (filters.reviewStatus !== undefined) {
-        filtered = filtered.filter((link: FriendLink) => link.reviewStatus === filters.reviewStatus)
-      }
-      setLinks(filtered)
+      const data = await getFriendLinkList({
+        id: filters.id,
+        userId: filters.userId,
+        name: filters.name,
+        author: filters.author,
+        email: filters.email,
+        url: filters.url,
+        reviewStatus: filters.reviewStatus,
+        isVisible: filters.isVisible,
+      })
+      setLinks(data)
     } catch (error) {
       console.error('加载友链失败', error)
     } finally {
@@ -291,6 +293,20 @@ const FriendLinkPage: React.FC = () => {
             style={{ width: 140 }}
             allowClear
           />
+          <Input
+            placeholder="邮箱"
+            value={filters.email}
+            onChange={(e) => setFilters({ ...filters, email: e.target.value })}
+            style={{ width: 180 }}
+            allowClear
+          />
+          <Input
+            placeholder="链接地址"
+            value={filters.url}
+            onChange={(e) => setFilters({ ...filters, url: e.target.value })}
+            style={{ width: 200 }}
+            allowClear
+          />
           <Select
             placeholder="状态"
             value={filters.reviewStatus}
@@ -302,6 +318,32 @@ const FriendLinkPage: React.FC = () => {
             <Select.Option value={1}>已审核</Select.Option>
             <Select.Option value={2}>已拒绝</Select.Option>
           </Select>
+          <Select
+            placeholder="可见状态"
+            value={filters.isVisible}
+            onChange={(value) => setFilters({ ...filters, isVisible: value })}
+            style={{ width: 120 }}
+            allowClear
+          >
+            <Select.Option value={1}>可见</Select.Option>
+            <Select.Option value={0}>不可见</Select.Option>
+          </Select>
+          <Input
+            placeholder="友链ID"
+            value={filters.id ?? ''}
+            onChange={(e) => setFilters({ ...filters, id: e.target.value ? Number(e.target.value) : undefined })}
+            style={{ width: 120 }}
+            type="number"
+            allowClear
+          />
+          <Input
+            placeholder="用户ID"
+            value={filters.userId ?? ''}
+            onChange={(e) => setFilters({ ...filters, userId: e.target.value ? Number(e.target.value) : undefined })}
+            style={{ width: 120 }}
+            type="number"
+            allowClear
+          />
           <div className="flex-1" />
           <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
             新建友链

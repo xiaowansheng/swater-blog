@@ -6,6 +6,7 @@ import com.blog.shared.annotation.ApiOperation;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.shared.Result;
 import com.blog.modules.friendlink.model.dto.FriendLinkDTO;
+import com.blog.modules.friendlink.model.dto.FriendLinkQueryDTO;
 import com.blog.modules.friendlink.model.vo.FriendLinkVO;
 import com.blog.modules.friendlink.service.FriendLinkService;
 import jakarta.validation.Valid;
@@ -21,8 +22,8 @@ public class FriendLinkController {
 
     @GetMapping("/list")
     @ApiOperation(name = "查询友链列表", type = ApiOperationType.QUERY, description = "查询所有友链")
-    public Result<List<FriendLinkVO>> list() {
-        List<FriendLinkVO> list = friendLinkService.list();
+    public Result<List<FriendLinkVO>> list(FriendLinkQueryDTO queryDTO) {
+        List<FriendLinkVO> list = friendLinkService.list(queryDTO);
         return Result.success(list);
     }
 

@@ -45,6 +45,7 @@ const CommentPage: React.FC = () => {
     parentId: number | undefined
     rootId: number | undefined
     targetType: string | undefined
+    targetId: number | undefined
     isVisible: number | undefined
   }>({
     status: undefined,
@@ -53,6 +54,7 @@ const CommentPage: React.FC = () => {
     parentId: undefined,
     rootId: undefined,
     targetType: undefined,
+    targetId: undefined,
     isVisible: undefined,
   })
   const [detailVisible, setDetailVisible] = useState(false)
@@ -69,6 +71,7 @@ const CommentPage: React.FC = () => {
         page: pagination.current,
         size: pagination.pageSize,
         status: filters.status,
+        targetId: filters.targetId,
         id: filters.id,
         parentId: filters.parentId,
         rootId: filters.rootId,
@@ -411,6 +414,14 @@ const CommentPage: React.FC = () => {
             placeholder="评论ID"
             value={filters.id || ''}
             onChange={(e) => setFilters({ ...filters, id: e.target.value ? Number(e.target.value) : undefined })}
+            style={{ width: 120 }}
+            type="number"
+            allowClear
+          />
+          <Input
+            placeholder="目标ID"
+            value={filters.targetId || ''}
+            onChange={(e) => setFilters({ ...filters, targetId: e.target.value ? Number(e.target.value) : undefined })}
             style={{ width: 120 }}
             type="number"
             allowClear

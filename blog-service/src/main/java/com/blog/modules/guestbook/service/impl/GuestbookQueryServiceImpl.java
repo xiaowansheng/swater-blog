@@ -69,6 +69,21 @@ public class GuestbookQueryServiceImpl implements GuestbookQueryService {
         if (queryDTO.getCity() != null && !queryDTO.getCity().trim().isEmpty()) {
             wrapper.eq(Guestbook::getCity, queryDTO.getCity());
         }
+        if (queryDTO.getType() != null && !queryDTO.getType().trim().isEmpty()) {
+            wrapper.eq(Guestbook::getType, queryDTO.getType().trim());
+        }
+        if (queryDTO.getIp() != null && !queryDTO.getIp().trim().isEmpty()) {
+            wrapper.eq(Guestbook::getIp, queryDTO.getIp().trim());
+        }
+        if (queryDTO.getDevice() != null && !queryDTO.getDevice().trim().isEmpty()) {
+            wrapper.like(Guestbook::getDevice, queryDTO.getDevice().trim());
+        }
+        if (queryDTO.getBrowser() != null && !queryDTO.getBrowser().trim().isEmpty()) {
+            wrapper.like(Guestbook::getBrowser, queryDTO.getBrowser().trim());
+        }
+        if (queryDTO.getLocation() != null && !queryDTO.getLocation().trim().isEmpty()) {
+            wrapper.like(Guestbook::getLocation, queryDTO.getLocation().trim());
+        }
 
         wrapper.orderByDesc(Guestbook::getCreateTime);
 
@@ -108,4 +123,3 @@ public class GuestbookQueryServiceImpl implements GuestbookQueryService {
         return vo;
     }
 }
-

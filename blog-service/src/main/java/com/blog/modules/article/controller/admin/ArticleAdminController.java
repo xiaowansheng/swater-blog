@@ -7,6 +7,7 @@ import com.blog.shared.Result;
 import com.blog.modules.article.model.dto.ArticleDTO;
 import com.blog.modules.article.model.dto.ArticleSaveDTO;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.modules.article.model.dto.ArticleQueryDTO;
 import com.blog.modules.article.model.vo.ArticleVO;
 import com.blog.modules.article.model.vo.ArticleStatisticsVO;
 import com.blog.modules.article.model.vo.ArticleSaveResultVO;
@@ -33,13 +34,8 @@ public class ArticleAdminController {
     @GetMapping("/list")
     @ApiOperation(name = "查询文章列表", type = ApiOperationType.QUERY,
             description = "分页查询文章列表，支持按状态、分类、关键词筛选")
-    public Result<PageResult<ArticleVO>> list(
-            @RequestParam(required = false) Long page,
-            @RequestParam(required = false) Long size,
-            @RequestParam(required = false) Integer status,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) String keyword) {
-        PageResult<ArticleVO> result = articleQueryService.list(page, size, status, categoryId, keyword);
+    public Result<PageResult<ArticleVO>> list(ArticleQueryDTO queryDTO) {
+        PageResult<ArticleVO> result = articleQueryService.list(queryDTO);
         return Result.success(result);
     }
 

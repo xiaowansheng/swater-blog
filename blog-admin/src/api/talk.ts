@@ -11,6 +11,8 @@ export interface TalkDTO {
 export const getTalkList = (params: {
   page?: number
   size?: number
+  id?: number
+  talkKey?: string
   keyword?: string
   status?: string
   isTop?: number

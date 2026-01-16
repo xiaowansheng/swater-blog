@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.shared.PageResult;
 import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.article.mapper.ArticleTagMapper;
+import com.blog.modules.article.model.dto.ArticleQueryDTO;
 import com.blog.modules.category.mapper.CategoryMapper;
 import com.blog.modules.tag.mapper.TagMapper;
 import com.blog.modules.article.model.entity.Article;
@@ -37,17 +38,30 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
     private ArticleTagMapper articleTagMapper;
 
     @Override
-    public PageResult<ArticleVO> list(Long page, Long size, Integer status, Long categoryId, String keyword) {
-        Page<Article> pageParam = PageUtil.buildPage(page, size);
+    public PageResult<ArticleVO> list(ArticleQueryDTO queryDTO) {
+        Page<Article> pageParam = PageUtil.buildPage(queryDTO.getPage(), queryDTO.getSize());
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
 
-        if (status != null) {
-            wrapper.eq(Article::getStatus, status);
+        if (queryDTO.getId() != null) {
+            wrapper.eq(Article::getId, queryDTO.getId());
         }
-        if (categoryId != null) {
-            wrapper.eq(Article::getCategoryId, categoryId);
+        if (queryDTO.getArticleKey() != null && !queryDTO.getArticleKey().trim().isEmpty()) {
+            wrapper.eq(Article::getArticleKey, queryDTO.getArticleKey().trim());
         }
-        if (keyword != null && !keyword.isEmpty()) {
+        if (queryDTO.getStatus() != null) {
+            wrapper.eq(Article::getStatus, queryDTO.getStatus());
+        }
+        if (queryDTO.getCategoryId() != null) {
+            wrapper.eq(Article::getCategoryId, queryDTO.getCategoryId());
+        }
+        if (queryDTO.getType() != null && !queryDTO.getType().trim().isEmpty()) {
+            wrapper.eq(Article::getType, queryDTO.getType().trim());
+        }
+        if (queryDTO.getIsTop() != null) {
+            wrapper.eq(Article::getIsTop, queryDTO.getIsTop());
+        }
+        if (queryDTO.getKeyword() != null && !queryDTO.getKeyword().trim().isEmpty()) {
+            String keyword = queryDTO.getKeyword().trim();
             wrapper.and(w -> w.like(Article::getTitle, keyword)
                     .or().like(Article::getContent, keyword)
                     .or().like(Article::getExcerpt, keyword));
@@ -123,4 +137,3 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         return vo;
     }
 }
-

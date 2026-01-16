@@ -72,4 +72,29 @@ public class GuestbookQueryDTO {
      * 城市
      */
     private String city;
+
+    /**
+     * 留言类型
+     */
+    private String type;
+
+    /**
+     * IP
+     */
+    private String ip;
+
+    /**
+     * 设备
+     */
+    private String device;
+
+    /**
+     * 浏览器
+     */
+    private String browser;
+
+    /**
+     * 位置
+     */
+    private String location;
 }

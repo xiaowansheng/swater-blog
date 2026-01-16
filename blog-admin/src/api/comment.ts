@@ -5,8 +5,7 @@ export const getCommentList = (params: {
   page?: number
   size?: number
   status?: number
-  postId?: number
-  momentId?: number
+  targetId?: number
   id?: number
   parentId?: number
   rootId?: number

@@ -16,6 +16,11 @@ export const getGuestbookList = (params: {
   country?: string
   province?: string
   city?: string
+  type?: string
+  ip?: string
+  device?: string
+  browser?: string
+  location?: string
 }): Promise<PageResult<Guestbook>> => {
   // 后端使用 reviewStatus 参数
   const { status, reviewStatus, ...rest } = params

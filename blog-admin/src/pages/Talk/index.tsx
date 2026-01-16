@@ -28,6 +28,8 @@ const TalkPage: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
   const [filters, setFilters] = useState<{
+    id?: number
+    talkKey?: string
     keyword?: string
     status?: string
     isTop?: number
@@ -122,6 +124,21 @@ const TalkPage: React.FC = () => {
             <Select.Option value={TalkStatus.PRIVATE}>私密</Select.Option>
             <Select.Option value={TalkStatus.DRAFT}>草稿</Select.Option>
           </Select>
+          <Input
+            placeholder="说说ID"
+            value={filters.id ?? ''}
+            onChange={(e) => setFilters({ ...filters, id: e.target.value ? Number(e.target.value) : undefined })}
+            style={{ width: 120 }}
+            type="number"
+            allowClear
+          />
+          <Input
+            placeholder="说说Key"
+            value={filters.talkKey ?? ''}
+            onChange={(e) => setFilters({ ...filters, talkKey: e.target.value || undefined })}
+            style={{ width: 160 }}
+            allowClear
+          />
           <Select
             placeholder="置顶状态"
             value={filters.isTop}

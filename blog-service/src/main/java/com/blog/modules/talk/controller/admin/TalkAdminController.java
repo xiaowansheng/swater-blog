@@ -6,6 +6,7 @@ import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.talk.model.dto.TalkDTO;
+import com.blog.modules.talk.model.dto.TalkQueryDTO;
 import com.blog.modules.talk.model.vo.TalkVO;
 import com.blog.modules.talk.service.TalkCommandService;
 import com.blog.modules.talk.service.TalkQueryService;
@@ -25,10 +26,8 @@ public class TalkAdminController {
     @GetMapping("/list")
     @ApiOperation(name = "查询说说列表", type = ApiOperationType.QUERY,
             description = "分页查询说说列表")
-    public Result<PageResult<TalkVO>> list(
-            @RequestParam(required = false) Long page,
-            @RequestParam(required = false) Long size) {
-        PageResult<TalkVO> result = talkQueryService.list(page, size);
+    public Result<PageResult<TalkVO>> list(TalkQueryDTO queryDTO) {
+        PageResult<TalkVO> result = talkQueryService.list(queryDTO);
         return Result.success(result);
     }
 

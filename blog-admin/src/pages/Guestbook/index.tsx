@@ -56,6 +56,11 @@ const GuestbookPage: React.FC = () => {
     country: string
     province: string
     city: string
+    type: string
+    ip: string
+    device: string
+    browser: string
+    location: string
   }>({
     status: undefined,
     keyword: '',
@@ -68,6 +73,11 @@ const GuestbookPage: React.FC = () => {
     country: '',
     province: '',
     city: '',
+    type: '',
+    ip: '',
+    device: '',
+    browser: '',
+    location: '',
   })
   const [detailVisible, setDetailVisible] = useState(false)
   const [currentGuestbook, setCurrentGuestbook] = useState<Guestbook | null>(null)
@@ -93,6 +103,11 @@ const GuestbookPage: React.FC = () => {
         country: filters.country,
         province: filters.province,
         city: filters.city,
+        type: filters.type,
+        ip: filters.ip,
+        device: filters.device,
+        browser: filters.browser,
+        location: filters.location,
       })
       setGuestbooks(result.records)
       setPagination((prev) => ({ ...prev, total: result.total }))
@@ -426,6 +441,41 @@ const GuestbookPage: React.FC = () => {
             value={filters.city}
             onChange={(e) => setFilters({ ...filters, city: e.target.value })}
             style={{ width: 120 }}
+            allowClear
+          />
+          <Input
+            placeholder="留言类型"
+            value={filters.type}
+            onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+            style={{ width: 120 }}
+            allowClear
+          />
+          <Input
+            placeholder="IP"
+            value={filters.ip}
+            onChange={(e) => setFilters({ ...filters, ip: e.target.value })}
+            style={{ width: 140 }}
+            allowClear
+          />
+          <Input
+            placeholder="设备"
+            value={filters.device}
+            onChange={(e) => setFilters({ ...filters, device: e.target.value })}
+            style={{ width: 140 }}
+            allowClear
+          />
+          <Input
+            placeholder="浏览器"
+            value={filters.browser}
+            onChange={(e) => setFilters({ ...filters, browser: e.target.value })}
+            style={{ width: 140 }}
+            allowClear
+          />
+          <Input
+            placeholder="位置"
+            value={filters.location}
+            onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+            style={{ width: 160 }}
             allowClear
           />
           <Button type="primary" icon={<SearchOutlined />} onClick={loadGuestbooks}>

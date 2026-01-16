@@ -4,10 +4,11 @@ package com.blog.modules.friendlink.service;
 
 import com.blog.shared.PageResult;
 import com.blog.modules.friendlink.model.dto.FriendLinkDTO;
+import com.blog.modules.friendlink.model.dto.FriendLinkQueryDTO;
 import com.blog.modules.friendlink.model.vo.FriendLinkVO;
 import java.util.List;
 public interface FriendLinkService {
-    List<FriendLinkVO> list();
+    List<FriendLinkVO> list(FriendLinkQueryDTO queryDTO);
 
     FriendLinkVO getById(Long id);
 
@@ -21,4 +22,3 @@ public interface FriendLinkService {
 
     void reject(Long id);
 }
-

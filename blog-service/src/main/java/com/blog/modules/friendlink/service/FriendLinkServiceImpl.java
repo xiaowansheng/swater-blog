@@ -3,6 +3,7 @@ package com.blog.modules.friendlink.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.modules.friendlink.mapper.FriendLinkMapper;
 import com.blog.modules.friendlink.model.dto.FriendLinkDTO;
+import com.blog.modules.friendlink.model.dto.FriendLinkQueryDTO;
 import com.blog.modules.friendlink.model.entity.FriendLink;
 import com.blog.modules.friendlink.model.vo.FriendLinkVO;
 import com.blog.modules.friendlink.event.FriendLinkCreatedEvent;
@@ -24,8 +25,34 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     private ApplicationEventPublisher eventPublisher;
 
     @Override
-    public List<FriendLinkVO> list() {
+    public List<FriendLinkVO> list(FriendLinkQueryDTO queryDTO) {
         LambdaQueryWrapper<FriendLink> wrapper = new LambdaQueryWrapper<>();
+        if (queryDTO != null) {
+            if (queryDTO.getId() != null) {
+                wrapper.eq(FriendLink::getId, queryDTO.getId());
+            }
+            if (queryDTO.getUserId() != null) {
+                wrapper.eq(FriendLink::getUserId, queryDTO.getUserId());
+            }
+            if (queryDTO.getName() != null && !queryDTO.getName().trim().isEmpty()) {
+                wrapper.like(FriendLink::getName, queryDTO.getName().trim());
+            }
+            if (queryDTO.getAuthor() != null && !queryDTO.getAuthor().trim().isEmpty()) {
+                wrapper.like(FriendLink::getAuthor, queryDTO.getAuthor().trim());
+            }
+            if (queryDTO.getEmail() != null && !queryDTO.getEmail().trim().isEmpty()) {
+                wrapper.like(FriendLink::getEmail, queryDTO.getEmail().trim());
+            }
+            if (queryDTO.getUrl() != null && !queryDTO.getUrl().trim().isEmpty()) {
+                wrapper.like(FriendLink::getUrl, queryDTO.getUrl().trim());
+            }
+            if (queryDTO.getReviewStatus() != null) {
+                wrapper.eq(FriendLink::getReviewStatus, queryDTO.getReviewStatus());
+            }
+            if (queryDTO.getIsVisible() != null) {
+                wrapper.eq(FriendLink::getIsVisible, queryDTO.getIsVisible());
+            }
+        }
         // 未审核优先（reviewStatus=0），然后按序号升序，最后按创建时间降序
         wrapper.orderByAsc(FriendLink::getReviewStatus)
                 .orderByAsc(FriendLink::getSort)
@@ -115,4 +142,3 @@ public class FriendLinkServiceImpl implements FriendLinkService {
         friendLinkMapper.updateById(friendLink);
     }
 }
-

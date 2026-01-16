@@ -12,8 +12,17 @@ export interface FriendLinkDTO {
   isVisible?: number
 }
 
-export const getFriendLinkList = (): Promise<FriendLink[]> => {
-  return request.get('/admin/friend-link/list')
+export const getFriendLinkList = (params?: {
+  id?: number
+  userId?: number
+  name?: string
+  author?: string
+  email?: string
+  url?: string
+  reviewStatus?: number
+  isVisible?: number
+}): Promise<FriendLink[]> => {
+  return request.get('/admin/friend-link/list', { params })
 }
 
 export const createFriendLink = (data: FriendLinkDTO): Promise<number> => {

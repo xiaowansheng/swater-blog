@@ -5,11 +5,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.shared.PageResult;
 import com.blog.modules.talk.mapper.TalkMapper;
-import com.blog.modules.user.mapper.UserMapper;
+import com.blog.modules.talk.model.dto.TalkQueryDTO;
 import com.blog.modules.talk.model.entity.Talk;
-import com.blog.modules.user.model.entity.User;
 import com.blog.modules.talk.model.vo.TalkVO;
 import com.blog.modules.talk.service.TalkQueryService;
+import com.blog.modules.user.mapper.UserMapper;
+import com.blog.modules.user.model.entity.User;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
@@ -26,9 +27,24 @@ public class TalkQueryServiceImpl implements TalkQueryService {
     private UserMapper userMapper;
 
     @Override
-    public PageResult<TalkVO> list(Long page, Long size) {
-        Page<Talk> pageParam = PageUtil.buildPage(page, size);
+    public PageResult<TalkVO> list(TalkQueryDTO queryDTO) {
+        Page<Talk> pageParam = PageUtil.buildPage(queryDTO.getPage(), queryDTO.getSize());
         LambdaQueryWrapper<Talk> wrapper = new LambdaQueryWrapper<>();
+        if (queryDTO.getId() != null) {
+            wrapper.eq(Talk::getId, queryDTO.getId());
+        }
+        if (queryDTO.getTalkKey() != null && !queryDTO.getTalkKey().trim().isEmpty()) {
+            wrapper.eq(Talk::getTalkKey, queryDTO.getTalkKey().trim());
+        }
+        if (queryDTO.getStatus() != null && !queryDTO.getStatus().trim().isEmpty()) {
+            wrapper.eq(Talk::getStatus, queryDTO.getStatus().trim());
+        }
+        if (queryDTO.getIsTop() != null) {
+            wrapper.eq(Talk::getIsTop, queryDTO.getIsTop());
+        }
+        if (queryDTO.getKeyword() != null && !queryDTO.getKeyword().trim().isEmpty()) {
+            wrapper.like(Talk::getContent, queryDTO.getKeyword().trim());
+        }
         wrapper.orderByDesc(Talk::getIsTop);
         wrapper.orderByDesc(Talk::getCreateTime);
         
@@ -68,4 +84,3 @@ public class TalkQueryServiceImpl implements TalkQueryService {
         return vo;
     }
 }
-
