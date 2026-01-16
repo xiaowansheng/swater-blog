@@ -12,7 +12,7 @@ export default function MomentLiveStats({
   const stats = useLiveStats({ type: 'TALK', id, initial });
 
   return (
-    <div className="flex gap-6 items-center pt-6 mt-6 border-t border-border text-sm text-muted-foreground">
+    <div className="flex gap-6 items-center pt-3 mt-6 border-t border-border text-sm text-muted-foreground">
       <div className="flex gap-1 items-center">
         <span>👀</span>
         <span>{stats.viewCount.toLocaleString()}</span>
