@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Image from '@/components/common/ImageWithPreview';
 import Modal from '@/components/common/Modal';
 import FriendLinkApplicationForm from './FriendLinkApplicationForm';
@@ -11,6 +12,7 @@ interface FriendLinkPageProps {
 }
 
 export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
+  const t = useTranslations('friendLink');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedLink, setSelectedLink] = useState<FriendLinkVO | null>(null);
@@ -55,7 +57,7 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                友链申请已提交，我们会在审核通过后与您联系！
+                {t('applicationSubmitted')}
               </p>
             </div>
           )}
@@ -77,8 +79,8 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
                     <div className="absolute -top-1 -right-1 text-accent/40 text-sm animate-bounce-soft">✦</div>
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-2 bg-gradient-to-r from-foreground to-primary/80 bg-clip-text text-transparent">暂无友情链接</h3>
-                <p className="text-foreground/60 mb-6">博主正在努力添加中，敬请期待...</p>
+                <h3 className="text-xl font-semibold mb-2 bg-gradient-to-r from-foreground to-primary/80 bg-clip-text text-transparent">{t('noFriendLinks')}</h3>
+                <p className="text-foreground/60 mb-6">{t('noFriendLinksHint')}</p>
                 <button
                   onClick={() => setIsModalOpen(true)}
                   className="group relative px-8 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all font-medium flex items-center gap-2 overflow-hidden"
@@ -89,7 +91,7 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    申请友链
+                    {t('applyFriendLink')}
                   </span>
                 </button>
               </div>
@@ -147,7 +149,7 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
                       )}
                       <div className="flex items-center gap-1.5 text-xs transition-all duration-300 opacity-0 group-hover/link:opacity-100 transform translate-y-1 group-hover/link:translate-y-0 text-primary">
                         <span className="flex items-center gap-1">
-                          查看详情
+                          {t('viewDetails')}
                           <svg className="w-3 h-3 group-hover/link:translate-x-0.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -169,7 +171,7 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    申请友链
+                    {t('applyFriendLink')}
                   </span>
                 </button>
               </div>
@@ -181,7 +183,7 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="申请友情链接"
+        title={t('applyFriendLinkTitle')}
       >
         <FriendLinkApplicationForm
           onSuccess={handleApplicationSuccess}
@@ -191,7 +193,7 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
       <Modal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
-        title="友链详情"
+        title={t('friendLinkDetail')}
       >
         {selectedLink && (
           <div className="space-y-6">
@@ -245,7 +247,7 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
             {/* 描述 */}
             {selectedLink.description && (
               <div className="p-4 rounded-lg bg-muted/50 border border-border">
-                <h4 className="text-sm font-semibold mb-2 text-foreground/80">简介</h4>
+                <h4 className="text-sm font-semibold mb-2 text-foreground/80">{t('description')}</h4>
                 <p className="text-sm text-foreground/70 leading-relaxed">
                   {selectedLink.description}
                 </p>
@@ -263,14 +265,14 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
-                  访问网站
+                  {t('visitWebsite')}
                 </span>
               </button>
               <button
                 onClick={() => setIsDetailModalOpen(false)}
                 className="px-6 py-3 border-2 rounded-xl border-border hover:border-primary hover:bg-primary/5 transition-all font-medium text-foreground/80 hover:text-primary"
               >
-                关闭
+                {t('close')}
               </button>
             </div>
           </div>

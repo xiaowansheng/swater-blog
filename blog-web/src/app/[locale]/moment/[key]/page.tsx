@@ -110,7 +110,7 @@ export default async function MomentDetailPage({
             {/* 内容区域 */}
             <div className="relative z-10">
               {/* 作者信息 */}
-              <div className="flex items-start gap-4 mb-6">
+              <div className="flex items-center gap-4 mb-6">
                 {author.avatar && (
                   <div className="relative flex-shrink-0" style={{ width: '80px', height: '80px' }}>
                     {/* 头像光晕 */}
@@ -131,7 +131,7 @@ export default async function MomentDetailPage({
                     </div>
                   </div>
                 )}
-                <div className="flex-1 pt-2">
+                <div className="flex-1">
                   <div className="text-lg font-bold mb-1 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent bg-[length:200%_auto] group-hover:animate-gradient">
                     {author.name || t('author')}
                   </div>

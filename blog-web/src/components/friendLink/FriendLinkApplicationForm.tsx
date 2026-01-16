@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { friendLinkApi } from '@/lib/api/friendLink';
 import { guestbookApi } from '@/lib/api/guestbook';
 import { authApi } from '@/lib/api/auth';
@@ -16,6 +17,7 @@ interface FriendLinkApplicationFormProps {
 export default function FriendLinkApplicationForm({
   onSuccess,
 }: FriendLinkApplicationFormProps) {
+  const t = useTranslations('friendLinkForm');
   // 从全局store获取用户信息
   const userInfo = useUserInfoStore();
   const setUserInfo = useUserInfoStore((state) => state.setUserInfo);
@@ -78,14 +80,14 @@ export default function FriendLinkApplicationForm({
   const handleSendCode = async () => {
     const trimmedEmail = formData.email?.trim() || '';
     if (!trimmedEmail) {
-      setError('请输入联系邮箱');
+      setError(t('pleaseEnterEmail'));
       return;
     }
     setSendingCode(true);
     setError('');
     try {
       await guestbookApi.sendEmailCode(trimmedEmail);
-      toast.success('验证码已发送');
+      toast.success(t('verificationCodeSent'));
       const endTime = Date.now() + 60 * 1000;
       localStorage.setItem('emailCodeEndTime', endTime.toString());
       setCooldown(60);
@@ -103,7 +105,7 @@ export default function FriendLinkApplicationForm({
       return true;
     }
     if (!emailCode.trim()) {
-      setError('请输入邮箱验证码');
+      setError(t('pleaseEnterVerificationCode'));
       return false;
     }
     const result = await authApi.verifyEmail(trimmedEmail, emailCode.trim());
@@ -117,23 +119,23 @@ export default function FriendLinkApplicationForm({
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError('请填写网站名称');
+      setError(t('pleaseEnterSiteName'));
       return;
     }
     if (!formData.author.trim()) {
-      setError('请填写您的昵称');
+      setError(t('pleaseEnterNickname'));
       return;
     }
     if (!formData.url.trim()) {
-      setError('请填写网站地址');
+      setError(t('pleaseEnterSiteUrl'));
       return;
     }
     if (!formData.email?.trim()) {
-      setError('请填写联系邮箱');
+      setError(t('pleaseEnterEmail'));
       return;
     }
     if (!formData.description?.trim()) {
-      setError('请填写网站描述');
+      setError(t('pleaseEnterSiteDescription'));
       return;
     }
 
@@ -167,7 +169,7 @@ export default function FriendLinkApplicationForm({
         onSuccess?.();
       }, 2000);
     } catch (err: any) {
-      setError(err.message || '提交失败，请稍后重试');
+      setError(err.message || t('submitFailed'));
     } finally {
       setLoading(false);
     }
@@ -193,20 +195,20 @@ export default function FriendLinkApplicationForm({
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              申请提交成功！我们会在审核通过后联系您
+              {t('applicationSuccess')}
             </p>
           </div>
         )}
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-foreground">
-            网站名称 <span className="text-red-500">*</span>
+            {t('siteName')} <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="请输入网站名称"
+            placeholder={t('siteNamePlaceholder')}
             required
             className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
           />
@@ -214,13 +216,13 @@ export default function FriendLinkApplicationForm({
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-foreground">
-            网站地址 <span className="text-red-500">*</span>
+            {t('siteUrl')} <span className="text-red-500">*</span>
           </label>
           <input
             type="url"
             value={formData.url}
             onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-            placeholder="https://example.com"
+            placeholder={t('siteUrlPlaceholder')}
             required
             className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
           />
@@ -228,7 +230,7 @@ export default function FriendLinkApplicationForm({
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-foreground">
-            您的昵称 <span className="text-red-500">*</span>
+            {t('yourNickname')} <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -238,7 +240,7 @@ export default function FriendLinkApplicationForm({
               setFormData({ ...formData, author: newAuthor });
               setUserInfo({ nickname: newAuthor });
             }}
-            placeholder="请输入您的昵称"
+            placeholder={t('nicknamePlaceholder')}
             required
             className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
           />
@@ -246,7 +248,7 @@ export default function FriendLinkApplicationForm({
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-foreground">
-            联系邮箱 <span className="text-red-500">*</span>
+            {t('contactEmail')} <span className="text-red-500">*</span>
           </label>
           <input
             type="email"
@@ -256,7 +258,7 @@ export default function FriendLinkApplicationForm({
               setFormData({ ...formData, email: newEmail });
               setUserInfo({ email: newEmail });
             }}
-            placeholder="请输入联系邮箱"
+            placeholder={t('emailPlaceholder')}
             required
             className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
           />
@@ -264,11 +266,11 @@ export default function FriendLinkApplicationForm({
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-foreground">
-            邮箱验证 <span className="text-red-500">*</span>
+            {t('emailVerification')} <span className="text-red-500">*</span>
           </label>
           {emailVerified ? (
             <div className="flex items-center justify-between rounded-xl border border-border bg-card/50 px-5 py-3">
-              <span className="text-sm text-primary/80">邮箱已验证</span>
+              <span className="text-sm text-primary/80">{t('emailVerified')}</span>
               <button
                 type="button"
                 onClick={() => {
@@ -277,7 +279,7 @@ export default function FriendLinkApplicationForm({
                 }}
                 className="text-xs text-primary hover:underline"
               >
-                更换/重新验证
+                {t('changeOrReverify')}
               </button>
             </div>
           ) : (
@@ -287,7 +289,7 @@ export default function FriendLinkApplicationForm({
                   type="text"
                   value={emailCode}
                   onChange={(e) => setEmailCode(e.target.value)}
-                  placeholder="请输入邮箱验证码"
+                  placeholder={t('verificationCodePlaceholder')}
                   className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
                 />
               </div>
@@ -298,10 +300,10 @@ export default function FriendLinkApplicationForm({
                 className="px-4 py-3 border border-border rounded-xl hover:bg-muted/50 transition-all text-sm disabled:opacity-50"
               >
                 {cooldown > 0
-                  ? `${cooldown}秒后重发`
+                  ? t('resendAfter', { seconds: cooldown })
                   : sendingCode
-                    ? '发送中...'
-                    : '发送验证码'}
+                    ? t('sending')
+                    : t('sendCode')}
               </button>
             </div>
           )}
@@ -309,25 +311,25 @@ export default function FriendLinkApplicationForm({
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-foreground">
-            网站Logo
+            {t('siteLogo')}
           </label>
           <input
             type="url"
             value={formData.logo}
             onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-            placeholder="https://example.com/logo.png"
+            placeholder={t('logoPlaceholder')}
             className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
           />
         </div>
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-foreground">
-            网站描述 <span className="text-red-500">*</span>
+            {t('siteDescription')} <span className="text-red-500">*</span>
           </label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="请简单描述您的网站"
+            placeholder={t('descriptionPlaceholder')}
             rows={3}
             required
             className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none shadow-sm focus:shadow-md"
@@ -341,7 +343,7 @@ export default function FriendLinkApplicationForm({
           disabled={loading || success}
           className="w-full px-8 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 disabled:opacity-50 transition-all font-medium relative overflow-hidden group"
         >
-          {loading ? '提交中...' : success ? '已提交' : '提交申请'}
+          {loading ? t('submitting') : success ? t('submitted') : t('submitApplication')}
         </button>
       </div>
     </form>

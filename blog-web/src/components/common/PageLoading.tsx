@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
 interface PageLoadingProps {
   onComplete?: () => void;
@@ -25,11 +26,12 @@ interface Star {
   scale: number;
 }
 
-export default function PageLoading({ 
-  onComplete, 
+export default function PageLoading({
+  onComplete,
   minDuration = 800,
-  maxDuration = 3000 
+  maxDuration = 3000
 }: PageLoadingProps) {
+  const t = useTranslations('common');
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentScene, setCurrentScene] = useState(0);
@@ -39,38 +41,38 @@ export default function PageLoading({
 
   // 首屏加载的故事场景
   const loadingScenes = [
-    { 
-      mascot: '(◕‿◕)', 
-      text: '欢迎来到我的小世界', 
-      subtext: '正在准备魔法道具...',
+    {
+      mascot: '(◕‿◕)',
+      text: t('loadingScene1Welcome'),
+      subtext: t('loadingScene1Subtitle'),
       color: 'from-pink-400 via-rose-400 to-pink-500',
       bgColor: 'from-pink-100/80 via-rose-100/80 to-pink-200/80'
     },
-    { 
-      mascot: '(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧', 
-      text: '施展召唤咒语中', 
-      subtext: '正在连接异次元服务器...',
+    {
+      mascot: '(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧',
+      text: t('loadingScene2Summon'),
+      subtext: t('loadingScene2Subtitle'),
       color: 'from-purple-400 via-violet-400 to-purple-500',
       bgColor: 'from-purple-100/80 via-violet-100/80 to-purple-200/80'
     },
-    { 
-      mascot: '(*^▽^*)', 
-      text: '收集彩虹能量', 
-      subtext: '正在加载精彩内容...',
+    {
+      mascot: '(*^▽^*)',
+      text: t('loadingScene3Energy'),
+      subtext: t('loadingScene3Subtitle'),
       color: 'from-blue-400 via-cyan-400 to-blue-500',
       bgColor: 'from-blue-100/80 via-cyan-100/80 to-blue-200/80'
     },
-    { 
-      mascot: '(≧◡≦)', 
-      text: '编织梦想之网', 
-      subtext: '马上就要完成啦...',
+    {
+      mascot: '(≧◡≦)',
+      text: t('loadingScene4Dream'),
+      subtext: t('loadingScene4Subtitle'),
       color: 'from-green-400 via-emerald-400 to-green-500',
       bgColor: 'from-green-100/80 via-emerald-100/80 to-green-200/80'
     },
-    { 
-      mascot: '(◡ ‿ ◡ ✿)', 
-      text: '准备就绪！', 
-      subtext: '欢迎进入我的博客世界 ♡',
+    {
+      mascot: '(◡ ‿ ◡ ✿)',
+      text: t('loadingScene5Ready'),
+      subtext: t('loadingScene5Subtitle'),
       color: 'from-yellow-400 via-orange-400 to-yellow-500',
       bgColor: 'from-yellow-100/80 via-orange-100/80 to-yellow-200/80'
     },
@@ -418,7 +420,7 @@ export default function PageLoading({
 
               {/* 进度信息 */}
               <div className="flex justify-between items-center text-sm font-medium">
-                <span className="text-gray-600">魔法进度</span>
+                <span className="text-gray-600">{t('magicProgress')}</span>
                 <motion.span
                   key={Math.floor(progress / 10)}
                   className={`bg-gradient-to-r ${currentSceneData.color} bg-clip-text text-transparent font-bold text-lg`}

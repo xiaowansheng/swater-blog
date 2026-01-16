@@ -22,9 +22,9 @@ export default async function FriendLinkPage({
 
     return (
       <>
-        <PageHeader title={t('friendLinks')} description="友情链接" coverImage={cover.link} />
+        <PageHeader title={t('friendLinks')} description={t('friendLinksDescription')} coverImage={cover.link} />
         <FriendLinkPageComponent friendLinks={friendLinks} />
-        
+
       </>
     );
   } catch (error) {
@@ -32,7 +32,7 @@ export default async function FriendLinkPage({
     const cover = await getCoverConfig();
     return (
       <>
-        <PageHeader title={t('friendLinks')} description="友情链接" coverImage={cover.link} />
+        <PageHeader title={t('friendLinks')} description={t('friendLinksDescription')} coverImage={cover.link} />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>

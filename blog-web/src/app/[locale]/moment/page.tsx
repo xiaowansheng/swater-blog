@@ -27,7 +27,7 @@ export default async function MomentPage({
 
     return (
       <>
-        <PageHeader title={t('moments')} description="记录生活的瞬间" coverImage={cover.talk} />
+        <PageHeader title={t('moments')} description={t('momentsDescription')} coverImage={cover.talk} />
         <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="max-w-4xl mx-auto" id="moment-list">
             {momentList.records.length > 0 ? (
@@ -66,7 +66,7 @@ export default async function MomentPage({
     const cover = await getCoverConfig();
     return (
       <>
-        <PageHeader title={t('moments')} description="记录生活的瞬间" coverImage={cover.talk} />
+        <PageHeader title={t('moments')} description={t('momentsDescription')} coverImage={cover.talk} />
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>

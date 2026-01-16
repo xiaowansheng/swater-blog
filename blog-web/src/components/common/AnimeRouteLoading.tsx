@@ -3,19 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSimpleRouteLoading } from '@/lib/hooks/useSimpleRouteLoading';
+import { useTranslations } from 'next-intl';
 
 export default function AnimeRouteLoading() {
+  const t = useTranslations('common');
   const { isLoading } = useSimpleRouteLoading();
   const [currentFrame, setCurrentFrame] = useState(0);
   const [hearts, setHearts] = useState<Array<{ id: number; x: number; y: number; delay: number; size: number }>>([]);
 
   // 超级可爱的动画帧序列
   const animationFrames = [
-    { face: '(◕‿◕)', text: '传送门启动中...', color: 'from-pink-400 to-rose-400' },
-    { face: '(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧', text: '魔法咒语念诵中...', color: 'from-purple-400 to-indigo-400' },
-    { face: '(*^▽^*)', text: '时空隧道穿越中...', color: 'from-blue-400 to-cyan-400' },
-    { face: '(≧◡≦)', text: '次元壁突破中...', color: 'from-green-400 to-emerald-400' },
-    { face: '(◡ ‿ ◡ ✿)', text: '即将到达目的地...', color: 'from-yellow-400 to-orange-400' },
+    { face: '(◕‿◕)', text: t('routeLoadingScene1'), color: 'from-pink-400 to-rose-400' },
+    { face: '(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧', text: t('routeLoadingScene2'), color: 'from-purple-400 to-indigo-400' },
+    { face: '(*^▽^*)', text: t('routeLoadingScene3'), color: 'from-blue-400 to-cyan-400' },
+    { face: '(≧◡≦)', text: t('routeLoadingScene4'), color: 'from-green-400 to-emerald-400' },
+    { face: '(◡ ‿ ◡ ✿)', text: t('routeLoadingScene5'), color: 'from-yellow-400 to-orange-400' },
   ];
 
   useEffect(() => {
@@ -236,7 +238,7 @@ export default function AnimeRouteLoading() {
                 {currentAnimation.text}
               </motion.h2>
               <p className="text-gray-600 text-sm">
-                正在施展传送魔法，请稍候片刻~ ✨
+                {t('castingTeleportMagic')}
               </p>
             </motion.div>
 

@@ -21,7 +21,7 @@ export default async function AboutPage({
 
   return (
     <>
-      <PageHeader title={t('about')} description="关于我" coverImage={cover.about} />
+      <PageHeader title={t('about')} description={t('aboutDescription')} coverImage={cover.about} />
       <main className="container flex-1 px-4 py-12 mx-auto">
         {/* 作者信息卡片 + 关于内容 */}
         <AuthorCard author={author}>
@@ -37,8 +37,8 @@ export default async function AboutPage({
                 </svg>
               </div>
               <div className="text-center space-y-1">
-                <p className="text-base font-medium text-foreground/70">暂无介绍内容</p>
-                <p className="text-sm text-foreground/50">博主正在努力撰写中，敬请期待</p>
+                <p className="text-base font-medium text-foreground/70">{t('noAboutContent')}</p>
+                <p className="text-sm text-foreground/50">{t('noAboutContentHint')}</p>
               </div>
             </div>
           )}

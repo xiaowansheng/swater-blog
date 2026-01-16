@@ -113,7 +113,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
       return;
     }
     if (!content.trim()) {
-      setError('Please enter content');
+      setError(t('pleaseEnterContent'));
       return;
     }
     if (!userInfo.email?.trim()) {
@@ -141,7 +141,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
       setContent('');
       setEmailCode('');
 
-      toast.success(t('success'));
+      toast.success(t('commentPublished'));
       onSuccess?.(message);
     } catch (err) {
       // 全局拦截器已经处理了错误提示，这里不需要再设置错误
@@ -168,7 +168,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
           type="text"
           value={userInfo.nickname || ''}
           onChange={(e) => setUserInfo({ nickname: e.target.value })}
-          placeholder={t('namePlaceholder')}
+          placeholder={tGuestbook('nicknamePlaceholder')}
           required
           className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
         />
@@ -178,7 +178,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
           type="email"
           value={userInfo.email || ''}
           onChange={(e) => setUserInfo({ email: e.target.value })}
-          placeholder={t('emailPlaceholder')}
+          placeholder={tGuestbook('emailPlaceholder')}
           required
           className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
         />
@@ -186,7 +186,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
       <div>
         {emailVerified ? (
           <div className="flex items-center justify-between rounded-xl border border-border bg-card/50 px-5 py-3">
-            <span className="text-sm text-primary/80">邮箱已验证</span>
+            <span className="text-sm text-primary/80">{t('emailVerified')}</span>
             <button
               type="button"
               onClick={() => {
@@ -195,7 +195,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
               }}
               className="text-xs text-primary hover:underline"
             >
-              更换/重新验证
+              {t('changeOrReverify')}
             </button>
           </div>
         ) : (
@@ -229,7 +229,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
           type="text"
           value={userInfo.qq || ''}
           onChange={(e) => setUserInfo({ qq: e.target.value })}
-          placeholder={t('qqPlaceholder')}
+          placeholder={tGuestbook('qqPlaceholder')}
           className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
         />
       </div>
@@ -237,7 +237,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder={t('placeholder')}
+          placeholder={tGuestbook('messageHint')}
           required
           rows={4}
           className="w-full px-5 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none shadow-sm focus:shadow-md"
@@ -249,7 +249,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
           disabled={submitting}
           className="px-8 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 disabled:opacity-50 transition-all font-medium relative overflow-hidden group"
         >
-          <span className="relative z-10">{submitting ? t('loading') || 'Loading...' : t('submit')}</span>
+          <span className="relative z-10">{submitting ? tGuestbook('sending') : tGuestbook('submit')}</span>
           {!submitting && (
             <span className="absolute inset-0 bg-gradient-to-r from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity"></span>
           )}

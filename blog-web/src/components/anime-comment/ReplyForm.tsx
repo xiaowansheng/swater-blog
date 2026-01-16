@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import toast from 'react-hot-toast';
 import EmojiPicker from './EmojiPicker';
 import { commentApi } from '@/lib/api/comment';
@@ -29,6 +30,7 @@ export default function ReplyForm({
   onSubmitSuccess,
   onCancel,
 }: ReplyFormProps) {
+  const t = useTranslations('comment');
   const { userInfo, updateUserInfo } = useUserInfo();
   const [content, setContent] = useState('');
   const [captcha, setCaptcha] = useState('');
@@ -81,13 +83,13 @@ export default function ReplyForm({
 
   const handleSendEmailCode = async () => {
     if (!normalizedEmail) {
-      toast.error('请输入邮箱地址');
+      toast.error(t('pleaseEnterEmail'));
       return;
     }
     setSendingCode(true);
     try {
       await commentApi.sendEmailCode(normalizedEmail);
-      toast.success('验证码已发送到您的邮箱');
+      toast.success(t('verificationCodeSent'));
       const endTime = Date.now() + 60 * 1000;
       localStorage.setItem('commentEmailCodeEndTime', endTime.toString());
       setCooldown(60);
@@ -100,18 +102,18 @@ export default function ReplyForm({
     const files = Array.from(e.target.files || []);
     const validFiles = files.filter((file) => {
       if (file.size > config.maxImageSize * 1024 * 1024) {
-        toast.error(`图片大小不能超过 ${config.maxImageSize}MB`);
+        toast.error(t('imageSizeTooLarge', { size: config.maxImageSize }));
         return false;
       }
       if (!file.type.startsWith('image/')) {
-        toast.error('只能上传图片文件');
+        toast.error(t('onlyImagesAllowed'));
         return false;
       }
       return true;
     });
 
     if (images.length + validFiles.length > config.maxImages) {
-      toast.error(`最多只能上传 ${config.maxImages} 张图片`);
+      toast.error(t('maxImagesExceeded', { count: config.maxImages }));
       return;
     }
 
@@ -140,7 +142,7 @@ export default function ReplyForm({
       return true;
     }
     if (!captcha.trim()) {
-      toast.error('请输入邮箱验证码');
+      toast.error(t('pleaseEnterVerificationCode'));
       return false;
     }
     const result = await authApi.verifyEmail(normalizedEmail, captcha.trim());
@@ -154,15 +156,15 @@ export default function ReplyForm({
     e.preventDefault();
 
     if (!userInfo.nickname?.trim()) {
-      toast.error('请输入昵称');
+      toast.error(t('pleaseEnterNickname'));
       return;
     }
     if (!normalizedEmail) {
-      toast.error('请输入邮箱地址');
+      toast.error(t('pleaseEnterEmail'));
       return;
     }
     if (!content.trim()) {
-      toast.error('请输入回复内容');
+      toast.error(t('pleaseEnterReplyContent'));
       return;
     }
 
@@ -181,7 +183,7 @@ export default function ReplyForm({
         content,
       });
 
-      toast.success('回复发布成功');
+      toast.success(t('replyPublished'));
       setContent('');
       setImages([]);
       setPreviewImages((prev) => {
@@ -199,7 +201,7 @@ export default function ReplyForm({
     <div className="mt-4 ml-8 md:ml-12">
       <div className="modern-card p-5 relative overflow-hidden">
         <div className="mb-4 p-3 bg-secondary/50 rounded-xl flex items-center justify-between">
-          <div className="text-secondary-foreground text-sm font-medium">正在回复 {parentNickname}</div>
+          <div className="text-secondary-foreground text-sm font-medium">{t('replyingTo')} {parentNickname}</div>
           <button type="button" onClick={onCancel} className="text-secondary-foreground hover:text-foreground transition-colors">
             ×
           </button>
@@ -212,7 +214,7 @@ export default function ReplyForm({
               name="nickname"
               value={userInfo.nickname}
               onChange={(e) => updateUserInfo({ nickname: e.target.value })}
-              placeholder="昵称 *"
+              placeholder={t('nicknamePlaceholder')}
               className="flex-1 px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
               maxLength={50}
             />
@@ -221,7 +223,7 @@ export default function ReplyForm({
               name="qq"
               value={userInfo.qq}
               onChange={(e) => updateUserInfo({ qq: e.target.value })}
-              placeholder="QQ（可选）"
+              placeholder={t('qqPlaceholder')}
               className="flex-1 px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
               maxLength={50}
             />
@@ -233,7 +235,7 @@ export default function ReplyForm({
               name="email"
               value={userInfo.email}
               onChange={(e) => updateUserInfo({ email: e.target.value })}
-              placeholder="邮箱 *"
+              placeholder={t('emailPlaceholder')}
               className="flex-1 px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
               maxLength={100}
               required
@@ -242,7 +244,7 @@ export default function ReplyForm({
             <div className="flex-1">
               {emailVerified ? (
                 <div className="h-full flex items-center justify-between rounded-xl border border-border bg-card/50 px-4 py-3">
-                  <span className="text-sm text-primary/80">邮箱已验证</span>
+                  <span className="text-sm text-primary/80">{t('emailVerified')}</span>
                   <button
                     type="button"
                     onClick={() => {
@@ -251,7 +253,7 @@ export default function ReplyForm({
                     }}
                     className="text-xs text-primary hover:underline"
                   >
-                    更换/重新验证
+                    {t('changeOrReverify')}
                   </button>
                 </div>
               ) : (
@@ -261,7 +263,7 @@ export default function ReplyForm({
                     name="captcha"
                     value={captcha}
                     onChange={(e) => setCaptcha(e.target.value)}
-                    placeholder="邮箱验证码 *"
+                    placeholder={t('verificationCodePlaceholder')}
                     className="flex-1 px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all shadow-sm focus:shadow-md"
                     maxLength={20}
                   />
@@ -271,7 +273,7 @@ export default function ReplyForm({
                     disabled={sendingCode || cooldown > 0 || !normalizedEmail}
                     className="px-4 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm whitespace-nowrap"
                   >
-                    {cooldown > 0 ? `${cooldown}s` : sendingCode ? '发送中...' : '发送验证码'}
+                    {cooldown > 0 ? `${cooldown}s` : sendingCode ? t('sending') : t('sendCode')}
                   </button>
                 </div>
               )}
@@ -284,7 +286,7 @@ export default function ReplyForm({
               name="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="写下你的回复..."
+              placeholder={t('replyPlaceholder')}
               className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none shadow-sm focus:shadow-md min-h-[100px]"
               maxLength={1000}
             />
@@ -308,7 +310,7 @@ export default function ReplyForm({
                     onClick={() => fileInputRef.current?.click()}
                     disabled={images.length >= config.maxImages}
                     className="p-2 rounded-lg hover:bg-muted/50 transition-colors duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="添加图片"
+                    title={t('addImage')}
                   >
                     <svg className="w-6 h-6 text-primary group-hover:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -323,14 +325,14 @@ export default function ReplyForm({
                 onClick={onCancel}
                 className="px-4 py-2 rounded-full border border-border text-primary hover:bg-muted/50 transition-all"
               >
-                取消
+                {t('cancel')}
               </button>
               <button
                 type="submit"
                 disabled={submitting}
                 className="px-6 py-2 rounded-full bg-gradient-to-r from-primary to-accent text-white hover:shadow-lg hover:shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                {submitting ? '提交中...' : '发布回复'}
+                {submitting ? t('submitting') : t('publishReply')}
               </button>
             </div>
           </div>
@@ -344,7 +346,7 @@ export default function ReplyForm({
                     type="button"
                     onClick={() => handleRemoveImage(idx)}
                     className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 text-white text-xs"
-                    title="删除"
+                    title={t('remove')}
                   >
                     ×
                   </button>

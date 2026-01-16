@@ -3,15 +3,23 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSimpleRouteLoading } from '@/lib/hooks/useSimpleRouteLoading';
+import { useTranslations } from 'next-intl';
 
 export default function RouteLoading() {
+  const t = useTranslations('common');
   const { isLoading } = useSimpleRouteLoading();
   const [currentMascot, setCurrentMascot] = useState(0);
   const [sparkles, setSparkles] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([]);
 
   // 可爱的二次元表情和文字
   const mascots = ['(◕‿◕✿)', '(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧', '(*^▽^*)', '(≧◡≦)', '(◡ ‿ ◡ ✿)'];
-  const loadingTexts = ['页面跳转中...', '正在传送中 ✨', '马上就好啦 (´∀｀)', '请稍等片刻 ♪', '加载中喵~ (=^･ω･^=)'];
+  const loadingTexts = [
+    t('pageLoadingText1'),
+    t('pageLoadingText2'),
+    t('pageLoadingText3'),
+    t('pageLoadingText4'),
+    t('pageLoadingText5')
+  ];
 
   useEffect(() => {
     if (isLoading) {
@@ -224,7 +232,7 @@ export default function RouteLoading() {
                 {loadingTexts[currentMascot]}
               </motion.p>
               <p className="text-sm text-gray-500 mt-3">
-                正在为您准备精彩内容 ♡
+                {t('preparingContent')}
               </p>
             </motion.div>
 
