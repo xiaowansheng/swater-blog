@@ -132,6 +132,10 @@ export default function FriendLinkApplicationForm({
       setError('请填写联系邮箱');
       return;
     }
+    if (!formData.description?.trim()) {
+      setError('请填写网站描述');
+      return;
+    }
 
     setLoading(true);
     setError('');
@@ -146,7 +150,7 @@ export default function FriendLinkApplicationForm({
         author: formData.author.trim(),
         url: formData.url.trim(),
         logo: formData.logo?.trim() || undefined,
-        description: formData.description?.trim() || undefined,
+        description: formData.description.trim(),
         email: formData.email.trim(),
         emailCode: emailCode.trim() || undefined,
       });
@@ -318,13 +322,14 @@ export default function FriendLinkApplicationForm({
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-foreground">
-            网站描述
+            网站描述 <span className="text-red-500">*</span>
           </label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="请简单描述您的网站"
             rows={3}
+            required
             className="w-full px-4 py-3 border border-border rounded-xl bg-card/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none shadow-sm focus:shadow-md"
           />
         </div>
