@@ -34,7 +34,7 @@ export default function SakuraRain() {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-[1]">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-[9999]">
       <AnimatePresence>
         {petals.map((petal) => (
           <motion.div
