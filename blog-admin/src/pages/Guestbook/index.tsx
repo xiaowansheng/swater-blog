@@ -307,22 +307,24 @@ const GuestbookPage: React.FC = () => {
           </Tooltip>
           {(record.reviewStatus === 0 || record.status === 0) && (
             <>
-              <Tooltip title="通过">
-                <Button
-                  type="text"
-                  icon={<CheckOutlined />}
-                  className="text-green-500"
-                  onClick={() => handleApprove(record.id)}
-                />
-              </Tooltip>
-              <Tooltip title="拒绝">
-                <Button
-                  type="text"
-                  icon={<CloseOutlined />}
-                  className="text-orange-500"
-                  onClick={() => handleReject(record.id)}
-                />
-              </Tooltip>
+              <Popconfirm title="确定通过这条留言吗？" onConfirm={() => handleApprove(record.id)}>
+                <Tooltip title="通过">
+                  <Button
+                    type="text"
+                    icon={<CheckOutlined />}
+                    className="text-green-500"
+                  />
+                </Tooltip>
+              </Popconfirm>
+              <Popconfirm title="确定拒绝这条留言吗？" onConfirm={() => handleReject(record.id)}>
+                <Tooltip title="拒绝">
+                  <Button
+                    type="text"
+                    icon={<CloseOutlined />}
+                    className="text-orange-500"
+                  />
+                </Tooltip>
+              </Popconfirm>
             </>
           )}
           <Popconfirm title="确定删除这条留言吗？" onConfirm={() => handleDelete(record.id)}>
@@ -558,25 +560,33 @@ const GuestbookPage: React.FC = () => {
               )}
               {(currentGuestbook.reviewStatus === 0 || currentGuestbook.status === 0) && (
                 <>
-                  <Button
-                    type="primary"
-                    icon={<CheckOutlined />}
-                    onClick={() => {
+                  <Popconfirm
+                    title="确定通过这条留言吗？"
+                    onConfirm={() => {
                       handleApprove(currentGuestbook.id)
                       setDetailVisible(false)
                     }}
                   >
-                    审核通过
-                  </Button>
-                  <Button
-                    icon={<CloseOutlined />}
-                    onClick={() => {
+                    <Button
+                      type="primary"
+                      icon={<CheckOutlined />}
+                    >
+                      审核通过
+                    </Button>
+                  </Popconfirm>
+                  <Popconfirm
+                    title="确定拒绝这条留言吗？"
+                    onConfirm={() => {
                       handleReject(currentGuestbook.id)
                       setDetailVisible(false)
                     }}
                   >
-                    审核拒绝
-                  </Button>
+                    <Button
+                      icon={<CloseOutlined />}
+                    >
+                      审核拒绝
+                    </Button>
+                  </Popconfirm>
                 </>
               )}
               <Popconfirm
