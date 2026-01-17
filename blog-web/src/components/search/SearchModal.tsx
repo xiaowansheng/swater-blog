@@ -28,6 +28,11 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
+      // 禁止页面滚动
+      document.body.style.overflow = 'hidden';
+    } else if (!isOpen) {
+      // 恢复页面滚动
+      document.body.style.overflow = '';
     }
   }, [isOpen]);
 
@@ -140,25 +145,37 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[12vh] px-4">
-          {/* 背景遮罩 */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute inset-0 bg-black/70 backdrop-blur-md"
-            onClick={onClose}
+        <>
+          {/* 背景遮罩 - 覆盖整个屏幕 */}
+          <div
+            className="fixed left-0 right-0 top-0 bottom-0 w-screen h-screen z-[9999] bg-black/50"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+            }}
           />
 
-          {/* 搜索弹窗 */}
-          <motion.div
-            initial={{ opacity: 0, y: -30, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -30, scale: 0.95 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="relative z-10 w-full max-w-3xl overflow-hidden shadow-2xl"
+          {/* 搜索弹窗容器 */}
+          <div
+            className="fixed left-0 right-0 top-0 bottom-0 w-screen h-screen z-[10000] flex items-start justify-center pt-[12vh] px-4"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+            }}
           >
+            <motion.div
+              initial={{ opacity: 0, y: -30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -30, scale: 0.95 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="relative z-10 w-full max-w-3xl pointer-events-auto"
+            >
             <div className="bg-background/95 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden">
               {/* 搜索头部 */}
               <div className="flex items-center gap-3 p-5 border-b border-border/50">
@@ -374,7 +391,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               </div>
             </div>
           </motion.div>
-        </div>
+          </div>
+        </>
       )}
     </AnimatePresence>
   );
