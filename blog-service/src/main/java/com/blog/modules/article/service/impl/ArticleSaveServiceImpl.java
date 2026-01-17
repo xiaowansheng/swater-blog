@@ -216,12 +216,6 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
                 dto.setCategoryId(categoryService.findOrCreateByName(dto.getCategoryName()));
             }
 
-            // 保存旧的封面文件ID用于更新引用关系
-            Long oldCoverFileId = null;
-            if (article.getCover() != null) {
-                oldCoverFileId = fileService.getFileIdByUrl(article.getCover());
-            }
-
             // 更新文章字段
             article.setTitle(dto.getTitle());
             article.setSlug(dto.getSlug());
@@ -260,11 +254,11 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
                 }
             }
 
-            // 获取旧的引用文件列表
-            List<Long> oldFileIds = new ArrayList<>();
-            if (oldCoverFileId != null) {
-                oldFileIds.add(oldCoverFileId);
-            }
+            // 获取旧的引用文件列表（从数据库查询）
+            List<Long> oldFileIds = fileService.listByReference("ARTICLE", articleId)
+                    .stream()
+                    .map(FileVO::getId)
+                    .collect(Collectors.toList());
 
             // 更新文件引用关系（删除旧的，添加验证过的新引用）
             fileService.updateReferences(

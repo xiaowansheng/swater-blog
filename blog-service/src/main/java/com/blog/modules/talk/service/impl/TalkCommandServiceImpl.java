@@ -152,18 +152,6 @@ public class TalkCommandServiceImpl implements TalkCommandService {
             throw new BusinessException("说说不存在");
         }
 
-        // 获取旧的引用文件列表
-        List<Long> oldFileIds = null;
-        if (talk.getImages() != null && !talk.getImages().isEmpty()) {
-            List<String> oldImages = JsonUtil.fromJson(talk.getImages(), List.class);
-            if (oldImages != null && !oldImages.isEmpty()) {
-                oldFileIds = oldImages.stream()
-                    .map(url -> fileService.getFileIdByUrl(url))
-                    .filter(fileId -> fileId != null)
-                    .collect(Collectors.toList());
-            }
-        }
-
         talk.setContent(dto.getContent());
         talk.setStatus(dto.getStatus());
         talk.setIsTop(dto.getIsTop());
@@ -188,6 +176,12 @@ public class TalkCommandServiceImpl implements TalkCommandService {
                 }
             }
         }
+
+        // 获取旧的引用文件列表（从数据库查询）
+        List<Long> oldFileIds = fileService.listByReference("TALK", id)
+                .stream()
+                .map(FileVO::getId)
+                .collect(Collectors.toList());
 
         // 更新文件引用关系（删除旧的，添加验证过的新引用）
         fileService.updateReferences(oldFileIds, validFileIds, "TALK", id);

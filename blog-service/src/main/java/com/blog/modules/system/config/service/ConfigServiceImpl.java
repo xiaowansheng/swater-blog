@@ -140,9 +140,6 @@ public class ConfigServiceImpl implements ConfigService {
                 throw new BusinessException("配置项不存在: " + key);
             }
 
-            // 获取旧的配置值
-            String oldValue = existingConfig.getValue();
-
             if (configDTO.getName() != null) {
                 existingConfig.setName(configDTO.getName());
             }
@@ -174,19 +171,11 @@ public class ConfigServiceImpl implements ConfigService {
                 }
             }
 
-            // 获取旧的引用文件ID列表
-            List<Long> oldFileIds = new ArrayList<>();
-            if (oldValue != null && !oldValue.isEmpty()) {
-                // 从旧配置值中提取文件URL并转换为fileId
-                // 由于配置值可能是各种格式，这里简化处理：查询已有的引用关系
-                List<Long> oldRefs = fileService.listByReference("CONFIG", existingConfig.getId())
-                        .stream()
-                        .map(FileVO::getId)
-                        .collect(Collectors.toList());
-                if (!oldRefs.isEmpty()) {
-                    oldFileIds = oldRefs;
-                }
-            }
+            // 获取旧的引用文件列表（从数据库查询）
+            List<Long> oldFileIds = fileService.listByReference("CONFIG", existingConfig.getId())
+                    .stream()
+                    .map(FileVO::getId)
+                    .collect(Collectors.toList());
 
             // 更新文件引用关系（删除旧的，添加验证过的新引用）
             fileService.updateReferences(
