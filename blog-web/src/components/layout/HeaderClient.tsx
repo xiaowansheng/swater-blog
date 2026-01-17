@@ -9,6 +9,7 @@ import MobileMenu from './MobileMenu';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 import { useDecoration } from '@/lib/context/DecorationContext';
 import MusicPlayerButton from '../decoration/MusicPlayerButton';
+import SearchModal from '../search/SearchModal';
 
 interface NavItem {
   href: string;
@@ -24,11 +25,33 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
   const { theme, toggleTheme, mounted } = useTheme();
   const { level, setLevel } = useDecoration();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [visible, setVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const pathname = usePathname();
   const isHomePage = pathname === '/' || pathname === '/zh' || pathname === '/en';
+
+  // 快捷键打开搜索
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // 只在未聚焦输入框时响应
+      if (
+        (e.key === '/' || (e.ctrlKey && e.key === 'k')) &&
+        !(
+          e.target instanceof HTMLInputElement ||
+          e.target instanceof HTMLTextAreaElement ||
+          e.target instanceof HTMLSelectElement
+        )
+      ) {
+        e.preventDefault();
+        setSearchModalOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
 
   useEffect(() => {
     let ticking = false;
@@ -132,6 +155,22 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
         </nav>
 
         <div className="flex gap-1.5 sm:gap-2 items-center">
+          {/* Search Button */}
+          <button
+            onClick={() => setSearchModalOpen(true)}
+            className={`min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
+              scrolled
+                ? 'hover:bg-primary/10'
+                : 'hover:bg-white/10 text-white'
+            }`}
+            title="搜索 (按 / 或 Ctrl+K)"
+          >
+            <svg className="relative z-10 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span className="absolute inset-0 bg-primary/5 opacity-0 transition-opacity group-hover:opacity-100"></span>
+          </button>
+
           <LanguageSwitcher scrolled={scrolled} />
 
           {/* Music Player Toggle */}
@@ -187,6 +226,7 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
         </div>
       </div>
       <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} navItems={navItems} />
+      <SearchModal isOpen={searchModalOpen} onClose={() => setSearchModalOpen(false)} />
     </header>
   );
 }

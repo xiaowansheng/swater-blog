@@ -88,6 +88,7 @@ public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
                     SearchVO vo = new SearchVO();
                     vo.setType("post");
                     vo.setId(article.getId());
+                    vo.setArticleKey(article.getArticleKey());
                     vo.setTitle(article.getTitle());
                     vo.setContent(article.getContent());
                     vo.setExcerpt(article.getExcerpt());
@@ -115,6 +116,8 @@ public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
                     vo.setType("moment");
                     vo.setId(talk.getId());
                     vo.setContent(talk.getContent());
+                    // 使用articleKey字段存储talkKey，前端会使用这个字段来跳转
+                    vo.setArticleKey(talk.getTalkKey());
                     if (talk.getCreateTime() != null) {
                         vo.setCreateTime(talk.getCreateTime().toString());
                     }
@@ -140,8 +143,36 @@ public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
                     vo.setType("comment");
                     vo.setId(comment.getId());
                     vo.setContent(comment.getContent());
+                    vo.setTitle("评论");
                     vo.setTargetId(comment.getTargetId());
                     vo.setTargetType(comment.getTargetType());
+
+                    // 根据评论目标类型查询对应的key
+                    if (comment.getTargetType() != null) {
+                        String targetType = comment.getTargetType().toLowerCase();
+                        System.out.println("评论 targetType: " + targetType + ", targetId: " + comment.getTargetId());
+
+                        if (targetType.contains("article") || targetType.contains("post")) {
+                            // 评论的是文章，查询文章的articleKey
+                            Article targetArticle = articleMapper.selectById(comment.getTargetId());
+                            System.out.println("查询文章: " + (targetArticle != null ? "找到" : "未找到"));
+                            if (targetArticle != null) {
+                                System.out.println("文章 articleKey: " + targetArticle.getArticleKey());
+                                // 使用articleKey字段存储目标文章的key
+                                vo.setArticleKey(targetArticle.getArticleKey());
+                            }
+                        } else if (targetType.contains("moment") || targetType.contains("talk")) {
+                            // 评论的是说说，查询说说的talkKey
+                            Talk targetTalk = talkMapper.selectById(comment.getTargetId());
+                            System.out.println("查询说说: " + (targetTalk != null ? "找到" : "未找到"));
+                            if (targetTalk != null) {
+                                System.out.println("说说 talkKey: " + targetTalk.getTalkKey());
+                                // 使用articleKey字段存储目标说说的talkKey
+                                vo.setArticleKey(targetTalk.getTalkKey());
+                            }
+                        }
+                    }
+
                     if (comment.getCreateTime() != null) {
                         vo.setCreateTime(comment.getCreateTime().toString());
                     }

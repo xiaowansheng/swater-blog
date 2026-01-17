@@ -276,9 +276,12 @@ export interface SearchVO {
   type: 'post' | 'moment' | 'comment';
   title: string;
   content: string;
+  excerpt?: string;
   highlight?: string;
-  url: string;
   createTime: string;
+  // 评论相关字段
+  targetId?: number;
+  targetType?: string;
 }
 
 export interface AboutVO {
