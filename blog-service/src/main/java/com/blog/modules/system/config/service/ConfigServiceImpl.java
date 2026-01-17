@@ -8,6 +8,9 @@ import com.blog.modules.system.config.model.dto.ConfigDTO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.shared.exception.BusinessException;
 import com.blog.modules.system.config.mapper.SysConfigMapper;
+import com.blog.modules.file.service.FileService;
+import com.blog.modules.file.mapper.FileMetaMapper;
+import com.blog.modules.file.model.entity.FileMeta;
 import com.blog.modules.system.config.model.entity.SysConfig;
 import com.blog.modules.system.config.model.vo.ConfigVO;
 import com.blog.modules.system.config.service.ConfigService;
@@ -20,6 +23,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,6 +32,12 @@ import java.util.stream.Collectors;
 public class ConfigServiceImpl implements ConfigService {
     @Autowired
     private SysConfigMapper sysConfigMapper;
+
+    @Autowired
+    private FileService fileService;
+
+    @Autowired
+    private FileMetaMapper fileMetaMapper;
 
     @Override
     @Cacheable(value = "configs", key = "'list:' + (#groupName != null ? #groupName : 'all')", unless = "#result == null || #result.isEmpty()")
@@ -41,7 +51,7 @@ public class ConfigServiceImpl implements ConfigService {
 
         List<SysConfig> configs = sysConfigMapper.selectList(wrapper);
         return configs.stream()
-                .map(config -> BeanUtil.copyProperties(config, ConfigVO.class))
+                .map(this::convertToVO)
                 .collect(Collectors.toList());
     }
 
@@ -69,7 +79,7 @@ public class ConfigServiceImpl implements ConfigService {
         if (config == null) {
             return null;
         }
-        return BeanUtil.copyProperties(config, ConfigVO.class);
+        return convertToVO(config);
     }
 
     @Override
@@ -92,7 +102,23 @@ public class ConfigServiceImpl implements ConfigService {
             config.setGroupName(configDTO.getGroupName());
             config.setSort(configDTO.getSort() != null ? configDTO.getSort() : 0);
             sysConfigMapper.insert(config);
-            return BeanUtil.copyProperties(config, ConfigVO.class);
+
+            // 处理文件引用关系：验证前端提交的引用列表
+            if (configDTO.getReferencedFileIds() != null && !configDTO.getReferencedFileIds().isEmpty()) {
+                List<Long> validFileIds = new ArrayList<>();
+                for (Long fileId : configDTO.getReferencedFileIds()) {
+                    // 检查文件是否在配置值中使用
+                    if (isFileInConfig(fileId, configDTO.getValue())) {
+                        validFileIds.add(fileId);
+                    }
+                }
+                // 只为在配置值中找到的文件建立引用关系
+                if (!validFileIds.isEmpty()) {
+                    fileService.addReferences(validFileIds, "CONFIG", config.getId());
+                }
+            }
+
+            return convertToVO(config);
         } catch (Exception e) {
             log.error("创建配置失败: error={}", e.getMessage());
             throw new BusinessException("配置创建失败: " + e.getMessage());
@@ -113,7 +139,10 @@ public class ConfigServiceImpl implements ConfigService {
             if (existingConfig == null) {
                 throw new BusinessException("配置项不存在: " + key);
             }
-            
+
+            // 获取旧的配置值
+            String oldValue = existingConfig.getValue();
+
             if (configDTO.getName() != null) {
                 existingConfig.setName(configDTO.getName());
             }
@@ -133,8 +162,42 @@ public class ConfigServiceImpl implements ConfigService {
                 existingConfig.setSort(configDTO.getSort());
             }
             sysConfigMapper.updateById(existingConfig);
+
+            // 处理文件引用关系：验证前端提交的引用列表
+            List<Long> validFileIds = new ArrayList<>();
+            if (configDTO.getReferencedFileIds() != null && !configDTO.getReferencedFileIds().isEmpty()) {
+                for (Long fileId : configDTO.getReferencedFileIds()) {
+                    // 检查文件是否在新的配置值中使用
+                    if (isFileInConfig(fileId, existingConfig.getValue())) {
+                        validFileIds.add(fileId);
+                    }
+                }
+            }
+
+            // 获取旧的引用文件ID列表
+            List<Long> oldFileIds = new ArrayList<>();
+            if (oldValue != null && !oldValue.isEmpty()) {
+                // 从旧配置值中提取文件URL并转换为fileId
+                // 由于配置值可能是各种格式，这里简化处理：查询已有的引用关系
+                List<Long> oldRefs = fileService.listByReference("CONFIG", existingConfig.getId())
+                        .stream()
+                        .map(FileVO::getId)
+                        .collect(Collectors.toList());
+                if (!oldRefs.isEmpty()) {
+                    oldFileIds = oldRefs;
+                }
+            }
+
+            // 更新文件引用关系（删除旧的，添加验证过的新引用）
+            fileService.updateReferences(
+                oldFileIds.isEmpty() ? null : oldFileIds,
+                validFileIds.isEmpty() ? null : validFileIds,
+                "CONFIG",
+                existingConfig.getId()
+            );
+
             SysConfig finalConfig = sysConfigMapper.selectById(existingConfig.getId());
-            return BeanUtil.copyProperties(finalConfig, ConfigVO.class);
+            return convertToVO(finalConfig);
         } catch (Exception e) {
             log.error("更新配置失败: key={}, error={}", key, e.getMessage());
             throw new BusinessException("配置更新失败: " + e.getMessage());
@@ -157,6 +220,43 @@ public class ConfigServiceImpl implements ConfigService {
                 sysConfigMapper.updateById(config);
             }
         }
+    }
+
+    /**
+     * 转换为VO并填充引用文件列表
+     */
+    private ConfigVO convertToVO(SysConfig config) {
+        ConfigVO vo = BeanUtil.copyProperties(config, ConfigVO.class);
+
+        // 填充引用文件列表
+        List<FileVO> referencedFiles = fileService.listByReference("CONFIG", config.getId());
+        vo.setReferencedFiles(referencedFiles);
+
+        return vo;
+    }
+
+    /**
+     * 检查文件是否在配置值中使用
+     * @param fileId 文件ID
+     * @param configValue 配置值
+     * @return 是否在使用中
+     */
+    private boolean isFileInConfig(Long fileId, String configValue) {
+        if (fileId == null || configValue == null) {
+            return false;
+        }
+
+        // 查询文件信息
+        FileMeta fileMeta = fileMetaMapper.selectById(fileId);
+        if (fileMeta == null) {
+            return false;
+        }
+
+        String fileUrl = fileMeta.getUrl();
+
+        // 检查是否在配置值中
+        // 配置值可能是URL、JSON、纯文本等各种格式
+        return configValue.contains(fileUrl);
     }
 }
 

@@ -3,6 +3,7 @@ package com.blog.modules.article.model.vo;
 
 
 
+import com.blog.modules.file.model.vo.FileVO;
 import com.blog.modules.tag.model.vo.TagVO;
 import com.blog.shared.model.vo.BaseVO;
 import lombok.Data;
@@ -62,5 +63,10 @@ public class ArticleVO extends com.blog.shared.model.vo.BaseVO {
      * 版本号（用于乐观锁）
      */
     private Long version;
+
+    /**
+     * 引用的文件列表
+     */
+    private List<FileVO> referencedFiles;
 }
 

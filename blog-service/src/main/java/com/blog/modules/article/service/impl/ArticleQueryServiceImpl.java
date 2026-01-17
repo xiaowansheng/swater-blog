@@ -17,6 +17,8 @@ import com.blog.modules.article.model.vo.ArticleVO;
 import com.blog.modules.article.model.vo.ArticleStatisticsVO;
 import com.blog.modules.tag.model.vo.TagVO;
 import com.blog.modules.article.service.ArticleQueryService;
+import com.blog.modules.file.model.vo.FileVO;
+import com.blog.modules.file.service.FileService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,9 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
 
     @Autowired
     private ArticleTagMapper articleTagMapper;
+
+    @Autowired
+    private FileService fileService;
 
     @Override
     public PageResult<ArticleVO> list(ArticleQueryDTO queryDTO) {
@@ -134,6 +139,11 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
             List<TagVO> tagVOs = BeanUtil.copyList(tags, TagVO.class);
             vo.setTags(tagVOs);
         }
+
+        // 填充引用文件列表
+        List<FileVO> referencedFiles = fileService.listByReference("ARTICLE", article.getId());
+        vo.setReferencedFiles(referencedFiles);
+
         return vo;
     }
 }

@@ -2,6 +2,7 @@ package com.blog.modules.talk.model.vo;
 
 
 
+import com.blog.modules.file.model.vo.FileVO;
 import com.blog.shared.model.vo.BaseVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -47,4 +48,9 @@ public class TalkVO extends com.blog.shared.model.vo.BaseVO {
     private String device;
 
     private String browser;
+
+    /**
+     * 引用的文件列表
+     */
+    private List<FileVO> referencedFiles;
 }

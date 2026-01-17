@@ -8,6 +8,7 @@ import com.blog.shared.model.dto.BaseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.NotBlank;
+import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ConfigDTO extends com.blog.shared.model.dto.BaseDTO {
@@ -28,5 +29,10 @@ public class ConfigDTO extends com.blog.shared.model.dto.BaseDTO {
     private String groupName;
 
     private Integer sort;
+
+    /**
+     * 文件引用ID列表（前端维护，包含配置值中使用的所有文件）
+     */
+    private List<Long> referencedFileIds;
 }
 

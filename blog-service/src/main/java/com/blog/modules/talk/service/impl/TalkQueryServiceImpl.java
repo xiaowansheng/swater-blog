@@ -8,7 +8,9 @@ import com.blog.modules.talk.mapper.TalkMapper;
 import com.blog.modules.talk.model.dto.TalkQueryDTO;
 import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.talk.model.vo.TalkVO;
+import com.blog.modules.file.model.vo.FileVO;
 import com.blog.modules.talk.service.TalkQueryService;
+import com.blog.modules.file.service.FileService;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.user.model.entity.User;
 import com.blog.shared.util.BeanUtil;
@@ -25,6 +27,9 @@ public class TalkQueryServiceImpl implements TalkQueryService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private FileService fileService;
 
     @Override
     public PageResult<TalkVO> list(TalkQueryDTO queryDTO) {
@@ -81,6 +86,11 @@ public class TalkQueryServiceImpl implements TalkQueryService {
                 vo.setImages(List.of());
             }
         }
+
+        // 填充引用文件列表
+        List<FileVO> referencedFiles = fileService.listByReference("TALK", talk.getId());
+        vo.setReferencedFiles(referencedFiles);
+
         return vo;
     }
 }
