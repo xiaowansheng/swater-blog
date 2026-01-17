@@ -116,3 +116,145 @@ export const getArticleVersion = (id: number): Promise<number> => {
 export const checkArticleConflict = (id: number, clientVersion: number): Promise<boolean> => {
   return request.get(`/admin/post/${id}/conflict`, { params: { clientVersion } })
 }
+
+// ==================== Markdown 导入相关接口 ====================
+
+// Markdown 导入配置
+export interface MarkdownImportConfig {
+  categoryMode?: 'AUTO' | 'MANUAL' | 'FRONTMATTER'
+  manualCategoryId?: number
+  autoCreateCategory?: boolean
+  overwriteCategory?: boolean
+  assetMode?: 'RELATIVE_PATH' | 'ABSOLUTE_URL' | 'BASE64'
+  cdnDomain?: string
+  basePath?: string
+  base64Threshold?: number
+  defaultStatus?: 'DRAFT' | 'PUBLISHED'
+  preserveFrontmatter?: boolean
+  authorId?: number
+  importAssets?: boolean
+  articleType?: string
+}
+
+// Markdown 导入预览
+export interface MarkdownImportPreview {
+  totalFileCount: number
+  mdFileCount: number
+  assetFileCount: number
+  articleCount: number
+  categoryCount: number
+  fileStructure?: any
+  categories: MarkdownImportCategoryPreview[]
+  articles: MarkdownImportArticlePreview[]
+  documents: any[]
+  warnings: string[]
+}
+
+export interface MarkdownImportCategoryPreview {
+  categoryKey: string
+  name: string
+  parentKey?: string
+  level: number
+  fullPath: string
+  articleCount: number
+  exists: boolean
+  willCreate: boolean
+}
+
+export interface MarkdownImportArticlePreview {
+  originalFilename: string
+  filePath: string
+  title: string
+  slug: string
+  category?: string
+  categoryKey?: string
+  tags: string[]
+  excerpt?: string
+  cover?: string
+  hasFrontmatter: boolean
+  isDraft: boolean
+  assetCount: number
+  assets: string[]
+  contentLength: number
+  imageCount: number
+}
+
+// Markdown 导入结果
+export interface MarkdownImportResult {
+  status: 'SUCCESS' | 'PARTIAL_SUCCESS' | 'FAILED'
+  successCount: number
+  failedCount: number
+  skippedCount: number
+  createdCategoryCount: number
+  importedAssetCount: number
+  articles: MarkdownImportedArticle[]
+  categories: MarkdownImportCreatedCategory[]
+  errors: MarkdownImportError[]
+  duration: number
+}
+
+export interface MarkdownImportedArticle {
+  originalFilename: string
+  articleId: number
+  title: string
+  slug: string
+  categoryId?: number
+  categoryName?: string
+  tags?: string[]
+  status: string
+  hasAssets: boolean
+  assetCount: number
+}
+
+export interface MarkdownImportCreatedCategory {
+  categoryId: number
+  categoryKey: string
+  name: string
+  parentId?: number
+  level: number
+  articleCount: number
+}
+
+export interface MarkdownImportError {
+  filename: string
+  message: string
+  errorType: 'PARSE_ERROR' | 'FILE_READ_ERROR' | 'CATEGORY_ERROR' | 'ARTICLE_CREATE_ERROR' | 'ASSET_UPLOAD_ERROR' | 'SKIPPED'
+  stackTrace?: string
+}
+
+// 预览 Markdown 导入
+export const previewMarkdownImport = (files: File[], basePath?: string): Promise<MarkdownImportPreview> => {
+  const formData = new FormData()
+  files.forEach(file => formData.append('files', file))
+  if (basePath) {
+    formData.append('basePath', basePath)
+  }
+  return request.post('/admin/post/import-md/preview', formData)
+}
+
+// 导入单个 Markdown 文件
+export const importMarkdown = (file: File, config?: Partial<MarkdownImportConfig>): Promise<MarkdownImportResult> => {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  if (config) {
+    if (config.categoryId !== undefined) formData.append('categoryId', config.categoryId.toString())
+    if (config.importAssets !== undefined) formData.append('importAssets', config.importAssets.toString())
+    if (config.assetMode) formData.append('assetMode', config.assetMode)
+    if (config.defaultStatus) formData.append('defaultStatus', config.defaultStatus)
+  }
+
+  return request.post('/admin/post/import-md', formData)
+}
+
+// 批量导入 Markdown 文件
+export const importMarkdownBatch = (files: File[], config?: MarkdownImportConfig): Promise<MarkdownImportResult> => {
+  const formData = new FormData()
+  files.forEach(file => formData.append('files', file))
+
+  if (config) {
+    formData.append('configJson', JSON.stringify(config))
+  }
+
+  return request.post('/admin/post/import-md/batch', formData)
+}

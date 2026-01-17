@@ -14,9 +14,14 @@ import com.blog.modules.article.model.vo.ArticleSaveResultVO;
 import com.blog.modules.article.service.ArticleCommandService;
 import com.blog.modules.article.service.ArticleQueryService;
 import com.blog.modules.article.service.ArticleSaveService;
+import com.blog.modules.article.service.MarkdownImportService;
+import com.blog.modules.article.model.dto.mdimport.MarkdownImportConfig;
+import com.blog.modules.article.model.dto.mdimport.MarkdownImportPreview;
+import com.blog.modules.article.model.dto.mdimport.MarkdownImportResult;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 @RestController
 @RequestMapping("/api/admin/post")
@@ -30,6 +35,9 @@ public class ArticleAdminController {
 
     @Autowired
     private ArticleSaveService articleSaveService;
+
+    @Autowired
+    private MarkdownImportService markdownImportService;
 
     @GetMapping("/list")
     @ApiOperation(name = "查询文章列表", type = ApiOperationType.QUERY,
@@ -144,6 +152,75 @@ public class ArticleAdminController {
             @RequestParam Long clientVersion) {
         boolean hasConflict = articleSaveService.hasConflict(id, clientVersion);
         return Result.success(hasConflict);
+    }
+
+    // ==================== Markdown 导入相关接口 ====================
+
+    /**
+     * 预览 Markdown 导入（解析文件但不创建文章）
+     */
+    @PostMapping(value = "/import-md/preview")
+    @ApiOperation(name = "预览 MD 导入", type = ApiOperationType.QUERY,
+            description = "解析上传的 Markdown 文件，预览将要创建的文章和分类结构")
+    public Result<MarkdownImportPreview> previewImport(
+            @RequestParam("files") MultipartFile[] files,
+            @RequestParam(value = "basePath", defaultValue = "") String basePath) {
+        try {
+            MarkdownImportPreview preview = markdownImportService.previewImport(files, basePath);
+            return Result.success(preview);
+        } catch (Exception e) {
+            return Result.error(500, "预览失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 导入单个 Markdown 文件
+     */
+    @PostMapping(value = "/import-md")
+    @ApiOperation(name = "导入单个 MD 文件", type = ApiOperationType.CREATE,
+            description = "导入单个 Markdown 文件为文章")
+    public Result<MarkdownImportResult> importMarkdown(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "importAssets", defaultValue = "true") Boolean importAssets,
+            @RequestParam(value = "assetMode", defaultValue = "ABSOLUTE_URL") String assetMode,
+            @RequestParam(value = "defaultStatus", defaultValue = "DRAFT") String defaultStatus) {
+        try {
+            MarkdownImportConfig config = new MarkdownImportConfig();
+            config.setCategoryMode(MarkdownImportConfig.CategoryMode.MANUAL);
+            config.setManualCategoryId(categoryId);
+            config.setImportAssets(importAssets);
+            config.setAssetMode(com.blog.modules.article.util.AssetPathProcessor.ProcessMode.valueOf(assetMode));
+            config.setDefaultStatus(MarkdownImportConfig.ArticleStatus.valueOf(defaultStatus));
+
+            MarkdownImportResult result = markdownImportService.importSingleFile(file, config);
+            return Result.success(result);
+        } catch (Exception e) {
+            return Result.error(500, "导入失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 批量导入 Markdown 文件
+     */
+    @PostMapping(value = "/import-md/batch", consumes = "multipart/form-data")
+    @ApiOperation(name = "批量导入 MD 文件", type = ApiOperationType.CREATE,
+            description = "批量导入多个 Markdown 文件，支持自动创建分类和层级结构")
+    public Result<MarkdownImportResult> importMarkdownBatch(
+            @RequestParam("files") MultipartFile[] files,
+            @RequestParam(value = "configJson", required = false) String configJson) {
+        try {
+            // 如果没有提供配置，使用默认配置
+            MarkdownImportConfig config = new MarkdownImportConfig();
+            if (configJson != null && !configJson.isEmpty()) {
+                // TODO: 解析 JSON 配置
+            }
+
+            MarkdownImportResult result = markdownImportService.importBatch(files, config);
+            return Result.success(result);
+        } catch (Exception e) {
+            return Result.error(500, "批量导入失败: " + e.getMessage());
+        }
     }
 }
 

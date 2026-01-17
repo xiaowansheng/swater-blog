@@ -11,6 +11,7 @@ import {
   CommentOutlined,
   VerticalAlignTopOutlined,
   EyeFilled,
+  ImportOutlined,
 } from '@ant-design/icons'
 import { useNavigate, Link } from 'react-router-dom'
 import {
@@ -370,13 +371,21 @@ const ArticleList: React.FC = () => {
               </Popconfirm>
             )}
           </div>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => navigate('/article/create')}
-          >
-            新建文章
-          </Button>
+          <Space>
+            <Button
+              icon={<ImportOutlined />}
+              onClick={() => navigate('/article/import')}
+            >
+              导入 MD 文档
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => navigate('/article/create')}
+            >
+              新建文章
+            </Button>
+          </Space>
         </div>
       </div>
 
