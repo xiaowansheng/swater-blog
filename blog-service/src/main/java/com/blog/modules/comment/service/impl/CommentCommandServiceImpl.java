@@ -13,6 +13,7 @@ import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.comment.model.entity.Comment;
 import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.comment.service.CommentCommandService;
+import com.blog.modules.file.service.FileService;
 import com.blog.shared.util.EventUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -28,6 +29,9 @@ public class CommentCommandServiceImpl implements CommentCommandService {
 
     @Autowired
     private TalkMapper talkMapper;
+
+    @Autowired
+    private FileService fileService;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -68,9 +72,12 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         if (comment == null) {
             throw new BusinessException("评论不存在");
         }
-        
+
+        // 清理文件引用关系
+        fileService.removeReferences("COMMENT", id);
+
         commentMapper.deleteById(id);
-        
+
         EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentDeletedEvent(this, id, comment)));
     }
 

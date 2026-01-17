@@ -11,6 +11,7 @@ import com.blog.modules.file.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 @RestController
 @RequestMapping("/api/admin/file")
 @ApiOperation(name = "文件管理模块", description = "文件管理接口", open = false)
@@ -63,5 +64,14 @@ public class FileController {
     public Result<Void> delete(@PathVariable Long id) {
         fileService.delete(id);
         return Result.success();
+    }
+
+    @GetMapping("/by-reference")
+    @ApiOperation(name = "查询引用对象的所有文件", type = ApiOperationType.QUERY, description = "根据引用类型和ID查询文件列表")
+    public Result<List<FileVO>> listByReference(
+            @RequestParam String refType,
+            @RequestParam Long refId) {
+        List<FileVO> files = fileService.listByReference(refType, refId);
+        return Result.success(files);
     }
 }

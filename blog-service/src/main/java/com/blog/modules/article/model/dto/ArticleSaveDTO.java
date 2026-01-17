@@ -88,6 +88,16 @@ public class ArticleSaveDTO {
     private Integer isTop;
 
     /**
+     * 封面文件ID（用于建立文件引用关系）
+     */
+    private Long coverFileId;
+
+    /**
+     * 文件引用ID列表（前端维护，包含内容中使用的所有文件）
+     */
+    private List<Long> referencedFileIds;
+
+    /**
      * 标签ID列表
      */
     private List<Long> tagIds;

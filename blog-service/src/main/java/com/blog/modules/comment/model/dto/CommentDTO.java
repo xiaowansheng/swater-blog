@@ -13,6 +13,11 @@ public class CommentDTO extends com.blog.shared.model.dto.BaseDTO {
 
     private List<String> images;
 
+    /**
+     * 图片文件ID列表（前端维护，包含内容中使用的所有文件）
+     */
+    private List<Long> referencedFileIds;
+
     private Long targetId;
 
     private String targetType;

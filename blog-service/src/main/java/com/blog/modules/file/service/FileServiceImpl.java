@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -345,5 +346,167 @@ public class FileServiceImpl implements FileService {
             }
         }
         return vo;
+    }
+
+    @Override
+    @Transactional
+    public void addReferences(List<Long> fileIds, String refType, Long refId) {
+        if (fileIds == null || fileIds.isEmpty() || refType == null || refId == null) {
+            return;
+        }
+
+        for (Long fileId : fileIds) {
+            // 检查文件是否存在
+            FileMeta fileMeta = fileMetaMapper.selectById(fileId);
+            if (fileMeta == null) {
+                continue;
+            }
+
+            // 检查引用关系是否已存在
+            Long existingCount = fileReferenceMapper.selectCount(
+                new LambdaQueryWrapper<FileReference>()
+                    .eq(FileReference::getFileId, fileId)
+                    .eq(FileReference::getRefType, refType)
+                    .eq(FileReference::getRefId, refId)
+            );
+
+            if (existingCount > 0) {
+                continue;
+            }
+
+            // 创建引用关系
+            FileReference reference = new FileReference();
+            reference.setFileId(fileId);
+            reference.setRefType(refType);
+            reference.setRefId(refId);
+            reference.setCreateTime(LocalDateTime.now());
+            fileReferenceMapper.insert(reference);
+
+            // 增加文件引用计数
+            fileMeta.setRefCount((fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0) + 1);
+            fileMetaMapper.updateById(fileMeta);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void removeReferences(String refType, Long refId) {
+        if (refType == null || refId == null) {
+            return;
+        }
+
+        // 查询所有引用关系
+        List<FileReference> references = fileReferenceMapper.selectList(
+            new LambdaQueryWrapper<FileReference>()
+                .eq(FileReference::getRefType, refType)
+                .eq(FileReference::getRefId, refId)
+        );
+
+        for (FileReference reference : references) {
+            FileMeta fileMeta = fileMetaMapper.selectById(reference.getFileId());
+            if (fileMeta != null) {
+                // 减少引用计数
+                int newRefCount = (fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0) - 1;
+                fileMeta.setRefCount(Math.max(0, newRefCount));
+
+                // 如果引用计数为0，删除物理文件和元数据
+                if (fileMeta.getRefCount() <= 0) {
+                    try {
+                        List<StoragePlugin> plugins = storagePluginFactory.getPlugins();
+                        if (!plugins.isEmpty()) {
+                            plugins.get(0).delete(fileMeta.getFilePath());
+                        }
+                    } catch (Exception e) {
+                        // 记录日志但继续执行
+                    }
+                    fileMetaMapper.deleteById(fileMeta.getId());
+                    fileReferenceMapper.deleteByFileId(reference.getFileId());
+                } else {
+                    fileMetaMapper.updateById(fileMeta);
+                }
+            }
+        }
+
+        // 删除所有引用关系
+        fileReferenceMapper.deleteByRefTypeAndRefId(refType, refId);
+    }
+
+    @Override
+    @Transactional
+    public void updateReferences(List<Long> oldFileIds, List<Long> newFileIds, String refType, Long refId) {
+        if (refType == null || refId == null) {
+            return;
+        }
+
+        // 删除旧引用
+        if (oldFileIds != null && !oldFileIds.isEmpty()) {
+            for (Long oldFileId : oldFileIds) {
+                fileReferenceMapper.delete(
+                    new LambdaQueryWrapper<FileReference>()
+                        .eq(FileReference::getFileId, oldFileId)
+                        .eq(FileReference::getRefType, refType)
+                        .eq(FileReference::getRefId, refId)
+                );
+
+                // 减少引用计数
+                FileMeta fileMeta = fileMetaMapper.selectById(oldFileId);
+                if (fileMeta != null) {
+                    int newRefCount = (fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0) - 1;
+                    fileMeta.setRefCount(Math.max(0, newRefCount));
+                    fileMetaMapper.updateById(fileMeta);
+                }
+            }
+        }
+
+        // 添加新引用
+        addReferences(newFileIds, refType, refId);
+    }
+
+    @Override
+    public Long getFileIdByUrl(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            return null;
+        }
+
+        FileMeta fileMeta = fileMetaMapper.selectOne(
+            new LambdaQueryWrapper<FileMeta>()
+                .eq(FileMeta::getUrl, url.trim())
+                .last("LIMIT 1")
+        );
+
+        return fileMeta != null ? fileMeta.getId() : null;
+    }
+
+    @Override
+    public List<FileVO> listByReference(String refType, Long refId) {
+        if (refType == null || refId == null) {
+            return List.of();
+        }
+
+        // 查询引用关系
+        List<FileReference> references = fileReferenceMapper.selectList(
+            new LambdaQueryWrapper<FileReference>()
+                .eq(FileReference::getRefType, refType)
+                .eq(FileReference::getRefId, refId)
+        );
+
+        if (references.isEmpty()) {
+            return List.of();
+        }
+
+        // 获取文件ID列表
+        List<Long> fileIds = references.stream()
+            .map(FileReference::getFileId)
+            .collect(Collectors.toList());
+
+        // 查询文件列表
+        List<FileMeta> fileMetas = fileMetaMapper.selectList(
+            new LambdaQueryWrapper<FileMeta>()
+                .in(FileMeta::getId, fileIds)
+        );
+
+        return fileMetas.stream()
+            .map(this::convertToVO)
+            .collect(Collectors.toList());
     }
 }

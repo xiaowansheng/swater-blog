@@ -13,6 +13,9 @@ import com.blog.modules.comment.model.dto.CommentDTO;
 import com.blog.modules.comment.model.entity.Comment;
 import com.blog.modules.comment.model.vo.CommentVO;
 import com.blog.modules.comment.service.CommentPublicService;
+import com.blog.modules.file.service.FileService;
+import com.blog.modules.file.mapper.FileMetaMapper;
+import com.blog.modules.file.model.entity.FileMeta;
 import com.blog.modules.message.service.MessageVerificationService;
 import com.blog.modules.talk.mapper.TalkMapper;
 import com.blog.modules.talk.model.entity.Talk;
@@ -39,7 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -67,6 +69,12 @@ public class CommentPublicServiceImpl implements CommentPublicService {
 
     @Autowired
     private EmailSessionProperties emailSessionProperties;
+
+    @Autowired
+    private FileService fileService;
+
+    @Autowired
+    private FileMetaMapper fileMetaMapper;
 
     @Override
     @Transactional
@@ -263,6 +271,21 @@ public class CommentPublicServiceImpl implements CommentPublicService {
 
         commentMapper.insert(comment);
 
+        // 处理文件引用关系：验证前端提交的引用列表
+        if (dto.getReferencedFileIds() != null && !dto.getReferencedFileIds().isEmpty()) {
+            List<Long> validFileIds = new ArrayList<>();
+            for (Long fileId : dto.getReferencedFileIds()) {
+                // 检查文件是否在评论内容或图片列表中使用
+                if (isFileInComment(fileId, dto.getContent(), dto.getImages())) {
+                    validFileIds.add(fileId);
+                }
+            }
+            // 只为在内容中找到的文件建立引用关系
+            if (!validFileIds.isEmpty()) {
+                fileService.addReferences(validFileIds, "COMMENT", comment.getId());
+            }
+        }
+
         if (comment.getParentId() == 0) {
             comment.setRootId(comment.getId());
             commentMapper.updateById(comment);
@@ -280,6 +303,43 @@ public class CommentPublicServiceImpl implements CommentPublicService {
 
         Comment savedComment = commentMapper.selectById(comment.getId());
         return convertToVO(savedComment, ownerEmailForView, false);
+    }
+
+    /**
+     * 检查文件是否在评论中使用
+     * @param fileId 文件ID
+     * @param content 评论内容
+     * @param images 图片列表
+     * @return 是否在使用中
+     */
+    private boolean isFileInComment(Long fileId, String content, List<String> images) {
+        if (fileId == null) {
+            return false;
+        }
+
+        // 查询文件信息
+        FileMeta fileMeta = fileMetaMapper.selectById(fileId);
+        if (fileMeta == null) {
+            return false;
+        }
+
+        String fileUrl = fileMeta.getUrl();
+
+        // 检查是否在内容中
+        if (content != null && content.contains(fileUrl)) {
+            return true;
+        }
+
+        // 检查是否在图片列表中
+        if (images != null && !images.isEmpty()) {
+            for (String imageUrl : images) {
+                if (imageUrl != null && imageUrl.contains(fileUrl)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private CommentVO convertToVO(Comment comment, String ownerEmail, boolean withReplyCount) {

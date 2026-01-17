@@ -8,13 +8,17 @@ import com.blog.modules.article.event.ArticleUpdatedEvent;
 import com.blog.shared.exception.BusinessException;
 import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.article.mapper.ArticleTagMapper;
+import com.blog.modules.file.mapper.FileMetaMapper;
 import com.blog.modules.article.model.dto.ArticleSaveDTO;
 import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.article.model.entity.ArticleTag;
 import com.blog.modules.article.model.enums.ArticleStatus;
 import com.blog.modules.article.model.vo.ArticleSaveResultVO;
 import com.blog.modules.article.service.ArticleSaveService;
+import com.blog.modules.file.model.entity.FileMeta;
 import com.blog.modules.category.service.CategoryService;
+import com.blog.modules.file.service.FileService;
+import com.blog.modules.file.util.ContentImageExtractor;
 import com.blog.modules.tag.service.TagService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.KeyUtil;
@@ -27,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,10 +52,16 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
     private ArticleTagMapper articleTagMapper;
 
     @Autowired
+    private FileMetaMapper fileMetaMapper;
+
+    @Autowired
     private CategoryService categoryService;
 
     @Autowired
     private TagService tagService;
+
+    @Autowired
+    private FileService fileService;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -128,6 +139,21 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
 
         articleMapper.insert(article);
 
+        // 处理文件引用关系：验证前端提交的引用列表
+        if (dto.getReferencedFileIds() != null && !dto.getReferencedFileIds().isEmpty()) {
+            List<Long> validFileIds = new ArrayList<>();
+            for (Long fileId : dto.getReferencedFileIds()) {
+                // 检查文件是否在封面或内容中使用
+                if (isFileInUse(fileId, dto.getCover(), dto.getContent())) {
+                    validFileIds.add(fileId);
+                }
+            }
+            // 只为在内容中找到的文件建立引用关系
+            if (!validFileIds.isEmpty()) {
+                fileService.addReferences(validFileIds, "ARTICLE", article.getId());
+            }
+        }
+
         // 处理标签
         saveArticleTags(article.getId(), dto.getTagIds(), dto.getTagNames());
 
@@ -190,6 +216,12 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
                 dto.setCategoryId(categoryService.findOrCreateByName(dto.getCategoryName()));
             }
 
+            // 保存旧的封面文件ID用于更新引用关系
+            Long oldCoverFileId = null;
+            if (article.getCover() != null) {
+                oldCoverFileId = fileService.getFileIdByUrl(article.getCover());
+            }
+
             // 更新文章字段
             article.setTitle(dto.getTitle());
             article.setSlug(dto.getSlug());
@@ -216,6 +248,31 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
             }
 
             articleMapper.updateById(article);
+
+            // 处理文件引用关系：验证前端提交的引用列表
+            List<Long> validFileIds = new ArrayList<>();
+            if (dto.getReferencedFileIds() != null && !dto.getReferencedFileIds().isEmpty()) {
+                for (Long fileId : dto.getReferencedFileIds()) {
+                    // 检查文件是否在封面或内容中使用
+                    if (isFileInUse(fileId, dto.getCover(), dto.getContent())) {
+                        validFileIds.add(fileId);
+                    }
+                }
+            }
+
+            // 获取旧的引用文件列表
+            List<Long> oldFileIds = new ArrayList<>();
+            if (oldCoverFileId != null) {
+                oldFileIds.add(oldCoverFileId);
+            }
+
+            // 更新文件引用关系（删除旧的，添加验证过的新引用）
+            fileService.updateReferences(
+                oldFileIds.isEmpty() ? null : oldFileIds,
+                validFileIds.isEmpty() ? null : validFileIds,
+                "ARTICLE",
+                articleId
+            );
 
             // 更新标签
             articleTagMapper.deleteByArticleId(articleId);
@@ -314,5 +371,65 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
         } else {
             runnable.run();
         }
+    }
+
+    /**
+     * 从内容中提取文件ID列表
+     */
+    private List<Long> extractFileIdsFromContent(String content) {
+        if (content == null || content.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 提取内容中的图片URL
+        Set<String> imageUrls = ContentImageExtractor.extractImageUrls(content);
+
+        if (imageUrls.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 将URL转换为文件ID
+        List<Long> fileIds = new ArrayList<>();
+        for (String url : imageUrls) {
+            Long fileId = fileService.getFileIdByUrl(url);
+            if (fileId != null) {
+                fileIds.add(fileId);
+            }
+        }
+
+        return fileIds;
+    }
+
+    /**
+     * 检查文件是否在文章内容中使用
+     * @param fileId 文件ID
+     * @param cover 封面URL
+     * @param content 文章内容
+     * @return 是否在使用中
+     */
+    private boolean isFileInUse(Long fileId, String cover, String content) {
+        if (fileId == null) {
+            return false;
+        }
+
+        // 查询文件信息
+        FileMeta fileMeta = fileMetaMapper.selectById(fileId);
+        if (fileMeta == null) {
+            return false;
+        }
+
+        String fileUrl = fileMeta.getUrl();
+
+        // 检查是否在封面中
+        if (cover != null && cover.contains(fileUrl)) {
+            return true;
+        }
+
+        // 检查是否在内容中
+        if (content != null && content.contains(fileUrl)) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -13,6 +13,7 @@ import com.blog.modules.article.model.entity.ArticleTag;
 import com.blog.modules.article.model.enums.ArticleStatus;
 import com.blog.modules.article.service.ArticleCommandService;
 import com.blog.modules.category.service.CategoryService;
+import com.blog.modules.file.service.FileService;
 import com.blog.modules.tag.service.TagService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.KeyUtil;
@@ -40,6 +41,9 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
 
     @Autowired
     private TagService tagService;
+
+    @Autowired
+    private FileService fileService;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -180,9 +184,13 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         if (article == null) {
             throw new BusinessException("文章不存在");
         }
+
+        // 清理文件引用关系
+        fileService.removeReferences("ARTICLE", id);
+
         articleMapper.deleteById(id);
         articleTagMapper.deleteByArticleId(id);
-        
+
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleDeletedEvent(this, id)));
     }
 
