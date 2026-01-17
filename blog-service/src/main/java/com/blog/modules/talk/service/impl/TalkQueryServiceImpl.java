@@ -52,12 +52,19 @@ public class TalkQueryServiceImpl implements TalkQueryService {
         }
         wrapper.orderByDesc(Talk::getIsTop);
         wrapper.orderByDesc(Talk::getCreateTime);
-        
+
         Page<Talk> result = talkMapper.selectPage(pageParam, wrapper);
-        List<TalkVO> voList = result.getRecords().stream()
-                .map(this::convertToVO)
+
+        // 批量查询引用文件
+        List<Long> talkIds = result.getRecords().stream()
+                .map(Talk::getId)
                 .collect(Collectors.toList());
-        
+        Map<Long, List<FileVO>> fileMap = fileService.listByReferencesBatch("TALK", talkIds);
+
+        List<TalkVO> voList = result.getRecords().stream()
+                .map(talk -> convertToVO(talk, fileMap.get(talk.getId())))
+                .collect(Collectors.toList());
+
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
     }
 
@@ -67,10 +74,10 @@ public class TalkQueryServiceImpl implements TalkQueryService {
         if (talk == null) {
             return null;
         }
-        return convertToVO(talk);
+        return convertToVO(talk, null);
     }
 
-    private TalkVO convertToVO(Talk talk) {
+    private TalkVO convertToVO(Talk talk, List<FileVO> referencedFiles) {
         TalkVO vo = BeanUtil.copyProperties(talk, TalkVO.class);
         if (talk.getAuthorId() != null) {
             User user = userMapper.selectById(talk.getAuthorId());
@@ -87,8 +94,10 @@ public class TalkQueryServiceImpl implements TalkQueryService {
             }
         }
 
-        // 填充引用文件列表
-        List<FileVO> referencedFiles = fileService.listByReference("TALK", talk.getId());
+        // 如果提供了文件列表则使用，否则查询
+        if (referencedFiles == null) {
+            referencedFiles = fileService.listByReference("TALK", talk.getId());
+        }
         vo.setReferencedFiles(referencedFiles);
 
         return vo;

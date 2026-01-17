@@ -6,6 +6,7 @@ import com.blog.modules.file.model.dto.FileUploadDTO;
 import com.blog.modules.file.model.vo.FileVO;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
+import java.util.Map;
 public interface FileService {
     FileVO upload(MultipartFile file, FileUploadDTO dto);
 
@@ -53,5 +54,13 @@ public interface FileService {
      * @return 文件列表
      */
     List<FileVO> listByReference(String refType, Long refId);
+
+    /**
+     * 批量查询多个引用对象的文件列表
+     * @param refType 引用类型
+     * @param refIds 引用对象ID列表
+     * @return Map<引用对象ID, 文件列表>
+     */
+    Map<Long, List<FileVO>> listByReferencesBatch(String refType, List<Long> refIds);
 }
 

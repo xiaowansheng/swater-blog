@@ -73,12 +73,19 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         }
         wrapper.orderByDesc(Article::getIsTop);
         wrapper.orderByDesc(Article::getCreateTime);
-        
+
         Page<Article> result = articleMapper.selectPage(pageParam, wrapper);
-        List<ArticleVO> voList = result.getRecords().stream()
-                .map(this::convertToVO)
+
+        // 批量查询引用文件
+        List<Long> articleIds = result.getRecords().stream()
+                .map(Article::getId)
                 .collect(Collectors.toList());
-        
+        Map<Long, List<FileVO>> fileMap = fileService.listByReferencesBatch("ARTICLE", articleIds);
+
+        List<ArticleVO> voList = result.getRecords().stream()
+                .map(article -> convertToVO(article, fileMap.get(article.getId())))
+                .collect(Collectors.toList());
+
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
     }
 
@@ -88,7 +95,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         if (article == null) {
             return null;
         }
-        return convertToVO(article);
+        return convertToVO(article, null);
     }
 
     @Override
@@ -125,7 +132,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         return statistics;
     }
 
-    private ArticleVO convertToVO(Article article) {
+    private ArticleVO convertToVO(Article article, List<FileVO> referencedFiles) {
         ArticleVO vo = BeanUtil.copyProperties(article, ArticleVO.class);
         if (article.getCategoryId() != null) {
             Category category = categoryMapper.selectById(article.getCategoryId());
@@ -140,8 +147,10 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
             vo.setTags(tagVOs);
         }
 
-        // 填充引用文件列表
-        List<FileVO> referencedFiles = fileService.listByReference("ARTICLE", article.getId());
+        // 如果提供了文件列表则使用，否则查询
+        if (referencedFiles == null) {
+            referencedFiles = fileService.listByReference("ARTICLE", article.getId());
+        }
         vo.setReferencedFiles(referencedFiles);
 
         return vo;

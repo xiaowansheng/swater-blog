@@ -43,10 +43,10 @@ public class FileCleanupTask {
         log.info("开始执行文件清理任务...");
 
         try {
-            // 计算过期时间：30天前
-            LocalDateTime expireTime = LocalDateTime.now().minusDays(30);
+            // 计算过期时间：7天前
+            LocalDateTime expireTime = LocalDateTime.now().minusDays(7);
 
-            // 查询过期文件：ref_count = 0 且 update_time 超过30天
+            // 查询过期文件：ref_count = 0 且 update_time 超过7天
             List<FileMeta> expiredFiles = fileMetaMapper.selectList(
                 new LambdaQueryWrapper<FileMeta>()
                     .eq(FileMeta::getRefCount, 0)

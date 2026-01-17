@@ -26,13 +26,8 @@ public class FileController {
 
     @PostMapping("/upload")
     @ApiOperation(name = "上传文件", type = ApiOperationType.CREATE, description = "上传文件")
-    public Result<FileVO> upload(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(required = false) String refType,
-            @RequestParam(required = false) Long refId) {
+    public Result<FileVO> upload(@RequestParam("file") MultipartFile file) {
         FileUploadDTO dto = new FileUploadDTO();
-        dto.setRefType(refType);
-        dto.setRefId(refId);
         // 后台管理上传不使用category，默认为null，会使用"original"
         dto.setCategory(null);
         FileVO vo = fileService.upload(file, dto);
@@ -41,13 +36,8 @@ public class FileController {
 
     @PostMapping("/upload-by-url")
     @ApiOperation(name = "上传外链文件", type = ApiOperationType.CREATE, description = "通过URL上传文件")
-    public Result<FileVO> uploadByUrl(
-            @RequestParam("url") String url,
-            @RequestParam(required = false) String refType,
-            @RequestParam(required = false) Long refId) {
+    public Result<FileVO> uploadByUrl(@RequestParam("url") String url) {
         FileUploadDTO dto = new FileUploadDTO();
-        dto.setRefType(refType);
-        dto.setRefId(refId);
         // 后台管理上传不使用category，默认为null，会使用"original"
         dto.setCategory(null);
         FileVO vo = fileService.uploadByUrl(url, dto);

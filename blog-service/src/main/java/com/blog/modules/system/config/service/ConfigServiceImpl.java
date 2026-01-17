@@ -50,8 +50,9 @@ public class ConfigServiceImpl implements ConfigService {
         wrapper.orderByAsc(SysConfig::getSort);
 
         List<SysConfig> configs = sysConfigMapper.selectList(wrapper);
+        // 转换为VO时不包含文件列表
         return configs.stream()
-                .map(this::convertToVO)
+                .map(this::convertToVOWithoutFiles)
                 .collect(Collectors.toList());
     }
 
@@ -79,7 +80,7 @@ public class ConfigServiceImpl implements ConfigService {
         if (config == null) {
             return null;
         }
-        return convertToVO(config);
+        return convertToVOWithoutFiles(config);
     }
 
     @Override
@@ -118,7 +119,7 @@ public class ConfigServiceImpl implements ConfigService {
                 }
             }
 
-            return convertToVO(config);
+            return convertToVOWithoutFiles(config);
         } catch (Exception e) {
             log.error("创建配置失败: error={}", e.getMessage());
             throw new BusinessException("配置创建失败: " + e.getMessage());
@@ -186,7 +187,7 @@ public class ConfigServiceImpl implements ConfigService {
             );
 
             SysConfig finalConfig = sysConfigMapper.selectById(existingConfig.getId());
-            return convertToVO(finalConfig);
+            return convertToVOWithoutFiles(finalConfig);
         } catch (Exception e) {
             log.error("更新配置失败: key={}, error={}", key, e.getMessage());
             throw new BusinessException("配置更新失败: " + e.getMessage());
@@ -222,6 +223,14 @@ public class ConfigServiceImpl implements ConfigService {
         vo.setReferencedFiles(referencedFiles);
 
         return vo;
+    }
+
+    /**
+     * 转换为VO（不包含文件列表）
+     * 用于缓存配置数据，文件列表按需查询
+     */
+    private ConfigVO convertToVOWithoutFiles(SysConfig config) {
+        return BeanUtil.copyProperties(config, ConfigVO.class);
     }
 
     /**

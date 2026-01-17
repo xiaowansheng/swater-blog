@@ -97,14 +97,7 @@ public class FileServiceImpl implements FileService {
                 fileMeta = performUpload(file, dto, storagePlugin, fileHash);
             }
 
-            if (dto.getRefType() != null && dto.getRefId() != null) {
-                FileReference reference = new FileReference();
-                reference.setFileId(fileMeta.getId());
-                reference.setRefType(dto.getRefType());
-                reference.setRefId(dto.getRefId());
-                reference.setCreateTime(LocalDateTime.now());
-                fileReferenceMapper.insert(reference);
-            }
+            // 上传时不建立引用关系，统一在保存业务对象时建立
 
             return convertToVO(fileMeta);
         } catch (Exception e) {
@@ -508,5 +501,60 @@ public class FileServiceImpl implements FileService {
         return fileMetas.stream()
             .map(this::convertToVO)
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<Long, List<FileVO>> listByReferencesBatch(String refType, List<Long> refIds) {
+        if (refType == null || refIds == null || refIds.isEmpty()) {
+            return Map.of();
+        }
+
+        // 查询所有引用关系
+        List<FileReference> references = fileReferenceMapper.selectList(
+            new LambdaQueryWrapper<FileReference>()
+                .eq(FileReference::getRefType, refType)
+                .in(FileReference::getRefId, refIds)
+        );
+
+        if (references.isEmpty()) {
+            return refIds.stream()
+                .collect(Collectors.toMap(id -> id, id -> List.of()));
+        }
+
+        // 获取文件ID列表
+        List<Long> fileIds = references.stream()
+            .map(FileReference::getFileId)
+            .distinct()
+            .collect(Collectors.toList());
+
+        // 批量查询文件
+        List<FileMeta> fileMetas = fileMetaMapper.selectList(
+            new LambdaQueryWrapper<FileMeta>()
+                .in(FileMeta::getId, fileIds)
+        );
+
+        // 转换为VO
+        List<FileVO> fileVOs = fileMetas.stream()
+            .map(this::convertToVO)
+            .collect(Collectors.toList());
+
+        // 按refId分组
+        Map<Long, List<FileVO>> result = refIds.stream()
+            .collect(Collectors.toMap(
+                id -> id,
+                id -> List.of()
+            ));
+
+        // 填充文件列表
+        for (FileReference reference : references) {
+            for (FileVO fileVO : fileVOs) {
+                if (fileVO.getId().equals(reference.getFileId())) {
+                    result.get(reference.getRefId()).add(fileVO);
+                    break;
+                }
+            }
+        }
+
+        return result;
     }
 }
