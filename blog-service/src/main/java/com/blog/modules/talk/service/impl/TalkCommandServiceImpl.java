@@ -3,6 +3,7 @@ package com.blog.modules.talk.service.impl;
 
 
 import com.blog.bootstrap.context.UserContext;
+import com.blog.modules.file.model.vo.FileVO;
 import com.blog.modules.talk.event.talk.*;
 import com.blog.shared.exception.BusinessException;
 import com.blog.modules.talk.mapper.TalkMapper;

@@ -5,6 +5,7 @@ package com.blog.modules.article.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.modules.article.event.ArticleCreatedEvent;
 import com.blog.modules.article.event.ArticleUpdatedEvent;
+import com.blog.modules.file.model.vo.FileVO;
 import com.blog.shared.exception.BusinessException;
 import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.article.mapper.ArticleTagMapper;

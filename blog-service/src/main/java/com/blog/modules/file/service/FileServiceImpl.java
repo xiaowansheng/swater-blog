@@ -40,6 +40,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 @Service
 public class FileServiceImpl implements FileService {
@@ -536,7 +537,7 @@ public class FileServiceImpl implements FileService {
         // 转换为VO
         List<FileVO> fileVOs = fileMetas.stream()
             .map(this::convertToVO)
-            .collect(Collectors.toList());
+            .toList();
 
         // 按refId分组
         Map<Long, List<FileVO>> result = refIds.stream()
