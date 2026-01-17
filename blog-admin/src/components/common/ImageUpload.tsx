@@ -21,22 +21,20 @@ interface ImageUploadProps {
   width?: string | number;
   height?: string | number;
   className?: string;
-  category?: string; // 业务分类，如: article_cover, avatar 等
   limitSize?: number; // 限制大小，单位 MB
   children?: React.ReactNode; // 自定义未上传时的显示内容
   showHint?: boolean; // 是否显示默认的比例和大小提示
 }
 
-export const ImageUpload: React.FC<ImageUploadProps> = ({ 
-  value, 
-  onChange, 
+export const ImageUpload: React.FC<ImageUploadProps> = ({
+  value,
+  onChange,
   aspectRatio = 'video',
   shape = 'rect',
   placeholder,
   width = '100%',
   height,
   className = '',
-  category,
   limitSize = 5,
   children,
   showHint,
@@ -66,7 +64,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     const { file, onSuccess, onError } = options;
     setLoading(true);
     try {
-      const res = await uploadFile(file as File, category);
+      const res = await uploadFile(file as File);
       onSuccess(res);
       // 使用 getFullUrl 拼接完整路径，优先使用 url 字段，其次使用 storagePath
       const path = getFullUrl(res.url || res.storagePath);

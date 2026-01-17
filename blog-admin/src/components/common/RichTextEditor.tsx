@@ -12,7 +12,6 @@ interface RichTextEditorProps {
   placeholder?: string
   height?: number
   className?: string
-  category?: string
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
@@ -21,7 +20,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   placeholder = '请输入内容...',
   height = 300,
   className = '',
-  category = 'talk_image'
 }) => {
   // editor 实例
   const [editor, setEditor] = useState<IDomEditor | null>(null)
@@ -49,7 +47,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         // 自定义上传逻辑
         async customUpload(file: File, insertFn: any) {
           try {
-            const res = await uploadFile(file, category)
+            const res = await uploadFile(file)
             // 使用 getFullUrl 拼接完整路径，优先使用 url 字段，其次使用 storagePath
             const url = getFullUrl(res.url || res.storagePath)
             const alt = res.originalName || file.name
@@ -105,7 +103,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               // 并发上传所有外部图片
               const uploadPromises = externalImages.map(async ({ src, alt }) => {
                 try {
-                  const res = await uploadExternalImage(src, category)
+                  const res = await uploadExternalImage(src)
                   const newUrl = getFullUrl(res.url || res.storagePath)
                   return { oldSrc: src, newSrc: newUrl, alt, success: true }
                 } catch (error) {
@@ -174,7 +172,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
               const imagePromises = externalImageUrls.map(async (oldUrl) => {
                 try {
-                  const res = await uploadExternalImage(oldUrl, category)
+                  const res = await uploadExternalImage(oldUrl)
                   const newUrl = getFullUrl(res.url || res.storagePath)
                   return { oldUrl, newUrl, type: '图片', success: true }
                 } catch (error) {
@@ -199,7 +197,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
               const webPromises = externalWebUrls.map(async (oldUrl) => {
                 try {
-                  const res = await uploadExternalWebpage(oldUrl, category)
+                  const res = await uploadExternalWebpage(oldUrl)
                   const newUrl = getFullUrl(res.url || res.storagePath)
                   return { oldUrl, newUrl, type: '网页', success: true }
                 } catch (error) {
@@ -276,7 +274,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
               const uploadPromises = externalImages.map(async ({ src, alt }) => {
                 try {
-                  const res = await uploadExternalImage(src, category)
+                  const res = await uploadExternalImage(src)
                   const newUrl = getFullUrl(res.url || res.storagePath)
                   return { oldSrc: src, newSrc: newUrl, alt, success: true }
                 } catch (error) {
@@ -336,7 +334,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
               const imagePromises = externalImageUrls.map(async (oldUrl) => {
                 try {
-                  const res = await uploadExternalImage(oldUrl, category)
+                  const res = await uploadExternalImage(oldUrl)
                   const newUrl = getFullUrl(res.url || res.storagePath)
                   return { oldUrl, newUrl, type: '??????', success: true }
                 } catch (error) {
@@ -360,7 +358,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
               const webPromises = externalWebUrls.map(async (oldUrl) => {
                 try {
-                  const res = await uploadExternalWebpage(oldUrl, category)
+                  const res = await uploadExternalWebpage(oldUrl)
                   const newUrl = getFullUrl(res.url || res.storagePath)
                   return { oldUrl, newUrl, type: '??????', success: true }
                 } catch (error) {
@@ -403,7 +401,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       editor.destroy()
       setEditor(null)
     }
-  }, [editor, category])
+  }, [editor])
 
   const handleHtmlChange = (editor: IDomEditor) => {
     const newHtml = editor.getHtml()

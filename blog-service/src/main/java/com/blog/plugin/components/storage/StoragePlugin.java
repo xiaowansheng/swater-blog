@@ -16,7 +16,9 @@ public interface StoragePlugin extends Plugin {
     String generateFilePath(String originalFilename);
 
     String generateFilePath(String originalFilename, String category);
-    
+
+    String generateFilePath(String originalFilename, String category, String fileHash);
+
     String calculateHash(MultipartFile file) throws Exception;
     
     boolean exists(String filePath) throws Exception;

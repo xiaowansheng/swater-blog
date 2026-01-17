@@ -214,7 +214,7 @@ const ProfilePage: React.FC = () => {
         className="profile-form"
       >
         <Form.Item name="avatar" label="头像">
-          <AvatarUpload category="avatar" width={120} height={120} />
+          <AvatarUpload width={120} height={120} />
         </Form.Item>
 
         <Form.Item

@@ -18,14 +18,12 @@ interface MultiImageUploadProps {
   value?: string[];
   onChange?: (urls: string[]) => void;
   maxCount?: number;
-  category?: string;
 }
 
 const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
   value = [],
   onChange,
   maxCount = 9,
-  category = 'talk',
 }) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -122,7 +120,7 @@ const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
   const handleCustomRequest = async (options: any) => {
     const { file, onSuccess, onError } = options;
     try {
-      const res = await uploadFile(file as File, category);
+      const res = await uploadFile(file as File);
       onSuccess(res);
       message.success('上传成功');
     } catch (error) {

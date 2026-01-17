@@ -10,7 +10,6 @@ interface MarkdownEditorProps {
   onChange?: (value: string) => void
   height?: number
   placeholder?: string
-  category?: string
   onSave?: () => void
 }
 
@@ -20,7 +19,6 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   onSave,
   height = 600,
   placeholder = '开始写作吧...',
-  category = 'article_image'
 }) => {
   const editorRef = useRef<HTMLDivElement>(null)
   const vditorInstance = useRef<Vditor | null>(null)
@@ -61,7 +59,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         handler: async (files: File[]) => {
           if (files.length === 0) return null
           try {
-            const res = await uploadFile(files[0], category)
+            const res = await uploadFile(files[0])
             // 使用 getFullUrl 拼接完整路径，优先使用 url 字段，其次使用 storagePath
             const url = getFullUrl(res.url || res.storagePath)
             const name = res.originalName || files[0].name
@@ -157,7 +155,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 
         const imagePromises = externalImageUrls.map(async (oldUrl) => {
           try {
-            const res = await uploadExternalImage(oldUrl, category)
+            const res = await uploadExternalImage(oldUrl)
             const newUrl = getFullUrl(res.url || res.storagePath)
             return { oldUrl, newUrl, type: '??????', success: true }
           } catch (error) {
@@ -178,7 +176,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 
         const webPromises = externalWebUrls.map(async (oldUrl) => {
           try {
-            const res = await uploadExternalWebpage(oldUrl, category)
+            const res = await uploadExternalWebpage(oldUrl)
             const newUrl = getFullUrl(res.url || res.storagePath)
             return { oldUrl, newUrl, type: '??????', success: true }
           } catch (error) {
@@ -213,7 +211,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 
       const uploadPromises = images.map(async ({ src, alt }) => {
         try {
-          const res = await uploadExternalImage(src, category)
+          const res = await uploadExternalImage(src)
           const newUrl = getFullUrl(res.url || res.storagePath)
           return { oldSrc: src, newSrc: newUrl, alt, success: true }
         } catch (error) {
@@ -336,7 +334,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       document.removeEventListener('drop', handleDropInEditor, true)
       document.removeEventListener('dragover', handleDragOverInEditor, true)
     }
-  }, [isInit, category])
+  }, [isInit])
 
   return (
     <div className="overflow-hidden w-full rounded-md border vditor-container">

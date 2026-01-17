@@ -14,12 +14,9 @@ export const getFileById = (id: number): Promise<FileMeta> => {
   return request.get(`/admin/file/${id}`)
 }
 
-export const uploadFile = (file: File, category?: string): Promise<FileMeta> => {
+export const uploadFile = (file: File): Promise<FileMeta> => {
   const formData = new FormData()
   formData.append('file', file)
-  if (category) {
-    formData.append('category', category)
-  }
   return request.post('/admin/file/upload', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
@@ -27,9 +24,9 @@ export const uploadFile = (file: File, category?: string): Promise<FileMeta> => 
   })
 }
 
-export const uploadFileByUrl = (url: string, category?: string): Promise<FileMeta> => {
+export const uploadFileByUrl = (url: string): Promise<FileMeta> => {
   return request.post('/admin/file/upload-by-url', null, {
-    params: { url, category },
+    params: { url },
   })
 }
 
@@ -44,17 +41,15 @@ export const deleteBatchFile = (ids: number[]): Promise<void> => {
 /**
  * 上传外部图片URL到服务器
  * @param imageUrl 外部图片URL
- * @param category 文件分类
  * @returns 上传后的文件元数据
  */
 export const uploadExternalImage = async (
-  imageUrl: string,
-  category?: string
+  imageUrl: string
 ): Promise<FileMeta> => {
   try {
-    return await uploadFileByUrl(imageUrl, category)
+    return await uploadFileByUrl(imageUrl)
   } catch (error) {
-    console.error('????????????????????????:', error)
+    console.error('上传外部图片失败:', error)
     throw error
   }
 }
@@ -114,18 +109,16 @@ export const isExternalWebUrl = (url: string): boolean => {
 /**
  * 抓取外部网页并保存为HTML文件
  * @param webpageUrl 外部网页URL
- * @param category 文件分类
  * @returns 上传后的文件元数据
  */
 export const uploadExternalWebpage = async (
-  webpageUrl: string,
-  category?: string
+  webpageUrl: string
 ): Promise<FileMeta> => {
   try {
-    return await uploadFileByUrl(webpageUrl, category)
+    return await uploadFileByUrl(webpageUrl)
   } catch (error) {
-    console.error('????????????????????????:', error)
-    throw new Error(`??????????????????: ${error instanceof Error ? error.message : '????????????'}`)
+    console.error('抓取外部网页失败:', error)
+    throw new Error(`抓取网页失败: ${error instanceof Error ? error.message : '未知错误'}`)
   }
 }
 

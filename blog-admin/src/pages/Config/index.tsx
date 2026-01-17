@@ -114,22 +114,16 @@ const ConfigPage: React.FC = () => {
     type = "cover",
     name,
     label,
-    category,
   }: {
     type?: "cover" | "avatar" | "icon" | "logo";
     name: string;
     label: string;
-    category?: string;
   }) => {
-    const commonProps = {
-      category: category || "config",
-    };
-
     if (type === "avatar") {
       // 头像：使用圆形预设
       return (
         <Form.Item name={name} label={label}>
-          <AvatarUpload {...commonProps} width={100} height={100} />
+          <AvatarUpload width={100} height={100} />
         </Form.Item>
       );
     }
@@ -138,7 +132,7 @@ const ConfigPage: React.FC = () => {
       // 图标/Favicon：使用正方形预设，尺寸较小
       return (
         <Form.Item name={name} label={label}>
-          <SquareUpload {...commonProps} width={64} height={64} />
+          <SquareUpload width={64} height={64} />
         </Form.Item>
       );
     }
@@ -147,10 +141,9 @@ const ConfigPage: React.FC = () => {
       // Logo：使用基础组件，完全自定义比例和内部提示
       return (
         <Form.Item name={name} label={label}>
-          <ImageUpload 
-            {...commonProps} 
-            width={240} 
-            height={80} 
+          <ImageUpload
+            width={240}
+            height={80}
             aspectRatio="any"
           >
             <div className="flex flex-col items-center">
@@ -166,7 +159,7 @@ const ConfigPage: React.FC = () => {
     // 默认封面：使用封面预设 (16:9)
     return (
       <Form.Item name={name} label={label}>
-        <CoverUpload {...commonProps} width={300} />
+        <CoverUpload width={300} />
       </Form.Item>
     );
   };

@@ -23,12 +23,12 @@ public class FileController {
     public Result<FileVO> upload(
             @RequestParam("file") MultipartFile file,
             @RequestParam(required = false) String refType,
-            @RequestParam(required = false) Long refId,
-            @RequestParam(required = false) String category) {
+            @RequestParam(required = false) Long refId) {
         FileUploadDTO dto = new FileUploadDTO();
         dto.setRefType(refType);
         dto.setRefId(refId);
-        dto.setCategory(category);
+        // 后台管理上传不使用category，默认为null，会使用"original"
+        dto.setCategory(null);
         FileVO vo = fileService.upload(file, dto);
         return Result.success(vo);
     }
@@ -38,12 +38,12 @@ public class FileController {
     public Result<FileVO> uploadByUrl(
             @RequestParam("url") String url,
             @RequestParam(required = false) String refType,
-            @RequestParam(required = false) Long refId,
-            @RequestParam(required = false) String category) {
+            @RequestParam(required = false) Long refId) {
         FileUploadDTO dto = new FileUploadDTO();
         dto.setRefType(refType);
         dto.setRefId(refId);
-        dto.setCategory(category);
+        // 后台管理上传不使用category，默认为null，会使用"original"
+        dto.setCategory(null);
         FileVO vo = fileService.uploadByUrl(url, dto);
         return Result.success(vo);
     }

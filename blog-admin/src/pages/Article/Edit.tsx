@@ -597,7 +597,6 @@ const ArticleEdit: React.FC = () => {
                   <Form.Item name="cover" label="文章封面">
                     <ImageUpload
                       placeholder="点击或拖拽上传文章封面"
-                      category="article_cover"
                     />
                   </Form.Item>
                   <Button
