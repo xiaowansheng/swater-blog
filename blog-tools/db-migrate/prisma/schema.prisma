@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model DatabaseConnection {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // mysql, postgresql, sqlserver, oracle
+  host        String
+  port        Int
+  username    String
+  password    String
+  database    String
+  isSource    Boolean  @default(false)
+  isTarget    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  migrationSources MigrationSourceConfig[] @relation("SourceConnection")
+  migrationTargets MigrationTargetConfig[] @relation("TargetConnection")
+}
+
+model MigrationSourceConfig {
+  id              String   @id @default(cuid())
+  connectionId    String
+  connection      DatabaseConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  tableName       String
+  schemaName      String?  @default("public")
+
+  migrations      MigrationConfig[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model MigrationTargetConfig {
+  id              String   @id @default(cuid())
+  connectionId    String
+  connection      DatabaseConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  tableName       String
+  schemaName      String?  @default("public")
+
+  migrations      MigrationConfig[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model FieldMapping {
+  id              String   @id @default(cuid())
+  sourceField     String
+  targetField     String
+  fieldType       String   // string, number, boolean, date, etc.
+  transformer     String?  // optional transformation function
+  defaultValue    String?  // default value if source is null
+  isPrimaryKey    Boolean  @default(false)
+
+  mappingId       String
+  mapping         TableMapping @relation(fields: [mappingId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model TableMapping {
+  id              String   @id @default(cuid())
+  sourceTableId   String
+  sourceTable     MigrationSourceConfig @relation(fields: [sourceTableId], references: [id], onDelete: Cascade)
+  targetTableId   String
+  targetTable     MigrationTargetConfig @relation(fields: [targetTableId], references: [id], onDelete: Cascade)
+
+  fieldMappings   FieldMapping[]
+  migrations      MigrationConfig[]
+
+  deleteBeforeInsert Boolean @default(false)
+  batchSize       Int      @default(1000)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model MigrationConfig {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+
+  sourceTableId   String
+  sourceTable     MigrationSourceConfig @relation(fields: [sourceTableId], references: [id], onDelete: Cascade)
+  targetTableId   String
+  targetTable     MigrationTargetConfig @relation(fields: [targetTableId], references: [id], onDelete: Cascade)
+
+  mappingId       String
+  mapping         TableMapping @relation(fields: [mappingId], references: [id], onDelete: Cascade)
+
+  enabled         Boolean  @default(true)
+
+  tasks           MigrationTask[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model MigrationTask {
+  id              String   @id @default(cuid())
+  configId        String
+  config          MigrationConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  status          String   // pending, running, completed, failed, cancelled
+  totalRecords    Int      @default(0)
+  processedRecords Int     @default(0)
+  failedRecords   Int      @default(0)
+  startTime       DateTime?
+  endTime         DateTime?
+  errorMessage    String?
+
+  logs            MigrationLog[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model MigrationLog {
+  id              String   @id @default(cuid())
+  taskId          String
+  task            MigrationTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  level           String   // info, warning, error, debug
+  message         String
+  data            String?  // JSON string
+
+  createdAt       DateTime @default(now())
+}
