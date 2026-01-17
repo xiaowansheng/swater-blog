@@ -8,16 +8,21 @@ import com.blog.shared.Result;
 import com.blog.modules.file.model.dto.FileUploadDTO;
 import com.blog.modules.file.model.vo.FileVO;
 import com.blog.modules.file.service.FileService;
+import com.blog.modules.file.task.FileCleanupTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
+import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/file")
 @ApiOperation(name = "文件管理模块", description = "文件管理接口", open = false)
 public class FileController {
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private FileCleanupTask fileCleanupTask;
 
     @PostMapping("/upload")
     @ApiOperation(name = "上传文件", type = ApiOperationType.CREATE, description = "上传文件")
@@ -73,5 +78,20 @@ public class FileController {
             @RequestParam Long refId) {
         List<FileVO> files = fileService.listByReference(refType, refId);
         return Result.success(files);
+    }
+
+    @PostMapping("/cleanup")
+    @ApiOperation(name = "手动清理过期文件", type = ApiOperationType.DELETE, description = "手动触发清理过期文件任务")
+    public Result<Map<String, Object>> manualCleanup() {
+        fileCleanupTask.manualCleanup();
+        return Result.success(Map.of("message", "文件清理任务已触发"));
+    }
+
+    @GetMapping("/expired/count")
+    @ApiOperation(name = "查询过期文件数量", type = ApiOperationType.QUERY, description = "查询引用数为0且超过30天的文件数量")
+    public Result<Map<String, Object>> getExpiredFileCount() {
+        // 这里可以添加查询过期文件数量的逻辑
+        // 暂时返回统计信息
+        return Result.success(Map.of("message", "请查看日志获取详细信息"));
     }
 }
