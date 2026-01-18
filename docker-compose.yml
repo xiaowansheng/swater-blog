@@ -74,26 +74,26 @@ services:
       timeout: 10s
       retries: 3
 
-  # Elasticsearch搜索引擎
-  elasticsearch:
-    image: elasticsearch:8.11.0
-    container_name: swater-elasticsearch
-    restart: unless-stopped
-    ports:
-      - "9200:9200"
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-    networks:
-      - blog-network
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  # Elasticsearch搜索引擎 - 暂时禁用
+  # elasticsearch:
+  #   image: elasticsearch:8.11.0
+  #   container_name: swater-elasticsearch
+  #   restart: unless-stopped
+  #   ports:
+  #     - "9200:9200"
+  #   environment:
+  #     - discovery.type=single-node
+  #     - xpack.security.enabled=false
+  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  #   volumes:
+  #     - elasticsearch_data:/usr/share/elasticsearch/data
+  #   networks:
+  #     - blog-network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
 
   # 后端服务
   blog-service:
@@ -117,7 +117,7 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin123}
-      ES_URIS: http://elasticsearch:9200
+      # ES_URIS: http://elasticsearch:9200  # 暂时禁用ES
       JAVA_OPTS: "-Xms512m -Xmx1024m -XX:+UseG1GC"
     volumes:
       - blog_logs:/app/logs
@@ -129,8 +129,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
+      # elasticsearch:
+      #   condition: service_healthy  # 暂时禁用ES
     networks:
       - blog-network
     healthcheck:
@@ -150,7 +150,8 @@ services:
     ports:
       - "3001:80"
     environment:
-      REACT_APP_API_BASE_URL: http://localhost:8888/api
+      # 在 Docker 网络中使用服务名称
+      VITE_API_BASE_URL: http://blog-service:8888/api
     depends_on:
       - blog-service
     networks:
@@ -166,7 +167,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://localhost:8888/api
+      # 在 Docker 网络中使用服务名称
+      NEXT_PUBLIC_API_BASE_URL: http://blog-service:8888/api
     depends_on:
       - blog-service
     networks:
@@ -196,7 +198,7 @@ volumes:
   mysql_data:
   redis_data:
   rabbitmq_data:
-  elasticsearch_data:
+  # elasticsearch_data:  # 暂时禁用ES
   blog_logs:
   blog_uploads:
 

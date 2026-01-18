@@ -65,8 +65,8 @@ if not exist .env (
 )
 
 REM 启动依赖服务
-echo 🐳 启动依赖服务 (MySQL, Redis, RabbitMQ, Elasticsearch)...
-docker-compose up -d mysql redis rabbitmq elasticsearch
+echo 🐳 启动依赖服务 (MySQL, Redis, RabbitMQ)...
+docker-compose -f docker-compose.env.yml up -d mysql redis rabbitmq
 
 REM 等待服务启动
 echo ⏳ 等待服务启动完成...
@@ -95,74 +95,16 @@ if exist blog-web (
     cd ..
 )
 
-REM 创建启动脚本
-echo 📜 创建启动脚本...
-(
-echo @echo off
-echo chcp 65001 ^>nul
-echo echo 🚀 启动 Swater Blog 开发环境...
-echo.
-echo REM 启动后端服务
-echo echo 📡 启动后端服务...
-echo cd blog-service
-echo start "Backend" gradlew.bat bootRun
-echo cd ..
-echo.
-echo REM 等待后端启动
-echo timeout /t 10 /nobreak ^>nul
-echo.
-echo REM 启动管理后台
-echo echo 🖥️  启动管理后台...
-echo cd blog-admin
-echo start "Admin" npm run dev
-echo cd ..
-echo.
-echo REM 启动博客前端（如果存在）
-echo if exist blog-web (
-echo     echo 🌐 启动博客前端...
-echo     cd blog-web
-echo     start "Web" npm run dev
-echo     cd ..
-echo ^)
-echo.
-echo echo ✅ 所有服务已启动！
-echo echo 📡 后端服务: http://localhost:8888
-echo echo 📚 API 文档: http://localhost:8888/swagger-ui.html
-echo echo 🖥️  管理后台: http://localhost:3001
-echo if exist blog-web (
-echo     echo 🌐 博客前端: http://localhost:3000
-echo ^)
-echo.
-echo pause
-) > start-dev.bat
-
-REM 创建停止脚本
-(
-echo @echo off
-echo chcp 65001 ^>nul
-echo echo 🛑 停止 Swater Blog 开发环境...
-echo.
-echo REM 停止 Docker 服务
-echo docker-compose down
-echo.
-echo REM 停止可能运行的进程
-echo taskkill /f /im java.exe 2^>nul ^|^| echo.
-echo taskkill /f /im node.exe 2^>nul ^|^| echo.
-echo.
-echo echo ✅ 开发环境已停止
-echo pause
-) > stop-dev.bat
-
 echo 🎉 开发环境搭建完成！
 echo 📋 使用说明:
-echo   • 启动开发环境: start-dev.bat
-echo   • 停止开发环境: stop-dev.bat
-echo   • 查看服务状态: docker-compose ps
-echo   • 查看服务日志: docker-compose logs -f [service-name]
+echo   • 启动开发环境: scripts\start-dev.bat
+echo   • 停止基础服务: docker-compose -f docker-compose.env.yml down
+echo   • 查看服务状态: docker-compose -f docker-compose.env.yml ps
+echo   • 查看服务日志: docker-compose -f docker-compose.env.yml logs -f [service-name]
 echo.
 echo ⚠️  注意事项:
 echo   • 首次启动可能需要较长时间下载依赖
-echo   • 请确保端口 3000, 3001, 8888, 3306, 6379, 5672, 9200 未被占用
+echo   • 请确保端口 3000, 3001, 8888, 3306, 6379, 5672 未被占用
 echo   • 修改 .env 文件中的配置以适应你的环境
 echo.
 echo 🚀 现在可以运行 start-dev.bat 启动开发环境！

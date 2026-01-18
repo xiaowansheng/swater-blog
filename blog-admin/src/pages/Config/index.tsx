@@ -21,6 +21,7 @@ import {
   MessageOutlined,
   CloudUploadOutlined,
   MailOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import { 
   ImageUpload,
@@ -43,6 +44,7 @@ const ConfigPage: React.FC = () => {
   const [privacyForm] = Form.useForm();
   const [commentForm] = Form.useForm();
   const [notifyForm] = Form.useForm();
+  const [componentForm] = Form.useForm();
   // const [uploadForm] = Form.useForm();
   // const [emailForm] = Form.useForm();
 
@@ -61,6 +63,7 @@ const ConfigPage: React.FC = () => {
         privacy,
         comment,
         notify,
+        component,
         // upload,
         // email,
       ] = await Promise.all([
@@ -71,6 +74,11 @@ const ConfigPage: React.FC = () => {
         configApi.getPrivacyConfig(),
         configApi.getCommentConfig(),
         configApi.getNotifyConfig(),
+        configApi.getComponentConfig().catch(() => ({
+          articleCommentEnabled: true,
+          talkCommentEnabled: true,
+          guestbookMessageEnabled: true
+        })),
         // configApi.getUploadConfig(),
         // configApi.getEmailConfig(),
       ]);
@@ -99,6 +107,7 @@ const ConfigPage: React.FC = () => {
       privacyForm.setFieldsValue(processConfig(privacy));
       commentForm.setFieldsValue(processConfig(comment));
       notifyForm.setFieldsValue(processConfig(notify));
+      componentForm.setFieldsValue(processConfig(component));
       // uploadForm.setFieldsValue(upload);
       // emailForm.setFieldsValue(email);
     } catch (error) {
@@ -692,6 +701,58 @@ const ConfigPage: React.FC = () => {
               loading={saving}
               onClick={() =>
                 handleSave("notify", notifyForm, configApi.updateNotifyConfig)
+              }
+            >
+              保存
+            </Button>
+          </Form.Item>
+        </Form>
+      ),
+    },
+    {
+      key: "component",
+      label: (
+        <span>
+          <AppstoreOutlined /> 组件设置
+        </span>
+      ),
+      children: (
+        <Form form={componentForm} layout="vertical" className="config-form">
+          <Form.Item
+            name="articleCommentEnabled"
+            label="文章评论组件"
+            valuePropName="checked"
+            tooltip="是否在文章详情页显示评论组件"
+          >
+            <Switch />
+          </Form.Item>
+          <Form.Item
+            name="talkCommentEnabled"
+            label="说说评论组件"
+            valuePropName="checked"
+            tooltip="是否在说说详情页显示评论组件"
+          >
+            <Switch />
+          </Form.Item>
+          <Form.Item
+            name="guestbookMessageEnabled"
+            label="留言组件"
+            valuePropName="checked"
+            tooltip="是否在留言板显示留言组件"
+          >
+            <Switch />
+          </Form.Item>
+          <Form.Item>
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              loading={saving}
+              onClick={() =>
+                handleSave(
+                  "component",
+                  componentForm,
+                  configApi.updateComponentConfig
+                )
               }
             >
               保存

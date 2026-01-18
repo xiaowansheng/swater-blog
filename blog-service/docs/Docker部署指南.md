@@ -86,34 +86,20 @@ git clone <repository-url>
 cd blog-service
 
 # 确保脚本可执行
-chmod +x docker-deploy.sh
 chmod +x docker/entrypoint.sh
 ```
 
 ### 3. 一键部署
 
-#### Linux/macOS
 ```bash
 # 构建并启动所有服务
-./docker-deploy.sh up -d
+docker-compose up -d --build
 
 # 查看服务状态
-./docker-deploy.sh status
+docker-compose ps
 
 # 查看日志
-./docker-deploy.sh logs
-```
-
-#### Windows
-```cmd
-# 构建并启动所有服务
-docker-deploy.bat up -d
-
-# 查看服务状态
-docker-deploy.bat status
-
-# 查看日志
-docker-deploy.bat logs
+docker-compose logs
 ```
 
 ### 4. 验证部署
@@ -197,62 +183,29 @@ networks:
         - subnet: 172.20.0.0/16
 ```
 
-## 部署脚本使用
-
-### 基本命令
+## Docker Compose 常用命令
 
 ```bash
 # 构建镜像
-./docker-deploy.sh build
+docker-compose build
 
 # 启动服务（前台）
-./docker-deploy.sh up
+docker-compose up
 
 # 启动服务（后台）
-./docker-deploy.sh up -d
+docker-compose up -d
 
 # 停止服务
-./docker-deploy.sh down
+docker-compose down
 
 # 重启服务
-./docker-deploy.sh restart
+docker-compose restart
 
 # 查看状态
-./docker-deploy.sh status
+docker-compose ps
 
 # 查看日志
-./docker-deploy.sh logs [service-name]
-
-# 健康检查
-./docker-deploy.sh health
-
-# 清理资源
-./docker-deploy.sh clean
-
-# 备份数据
-./docker-deploy.sh backup
-
-# 启动监控
-./docker-deploy.sh monitor
-
-# 更新服务
-./docker-deploy.sh update
-```
-
-### 高级选项
-
-```bash
-# 指定环境
-./docker-deploy.sh -e dev up
-
-# 指定项目名
-./docker-deploy.sh -p my-blog up
-
-# 详细输出
-./docker-deploy.sh -v up
-
-# 指定compose文件
-./docker-deploy.sh -f docker-compose.prod.yml up
+docker-compose logs [service-name]
 ```
 
 ## 生产环境配置
@@ -329,7 +282,7 @@ save 60 10000
 
 ```bash
 # 启动监控服务
-./docker-deploy.sh monitor
+docker-compose -f docker-compose-monitoring.yml up -d
 
 # 访问监控界面
 # Grafana: http://localhost:3000
@@ -344,10 +297,10 @@ save 60 10000
 #### 查看实时日志
 ```bash
 # 查看所有服务日志
-./docker-deploy.sh logs -f
+docker-compose logs -f
 
 # 查看特定服务日志
-./docker-deploy.sh logs blog-service
+docker-compose logs -f blog-service
 
 # 查看最近100行日志
 docker-compose logs --tail=100 blog-service
@@ -367,10 +320,7 @@ logging:
 #### 自动备份
 ```bash
 # 创建备份
-./docker-deploy.sh backup
-
-# 定时备份（添加到crontab）
-0 2 * * * /path/to/docker-deploy.sh backup
+# 建议使用 mysqldump/redis-cli 等方式自行编排备份任务
 ```
 
 #### 手动备份
@@ -527,7 +477,8 @@ ports:
 git pull origin main
 
 # 重新构建并部署
-./docker-deploy.sh update
+docker-compose pull
+docker-compose up -d --build
 ```
 
 ### 依赖更新
@@ -536,7 +487,7 @@ git pull origin main
 docker-compose pull
 
 # 重启服务
-./docker-deploy.sh restart
+docker-compose restart
 ```
 
 ### 滚动更新

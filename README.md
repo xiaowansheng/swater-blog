@@ -14,7 +14,7 @@ Swater Blog 是一个基于 Spring Boot 3.x 的现代化博客系统，提供完
 - 🚀 **现代化技术栈**: Spring Boot 3.x + JDK 21 + React 18
 - 🔧 **高度可配置**: 支持多环境配置，灵活的存储策略
 - 📦 **容器化部署**: Docker + Docker Compose 一键部署
-- 🔍 **全文搜索**: 集成 Elasticsearch 实现高效搜索
+- 🔍 **全文搜索**: Elasticsearch 支持（当前默认禁用）
 - 📊 **实时监控**: Prometheus + Grafana 监控体系
 - 🔐 **安全可靠**: 完善的认证授权和安全防护
 - 🎨 **响应式设计**: 支持多端适配的现代化界面
@@ -27,7 +27,10 @@ swater-blog/
 ├── blog-admin/           # 管理后台前端 (React + Ant Design)
 ├── blog-web/             # 博客前端 (Next.js)
 ├── docs/                 # 项目文档
-├── docker-compose.yml    # Docker 编排文件
+├── scripts/              # 开发脚本
+├── docker-compose.yml    # 生产/全量编排
+├── docker-compose.env.yml# 开发依赖编排（仅基础服务）
+├── docker-compose.dev.yml# 开发编排（基础服务 + 后端）
 └── README.md            # 项目说明
 ```
 
@@ -38,14 +41,14 @@ swater-blog/
 - **数据库**: MySQL 8.0 + MyBatis-Plus
 - **缓存**: Redis 6.0+
 - **消息队列**: RabbitMQ 3.12+
-- **搜索引擎**: Elasticsearch 8.0+
+- **搜索引擎**: Elasticsearch 8.0+（可选）
 - **认证授权**: SaToken
 - **任务调度**: Quartz
 - **API文档**: SpringDoc OpenAPI 3.0
 
 ### 前端技术
 - **管理后台**: React 18 + Ant Design + TypeScript
-- **博客前端**: Next.js + Tailwind CSS
+- **博客前端**: Next.js 16 + React 19 + Tailwind CSS
 - **状态管理**: Zustand
 - **HTTP客户端**: Axios
 - **富文本编辑**: MD Editor
@@ -62,15 +65,15 @@ swater-blog/
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/your-username/swater-blog.git
+git clone https://github.com/xiaowansheng/swater-blog.git
 cd swater-blog
 
-# 2. 启动所有服务
+# 2. 启动所有服务（ES 默认禁用）
 docker-compose up -d
 
 # 3. 等待服务启动完成，访问应用
 # 博客前端: http://localhost:3000
-# 管理后台: http://localhost:3001  
+# 管理后台: http://localhost:3001
 # API文档: http://localhost:8888/swagger-ui.html
 ```
 
@@ -82,22 +85,20 @@ docker-compose up -d
 - MySQL 8.0+
 - Redis 6.0+
 - RabbitMQ 3.12+
-- Elasticsearch 8.0+
+- Elasticsearch 8.0+（可选）
 
 #### 启动步骤
 
-1. **准备数据库**
+1. **启动基础依赖**
 ```bash
-# 创建数据库
-mysql -u root -p
-CREATE DATABASE blog DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+docker-compose -f docker-compose.env.yml up -d mysql redis rabbitmq
 ```
 
 2. **启动后端服务**
 ```bash
 cd blog-service
 # 修改配置文件 src/main/resources/application-dev.yml
-./gradlew bootRun
+./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
 
 3. **启动管理后台**
@@ -112,6 +113,33 @@ npm run dev
 cd blog-web  
 npm install
 npm run dev
+```
+
+5. **访问地址**
+- 管理后台: http://localhost:3000
+- 博客前端: http://localhost:3001
+- API 文档: http://localhost:8888/swagger-ui.html
+
+#### 一键脚本（可选）
+```bash
+# 启动完整开发环境（基础依赖 + 后端 + 前端）
+scripts/start-dev.sh
+# Windows
+scripts\\start-dev.bat
+```
+
+#### 安装/准备脚本（可选）
+用于首次配置或新机器初始化，会检查环境、安装依赖并拉起基础服务。
+```bash
+scripts/dev-setup.sh
+# Windows
+scripts\\dev-setup.bat
+```
+
+#### 开发容器（仅后端）
+```bash
+# 启动基础服务 + 后端服务容器
+docker-compose -f docker-compose.dev.yml up -d
 ```
 
 ## 📚 文档导航
@@ -133,7 +161,7 @@ npm run dev
 - ✅ **评论系统**: 多级评论，邮件通知，垃圾评论过滤  
 - ✅ **用户系统**: 角色权限管理，OAuth 登录集成
 - ✅ **文件管理**: 本地存储/OSS，图片压缩优化
-- ✅ **搜索功能**: Elasticsearch 全文搜索，高亮显示
+- ✅ **搜索功能**: Elasticsearch 全文搜索，高亮显示（可选）
 
 ### 管理功能  
 - ✅ **数据统计**: 访问量统计，用户行为分析

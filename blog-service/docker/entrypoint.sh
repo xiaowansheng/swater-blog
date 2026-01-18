@@ -110,14 +110,14 @@ wait_for_dependencies() {
         wait_for_service "$SPRING_RABBITMQ_HOST" "$rabbitmq_port" "RabbitMQ消息队列" 30
     fi
     
-    # 等待Elasticsearch
-    if [ -n "$SPRING_ELASTICSEARCH_URIS" ] && [ "$WAIT_FOR_ES" != "false" ]; then
-        local es_host=$(echo "$SPRING_ELASTICSEARCH_URIS" | sed -n 's/.*:\/\/\([^:]*\):.*/\1/p')
-        local es_port=$(echo "$SPRING_ELASTICSEARCH_URIS" | sed -n 's/.*:\([0-9]*\).*/\1/p')
-        if [ -n "$es_host" ] && [ -n "$es_port" ]; then
-            wait_for_service "$es_host" "$es_port" "Elasticsearch搜索引擎" 30
-        fi
-    fi
+    # 等待Elasticsearch - 暂时禁用
+    # if [ -n "$SPRING_ELASTICSEARCH_URIS" ] && [ "$WAIT_FOR_ES" != "false" ]; then
+    #     local es_host=$(echo "$SPRING_ELASTICSEARCH_URIS" | sed -n 's/.*:\/\/\([^:]*\):.*/\1/p')
+    #     local es_port=$(echo "$SPRING_ELASTICSEARCH_URIS" | sed -n 's/.*:\([0-9]*\).*/\1/p')
+    #     if [ -n "$es_host" ] && [ -n "$es_port" ]; then
+    #         wait_for_service "$es_host" "$es_port" "Elasticsearch搜索引擎" 30
+    #     fi
+    # fi
 }
 
 # 设置JVM参数

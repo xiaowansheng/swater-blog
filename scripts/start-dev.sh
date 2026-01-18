@@ -21,9 +21,8 @@ fi
 
 # 启动基础服务
 echo ""
-echo "2. 启动基础服务 (MySQL, Redis, RabbitMQ, Elasticsearch)..."
-cd blog-service
-docker-compose up -d mysql redis rabbitmq elasticsearch
+echo "2. 启动基础服务 (MySQL, Redis, RabbitMQ)..."
+docker-compose -f docker-compose.env.yml up -d mysql redis rabbitmq
 
 # 等待服务启动
 echo ""
@@ -38,6 +37,7 @@ docker-compose ps
 # 启动后端服务
 echo ""
 echo "5. 启动后端服务..."
+cd blog-service
 gnome-terminal --title="后端服务" -- bash -c "./gradlew bootRun --args='--spring.profiles.active=dev'; exec bash" &
 
 # 等待后端服务启动
@@ -45,11 +45,17 @@ echo ""
 echo "6. 等待后端服务启动..."
 sleep 20
 
-# 启动前端服务
+# 启动管理后台
 echo ""
-echo "7. 启动前端服务..."
+echo "7. 启动管理后台..."
 cd ../blog-admin
 gnome-terminal --title="前端服务" -- bash -c "npm run dev; exec bash" &
+
+# 启动博客前端
+echo ""
+echo "8. 启动博客前端..."
+cd ../blog-web
+gnome-terminal --title="博客前端" -- bash -c "npm run dev; exec bash" &
 
 echo ""
 echo "========================================"
@@ -58,7 +64,8 @@ echo "========================================"
 echo ""
 echo "服务地址:"
 echo "- 后端API: http://localhost:8888"
-echo "- 前端管理: http://localhost:3000"
+echo "- 管理后台: http://localhost:3000"
+echo "- 博客前端: http://localhost:3001"
 echo "- API文档: http://localhost:8888/swagger-ui.html"
 echo "- 监控面板: http://localhost:8888/actuator"
 echo ""
@@ -66,7 +73,6 @@ echo "数据库连接:"
 echo "- MySQL: localhost:3306"
 echo "- Redis: localhost:6379"
 echo "- RabbitMQ管理: http://localhost:15672 (guest/guest)"
-echo "- Elasticsearch: http://localhost:9200"
 echo ""
 echo "按 Ctrl+C 停止所有服务"
 

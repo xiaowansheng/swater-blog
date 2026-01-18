@@ -1,16 +1,15 @@
-'use client';
-
 import { formatDate } from '@/lib/utils/format';
-import { usePathname, Link } from '@/lib/i18n/routing';
+import { Link } from '@/lib/i18n/routing';
 import type { PostVO } from '@/types';
 
 interface ArticleMetaProps {
   article: PostVO;
+  locale?: string;
 }
 
-export default function ArticleMeta({ article }: ArticleMetaProps) {
-  const pathname = usePathname();
-  const locale = pathname?.split('/')[1] || 'zh';
+export default function ArticleMeta({ article, locale = 'zh' }: ArticleMetaProps) {
+  // 根据locale映射到dayjs的locale
+  const dayjsLocale = locale === 'en' ? 'en' : 'zh-cn';
 
   return (
     <div className="flex flex-wrap gap-4 items-center pb-6 mb-8 text-sm border-b text-muted border-border/40">
@@ -27,10 +26,10 @@ export default function ArticleMeta({ article }: ArticleMetaProps) {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          {formatDate(article.publishedAt, 'YYYY-MM-DD HH:mm', locale)}
+          {formatDate(article.publishedAt, 'YYYY-MM-DD HH:mm', dayjsLocale)}
         </span>
       )}
-      
+
       {/* 字数统计 */}
       <span className="flex items-center gap-1.5">
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,7 +37,7 @@ export default function ArticleMeta({ article }: ArticleMetaProps) {
         </svg>
         {(article.content?.length || 0).toLocaleString()} 字
       </span>
-      
+
       {/* 阅读量 */}
       <span className="flex items-center gap-1.5">
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

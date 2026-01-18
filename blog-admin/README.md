@@ -84,9 +84,13 @@ blog-admin/
 
 ```bash
 # 安装依赖
+npm install
+# 或
 pnpm install
 
 # 启动开发服务器
+npm run dev
+# 或
 pnpm dev
 
 # 构建生产版本
@@ -103,6 +107,9 @@ pnpm preview
 
 主要配置项：
 - `VITE_API_BASE_URL` - API基础路径
+
+默认开发端口：`http://localhost:3000`  
+如需修改端口或代理配置，请查看 `vite.config.ts`。
 
 ## API对接
 

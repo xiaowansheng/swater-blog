@@ -63,8 +63,8 @@ else
 fi
 
 # 启动依赖服务
-echo -e "${BLUE}🐳 启动依赖服务 (MySQL, Redis, RabbitMQ, Elasticsearch)...${NC}"
-docker-compose up -d mysql redis rabbitmq elasticsearch
+echo -e "${BLUE}🐳 启动依赖服务 (MySQL, Redis, RabbitMQ)...${NC}"
+docker-compose -f docker-compose.env.yml up -d mysql redis rabbitmq
 
 # 等待服务启动
 echo -e "${BLUE}⏳ 等待服务启动完成...${NC}"
@@ -94,90 +94,16 @@ if [ -d "blog-web" ]; then
     cd ..
 fi
 
-# 创建启动脚本
-echo -e "${BLUE}📜 创建启动脚本...${NC}"
-cat > start-dev.sh << 'EOF'
-#!/bin/bash
-
-echo "🚀 启动 Swater Blog 开发环境..."
-
-# 启动后端服务
-echo "📡 启动后端服务..."
-cd blog-service
-./gradlew bootRun &
-BACKEND_PID=$!
-cd ..
-
-# 等待后端启动
-sleep 10
-
-# 启动管理后台
-echo "🖥️  启动管理后台..."
-cd blog-admin
-npm run dev &
-ADMIN_PID=$!
-cd ..
-
-# 启动博客前端（如果存在）
-if [ -d "blog-web" ]; then
-    echo "🌐 启动博客前端..."
-    cd blog-web
-    npm run dev &
-    WEB_PID=$!
-    cd ..
-fi
-
-echo "✅ 所有服务已启动！"
-echo "📡 后端服务: http://localhost:8888"
-echo "📚 API 文档: http://localhost:8888/swagger-ui.html"
-echo "🖥️  管理后台: http://localhost:3001"
-if [ -d "blog-web" ]; then
-    echo "🌐 博客前端: http://localhost:3000"
-fi
-
-# 等待用户输入来停止服务
-read -p "按 Enter 键停止所有服务..."
-
-echo "🛑 停止服务..."
-kill $BACKEND_PID 2>/dev/null || true
-kill $ADMIN_PID 2>/dev/null || true
-if [ -n "$WEB_PID" ]; then
-    kill $WEB_PID 2>/dev/null || true
-fi
-
-echo "✅ 所有服务已停止"
-EOF
-
-chmod +x start-dev.sh
-
-# 创建停止脚本
-cat > stop-dev.sh << 'EOF'
-#!/bin/bash
-
-echo "🛑 停止 Swater Blog 开发环境..."
-
-# 停止 Docker 服务
-docker-compose down
-
-# 停止可能运行的进程
-pkill -f "gradlew bootRun" 2>/dev/null || true
-pkill -f "npm run dev" 2>/dev/null || true
-
-echo "✅ 开发环境已停止"
-EOF
-
-chmod +x stop-dev.sh
-
 echo -e "${GREEN}🎉 开发环境搭建完成！${NC}"
 echo -e "${BLUE}📋 使用说明:${NC}"
-echo -e "  • 启动开发环境: ${GREEN}./start-dev.sh${NC}"
-echo -e "  • 停止开发环境: ${GREEN}./stop-dev.sh${NC}"
-echo -e "  • 查看服务状态: ${GREEN}docker-compose ps${NC}"
-echo -e "  • 查看服务日志: ${GREEN}docker-compose logs -f [service-name]${NC}"
+echo -e "  • 启动开发环境: ${GREEN}./scripts/start-dev.sh${NC}"
+echo -e "  • 停止基础服务: ${GREEN}docker-compose -f docker-compose.env.yml down${NC}"
+echo -e "  • 查看服务状态: ${GREEN}docker-compose -f docker-compose.env.yml ps${NC}"
+echo -e "  • 查看服务日志: ${GREEN}docker-compose -f docker-compose.env.yml logs -f [service-name]${NC}"
 echo ""
 echo -e "${YELLOW}⚠️  注意事项:${NC}"
 echo -e "  • 首次启动可能需要较长时间下载依赖"
-echo -e "  • 请确保端口 3000, 3001, 8888, 3306, 6379, 5672, 9200 未被占用"
+echo -e "  • 请确保端口 3000, 3001, 8888, 3306, 6379, 5672 未被占用"
 echo -e "  • 修改 .env 文件中的配置以适应你的环境"
 echo ""
 echo -e "${GREEN}🚀 现在可以运行 ./start-dev.sh 启动开发环境！${NC}"
