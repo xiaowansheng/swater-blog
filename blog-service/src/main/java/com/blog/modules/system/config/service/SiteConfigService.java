@@ -21,6 +21,7 @@ import com.blog.modules.system.config.model.dto.config.SocialConfigDTO;
 import com.blog.modules.system.config.model.dto.config.CoverConfigDTO;
 import com.blog.modules.system.config.model.dto.config.AuthorConfigDTO;
 import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
+import com.blog.modules.system.config.model.dto.config.ComponentConfigDTO;
 import java.util.Map;
 /**
  * 网站配置服务
@@ -40,7 +41,9 @@ public interface SiteConfigService {
     PrivacyConfigDTO getPrivacyConfig();
     
     CommentConfigDTO getCommentConfig();
-    
+
+    ComponentConfigDTO getComponentConfig();
+
     NotifyConfigDTO getNotifyConfig();
     
     UploadConfigDTO getUploadConfig();
@@ -60,7 +63,9 @@ public interface SiteConfigService {
     void updatePrivacyConfig(PrivacyConfigDTO config);
     
     void updateCommentConfig(CommentConfigDTO config);
-    
+
+    void updateComponentConfig(ComponentConfigDTO config);
+
     void updateNotifyConfig(NotifyConfigDTO config);
     
     void updateUploadConfig(UploadConfigDTO config);

@@ -22,6 +22,7 @@ import com.blog.modules.system.config.model.dto.config.SocialConfigDTO;
 import com.blog.modules.system.config.model.dto.config.CoverConfigDTO;
 import com.blog.modules.system.config.model.dto.config.AuthorConfigDTO;
 import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
+import com.blog.modules.system.config.model.dto.config.ComponentConfigDTO;
 import com.blog.shared.annotation.ApiOperation;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.shared.Result;
@@ -126,6 +127,21 @@ public class SiteConfigController {
     @ApiOperation(name = "更新评论配置", type = ApiOperationType.UPDATE, description = "更新评论设置配置")
     public Result<Void> updateCommentConfig(@RequestBody CommentConfigDTO config) {
         siteConfigService.updateCommentConfig(config);
+        return Result.success();
+    }
+
+    // ========== 组件设置 ==========
+
+    @GetMapping("/component")
+    @ApiOperation(name = "获取组件配置", type = ApiOperationType.QUERY, description = "获取组件开关配置")
+    public Result<ComponentConfigDTO> getComponentConfig() {
+        return Result.success(siteConfigService.getComponentConfig());
+    }
+
+    @PutMapping("/component")
+    @ApiOperation(name = "更新组件配置", type = ApiOperationType.UPDATE, description = "更新组件开关配置")
+    public Result<Void> updateComponentConfig(@RequestBody ComponentConfigDTO config) {
+        siteConfigService.updateComponentConfig(config);
         return Result.success();
     }
 

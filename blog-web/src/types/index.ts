@@ -109,6 +109,12 @@ export interface CommentConfig {
   allowGuest: boolean;
 }
 
+export interface ComponentConfig {
+  articleCommentEnabled: boolean;
+  talkCommentEnabled: boolean;
+  guestbookMessageEnabled: boolean;
+}
+
 /**
  * 前台公开配置（已过滤敏感信息）
  */
@@ -119,6 +125,7 @@ export interface PublicConfigVO {
   social: SocialConfig;
   privacy: PrivacyConfig;
   comment: CommentConfig;
+  component?: ComponentConfig;
 }
 
 export interface PostVO {

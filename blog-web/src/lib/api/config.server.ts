@@ -1,5 +1,5 @@
 import { fetchServer } from './server';
-import type { PublicConfigVO, SiteInfo, AuthorInfo, CoverConfig, SocialConfig, PrivacyConfig, CommentConfig } from '@/types';
+import type { PublicConfigVO, SiteInfo, AuthorInfo, CoverConfig, SocialConfig, PrivacyConfig, CommentConfig, ComponentConfig } from '@/types';
 import { cache } from 'react';
 
 // 默认配置（API调用失败时使用）
@@ -45,6 +45,11 @@ const defaultConfig: PublicConfigVO = {
   comment: {
     allowAnonymous: false,
     allowGuest: true,
+  },
+  component: {
+    articleCommentEnabled: true,
+    talkCommentEnabled: true,
+    guestbookMessageEnabled: true,
   },
 };
 
@@ -107,6 +112,18 @@ export const getPrivacyConfig = cache(async (): Promise<PrivacyConfig> => {
 export const getCommentConfig = cache(async (): Promise<CommentConfig> => {
   const config = await getServerConfig();
   return config.comment;
+});
+
+/**
+ * 获取组件配置
+ */
+export const getComponentConfig = cache(async (): Promise<ComponentConfig> => {
+  const config = await getServerConfig();
+  return config.component || {
+    articleCommentEnabled: true,
+    talkCommentEnabled: true,
+    guestbookMessageEnabled: true,
+  };
 });
 
 /**

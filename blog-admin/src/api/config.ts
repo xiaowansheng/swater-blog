@@ -106,6 +106,12 @@ export interface EmailConfig {
   fromName: string
 }
 
+export interface ComponentConfig {
+  articleCommentEnabled: boolean
+  talkCommentEnabled: boolean
+  guestbookMessageEnabled: boolean
+}
+
 // API 方法
 export const getSiteConfig = (): Promise<SiteConfig> => request.get('/admin/site-config/site')
 export const updateSiteConfig = (data: SiteConfig): Promise<void> => request.put('/admin/site-config/site', data)
@@ -133,3 +139,8 @@ export const updateUploadConfig = (data: UploadConfig): Promise<void> => request
 
 export const getEmailConfig = (): Promise<EmailConfig> => request.get('/admin/site-config/email')
 export const updateEmailConfig = (data: EmailConfig): Promise<void> => request.put('/admin/site-config/email', data)
+
+// 组件配置
+export const getComponentConfig = (): Promise<ComponentConfig> => request.get('/admin/site-config/component')
+export const updateComponentConfig = (data: ComponentConfig): Promise<void> => request.put('/admin/site-config/component', data)
+

@@ -10,6 +10,7 @@ import com.blog.modules.system.config.model.dto.config.SocialConfigDTO;
 import com.blog.modules.system.config.model.dto.config.CoverConfigDTO;
 import com.blog.modules.system.config.model.dto.config.AuthorConfigDTO;
 import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
+import com.blog.modules.system.config.model.dto.config.ComponentConfigDTO;
 import com.blog.modules.system.config.model.vo.ConfigVO;
 import com.blog.modules.system.config.service.ConfigService;
 import com.blog.modules.system.config.service.SiteConfigService;
@@ -39,6 +40,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     private static final String KEY_NOTIFY = "notify";
     private static final String KEY_UPLOAD = "upload";
     private static final String KEY_EMAIL = "email";
+    private static final String KEY_COMPONENT = "component.enabled";
     
     // ========== 通用方法 ==========
     
@@ -123,6 +125,20 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     }
 
     @Override
+    @Cacheable(value = "configs", key = "'component'", unless = "#result == null")
+    public ComponentConfigDTO getComponentConfig() {
+        ComponentConfigDTO config = getConfig(KEY_COMPONENT, ComponentConfigDTO.class);
+        if (config == null) {
+            // 返回默认配置，所有组件启用
+            config = new ComponentConfigDTO();
+            config.setArticleCommentEnabled(true);
+            config.setTalkCommentEnabled(true);
+            config.setGuestbookMessageEnabled(true);
+        }
+        return config;
+    }
+
+    @Override
     @Cacheable(value = "configs", key = "'notify'", unless = "#result == null")
     public NotifyConfigDTO getNotifyConfig() {
         return getConfig(KEY_NOTIFY, NotifyConfigDTO.class);
@@ -183,7 +199,14 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     public void updateCommentConfig(CommentConfigDTO config) {
         updateConfig(KEY_COMMENT, config);
     }
-    
+
+    @Override
+    @CacheEvict(value = "configs", allEntries = true)
+    @Transactional
+    public void updateComponentConfig(ComponentConfigDTO config) {
+        updateConfig(KEY_COMPONENT, config);
+    }
+
     @Override
     @CacheEvict(value = "configs", key = "'notify'")
     @Transactional
@@ -211,33 +234,36 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Cacheable(value = "configs", key = "'public'", unless = "#result == null || #result.isEmpty()")
     public Map<String, Object> getPublicConfig() {
         Map<String, Object> result = new LinkedHashMap<>();
-        
+
         // 网站信息 - 全部公开
         result.put("site", getSiteConfig());
-        
+
         // 作者信息 - 过滤敏感字段
         AuthorConfigDTO author = getAuthorConfig();
         if (author != null) {
             result.put("author", author.toPublicView());
         }
-        
+
         // 封面配置 - 全部公开
         result.put("cover", getCoverConfig());
-        
+
         // 社交链接 - 全部公开
         result.put("social", getSocialConfig());
-        
+
         // 隐私配置 - 全部公开（前台需要知道显示什么）
         result.put("privacy", getPrivacyConfig());
-        
+
         // 评论配置 - 部分公开
         CommentConfigDTO comment = getCommentConfig();
         if (comment != null) {
             result.put("comment", comment.toPublicView());
         }
-        
+
+        // 组件配置 - 全部公开
+        result.put("component", getComponentConfig());
+
         // notify、upload、email 不返回给前台
-        
+
         return result;
     }
 }

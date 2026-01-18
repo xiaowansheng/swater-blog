@@ -12,7 +12,7 @@ import { AnimeComment } from '@/components/anime-comment';
 import ContentTracker from '@/components/visitor/ContentTracker';
 import ArticleLiveStats from '@/components/article/ArticleLiveStats';
 import { articleApi } from '@/lib/api/article';
-import { getAuthorInfo, getCoverConfig } from '@/lib/api/config.server';
+import { getAuthorInfo, getCoverConfig, getComponentConfig } from '@/lib/api/config.server';
 import { ISR_REVALIDATE } from '@/lib/constants';
 import { generateArticleMetadata } from '@/lib/utils/seo';
 import { formatDate } from '@/lib/utils/format';
@@ -47,10 +47,11 @@ export default async function PostDetailPage({
   const { locale, slug } = await params;
 
   try {
-    const [article, author, cover] = await Promise.all([
+    const [article, author, cover, componentConfig] = await Promise.all([
       articleApi.getByKey(slug),
       getAuthorInfo(),
-      getCoverConfig()
+      getCoverConfig(),
+      getComponentConfig()
     ]);
 
     return (
@@ -158,10 +159,12 @@ export default async function PostDetailPage({
               />
               <ArticleCopyright article={article} author={author} />
 
-              {/* 二次元评论组件 */}
-              <div className="mt-12">
-                <AnimeComment postId={article.id} />
-              </div>
+              {/* 二次元评论组件 - 根据配置显示 */}
+              {componentConfig.articleCommentEnabled && (
+                <div className="mt-12">
+                  <AnimeComment postId={article.id} />
+                </div>
+              )}
             </article>
 
             {/* 侧边栏菜单 - 只在大屏幕显示 */}

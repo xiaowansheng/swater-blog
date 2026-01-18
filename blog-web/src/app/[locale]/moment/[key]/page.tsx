@@ -11,7 +11,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import { momentApi } from '@/lib/api/moment';
 import { formatDate } from '@/lib/utils/format';
 import { ISR_REVALIDATE } from '@/lib/constants';
-import { getAuthorInfo, getServerConfig } from '@/lib/api/config.server';
+import { getAuthorInfo, getServerConfig, getComponentConfig } from '@/lib/api/config.server';
 
 export const revalidate = ISR_REVALIDATE.HOME;
 
@@ -82,10 +82,11 @@ export default async function MomentDetailPage({
   const t = await getTranslations('common');
 
   try {
-    const [moment, author, config] = await Promise.all([
+    const [moment, author, config, componentConfig] = await Promise.all([
       momentApi.getByKey(key),
       getAuthorInfo(),
       getServerConfig(),
+      getComponentConfig(),
     ]);
     const { privacy } = config;
 
@@ -225,12 +226,14 @@ export default async function MomentDetailPage({
                 />
               </div>
 
-              {/* 评论区 */}
-              <div className="pt-8 border-t border-border/50 relative">
-                {/* 装饰星星 */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 text-primary/10 text-sm">✦</div>
-                <AnimeComment momentId={moment.id} />
-              </div>
+              {/* 评论区 - 根据配置显示 */}
+              {componentConfig.talkCommentEnabled && (
+                <div className="pt-8 border-t border-border/50 relative">
+                  {/* 装饰星星 */}
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 text-primary/10 text-sm">✦</div>
+                  <AnimeComment momentId={moment.id} />
+                </div>
+              )}
             </div>
           </article>
         </main>
