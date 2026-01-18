@@ -113,11 +113,23 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-blog123456}
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_DATABASE: ${REDIS_DATABASE:-0}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin123}
-      # ES_URIS: http://elasticsearch:9200  # 暂时禁用ES
+      # ES_URIS: ${ES_URIS:-http://elasticsearch:9200}  # 暂时禁用ES
+      ES_USERNAME: ${ES_USERNAME:-}
+      ES_PASSWORD: ${ES_PASSWORD:-}
+      MAIL_HOST: ${MAIL_HOST:-smtp.qq.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      AMAP_KEY: ${AMAP_KEY:-}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-swater_blog_jwt_secret_key_2024}
+      FILE_STORAGE_TYPE: ${FILE_STORAGE_TYPE:-local}
+      SERVER_PORT: ${SERVER_PORT:-8888}
       JAVA_OPTS: "-Xms512m -Xmx1024m -XX:+UseG1GC"
     volumes:
       - blog_logs:/app/logs
