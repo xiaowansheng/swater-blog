@@ -1,5 +1,5 @@
 import { Layout, Spin, Breadcrumb } from 'antd'
-import { Suspense, useEffect } from 'react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 import { useLocation, useOutlet, Link } from 'react-router-dom'
 import Header from './components/Header'
 import Sidebar from './components/Sidebar'
@@ -89,6 +89,14 @@ const BasicLayout: React.FC = () => {
   const location = useLocation()
   const outlet = useOutlet()
   const { drop, refresh } = useAliveController()
+  const [refreshSeeds, setRefreshSeeds] = useState<Record<string, number>>({})
+
+  const bumpRefreshSeed = useCallback((key: string) => {
+    setRefreshSeeds((prev) => ({
+      ...prev,
+      [key]: (prev[key] ?? 0) + 1,
+    }))
+  }, [])
 
   useEffect(() => {
     if (isAuthenticated()) {
@@ -114,6 +122,7 @@ const BasicLayout: React.FC = () => {
       const key = event.detail?.key
       if (key) {
         refresh(key)
+        bumpRefreshSeed(key)
       }
     }
 
@@ -124,7 +133,9 @@ const BasicLayout: React.FC = () => {
       window.removeEventListener('tab-remove', handleRemove as EventListener)
       window.removeEventListener('tab-refresh', handleRefresh as EventListener)
     }
-  }, [drop, refresh])
+  }, [bumpRefreshSeed, drop, refresh])
+
+  const keepAliveKey = `${location.pathname}:${refreshSeeds[location.pathname] ?? 0}`
 
   return (
     <Layout className="h-screen">
@@ -137,7 +148,7 @@ const BasicLayout: React.FC = () => {
             <div className="mb-4">
               <Breadcrumb items={getBreadcrumbItems(location.pathname)} />
             </div>
-            <KeepAlive name={location.pathname} when={shouldCache} key={location.pathname}>
+            <KeepAlive name={location.pathname} when={shouldCache} key={keepAliveKey}>
               <Suspense fallback={<PageLoading />}>{outlet}</Suspense>
             </KeepAlive>
           </div>
