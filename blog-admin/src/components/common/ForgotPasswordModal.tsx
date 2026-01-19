@@ -10,23 +10,12 @@ interface ForgotPasswordModalProps {
   onClose: () => void
 }
 
-const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ open, onClose }) => {
+const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = React.memo(({ open, onClose }) => {
   const [currentStep, setCurrentStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [countdown, setCountdown] = useState(0)
   const [form] = Form.useForm()
-
-  console.log('ForgotPasswordModal 渲染, open:', open)
-
-  useEffect(() => {
-    console.log('ForgotPasswordModal open 状态变化:', open)
-    if (open) {
-      console.log('忘记密码模态框应该显示')
-    } else {
-      console.log('忘记密码模态框应该隐藏')
-    }
-  }, [open])
 
   // 发送验证码倒计时
   const startCountdown = () => {
@@ -230,6 +219,8 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ open, onClose
       </div>
     </Modal>
   )
-}
+})
+
+ForgotPasswordModal.displayName = 'ForgotPasswordModal'
 
 export default ForgotPasswordModal
