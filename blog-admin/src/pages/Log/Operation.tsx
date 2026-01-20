@@ -173,8 +173,8 @@ const LogOperationPage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 80,
-      fixed: 'right',
-      align: 'center',
+      fixed: 'right' as const,
+      align: 'center' as const,
       render: (_: any, record: LogOperation) => (
         <div style={{ textAlign: 'center' }}>
           <Button

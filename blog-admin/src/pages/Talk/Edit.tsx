@@ -19,7 +19,6 @@ const TalkEdit: React.FC = () => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const status = Form.useWatch('status', form)
 
   // 保存状态
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
@@ -133,7 +132,7 @@ const TalkEdit: React.FC = () => {
 
       setSaveStatus('saved')
       setLastSavedTime(new Date())
-    } catch (error) {
+    } catch (error: any) {
       if (error?.errorFields) {
         message.warning('请填写必填项')
         setSaveStatus('idle')

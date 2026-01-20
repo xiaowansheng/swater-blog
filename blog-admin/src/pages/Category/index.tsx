@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Breadcrumb } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { getCategoryList, createCategory, updateCategory, deleteCategory } from '@/api/category'
 import { Category } from '@/types'
 
 const CategoryPage: React.FC = () => {
-  const navigate = useNavigate()
   const [categories, setCategories] = useState<Category[]>([])
   const [allCategories, setAllCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)

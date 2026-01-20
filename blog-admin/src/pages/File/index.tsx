@@ -414,7 +414,7 @@ const FilePage: React.FC = () => {
                           </span>
                         )}
                         <div className="flex items-center gap-1">
-                          <Tag color={file.refCount > 0 ? 'blue' : 'default'} className="text-xs">
+                          <Tag color={(file.refCount ?? 0) > 0 ? 'blue' : 'default'} className="text-xs">
                             引用: {file.refCount || 0}
                           </Tag>
                         </div>

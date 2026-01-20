@@ -238,7 +238,7 @@ export const importMarkdown = (file: File, config?: Partial<MarkdownImportConfig
   formData.append('file', file)
 
   if (config) {
-    if (config.categoryId !== undefined) formData.append('categoryId', config.categoryId.toString())
+    if (config.manualCategoryId !== undefined) formData.append('categoryId', config.manualCategoryId.toString())
     if (config.importAssets !== undefined) formData.append('importAssets', config.importAssets.toString())
     if (config.assetMode) formData.append('assetMode', config.assetMode)
     if (config.defaultStatus) formData.append('defaultStatus', config.defaultStatus)

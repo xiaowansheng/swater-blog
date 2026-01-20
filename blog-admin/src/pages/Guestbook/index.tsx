@@ -283,7 +283,7 @@ const GuestbookPage: React.FC = () => {
       width: 120,
       render: (_: any, record: Guestbook) => (
         <Space direction="vertical" size="small">
-          {getStatusTag(record.reviewStatus ?? record.status)}
+          {getStatusTag(record.reviewStatus ?? record.status ?? 0)}
           <Tag
             icon={record.isVisible === 1 ? <EyeOutlined /> : <EyeInvisibleOutlined />}
             color={record.isVisible === 1 ? 'success' : 'default'}
@@ -320,7 +320,7 @@ const GuestbookPage: React.FC = () => {
               onClick={() => showDetail(record)}
             />
           </Tooltip>
-          {(record.reviewStatus === 0 || record.status === 0) && (
+          {((record.reviewStatus ?? record.status) === 0) && (
             <>
               <Popconfirm title="确定通过这条留言吗？" onConfirm={() => handleApprove(record.id)}>
                 <Tooltip title="通过">
@@ -560,7 +560,7 @@ const GuestbookPage: React.FC = () => {
                 </Descriptions.Item>
               )}
               <Descriptions.Item label="审核状态">
-                {getStatusTag(currentGuestbook.reviewStatus)}
+                {getStatusTag(currentGuestbook.reviewStatus ?? 0)}
               </Descriptions.Item>
               {currentGuestbook.isVisible !== undefined && (
                 <Descriptions.Item label="可见状态">

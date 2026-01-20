@@ -9,7 +9,6 @@ import {
   Popconfirm,
   Empty,
   Spin,
-  Upload,
   Row,
   Col,
   Tag,
@@ -21,15 +20,13 @@ import {
   EditOutlined,
   DeleteOutlined,
   PictureOutlined,
-  UploadOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
-import { getAlbumList, createAlbum, updateAlbum, deleteAlbum, AlbumDTO } from '@/api/album'
+import { getAlbumList, createAlbum, updateAlbum, deleteAlbum } from '@/api/album'
 import { Album, AlbumStatus, ALBUM_STATUS_MAP } from '@/types'
 
 const AlbumPage: React.FC = () => {
   const [albums, setAlbums] = useState<Album[]>([])
-  const [allAlbums, setAllAlbums] = useState<Album[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [editingAlbum, setEditingAlbum] = useState<Album | null>(null)
@@ -48,7 +45,6 @@ const AlbumPage: React.FC = () => {
     try {
       const result = await getAlbumList()
       const allAlbumData = result.records || []
-      setAllAlbums(allAlbumData)
 
       let filtered = allAlbumData
       if (filters.name) {

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Upload, message, Modal } from 'antd';
 import Image from '@/components/common/ImageWithPreview';
 import {
-  PlusOutlined,
   LoadingOutlined,
   DeleteOutlined,
   EyeOutlined,
@@ -40,7 +39,6 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   showHint,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [isDragOver, setIsDragOver] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
 
   // 如果有 children，默认不显示提示，除非显式指定 showHint 为 true
@@ -118,9 +116,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
     if (height) style.height = height;
 
-    const borderClass = isDragOver 
-      ? "border-blue-500 bg-blue-50/50 scale-[1.02] ring-4 ring-blue-500/10" 
-      : "border-gray-200 bg-gray-400/10 hover:border-blue-400 hover:bg-white";
+    const borderClass = "border-gray-200 bg-gray-400/10 hover:border-blue-400 hover:bg-white";
 
     return {
       className: `${baseClasses} ${shapeClass} ${borderClass} ${className}`,
@@ -140,9 +136,6 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         customRequest={handleUpload}
         beforeUpload={beforeUpload}
         accept="image/*"
-        onDragEnter={() => setIsDragOver(true)}
-        onDragLeave={() => setIsDragOver(false)}
-        onDrop={() => setIsDragOver(false)}
       >
         <div {...containerProps}>
           {value ? (

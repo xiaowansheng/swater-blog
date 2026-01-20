@@ -17,14 +17,14 @@ export enum SaveStatus {
 // 保存状态信息
 export interface SaveState {
   status: SaveStatus
-  lastSavedTime: Date | null
-  articleId: number | null
-  version: number | null
-  errorMessage: string | null
+  lastSavedTime: Date | undefined
+  articleId: number | undefined
+  version: number | undefined
+  errorMessage: string | undefined
   conflictData: {
     serverContent: string
     serverUpdateTime: string
-  } | null
+  } | undefined
 }
 
 // Hook配置选项
@@ -65,23 +65,23 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
   // 保存状态
   const [saveState, setSaveState] = useState<SaveState>({
     status: SaveStatus.IDLE,
-    lastSavedTime: null,
-    articleId: null,
-    version: null,
-    errorMessage: null,
-    conflictData: null,
+    lastSavedTime: undefined,
+    articleId: undefined,
+    version: undefined,
+    errorMessage: undefined,
+    conflictData: undefined,
   })
 
   // 保存队列和锁
   const saveQueueRef = useRef<ArticleSaveDTO[]>([])
   const isSavingRef = useRef(false)
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const autoSaveTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const autoSaveTimerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
   const lastContentRef = useRef<string>('')
   const isOnlineRef = useRef(navigator.onLine)
-  const latestArticleIdRef = useRef<number | null>(null)
-  const latestVersionRef = useRef<number | null>(null)
-  const articleKeyRef = useRef<string | null>(null)
+  const latestArticleIdRef = useRef<number | undefined>(undefined)
+  const latestVersionRef = useRef<number | undefined>(undefined)
+  const articleKeyRef = useRef<string | undefined>(undefined)
 
   const ensureArticleKey = useCallback(() => {
     if (!articleKeyRef.current) {
@@ -170,7 +170,7 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
     isSavingRef.current = true
     saveQueueRef.current = []
 
-    setSaveState(prev => ({ ...prev, status: SaveStatus.SAVING, errorMessage: null }))
+    setSaveState(prev => ({ ...prev, status: SaveStatus.SAVING, errorMessage: undefined }))
 
     try {
       const result = await saveArticle(payload)
@@ -202,8 +202,8 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
           lastSavedTime: new Date(),
           articleId: result.id,
           version: result.version,
-          errorMessage: null,
-          conflictData: null,
+          errorMessage: undefined,
+          conflictData: undefined,
         }))
         
         // 保存成功后删除本地草稿
@@ -350,13 +350,13 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
   const stopAutoSaveTimer = useCallback(() => {
     if (autoSaveTimerRef.current) {
       clearInterval(autoSaveTimerRef.current)
-      autoSaveTimerRef.current = null
+      autoSaveTimerRef.current = undefined
     }
   }, [])
 
   // 重试保存
   const retry = useCallback((data: Omit<ArticleSaveDTO, 'autoSave' | 'clientVersion'>) => {
-    setSaveState(prev => ({ ...prev, status: SaveStatus.IDLE, errorMessage: null }))
+    setSaveState(prev => ({ ...prev, status: SaveStatus.IDLE, errorMessage: undefined }))
     save(data)
   }, [save])
 
@@ -365,8 +365,8 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
     setSaveState(prev => ({
       ...prev,
       status: SaveStatus.IDLE,
-      conflictData: null,
-      errorMessage: null,
+      conflictData: undefined,
+      errorMessage: undefined,
     }))
   }, [])
 
@@ -375,9 +375,9 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
     setSaveState(prev => ({
       ...prev,
       status: SaveStatus.IDLE,
-      conflictData: null,
-      errorMessage: null,
-      version: null, // 清除版本号，强制覆盖
+      conflictData: undefined,
+      errorMessage: undefined,
+      version: undefined, // 清除版本号，强制覆盖
     }))
     save(data)
   }, [save])

@@ -213,7 +213,7 @@ const CommentPage: React.FC = () => {
                 回复 #{record.parentId}
               </Tag>
             ):''}
-            {record.replyCount > 0 && (
+            {(record.replyCount ?? 0) > 0 && (
               <Tag color="cyan">{record.replyCount} 条回复</Tag>
             )}
           </div>
@@ -614,7 +614,7 @@ const CommentPage: React.FC = () => {
                   <Tag color="orange">#{currentComment.rootId}</Tag>
                 </Descriptions.Item>
               )}
-              {currentComment.replyCount > 0 && (
+              {(currentComment.replyCount ?? 0) > 0 && (
                 <Descriptions.Item label="回复数量">
                   <Tag color="cyan">{currentComment.replyCount} 条</Tag>
                 </Descriptions.Item>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag as AntTag, ColorPicker } from 'antd'
+import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag as AntTag } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
 import { getTagList, createTag, updateTag, deleteTag } from '@/api/tag'
 import { Tag } from '@/types'

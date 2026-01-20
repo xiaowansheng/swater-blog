@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Popover, Input, Button, Tag, Space, Empty, Tooltip } from 'antd';
-import { PlusOutlined, SearchOutlined, CheckOutlined } from '@ant-design/icons';
+import { Popover, Input, Button, Tag, Empty, Tooltip } from 'antd';
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { Tag as TagType } from '@/types';
 
 interface TagSelectorProps {
@@ -28,7 +28,6 @@ const TagSelector: React.FC<TagSelectorProps> = ({ value = [], onChange, tags, m
   }, [tags, searchText]);
 
   const toggleTag = (tag: TagType | string) => {
-    const tagName = typeof tag === 'string' ? tag : tag.name;
     const tagId = typeof tag === 'string' ? tag : tag.id;
     
     const isSelected = value.some(v => v === tagId);

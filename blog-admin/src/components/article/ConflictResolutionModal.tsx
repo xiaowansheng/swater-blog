@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Button, Space, Alert, Tabs, Typography } from 'antd'
+import { Modal, Button, Alert, Tabs, Typography } from 'antd'
 import { ExclamationCircleOutlined, CloudDownloadOutlined, CloudUploadOutlined } from '@ant-design/icons'
 
 const { Text, Paragraph } = Typography

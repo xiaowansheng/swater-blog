@@ -7,7 +7,6 @@ import {
   DesktopOutlined,
   ApartmentOutlined,
   ChromeOutlined,
-  SearchOutlined,
 } from '@ant-design/icons'
 import { getVisitorList, getVisitorStatistics } from '@/api/visitor'
 import { Visitor, VisitorStatistics } from '@/types'
@@ -24,7 +23,6 @@ const VisitorPage: React.FC = () => {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
   const [statRange, setStatRange] = useState<[string | null, string | null]>([null, null])
   const [filters, setFilters] = useState<{
-    ip: string
     country: string
     province: string
     city: string
@@ -33,7 +31,6 @@ const VisitorPage: React.FC = () => {
     browserName: string
     trafficSource: string | undefined
   }>({
-    ip: '',
     country: '',
     province: '',
     city: '',
@@ -63,14 +60,7 @@ const VisitorPage: React.FC = () => {
       const result = await getVisitorList({
         page: pagination.current,
         size: pagination.pageSize,
-        ip: filters.ip || undefined,
-        country: filters.country || undefined,
-        province: filters.province || undefined,
-        city: filters.city || undefined,
-        deviceType: filters.deviceType,
-        osName: filters.osName || undefined,
-        browserName: filters.browserName || undefined,
-        trafficSource: filters.trafficSource,
+        keyword: filters.country || filters.province || filters.city || undefined,
       })
       setVisitors(result.records)
       setPagination((prev) => ({ ...prev, total: result.total }))
@@ -298,14 +288,6 @@ const VisitorPage: React.FC = () => {
         className="chart-card"
         extra={
           <Space wrap>
-            <Input
-              placeholder="IP地址"
-              prefix={<SearchOutlined className="text-gray-400" />}
-              value={filters.ip}
-              onChange={(e) => setFilters({ ...filters, ip: e.target.value })}
-              style={{ width: 140 }}
-              allowClear
-            />
             <Input
               placeholder="国家"
               value={filters.country}

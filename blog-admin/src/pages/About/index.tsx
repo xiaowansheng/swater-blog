@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, Button, message, Spin, Input, Breadcrumb, Space } from 'antd'
+import { Card, Button, message, Spin, Breadcrumb } from 'antd'
 import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, Link } from 'react-router-dom'
 import { getAbout, updateAbout } from '@/api/about'

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Card, Button, Tag, Space, Spin, Empty, Avatar, Tooltip, Divider } from 'antd'
+import { Card, Button, Tag, Space, Spin, Empty, Avatar, Divider } from 'antd'
 import { ArrowLeftOutlined, VerticalAlignTopOutlined, EnvironmentOutlined, MobileOutlined, GlobalOutlined } from '@ant-design/icons'
 import { getTalkById } from '@/api/talk'
 import { getAuthorConfig } from '@/api/config'

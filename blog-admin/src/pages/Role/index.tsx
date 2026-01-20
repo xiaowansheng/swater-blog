@@ -7,7 +7,6 @@ import ApiAuthModal from './ApiAuthModal'
 
 const RolePage: React.FC = () => {
   const [roles, setRoles] = useState<Role[]>([])
-  const [allRoles, setAllRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [apiAuthVisible, setApiAuthVisible] = useState(false)
@@ -29,7 +28,6 @@ const RolePage: React.FC = () => {
     setLoading(true)
     try {
       const data = await getRoleList()
-      setAllRoles(data)
 
       let filtered = data
       if (filters.name) {

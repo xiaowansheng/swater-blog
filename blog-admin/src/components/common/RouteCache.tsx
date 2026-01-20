@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 interface RouteCacheProps {
   children: React.ReactNode
@@ -18,7 +18,6 @@ const MAX_CACHE = 10
 
 export const RouteCache: React.FC<RouteCacheProps> = ({ children }) => {
   const location = useLocation()
-  const navigate = useNavigate()
   const [renderKey, setRenderKey] = useState(0)
   const currentPathRef = useRef(location.pathname)
 

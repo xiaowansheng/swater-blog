@@ -199,7 +199,7 @@ const FriendLinkPage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 180,
-      render: (_: any, record: FriendLink, index: number) => (
+      render: (_: any, record: FriendLink) => (
         <Space size="small">
           <Tooltip title="编辑">
             <Button

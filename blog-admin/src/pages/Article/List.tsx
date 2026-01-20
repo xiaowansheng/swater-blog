@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Input, Select, Tag, Avatar, Tooltip, Card, Breadcrumb } from 'antd'
+import { Table, Button, Space, Popconfirm, message, Input, Select, Tag, Tooltip } from 'antd'
 import Image from '@/components/common/ImageWithPreview'
 import {
   PlusOutlined,
@@ -13,7 +13,7 @@ import {
   EyeFilled,
   ImportOutlined,
 } from '@ant-design/icons'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   getArticleList,
   deleteArticle,

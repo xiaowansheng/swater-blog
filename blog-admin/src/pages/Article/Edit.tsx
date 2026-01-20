@@ -301,7 +301,7 @@ const ArticleEdit: React.FC = () => {
 
       // 上传文件
       message.loading({ content: '正在上传封面...', key: 'uploadCover' })
-      const result = await uploadFile(file, 'article_cover')
+      const result = await uploadFile(file)
 
       // 打印调试信息，看看后端返回了什么
       console.log('封面上传结果:', {

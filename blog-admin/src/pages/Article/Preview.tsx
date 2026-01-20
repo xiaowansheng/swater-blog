@@ -79,8 +79,8 @@ const ArticlePreview: React.FC = () => {
           console.log('找到内容元素:', {
             element: contentElement,
             innerHTML: contentElement.innerHTML?.substring(0, 200),
-            offsetWidth: contentElement.offsetWidth,
-            offsetHeight: contentElement.offsetHeight,
+            offsetWidth: (contentElement as HTMLElement).offsetWidth,
+            offsetHeight: (contentElement as HTMLElement).offsetHeight,
           })
 
           message.loading({ content: '正在生成 PDF...', key: 'exportPdf', duration: 0 })

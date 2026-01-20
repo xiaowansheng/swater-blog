@@ -25,7 +25,6 @@ import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  FolderOpenOutlined,
   FileMarkdownOutlined,
   PictureOutlined,
 } from '@ant-design/icons'
@@ -43,7 +42,7 @@ import styles from './Import.module.scss'
 const { Dragger } = Upload
 const { Step } = Steps
 const { Option } = Select
-const { Title, Text, Paragraph } = Typography
+const { Title, Text } = Typography
 
 const ArticleImport: React.FC = () => {
   const navigate = useNavigate()
@@ -440,7 +439,7 @@ const ArticleImport: React.FC = () => {
       <div className={styles.preview}>
         <Card title="导入预览" bordered={false}>
           <Alert
-            message={previewData.getStatisticsSummary?.() || `将创建 ${previewData.articleCount} 篇文章，${previewData.categoryCount} 个分类`}
+            message={`将创建 ${previewData.articleCount} 篇文章，${previewData.categoryCount} 个分类`}
             type="info"
             showIcon
             style={{ marginBottom: 16 }}

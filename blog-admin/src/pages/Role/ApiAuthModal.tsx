@@ -86,7 +86,7 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
         allValidApiKeys.includes(key as string)
       )
 
-      await assignApis(roleId, validCheckedKeys.map(Number))
+      await assignApis(roleId, validCheckedKeys.map(String).map(Number))
       message.success('API权限分配成功')
       onSuccess()
       onCancel()
@@ -192,7 +192,7 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
 
   // 自定义处理选中逻辑
   const handleCheck = (checkedKeysValue: any, info: any) => {
-    const { checked, node, checkedNodes } = info
+    const { checked, node } = info
 
     // 如果选中的是父节点（模块），需要只选择当前过滤后可见的子节点
     if (node.children && node.children.length > 0) {
@@ -249,8 +249,8 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
             return keys
           }
 
-          const allApiKeysToRemove = getAllApiKeysUnderParent(node.key, treeData)
-          newKeys = newKeys.filter(key => !allApiKeysToRemove.includes(key))
+          const allApiKeysToRemove = getAllApiKeysUnderParent(String(node.key), treeData)
+          newKeys = newKeys.filter(key => !allApiKeysToRemove.includes(String(key)))
         }
 
         return newKeys

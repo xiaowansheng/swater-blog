@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, InputNumber, Tag, Tooltip, Select, Switch, TreeSelect, ModalProps, Empty } from 'antd'
+import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, InputNumber, Tag, Tooltip, Select, Switch, TreeSelect, Empty } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, InfoCircleOutlined, CheckCircleOutlined, SearchOutlined } from '@ant-design/icons'
 import { getApiList, createApi, updateApi, deleteApi, refreshApi } from '@/api/api'
 import { ApiVO, ApiRefreshResultVO } from '@/types/api'
 
 const ApiPage: React.FC = () => {
   const [apis, setApis] = useState<ApiVO[]>([])
-  const [allApis, setAllApis] = useState<ApiVO[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [editingApi, setEditingApi] = useState<ApiVO | null>(null)
@@ -30,7 +29,6 @@ const ApiPage: React.FC = () => {
     setLoading(true)
     try {
       const data = await getApiList()
-      setAllApis(data)
 
       const filterApi = (api: ApiVO) => {
         if (filters.name && !api.name.toLowerCase().includes(filters.name.toLowerCase())) {
@@ -164,7 +162,7 @@ const ApiPage: React.FC = () => {
       title: '接口名称',
       dataIndex: 'name',
       key: 'name',
-      render: (name: string, record: ApiVO) => (
+      render: (name: string) => (
         <span className="font-medium">{name}</span>
       ),
     },

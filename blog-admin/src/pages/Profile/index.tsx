@@ -14,7 +14,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/auth";
 import { AvatarUpload } from "@/components/common/ImageUpload";
 import { getFullUrl } from "@/utils/format";
-import * as authApi from "@/api/auth";
 import * as userApi from "@/api/user";
 
 const { TextArea } = Input;

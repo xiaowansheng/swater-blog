@@ -19,8 +19,6 @@ import {
   LockOutlined,
   BellOutlined,
   MessageOutlined,
-  CloudUploadOutlined,
-  MailOutlined,
   AppstoreOutlined,
 } from "@ant-design/icons";
 import { 
@@ -59,7 +57,6 @@ const ConfigPage: React.FC = () => {
         site,
         author,
         cover,
-        social,
         privacy,
         comment,
         notify,

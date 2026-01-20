@@ -26,8 +26,6 @@ import { getRoleList } from '@/api/role'
 import { User, Role } from '@/types'
 import { formatDate, getFullUrl } from '@/utils/format'
 
-const { Option } = Select
-
 const UserPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([])
   const [roles, setRoles] = useState<Role[]>([])
@@ -41,13 +39,11 @@ const UserPage: React.FC = () => {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
   const [filters, setFilters] = useState<{
     username: string
-    nickname: string
     email: string
     roleId: number | undefined
     status: number | undefined
   }>({
     username: '',
-    nickname: '',
     email: '',
     roleId: undefined,
     status: undefined,
@@ -81,11 +77,7 @@ const UserPage: React.FC = () => {
       const result = await getUserList({
         page: pagination.current,
         size: pagination.pageSize,
-        username: filters.username || undefined,
-        nickname: filters.nickname || undefined,
-        email: filters.email || undefined,
-        roleId: filters.roleId,
-        status: filters.status,
+        keyword: filters.username || filters.email || undefined,
       })
       setUsers(result.records)
       setPagination((prev) => ({ ...prev, total: result.total }))
@@ -254,13 +246,6 @@ const UserPage: React.FC = () => {
             value={filters.username}
             onChange={(e) => setFilters({ ...filters, username: e.target.value })}
             style={{ width: 160 }}
-            allowClear
-          />
-          <Input
-            placeholder="昵称"
-            value={filters.nickname}
-            onChange={(e) => setFilters({ ...filters, nickname: e.target.value })}
-            style={{ width: 140 }}
             allowClear
           />
           <Input

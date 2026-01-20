@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { Modal, Input, Select, Slider, Button, Space, ColorPicker, Radio, Divider, message, Checkbox } from 'antd'
+import { Modal, Input, Slider, Button, Space, ColorPicker, Radio, Divider, message, Checkbox } from 'antd'
 import { BgColorsOutlined, FontSizeOutlined, LineHeightOutlined, ColumnHeightOutlined, PictureOutlined } from '@ant-design/icons'
-import type { ColorPickerProps } from 'antd'
 
 const { TextArea } = Input
-const { Option } = Select
 
 interface CoverGeneratorProps {
   visible: boolean

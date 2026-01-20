@@ -58,18 +58,18 @@ const getBreadcrumbItems = (pathname: string) => {
     const isLast = index === pathSegments.length - 1
 
     if (segment === 'create' || segment === 'edit') {
-      items.push({ title: isLast ? '编辑' : '操作' })
+      items.push({ title: isLast ? <span>编辑</span> : <span>操作</span> })
     } else if (segment === 'detail') {
-      items.push({ title: '详情' })
+      items.push({ title: <span>详情</span> })
     } else if (routeMap[segment]) {
       items.push({
-        title: isLast ? routeMap[segment] : <Link to={currentPath}>{routeMap[segment]}</Link>,
+        title: isLast ? <span>{routeMap[segment]}</span> : <Link to={currentPath}>{routeMap[segment]}</Link>,
       })
     } else if (!isNaN(Number(segment))) {
       // ID 参数，不显示
     } else {
       items.push({
-        title: isLast ? segment : <Link to={currentPath}>{segment}</Link>,
+        title: isLast ? <span>{segment}</span> : <Link to={currentPath}>{segment}</Link>,
       })
     }
   })

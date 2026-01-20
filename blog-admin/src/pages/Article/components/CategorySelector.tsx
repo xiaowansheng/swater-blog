@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Popover, Input, Button, Tag, Space, Empty } from 'antd';
+import { Popover, Input, Button, Tag, Empty } from 'antd';
 import { PlusOutlined, SearchOutlined, CheckOutlined } from '@ant-design/icons';
 import { Category } from '@/types';
 

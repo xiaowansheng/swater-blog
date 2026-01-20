@@ -1,5 +1,5 @@
 import React from 'react'
-import { Tooltip, Spin, Badge } from 'antd'
+import { Tooltip, Spin } from 'antd'
 import { 
   CheckCircleOutlined, 
   SyncOutlined, 
