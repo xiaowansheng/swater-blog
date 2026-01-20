@@ -265,6 +265,7 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
   file:
+    path: /app/logs
     name: /app/logs/application.log
     max-size: 100MB
     max-history: 30

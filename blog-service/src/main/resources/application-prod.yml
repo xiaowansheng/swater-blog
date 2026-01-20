@@ -258,6 +258,7 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
   file:
+    path: /var/log/blog
     name: /var/log/blog/application.log
     max-size: 100MB
     max-history: 60

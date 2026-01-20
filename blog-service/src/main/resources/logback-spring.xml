@@ -1,17 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    
-    <springProperty scope="context" name="springAppName" source="spring.application.name"/>
-    
-    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}"/>
-    
-    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
-    
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-    </root>
-    
-    <logger name="com.blog" level="DEBUG"/>
-</configuration>
+<configuration scan="true" scanPeriod="30 seconds">
 
+    <!-- Spring Boot 默认变量 / pattern -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <!-- 应用名 -->
+    <springProperty scope="context" name="springAppName" source="spring.application.name" defaultValue="app"/>
+
+    <!-- root level：默认 INFO，可通过 logging.level.root 或环境变量 LOG_LEVEL_ROOT 覆盖 -->
+    <springProperty scope="context" name="ROOT_LEVEL_FROM_SPRING" source="logging.level.root" defaultValue="INFO"/>
+    <property name="ROOT_LEVEL" value="${LOG_LEVEL_ROOT:-${ROOT_LEVEL_FROM_SPRING}}"/>
+
+    <!-- 日志目录：优先 LOG_PATH，其次 logging.file.path，再否则 /tmp/logs -->
+    <springProperty scope="context" name="LOG_PATH_FROM_SPRING" source="logging.file.path" defaultValue=""/>
+    <property name="LOG_PATH" value="${LOG_PATH:-${LOG_PATH_FROM_SPRING:-/tmp/logs}}"/>
+
+    <!-- 文件名前缀：可用 LOG_NAME 覆盖（默认用应用名） -->
+    <property name="LOG_NAME" value="${LOG_NAME:-${springAppName}}"/>
+
+    <!-- Pattern：你也可以直接用 Boot 默认的 FILE_LOG_PATTERN -->
+    <property name="FILE_PATTERN" value="${FILE_LOG_PATTERN:-%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n}"/>
+
+    <!-- ========= 主文件：记录 >= ROOT_LEVEL 的全部日志 ========= -->
+    <appender name="APP_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${LOG_NAME}.log</file>
+        <encoder>
+            <pattern>${FILE_PATTERN}</pattern>
+        </encoder>
+
+        <!-- 关键：跟随 ROOT_LEVEL 过滤 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${ROOT_LEVEL}</level>
+        </filter>
+
+        <!-- 滚动策略（按天 + 大小） -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${LOG_NAME}.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>${LOG_MAX_FILE_SIZE:-100MB}</maxFileSize>
+            <maxHistory>${LOG_MAX_HISTORY:-30}</maxHistory>
+            <totalSizeCap>${LOG_TOTAL_SIZE_CAP:-5GB}</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- ========= ERROR 文件：只记录 ERROR ========= -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${LOG_NAME}-error.log</file>
+        <encoder>
+            <pattern>${FILE_PATTERN}</pattern>
+        </encoder>
+
+        <!-- 只收 ERROR -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${LOG_NAME}-error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>${LOG_ERR_MAX_FILE_SIZE:-100MB}</maxFileSize>
+            <maxHistory>${LOG_ERR_MAX_HISTORY:-60}</maxHistory>
+            <totalSizeCap>${LOG_ERR_TOTAL_SIZE_CAP:-5GB}</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 你的业务包日志级别（可保留/按需删） -->
+    <logger name="com.blog" level="${LOG_LEVEL_COM_BLOG:-DEBUG}"/>
+
+    <!-- root：默认 INFO（可配置），输出到控制台 + 主文件 + error 文件 -->
+    <root level="${ROOT_LEVEL}">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="APP_FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </root>
+
+</configuration>
