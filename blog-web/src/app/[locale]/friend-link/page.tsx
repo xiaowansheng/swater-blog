@@ -2,10 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import PageHeader from '@/components/layout/PageHeader';
 import FriendLinkPageComponent from '@/components/friendLink/FriendLinkPage';
 import { friendLinkApi } from '@/lib/api/friendLink';
-import { ISR_REVALIDATE } from '@/lib/constants';
 import { getCoverConfig } from '@/lib/api/config.server';
-
-export const revalidate = ISR_REVALIDATE.FRIEND_LINK;
 
 export default async function FriendLinkPage({
   params,

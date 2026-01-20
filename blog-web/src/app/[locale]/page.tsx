@@ -6,9 +6,6 @@ import Pagination from '@/components/common/Pagination';
 import { articleApi } from '@/lib/api/article';
 import { categoryApi } from '@/lib/api/category';
 import { tagApi } from '@/lib/api/tag';
-import { ISR_REVALIDATE } from '@/lib/constants';
-
-export const revalidate = ISR_REVALIDATE.HOME;
 
 export default async function HomePage({
   searchParams,

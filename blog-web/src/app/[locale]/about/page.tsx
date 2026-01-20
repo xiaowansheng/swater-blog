@@ -2,10 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import PageHeader from '@/components/layout/PageHeader';
 import MarkdownRenderer from '@/components/markdown/MarkdownRenderer';
 import AuthorCard from '@/components/author/AuthorCard';
-import { ISR_REVALIDATE } from '@/lib/constants';
 import { getAboutContent, getCoverConfig, getAuthorInfo } from '@/lib/api/config.server';
-
-export const revalidate = ISR_REVALIDATE.ABOUT;
 
 export default async function AboutPage({
   params,

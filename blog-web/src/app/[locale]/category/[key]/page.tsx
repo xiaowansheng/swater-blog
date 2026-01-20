@@ -4,10 +4,7 @@ import ArticleList from '@/components/article/ArticleList';
 import Pagination from '@/components/common/Pagination';
 import { articleApi } from '@/lib/api/article';
 import { categoryApi } from '@/lib/api/category';
-import { ISR_REVALIDATE } from '@/lib/constants';
 import { getCoverConfig } from '@/lib/api/config.server';
-
-export const revalidate = ISR_REVALIDATE.CATEGORY;
 
 export default async function CategoryPage({
   params,

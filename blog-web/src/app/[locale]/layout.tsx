@@ -9,6 +9,23 @@ import { getSiteInfo, getServerConfig } from '@/lib/api/config.server';
 import { SiteConfigProvider } from '@/lib/context/SiteConfigContext';
 import VisitorTracker from '@/components/visitor/VisitorTracker';
 import { Toaster } from 'react-hot-toast';
+import { DecorationProvider } from '@/lib/context/DecorationContext';
+import DecorationManager from '@/components/decoration/DecorationManager';
+import PageLoadingWrapper from '@/components/common/PageLoadingWrapper';
+import TopProgressBar from '@/components/common/TopProgressBar';
+import FloatingToolbar from '@/components/widgets/FloatingToolbar';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSiteInfo();
+
+  return {
+    title: site.name || 'Blog',
+    description: site.description || 'A modern blog platform',
+    icons: site.favicon ? { icon: site.favicon } : undefined,
+  };
+}
 
 const nunito = Nunito({
   variable: '--font-nunito',
@@ -26,34 +43,6 @@ const notoSansSC = Noto_Sans_SC({
   subsets: ['latin'],
   weight: ['400', '500', '700'],
 });
-
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  const site = await getSiteInfo();
-  
-  return {
-    title: site.name || 'Blog',
-    description: site.description || 'A modern blog platform',
-    icons: site.favicon ? { icon: site.favicon } : undefined,
-    alternates: {
-      languages: {
-        'zh': '/zh',
-        'en': '/en',
-      },
-    },
-  };
-}
-
-import { DecorationProvider } from '@/lib/context/DecorationContext';
-import DecorationManager from '@/components/decoration/DecorationManager';
-import PageLoadingWrapper from '@/components/common/PageLoadingWrapper';
-import TopProgressBar from '@/components/common/TopProgressBar';
-import FloatingToolbar from '@/components/widgets/FloatingToolbar';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 
 export default async function LocaleLayout({
   children,

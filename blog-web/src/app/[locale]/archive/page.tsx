@@ -3,11 +3,8 @@ import PageHeader from '@/components/layout/PageHeader';
 import { categoryApi } from '@/lib/api/category';
 import { tagApi } from '@/lib/api/tag';
 import { Link } from '@/lib/i18n/routing';
-import { ISR_REVALIDATE } from '@/lib/constants';
 import { getCoverConfig } from '@/lib/api/config.server';
 import ArchiveTimeline from '@/components/archive/ArchiveTimeline';
-
-export const revalidate = ISR_REVALIDATE.ARCHIVE;
 
 export default async function ArchiveListPage({
   params,

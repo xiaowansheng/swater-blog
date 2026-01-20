@@ -10,11 +10,9 @@ import { fetchServer } from '@/lib/api/server';
 import type { GuestbookVO, ComponentConfig } from '@/types';
 
 export default function GuestbookPage({
-  params,
   searchParams,
 }: {
-  params: Promise<{ locale: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: { page?: string };
 }) {
   const t = useTranslations('common');
   const tGuestbook = useTranslations('guestbook');
@@ -37,8 +35,7 @@ export default function GuestbookPage({
       try {
         setLoading(true);
         setError(false);
-        const params = await searchParams;
-        const { page = '1' } = params;
+        const { page = '1' } = searchParams;
         const pageNum = parseInt(page, 10) || 1;
         setCurrentPage(pageNum);
 

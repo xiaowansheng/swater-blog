@@ -286,6 +286,7 @@ export interface SearchVO {
   excerpt?: string;
   highlight?: string;
   createTime: string;
+  url?: string;
   // 评论相关字段
   targetId?: number;
   targetType?: string;

@@ -2,10 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import PageHeader from '@/components/layout/PageHeader';
 import { tagApi } from '@/lib/api/tag';
 import { Link } from '@/lib/i18n/routing';
-import { ISR_REVALIDATE } from '@/lib/constants';
 import { getCoverConfig } from '@/lib/api/config.server';
-
-export const revalidate = ISR_REVALIDATE.TAG;
 
 export default async function TagListPage({
   params,

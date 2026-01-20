@@ -9,9 +9,10 @@ interface LoadingLinkProps {
   children: React.ReactNode;
   className?: string;
   onClick?: () => void;
+  style?: React.CSSProperties;
 }
 
-export default function LoadingLink({ href, children, className, onClick }: LoadingLinkProps) {
+export default function LoadingLink({ href, children, className, onClick, style }: LoadingLinkProps) {
   const { startLoading } = useSimpleRouteLoading();
 
   const handleClick = () => {
@@ -20,7 +21,7 @@ export default function LoadingLink({ href, children, className, onClick }: Load
   };
 
   return (
-    <Link href={href} className={className} onClick={handleClick}>
+    <Link href={href} className={className} onClick={handleClick} style={style}>
       {children}
     </Link>
   );

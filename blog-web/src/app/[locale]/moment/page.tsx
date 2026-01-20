@@ -3,10 +3,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import MomentList from '@/components/moment/MomentList';
 import Pagination from '@/components/common/Pagination';
 import { momentApi } from '@/lib/api/moment';
-import { ISR_REVALIDATE } from '@/lib/constants';
 import { getCoverConfig } from '@/lib/api/config.server';
-
-export const revalidate = ISR_REVALIDATE.HOME;
 
 export default async function MomentPage({
   params,

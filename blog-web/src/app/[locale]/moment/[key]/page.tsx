@@ -13,7 +13,27 @@ import { formatDate } from '@/lib/utils/format';
 import { ISR_REVALIDATE } from '@/lib/constants';
 import { getAuthorInfo, getServerConfig, getComponentConfig } from '@/lib/api/config.server';
 
-export const revalidate = ISR_REVALIDATE.HOME;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; key: string }>;
+}): Promise<Metadata> {
+  const { key, locale } = await params;
+  const t = await getTranslations('common');
+
+  try {
+    const moment = await momentApi.getByKey(key);
+    const content = moment.content.replace(/<[^>]*>/g, '').substring(0, 100);
+    return {
+      title: `${t('moments')} - ${content}...`,
+      description: content,
+    };
+  } catch {
+    return {
+      title: t('momentDetail'),
+    };
+  }
+}
 
 // 格式化位置信息
 function formatLocation(
@@ -49,28 +69,6 @@ function formatDeviceAndBrowser(device: string | undefined, browser: string | un
   if (device) parts.push(device);
   if (browser) parts.push(browser);
   return parts.join(' · ');
-}
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string; key: string }>;
-}): Promise<Metadata> {
-  const { key, locale } = await params;
-  const t = await getTranslations('common');
-
-  try {
-    const moment = await momentApi.getByKey(key);
-    const content = moment.content.replace(/<[^>]*>/g, '').substring(0, 100);
-    return {
-      title: `${t('moments')} - ${content}...`,
-      description: content,
-    };
-  } catch {
-    return {
-      title: t('momentDetail'),
-    };
-  }
 }
 
 export default async function MomentDetailPage({

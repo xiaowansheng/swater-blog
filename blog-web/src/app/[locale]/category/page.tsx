@@ -2,10 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import PageHeader from '@/components/layout/PageHeader';
 import { categoryApi } from '@/lib/api/category';
 import { Link } from '@/lib/i18n/routing';
-import { ISR_REVALIDATE } from '@/lib/constants';
 import { getCoverConfig } from '@/lib/api/config.server';
-
-export const revalidate = ISR_REVALIDATE.CATEGORY;
 
 export default async function CategoryListPage({
   params,

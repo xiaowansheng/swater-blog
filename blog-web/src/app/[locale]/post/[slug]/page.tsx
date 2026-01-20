@@ -17,12 +17,6 @@ import { ISR_REVALIDATE } from '@/lib/constants';
 import { generateArticleMetadata } from '@/lib/utils/seo';
 import { formatDate } from '@/lib/utils/format';
 
-export const revalidate = ISR_REVALIDATE.POST_DETAIL;
-
-export async function generateStaticParams() {
-  return [];
-}
-
 export async function generateMetadata({
   params,
 }: {
