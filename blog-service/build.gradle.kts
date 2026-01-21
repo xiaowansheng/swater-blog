@@ -61,8 +61,8 @@ dependencies {
     implementation("cn.dev33:sa-token-redis-jackson:1.39.0")
 
     // --- 搜索与监控 ---
-    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
-    implementation("co.elastic.clients:elasticsearch-java")
+    // implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
+    // implementation("co.elastic.clients:elasticsearch-java")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.github.mweirauch:micrometer-jvm-extras:0.2.2")
     implementation("nl.basjes.parse.useragent:yauaa:7.23.0")
@@ -93,7 +93,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:mysql")
-    testImplementation("org.testcontainers:elasticsearch")
+    // testImplementation("org.testcontainers:elasticsearch")
     testImplementation("org.testcontainers:rabbitmq")
     testImplementation("com.h2database:h2")
 

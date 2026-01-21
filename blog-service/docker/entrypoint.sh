@@ -56,6 +56,20 @@ wait_for_service() {
 
 # 检查必需的环境变量
 check_required_env() {
+    # If SPRING_DATASOURCE_* is not provided, derive it from DB_* defaults.
+    if [ -z "$SPRING_DATASOURCE_URL" ]; then
+        local db_host=${DB_HOST:-mysql}
+        local db_port=${DB_PORT:-3306}
+        local db_name=${DB_NAME:-blog}
+        export SPRING_DATASOURCE_URL="jdbc:mysql://${db_host}:${db_port}/${db_name}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai"
+    fi
+    if [ -z "$SPRING_DATASOURCE_USERNAME" ]; then
+        export SPRING_DATASOURCE_USERNAME=${DB_USER:-blog}
+    fi
+    if [ -z "$SPRING_DATASOURCE_PASSWORD" ]; then
+        export SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-blog123456}
+    fi
+
     local required_vars=(
         "SPRING_DATASOURCE_URL"
         "SPRING_DATASOURCE_USERNAME"

@@ -9,8 +9,6 @@ server:
 spring:
   application:
     name: blog-docker
-  profiles:
-    active: docker
   tomcat:
     # Docker环境连接器配置
     threads:
@@ -114,6 +112,9 @@ spring:
           min-idle: 2
           max-wait: 3000ms
         shutdown-timeout: 100ms
+    elasticsearch:
+      repositories:
+        enabled: ${SEARCH_REPOSITORIES_ENABLED:false}
 
   # Docker环境RabbitMQ配置 - 使用环境变量
   rabbitmq:
@@ -154,12 +155,6 @@ spring:
           timeout: 25000
           connection-timeout: 25000
           write-timeout: 25000
-
-  # Elasticsearch配置 - 使用环境变量
-  elasticsearch:
-    uris: ${ES_URIS:http://elasticsearch:9200}
-    username: ${ES_USERNAME:}
-    password: ${ES_PASSWORD:}
 
 # 文件存储配置 - Docker环境
 file:
@@ -303,6 +298,8 @@ management:
   health:
     redis:
       enabled: true
+    elasticsearch:
+      enabled: false
     db:
       enabled: true
     rabbit:
@@ -433,7 +430,7 @@ plugin:
 
   # 搜索插件配置
   search:
-    active: ${SEARCH_TYPE:elasticsearch}  # database/elasticsearch
+    active: ${SEARCH_TYPE:database}  # database/elasticsearch
 
   # 文本处理插件配置
   text:
