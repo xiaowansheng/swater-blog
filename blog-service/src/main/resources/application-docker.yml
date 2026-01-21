@@ -92,7 +92,8 @@ spring:
   # SQL初始化
   sql:
     init:
-      mode: never  # Docker环境不执行初始化脚本
+      mode: always  # Docker环境自动执行表结构初始化
+      schema-locations: classpath:schema.sql
       continue-on-error: false
       separator: ";"
       encoding: utf-8
