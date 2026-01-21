@@ -321,9 +321,9 @@ security:
   rate-limit:
     enabled: true
     default-window: 60
-    default-limit: 100
-    ip-per-second: 10
-    ip-per-minute: 600
+    default-limit: 200
+    ip-per-second: 20
+    ip-per-minute: 1200
     message: "????????????"
     whitelist:
       - /favicon.ico

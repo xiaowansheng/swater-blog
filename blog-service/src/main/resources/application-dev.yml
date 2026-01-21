@@ -328,9 +328,9 @@ security:
   rate-limit:
     enabled: false  # 开发时禁用限流
     default-window: 60
-    default-limit: 1000  # 开发时较高限制
-    ip-per-second: 10
-    ip-per-minute: 600
+    default-limit: 2000  # 开发时较高限制
+    ip-per-second: 50
+    ip-per-minute: 3000
     message: "????????????"
     whitelist:
       - /favicon.ico
