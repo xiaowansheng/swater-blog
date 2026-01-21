@@ -42,6 +42,8 @@ public class CommentDTO extends com.blog.shared.model.dto.BaseDTO {
 
     private String ip;
 
+    private String ipLocation;
+
     private String country;
 
     private String province;
