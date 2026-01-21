@@ -5,7 +5,7 @@
 # ========================================
 
 # 构建阶段
-FROM gradle:8.5-jdk21-alpine AS builder
+FROM gradle:8.5-jdk21-jammy AS builder
 
 LABEL stage=builder
 LABEL maintainer="blog-team"
@@ -32,7 +32,7 @@ COPY src src
 RUN ./gradlew bootJar --no-daemon --parallel
 
 # 运行阶段
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jre-jammy
 
 LABEL maintainer="blog-team"
 LABEL version="1.0.0"
