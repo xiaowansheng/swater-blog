@@ -16,6 +16,7 @@ public class LocationInfo {
     private String isp;
     private String timezone;
     private String ip;
+    private String ipLocation;
     private String device;
     private String browser;
 }

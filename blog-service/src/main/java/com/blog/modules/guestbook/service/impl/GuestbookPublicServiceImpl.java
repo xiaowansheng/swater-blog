@@ -127,6 +127,9 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
                     } else {
                         guestbook.setIp(ip);
                     }
+                    if (locationInfo.getIpLocation() != null && !locationInfo.getIpLocation().isEmpty()) {
+                        guestbook.setIpLocation(locationInfo.getIpLocation());
+                    }
                     guestbook.setLocation(locationInfo.getLocation() != null ? locationInfo.getLocation() :
                             (locationInfo.getProvince() != null && locationInfo.getCity() != null ?
                                     locationInfo.getProvince() + locationInfo.getCity() : null));

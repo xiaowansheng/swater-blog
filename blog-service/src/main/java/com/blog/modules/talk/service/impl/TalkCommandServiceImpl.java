@@ -95,6 +95,9 @@ public class TalkCommandServiceImpl implements TalkCommandService {
                     } else {
                         talk.setIp(ip);
                     }
+                    if (locationInfo.getIpLocation() != null && !locationInfo.getIpLocation().isEmpty()) {
+                        talk.setIpLocation(locationInfo.getIpLocation());
+                    }
                     talk.setLocation(locationInfo.getLocation() != null ? locationInfo.getLocation() :
                             (locationInfo.getProvince() != null && locationInfo.getCity() != null ?
                                     locationInfo.getProvince() + locationInfo.getCity() : null));

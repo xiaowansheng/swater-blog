@@ -33,6 +33,8 @@ public class TalkVO extends com.blog.shared.model.vo.BaseVO {
 
     private String ip;
 
+    private String ipLocation;
+
     private String country;
 
     private String province;

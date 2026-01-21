@@ -221,6 +221,10 @@ public class CommentPublicServiceImpl implements CommentPublicService {
                 dto.setIp(locationInfo.getIp());
             }
 
+            if (locationInfo.getIpLocation() != null && !locationInfo.getIpLocation().isEmpty()) {
+                dto.setIpLocation(locationInfo.getIpLocation());
+            }
+
             if (dto.getLocation() == null || dto.getLocation().isEmpty()) {
                 if (locationInfo.getProvince() != null && locationInfo.getCity() != null) {
                     dto.setLocation(locationInfo.getProvince() + locationInfo.getCity());
