@@ -58,7 +58,10 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 
 # 复制启动脚本
 COPY docker/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh && chown blog:blog /app/entrypoint.sh
+# Normalize line endings in case the script was edited on Windows.
+RUN sed -i 's/\r$//' /app/entrypoint.sh \
+    && chmod +x /app/entrypoint.sh \
+    && chown blog:blog /app/entrypoint.sh
 
 # 切换到应用用户
 USER blog
