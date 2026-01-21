@@ -19,6 +19,9 @@ COPY build.gradle.kts settings.gradle.kts ./
 COPY gradle gradle
 COPY gradlew ./
 
+# Fix CRLF in gradlew inside Linux container
+RUN sed -i 's/\r$//' gradlew && chmod +x gradlew
+
 # 下载依赖（利用Docker缓存）
 RUN ./gradlew dependencies --no-daemon
 
