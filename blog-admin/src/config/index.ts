@@ -2,12 +2,31 @@
  * 项目配置对象
  * 统一管理环境变量
  */
+
+// 动态获取 WebSocket 地址
+const getWsBaseUrl = () => {
+  // 如果环境变量中配置了，直接使用
+  if (import.meta.env.VITE_WS_BASE_URL) {
+    return import.meta.env.VITE_WS_BASE_URL;
+  }
+  
+  // 否则根据当前页面协议和域名自动生成
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host;
+    return `${protocol}//${host}`;
+  }
+  
+  // 服务端渲染或构建时的默认值
+  return 'ws://localhost:8888';
+};
+
 const config = {
   // API 基础路径
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
   
   // WebSocket 基础路径
-  wsBaseUrl: import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8888',
+  wsBaseUrl: getWsBaseUrl(),
   
   // 上传接口地址
   uploadUrl: import.meta.env.VITE_UPLOAD_URL || '/api/upload',
