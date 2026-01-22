@@ -185,13 +185,16 @@ services:
   nginx:
     image: nginx:alpine
     container_name: swater-nginx
+    environment:
+      NGINX_ADMIN_DOMAIN: ${NGINX_ADMIN_DOMAIN:-admin.local}
+      NGINX_WEB_DOMAIN: ${NGINX_WEB_DOMAIN:-web.local}
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker/nginx/templates:/etc/nginx/templates
       - blog_uploads:/var/www/uploads:ro
     depends_on:
       - blog-service
@@ -213,3 +216,8 @@ volumes:
 networks:
   blog-network:
     driver: bridge
+
+
+
+
+
