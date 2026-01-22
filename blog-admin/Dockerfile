@@ -25,7 +25,7 @@ RUN pnpm install --frozen-lockfile
 # 复制源代码
 COPY . .
 
-# 构建应用
+# 构建应用（会自动读取 .env.local 文件）
 RUN pnpm build
 
 # 生产阶段

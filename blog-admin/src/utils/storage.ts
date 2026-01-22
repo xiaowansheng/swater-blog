@@ -1,4 +1,6 @@
-const TOKEN_KEY = 'blog_admin_token'
+import config from '@/config'
+
+const TOKEN_KEY = `${config.storagePrefix}token`
 
 export const getToken = (): string | null => {
   return localStorage.getItem(TOKEN_KEY)

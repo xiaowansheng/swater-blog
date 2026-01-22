@@ -162,10 +162,6 @@ services:
     restart: unless-stopped
     ports:
       - "3001:80"
-    environment:
-      # 在 Docker 网络中使用服务名称
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
-      VITE_UPLOAD_RESOURCE_PREFIX: ${VITE_UPLOAD_RESOURCE_PREFIX:-/uploads}
     depends_on:
       - blog-service
     networks:
@@ -180,10 +176,6 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
-    environment:
-      # 在 Docker 网络中使用服务名称
-      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-/api}
-      NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX: ${NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX:-/uploads}
     depends_on:
       - blog-service
     networks:

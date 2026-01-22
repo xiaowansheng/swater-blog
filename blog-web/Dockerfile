@@ -25,11 +25,15 @@ RUN pnpm install --frozen-lockfile
 # 复制源代码
 COPY . .
 
-# 设置构建时环境变量（根据需要调整）
+# 设置构建时环境变量
+ARG NEXT_PUBLIC_API_BASE_URL=/api
+ARG NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX=/uploads
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+ENV NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX=${NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX}
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# 构建 Next.js 应用
+# 构建 Next.js 应用（会自动读取 .env.local 文件）
 RUN pnpm build
 
 # 生产阶段
