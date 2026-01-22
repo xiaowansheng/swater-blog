@@ -4,8 +4,6 @@
 # Elasticsearch暂时禁用
 # ========================================
 
-version: '3.8'
-
 services:
   # MySQL数据库
   mysql:
