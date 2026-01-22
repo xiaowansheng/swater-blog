@@ -40,5 +40,6 @@ out/
 .DS_Store
 
 ### Config ###
-config/
+config/*.yml
+config/*.properties
 uploads/

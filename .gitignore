@@ -16,12 +16,6 @@ uploads/
 .env.prod
 .env.*.local
 
-# Spring Boot 生产环境配置文件
-**/application-prod.yml
-**/application-production.yml
-config/application-prod.yml
-config/application-production.yml
-
 # 日志文件
 logs/
 *.log
