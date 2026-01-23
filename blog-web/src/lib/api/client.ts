@@ -7,6 +7,15 @@ const API_BASE_URL = typeof window !== 'undefined'
   ? process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8888'
   : 'http://localhost:8888';
 
+function normalizeApiUrl(base: string, path: string) {
+  const baseTrim = base.endsWith('/') ? base.slice(0, -1) : base;
+  const pathTrim = path.startsWith('/') ? path : `/${path}`;
+  if (baseTrim.endsWith('/api') && pathTrim.startsWith('/api/')) {
+    return baseTrim + pathTrim.slice(4);
+  }
+  return baseTrim + pathTrim;
+}
+
 export async function fetchClient<T>(
   url: string,
   options?: RequestInit & { silent?: boolean }
@@ -18,7 +27,7 @@ export async function fetchClient<T>(
 
   try {
     const verifyToken = getVerifyToken();
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    const response = await fetch(normalizeApiUrl(API_BASE_URL, url), {
       ...options,
       headers: {
         'Content-Type': 'application/json',

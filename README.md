@@ -152,6 +152,8 @@ docker-compose -f docker-compose.dev.yml up -d
 | 🛠️ 开发指南 | [开发指南](docs/tech/开发指南.md) | 开发环境搭建和规范 |
 | ⚙️ 配置说明 | [配置说明文档](docs/tech/配置说明文档.md) | 详细配置参数说明 |
 | 🚀 部署指南 | [部署文档](docs/tech/部署文档.md) | 生产环境部署指南 |
+| 📦 Web 部署 | [Blog Web 部署](blog-web/README-DOCKER.md) | 前台单独部署文档 |
+| 📦 Admin 部署 | [Blog Admin 部署](blog-admin/README-DOCKER.md) | 管理后台单独部署文档 |
 | 🤝 贡献指南 | [CONTRIBUTING.md](CONTRIBUTING.md) | 如何参与项目贡献 |
 
 ## 🎯 功能特性
