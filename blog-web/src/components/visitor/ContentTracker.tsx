@@ -1,12 +1,13 @@
 'use client';
 
+import { safeRandomUUID } from '@/lib/utils/uuid';
 import { useEffect, useRef } from 'react';
 import { trackEnter, type ContentType } from '@/lib/api/track';
 
 function getOrCreateId(key: string, storage: Storage) {
   const existing = storage.getItem(key);
   if (existing) return existing;
-  const id = crypto.randomUUID();
+  const id = safeRandomUUID();
   storage.setItem(key, id);
   return id;
 }
@@ -55,3 +56,4 @@ export default function ContentTracker({
 
   return null;
 }
+
