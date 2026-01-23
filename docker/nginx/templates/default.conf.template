@@ -66,6 +66,12 @@ server {
 
 # HTTPS (optional). Uncomment and provide certs before enabling.
 #server {
+#    listen 80;
+#    server_name ${NGINX_WEB_DOMAIN};
+#    return 301 https://$host$request_uri;
+#}
+#
+#server {
 #    listen 443 ssl http2;
 #    server_name ${NGINX_WEB_DOMAIN};
 #
@@ -116,6 +122,12 @@ server {
 #}
 
 # HTTPS (optional). Uncomment and provide certs before enabling.
+#server {
+#    listen 80;
+#    server_name ${NGINX_ADMIN_DOMAIN};
+#    return 301 https://$host$request_uri;
+#}
+#
 #server {
 #    listen 443 ssl http2;
 #    server_name ${NGINX_ADMIN_DOMAIN};
