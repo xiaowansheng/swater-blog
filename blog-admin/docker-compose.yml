@@ -1,0 +1,49 @@
+# ========================================
+# Blog Admin 单独部署配置
+# 仅包含管理后台应用
+# ========================================
+
+services:
+  blog-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: blog-admin
+    restart: unless-stopped
+    ports:
+      - "${ADMIN_PORT:-3001}:80"
+    environment:
+      # API 后端地址（在构建时已经写入，这里仅作说明）
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8888}
+    networks:
+      - blog-admin-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx 反向代理（可选，用于额外的代理层）
+  nginx:
+    image: nginx:alpine
+    container_name: blog-admin-nginx
+    restart: unless-stopped
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx-admin.conf:/etc/nginx/conf.d/blog-admin.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro  # SSL 证书目录（如果需要 HTTPS）
+    depends_on:
+      - blog-admin
+    networks:
+      - blog-admin-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  blog-admin-network:
+    driver: bridge
