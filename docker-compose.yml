@@ -231,8 +231,8 @@ services:
       NGINX_ADMIN_DOMAIN: ${NGINX_ADMIN_DOMAIN:-admin.local}
       NGINX_WEB_DOMAIN: ${NGINX_WEB_DOMAIN:-web.local}
       # nginx-proxy integration
-      VIRTUAL_HOST: ${NGINX_ADMIN_DOMAIN:-admin.local},${NGINX_WEB_DOMAIN:-web.local}
-      LETSENCRYPT_HOST: ${NGINX_ADMIN_DOMAIN:-admin.local},${NGINX_WEB_DOMAIN:-web.local}
+      VIRTUAL_HOST: ${NGINX_DOMAINS:-admin.local,web.local}
+      LETSENCRYPT_HOST: ${NGINX_DOMAINS:-admin.local,web.local}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:-user@example.com}
     restart: unless-stopped
     volumes:
