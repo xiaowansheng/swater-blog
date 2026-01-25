@@ -97,7 +97,7 @@ services:
   blog-service:
     build:
       context: ./blog-service
-      dockerfile: Dockerfile
+      dockerfile: ${BLOG_SERVICE_DOCKERFILE:-Dockerfile}
     container_name: swater-blog-service
     user: "0"
     restart: unless-stopped
@@ -157,7 +157,7 @@ services:
   blog-admin:
     build:
       context: ./blog-admin
-      dockerfile: Dockerfile
+      dockerfile: ${BLOG_ADMIN_DOCKERFILE:-Dockerfile}
     container_name: swater-blog-admin
     restart: unless-stopped
     ports:
@@ -171,7 +171,7 @@ services:
   blog-web:
     build:
       context: ./blog-web
-      dockerfile: Dockerfile
+      dockerfile: ${BLOG_WEB_DOCKERFILE:-Dockerfile}
     container_name: swater-blog-web
     restart: unless-stopped
     ports:
