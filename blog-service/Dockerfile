@@ -14,6 +14,46 @@ LABEL description="Blog service build stage"
 # 设置工作目录
 WORKDIR /app
 
+# 可通过构建参数覆盖 Maven 镜像源（主/备）
+ARG MAVEN_REPO_PRIMARY=https://maven.aliyun.com/repository/public
+ARG MAVEN_REPO_FALLBACK=https://mirrors.cloud.tencent.com/nexus/repository/maven-public/
+ENV MAVEN_REPO_PRIMARY=${MAVEN_REPO_PRIMARY}
+ENV MAVEN_REPO_FALLBACK=${MAVEN_REPO_FALLBACK}
+
+# 配置 Gradle 全局镜像源（含插件与依赖）
+RUN mkdir -p /root/.gradle/init.d && \
+    cat > /root/.gradle/init.d/mirrors.gradle <<'EOF'
+def primary = System.getenv("MAVEN_REPO_PRIMARY") ?: "https://maven.aliyun.com/repository/public"
+def fallback = System.getenv("MAVEN_REPO_FALLBACK") ?: "https://mirrors.cloud.tencent.com/nexus/repository/maven-public/"
+
+settingsEvaluated { settings ->
+    settings.pluginManagement {
+        repositories {
+            maven { url = uri(primary) }
+            maven { url = uri(fallback) }
+            gradlePluginPortal()
+            mavenCentral()
+        }
+    }
+}
+
+allprojects {
+    buildscript {
+        repositories {
+            maven { url = uri(primary) }
+            maven { url = uri(fallback) }
+            gradlePluginPortal()
+            mavenCentral()
+        }
+    }
+    repositories {
+        maven { url = uri(primary) }
+        maven { url = uri(fallback) }
+        mavenCentral()
+    }
+}
+EOF
+
 # 复制构建文件
 COPY build.gradle.kts settings.gradle.kts ./
 COPY gradle gradle
@@ -22,14 +62,14 @@ COPY gradlew ./
 # Fix CRLF in gradlew inside Linux container
 RUN sed -i 's/\r$//' gradlew && chmod +x gradlew
 
-# 下载依赖（利用Docker缓存）
-RUN ./gradlew dependencies --no-daemon
+# 下载依赖（利用Docker缓存，输出更完整日志）
+RUN ./gradlew dependencies --no-daemon --info --stacktrace
 
 # 复制源代码
 COPY src src
 
 # 构建应用
-RUN ./gradlew bootJar --no-daemon --parallel
+RUN ./gradlew bootJar --no-daemon --parallel --info --stacktrace
 
 # 运行阶段
 FROM eclipse-temurin:21-jre-jammy

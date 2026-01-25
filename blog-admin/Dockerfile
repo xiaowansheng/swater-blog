@@ -13,14 +13,24 @@ LABEL description="Blog Admin build stage"
 
 WORKDIR /app
 
+# 可通过构建参数覆盖镜像源（主/备）
+ARG NPM_REGISTRY_PRIMARY=https://registry.npmmirror.com
+ARG NPM_REGISTRY_FALLBACK=https://mirrors.cloud.tencent.com/npm
+ARG PNPM_REGISTRY_PRIMARY=https://registry.npmmirror.com
+ARG PNPM_REGISTRY_FALLBACK=https://mirrors.cloud.tencent.com/npm
+
 # 复制 package 文件
 COPY package.json pnpm-lock.yaml ./
 
-# 安装 pnpm
-RUN npm install -g pnpm@9
+# 安装 pnpm（输出更完整日志，主备切换）
+RUN npm config set registry ${NPM_REGISTRY_PRIMARY} \
+    && (npm install -g pnpm@9 --loglevel verbose || (npm config set registry ${NPM_REGISTRY_FALLBACK} && npm install -g pnpm@9 --loglevel verbose)) \
+    && pnpm config set registry ${PNPM_REGISTRY_PRIMARY} \
+    && pnpm config set fetch-retries 5 \
+    && pnpm config set fetch-timeout 600000
 
 # 安装依赖
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --reporter=ndjson || (pnpm config set registry ${PNPM_REGISTRY_FALLBACK} && pnpm install --frozen-lockfile --reporter=ndjson)
 
 # 复制源代码
 COPY . .
@@ -29,7 +39,7 @@ COPY . .
 ENV NODE_ENV=production
 
 # 构建应用（会自动读取 .env.production 文件）
-RUN pnpm build
+RUN pnpm build --reporter=ndjson
 
 # 生产阶段
 FROM nginx:alpine

@@ -17,9 +17,10 @@ java {
 }
 
 repositories {
-    mavenCentral()
     maven { url = uri("https://maven.aliyun.com/repository/public") }
     maven { url = uri("https://maven.aliyun.com/repository/spring") }
+    maven { url = uri("https://mirrors.cloud.tencent.com/nexus/repository/maven-public/") }
+    mavenCentral()
 }
 
 // 强制版本策略：彻底解决 SnakeYAML 冲突
