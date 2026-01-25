@@ -1,35 +1,51 @@
-# 依赖
+# Dependencies
 node_modules
+.pnpm-store
+.npm
+.yarn
+.pnp
+.pnp.*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# 构建输出
-.next
-out
+# Build output
+/.next
+/out
+/dist
+/coverage
 
-# 缓存
+# Cache
+/.turbo
+/.vercel
+/.cache
+.eslintcache
+.stylelintcache
+tsconfig.tsbuildinfo
+
+# IDE/editor
 .vscode
 .idea
 *.swp
 *.swo
 *~
-.turbo
 
-# 环境变量
-.env.local
-.env.*.local
+# Env (keep build-time env files)
+.env
+.env.*
+!.env.example
+!.env.production
+!.env.development
 
 # Git
 .git
 .gitignore
 
-# 文档
-README.md
-docs
+# Docs
+/docs
+README*.md
 
-# 其他
+# OS/logs
 .DS_Store
 *.log
-tsconfig.tsbuildinfo

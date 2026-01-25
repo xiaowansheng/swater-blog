@@ -1,7 +1,9 @@
-# Gradle
+# Gradle/Maven
 .gradle
-build
-bin
+/build
+/bin
+/out
+/target
 !gradle/wrapper/gradle-wrapper.jar
 
 # IDE
@@ -21,25 +23,34 @@ bin
 Thumbs.db
 
 # Logs
-logs
+/logs
 *.log
 
 # Temp
-tmp
-temp
+/tmp
+/temp
+*.tmp
+*.bak
+*.swp
+*.swo
 
-# Config
-config/*.yml
-config/*.properties
+# Env
+.env
+.env.*
+
+# Config (externalized at runtime)
+/config/*.yml
+/config/*.properties
 
 # App specific
-uploads
-docs
-monitoring
-# 不要忽略 docker 目录，因为 Dockerfile 需要其中的 entrypoint.sh
-# docker 
+/uploads
+/docs
+/monitoring
 
-# 忽略文档和脚本，但保留必要的
+# Keep docker directory for entrypoint script
+# docker
+
+# Misc
 *.bat
 generate-api-docs.sh
 monitoring-setup.md
