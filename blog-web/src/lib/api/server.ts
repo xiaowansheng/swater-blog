@@ -3,6 +3,7 @@ import { getMockResponse } from './mock';
 import { getVerifyToken, VERIFY_TOKEN_HEADER } from '../auth/emailSession';
 
 const CLIENT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8888';
+const SERVER_BASE_URL = process.env.SERVER_API_BASE_URL;
 
 function resolveServerBaseUrl(base: string) {
   // If a relative base like "/api" is provided, use internal service URL for SSR.
@@ -12,7 +13,7 @@ function resolveServerBaseUrl(base: string) {
   return base;
 }
 
-const API_BASE_URL = resolveServerBaseUrl(CLIENT_BASE_URL);
+const API_BASE_URL = resolveServerBaseUrl(SERVER_BASE_URL || CLIENT_BASE_URL);
 
 function normalizeApiUrl(base: string, path: string) {
   const baseTrim = base.endsWith('/') ? base.slice(0, -1) : base;
