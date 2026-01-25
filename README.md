@@ -69,7 +69,15 @@ git clone https://github.com/xiaowansheng/swater-blog.git
 cd swater-blog
 
 # 2. 启动所有服务（ES 默认禁用）
-docker-compose up -d
+# 使用 HTTP（直连 nginx）
+COMPOSE_PROFILES=http docker-compose up -d
+
+# 使用 HTTPS（nginx-proxy + ACME）
+COMPOSE_PROFILES=https docker-compose up -d
+
+# 也可以在 .env 中设置（参考 .env.example）
+# COMPOSE_PROFILES=http
+# COMPOSE_PROFILES=https
 
 # 3. 等待服务启动完成，访问应用
 # 博客前端: http://localhost:3000
