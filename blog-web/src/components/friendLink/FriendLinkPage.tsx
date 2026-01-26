@@ -84,7 +84,7 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
                 <p className="text-foreground/60 mb-6">{t('noFriendLinksHint')}</p>
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="group relative px-8 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all font-medium flex items-center gap-2 overflow-hidden"
+                  className="group relative px-8 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all font-medium flex items-center justify-center gap-2 overflow-hidden mx-auto"
                 >
                   {/* 按钮光泽 */}
                   <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -171,7 +171,7 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
               <div className="flex justify-center mt-8">
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="group relative px-8 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all font-medium flex items-center gap-2 overflow-hidden"
+                  className="group relative px-8 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all font-medium flex items-center justify-center gap-2 overflow-hidden"
                 >
                   {/* 按钮光泽 */}
                   <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
