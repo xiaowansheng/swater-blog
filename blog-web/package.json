@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --port 3001",
     "build": "next build",
+    "build:dist": "next build && node ./scripts/build-dist.js",
     "start": "next start",
     "lint": "eslint"
   },
