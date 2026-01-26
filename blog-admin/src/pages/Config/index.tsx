@@ -10,6 +10,7 @@ import {
   Spin,
   InputNumber,
   Divider,
+  Modal,
 } from "antd";
 import {
   SaveOutlined,
@@ -20,6 +21,7 @@ import {
   BellOutlined,
   MessageOutlined,
   AppstoreOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { 
   ImageUpload,
@@ -35,6 +37,7 @@ const ConfigPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("site");
+  const [unsavedTabs, setUnsavedTabs] = useState<Set<string>>(new Set());
 
   const [siteForm] = Form.useForm();
   const [authorForm] = Form.useForm();
@@ -49,6 +52,38 @@ const ConfigPage: React.FC = () => {
   useEffect(() => {
     loadAllConfigs();
   }, []);
+
+  // 标记标签页为未保存状态
+  const markTabAsUnsaved = (tabKey: string) => {
+    setUnsavedTabs((prev) => new Set(prev).add(tabKey));
+  };
+
+  // 清除标签页的未保存状态
+  const clearTabUnsaved = (tabKey: string) => {
+    setUnsavedTabs((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(tabKey);
+      return newSet;
+    });
+  };
+
+  // 处理标签页切换
+  const handleTabChange = (newTab: string) => {
+    if (unsavedTabs.has(activeTab)) {
+      Modal.confirm({
+        title: "未保存的更改",
+        icon: <ExclamationCircleOutlined />,
+        content: "当前标签页有未保存的数据，确定要离开吗？",
+        okText: "离开",
+        cancelText: "取消",
+        onOk: () => {
+          setActiveTab(newTab);
+        },
+      });
+    } else {
+      setActiveTab(newTab);
+    }
+  };
 
   const loadAllConfigs = async () => {
     setLoading(true);
@@ -172,7 +207,7 @@ const ConfigPage: React.FC = () => {
 
   // 保存配置
   const handleSave = async (
-    _type: string,
+    type: string,
     form: any,
     updateFn: (data: any) => Promise<void>
   ) => {
@@ -198,6 +233,7 @@ const ConfigPage: React.FC = () => {
 
       await updateFn(processedValues);
       message.success("保存成功");
+      clearTabUnsaved(type); // 保存成功后清除未保存标记
     } catch (error) {
       console.error("保存失败", error);
       message.error("保存失败");
@@ -212,10 +248,18 @@ const ConfigPage: React.FC = () => {
       label: (
         <span>
           <GlobalOutlined /> 网站信息
+          <span style={{ color: "#ff4d4f", marginLeft: "8px", display: "inline-block", width: "12px" }}>
+            {unsavedTabs.has("site") ? "●" : ""}
+          </span>
         </span>
       ),
       children: (
-        <Form form={siteForm} layout="vertical" className="config-form">
+        <Form 
+          form={siteForm} 
+          layout="vertical" 
+          className="config-form"
+          onValuesChange={() => markTabAsUnsaved("site")}
+        >
           <Form.Item name="name" label="网站名称" rules={[{ required: true }]}>
             <Input placeholder="请输入网站名称" />
           </Form.Item>
@@ -262,10 +306,18 @@ const ConfigPage: React.FC = () => {
       label: (
         <span>
           <UserOutlined /> 作者信息
+          <span style={{ color: "#ff4d4f", marginLeft: "8px", display: "inline-block", width: "12px" }}>
+            {unsavedTabs.has("author") ? "●" : ""}
+          </span>
         </span>
       ),
       children: (
-        <Form form={authorForm} layout="vertical" className="config-form">
+        <Form 
+          form={authorForm} 
+          layout="vertical" 
+          className="config-form"
+          onValuesChange={() => markTabAsUnsaved("author")}
+        >
           <Form.Item name="name" label="作者名称">
             <Input placeholder="博主名称" />
           </Form.Item>
@@ -481,10 +533,18 @@ const ConfigPage: React.FC = () => {
       label: (
         <span>
           <PictureOutlined /> 封面配置
+          <span style={{ color: "#ff4d4f", marginLeft: "8px", display: "inline-block", width: "12px" }}>
+            {unsavedTabs.has("cover") ? "●" : ""}
+          </span>
         </span>
       ),
       children: (
-        <Form form={coverForm} layout="vertical" className="config-form">
+        <Form 
+          form={coverForm} 
+          layout="vertical" 
+          className="config-form"
+          onValuesChange={() => markTabAsUnsaved("cover")}
+        >
           <ImageField name="home" label="首页封面" />
           <ImageField name="article" label="文章页封面" />
           <ImageField name="archive" label="归档页封面" />
@@ -516,10 +576,18 @@ const ConfigPage: React.FC = () => {
       label: (
         <span>
           <LockOutlined /> 隐私设置
+          <span style={{ color: "#ff4d4f", marginLeft: "8px", display: "inline-block", width: "12px" }}>
+            {unsavedTabs.has("privacy") ? "●" : ""}
+          </span>
         </span>
       ),
       children: (
-        <Form form={privacyForm} layout="vertical" className="config-form">
+        <Form 
+          form={privacyForm} 
+          layout="vertical" 
+          className="config-form"
+          onValuesChange={() => markTabAsUnsaved("privacy")}
+        >
           <Form.Item
             name="showIp"
             label="显示IP地址"
@@ -576,10 +644,18 @@ const ConfigPage: React.FC = () => {
       label: (
         <span>
           <MessageOutlined /> 评论设置
+          <span style={{ color: "#ff4d4f", marginLeft: "8px", display: "inline-block", width: "12px" }}>
+            {unsavedTabs.has("comment") ? "●" : ""}
+          </span>
         </span>
       ),
       children: (
-        <Form form={commentForm} layout="vertical" className="config-form">
+        <Form 
+          form={commentForm} 
+          layout="vertical" 
+          className="config-form"
+          onValuesChange={() => markTabAsUnsaved("comment")}
+        >
           <Form.Item
             name="enabled"
             label="启用评论功能"
@@ -649,10 +725,18 @@ const ConfigPage: React.FC = () => {
       label: (
         <span>
           <BellOutlined /> 通知设置
+          <span style={{ color: "#ff4d4f", marginLeft: "8px", display: "inline-block", width: "12px" }}>
+            {unsavedTabs.has("notify") ? "●" : ""}
+          </span>
         </span>
       ),
       children: (
-        <Form form={notifyForm} layout="vertical" className="config-form">
+        <Form 
+          form={notifyForm} 
+          layout="vertical" 
+          className="config-form"
+          onValuesChange={() => markTabAsUnsaved("notify")}
+        >
           <Form.Item
             name="loginNotify"
             label="登录通知"
@@ -711,10 +795,18 @@ const ConfigPage: React.FC = () => {
       label: (
         <span>
           <AppstoreOutlined /> 组件设置
+          <span style={{ color: "#ff4d4f", marginLeft: "8px", display: "inline-block", width: "12px" }}>
+            {unsavedTabs.has("component") ? "●" : ""}
+          </span>
         </span>
       ),
       children: (
-        <Form form={componentForm} layout="vertical" className="config-form">
+        <Form 
+          form={componentForm} 
+          layout="vertical" 
+          className="config-form"
+          onValuesChange={() => markTabAsUnsaved("component")}
+        >
           <Form.Item
             name="articleCommentEnabled"
             label="文章评论组件"
@@ -860,7 +952,7 @@ const ConfigPage: React.FC = () => {
           <Tabs
             className="config-tabs"
             activeKey={activeTab}
-            onChange={setActiveTab}
+            onChange={handleTabChange}
             items={tabItems}
             tabPosition="left"
           />
