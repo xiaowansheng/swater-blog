@@ -201,12 +201,12 @@ export default async function Sidebar({ categories = [], tags = [], hotArticles 
           {/* 热门文章列表 */}
           <ul className="space-y-2 sm:space-y-2.5 relative z-10">
             {hotArticles.map((article, index) => (
-              <li key={article.id} className="flex items-start gap-2 sm:gap-3 group relative">
+              <li key={article.id} className="flex items-center gap-2 sm:gap-3 group relative">
                 {/* 悬停背景 */}
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -mx-2 -my-1"></div>
 
                 {/* 排名徽章 */}
-                <span className="relative flex-shrink-0 w-6 h-6 sm:w-6 sm:h-6 rounded-lg text-xs font-bold flex items-center justify-center mt-0.5 transition-all duration-300 group-hover:scale-110"
+                <span className="relative flex-shrink-0 w-6 h-6 sm:w-6 sm:h-6 rounded-lg text-xs font-bold flex items-center justify-center transition-all duration-300 group-hover:scale-110"
                   style={{
                     background: index < 3
                       ? 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)'
@@ -222,7 +222,7 @@ export default async function Sidebar({ categories = [], tags = [], hotArticles 
                 </span>
                 <Link
                   href={`/post/${article.articleKey}`}
-                  className="relative z-10 text-xs sm:text-sm text-foreground/70 hover:text-primary line-clamp-2 flex-1 transition-all duration-300 group-hover:translate-x-1"
+                  className="relative z-10 text-xs sm:text-sm text-foreground/70 hover:text-primary line-clamp-2 flex-1 transition-all duration-300 group-hover:translate-x-1 flex items-center"
                 >
                   {article.title}
                 </Link>
