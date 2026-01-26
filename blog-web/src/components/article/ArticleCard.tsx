@@ -107,28 +107,45 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
 
           {/* 标签区域 */}
           <div className="flex flex-wrap items-center gap-2">
+            {/* 分类标签 - 二次元蓝色样式 */}
             {article.categoryName && article.categoryKey && (
               <LoadingLink href={`/category/${article.categoryKey}`}>
-                <span className="group/tag relative inline-block px-2.5 py-1 bg-gradient-to-r from-primary/10 to-accent/10 text-primary rounded-full text-xs font-bold border border-primary/20 overflow-hidden">
-                  <span className="relative z-10">{article.categoryName}</span>
-                  {/* 标签背景光效 */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300"></div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300"></div>
+                <span className="group/category relative inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-br from-blue-400/90 to-blue-500/90 text-white rounded-full text-xs font-bold overflow-hidden transition-all duration-300 hover:scale-110 hover:rotate-[-2deg] shadow-lg shadow-blue-400/30 hover:shadow-xl hover:shadow-blue-400/50">
+                  {/* 分类图标 */}
+                  <svg className="w-3.5 h-3.5 relative z-10 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                  </svg>
+                  <span className="relative z-10 drop-shadow-sm">{article.categoryName}</span>
+                  {/* 高光效果 */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-transparent opacity-60"></div>
+                  {/* 悬停闪光 */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent translate-x-[-200%] group-hover/category:translate-x-[200%] transition-transform duration-700 skew-x-[-20deg]"></div>
+                  {/* 边缘高光 */}
+                  <div className="absolute inset-0 rounded-full border-2 border-white/30"></div>
+                  {/* 星星装饰 */}
+                  <div className="absolute -top-1 -right-1 text-yellow-300 text-[10px] opacity-0 group-hover/category:opacity-100 transition-opacity duration-300 animate-pulse">✦</div>
                 </span>
               </LoadingLink>
             )}
+            
+            {/* 标签 - 二次元绿色样式 */}
             {article.tags && article.tags.length > 0 && (
               article.tags.map((tag, index) => (
                 <LoadingLink
                   key={tag.id}
                   href={`/tag/${tag.tagKey}`}
-                  className="group/tag relative inline-block text-xs px-2 py-0.5 rounded-md bg-gradient-to-r from-secondary/40 to-secondary/30 text-muted-foreground hover:text-white border border-transparent transition-all duration-300 overflow-hidden"
+                  className="group/tag relative inline-flex items-center text-xs px-2.5 py-1 rounded-full bg-gradient-to-br from-emerald-400/80 to-green-500/80 text-white font-semibold transition-all duration-300 hover:scale-110 hover:rotate-[2deg] shadow-md shadow-emerald-400/30 hover:shadow-lg hover:shadow-emerald-400/50 overflow-hidden"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <span className="relative z-10">#{tag.name}</span>
-                  {/* 标签背景 */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300"></div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300"></div>
+                  <span className="relative z-10 drop-shadow-sm">#{tag.name}</span>
+                  {/* 高光效果 */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-60"></div>
+                  {/* 悬停闪光 */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent translate-x-[-200%] group-hover/tag:translate-x-[200%] transition-transform duration-700 skew-x-[-20deg]"></div>
+                  {/* 边缘高光 */}
+                  <div className="absolute inset-0 rounded-full border border-white/30"></div>
+                  {/* 小星星装饰 */}
+                  <div className="absolute -top-0.5 -right-0.5 text-yellow-300 text-[8px] opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300 animate-pulse">✧</div>
                 </LoadingLink>
               ))
             )}
