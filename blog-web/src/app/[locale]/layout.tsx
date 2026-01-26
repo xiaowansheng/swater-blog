@@ -7,6 +7,7 @@ import { Nunito, Varela_Round, Noto_Sans_SC } from 'next/font/google';
 import '@/styles/globals.css';
 import { getSiteInfo, getServerConfig } from '@/lib/api/config.server';
 import { SiteConfigProvider } from '@/lib/context/SiteConfigContext';
+import { getFullUrl } from '@/lib/utils/format';
 import VisitorTracker from '@/components/visitor/VisitorTracker';
 import { Toaster } from 'react-hot-toast';
 import { DecorationProvider } from '@/lib/context/DecorationContext';
@@ -19,11 +20,25 @@ import Footer from '@/components/layout/Footer';
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteInfo();
+  const favicon = site.favicon ? getFullUrl(site.favicon) : '/favicon.svg';
+  const faviconType = (() => {
+    const lower = favicon.toLowerCase();
+    if (lower.endsWith('.svg')) return 'image/svg+xml';
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
+    if (lower.endsWith('.ico')) return 'image/x-icon';
+    return undefined;
+  })();
 
   return {
     title: site.name || 'Blog',
     description: site.description || 'A modern blog platform',
-    icons: { icon: site.favicon || '/favicon.svg' },
+    icons: {
+      icon: [
+        { url: '/favicon.ico' },
+        { url: favicon, ...(faviconType ? { type: faviconType } : {}) },
+      ],
+    },
   };
 }
 
