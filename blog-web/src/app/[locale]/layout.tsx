@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: site.name || 'Blog',
     description: site.description || 'A modern blog platform',
-    icons: site.favicon ? { icon: site.favicon } : undefined,
+    icons: { icon: site.favicon || '/favicon.svg' },
   };
 }
 
