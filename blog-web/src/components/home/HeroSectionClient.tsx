@@ -161,24 +161,24 @@ export default function HeroSectionClient({
             </span>
           </motion.p>
 
-          <motion.div variants={itemVariants} className="flex flex-wrap gap-4 justify-center text-sm text-muted">
-            <div className="flex gap-2 items-center px-4 py-2 rounded-full border backdrop-blur-sm transition-all bg-card/50 border-border/50 hover:border-primary/50 hover:bg-primary/5 group">
-              <svg className="w-4 h-4 transition-transform text-primary group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <motion.div variants={itemVariants} className="flex flex-wrap gap-4 justify-center text-sm">
+            <div className="flex gap-2.5 items-center px-5 py-2.5 rounded-full border backdrop-blur-md transition-all bg-card/70 dark:bg-card/60 border-border/60 hover:border-primary hover:bg-card/80 dark:hover:bg-card/70 hover:shadow-lg hover:shadow-primary/20 hover:scale-105 group">
+              <svg className="w-5 h-5 text-primary dark:text-primary drop-shadow-sm transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <span>{articleCount} {t('articleCount')}</span>
+              <span className="font-semibold text-foreground/90 dark:text-foreground/95 group-hover:text-foreground drop-shadow-sm">{articleCount} {t('articleCount')}</span>
             </div>
-            <div className="flex gap-2 items-center px-4 py-2 rounded-full border backdrop-blur-sm transition-all bg-card/50 border-border/50 hover:border-primary/50 hover:bg-primary/5 group">
-              <svg className="w-4 h-4 transition-transform text-primary group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            <div className="flex gap-2.5 items-center px-5 py-2.5 rounded-full border backdrop-blur-md transition-all bg-card/70 dark:bg-card/60 border-border/60 hover:border-primary hover:bg-card/80 dark:hover:bg-card/70 hover:shadow-lg hover:shadow-primary/20 hover:scale-105 group">
+              <svg className="w-5 h-5 text-primary dark:text-primary drop-shadow-sm transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
               </svg>
-              <span>{tagCount} {t('tagCount')}</span>
+              <span className="font-semibold text-foreground/90 dark:text-foreground/95 group-hover:text-foreground drop-shadow-sm">{tagCount} {t('tagCount')}</span>
             </div>
-            <div className="flex gap-2 items-center px-4 py-2 rounded-full border backdrop-blur-sm transition-all bg-card/50 border-border/50 hover:border-primary/50 hover:bg-primary/5 group">
-              <svg className="w-4 h-4 transition-transform text-primary group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <div className="flex gap-2.5 items-center px-5 py-2.5 rounded-full border backdrop-blur-md transition-all bg-card/70 dark:bg-card/60 border-border/60 hover:border-primary hover:bg-card/80 dark:hover:bg-card/70 hover:shadow-lg hover:shadow-primary/20 hover:scale-105 group">
+              <svg className="w-5 h-5 text-primary dark:text-primary drop-shadow-sm transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
-              <span>{categoryCount} {t('categoryCount')}</span>
+              <span className="font-semibold text-foreground/90 dark:text-foreground/95 group-hover:text-foreground drop-shadow-sm">{categoryCount} {t('categoryCount')}</span>
             </div>
           </motion.div>
 
