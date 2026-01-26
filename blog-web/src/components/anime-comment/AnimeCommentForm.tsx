@@ -9,6 +9,7 @@ import { commentApi } from '@/lib/api/comment';
 import { authApi } from '@/lib/api/auth';
 import { clearVerifyToken, getVerifyToken, isVerifyTokenValidForEmail, saveVerifyToken } from '@/lib/auth/emailSession';
 import { useUserInfo } from './UserInfoContext';
+import { Card } from '@/components/ui/Card';
 
 interface AnimeCommentFormProps {
   config: AnimeCommentConfig;
@@ -190,7 +191,7 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
 
   return (
     <form id="comment-form" onSubmit={handleSubmit} className="mb-12">
-      <div className="modern-card p-6 md:p-8 relative overflow-hidden">
+      <Card className="p-6 md:p-8 relative overflow-hidden" hoverEffect={false}>
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-30"></div>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col md:flex-row gap-4">
@@ -330,8 +331,7 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
             </div>
           )}
         </div>
-      </div>
+      </Card>
     </form>
   );
 }
-

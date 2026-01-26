@@ -1,12 +1,12 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { usePathname } from '@/lib/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { formatDate, stripMarkdown } from '@/lib/utils/format';
 import type { PostVO } from '@/types';
 import Image from '@/components/common/ImageWithPreview';
 import LoadingLink from '@/components/common/LoadingLink';
+import { Card } from '@/components/ui/Card';
 
 interface ArticleCardProps {
   article: PostVO;
@@ -21,14 +21,13 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
   const showCover = cardVariant === 'card' && article.cover;
 
   return (
-    <motion.article
+    <Card
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-      className={`overflow-hidden group modern-card flex flex-col relative ${showCover ? 'md:flex-row' : ''}`}
+      className={`group flex flex-col relative ${showCover ? 'md:flex-row' : ''}`}
     >
-      {/* 装饰性背景 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-accent/[0.02] pointer-events-none"></div>
+      {/* 装饰性背景 - 保留文章卡片特有的装饰 */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/[0.05] to-transparent rounded-bl-full pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-accent/[0.05] to-transparent rounded-tr-full pointer-events-none"></div>
 
@@ -37,7 +36,7 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
       <div className="absolute bottom-6 right-8 text-accent/20 text-xs animate-twinkle pointer-events-none" style={{ animationDelay: '0.5s' }}>✧</div>
 
       {showCover && (
-        <LoadingLink href={`/post/${article.articleKey}`} className="md:w-[40%] lg:w-[35%] shrink-0 relative">
+        <LoadingLink href={`/post/${article.articleKey}`} className="md:w-[40%] lg:w-[35%] shrink-0 relative z-20">
           <div className="overflow-hidden relative h-48 sm:h-56 md:h-full min-h-[240px]">
             <Image
               src={article.cover!}
@@ -71,7 +70,7 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
           </LoadingLink>
 
           {/* 统计信息 */}
-          <div className="flex items-center gap-4 text-xs text-muted-foreground/60 mb-3">
+          <div className="flex items-center gap-4 text-xs text-muted-foreground/60 mb-3 ml-1">
             <span className="flex items-center gap-1.5 group/stat">
               <svg className="w-3.5 h-3.5 text-primary/60 group-hover/stat:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -139,7 +138,7 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
 
       {/* 底部装饰线 */}
       <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-    </motion.article>
+    </Card>
   );
 }
 

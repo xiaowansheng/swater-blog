@@ -5,6 +5,7 @@ import type { GuestbookVO } from '@/types';
 import { formatDate } from '@/lib/utils/format';
 import { usePathname } from '@/lib/i18n/routing';
 import { useSiteConfig } from '@/lib/context/SiteConfigContext';
+import { Card } from '@/components/ui/Card';
 
 interface GuestbookItemProps {
   message: GuestbookVO;
@@ -67,7 +68,7 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5 hover:shadow-md transition-shadow">
+    <Card className="p-5" variant="glass" hoverEffect={false}>
       {/* 第一部分：头像和作者信息 */}
       <div className="flex items-center gap-4 mb-3">
         <div className="flex-shrink-0">
@@ -145,6 +146,6 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
           ))}
         </div>
       )}
-    </div>
+    </Card>
   );
 }

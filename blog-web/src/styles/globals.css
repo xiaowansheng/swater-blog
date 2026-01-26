@@ -782,9 +782,45 @@ aside[class*="scrollbar-hide"]::-webkit-scrollbar {
   -webkit-appearance: none !important;
 }
 
+
 aside.lg\:overflow-y-auto::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
+}
+
+
+/* ===== Custom Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(96, 165, 250, 0.2);
+  border-radius: 99px;
+  transition: background 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(96, 165, 250, 0.4);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(122, 162, 255, 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(122, 162, 255, 0.4);
+}
+
+/* ===== Selection ===== */
+::selection {
+  background: rgba(96, 165, 250, 0.2);
+  color: var(--primary);
 }
 

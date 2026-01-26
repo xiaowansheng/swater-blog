@@ -62,7 +62,7 @@ export default function TopProgressBar() {
     <AnimatePresence>
       {(isLoading || progress > 0) && (
         <motion.div
-          className="fixed top-0 left-0 right-0 z-[9999] h-1 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400"
+          className="fixed top-0 left-0 right-0 z-[9999] h-1 bg-gradient-to-r from-primary via-accent to-deco-pink"
           initial={{ scaleX: 0, opacity: 0 }}
           animate={{ 
             scaleX: progress / 100, 

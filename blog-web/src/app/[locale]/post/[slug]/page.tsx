@@ -16,6 +16,7 @@ import { getAuthorInfo, getCoverConfig, getComponentConfig } from '@/lib/api/con
 import { ISR_REVALIDATE } from '@/lib/constants';
 import { generateArticleMetadata } from '@/lib/utils/seo';
 import { formatDate } from '@/lib/utils/format';
+import { Card } from '@/components/ui/Card';
 
 export async function generateMetadata({
   params,
@@ -141,24 +142,26 @@ export default async function PostDetailPage({
         <main className="container mx-auto px-4 py-12 flex-1">
           <div className="lg:flex lg:gap-8">
             {/* 主要内容 */}
-            <article className="flex-1 bg-card border border-border rounded-2xl p-8 md:p-12 shadow-sm">
-              {/* <ArticleMeta article={article} /> */}
-              <div className="vditor-reset" data-reading-target>
-                <MarkdownRenderer content={article.content} />
-              </div>
-              <ContentLikeButton
-                contentType="ARTICLE"
-                contentId={article.id}
-                initialLikeCount={article.likeCount || 0}
-              />
-              <ArticleCopyright article={article} author={author} />
+            <article className="flex-1">
+              <Card hoverEffect={false} className="p-8 md:p-12 rounded-2xl shadow-sm border border-border bg-card">
+                  {/* <ArticleMeta article={article} /> */}
+                  <div className="vditor-reset" data-reading-target>
+                    <MarkdownRenderer content={article.content} />
+                  </div>
+                  <ContentLikeButton
+                    contentType="ARTICLE"
+                    contentId={article.id}
+                    initialLikeCount={article.likeCount || 0}
+                  />
+                  <ArticleCopyright article={article} author={author} />
 
-              {/* 二次元评论组件 - 根据配置显示 */}
-              {componentConfig.articleCommentEnabled && (
-                <div className="mt-12">
-                  <AnimeComment postId={article.id} />
-                </div>
-              )}
+                  {/* 二次元评论组件 - 根据配置显示 */}
+                  {componentConfig.articleCommentEnabled && (
+                    <div className="mt-12">
+                      <AnimeComment postId={article.id} />
+                    </div>
+                  )}
+              </Card>
             </article>
 
             {/* 侧边栏菜单 - 只在大屏幕显示 */}

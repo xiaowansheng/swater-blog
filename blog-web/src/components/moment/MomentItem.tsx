@@ -7,6 +7,7 @@ import type { MomentVO } from '@/types';
 import { formatDate, getFullUrl } from '@/lib/utils/format';
 import ImagePreview from '@/components/ImagePreview';
 import { useSiteConfig } from '@/lib/context/SiteConfigContext';
+import { Card } from '@/components/ui/Card';
 
 // 格式化位置信息
 function formatLocation(
@@ -119,8 +120,8 @@ export default function MomentItem({ moment }: MomentItemProps) {
   const displayImages = fullUrlImages.slice(0, displayCount);
 
   return (
-    <article className="group relative p-6 transition-all border rounded-2xl bg-card border-border hover:shadow-lg overflow-hidden">
-      {/* 装饰性背景 */}
+    <Card className="p-6 relative overflow-hidden group">
+      {/* 装饰性背景 - kept for specific moment style if needed, or rely on Card's default. Card implies simple background. I will keep specific decorators for consistency with previous design if they are distinct. */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-accent/[0.02] pointer-events-none"></div>
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-accent/[0.03] to-transparent rounded-bl-full pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-primary/[0.03] to-transparent rounded-tr-full pointer-events-none"></div>
@@ -286,7 +287,7 @@ export default function MomentItem({ moment }: MomentItemProps) {
           initialIndex={previewIndex}
         />
       )}
-    </article>
+    </Card>
   );
 }
 

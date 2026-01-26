@@ -6,6 +6,7 @@ import type { CommentVO, PrivacyConfig } from '@/types';
 import { AnimeCommentConfig } from './types';
 import { getRandomAnimeAvatar } from './constants';
 import ReplyForm from './ReplyForm';
+import { Card } from '@/components/ui/Card';
 
 interface ReplyState {
   items: CommentVO[];
@@ -104,7 +105,7 @@ export default function AnimeCommentItem({
 
   return (
     <div className="animate-fade-in">
-      <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-5 border border-card-border shadow-sm hover:shadow-md transition-all duration-300 relative group">
+      <Card className="p-5 relative group" variant="glass">
         {/* 第一部分：头像和作者信息 */}
         <div className="flex items-center gap-3 mb-3">
           <div className="relative flex-shrink-0">
@@ -230,7 +231,7 @@ export default function AnimeCommentItem({
             </button>
           )}
         </div>
-      </div>
+      </Card>
 
       {/* 回复表单 */}
       {showReplyForm && (
@@ -256,9 +257,10 @@ export default function AnimeCommentItem({
             <div className="text-sm text-muted-foreground">暂无回复</div>
           )}
           {replies.map((child) => (
-            <div
+            <Card
               key={child.id}
               className="bg-card/80 border border-card-border rounded-xl p-4 shadow-sm"
+              variant="default" // Using default since it's nested
             >
               {/* 第一部分：头像和作者信息 */}
               <div className="flex items-center gap-3 mb-3">
@@ -362,7 +364,7 @@ export default function AnimeCommentItem({
                   </div>
                 )}
               </div>
-            </div>
+            </Card>
           ))}
           {hasMoreReplies && (
             <button

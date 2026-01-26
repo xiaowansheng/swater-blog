@@ -3,6 +3,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import { tagApi } from '@/lib/api/tag';
 import { Link } from '@/lib/i18n/routing';
 import { getCoverConfig } from '@/lib/api/config.server';
+import { Card } from '@/components/ui/Card';
 
 export default async function TagListPage({
   params,
@@ -22,23 +23,34 @@ export default async function TagListPage({
         <PageHeader title={t('tags')} description={t('tagDescription')} coverImage={cover.tag} />
         <main className="container flex-1 px-4 py-12 mx-auto">
           <div className="flex flex-wrap gap-3">
-            {tags.map((tag) => (
+            {tags.map((tag, index) => (
               <Link
                 key={tag.id}
                 href={`/tag/${tag.tagKey}`}
-                className="group px-5 py-3 bg-card border border-border rounded-xl hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1"
+                className="block focus:outline-none"
               >
-                <span className="font-medium group-hover:text-primary transition-colors">{tag.name}</span>
-                {tag.articleCount !== undefined && (
-                  <span className="ml-2 px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
-                    {tag.articleCount}
-                  </span>
-                )}
+                <Card 
+                  className="group px-5 py-3 flex items-center justify-center overflow-hidden relative"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.03 }}
+                >
+                  {/* 悬停背景 */}
+                   <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                   
+                  <div className="relative z-10 flex items-center">
+                    <span className="font-medium group-hover:text-primary transition-colors">{tag.name}</span>
+                    {tag.articleCount !== undefined && (
+                      <span className="ml-2 px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium border border-primary/20">
+                        {tag.articleCount}
+                      </span>
+                    )}
+                  </div>
+                </Card>
               </Link>
             ))}
           </div>
         </main>
-        
       </>
     );
   } catch (error) {
@@ -50,9 +62,7 @@ export default async function TagListPage({
         <main className="container flex-1 px-4 py-8 mx-auto">
           <p>{t('noData')}</p>
         </main>
-        
       </>
     );
   }
 }
-

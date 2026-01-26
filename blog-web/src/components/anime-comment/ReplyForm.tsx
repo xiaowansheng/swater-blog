@@ -8,6 +8,7 @@ import { commentApi } from '@/lib/api/comment';
 import { authApi } from '@/lib/api/auth';
 import { clearVerifyToken, getVerifyToken, isVerifyTokenValidForEmail, saveVerifyToken } from '@/lib/auth/emailSession';
 import { useUserInfo } from './UserInfoContext';
+import { Card } from '@/components/ui/Card';
 
 interface ReplyFormProps {
   parentId: number;
@@ -199,7 +200,7 @@ export default function ReplyForm({
 
   return (
     <div className="mt-4 ml-8 md:ml-12">
-      <div className="modern-card p-5 relative overflow-hidden">
+      <Card className="p-5 relative overflow-hidden" hoverEffect={false}>
         <div className="mb-4 p-3 bg-secondary/50 rounded-xl flex items-center justify-between">
           <div className="text-secondary-foreground text-sm font-medium">{t('replyingTo')} {parentNickname}</div>
           <button type="button" onClick={onCancel} className="text-secondary-foreground hover:text-foreground transition-colors">
@@ -355,7 +356,7 @@ export default function ReplyForm({
             </div>
           )}
         </form>
-      </div>
+      </Card>
     </div>
   );
 }

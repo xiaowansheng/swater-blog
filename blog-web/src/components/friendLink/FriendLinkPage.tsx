@@ -6,6 +6,7 @@ import Image from '@/components/common/ImageWithPreview';
 import Modal from '@/components/common/Modal';
 import FriendLinkApplicationForm from './FriendLinkApplicationForm';
 import type { FriendLinkVO } from '@/types';
+import { Card } from '@/components/ui/Card';
 
 interface FriendLinkPageProps {
   friendLinks: FriendLinkVO[];
@@ -103,60 +104,67 @@ export default function FriendLinkPage({ friendLinks }: FriendLinkPageProps) {
                   <button
                     key={link.id}
                     onClick={() => handleLinkClick(link)}
-                    className="group/link relative p-3 sm:p-4 transition-all duration-300 border rounded-xl bg-card border-border hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 overflow-hidden text-left cursor-pointer"
+                    className="block w-full h-full text-left focus:outline-none"
                     style={{ animationDelay: `${index * 0.05}s` }}
                   >
-                    {/* 悬停背景 */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-accent/[0.02] opacity-0 group-hover/link:opacity-100 transition-opacity duration-300"></div>
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-transparent opacity-0 group-hover/link:opacity-100 transition-opacity duration-500"></div>
+                    <Card 
+                       className="group/link h-full p-3 sm:p-4 relative overflow-hidden" 
+                       initial={{ opacity: 0, scale: 0.95 }}
+                       animate={{ opacity: 1, scale: 1 }}
+                       transition={{ delay: index * 0.05 }}
+                    >
+                      {/* 悬停背景 */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-accent/[0.02] opacity-0 group-hover/link:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-transparent opacity-0 group-hover/link:opacity-100 transition-opacity duration-500"></div>
 
-                    {/* 装饰星星 */}
-                    <div className="absolute top-1.5 right-1.5 text-primary/10 text-[8px] animate-twinkle">✦</div>
-                    <div className="absolute bottom-2 left-2 text-accent/10 text-[8px] animate-twinkle" style={{ animationDelay: '0.5s' }}>✧</div>
+                      {/* 装饰星星 */}
+                      <div className="absolute top-1.5 right-1.5 text-primary/10 text-[8px] animate-twinkle">✦</div>
+                      <div className="absolute bottom-2 left-2 text-accent/10 text-[8px] animate-twinkle" style={{ animationDelay: '0.5s' }}>✧</div>
 
-                    <div className="relative z-10">
-                      <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                        {link.logo ? (
-                          <div className="relative shrink-0">
-                            {/* Logo光晕 */}
-                            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/30 to-accent/30 blur-sm opacity-0 group-hover/link:opacity-100 transition-opacity duration-300"></div>
-                            <div className="relative">
-                              <Image
-                                src={link.logo}
-                                alt={link.name}
-                                width={48}
-                                height={48}
-                                className="transition-all duration-300 border-2 rounded-full border-border group-hover/link:border-primary group-hover/link:scale-110 w-10 h-10 sm:w-12 sm:h-12 ring-2 ring-transparent group-hover/link:ring-primary/20"
-                                previewEnabled={false}
-                              />
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                          {link.logo ? (
+                            <div className="relative shrink-0">
+                              {/* Logo光晕 */}
+                              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/30 to-accent/30 blur-sm opacity-0 group-hover/link:opacity-100 transition-opacity duration-300"></div>
+                              <div className="relative">
+                                <Image
+                                  src={link.logo}
+                                  alt={link.name}
+                                  width={48}
+                                  height={48}
+                                  className="transition-all duration-300 border-2 rounded-full border-border group-hover/link:border-primary group-hover/link:scale-110 w-10 h-10 sm:w-12 sm:h-12 ring-2 ring-transparent group-hover/link:ring-primary/20"
+                                  previewEnabled={false}
+                                />
+                              </div>
                             </div>
-                          </div>
-                        ) : (
-                          <div className="relative shrink-0">
-                            {/* 首字母光晕 */}
-                            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/30 to-accent/30 blur-sm opacity-0 group-hover/link:opacity-100 transition-opacity duration-300"></div>
-                            <div className="flex items-center justify-center transition-all duration-300 border-2 rounded-full w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary/10 to-accent/10 border-border group-hover/link:border-primary group-hover/link:scale-110 ring-2 ring-transparent group-hover/link:ring-primary/20">
-                              <span className="text-base sm:text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{link.name.charAt(0).toUpperCase()}</span>
+                          ) : (
+                            <div className="relative shrink-0">
+                              {/* 首字母光晕 */}
+                              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/30 to-accent/30 blur-sm opacity-0 group-hover/link:opacity-100 transition-opacity duration-300"></div>
+                              <div className="flex items-center justify-center transition-all duration-300 border-2 rounded-full w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-primary/10 to-accent/10 border-border group-hover/link:border-primary group-hover/link:scale-110 ring-2 ring-transparent group-hover/link:ring-primary/20">
+                                <span className="text-base sm:text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{link.name.charAt(0).toUpperCase()}</span>
+                              </div>
                             </div>
-                          </div>
+                          )}
+                          <h2 className="text-sm sm:text-base font-bold transition-colors group-hover/link:text-primary line-clamp-1 flex-1">{link.name}</h2>
+                        </div>
+                        {link.description && (
+                          <p className="text-xs text-foreground/70 line-clamp-2 relative mb-2">
+                            {link.description}
+                          </p>
                         )}
-                        <h2 className="text-sm sm:text-base font-bold transition-colors group-hover/link:text-primary line-clamp-1 flex-1">{link.name}</h2>
+                        <div className="flex items-center gap-1.5 text-xs transition-all duration-300 opacity-0 group-hover/link:opacity-100 transform translate-y-1 group-hover/link:translate-y-0 text-primary">
+                          <span className="flex items-center gap-1">
+                            {t('viewDetails')}
+                            <svg className="w-3 h-3 group-hover/link:translate-x-0.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          </span>
+                        </div>
                       </div>
-                      {link.description && (
-                        <p className="text-xs text-foreground/70 line-clamp-2 relative mb-2">
-                          {link.description}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-1.5 text-xs transition-all duration-300 opacity-0 group-hover/link:opacity-100 transform translate-y-1 group-hover/link:translate-y-0 text-primary">
-                        <span className="flex items-center gap-1">
-                          {t('viewDetails')}
-                          <svg className="w-3 h-3 group-hover/link:translate-x-0.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                        </span>
-                      </div>
-                    </div>
+                    </Card>
                   </button>
                 ))}
               </div>

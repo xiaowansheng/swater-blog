@@ -2,6 +2,7 @@ import type { AuthorInfo } from '@/types';
 import { getFullUrl } from '@/lib/utils/format';
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+import { Card } from '@/components/ui/Card';
 
 interface AuthorCardProps {
   author: AuthorInfo;
@@ -166,30 +167,34 @@ export default function AuthorCard({ author, children }: AuthorCardProps) {
   const availableContactLinks = contactLinks.filter(link => link.value);
 
   return (
-    <div className="relative overflow-hidden group">
-      {/* 二次元风格背景装饰 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-pink-100/50 via-purple-100/30 to-blue-100/50 dark:from-pink-900/20 dark:via-purple-900/10 dark:to-blue-900/20 rounded-3xl" />
+    <div className="relative group">
+       {/* 二次元风格背景装饰 - Kept external to Card to act as underlay if needed, or put inside. 
+           The original had them inside the outer div but outside the inner card div. 
+           If I make the outer div the Card, these will be inside. 
+           I will put everything inside Card since Card renders a div. 
+       */}
+       
+      <Card className="relative overflow-hidden" variant="glass" hoverEffect={false}>
+        {/* 二次元风格背景装饰 */}
+        <div className="absolute inset-0 bg-gradient-to-br from-pink-100/50 via-purple-100/30 to-blue-100/50 dark:from-pink-900/20 dark:via-purple-900/10 dark:to-blue-900/20" />
       
-      {/* 浮动装饰元素 */}
-      <div className="absolute top-6 right-6 w-12 h-12 opacity-20">
-        <svg viewBox="0 0 100 100" className="w-full h-full text-pink-400 animate-pulse">
-          <path d="M50 15 L61 40 L88 40 L67 55 L76 82 L50 67 L24 82 L33 55 L12 40 L39 40 Z" fill="currentColor"/>
-        </svg>
-      </div>
-      <div className="absolute top-1/3 right-12 w-6 h-6 opacity-15">
-        <svg viewBox="0 0 100 100" className="w-full h-full text-purple-400 animate-bounce" style={{ animationDuration: '3s' }}>
-          <circle cx="50" cy="50" r="40" fill="currentColor"/>
-        </svg>
-      </div>
+        {/* 浮动装饰元素 */}
+        <div className="absolute top-6 right-6 w-12 h-12 opacity-20">
+          <svg viewBox="0 0 100 100" className="w-full h-full text-pink-400 animate-pulse">
+            <path d="M50 15 L61 40 L88 40 L67 55 L76 82 L50 67 L24 82 L33 55 L12 40 L39 40 Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div className="absolute top-1/3 right-12 w-6 h-6 opacity-15">
+          <svg viewBox="0 0 100 100" className="w-full h-full text-purple-400 animate-bounce" style={{ animationDuration: '3s' }}>
+            <circle cx="50" cy="50" r="40" fill="currentColor"/>
+          </svg>
+        </div>
 
-      {/* 主卡片 */}
-      <div className="relative bg-card/80 backdrop-blur-sm border-2 border-pink-200/50 dark:border-pink-800/30 rounded-3xl shadow-xl shadow-pink-100/50 dark:shadow-pink-900/20 overflow-hidden">
-        
         {/* 顶部装饰条 */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-full" />
         
         {/* 作者信息区域 */}
-        <div className="p-6 md:p-8">
+        <div className="p-6 md:p-8 relative z-10">
           <div className="flex flex-col items-center text-center">
             
             {/* 头像区域 */}
@@ -303,7 +308,7 @@ export default function AuthorCard({ author, children }: AuthorCardProps) {
 
         {/* 底部装饰 */}
         <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-400/0 via-purple-400/50 to-blue-400/0" />
-      </div>
+      </Card>
 
       {/* 自定义动画样式 */}
       <style>{`

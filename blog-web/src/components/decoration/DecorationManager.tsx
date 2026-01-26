@@ -5,6 +5,7 @@ import { useDecoration } from '@/lib/context/DecorationContext';
 import SakuraRain from '@/components/decoration/SakuraRain';
 import CornerDecoration from '@/components/decoration/CornerDecoration';
 import AnimeMusicPlayer from '@/components/decoration/AnimeMusicPlayer';
+import ClickEffects from '@/components/decoration/ClickEffects';
 // import Mascot from '@/components/decoration/Mascot';
 
 export default function DecorationManager() {
@@ -22,6 +23,8 @@ export default function DecorationManager() {
 
   return (
     <>
+      <ClickEffects />
+      
       {/* 音乐播放器 - 不受装饰等级限制，始终可见 */}
       <AnimeMusicPlayer />
 
@@ -30,9 +33,9 @@ export default function DecorationManager() {
         <>
           <CornerDecoration />
           {level === 'full' && <SakuraRain />}
+          {/* <Mascot /> */}
         </>
       )}
-      {/* <Mascot /> */}
     </>
   );
 }

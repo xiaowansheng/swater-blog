@@ -5,6 +5,7 @@ import { tagApi } from '@/lib/api/tag';
 import { Link } from '@/lib/i18n/routing';
 import { getCoverConfig } from '@/lib/api/config.server';
 import ArchiveTimeline from '@/components/archive/ArchiveTimeline';
+import { Card } from '@/components/ui/Card';
 
 export default async function ArchiveListPage({
   params,
@@ -48,36 +49,42 @@ export default async function ArchiveListPage({
                     <Link
                       key={category.id}
                       href={`/category/${category.categoryKey}`}
-                      className="group relative bg-card border border-border rounded-xl p-6 overflow-hidden transition-all duration-300 hover:-translate-y-1"
-                      style={{ animationDelay: `${index * 0.05}s` }}
+                      className="block h-full"
                     >
-                      {/* 悬停背景 */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <Card 
+                        className="h-full p-6 group relative overflow-hidden"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        {/* 悬停背景 */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-                      <div className="relative z-10">
-                        <div className="flex items-start justify-between mb-3">
-                          <h3 className="text-xl font-bold group-hover:text-primary transition-colors">{category.name}</h3>
-                          {category.articleCount !== undefined && (
-                            <span className="px-3 py-1 bg-gradient-to-r from-primary/10 to-accent/10 text-primary rounded-full text-xs font-medium border border-primary/20">
-                              {category.articleCount}
-                            </span>
+                        <div className="relative z-10">
+                          <div className="flex items-start justify-between mb-3">
+                            <h3 className="text-xl font-bold group-hover:text-primary transition-colors">{category.name}</h3>
+                            {category.articleCount !== undefined && (
+                              <span className="px-3 py-1 bg-gradient-to-r from-primary/10 to-accent/10 text-primary rounded-full text-xs font-medium border border-primary/20">
+                                {category.articleCount}
+                              </span>
+                            )}
+                          </div>
+                          {category.description && (
+                            <p className="text-foreground/70 mb-2 line-clamp-2">{category.description}</p>
                           )}
                         </div>
-                        {category.description && (
-                          <p className="text-foreground/70 mb-2 line-clamp-2">{category.description}</p>
-                        )}
-                      </div>
+                      </Card>
                     </Link>
                   ))}
                 </div>
               ) : (
-                <div className="overflow-hidden relative p-6 sm:p-8 text-center modern-card">
+                <Card className="p-6 sm:p-8 text-center">
                   <div className="absolute inset-0 bg-gradient-to-br via-transparent from-primary/5 to-accent/5"></div>
                   <div className="relative z-10">
                     <p className="text-muted-foreground">{t('noCategories')}</p>
                   </div>
-                </div>
+                </Card>
               )}
             </div>
           </section>
@@ -104,32 +111,38 @@ export default async function ArchiveListPage({
                   {tags.map((tag, index) => (
                     <Link
                       key={tag.id}
-                      href={`/tag/${tag.id}`}
-                      className="group relative px-5 py-3 bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
-                      style={{ animationDelay: `${index * 0.03}s` }}
+                      href={`/tag/${tag.tagKey}`}
+                      className="block"
                     >
-                      {/* 悬停背景 */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <Card 
+                        className="group relative px-5 py-3 overflow-hidden flex items-center justify-center"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                         animate={{ opacity: 1, scale: 1 }}
+                         transition={{ delay: index * 0.03 }}
+                      >
+                        {/* 悬停背景 */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                      <div className="relative z-10 flex items-center gap-2">
-                        <span className="font-medium group-hover:text-primary transition-colors">{tag.name}</span>
-                        {tag.articleCount !== undefined && (
-                          <span className="px-2 py-0.5 bg-gradient-to-r from-primary/10 to-accent/10 text-primary rounded-full text-xs font-medium border border-primary/20">
-                            {tag.articleCount}
-                          </span>
-                        )}
-                      </div>
+                        <div className="relative z-10 flex items-center gap-2">
+                          <span className="font-medium group-hover:text-primary transition-colors">{tag.name}</span>
+                          {tag.articleCount !== undefined && (
+                            <span className="px-2 py-0.5 bg-gradient-to-r from-primary/10 to-accent/10 text-primary rounded-full text-xs font-medium border border-primary/20">
+                              {tag.articleCount}
+                            </span>
+                          )}
+                        </div>
+                      </Card>
                     </Link>
                   ))}
                 </div>
               ) : (
-                <div className="overflow-hidden relative p-6 sm:p-8 text-center modern-card">
+                <Card className="p-6 sm:p-8 text-center">
                   <div className="absolute inset-0 bg-gradient-to-br via-transparent from-primary/5 to-accent/5"></div>
                   <div className="relative z-10">
                     <p className="text-muted-foreground">{t('noTags')}</p>
                   </div>
-                </div>
+                </Card>
               )}
             </div>
           </section>

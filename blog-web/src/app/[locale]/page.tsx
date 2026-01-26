@@ -6,6 +6,7 @@ import Pagination from '@/components/common/Pagination';
 import { articleApi } from '@/lib/api/article';
 import { categoryApi } from '@/lib/api/category';
 import { tagApi } from '@/lib/api/tag';
+import type { PageResult, PostVO, CategoryVO, TagVO } from '@/types';
 
 export default async function HomePage({
   searchParams,
@@ -16,10 +17,10 @@ export default async function HomePage({
   const { page = '1' } = await searchParams;
   const currentPage = parseInt(page, 10) || 1;
 
-  let articleList: any = { records: [], total: 0, size: 10, current: 1, pages: 0 };
-  let hotArticles: any[] = [];
-  let categories: any[] = [];
-  let tags: any[] = [];
+  let articleList: PageResult<PostVO> = { records: [], total: 0, size: 10, current: 1, pages: 0 };
+  let hotArticles: PostVO[] = [];
+  let categories: CategoryVO[] = [];
+  let tags: TagVO[] = [];
 
   try {
     articleList = await articleApi.getList({ page: currentPage, size: 10 });
