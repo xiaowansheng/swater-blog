@@ -15,7 +15,7 @@ export default async function Head() {
 
   return (
     <>
-      <link rel="icon" href="/favicon.ico" sizes="any" />
+      {/* <link rel="icon" href="/favicon.ico" sizes="any" /> */}
       <link rel="icon" href={favicon} {...(faviconType ? { type: faviconType } : {})} />
     </>
   );
