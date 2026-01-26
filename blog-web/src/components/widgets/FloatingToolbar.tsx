@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
-import DraggableButton from '@/components/common/DraggableButton';
+
 
 export default function FloatingToolbar() {
   const t = useTranslations('common');
   const [isOpen, setIsOpen] = useState(false);
   const [show, setShow] = useState(false);
-  const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 100 });
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,11 +28,7 @@ export default function FloatingToolbar() {
   if (!show) return null;
 
   return (
-    <DraggableButton
-      initialPosition={{ x: window.innerWidth - 90, y: 100 }}
-      onPositionChange={setButtonPosition}
-    >
-      <div className="relative flex flex-col items-center">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-4">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -40,7 +36,7 @@ export default function FloatingToolbar() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.8 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="mb-4 relative"
+            className="relative"
           >
             {/* 可爱的气泡背景 */}
             <div className="absolute -inset-2 bg-gradient-to-r from-pink-200/20 via-purple-200/20 to-blue-200/20 rounded-full blur-lg animate-pulse" />
@@ -80,6 +76,7 @@ export default function FloatingToolbar() {
       </AnimatePresence>
 
       {/* 主按钮 */}
+      <motion.div>
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className="relative w-16 h-16 bg-gradient-to-br from-deco-pink via-primary to-deco-blue text-white shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center justify-center group overflow-hidden"
@@ -227,6 +224,7 @@ export default function FloatingToolbar() {
           transition={{ duration: 0.4 }}
         />
       </motion.button>
+      </motion.div>
 
       {/* 底部装饰 */}
       <motion.div
@@ -241,8 +239,7 @@ export default function FloatingToolbar() {
           ease: "easeInOut"
         }}
       />
-      </div>
-    </DraggableButton>
+    </div>
   );
 }
 
