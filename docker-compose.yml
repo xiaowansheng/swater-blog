@@ -198,6 +198,7 @@ services:
       - dhparam:/etc/nginx/dhparam
       - certs:/etc/nginx/certs:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./docker/nginx/limits.conf:/etc/nginx/conf.d/zz-limits.conf:ro
     networks:
       - blog-network
     restart: unless-stopped
