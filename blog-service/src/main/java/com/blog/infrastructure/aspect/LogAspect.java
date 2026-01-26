@@ -212,7 +212,8 @@ public class LogAspect {
         try {
             Object[] args = point.getArgs();
             if (args != null && args.length > 0) {
-                String params = JsonUtil.toJson(args);
+                Object[] safeArgs = sanitizeArgs(args);
+                String params = JsonUtil.toJson(safeArgs);
                 // 限制参数长度，避免数据过大
                 if (params != null && params.length() > 10000) {
                     params = params.substring(0, 10000) + "...";
@@ -224,6 +225,31 @@ public class LogAspect {
         }
 
         return logOperation;
+    }
+
+    private Object[] sanitizeArgs(Object[] args) {
+        Object[] sanitized = new Object[args.length];
+        for (int i = 0; i < args.length; i++) {
+            Object arg = args[i];
+            if (arg == null) {
+                sanitized[i] = null;
+                continue;
+            }
+            // Avoid serializing servlet/request/stream types which may contain JDK-internal fields
+            if (arg instanceof jakarta.servlet.ServletRequest
+                || arg instanceof jakarta.servlet.ServletResponse
+                || arg instanceof jakarta.servlet.http.HttpSession
+                || arg instanceof org.springframework.web.multipart.MultipartFile
+                || arg instanceof java.io.InputStream
+                || arg instanceof java.io.OutputStream
+                || arg instanceof java.io.Reader
+                || arg instanceof java.io.Writer) {
+                sanitized[i] = "[filtered:" + arg.getClass().getSimpleName() + "]";
+                continue;
+            }
+            sanitized[i] = arg;
+        }
+        return sanitized;
     }
 
     /**
