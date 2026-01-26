@@ -22,6 +22,7 @@ import {
   MessageOutlined,
   AppstoreOutlined,
   ExclamationCircleOutlined,
+  UndoOutlined,
 } from "@ant-design/icons";
 import { 
   ImageUpload,
@@ -38,6 +39,7 @@ const ConfigPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("site");
   const [unsavedTabs, setUnsavedTabs] = useState<Set<string>>(new Set());
+  const [originalValues, setOriginalValues] = useState<Record<string, any>>({});
 
   const [siteForm] = Form.useForm();
   const [authorForm] = Form.useForm();
@@ -140,6 +142,17 @@ const ConfigPage: React.FC = () => {
       commentForm.setFieldsValue(processConfig(comment));
       notifyForm.setFieldsValue(processConfig(notify));
       componentForm.setFieldsValue(processConfig(component));
+      
+      // 保存原始值用于撤销
+      setOriginalValues({
+        site: processConfig(site),
+        author: processConfig(author),
+        cover: processConfig(cover),
+        privacy: processConfig(privacy),
+        comment: processConfig(comment),
+        notify: processConfig(notify),
+        component: processConfig(component),
+      });
       // uploadForm.setFieldsValue(upload);
       // emailForm.setFieldsValue(email);
     } catch (error) {
@@ -234,11 +247,37 @@ const ConfigPage: React.FC = () => {
       await updateFn(processedValues);
       message.success("保存成功");
       clearTabUnsaved(type); // 保存成功后清除未保存标记
+      
+      // 更新原始值
+      setOriginalValues(prev => ({
+        ...prev,
+        [type]: processedValues
+      }));
     } catch (error) {
       console.error("保存失败", error);
       message.error("保存失败");
     } finally {
       setSaving(false);
+    }
+  };
+
+  // 撤销修改
+  const handleUndo = () => {
+    const formMap: Record<string, any> = {
+      site: siteForm,
+      author: authorForm,
+      cover: coverForm,
+      privacy: privacyForm,
+      comment: commentForm,
+      notify: notifyForm,
+      component: componentForm,
+    };
+    
+    const currentForm = formMap[activeTab];
+    if (currentForm && originalValues[activeTab]) {
+      currentForm.setFieldsValue(originalValues[activeTab]);
+      clearTabUnsaved(activeTab);
+      message.success("已撤销修改");
     }
   };
 
@@ -286,18 +325,7 @@ const ConfigPage: React.FC = () => {
           <Form.Item name="notice" label="网站公告">
             <TextArea rows={3} placeholder="首页显示的公告内容" />
           </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              loading={saving}
-              onClick={() =>
-                handleSave("site", siteForm, configApi.updateSiteConfig)
-              }
-            >
-              保存
-            </Button>
-          </Form.Item>
+
         </Form>
       ),
     },
@@ -513,18 +541,7 @@ const ConfigPage: React.FC = () => {
             <Switch />
           </Form.Item>
 
-          <Form.Item>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              loading={saving}
-              onClick={() =>
-                handleSave("author", authorForm, configApi.updateAuthorConfig)
-              }
-            >
-              保存
-            </Button>
-          </Form.Item>
+
         </Form>
       ),
     },
@@ -556,18 +573,7 @@ const ConfigPage: React.FC = () => {
           <ImageField name="about" label="关于页封面" />
           <ImageField name="message" label="留言页封面" />
           <ImageField name="default" label="默认封面" />
-          <Form.Item>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              loading={saving}
-              onClick={() =>
-                handleSave("cover", coverForm, configApi.updateCoverConfig)
-              }
-            >
-              保存
-            </Button>
-          </Form.Item>
+
         </Form>
       ),
     },
@@ -620,22 +626,7 @@ const ConfigPage: React.FC = () => {
           >
             <Switch />
           </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              loading={saving}
-              onClick={() =>
-                handleSave(
-                  "privacy",
-                  privacyForm,
-                  configApi.updatePrivacyConfig
-                )
-              }
-            >
-              保存
-            </Button>
-          </Form.Item>
+
         </Form>
       ),
     },
@@ -701,22 +692,7 @@ const ConfigPage: React.FC = () => {
           >
             <TextArea rows={2} placeholder="例如：垃圾,广告,违法" />
           </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              loading={saving}
-              onClick={() =>
-                handleSave(
-                  "comment",
-                  commentForm,
-                  configApi.updateCommentConfig
-                )
-              }
-            >
-              保存
-            </Button>
-          </Form.Item>
+
         </Form>
       ),
     },
@@ -775,18 +751,7 @@ const ConfigPage: React.FC = () => {
           >
             <Switch />
           </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              loading={saving}
-              onClick={() =>
-                handleSave("notify", notifyForm, configApi.updateNotifyConfig)
-              }
-            >
-              保存
-            </Button>
-          </Form.Item>
+
         </Form>
       ),
     },
@@ -831,22 +796,7 @@ const ConfigPage: React.FC = () => {
           >
             <Switch />
           </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              loading={saving}
-              onClick={() =>
-                handleSave(
-                  "component",
-                  componentForm,
-                  configApi.updateComponentConfig
-                )
-              }
-            >
-              保存
-            </Button>
-          </Form.Item>
+
         </Form>
       ),
     },
@@ -942,35 +892,106 @@ const ConfigPage: React.FC = () => {
     // },
   ];
 
+  // 获取当前标签页对应的保存函数
+  const getSaveHandler = () => {
+    const handlers: Record<string, () => void> = {
+      site: () => handleSave("site", siteForm, configApi.updateSiteConfig),
+      author: () => handleSave("author", authorForm, configApi.updateAuthorConfig),
+      cover: () => handleSave("cover", coverForm, configApi.updateCoverConfig),
+      privacy: () => handleSave("privacy", privacyForm, configApi.updatePrivacyConfig),
+      comment: () => handleSave("comment", commentForm, configApi.updateCommentConfig),
+      notify: () => handleSave("notify", notifyForm, configApi.updateNotifyConfig),
+      component: () => handleSave("component", componentForm, configApi.updateComponentConfig),
+    };
+    return handlers[activeTab];
+  };
+
   return (
     <div className="page-container">
       <div className="search-bar">
         <h2 className="text-lg font-medium">系统配置</h2>
       </div>
-      <Card className="chart-card">
+      <Card className="chart-card config-card-wrapper">
         <Spin spinning={loading}>
-          <Tabs
-            className="config-tabs"
-            activeKey={activeTab}
-            onChange={handleTabChange}
-            items={tabItems}
-            tabPosition="left"
-          />
+          <div className="tabs-wrapper">
+            <Tabs
+              className="config-tabs"
+              activeKey={activeTab}
+              onChange={handleTabChange}
+              items={tabItems}
+              tabPosition="left"
+            />
+            
+            {/* 固定在标签页内容区域右下角的操作按钮 */}
+            {unsavedTabs.has(activeTab) && (
+              <div className="fixed-action-buttons">
+                <Button
+                  size="large"
+                  icon={<UndoOutlined />}
+                  onClick={handleUndo}
+                >
+                  撤销
+                </Button>
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<SaveOutlined />}
+                  loading={saving}
+                  onClick={getSaveHandler()}
+                >
+                  保存
+                </Button>
+              </div>
+            )}
+          </div>
         </Spin>
       </Card>
+
       <style>{`
-        .config-tabs {
+        .config-card-wrapper {
+          position: relative;
+        }
+        
+        .tabs-wrapper {
+          position: relative;
           height: calc(100vh - 280px);
           min-height: 400px;
+        }
+        
+        .config-tabs {
+          height: 100%;
         }
         .config-tabs .ant-tabs-nav {
           overflow-y: auto;
         }
         .config-tabs .ant-tabs-content-holder {
           overflow-y: auto;
+          position: relative;
         }
-        .config-form { max-width: 600px; padding-left: 24px; }
+        .config-form { 
+          max-width: 600px; 
+          padding-left: 24px;
+          padding-bottom: 100px;
+        }
         .config-form .ant-form-item { margin-bottom: 16px; }
+        
+        .fixed-action-buttons {
+          position: absolute;
+          bottom: 24px;
+          right: 24px;
+          z-index: 1000;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        
+        .fixed-action-buttons .ant-btn {
+          height: 48px;
+          padding: 0 32px;
+          font-size: 16px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          width: 120px;
+        }
       `}</style>
     </div>
   );
