@@ -1,7 +1,4 @@
-'use client';
-
-import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { getTranslations } from 'next-intl/server';
 import PageHeader from '@/components/layout/PageHeader';
 import GuestbookSection from '@/components/guestbook/GuestbookSection';
 import ComponentDisabledNotice from '@/components/common/ComponentDisabledNotice';
@@ -9,101 +6,43 @@ import { guestbookApi } from '@/lib/api/guestbook';
 import { fetchServer } from '@/lib/api/server';
 import type { GuestbookVO, ComponentConfig } from '@/types';
 
-export default function GuestbookPage({
+const DEFAULT_COMPONENT_CONFIG: ComponentConfig = {
+  articleCommentEnabled: true,
+  talkCommentEnabled: true,
+  guestbookMessageEnabled: true,
+};
+
+export default async function GuestbookPage({
   searchParams,
 }: {
-  searchParams: { page?: string };
+  searchParams: Promise<{ page?: string }>;
 }) {
-  const t = useTranslations('common');
-  const tGuestbook = useTranslations('guestbook');
+  const { page = '1' } = await searchParams;
+  const currentPage = parseInt(page, 10) || 1;
+  const t = await getTranslations('common');
+  const tGuestbook = await getTranslations('guestbook');
 
-  const [guestbook, setGuestbook] = useState<{ records: GuestbookVO[] }>({
-    records: [],
-  });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [componentConfig, setComponentConfig] = useState<ComponentConfig>({
-    articleCommentEnabled: true,
-    talkCommentEnabled: true,
-    guestbookMessageEnabled: true,
-  });
-  const [configLoading, setConfigLoading] = useState(true);
+  let guestbookRecords: GuestbookVO[] = [];
+  let componentConfig: ComponentConfig = DEFAULT_COMPONENT_CONFIG;
+  let hasGuestbookError = false;
 
-  useEffect(() => {
-    const loadGuestbook = async () => {
-      try {
-        setLoading(true);
-        setError(false);
-        const { page = '1' } = searchParams;
-        const pageNum = parseInt(page, 10) || 1;
-        setCurrentPage(pageNum);
-
-        const data = await guestbookApi.getListClient(pageNum, 10);
-        setGuestbook({ records: data.records || [] });
-      } catch (err) {
-        console.error('Failed to load guestbook:', err);
-        setError(true);
-        setGuestbook({ records: [] });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const loadComponentConfig = async () => {
-      try {
-        setConfigLoading(true);
-        const configs = await fetchServer<{ component?: ComponentConfig }>('/api/public/config');
-        const config = configs?.component || {
-          articleCommentEnabled: true,
-          talkCommentEnabled: true,
-          guestbookMessageEnabled: true,
-        };
-        setComponentConfig(config);
-      } catch (err) {
-        console.error('Failed to load component config:', err);
-        // 使用默认值
-        setComponentConfig({
-          articleCommentEnabled: true,
-          talkCommentEnabled: true,
-          guestbookMessageEnabled: true,
-        });
-      } finally {
-        setConfigLoading(false);
-      }
-    };
-
-    loadGuestbook();
-    loadComponentConfig();
-  }, [searchParams]);
-
-  if (loading) {
-    return (
-      <>
-        <PageHeader>
-          <div className="relative w-full overflow-hidden">
-            <div className="relative mx-auto max-w-4xl px-4 text-center">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card/70 px-5 py-2 text-xs uppercase tracking-[0.32em] text-primary/70 shadow-sm backdrop-blur">
-                <span className="h-2 w-2 rounded-full bg-primary/80"></span>
-                Sweet Guestbook
-              </div>
-              <h1 className="mt-6 text-4xl font-black tracking-tight text-foreground sm:text-6xl">
-                <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-                  {t('guestbook')}
-                </span>
-              </h1>
-              <p className="mt-4 text-base text-muted sm:text-lg">{tGuestbook('description')}</p>
-            </div>
-          </div>
-        </PageHeader>
-        <main className="container flex-1 px-4 py-8 mx-auto">
-          <div className="text-center text-muted">Loading...</div>
-        </main>
-      </>
-    );
+  try {
+    const guestbook = await guestbookApi.getList(currentPage, 10);
+    guestbookRecords = guestbook.records || [];
+  } catch (err) {
+    console.error('Failed to load guestbook:', err);
+    hasGuestbookError = true;
   }
 
-  if (error) {
+  try {
+    const configs = await fetchServer<{ component?: ComponentConfig }>('/api/public/config');
+    componentConfig = configs?.component || DEFAULT_COMPONENT_CONFIG;
+  } catch (err) {
+    console.error('Failed to load component config:', err);
+    componentConfig = DEFAULT_COMPONENT_CONFIG;
+  }
+
+  if (hasGuestbookError) {
     return (
       <>
         <PageHeader title={t('guestbook')} description={tGuestbook('description')} />
@@ -137,9 +76,7 @@ export default function GuestbookPage({
           <div className="pointer-events-none absolute -top-20 left-0 h-40 w-40 rounded-full bg-deco-pink/40 blur-3xl"></div>
           <div className="pointer-events-none absolute top-10 right-10 h-36 w-36 rounded-full bg-deco-yellow/35 blur-3xl"></div>
 
-          {configLoading ? (
-            <div className="text-center text-muted">Loading...</div>
-          ) : componentConfig.guestbookMessageEnabled ? (
+          {componentConfig.guestbookMessageEnabled ? (
             <div className="relative rounded-[36px] border border-primary/15 bg-gradient-to-br from-white/80 via-secondary/40 to-primary/10 p-1 shadow-[0_32px_90px_-60px_rgba(96,165,250,0.55)]">
               <div className="rounded-[34px] bg-card/90 backdrop-blur-xl">
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-primary/10 px-6 py-4 sm:px-8">
@@ -163,7 +100,7 @@ export default function GuestbookPage({
 
                 <div className="relative px-6 pb-10 pt-6 sm:px-8">
                   <GuestbookSection
-                    initialMessages={guestbook.records}
+                    initialMessages={guestbookRecords}
                     currentPage={currentPage}
                     pageSize={10}
                   />
