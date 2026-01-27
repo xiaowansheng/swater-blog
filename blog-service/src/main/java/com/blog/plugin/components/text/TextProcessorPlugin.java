@@ -10,22 +10,6 @@ import com.blog.plugin.core.ProcessResult;
 public interface TextProcessorPlugin extends Plugin {
 
     /**
-     * 处理内容（清理HTML、过滤敏感词等）
-     *
-     * @param content 原始内容
-     * @return 处理后的内容
-     */
-    String processContent(String content);
-
-    /**
-     * 检查是否为垃圾信息
-     *
-     * @param content 内容
-     * @return 是否为垃圾信息
-     */
-    boolean isSpam(String content);
-
-    /**
      * 处理文本内容并返回处理结果
      *
      * @param content 内容
