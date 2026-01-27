@@ -52,8 +52,9 @@ export async function fetchServer<T>(url: string, options?: RequestInit): Promis
     }
 
     return result.data;
-  } catch (error: any) {
-    if (error.code === 'ECONNREFUSED' || error.message?.includes('fetch failed')) {
+  } catch (error: unknown) {
+    const err = error as { code?: string; message?: string };
+    if (err.code === 'ECONNREFUSED' || err.message?.includes('fetch failed')) {
       console.warn(`API server connection failed: ${normalizeApiUrl(API_BASE_URL, url)}`);
       throw error;
     }
