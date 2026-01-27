@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import GuestbookList from './GuestbookList';
 import GuestbookForm from './GuestbookForm';
 import { guestbookApi } from '@/lib/api/guestbook';
@@ -14,6 +14,7 @@ interface GuestbookSectionProps {
   total: number;
   currentPage: number;
   pageSize: number;
+  sort: string;
 }
 
 export default function GuestbookSection({
@@ -21,23 +22,51 @@ export default function GuestbookSection({
   total,
   currentPage,
   pageSize,
+  sort,
 }: GuestbookSectionProps) {
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations('common');
   const tGuestbook = useTranslations('guestbook');
+  
+  // 使用 Key 来强制重置组件状态，或者使用 useEffect 保持数据同步
   const [messages, setMessages] = useState<GuestbookVO[]>(initialMessages);
+  
+  // 当初始消息变化时同步更新（如翻页）
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
+
+  const searchParams = useSearchParams();
 
   const totalPages = Math.ceil(total / pageSize);
 
   const handlePageChange = (page: number) => {
-    router.push(`${pathname}?page=${page}`);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', page.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const handleSortChange = (newSort: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('sort', newSort);
+    params.set('page', '1'); // 切换排序重置到第一页
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   const refreshMessages = async () => {
     try {
-      const result = await guestbookApi.getListClient(currentPage, pageSize);
-      setMessages(result.records || []);
+      // 提交成功后重新获取服务器数据（包括总数等）
+      router.refresh();
+      
+      // 如果已在第一页，本地也刷一下（router.refresh 可能有延迟）
+      if (currentPage === 1) {
+        const result = await guestbookApi.getListClient(1, pageSize, sort);
+        setMessages(result.records || []);
+      } else {
+        // 如果在其他页，跳转回第一页
+        handlePageChange(1);
+      }
     } catch (error) {
       console.error('Failed to refresh guestbook:', error);
     }
@@ -58,10 +87,33 @@ export default function GuestbookSection({
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
                 </span>
                 {tGuestbook('messageList')}
-                <span className="text-sm font-normal text-muted-foreground ml-2 px-3 py-1 rounded-full bg-secondary/50 border border-secondary">
+                 <span className="text-sm font-normal text-muted-foreground ml-2 px-3 py-1 rounded-full bg-secondary/50 border border-secondary">
                     {tGuestbook('total', { count: total })}
                 </span>
             </h2>
+
+            <div className="flex items-center gap-1 p-1 bg-secondary/30 rounded-xl border border-primary/5">
+                <button
+                    onClick={() => handleSortChange('desc')}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
+                        sort === 'desc' 
+                        ? 'bg-white dark:bg-card text-primary shadow-sm ring-1 ring-primary/10' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-card/50'
+                    }`}
+                >
+                    {tGuestbook('latest')}
+                </button>
+                <button
+                    onClick={() => handleSortChange('asc')}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
+                        sort === 'asc' 
+                        ? 'bg-white dark:bg-card text-primary shadow-sm ring-1 ring-primary/10' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-card/50'
+                    }`}
+                >
+                    {tGuestbook('oldest')}
+                </button>
+            </div>
         </div>
 
         {messages.length > 0 ? (

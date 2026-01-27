@@ -1,7 +1,5 @@
 package com.blog.modules.guestbook.service.impl;
 
-
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.modules.auth.config.EmailSessionProperties;
@@ -34,9 +32,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 public class GuestbookPublicServiceImpl implements GuestbookPublicService {
@@ -45,10 +43,10 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
 
     @Autowired
     private UserMapper userMapper;
-    
+
     @Autowired
     private ApplicationEventPublisher eventPublisher;
-    
+
     @Autowired
     private MessageVerificationService messageVerificationService;
 
@@ -62,14 +60,19 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
     private SensitiveWordHelper sensitiveWordHelper;
 
     @Override
-    public PageResult<GuestbookVO> list(Long page, Long size) {
+    public PageResult<GuestbookVO> list(Long page, Long size, String sort) {
         String ownerEmail = getOwnerEmailFromRequest();
         Page<Guestbook> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Guestbook> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Guestbook::getDeleted, 0);
         wrapper.and(w -> w.eq(Guestbook::getReviewStatus, 1)
                 .or(ownerEmail != null && !ownerEmail.isBlank(), w2 -> w2.eq(Guestbook::getEmail, ownerEmail)));
-        wrapper.orderByDesc(Guestbook::getCreateTime);
+
+        if ("asc".equalsIgnoreCase(sort)) {
+            wrapper.orderByAsc(Guestbook::getCreateTime);
+        } else {
+            wrapper.orderByDesc(Guestbook::getCreateTime);
+        }
 
         Page<Guestbook> result = guestbookMapper.selectPage(pageParam, wrapper);
         List<GuestbookVO> voList = result.getRecords().stream()
@@ -104,13 +107,13 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
         // 敏感词检测：如果包含敏感词则需要审核，否则自动通过
         if (sensitiveWordHelper.contains(guestbook.getContent())) {
             // 包含敏感词：需要审核，不可见
-            guestbook.setReviewStatus(0);  // 待审核
-            guestbook.setIsVisible(0);  // 不可见
+            guestbook.setReviewStatus(0); // 待审核
+            guestbook.setIsVisible(0); // 不可见
             log.info("留言包含敏感词，ID: {}, 需要人工审核", guestbook.getId());
         } else {
             // 无敏感词：自动审核通过，可见
-            guestbook.setReviewStatus(1);  // 审核通过
-            guestbook.setIsVisible(1);  // 可见
+            guestbook.setReviewStatus(1); // 审核通过
+            guestbook.setIsVisible(1); // 可见
         }
 
         // Convert images list to JSON string if present
@@ -146,9 +149,10 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
                     if (locationInfo.getIpLocation() != null && !locationInfo.getIpLocation().isEmpty()) {
                         guestbook.setIpLocation(locationInfo.getIpLocation());
                     }
-                    guestbook.setLocation(locationInfo.getLocation() != null ? locationInfo.getLocation() :
-                            (locationInfo.getProvince() != null && locationInfo.getCity() != null ?
-                                    locationInfo.getProvince() + locationInfo.getCity() : null));
+                    guestbook.setLocation(locationInfo.getLocation() != null ? locationInfo.getLocation()
+                            : (locationInfo.getProvince() != null && locationInfo.getCity() != null
+                                    ? locationInfo.getProvince() + locationInfo.getCity()
+                                    : null));
                 } else {
                     guestbook.setIp(ip);
                 }
@@ -167,10 +171,10 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
 
         // Save to database
         guestbookMapper.insert(guestbook);
-        
+
         // Convert to VO
         GuestbookVO vo = convertToVO(guestbook, emailVerifiedBySession ? ownerEmail : dto.getEmail());
-        
+
         // Publish event after transaction commit
         if (guestbook.getId() != null) {
             Long guestbookId = guestbook.getId();
@@ -182,7 +186,7 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
                 }
             });
         }
-        
+
         return vo;
     }
 
@@ -215,9 +219,9 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
 
     private String getOwnerEmailFromRequest() {
         HttpServletRequest request = RequestUtil.getRequest();
-        if (request == null || emailSessionProperties == null) return null;
+        if (request == null || emailSessionProperties == null)
+            return null;
         String token = request.getHeader(emailSessionProperties.getHeaderName());
         return EmailSessionTokenUtil.getEmail(token, emailSessionProperties);
     }
 }
-

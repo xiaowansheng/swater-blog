@@ -18,9 +18,9 @@ export const revalidate = ISR_REVALIDATE.GUESTBOOK;
 export default async function GuestbookPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; sort?: string }>;
 }) {
-  const { page = '1' } = await searchParams;
+  const { page = '1', sort = 'desc' } = await searchParams;
   const currentPage = parseInt(page, 10) || 1;
   const t = await getTranslations('common');
   const tGuestbook = await getTranslations('guestbook');
@@ -31,7 +31,7 @@ export default async function GuestbookPage({
   let hasGuestbookError = false;
 
   try {
-    const guestbook = await guestbookApi.getList(currentPage, PAGINATION_DEFAULT_SIZE);
+    const guestbook = await guestbookApi.getList(currentPage, PAGINATION_DEFAULT_SIZE, sort);
     guestbookRecords = guestbook.records || [];
     guestbookTotal = guestbook.total || 0;
   } catch (err) {
@@ -115,6 +115,7 @@ export default async function GuestbookPage({
                     total={guestbookTotal}
                     currentPage={currentPage}
                     pageSize={PAGINATION_DEFAULT_SIZE}
+                    sort={sort}
                   />
 
                   <div className="pointer-events-none absolute -bottom-6 left-1/2 hidden h-16 w-16 -translate-x-1/2 rounded-full bg-deco-pink/30 blur-2xl sm:block"></div>

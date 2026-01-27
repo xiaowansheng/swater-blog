@@ -13,14 +13,18 @@ export interface GuestbookSubmitDTO {
 }
 
 export const guestbookApi = {
-  getList: (page: number = 1, size: number = 10) => {
+  getList: (page: number = 1, size: number = 10, sort?: string) => {
+    const params = new URLSearchParams({ page: page.toString(), size: size.toString() });
+    if (sort) params.append('sort', sort);
     return fetchServer<PageResult<GuestbookVO>>(
-      `/api/public/guestbook/list?page=${page}&size=${size}`
+      `/api/public/guestbook/list?${params.toString()}`
     );
   },
-  getListClient: (page: number = 1, size: number = 10) => {
+  getListClient: (page: number = 1, size: number = 10, sort?: string) => {
+    const params = new URLSearchParams({ page: page.toString(), size: size.toString() });
+    if (sort) params.append('sort', sort);
     return fetchClient<PageResult<GuestbookVO>>(
-      `/api/public/guestbook/list?page=${page}&size=${size}`
+      `/api/public/guestbook/list?${params.toString()}`
     );
   },
   sendEmailCode: (email: string) => {

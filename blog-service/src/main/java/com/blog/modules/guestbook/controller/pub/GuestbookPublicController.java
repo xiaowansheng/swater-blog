@@ -1,6 +1,5 @@
 package com.blog.modules.guestbook.controller.pub;
 
-
 import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
@@ -11,6 +10,7 @@ import com.blog.modules.guestbook.service.GuestbookPublicService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 @RestController
 @RequestMapping("/api/public/guestbook")
 @ApiOperation(name = "留言簿公开接口", description = "留言簿相关接口", open = true)
@@ -22,8 +22,9 @@ public class GuestbookPublicController {
     @ApiOperation(name = "获取留言列表", type = ApiOperationType.QUERY, description = "分页获取留言列表")
     public Result<PageResult<GuestbookVO>> list(
             @RequestParam(defaultValue = "1") Long page,
-            @RequestParam(defaultValue = "10") Long size) {
-        PageResult<GuestbookVO> result = guestbookPublicService.list(page, size);
+            @RequestParam(defaultValue = "10") Long size,
+            @RequestParam(required = false) String sort) {
+        PageResult<GuestbookVO> result = guestbookPublicService.list(page, size, sort);
         return Result.success(result);
     }
 
@@ -34,4 +35,3 @@ public class GuestbookPublicController {
         return Result.success(vo);
     }
 }
-
