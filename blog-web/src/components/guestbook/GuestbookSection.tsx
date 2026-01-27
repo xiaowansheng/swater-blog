@@ -31,11 +31,11 @@ export default function GuestbookSection({
   const tGuestbook = useTranslations('guestbook');
   
   const [isPendingNav, startTransition] = useTransition();
-  const [messages, setMessages] = useState<GuestbookVO[]>(initialMessages);
+  const [jumpPage, setJumpPage] = useState<string>('');
   
   // 当初始消息变化时同步更新（如翻页、排序改变）
   useEffect(() => {
-    setMessages(initialMessages);
+    setJumpPage(''); // 参数变化时清空跳转输入框
   }, [initialMessages]);
 
   const searchParams = useSearchParams();
@@ -59,19 +59,26 @@ export default function GuestbookSection({
     });
   };
 
+  const handleJumpPage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const pageNum = parseInt(jumpPage, 10);
+    if (isNaN(pageNum) || pageNum < 1 || pageNum > totalPages) {
+      setJumpPage('');
+      return;
+    }
+    handlePageChange(pageNum);
+    setJumpPage('');
+  };
+
   const refreshMessages = async () => {
     try {
-      // 提交成功后重新获取服务器数据（包括总数等）
-      router.refresh();
-      
-      // 如果已在第一页，本地也刷一下（router.refresh 可能有延迟）
-      if (currentPage === 1) {
-        const result = await guestbookApi.getListClient(1, pageSize, sort);
-        setMessages(result.records || []);
-      } else {
-        // 如果在其他页，跳转回第一页
-        handlePageChange(1);
-      }
+      // 提交成功后重新获取服务器数据
+      startTransition(() => {
+          router.refresh();
+          if (currentPage !== 1) {
+            handlePageChange(1);
+          }
+      });
     } catch (error) {
       console.error('Failed to refresh guestbook:', error);
     }
@@ -121,9 +128,9 @@ export default function GuestbookSection({
             </div>
         </div>
 
-        {messages.length > 0 ? (
+        {initialMessages && initialMessages.length > 0 ? (
           <div className="relative">
-             <GuestbookList messages={messages} />
+             <GuestbookList messages={initialMessages} />
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in-95 duration-500">
@@ -182,6 +189,24 @@ export default function GuestbookSection({
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
             </div>
+
+            <form onSubmit={handleJumpPage} className="flex items-center gap-2 px-3 py-1 bg-white/50 dark:bg-black/20 backdrop-blur-sm rounded-full border border-primary/10 shadow-sm ml-4">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">{t('jumpTo')}</span>
+                <input
+                    type="text"
+                    value={jumpPage}
+                    onChange={(e) => setJumpPage(e.target.value.replace(/\D/g, ''))}
+                    className="w-10 h-7 bg-transparent border-b border-primary/20 text-center text-sm focus:outline-none focus:border-primary transition-colors"
+                />
+                <span className="text-xs text-muted-foreground whitespace-nowrap">{t('page')}</span>
+                <button 
+                  type="submit"
+                  disabled={!jumpPage}
+                  className="p-1.5 rounded-full hover:bg-primary/10 text-primary transition-all disabled:opacity-30"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                </button>
+            </form>
         </div>
       )}
     </div>
