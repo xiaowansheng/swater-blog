@@ -98,7 +98,6 @@
   --font-sans: var(--font-nunito), var(--font-noto-sans-sc), system-ui, sans-serif;
   --font-title: var(--font-varela-round), var(--font-noto-sans-sc), system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-
   --animate-float: float 6s ease-in-out infinite;
   --animate-twinkle: twinkle 2s ease-in-out infinite;
   --animate-bounce-soft: bounce-soft 3s ease-in-out infinite;
@@ -258,8 +257,8 @@ body::after {
 }
 
 .animate-float {
-  animation: float 6s ease-in-out infinite;
-}
+     animation: float 1.2s ease-in-out infinite;
+   }
 
 .gradient-text {
   background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);

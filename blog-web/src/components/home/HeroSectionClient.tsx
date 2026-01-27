@@ -182,28 +182,26 @@ export default function HeroSectionClient({
             </div>
           </motion.div>
 
-          <motion.div 
-            variants={itemVariants} 
-            className="mt-12"
-            animate={{
-              y: [0, 10, 0],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 3 // Wait for entrance
-            }}
-          >
-            <button
-              onClick={handleScrollToContent}
-              className="inline-block cursor-pointer"
-              aria-label={t('scrollToContent')}
-            >
-              <svg className="mx-auto w-6 h-6 transition-colors text-primary/60 hover:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+          <motion.div variants={itemVariants} className="mt-12 flex justify-center">
+            <div className="animate-float">
+              <button
+                onClick={handleScrollToContent}
+                className="relative inline-block cursor-pointer transition-transform hover:scale-110 group"
+                aria-label={t('scrollToContent')}
+              >
+                {/* 呼吸灯光晕效果 */}
+                <div className="absolute inset-0 rounded-full blur-xl opacity-0 transition-opacity bg-primary/30 group-hover:opacity-100"></div>
+                
+                <svg 
+                    className="relative z-10 mx-auto w-10 h-10 transition-all text-primary hover:text-primary drop-shadow-[0_0_12px_rgba(var(--primary),0.6)]" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                  </svg>
+              </button>
+            </div>
           </motion.div>
         </motion.div>
       </motion.div>
