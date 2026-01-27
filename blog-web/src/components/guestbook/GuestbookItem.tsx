@@ -77,11 +77,14 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
   ];
   const colorIndex = (displayName.length + (message.id || 0)) % avatarColors.length;
   const avatarClass = avatarColors[colorIndex];
+  
+  // Deterministic rotation based on ID to avoid hydration mismatch
+  const rotation = ((message.id || 0) % 5) - 2;
 
   return (
-    <div className="group break-inside-avoid mb-6">
+    <div className="group break-inside-avoid mb-6" style={{ transform: `rotate(${rotation}deg)` }}>
       <div 
-        className="relative bg-white/80 dark:bg-card/80 backdrop-blur-sm rounded-[2rem] p-5 border border-primary/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:rotate-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:border-primary/20"
+        className="relative bg-white/80 dark:bg-card/80 backdrop-blur-sm rounded-[2rem] p-5 border border-primary/10 shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-2 hover:rotate-0 hover:shadow-[0_15px_30px_rgba(0,0,0,0.06)] hover:border-primary/20 hover:z-10"
       >
         {/* 装饰性的小圆点 */}
         <div className="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -149,6 +149,7 @@
     "tips": "温馨提示",
     "tipsContent": "请文明留言，共同维护良好的交流环境",
     "messageCount": "条留言",
+    "total": "共 {count} 条",
     "nicknameRequired": "请输入昵称",
     "emailRequired": "请输入邮箱",
     "emailCodeRequired": "请输入邮箱验证码",

@@ -26,12 +26,14 @@ export default async function GuestbookPage({
   const tGuestbook = await getTranslations('guestbook');
 
   let guestbookRecords: GuestbookVO[] = [];
+  let guestbookTotal = 0;
   let componentConfig: ComponentConfig = DEFAULT_COMPONENT_CONFIG;
   let hasGuestbookError = false;
 
   try {
     const guestbook = await guestbookApi.getList(currentPage, PAGINATION_DEFAULT_SIZE);
     guestbookRecords = guestbook.records || [];
+    guestbookTotal = guestbook.total || 0;
   } catch (err) {
     console.error('Failed to load guestbook:', err);
     hasGuestbookError = true;
@@ -110,6 +112,7 @@ export default async function GuestbookPage({
                 <div className="relative px-6 pb-10 pt-6 sm:px-8">
                   <GuestbookSection
                     initialMessages={guestbookRecords}
+                    total={guestbookTotal}
                     currentPage={currentPage}
                     pageSize={PAGINATION_DEFAULT_SIZE}
                   />

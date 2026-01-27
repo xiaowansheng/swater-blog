@@ -29,6 +29,8 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
   const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState('');
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   // 初始化倒计时状态
   useEffect(() => {
     const savedEndTime = localStorage.getItem('emailCodeEndTime');
@@ -104,7 +106,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
     setEmailVerified(true);
     setEmailCode('');
     return true;
-  };
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,6 +142,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
       // 清空内容，保留用户信息
       setContent('');
       setEmailCode('');
+      setIsExpanded(false); // 收起表单
 
       toast.success(t('commentPublished'));
       onSuccess?.(message);
@@ -150,140 +153,191 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
     }
   };
 
+  if (!isExpanded) {
+    return (
+        <button
+            onClick={() => setIsExpanded(true)}
+            className="group relative w-full max-w-2xl mx-auto flex items-center justify-between p-6 bg-white/60 dark:bg-card/60 backdrop-blur-xl border-2 border-dashed border-primary/20 rounded-[2rem] hover:border-primary/40 hover:bg-white/80 dark:hover:bg-card/80 transition-all duration-500 shadow-sm hover:shadow-md cursor-pointer overflow-hidden"
+        >
+             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+             
+             <div className="flex items-center gap-4 relative z-10">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent text-white shadow-lg shadow-primary/30 transform -rotate-6 group-hover:rotate-0 transition-transform duration-500">
+                     <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                     </svg>
+                </div>
+                <div className="text-left">
+                     <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">{tGuestbook('writeMessage')}</h3>
+                     <p className="text-sm text-muted-foreground/80 font-medium">Capture your thoughts...</p>
+                </div>
+             </div>
+
+             <div className="relative z-10 h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                 <svg className="w-5 h-5 transform group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                 </svg>
+             </div>
+        </button>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 p-1 relative overflow-hidden">
-      {error && (
-        <div className="p-4 bg-red-50/80 border border-red-200 rounded-2xl shadow-sm backdrop-blur-sm animate-in fade-in slide-in-from-top-2">
-          <p className="text-red-600 text-sm font-bold flex items-center gap-2">
-            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            {error}
-          </p>
-        </div>
-      )}
-      <div className="space-y-4">
-        <div className="group relative">
-            <input
-            type="text"
-            value={userInfo.nickname || ''}
-            onChange={(e) => setUserInfo({ nickname: e.target.value })}
-            placeholder={tGuestbook('nicknamePlaceholder')}
-            required
-            className="w-full px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.01] origin-left"
-            />
-            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity text-primary/40">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <div className="w-full max-w-2xl mx-auto animate-in fade-in zoom-in-95 duration-300 slide-in-from-top-4">
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-white/80 dark:bg-card/80 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-1">
+            {/* 顶栏 */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-primary/5">
+                 <div className="flex items-center gap-3">
+                    <div className="h-2.5 w-2.5 rounded-full bg-red-400/80"></div>
+                    <div className="h-2.5 w-2.5 rounded-full bg-yellow-400/80"></div>
+                    <div className="h-2.5 w-2.5 rounded-full bg-green-400/80"></div>
+                 </div>
+                 <button 
+                    onClick={() => setIsExpanded(false)}
+                    className="p-2 -mr-2 text-muted-foreground/50 hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
+                 >
+                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+                 </button>
             </div>
-        </div>
 
-        <div className="group relative">
-            <input
-            type="email"
-            value={userInfo.email || ''}
-            onChange={(e) => setUserInfo({ email: e.target.value })}
-            placeholder={tGuestbook('emailPlaceholder')}
-            required
-            className="w-full px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.01] origin-left"
-            />
-        </div>
-
-        <div>
-            {emailVerified ? (
-            <div className="flex items-center justify-between rounded-2xl border-2 border-green-500/10 bg-green-50/50 px-5 py-3 backdrop-blur-sm">
-                <span className="text-sm font-semibold text-green-600 flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    {t('emailVerified')}
-                </span>
-                <button
-                type="button"
-                onClick={() => {
-                    clearVerifyToken();
-                    setEmailVerified(false);
-                }}
-                className="text-xs font-bold text-green-600/70 hover:text-green-600 hover:underline px-2 py-1"
-                >
-                {t('changeOrReverify')}
-                </button>
-            </div>
-            ) : (
-            <div className="flex gap-3 items-end">
-                <div className="flex-1 group relative">
+            <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
+            {error && (
+                <div className="p-4 bg-red-50/80 border border-red-200 rounded-2xl shadow-sm backdrop-blur-sm animate-in fade-in slide-in-from-top-2">
+                <p className="text-red-600 text-sm font-bold flex items-center gap-2">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    {error}
+                </p>
+                </div>
+            )}
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 animate-in slide-in-from-bottom-4 fade-in duration-500 delay-100">
+                <div className="group relative">
                     <input
-                        type="text"
-                        value={emailCode}
-                        onChange={(e) => setEmailCode(e.target.value)}
-                        placeholder={tGuestbook('emailCodePlaceholder')}
-                        className="w-full px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.01] origin-left"
+                    type="text"
+                    value={userInfo.nickname || ''}
+                    onChange={(e) => setUserInfo({ nickname: e.target.value })}
+                    placeholder={tGuestbook('nicknamePlaceholder')}
+                    required
+                    className="w-full px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.02] origin-left"
+                    />
+                     <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity text-primary/40">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                </div>
+
+                <div className="group relative">
+                    <input
+                    type="email"
+                    value={userInfo.email || ''}
+                    onChange={(e) => setUserInfo({ email: e.target.value })}
+                    placeholder={tGuestbook('emailPlaceholder')}
+                    required
+                    className="w-full px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.02] origin-left"
                     />
                 </div>
+            </div>
+
+            <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 delay-200">
+                {emailVerified ? (
+                <div className="flex items-center justify-between rounded-2xl border-2 border-green-500/10 bg-green-50/50 px-5 py-3 backdrop-blur-sm">
+                    <span className="text-sm font-semibold text-green-600 flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        {t('emailVerified')}
+                    </span>
+                    <button
+                    type="button"
+                    onClick={() => {
+                        clearVerifyToken();
+                        setEmailVerified(false);
+                    }}
+                    className="text-xs font-bold text-green-600/70 hover:text-green-600 hover:underline px-2 py-1"
+                    >
+                    {t('changeOrReverify')}
+                    </button>
+                </div>
+                ) : (
+                <div className="flex gap-3 items-end">
+                    <div className="flex-1 group relative">
+                        <input
+                            type="text"
+                            value={emailCode}
+                            onChange={(e) => setEmailCode(e.target.value)}
+                            placeholder={tGuestbook('emailCodePlaceholder')}
+                            className="w-full px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.01] origin-left"
+                        />
+                    </div>
+                    <button
+                    type="button"
+                    onClick={handleSendCode}
+                    disabled={sendingCode || cooldown > 0}
+                    className="px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 hover:bg-primary/5 hover:border-primary/20 text-primary/80 font-bold text-sm transition-all disabled:opacity-50 disabled:hover:bg-transparent min-w-[100px] active:scale-95"
+                    >
+                    {cooldown > 0
+                        ? `${cooldown}s`
+                        : sendingCode
+                        ? '...'
+                        : tGuestbook('sendCode')}
+                    </button>
+                </div>
+                )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 animate-in slide-in-from-bottom-4 fade-in duration-500 delay-300">
+                 <div className="group relative">
+                    <input
+                    type="text"
+                    value={userInfo.qq || ''}
+                    onChange={(e) => setUserInfo({ qq: e.target.value })}
+                    placeholder={tGuestbook('qqPlaceholder')}
+                    className="w-full px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.02] origin-left"
+                    />
+                     <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity text-primary/40">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.003 2c-5.522 0-10 4.478-10 10 0 5.523 4.478 10 10 10 5.523 0 10-4.477 10-10 0-5.522-4.477-10-10-10zm4.27 15.655c-.713.635-1.637.75-2.203.242-.23-.206-.217-.55.034-.78.223-.205.58-.22.863.02.13.11.23.116.324.085.122-.04.223-.217.152-.403-.23-.604-.985-.757-1.467-.78-.718-.035-1.462.16-1.98.53-.16.115-.36.108-.508-.027l-1.01-1.02c-.146-.148-.288-.277-.57-.27-.294.008-.476.12-.665.31l-.974.98c-.142.143-.327.18-.515.082-.54-.282-1.397-.47-2.07-.35-.55.097-1.3.468-1.503 1.096-.057.177.037.355.158.397.094.032.196.027.327-.083.284-.24.64-.225.864-.02.25.23.264.574.034.78-.566.508-1.49.393-2.204-.242-.18-.16-.27-.373-.255-.59.015-.224.135-.42.34-.555.26-.17.6-.144.757.06.075.094.202.126.315.08.113-.047.165-.18.125-.297-.43-1.258-1.55-2.096-2.91-2.096-1.64 0-2.97 1.33-2.97 2.97 0 1.638 1.33 2.968 2.97 2.968 1.36 0 2.48-.838 2.91-2.097.04-.116.12-.25.01-.297z" opacity=".5"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div className="group relative animate-in slide-in-from-bottom-4 fade-in duration-500 delay-400">
+                <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder={tGuestbook('messageHint')}
+                required
+                rows={5}
+                className="w-full px-5 py-4 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all resize-none font-medium placeholder:text-muted-foreground/60 focus:scale-[1.01] origin-left"
+                />
+            </div>
+            
+            <div className="flex gap-3 justify-end pt-2 animate-in slide-in-from-bottom-4 fade-in duration-500 delay-500">
                 <button
-                type="button"
-                onClick={handleSendCode}
-                disabled={sendingCode || cooldown > 0}
-                className="px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 hover:bg-primary/5 hover:border-primary/20 text-primary/80 font-bold text-sm transition-all disabled:opacity-50 disabled:hover:bg-transparent min-w-[100px] active:scale-95"
+                type="submit"
+                disabled={submitting}
+                className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-primary via-primary to-accent text-white rounded-2xl shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none transition-all font-bold tracking-wide relative overflow-hidden group"
                 >
-                {cooldown > 0
-                    ? `${cooldown}s`
-                    : sendingCode
-                    ? '...'
-                    : tGuestbook('sendCode')}
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                    {submitting ? (
+                        <>
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {tGuestbook('sending')}
+                        </>
+                    ) : (
+                        <>
+                            {tGuestbook('submit')}
+                            <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </>
+                    )}
+                </span>
+                <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-2xl"></span>
                 </button>
             </div>
-            )}
+            </form>
         </div>
-
-        <div className="group relative">
-            <input
-            type="text"
-            value={userInfo.qq || ''}
-            onChange={(e) => setUserInfo({ qq: e.target.value })}
-            placeholder={tGuestbook('qqPlaceholder')}
-            className="w-full px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.01] origin-left"
-            />
-             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity text-primary/40">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.003 2c-5.522 0-10 4.478-10 10 0 5.523 4.478 10 10 10 5.523 0 10-4.477 10-10 0-5.522-4.477-10-10-10zm4.27 15.655c-.713.635-1.637.75-2.203.242-.23-.206-.217-.55.034-.78.223-.205.58-.22.863.02.13.11.23.116.324.085.122-.04.223-.217.152-.403-.23-.604-.985-.757-1.467-.78-.718-.035-1.462.16-1.98.53-.16.115-.36.108-.508-.027l-1.01-1.02c-.146-.148-.288-.277-.57-.27-.294.008-.476.12-.665.31l-.974.98c-.142.143-.327.18-.515.082-.54-.282-1.397-.47-2.07-.35-.55.097-1.3.468-1.503 1.096-.057.177.037.355.158.397.094.032.196.027.327-.083.284-.24.64-.225.864-.02.25.23.264.574.034.78-.566.508-1.49.393-2.204-.242-.18-.16-.27-.373-.255-.59.015-.224.135-.42.34-.555.26-.17.6-.144.757.06.075.094.202.126.315.08.113-.047.165-.18.125-.297-.43-1.258-1.55-2.096-2.91-2.096-1.64 0-2.97 1.33-2.97 2.97 0 1.638 1.33 2.968 2.97 2.968 1.36 0 2.48-.838 2.91-2.097.04-.116.12-.25.01-.297z" opacity=".5"/></svg>
-            </div>
-        </div>
-
-        <div className="group relative">
-            <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder={tGuestbook('messageHint')}
-            required
-            rows={4}
-            className="w-full px-5 py-4 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all resize-none font-medium placeholder:text-muted-foreground/60 focus:scale-[1.01] origin-left"
-            />
-        </div>
-      </div>
-      
-      <div className="flex gap-3 justify-end pt-2">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-primary via-primary to-accent text-white rounded-2xl shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none transition-all font-bold tracking-wide relative overflow-hidden group"
-        >
-          <span className="relative z-10 flex items-center justify-center gap-2">
-              {submitting ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    {tGuestbook('sending')}
-                  </>
-              ) : (
-                  <>
-                    {tGuestbook('submit')}
-                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                  </>
-              )}
-          </span>
-          <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 rounded-2xl"></span>
-        </button>
-      </div>
-    </form>
-
+    </div>
   );
 }
+
