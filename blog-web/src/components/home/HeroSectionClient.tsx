@@ -3,7 +3,7 @@
 import { useScroll, useTransform, motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { getFullUrl } from '@/lib/utils/format';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface HeroSectionClientProps {
   siteName: string;
@@ -26,6 +26,8 @@ export default function HeroSectionClient({
 }: HeroSectionClientProps) {
   const t = useTranslations('common');
   const containerRef = useRef<HTMLElement>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const snappingRef = useRef(false);
   const { scrollY } = useScroll();
   
   // Parallax effects
@@ -59,11 +61,92 @@ export default function HeroSectionClient({
   };
 
   const handleScrollToContent = () => {
-    const articlesElement = document.getElementById('articles');
-    if (articlesElement) {
-      articlesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    // Prefer the specific list anchor, but fall back to the main container.
+    const target =
+      document.getElementById('article-list') ??
+      document.getElementById('articles');
+    if (!target) return;
+
+    // Fixed header height is ~64px (h-16). Add a small buffer.
+    const headerOffset = 72;
+    const top =
+      window.scrollY + target.getBoundingClientRect().top - headerOffset;
+
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    const headerOffset = 72;
+    const snapToHeroBottom = () => {
+      const hero = containerRef.current;
+      if (!hero || snappingRef.current) return;
+
+      const heroTop = hero.offsetTop;
+      const heroHeight = hero.offsetHeight;
+      const heroBottomTop = heroTop + heroHeight - headerOffset;
+
+      snappingRef.current = true;
+      window.scrollTo({
+        top: Math.max(0, heroBottomTop),
+        behavior: 'smooth',
+      });
+
+      // Release the lock after the smooth scroll likely completes.
+      window.setTimeout(() => {
+        snappingRef.current = false;
+      }, 700);
+    };
+
+    const shouldSnapFromHero = () => {
+      const hero = containerRef.current;
+      if (!hero) return false;
+
+      const rect = hero.getBoundingClientRect();
+      const heroBottomTop = hero.offsetTop + hero.offsetHeight - headerOffset;
+      const y = window.scrollY;
+
+      // 只要封面仍在视口内（且还没滚过封面底部），就允许吸附
+      const heroInViewport = rect.bottom > headerOffset && rect.top < window.innerHeight;
+      const notPastHeroBottom = y < heroBottomTop - 2;
+
+      return heroInViewport && notPastHeroBottom;
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY <= 6) return;
+      if (!shouldSnapFromHero()) return;
+      e.preventDefault();
+      snapToHeroBottom();
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartYRef.current = e.touches[0]?.clientY ?? null;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const startY = touchStartYRef.current;
+      const currentY = e.touches[0]?.clientY;
+      if (startY == null || currentY == null) return;
+
+      const delta = startY - currentY;
+      if (delta <= 12) return;
+      if (!shouldSnapFromHero()) return;
+
+      e.preventDefault();
+      touchStartYRef.current = null;
+      snapToHeroBottom();
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+    };
+  }, []);
 
   // 首页封面背景样式
   const fullCoverImage = getFullUrl(coverImage);
