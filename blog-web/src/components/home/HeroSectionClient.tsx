@@ -67,8 +67,7 @@ export default function HeroSectionClient({
       document.getElementById('articles');
     if (!target) return;
 
-    // Fixed header height is ~64px (h-16). Add a small buffer.
-    const headerOffset = 72;
+    const headerOffset = 0;
     const top =
       window.scrollY + target.getBoundingClientRect().top - headerOffset;
 
@@ -76,7 +75,7 @@ export default function HeroSectionClient({
   };
 
   useEffect(() => {
-    const headerOffset = 72;
+    const headerOffset = 0;
     const snapToHeroBottom = () => {
       const hero = containerRef.current;
       if (!hero || snappingRef.current) return;
