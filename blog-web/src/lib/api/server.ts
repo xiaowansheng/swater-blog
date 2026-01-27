@@ -6,10 +6,9 @@ const CLIENT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhos
 const SERVER_BASE_URL = process.env.SERVER_API_BASE_URL;
 
 function resolveServerBaseUrl(base: string) {
-  // If a relative base like "/api" is provided, use internal service URL for SSR.
-  if (base.startsWith('/')) {
-    return `http://blog-service:8888${base}`;
-  }
+  // Only rewrite relative base URLs when running on the server (SSR).
+  // In the browser, a relative base like "/api" must stay relative to
+  // avoid mixed-content and internal hostname leaks.
   return base;
 }
 
