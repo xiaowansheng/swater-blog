@@ -1,5 +1,4 @@
-package com.blog.plugin.core;
-
+package com.blog.plugin.components.text;
 
 import lombok.Data;
 import java.util.HashMap;
@@ -68,4 +67,3 @@ public class ProcessResult {
         return this.metadata.getOrDefault(key, defaultValue);
     }
 }
-

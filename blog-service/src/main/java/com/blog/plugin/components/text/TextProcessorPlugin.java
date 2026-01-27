@@ -1,7 +1,6 @@
 package com.blog.plugin.components.text;
 
 import com.blog.plugin.core.Plugin;
-import com.blog.plugin.core.ProcessResult;
 
 /**
  * 统一的文本处理插件接口

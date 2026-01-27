@@ -1,8 +1,8 @@
 package com.blog.plugin.components.text.impl;
 
+import com.blog.plugin.components.text.ProcessResult;
 import com.blog.plugin.components.text.TextProcessorPlugin;
 import com.blog.plugin.core.Plugin;
-import com.blog.plugin.core.ProcessResult;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
