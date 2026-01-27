@@ -23,9 +23,9 @@ export default async function GuestbookPage({
   searchParams: Promise<{ page?: string; sort?: string; size?: string }>;
 }) {
   const { page = '1', sort = 'desc', size } = await searchParams;
-  
+
   const currentPage = parseInt(page, 10) || 1;
-  const pageSize = parseInt(size || '')||20;
+  const pageSize = parseInt(size || '') || 20;
   const t = await getTranslations('common');
   const tGuestbook = await getTranslations('guestbook');
 
@@ -80,7 +80,7 @@ export default async function GuestbookPage({
               {tGuestbook('description')}
             </p>
           </div>
-          
+
           {/* 更多装饰性背景元素 */}
           <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-primary/20 rounded-full blur-[60px] animate-pulse"></div>
           <div className="absolute top-1/3 right-1/4 w-40 h-40 bg-accent/20 rounded-full blur-[70px] animate-pulse delay-700"></div>
@@ -115,7 +115,6 @@ export default async function GuestbookPage({
 
                 <div className="relative px-6 pb-10 pt-6 sm:px-8">
                   <GuestbookSection
-                    key={`${currentPage}-${sort}-${pageSize}`}
                     initialMessages={guestbookRecords}
                     total={guestbookTotal}
                     currentPage={currentPage}

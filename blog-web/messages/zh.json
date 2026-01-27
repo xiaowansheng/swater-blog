@@ -152,6 +152,8 @@
     "total": "共 {count} 条",
     "latest": "最新",
     "oldest": "最早",
+    "noGuestbook": "暂无留言",
+    "noGuestbookHint": "成为第一个留言的人吧",
     "nicknameRequired": "请输入昵称",
     "emailRequired": "请输入邮箱",
     "emailCodeRequired": "请输入邮箱验证码",
@@ -168,9 +170,7 @@
     "emailPlaceholder": "邮箱",
     "qqPlaceholder": "QQ号（可选）",
     "submit": "提交留言",
-    "sending": "提交中...",
-    "latest": "最新",
-    "oldest": "最早"
+    "sending": "提交中..."
   },
   "friendLink": {
     "applicationSubmitted": "友链申请已提交，我们会在审核通过后与您联系！",

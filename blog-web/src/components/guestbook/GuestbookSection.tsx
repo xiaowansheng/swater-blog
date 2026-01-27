@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/lib/i18n/routing';
 import { useSearchParams } from 'next/navigation';
@@ -30,8 +30,13 @@ export default function GuestbookSection({
   const t = useTranslations('common');
   const tGuestbook = useTranslations('guestbook');
   
-  // 使用 Key 来强制重置组件状态，所以不再需要手动同步 useEffect
+  const [isPendingNav, startTransition] = useTransition();
   const [messages, setMessages] = useState<GuestbookVO[]>(initialMessages);
+  
+  // 当初始消息变化时同步更新（如翻页、排序改变）
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
 
   const searchParams = useSearchParams();
 
@@ -40,15 +45,18 @@ export default function GuestbookSection({
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
-    // 如果 URL 中有 size 参数，保持它
-    router.push(`${pathname}?${params.toString()}`);
+    startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   };
 
   const handleSortChange = (newSort: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('sort', newSort);
     params.set('page', '1'); // 切换排序重置到第一页
-    router.push(`${pathname}?${params.toString()}`);
+    startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   };
 
   const refreshMessages = async () => {
@@ -77,7 +85,7 @@ export default function GuestbookSection({
       </section>
 
       {/* 留言列表区域 - 全宽瀑布流 */}
-      <section className="relative min-h-[500px]">
+      <section className={`relative min-h-[500px] transition-opacity duration-300 ${isPendingNav ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
         <div className="flex items-center justify-between mb-8 px-2">
             <h2 className="text-2xl font-bold flex items-center gap-3">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
