@@ -1,17 +1,16 @@
-package com.blog.bootstrap.config;
-
+﻿package com.blog.bootstrap.config;
 
 import cn.dev33.satoken.context.SaHolder;
 import cn.dev33.satoken.interceptor.SaInterceptor;
-import cn.dev33.satoken.router.SaRouter;
 import cn.dev33.satoken.stp.StpUtil;
 import com.blog.bootstrap.context.UserContext;
 import com.blog.infrastructure.interceptor.ApiPermissionInterceptor;
+import com.blog.modules.system.role.model.vo.RoleVO;
+import com.blog.modules.system.role.service.RoleService;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.user.model.entity.User;
-import com.blog.modules.system.role.model.vo.RoleVO;
 import com.blog.modules.user.model.vo.UserVO;
-import com.blog.modules.system.role.service.RoleService;
+import com.blog.shared.exception.BusinessException;
 import com.blog.shared.util.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,7 @@ import java.util.List;
 /**
  * SaToken 配置类
  * <p>
- * 配置登录拦截器，验证用户身份并设置用户上下文
+ * 配置登录拦截器，验证用户身份并设置用户上下文。
  * </p>
  */
 @Slf4j
@@ -60,8 +59,10 @@ public class SaTokenConfig implements WebMvcConfigurer {
 
                     // 检查登录状态
                     StpUtil.checkLogin();
+                    // 显式刷新最后活跃时间，确保 active-timeout 为滚动过期
+                    StpUtil.updateLastActivityToNow();
 
-                    // 设置用户上下文（每个请求只查一次数据库）
+                    // 设置用户上下文（每个请求只查询一次数据库）
                     try {
                         Long userId = StpUtil.getLoginIdAsLong();
                         User user = userMapper.selectById(userId);
@@ -69,13 +70,13 @@ public class SaTokenConfig implements WebMvcConfigurer {
                         if (user == null || user.getDeleted() == 1) {
                             log.warn("用户不存在或已删除: userId={}", userId);
                             StpUtil.logout();
-                            throw new com.blog.shared.exception.BusinessException("用户不存在");
+                            throw new BusinessException("用户不存在");
                         }
 
                         if (user.getStatus() != null && user.getStatus() == 0) {
                             log.warn("用户已被禁用: userId={}", userId);
                             StpUtil.logout();
-                            throw new com.blog.shared.exception.BusinessException("用户已被禁用");
+                            throw new BusinessException("用户已被禁用");
                         }
 
                         // 转换为 VO 并设置到上下文
@@ -117,4 +118,3 @@ public class SaTokenConfig implements WebMvcConfigurer {
         return vo;
     }
 }
-
