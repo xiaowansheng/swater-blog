@@ -61,17 +61,14 @@ export default function HeroSectionClient({
   };
 
   const handleScrollToContent = () => {
-    // Prefer the specific list anchor, but fall back to the main container.
-    const target =
-      document.getElementById('article-list') ??
-      document.getElementById('articles');
-    if (!target) return;
+    // 跳转到当前 Hero 组件的底部
+    const hero = containerRef.current;
+    if (!hero) return;
 
     const headerOffset = 0;
-    const top =
-      window.scrollY + target.getBoundingClientRect().top - headerOffset;
+    const heroBottomTop = hero.offsetTop + hero.offsetHeight - headerOffset;
 
-    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    window.scrollTo({ top: Math.max(0, heroBottomTop), behavior: 'smooth' });
   };
 
   useEffect(() => {
