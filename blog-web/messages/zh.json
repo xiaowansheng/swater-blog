@@ -164,7 +164,8 @@
     "nicknamePlaceholder": "昵称",
     "emailPlaceholder": "邮箱",
     "qqPlaceholder": "QQ号（可选）",
-    "submit": "提交留言"
+    "submit": "提交留言",
+    "sending": "提交中..."
   },
   "friendLink": {
     "applicationSubmitted": "友链申请已提交，我们会在审核通过后与您联系！",

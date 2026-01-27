@@ -59,19 +59,25 @@ export default async function GuestbookPage({
   return (
     <>
       <PageHeader>
-        <div className="relative w-full overflow-hidden">
-          <div className="relative mx-auto max-w-4xl px-4 text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card/70 px-5 py-2 text-xs uppercase tracking-[0.32em] text-primary/70 shadow-sm backdrop-blur">
-              <span className="h-2 w-2 rounded-full bg-primary/80"></span>
+        <div className="relative w-full overflow-hidden py-10">
+          <div className="relative mx-auto max-w-4xl px-4 text-center z-10">
+            <div className="inline-flex items-center gap-2 rounded-full border-2 border-primary/20 bg-white/60 dark:bg-black/20 px-6 py-2.5 text-xs font-bold uppercase tracking-[0.2em] text-primary shadow-[0_4px_14px_rgba(0,0,0,0.05)] backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <span className="h-2 w-2 rounded-full bg-primary animate-pulse"></span>
               Sweet Guestbook
             </div>
-            <h1 className="mt-6 text-4xl font-black tracking-tight text-foreground sm:text-6xl">
-              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+            <h1 className="mt-8 text-5xl font-black tracking-tight text-foreground sm:text-7xl drop-shadow-sm animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
+              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
                 {t('guestbook')}
               </span>
             </h1>
-            <p className="mt-4 text-base text-muted sm:text-lg">{tGuestbook('description')}</p>
+            <p className="mt-6 text-lg text-muted-foreground/80 sm:text-xl font-medium max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
+              {tGuestbook('description')}
+            </p>
           </div>
+          
+          {/* 更多装饰性背景元素 */}
+          <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-primary/20 rounded-full blur-[60px] animate-pulse"></div>
+          <div className="absolute top-1/3 right-1/4 w-40 h-40 bg-accent/20 rounded-full blur-[70px] animate-pulse delay-700"></div>
         </div>
       </PageHeader>
       <main className="container relative flex-1 px-4 pb-20 mx-auto">

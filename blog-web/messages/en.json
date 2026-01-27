@@ -164,7 +164,8 @@
     "nicknamePlaceholder": "Nickname",
     "emailPlaceholder": "Email",
     "qqPlaceholder": "QQ (optional)",
-    "submit": "Submit"
+    "submit": "Submit",
+    "sending": "Submitting..."
   },
   "friendLink": {
     "applicationSubmitted": "Friend link application submitted! We will contact you after approval.",

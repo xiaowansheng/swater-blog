@@ -19,23 +19,13 @@ function formatLocation(
   location: string | undefined,
   ipLocation: string | undefined
 ): string {
-  // 优先使用经纬度解析的 location
   if (location) return location;
-
-  // 其次使用 IP 解析的 ipLocation
   if (ipLocation) return ipLocation;
 
-  // 最后才拼接 country, province, city
   const parts = [];
-  if (country && country !== '中国') {
-    parts.push(country);
-  }
-  if (province) {
-    parts.push(province);
-  }
-  if (city && city !== province) {
-    parts.push(city);
-  }
+  if (country && country !== '中国') parts.push(country);
+  if (province) parts.push(province);
+  if (city && city !== province) parts.push(city);
   return parts.length > 0 ? parts.join(' · ') : '';
 }
 
@@ -59,93 +49,110 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
 
   const getStatusBadge = () => {
     if (isPending) {
-      return <span className="inline-block px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">待审核</span>;
+      return <span className="inline-block px-2 py-0.5 text-[10px] sm:text-xs font-bold bg-yellow-100 text-yellow-600 rounded-full border border-yellow-200">待审核</span>;
     }
     if (isRejected) {
-      return <span className="inline-block px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded-full">已拒绝</span>;
+      return <span className="inline-block px-2 py-0.5 text-[10px] sm:text-xs font-bold bg-red-100 text-red-600 rounded-full border border-red-200">已拒绝</span>;
     }
     return null;
   };
 
+  // 生成随机柔和背景色给头像
+  const avatarColors = [
+    'bg-red-100 text-red-600',
+    'bg-orange-100 text-orange-600',
+    'bg-amber-100 text-amber-600',
+    'bg-green-100 text-green-600',
+    'bg-emerald-100 text-emerald-600',
+    'bg-teal-100 text-teal-600',
+    'bg-cyan-100 text-cyan-600',
+    'bg-sky-100 text-sky-600',
+    'bg-blue-100 text-blue-600',
+    'bg-indigo-100 text-indigo-600',
+    'bg-violet-100 text-violet-600',
+    'bg-purple-100 text-purple-600',
+    'bg-fuchsia-100 text-fuchsia-600',
+    'bg-pink-100 text-pink-600',
+    'bg-rose-100 text-rose-600',
+  ];
+  const colorIndex = (displayName.length + (message.id || 0)) % avatarColors.length;
+  const avatarClass = avatarColors[colorIndex];
+
   return (
-    <Card className="p-5" variant="glass" hoverEffect={false}>
-      {/* 第一部分：头像和作者信息 */}
-      <div className="flex items-center gap-4 mb-3">
-        <div className="flex-shrink-0">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center border-2 border-border">
-            <span className="text-primary font-bold text-lg">{initial}</span>
+    <div className="group break-inside-avoid mb-6">
+      <div 
+        className="relative bg-white/80 dark:bg-card/80 backdrop-blur-sm rounded-[2rem] p-5 border border-primary/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:rotate-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:border-primary/20"
+      >
+        {/* 装饰性的小圆点 */}
+        <div className="absolute top-4 right-4 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="w-2 h-2 rounded-full bg-primary/20"></div>
+          <div className="w-2 h-2 rounded-full bg-secondary/20"></div>
+        </div>
+
+        {/* 头部：头像与信息 */}
+        <div className="flex items-start gap-3.5 mb-3">
+          <div className="flex-shrink-0 mt-1">
+            <div className={`w-10 h-10 rounded-2xl ${avatarClass} flex items-center justify-center font-black text-lg shadow-sm transform -rotate-3 group-hover:rotate-0 transition-transform duration-300`}>
+              {initial}
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-0.5">
+              <span className="font-bold text-foreground text-[15px]">{displayName}</span>
+              {getStatusBadge()}
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground/80">
+              <span className="flex items-center gap-1">
+                 {formatDate(message.createTime, 'MM-DD HH:mm', locale)}
+              </span>
+              <span className="w-0.5 h-2.5 bg-border rounded-full"></span>
+               {/* 简化后的位置显示 */}
+               {(privacy.showLocation && (message.location || message.ipLocation || message.country || message.province || message.city)) ? (
+                <span className="truncate max-w-[120px]">
+                   {formatLocation(message.country, message.province, message.city, message.location, message.ipLocation)}
+                </span>
+               ) : (
+                 <span>Earth</span>
+               )}
+            </div>
           </div>
         </div>
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-foreground">{displayName}</span>
-            {getStatusBadge()}
-          </div>
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            {formatDate(message.createTime, 'YYYY-MM-DD HH:mm', locale)}
-          </span>
-        </div>
-      </div>
 
-      {/* 第二部分：留言内容 */}
-      <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed mb-3">
-        {isHidden && <span className="text-muted italic">留言已被隐藏 </span>}
-        {message.content}
-      </p>
+        {/* 内容区域 - 类似气泡风格 */}
+        <div className="relative z-10">
+            <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed text-[15px] font-medium">
+                {isHidden && <span className="text-muted-foreground/60 italic text-sm block mb-1">Passerby whispers... (Hidden)</span>}
+                {message.content}
+            </p>
 
-      {/* 第三部分：地址和设备信息 */}
-      {(privacy.showLocation || privacy.showDevice || privacy.showBrowser) &&
-       (message.location || message.ipLocation || message.country || message.province || message.city || message.device || message.browser) && (
-        <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">
-          {/* 左边：地址 */}
-          <div className="flex items-center gap-1 flex-1">
-            {privacy.showLocation && formatLocation(message.country, message.province, message.city, message.location, message.ipLocation) && (
-              <>
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>{formatLocation(message.country, message.province, message.city, message.location, message.ipLocation)}</span>
-              </>
+            {message.images && message.images.length > 0 && (
+                <div className="mt-3 grid gap-2 grid-cols-2">
+                {message.images.map((src, index) => (
+                    <div key={`${message.id}-${index}`} className="relative group/img overflow-hidden rounded-xl border border-border/50 aspect-square">
+                     <Image
+                        src={src}
+                        alt={`${displayName} image ${index + 1}`}
+                        width={200}
+                        height={200}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110"
+                        />
+                    </div>
+                ))}
+                </div>
             )}
-          </div>
+        </div>
 
-          {/* 右边：设备和浏览器 */}
-          <div className="flex items-center gap-1 flex-1 justify-end">
-            {(privacy.showDevice || privacy.showBrowser) && formatDeviceAndBrowser(
-              privacy.showDevice ? message.device : undefined,
-              privacy.showBrowser ? message.browser : undefined
-            ) && (
-              <>
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span>{formatDeviceAndBrowser(
+        {/* 底部设备信息 - 更加隐晦 */}
+        {(privacy.showDevice || privacy.showBrowser) && 
+         (message.device || message.browser) && (
+          <div className="mt-3 pt-3 border-t border-dashed border-primary/10 flex items-center justify-end gap-2 text-[10px] text-muted-foreground/50 opacity-0 group-hover:opacity-70 transition-opacity">
+               {formatDeviceAndBrowser(
                   privacy.showDevice ? message.device : undefined,
                   privacy.showBrowser ? message.browser : undefined
-                )}</span>
-              </>
-            )}
+               )}
           </div>
-        </div>
-      )}
-      {message.images && message.images.length > 0 && (
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {message.images.map((src, index) => (
-            <Image
-              key={`${message.id}-${index}`}
-              src={src}
-              alt={`${displayName} image ${index + 1}`}
-              width={320}
-              height={200}
-              className="rounded-lg border border-border w-full h-40 object-cover"
-            />
-          ))}
-        </div>
-      )}
-    </Card>
+        )}
+      </div>
+    </div>
   );
 }
