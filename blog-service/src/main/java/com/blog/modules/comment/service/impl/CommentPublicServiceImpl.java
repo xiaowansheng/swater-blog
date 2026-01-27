@@ -25,6 +25,7 @@ import com.blog.plugin.components.location.LocationInfo;
 import com.blog.plugin.components.location.LocationProviderFactory;
 import com.blog.plugin.components.location.LocationProviderPlugin;
 import com.blog.shared.PageResult;
+import com.blog.shared.SensitiveWordHelper;
 import com.blog.shared.exception.BusinessException;
 import com.blog.shared.model.UserAgentInfo;
 import com.blog.shared.util.BeanUtil;
@@ -75,6 +76,9 @@ public class CommentPublicServiceImpl implements CommentPublicService {
 
     @Autowired
     private FileMetaMapper fileMetaMapper;
+
+    @Autowired
+    private SensitiveWordHelper sensitiveWordHelper;
 
     @Override
     @Transactional
@@ -267,10 +271,17 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         } else {
             comment.setImages("[]");
         }
-        comment.setIsVisible(0);
 
-        if (comment.getStatus() == null) {
-            comment.setStatus(0);
+        // 敏感词检测：如果包含敏感词则需要审核，否则自动通过
+        if (sensitiveWordHelper.contains(comment.getContent())) {
+            // 包含敏感词：需要审核，不可见
+            comment.setStatus(0);  // 待审核
+            comment.setIsVisible(0);  // 不可见
+            log.info("评论包含敏感词，ID: {}, 需要人工审核", comment.getId());
+        } else {
+            // 无敏感词：自动审核通过，可见
+            comment.setStatus(1);  // 审核通过
+            comment.setIsVisible(1);  // 可见
         }
 
         commentMapper.insert(comment);

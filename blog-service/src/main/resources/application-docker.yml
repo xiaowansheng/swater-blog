@@ -440,10 +440,6 @@ plugin:
   search:
     active: ${SEARCH_TYPE:database}  # database/elasticsearch
 
-  # 文本处理插件配置
-  text:
-    active: sensitive-word  # sensitive-word
-
   # 位置服务插件配置
   location:
     active: ${LOCATION_TYPE:amap}  # amap/baidu/ip2location

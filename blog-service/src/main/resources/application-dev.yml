@@ -448,10 +448,6 @@ plugin:
   search:
     active: database  # database/elasticsearch
 
-  # 文本处理插件配置
-  text:
-    active: sensitive-word  # sensitive-word
-
   # 位置服务插件配置
   location:
     active: amap  # amap/baidu/ip2location

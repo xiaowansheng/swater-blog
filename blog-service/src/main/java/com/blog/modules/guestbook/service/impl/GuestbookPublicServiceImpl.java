@@ -21,6 +21,7 @@ import com.blog.shared.model.UserAgentInfo;
 import com.blog.shared.util.UserAgentUtil;
 import com.blog.plugin.components.location.LocationProviderFactory;
 import com.blog.plugin.components.location.LocationProviderPlugin;
+import com.blog.shared.SensitiveWordHelper;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.JsonUtil;
@@ -56,6 +57,9 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
 
     @Autowired(required = false)
     private LocationProviderFactory locationProviderFactory;
+
+    @Autowired
+    private SensitiveWordHelper sensitiveWordHelper;
 
     @Override
     public PageResult<GuestbookVO> list(Long page, Long size) {
@@ -96,6 +100,18 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
         // Set default values
         guestbook.setIsVisible(1); // Visible by default
         guestbook.setReviewStatus(0); // Pending review
+
+        // 敏感词检测：如果包含敏感词则需要审核，否则自动通过
+        if (sensitiveWordHelper.contains(guestbook.getContent())) {
+            // 包含敏感词：需要审核，不可见
+            guestbook.setReviewStatus(0);  // 待审核
+            guestbook.setIsVisible(0);  // 不可见
+            log.info("留言包含敏感词，ID: {}, 需要人工审核", guestbook.getId());
+        } else {
+            // 无敏感词：自动审核通过，可见
+            guestbook.setReviewStatus(1);  // 审核通过
+            guestbook.setIsVisible(1);  // 可见
+        }
 
         // Convert images list to JSON string if present
         if (dto.getImages() != null && !dto.getImages().isEmpty()) {
