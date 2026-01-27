@@ -3,15 +3,10 @@ import PageHeader from '@/components/layout/PageHeader';
 import GuestbookSection from '@/components/guestbook/GuestbookSection';
 import ComponentDisabledNotice from '@/components/common/ComponentDisabledNotice';
 import { guestbookApi } from '@/lib/api/guestbook';
-import { fetchServer } from '@/lib/api/server';
+import { getCoverConfig, getComponentConfig } from '@/lib/api/config.server';
 import { ISR_REVALIDATE } from '@/lib/constants';
-import type { GuestbookVO, ComponentConfig } from '@/types';
+import type { GuestbookVO } from '@/types';
 
-const DEFAULT_COMPONENT_CONFIG: ComponentConfig = {
-  articleCommentEnabled: true,
-  talkCommentEnabled: true,
-  guestbookMessageEnabled: true,
-};
 
 export const revalidate = ISR_REVALIDATE.GUESTBOOK;
 
@@ -31,8 +26,12 @@ export default async function GuestbookPage({
 
   let guestbookRecords: GuestbookVO[] = [];
   let guestbookTotal = 0;
-  let componentConfig: ComponentConfig = DEFAULT_COMPONENT_CONFIG;
   let hasGuestbookError = false;
+
+  const [cover, componentConfig] = await Promise.all([
+    getCoverConfig(),
+    getComponentConfig(),
+  ]);
 
   try {
     const guestbook = await guestbookApi.getList(currentPage, pageSize, sort);
@@ -41,14 +40,6 @@ export default async function GuestbookPage({
   } catch (err) {
     console.error('Failed to load guestbook:', err);
     hasGuestbookError = true;
-  }
-
-  try {
-    const configs = await fetchServer<{ component?: ComponentConfig }>('/api/public/config');
-    componentConfig = configs?.component || DEFAULT_COMPONENT_CONFIG;
-  } catch (err) {
-    console.error('Failed to load component config:', err);
-    componentConfig = DEFAULT_COMPONENT_CONFIG;
   }
 
   if (hasGuestbookError) {
@@ -64,28 +55,11 @@ export default async function GuestbookPage({
 
   return (
     <>
-      <PageHeader>
-        <div className="relative w-full overflow-hidden py-10">
-          <div className="relative mx-auto max-w-4xl px-4 text-center z-10">
-            <div className="inline-flex items-center gap-2 rounded-full border-2 border-primary/20 bg-white/60 dark:bg-black/20 px-6 py-2.5 text-xs font-bold uppercase tracking-[0.2em] text-primary shadow-[0_4px_14px_rgba(0,0,0,0.05)] backdrop-blur-md animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <span className="h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-              Sweet Guestbook
-            </div>
-            <h1 className="mt-8 text-5xl font-black tracking-tight text-foreground sm:text-7xl drop-shadow-sm animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
-              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
-                {t('guestbook')}
-              </span>
-            </h1>
-            <p className="mt-6 text-lg text-muted-foreground/80 sm:text-xl font-medium max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-              {tGuestbook('description')}
-            </p>
-          </div>
-
-          {/* 更多装饰性背景元素 */}
-          <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-primary/20 rounded-full blur-[60px] animate-pulse"></div>
-          <div className="absolute top-1/3 right-1/4 w-40 h-40 bg-accent/20 rounded-full blur-[70px] animate-pulse delay-700"></div>
-        </div>
-      </PageHeader>
+      <PageHeader
+        title={t('guestbook')}
+        description={tGuestbook('description')}
+        coverImage={cover.message}
+      />
       <main className="container relative flex-1 px-4 pb-20 mx-auto">
         <section className="relative mt-8">
           <div className="pointer-events-none absolute -top-20 left-0 h-40 w-40 rounded-full bg-deco-pink/40 blur-3xl"></div>
