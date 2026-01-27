@@ -1,11 +1,9 @@
-'use client';
-
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import { Card } from '@/components/ui/Card';
 import { Link } from '@/lib/i18n/routing';
 
-export default function NotFound() {
-  const t = useTranslations('common');
+export default async function NotFound() {
+  const t = await getTranslations('common');
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center p-4">
