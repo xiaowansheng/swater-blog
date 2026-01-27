@@ -15,12 +15,15 @@ const DEFAULT_COMPONENT_CONFIG: ComponentConfig = {
 
 export const revalidate = ISR_REVALIDATE.GUESTBOOK;
 
+export const dynamic = 'force-dynamic';
+
 export default async function GuestbookPage({
   searchParams,
 }: {
   searchParams: Promise<{ page?: string; sort?: string; size?: string }>;
 }) {
   const { page = '1', sort = 'desc', size } = await searchParams;
+  
   const currentPage = parseInt(page, 10) || 1;
   const pageSize = parseInt(size || '')||20;
   const t = await getTranslations('common');
@@ -112,6 +115,7 @@ export default async function GuestbookPage({
 
                 <div className="relative px-6 pb-10 pt-6 sm:px-8">
                   <GuestbookSection
+                    key={`${currentPage}-${sort}-${pageSize}`}
                     initialMessages={guestbookRecords}
                     total={guestbookTotal}
                     currentPage={currentPage}

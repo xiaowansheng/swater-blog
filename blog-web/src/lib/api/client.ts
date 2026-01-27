@@ -29,6 +29,7 @@ export async function fetchClient<T>(
     const verifyToken = getVerifyToken();
     const response = await fetch(normalizeApiUrl(API_BASE_URL, url), {
       ...options,
+      cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
         ...(verifyToken ? { [VERIFY_TOKEN_HEADER]: verifyToken } : {}),

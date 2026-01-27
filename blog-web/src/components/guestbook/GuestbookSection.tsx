@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useRouter, usePathname } from '@/lib/i18n/routing';
+import { useSearchParams } from 'next/navigation';
 import GuestbookList from './GuestbookList';
 import GuestbookForm from './GuestbookForm';
 import { guestbookApi } from '@/lib/api/guestbook';
@@ -29,13 +30,8 @@ export default function GuestbookSection({
   const t = useTranslations('common');
   const tGuestbook = useTranslations('guestbook');
   
-  // 使用 Key 来强制重置组件状态，或者使用 useEffect 保持数据同步
+  // 使用 Key 来强制重置组件状态，所以不再需要手动同步 useEffect
   const [messages, setMessages] = useState<GuestbookVO[]>(initialMessages);
-  
-  // 当初始消息变化时同步更新（如翻页）
-  useEffect(() => {
-    setMessages(initialMessages);
-  }, [initialMessages]);
 
   const searchParams = useSearchParams();
 

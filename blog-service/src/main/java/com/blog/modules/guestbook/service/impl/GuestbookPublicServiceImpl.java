@@ -70,8 +70,10 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
 
         if ("asc".equalsIgnoreCase(sort)) {
             wrapper.orderByAsc(Guestbook::getCreateTime);
+            wrapper.orderByAsc(Guestbook::getId);
         } else {
             wrapper.orderByDesc(Guestbook::getCreateTime);
+            wrapper.orderByDesc(Guestbook::getId);
         }
 
         Page<Guestbook> result = guestbookMapper.selectPage(pageParam, wrapper);
