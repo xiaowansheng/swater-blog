@@ -157,7 +157,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
     return (
         <button
             onClick={() => setIsExpanded(true)}
-            className="group relative w-full max-w-2xl mx-auto flex items-center justify-between p-6 bg-white/60 dark:bg-card/60 backdrop-blur-xl border-2 border-dashed border-primary/20 rounded-[2rem] hover:border-primary/40 hover:bg-white/80 dark:hover:bg-card/80 transition-all duration-500 shadow-sm hover:shadow-md cursor-pointer overflow-hidden"
+            className="group relative w-full max-w-2xl mx-auto flex items-center justify-between p-6 bg-white/40 dark:bg-card/40 backdrop-blur-xl border-2 border-dashed border-primary/20 rounded-[2rem] hover:border-primary/40 hover:bg-white/60 dark:hover:bg-card/60 transition-all duration-500 shadow-sm hover:shadow-md cursor-pointer overflow-hidden"
         >
              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
              
@@ -202,8 +202,8 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
 
             <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
             {error && (
-                <div className="p-4 bg-red-50/80 border border-red-200 rounded-2xl shadow-sm backdrop-blur-sm animate-in fade-in slide-in-from-top-2">
-                <p className="text-red-600 text-sm font-bold flex items-center gap-2">
+                <div className="p-4 bg-red-50/80 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-2xl shadow-sm backdrop-blur-sm animate-in fade-in slide-in-from-top-2">
+                <p className="text-red-600 dark:text-red-400 text-sm font-bold flex items-center gap-2">
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
@@ -220,7 +220,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
                     onChange={(e) => setUserInfo({ nickname: e.target.value })}
                     placeholder={tGuestbook('nicknamePlaceholder')}
                     required
-                    className="w-full px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.02] origin-left"
+                    className="w-full px-5 py-3.5 border-2 border-primary/10 dark:border-primary/5 rounded-2xl bg-white/50 dark:bg-black/20 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/30 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.02] origin-left"
                     />
                      <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity text-primary/40">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -234,15 +234,15 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
                     onChange={(e) => setUserInfo({ email: e.target.value })}
                     placeholder={tGuestbook('emailPlaceholder')}
                     required
-                    className="w-full px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.02] origin-left"
+                    className="w-full px-5 py-3.5 border-2 border-primary/10 dark:border-primary/5 rounded-2xl bg-white/50 dark:bg-black/20 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/30 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.02] origin-left"
                     />
                 </div>
             </div>
 
             <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 delay-200">
                 {emailVerified ? (
-                <div className="flex items-center justify-between rounded-2xl border-2 border-green-500/10 bg-green-50/50 px-5 py-3 backdrop-blur-sm">
-                    <span className="text-sm font-semibold text-green-600 flex items-center gap-2">
+                <div className="flex items-center justify-between rounded-2xl border-2 border-green-500/10 dark:border-green-500/20 bg-green-50/50 dark:bg-green-950/30 px-5 py-3 backdrop-blur-sm">
+                    <span className="text-sm font-semibold text-green-600 dark:text-green-400 flex items-center gap-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         {t('emailVerified')}
                     </span>
@@ -252,7 +252,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
                         clearVerifyToken();
                         setEmailVerified(false);
                     }}
-                    className="text-xs font-bold text-green-600/70 hover:text-green-600 hover:underline px-2 py-1"
+                    className="text-xs font-bold text-green-600/70 dark:text-green-400/70 hover:text-green-600 dark:hover:text-green-400 hover:underline px-2 py-1"
                     >
                     {t('changeOrReverify')}
                     </button>
@@ -265,14 +265,14 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
                             value={emailCode}
                             onChange={(e) => setEmailCode(e.target.value)}
                             placeholder={tGuestbook('emailCodePlaceholder')}
-                            className="w-full px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.01] origin-left"
+                            className="w-full px-5 py-3.5 border-2 border-primary/10 dark:border-primary/5 rounded-2xl bg-white/50 dark:bg-black/20 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/30 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.01] origin-left"
                         />
                     </div>
                     <button
                     type="button"
                     onClick={handleSendCode}
                     disabled={sendingCode || cooldown > 0}
-                    className="px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 hover:bg-primary/5 hover:border-primary/20 text-primary/80 font-bold text-sm transition-all disabled:opacity-50 disabled:hover:bg-transparent min-w-[100px] active:scale-95"
+                    className="px-5 py-3.5 border-2 border-primary/10 dark:border-primary/5 rounded-2xl bg-white/50 dark:bg-card/40 hover:bg-primary/5 dark:hover:bg-primary/10 hover:border-primary/20 dark:hover:border-primary/30 text-primary/80 dark:text-primary font-bold text-sm transition-all disabled:opacity-50 disabled:hover:bg-transparent min-w-[100px] active:scale-95"
                     >
                     {cooldown > 0
                         ? `${cooldown}s`
@@ -291,7 +291,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
                     value={userInfo.qq || ''}
                     onChange={(e) => setUserInfo({ qq: e.target.value })}
                     placeholder={tGuestbook('qqPlaceholder')}
-                    className="w-full px-5 py-3.5 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.02] origin-left"
+                    className="w-full px-5 py-3.5 border-2 border-primary/10 dark:border-primary/5 rounded-2xl bg-white/50 dark:bg-black/20 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/30 transition-all font-medium placeholder:text-muted-foreground/60 focus:scale-[1.02] origin-left"
                     />
                      <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity text-primary/40">
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.003 2c-5.522 0-10 4.478-10 10 0 5.523 4.478 10 10 10 5.523 0 10-4.477 10-10 0-5.522-4.477-10-10-10zm4.27 15.655c-.713.635-1.637.75-2.203.242-.23-.206-.217-.55.034-.78.223-.205.58-.22.863.02.13.11.23.116.324.085.122-.04.223-.217.152-.403-.23-.604-.985-.757-1.467-.78-.718-.035-1.462.16-1.98.53-.16.115-.36.108-.508-.027l-1.01-1.02c-.146-.148-.288-.277-.57-.27-.294.008-.476.12-.665.31l-.974.98c-.142.143-.327.18-.515.082-.54-.282-1.397-.47-2.07-.35-.55.097-1.3.468-1.503 1.096-.057.177.037.355.158.397.094.032.196.027.327-.083.284-.24.64-.225.864-.02.25.23.264.574.034.78-.566.508-1.49.393-2.204-.242-.18-.16-.27-.373-.255-.59.015-.224.135-.42.34-.555.26-.17.6-.144.757.06.075.094.202.126.315.08.113-.047.165-.18.125-.297-.43-1.258-1.55-2.096-2.91-2.096-1.64 0-2.97 1.33-2.97 2.97 0 1.638 1.33 2.968 2.97 2.968 1.36 0 2.48-.838 2.91-2.097.04-.116.12-.25.01-.297z" opacity=".5"/></svg>
@@ -306,7 +306,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
                 placeholder={tGuestbook('messageHint')}
                 required
                 rows={5}
-                className="w-full px-5 py-4 border-2 border-primary/10 rounded-2xl bg-white/50 dark:bg-black/10 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/20 transition-all resize-none font-medium placeholder:text-muted-foreground/60 focus:scale-[1.01] origin-left"
+                className="w-full px-5 py-4 border-2 border-primary/10 dark:border-primary/5 rounded-2xl bg-white/50 dark:bg-black/20 backdrop-blur-sm focus:outline-none focus:border-primary/40 focus:bg-white/80 dark:focus:bg-black/30 transition-all resize-none font-medium placeholder:text-muted-foreground/60 focus:scale-[1.01] origin-left"
                 />
             </div>
             

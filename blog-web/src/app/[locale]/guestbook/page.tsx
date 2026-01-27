@@ -62,11 +62,11 @@ export default async function GuestbookPage({
       />
       <main className="container relative flex-1 px-4 pb-20 mx-auto">
         <section className="relative mt-8">
-          <div className="pointer-events-none absolute -top-20 left-0 h-40 w-40 rounded-full bg-deco-pink/40 blur-3xl"></div>
-          <div className="pointer-events-none absolute top-10 right-10 h-36 w-36 rounded-full bg-deco-yellow/35 blur-3xl"></div>
+          <div className="pointer-events-none absolute -top-20 left-0 h-40 w-40 rounded-full bg-primary/20 dark:bg-primary/10 blur-3xl"></div>
+          <div className="pointer-events-none absolute top-10 right-10 h-36 w-36 rounded-full bg-accent/20 dark:bg-accent/10 blur-3xl"></div>
 
           {componentConfig.guestbookMessageEnabled ? (
-            <div className="relative rounded-[36px] border border-primary/15 bg-gradient-to-br from-white/80 via-secondary/40 to-primary/10 p-1 shadow-[0_32px_90px_-60px_rgba(96,165,250,0.55)]">
+            <div className="relative rounded-[36px] border border-primary/15 bg-gradient-to-br from-white/80 via-secondary/40 to-primary/10 dark:from-card/40 dark:via-secondary/10 dark:to-primary/5 p-1 shadow-[0_32px_90px_-60px_rgba(96,165,250,0.55)] dark:shadow-none">
               <div className="rounded-[34px] bg-card/90 backdrop-blur-xl">
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-primary/10 px-6 py-4 sm:px-8">
                   <div className="flex items-center gap-3">

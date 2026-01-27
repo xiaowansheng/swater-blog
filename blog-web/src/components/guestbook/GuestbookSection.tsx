@@ -109,8 +109,8 @@ export default function GuestbookSection({
                     onClick={() => handleSortChange('desc')}
                     className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
                         sort === 'desc' 
-                        ? 'bg-white dark:bg-card text-primary shadow-sm ring-1 ring-primary/10' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-card/50'
+                        ? 'bg-white dark:bg-card text-primary shadow-sm ring-1 ring-primary/10 dark:ring-primary/20' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-white/10'
                     }`}
                 >
                     {tGuestbook('latest')}
@@ -119,8 +119,8 @@ export default function GuestbookSection({
                     onClick={() => handleSortChange('asc')}
                     className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
                         sort === 'asc' 
-                        ? 'bg-white dark:bg-card text-primary shadow-sm ring-1 ring-primary/10' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-card/50'
+                        ? 'bg-white dark:bg-card text-primary shadow-sm ring-1 ring-primary/10 dark:ring-primary/20' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-white/10'
                     }`}
                 >
                     {tGuestbook('oldest')}
@@ -164,7 +164,7 @@ export default function GuestbookSection({
       {/* 分页 */}
        {totalPages > 1 && (
         <div className="flex justify-center pt-8 pb-4">
-            <div className="inline-flex items-center gap-1 p-1 bg-white/50 dark:bg-black/20 backdrop-blur-sm rounded-full border border-primary/10 shadow-sm">
+            <div className="inline-flex items-center gap-1 p-1 bg-white/40 dark:bg-black/20 backdrop-blur-sm rounded-full border border-primary/10 dark:border-primary/5 shadow-sm">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage <= 1}
@@ -190,7 +190,7 @@ export default function GuestbookSection({
               </button>
             </div>
 
-            <form onSubmit={handleJumpPage} className="flex items-center gap-2 px-3 py-1 bg-white/50 dark:bg-black/20 backdrop-blur-sm rounded-full border border-primary/10 shadow-sm ml-4">
+            <form onSubmit={handleJumpPage} className="flex items-center gap-2 px-3 py-1 bg-white/40 dark:bg-black/20 backdrop-blur-sm rounded-full border border-primary/10 dark:border-primary/5 shadow-sm ml-4">
                 <span className="text-xs text-muted-foreground whitespace-nowrap">{t('jumpTo')}</span>
                 <input
                     type="text"
