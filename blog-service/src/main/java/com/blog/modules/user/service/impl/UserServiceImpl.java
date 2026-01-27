@@ -1,11 +1,11 @@
 package com.blog.modules.user.service.impl;
 
-import com.blog.modules.auth.model.dto.ResetPasswordDTO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.shared.PageResult;
 import com.blog.modules.user.model.dto.UpdatePasswordDTO;
 import com.blog.modules.user.model.dto.UpdateProfileDTO;
+import com.blog.modules.user.model.dto.AdminResetPasswordDTO;
 import com.blog.modules.user.model.dto.UserDTO;
 import com.blog.modules.user.model.vo.UserVO;
 import com.blog.modules.user.model.entity.User;
@@ -30,9 +30,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Service
 public class UserServiceImpl implements UserService {
     @Autowired
@@ -45,7 +45,8 @@ public class UserServiceImpl implements UserService {
     private ApplicationEventPublisher eventPublisher;
 
     @Override
-    public PageResult<UserVO> list(Long page, Long size, String username, String nickname, String email, Long roleId, Integer status) {
+    public PageResult<UserVO> list(Long page, Long size, String username, String nickname, String email, Long roleId,
+            Integer status) {
         Page<User> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
 
@@ -103,7 +104,7 @@ public class UserServiceImpl implements UserService {
                 throw new BusinessException("邮箱已存在");
             }
         }
-        
+
         User user = BeanUtil.copyProperties(dto, User.class);
         if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
             user.setPassword(PasswordUtil.encode(dto.getPassword()));
@@ -117,12 +118,13 @@ public class UserServiceImpl implements UserService {
         if (dto.getRoleKey() == null) {
             user.setRoleKey("user");
         }
-        
+
         userMapper.insert(user);
-        
+
         User savedUser = userMapper.selectById(user.getId());
-        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserCreatedEvent(this, user.getId(), savedUser)));
-        
+        EventUtil.publishEventAfterCommit(
+                () -> eventPublisher.publishEvent(new UserCreatedEvent(this, user.getId(), savedUser)));
+
         return user.getId();
     }
 
@@ -134,7 +136,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
-        
+
         if (dto.getUsername() != null && !dto.getUsername().equals(user.getUsername())) {
             LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(User::getUsername, dto.getUsername()).ne(User::getId, id);
@@ -142,7 +144,7 @@ public class UserServiceImpl implements UserService {
                 throw new BusinessException("用户名已存在");
             }
         }
-        
+
         if (dto.getEmail() != null && !dto.getEmail().isEmpty() && !dto.getEmail().equals(user.getEmail())) {
             LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(User::getEmail, dto.getEmail()).ne(User::getId, id);
@@ -150,7 +152,7 @@ public class UserServiceImpl implements UserService {
                 throw new BusinessException("邮箱已存在");
             }
         }
-        
+
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setNickname(dto.getNickname());
@@ -163,11 +165,12 @@ public class UserServiceImpl implements UserService {
         user.setRoleKey(dto.getRoleKey());
         user.setStatus(dto.getStatus());
         user.setDisabled(dto.getDisabled());
-        
+
         userMapper.updateById(user);
-        
+
         User updatedUser = userMapper.selectById(id);
-        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserUpdatedEvent(this, id, updatedUser)));
+        EventUtil.publishEventAfterCommit(
+                () -> eventPublisher.publishEvent(new UserUpdatedEvent(this, id, updatedUser)));
     }
 
     @Override
@@ -179,21 +182,21 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException("用户不存在");
         }
         userMapper.deleteById(id);
-        
+
         EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserDeletedEvent(this, id)));
     }
 
     @Override
     @Transactional
     @CacheEvict(value = "user", key = "#id")
-    public void resetPassword(Long id, ResetPasswordDTO dto) {
+    public void resetPassword(Long id, AdminResetPasswordDTO dto) {
         User user = userMapper.selectById(id);
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
-        user.setPassword(PasswordUtil.encode(dto.getNewPassword()));
+        user.setPassword(PasswordUtil.encode(dto.getPassword()));
         userMapper.updateById(user);
-        
+
         EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserPasswordResetEvent(this, id)));
     }
 
@@ -205,7 +208,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
-        
+
         // 由于用户表只有一个role字段，这里只分配第一个角色
         if (roleIds != null && !roleIds.isEmpty()) {
             Long roleId = roleIds.get(0);
@@ -221,9 +224,10 @@ public class UserServiceImpl implements UserService {
             user.setRoleKey("user");
             userMapper.updateById(user);
         }
-        
+
         User updatedUser = userMapper.selectById(id);
-        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserUpdatedEvent(this, id, updatedUser)));
+        EventUtil.publishEventAfterCommit(
+                () -> eventPublisher.publishEvent(new UserUpdatedEvent(this, id, updatedUser)));
     }
 
     private UserVO convertToVO(User user) {
@@ -285,7 +289,8 @@ public class UserServiceImpl implements UserService {
         userMapper.updateById(user);
 
         User updatedUser = userMapper.selectById(userId);
-        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserUpdatedEvent(this, userId, updatedUser)));
+        EventUtil.publishEventAfterCommit(
+                () -> eventPublisher.publishEvent(new UserUpdatedEvent(this, userId, updatedUser)));
     }
 
     @Override
@@ -309,4 +314,3 @@ public class UserServiceImpl implements UserService {
         EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new UserPasswordResetEvent(this, userId)));
     }
 }
-

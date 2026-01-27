@@ -1,15 +1,16 @@
 package com.blog.modules.user.service;
 
-
 import com.blog.shared.PageResult;
-import com.blog.modules.auth.model.dto.ResetPasswordDTO;
+import com.blog.modules.user.model.dto.AdminResetPasswordDTO;
 import com.blog.modules.user.model.dto.UpdatePasswordDTO;
 import com.blog.modules.user.model.dto.UpdateProfileDTO;
 import com.blog.modules.user.model.dto.UserDTO;
 import com.blog.modules.user.model.vo.UserVO;
 import java.util.List;
+
 public interface UserService {
-    PageResult<UserVO> list(Long page, Long size, String username, String nickname, String email, Long roleId, Integer status);
+    PageResult<UserVO> list(Long page, Long size, String username, String nickname, String email, Long roleId,
+            Integer status);
 
     UserVO getById(Long id);
 
@@ -19,7 +20,7 @@ public interface UserService {
 
     void delete(Long id);
 
-    void resetPassword(Long id, ResetPasswordDTO dto);
+    void resetPassword(Long id, AdminResetPasswordDTO dto);
 
     void assignRoles(Long id, List<Long> roleIds);
 
@@ -33,4 +34,3 @@ public interface UserService {
      */
     void updatePassword(UpdatePasswordDTO dto);
 }
-

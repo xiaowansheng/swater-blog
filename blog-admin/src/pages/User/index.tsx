@@ -18,7 +18,7 @@ import {
   EditOutlined,
   DeleteOutlined,
   UserOutlined,
-  KeyOutlined,
+  SyncOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
 import { getUserList, createUser, updateUser, deleteUser, resetPassword } from '@/api/user'
@@ -219,7 +219,7 @@ const UserPage: React.FC = () => {
           <Tooltip title="重置密码">
             <Button
               type="text"
-              icon={<KeyOutlined />}
+              icon={<SyncOutlined />}
               onClick={() => handleResetPassword(record.id)}
             />
           </Tooltip>

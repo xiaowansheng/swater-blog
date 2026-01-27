@@ -1,4 +1,4 @@
-﻿package com.blog.bootstrap.config;
+package com.blog.bootstrap.config;
 
 import cn.dev33.satoken.context.SaHolder;
 import cn.dev33.satoken.interceptor.SaInterceptor;
@@ -60,7 +60,7 @@ public class SaTokenConfig implements WebMvcConfigurer {
                     // 检查登录状态
                     StpUtil.checkLogin();
                     // 显式刷新最后活跃时间，确保 active-timeout 为滚动过期
-                    StpUtil.updateLastActivityToNow();
+                    StpUtil.updateLastActiveToNow();
 
                     // 设置用户上下文（每个请求只查询一次数据库）
                     try {
