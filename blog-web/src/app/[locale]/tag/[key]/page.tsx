@@ -5,7 +5,7 @@ import Pagination from '@/components/common/Pagination';
 import { articleApi } from '@/lib/api/article';
 import { tagApi } from '@/lib/api/tag';
 import { getCoverConfig } from '@/lib/api/config.server';
-import { ISR_REVALIDATE } from '@/lib/constants';
+import { ISR_REVALIDATE, PAGINATION_DEFAULT_SIZE } from '@/lib/constants';
 
 export const revalidate = ISR_REVALIDATE.TAG;
 
@@ -26,7 +26,7 @@ export default async function TagPage({
     const [articleList, cover] = await Promise.all([
       articleApi.getList({
         page: currentPage,
-        size: 10,
+        size: PAGINATION_DEFAULT_SIZE,
         tagId: tag.id,
       }),
       getCoverConfig()

@@ -6,7 +6,7 @@ import Pagination from '@/components/common/Pagination';
 import { articleApi } from '@/lib/api/article';
 import { categoryApi } from '@/lib/api/category';
 import { tagApi } from '@/lib/api/tag';
-import { ISR_REVALIDATE } from '@/lib/constants';
+import { ISR_REVALIDATE, PAGINATION_DEFAULT_SIZE } from '@/lib/constants';
 import type { PageResult, PostVO, CategoryVO, TagVO } from '@/types';
 
 export const revalidate = ISR_REVALIDATE.HOME;
@@ -20,13 +20,13 @@ export default async function HomePage({
   const { page = '1' } = await searchParams;
   const currentPage = parseInt(page, 10) || 1;
 
-  let articleList: PageResult<PostVO> = { records: [], total: 0, size: 10, current: 1, pages: 0 };
+  let articleList: PageResult<PostVO> = { records: [], total: 0, size: PAGINATION_DEFAULT_SIZE, current: 1, pages: 0 };
   let hotArticles: PostVO[] = [];
   let categories: CategoryVO[] = [];
   let tags: TagVO[] = [];
 
   try {
-    articleList = await articleApi.getList({ page: currentPage, size: 10 });
+    articleList = await articleApi.getList({ page: currentPage, size: PAGINATION_DEFAULT_SIZE });
   } catch (error) {
     console.warn('Failed to load articles (API server may not be running):', error);
   }

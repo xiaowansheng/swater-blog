@@ -4,7 +4,7 @@ import GuestbookSection from '@/components/guestbook/GuestbookSection';
 import ComponentDisabledNotice from '@/components/common/ComponentDisabledNotice';
 import { guestbookApi } from '@/lib/api/guestbook';
 import { fetchServer } from '@/lib/api/server';
-import { ISR_REVALIDATE } from '@/lib/constants';
+import { ISR_REVALIDATE, PAGINATION_DEFAULT_SIZE } from '@/lib/constants';
 import type { GuestbookVO, ComponentConfig } from '@/types';
 
 const DEFAULT_COMPONENT_CONFIG: ComponentConfig = {
@@ -30,7 +30,7 @@ export default async function GuestbookPage({
   let hasGuestbookError = false;
 
   try {
-    const guestbook = await guestbookApi.getList(currentPage, 10);
+    const guestbook = await guestbookApi.getList(currentPage, PAGINATION_DEFAULT_SIZE);
     guestbookRecords = guestbook.records || [];
   } catch (err) {
     console.error('Failed to load guestbook:', err);
@@ -105,7 +105,7 @@ export default async function GuestbookPage({
                   <GuestbookSection
                     initialMessages={guestbookRecords}
                     currentPage={currentPage}
-                    pageSize={10}
+                    pageSize={PAGINATION_DEFAULT_SIZE}
                   />
 
                   <div className="pointer-events-none absolute -bottom-6 left-1/2 hidden h-16 w-16 -translate-x-1/2 rounded-full bg-deco-pink/30 blur-2xl sm:block"></div>
