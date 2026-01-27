@@ -2,10 +2,10 @@ import { getTranslations } from 'next-intl/server';
 import PageHeader from '@/components/layout/PageHeader';
 import { searchApi } from '@/lib/api/search';
 import { Card } from '@/components/ui/Card';
-import { ISR_REVALIDATE, PAGINATION_DEFAULT_SIZE } from '@/lib/constants';
+import { PAGINATION_DEFAULT_SIZE } from '@/lib/constants';
 import type { PageResult, SearchVO } from '@/types';
 
-export const revalidate = ISR_REVALIDATE.SEARCH;
+export const revalidate = 60;
 
 const EMPTY_RESULTS: PageResult<SearchVO> = {
   records: [],

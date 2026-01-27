@@ -13,12 +13,11 @@ import ContentTracker from '@/components/visitor/ContentTracker';
 import ArticleLiveStats from '@/components/article/ArticleLiveStats';
 import { articleApi } from '@/lib/api/article';
 import { getAuthorInfo, getCoverConfig, getComponentConfig } from '@/lib/api/config.server';
-import { ISR_REVALIDATE } from '@/lib/constants';
 import { generateArticleMetadata } from '@/lib/utils/seo';
 import { formatDate } from '@/lib/utils/format';
 import { Card } from '@/components/ui/Card';
 
-export const revalidate = ISR_REVALIDATE.POST_DETAIL;
+export const revalidate = 3600;
 
 export async function generateMetadata({
   params,

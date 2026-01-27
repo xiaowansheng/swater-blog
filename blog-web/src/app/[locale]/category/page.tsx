@@ -4,10 +4,10 @@ import { categoryApi } from '@/lib/api/category';
 import { Link } from '@/lib/i18n/routing';
 import { getCoverConfig } from '@/lib/api/config.server';
 import { Card } from '@/components/ui/Card';
-import { DEFAULT_COVER_CONFIG, ISR_REVALIDATE } from '@/lib/constants';
+import { DEFAULT_COVER_CONFIG } from '@/lib/constants';
 import type { CategoryVO } from '@/types';
 
-export const revalidate = ISR_REVALIDATE.CATEGORY;
+export const revalidate = 600;
 
 export default async function CategoryListPage() {
   const t = await getTranslations('common');

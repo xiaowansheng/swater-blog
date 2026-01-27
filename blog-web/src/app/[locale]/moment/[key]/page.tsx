@@ -10,11 +10,10 @@ import ContentLikeButton from '@/components/common/ContentLikeButton';
 import PageHeader from '@/components/layout/PageHeader';
 import { momentApi } from '@/lib/api/moment';
 import { formatDate } from '@/lib/utils/format';
-import { ISR_REVALIDATE } from '@/lib/constants';
 import { getAuthorInfo, getServerConfig, getComponentConfig } from '@/lib/api/config.server';
 import type { MomentVO } from '@/types';
 
-export const revalidate = ISR_REVALIDATE.MOMENT;
+export const revalidate = 60;
 
 export async function generateMetadata({
   params,

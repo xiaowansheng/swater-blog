@@ -6,12 +6,11 @@ import { momentApi } from '@/lib/api/moment';
 import { getCoverConfig } from '@/lib/api/config.server';
 import {
   DEFAULT_COVER_CONFIG,
-  ISR_REVALIDATE,
   PAGINATION_DEFAULT_SIZE,
 } from '@/lib/constants';
 import type { MomentVO, PageResult } from '@/types';
 
-export const revalidate = ISR_REVALIDATE.MOMENT;
+export const revalidate = 60;
 
 const EMPTY_MOMENT_LIST: PageResult<MomentVO> = {
   records: [],

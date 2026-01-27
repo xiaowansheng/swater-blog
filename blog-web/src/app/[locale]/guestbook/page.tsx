@@ -4,11 +4,10 @@ import GuestbookSection from '@/components/guestbook/GuestbookSection';
 import ComponentDisabledNotice from '@/components/common/ComponentDisabledNotice';
 import { guestbookApi } from '@/lib/api/guestbook';
 import { getCoverConfig, getComponentConfig } from '@/lib/api/config.server';
-import { ISR_REVALIDATE } from '@/lib/constants';
 import type { GuestbookVO } from '@/types';
 
 
-export const revalidate = ISR_REVALIDATE.GUESTBOOK;
+export const revalidate = 60;
 
 export const dynamic = 'force-dynamic';
 

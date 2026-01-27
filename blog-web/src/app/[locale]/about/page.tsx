@@ -3,9 +3,8 @@ import PageHeader from '@/components/layout/PageHeader';
 import MarkdownRenderer from '@/components/markdown/MarkdownRenderer';
 import AuthorCard from '@/components/author/AuthorCard';
 import { getAboutContent, getCoverConfig, getAuthorInfo } from '@/lib/api/config.server';
-import { ISR_REVALIDATE } from '@/lib/constants';
 
-export const revalidate = ISR_REVALIDATE.ABOUT;
+export const revalidate = 3600;
 
 export default async function AboutPage({
   params,

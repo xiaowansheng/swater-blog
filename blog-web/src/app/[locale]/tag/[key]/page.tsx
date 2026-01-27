@@ -7,12 +7,11 @@ import { tagApi } from '@/lib/api/tag';
 import { getCoverConfig } from '@/lib/api/config.server';
 import {
   DEFAULT_COVER_CONFIG,
-  ISR_REVALIDATE,
   PAGINATION_DEFAULT_SIZE,
 } from '@/lib/constants';
 import type { PageResult, PostVO, TagVO } from '@/types';
 
-export const revalidate = ISR_REVALIDATE.TAG;
+export const revalidate = 600;
 
 const EMPTY_ARTICLE_LIST: PageResult<PostVO> = {
   records: [],

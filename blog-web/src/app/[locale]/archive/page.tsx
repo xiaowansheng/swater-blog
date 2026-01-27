@@ -6,10 +6,10 @@ import { Link } from '@/lib/i18n/routing';
 import { getCoverConfig } from '@/lib/api/config.server';
 import ArchiveTimeline from '@/components/archive/ArchiveTimeline';
 import { Card } from '@/components/ui/Card';
-import { DEFAULT_COVER_CONFIG, ISR_REVALIDATE } from '@/lib/constants';
+import { DEFAULT_COVER_CONFIG } from '@/lib/constants';
 import type { CategoryVO, TagVO } from '@/types';
 
-export const revalidate = ISR_REVALIDATE.ARCHIVE;
+export const revalidate = 3600;
 
 export default async function ArchiveListPage() {
   const t = await getTranslations('common');

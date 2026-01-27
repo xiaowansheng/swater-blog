@@ -3,10 +3,10 @@ import PageHeader from '@/components/layout/PageHeader';
 import FriendLinkPageComponent from '@/components/friendLink/FriendLinkPage';
 import { friendLinkApi } from '@/lib/api/friendLink';
 import { getCoverConfig } from '@/lib/api/config.server';
-import { DEFAULT_COVER_CONFIG, ISR_REVALIDATE } from '@/lib/constants';
+import { DEFAULT_COVER_CONFIG } from '@/lib/constants';
 import type { FriendLinkVO } from '@/types';
 
-export const revalidate = ISR_REVALIDATE.FRIEND_LINK;
+export const revalidate = 1800;
 
 export default async function FriendLinkPage() {
   const t = await getTranslations('common');

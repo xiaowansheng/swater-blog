@@ -6,10 +6,10 @@ import Pagination from '@/components/common/Pagination';
 import { articleApi } from '@/lib/api/article';
 import { categoryApi } from '@/lib/api/category';
 import { tagApi } from '@/lib/api/tag';
-import { ISR_REVALIDATE, PAGINATION_DEFAULT_SIZE } from '@/lib/constants';
+import { PAGINATION_DEFAULT_SIZE } from '@/lib/constants';
 import type { PageResult, PostVO, CategoryVO, TagVO } from '@/types';
 
-export const revalidate = ISR_REVALIDATE.HOME;
+export const revalidate = 300;
 
 export default async function HomePage({
   searchParams,
