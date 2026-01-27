@@ -6,6 +6,9 @@ import { Link } from '@/lib/i18n/routing';
 import { getCoverConfig } from '@/lib/api/config.server';
 import ArchiveTimeline from '@/components/archive/ArchiveTimeline';
 import { Card } from '@/components/ui/Card';
+import { ISR_REVALIDATE } from '@/lib/constants';
+
+export const revalidate = ISR_REVALIDATE.ARCHIVE;
 
 export default async function ArchiveListPage({
   params,

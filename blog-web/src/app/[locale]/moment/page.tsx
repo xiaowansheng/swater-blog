@@ -4,6 +4,9 @@ import MomentList from '@/components/moment/MomentList';
 import Pagination from '@/components/common/Pagination';
 import { momentApi } from '@/lib/api/moment';
 import { getCoverConfig } from '@/lib/api/config.server';
+import { ISR_REVALIDATE } from '@/lib/constants';
+
+export const revalidate = ISR_REVALIDATE.MOMENT;
 
 export default async function MomentPage({
   params,

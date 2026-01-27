@@ -3,6 +3,9 @@ import PageHeader from '@/components/layout/PageHeader';
 import FriendLinkPageComponent from '@/components/friendLink/FriendLinkPage';
 import { friendLinkApi } from '@/lib/api/friendLink';
 import { getCoverConfig } from '@/lib/api/config.server';
+import { ISR_REVALIDATE } from '@/lib/constants';
+
+export const revalidate = ISR_REVALIDATE.FRIEND_LINK;
 
 export default async function FriendLinkPage({
   params,

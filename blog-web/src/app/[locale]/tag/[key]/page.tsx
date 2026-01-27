@@ -5,6 +5,9 @@ import Pagination from '@/components/common/Pagination';
 import { articleApi } from '@/lib/api/article';
 import { tagApi } from '@/lib/api/tag';
 import { getCoverConfig } from '@/lib/api/config.server';
+import { ISR_REVALIDATE } from '@/lib/constants';
+
+export const revalidate = ISR_REVALIDATE.TAG;
 
 export default async function TagPage({
   params,

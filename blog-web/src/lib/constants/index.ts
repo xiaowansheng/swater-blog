@@ -10,5 +10,7 @@ export const ISR_REVALIDATE = {
   ABOUT: 3600,
   FRIEND_LINK: 1800,
   MOMENT: 300,
+  GUESTBOOK: 60,
+  SEARCH: 60,
 };
 

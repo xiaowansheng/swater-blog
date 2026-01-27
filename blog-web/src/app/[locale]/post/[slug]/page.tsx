@@ -18,6 +18,8 @@ import { generateArticleMetadata } from '@/lib/utils/seo';
 import { formatDate } from '@/lib/utils/format';
 import { Card } from '@/components/ui/Card';
 
+export const revalidate = ISR_REVALIDATE.POST_DETAIL;
+
 export async function generateMetadata({
   params,
 }: {

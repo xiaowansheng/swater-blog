@@ -13,6 +13,8 @@ import { formatDate } from '@/lib/utils/format';
 import { ISR_REVALIDATE } from '@/lib/constants';
 import { getAuthorInfo, getServerConfig, getComponentConfig } from '@/lib/api/config.server';
 
+export const revalidate = ISR_REVALIDATE.MOMENT;
+
 export async function generateMetadata({
   params,
 }: {

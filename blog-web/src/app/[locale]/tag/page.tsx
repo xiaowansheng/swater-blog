@@ -4,6 +4,9 @@ import { tagApi } from '@/lib/api/tag';
 import { Link } from '@/lib/i18n/routing';
 import { getCoverConfig } from '@/lib/api/config.server';
 import { Card } from '@/components/ui/Card';
+import { ISR_REVALIDATE } from '@/lib/constants';
+
+export const revalidate = ISR_REVALIDATE.TAG;
 
 export default async function TagListPage({
   params,

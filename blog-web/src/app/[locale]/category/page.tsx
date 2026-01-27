@@ -4,6 +4,9 @@ import { categoryApi } from '@/lib/api/category';
 import { Link } from '@/lib/i18n/routing';
 import { getCoverConfig } from '@/lib/api/config.server';
 import { Card } from '@/components/ui/Card';
+import { ISR_REVALIDATE } from '@/lib/constants';
+
+export const revalidate = ISR_REVALIDATE.CATEGORY;
 
 export default async function CategoryListPage({
   params,

@@ -4,6 +4,7 @@ import GuestbookSection from '@/components/guestbook/GuestbookSection';
 import ComponentDisabledNotice from '@/components/common/ComponentDisabledNotice';
 import { guestbookApi } from '@/lib/api/guestbook';
 import { fetchServer } from '@/lib/api/server';
+import { ISR_REVALIDATE } from '@/lib/constants';
 import type { GuestbookVO, ComponentConfig } from '@/types';
 
 const DEFAULT_COMPONENT_CONFIG: ComponentConfig = {
@@ -11,6 +12,8 @@ const DEFAULT_COMPONENT_CONFIG: ComponentConfig = {
   talkCommentEnabled: true,
   guestbookMessageEnabled: true,
 };
+
+export const revalidate = ISR_REVALIDATE.GUESTBOOK;
 
 export default async function GuestbookPage({
   searchParams,

@@ -2,6 +2,9 @@ import { getTranslations } from 'next-intl/server';
 import PageHeader from '@/components/layout/PageHeader';
 import { searchApi } from '@/lib/api/search';
 import { Card } from '@/components/ui/Card';
+import { ISR_REVALIDATE } from '@/lib/constants';
+
+export const revalidate = ISR_REVALIDATE.SEARCH;
 
 export default async function SearchPage({
   params,
