@@ -2,6 +2,7 @@
 
 import { useScroll, useTransform, motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { getFullUrl } from '@/lib/utils/format';
 import { useEffect, useRef } from 'react';
 
@@ -144,19 +145,28 @@ export default function HeroSectionClient({
     };
   }, []);
 
-  // 首页封面背景样式
+  // 首页封面背景地址
   const fullCoverImage = getFullUrl(coverImage);
-  const heroStyle = fullCoverImage ? {
-    backgroundImage: `url(${fullCoverImage})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-  } : {};
 
   return (
-    <section ref={containerRef} className="flex overflow-hidden relative justify-center items-center min-h-screen" style={heroStyle}>
-      {/* 背景遮罩 */}
+    <section 
+      ref={containerRef} 
+      className="flex overflow-hidden relative justify-center items-center min-h-screen bg-background"
+    >
+      {/* 背景图片/遮罩 */}
       {fullCoverImage ? (
-        <div className="absolute inset-0 z-0 bg-black/40"></div>
+        <>
+          <Image
+            src={fullCoverImage}
+            alt={siteName}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover pointer-events-none"
+            quality={90}
+          />
+          <div className="absolute inset-0 z-0 bg-black/40"></div>
+        </>
       ) : (
         <>
           <div className="absolute inset-0 z-0 bg-gradient-to-br from-background via-background to-primary/5"></div>
@@ -215,7 +225,7 @@ export default function HeroSectionClient({
         <motion.div 
           className="mx-auto w-full max-w-4xl text-center"
           variants={containerVariants}
-          initial="hidden"
+          initial={false}
           animate="visible"
         >
           <motion.div variants={itemVariants} className="relative mb-8">
@@ -227,7 +237,10 @@ export default function HeroSectionClient({
             </div>
           </motion.div>
 
-          <motion.h1 variants={itemVariants} className="relative mb-6 text-6xl font-black md:text-8xl gradient-text">
+          <motion.h1 
+            variants={itemVariants} 
+            className="relative mb-6 text-6xl font-black md:text-8xl gradient-text"
+          >
             {siteName}
             <span className="absolute -bottom-4 left-1/2 w-32 h-1 bg-gradient-to-r rounded-full opacity-60 -translate-x-1/2 from-primary via-accent to-primary"></span>
           </motion.h1>
@@ -253,8 +266,8 @@ export default function HeroSectionClient({
               </svg>
               <span className="font-semibold text-foreground/90 dark:text-foreground/95 group-hover:text-foreground drop-shadow-sm">{tagCount} {t('tagCount')}</span>
             </div>
-            <div className="flex gap-2.5 items-center px-5 py-2.5 rounded-full border backdrop-blur-md transition-all bg-card/70 dark:bg-card/60 border-border/60 hover:border-primary hover:bg-card/80 dark:hover:bg-card/70 hover:shadow-lg hover:shadow-primary/20 hover:scale-105 group">
-              <svg className="w-5 h-5 text-primary dark:text-primary drop-shadow-sm transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+            <div className="flex gap-2.5 items-center px-5 py-2.5 rounded-full border backdrop-blur-md transition-all bg-card/70 dark:bg-card/60 border-border/60 hover:border-primary hover:bg-card/80 dark:hover:bg-card/70 hover:shadow-lg hover:shadow-primary/20 hover:scale-105 group" role="status">
+              <svg className="w-5 h-5 text-primary dark:text-primary drop-shadow-sm transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
               <span className="font-semibold text-foreground/90 dark:text-foreground/95 group-hover:text-foreground drop-shadow-sm">{categoryCount} {t('categoryCount')}</span>
