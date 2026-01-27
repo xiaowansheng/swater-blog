@@ -78,6 +78,9 @@ dependencies {
     implementation("org.jsoup:jsoup:1.18.3")
     implementation("com.rometools:rome:2.1.0")
 
+    // --- 敏感词处理 ---
+    implementation("com.github.houbb:sensitive-word:0.29.4")
+
     // --- PDF 导出库 ---
 
     // 第三方 SDK

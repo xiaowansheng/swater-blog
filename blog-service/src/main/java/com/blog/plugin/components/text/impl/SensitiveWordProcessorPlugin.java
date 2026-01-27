@@ -3,26 +3,47 @@ package com.blog.plugin.components.text.impl;
 import com.blog.plugin.components.text.ProcessResult;
 import com.blog.plugin.components.text.TextProcessorPlugin;
 import com.blog.plugin.core.Plugin;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 
-/**
- * 内置敏感词处理插件
- * 用于处理评论、留言等文本内容中的敏感词
- */
+import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
+import com.github.houbb.sensitive.word.support.allow.WordAllows;
+import com.github.houbb.sensitive.word.support.deny.WordDenys;
+
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "plugin.text.active", havingValue = "sensitive-word", matchIfMissing = false)
 public class SensitiveWordProcessorPlugin implements TextProcessorPlugin, Plugin {
 
-    private static final List<String> DEFAULT_SENSITIVE_WORDS = new ArrayList<>();
+    private SensitiveWordBs sensitiveWordBs;
+
+    @PostConstruct
+    public void init() {
+        this.sensitiveWordBs = SensitiveWordBs.newInstance()
+                .wordDeny(WordDenys.defaults())
+                .wordAllow(WordAllows.defaults())
+                // 各种忽略策略（文档里有这些）
+                .ignoreCase(true)
+                .ignoreWidth(true)
+                .ignoreNumStyle(true)
+                .ignoreChineseStyle(true)
+                .ignoreEnglishStyle(true)
+                .ignoreRepeat(true)
+                // 检测类型
+                .enableNumCheck(true)
+                .enableEmailCheck(true)
+                .enableUrlCheck(true)   // URL 检测是这样开启的（不是 ignoreUrl）:contentReference[oaicite:2]{index=2}
+                .init();
+
+        log.info("SensitiveWordProcessorPlugin 初始化完成");
+    }
 
     @Override
     public String getName() {
@@ -36,82 +57,49 @@ public class SensitiveWordProcessorPlugin implements TextProcessorPlugin, Plugin
 
     @Override
     public ProcessResult process(String content) {
-        if (content == null || content.isEmpty()) {
+        if (content == null || content.isBlank()) {
             return new ProcessResult("");
         }
 
-        String processedContent = processContent(content);
-        boolean hasSensitiveWords = containsSensitiveWords(content);
+        // 统一：先清理 HTML，再做检测/替换/找词，避免“检测到但替换不到”的不一致
+        String normalized = normalize(content);
+
+        boolean hasSensitiveWords = containsSensitiveWords(normalized);
+
+        // SensitiveWordBs 文档示例：replace(text) 默认用 * 替换 :contentReference[oaicite:3]{index=3}
+        String processedContent = hasSensitiveWords
+                ? sensitiveWordBs.replace(normalized)
+                : normalized;
+
+        List<String> foundWords = hasSensitiveWords
+                ? findSensitiveWords(normalized)
+                : Collections.emptyList();
 
         ProcessResult result = new ProcessResult(processedContent);
         result.addMetadata("originalLength", content.length());
+        result.addMetadata("normalizedLength", normalized.length());
         result.addMetadata("processedLength", processedContent.length());
         result.addMetadata("hasSensitiveWords", hasSensitiveWords);
 
+        if (!foundWords.isEmpty()) {
+            result.addMetadata("sensitiveWords", foundWords);
+            result.addMetadata("sensitiveWordCount", foundWords.size());
+        }
+
         return result;
     }
 
-    /**
-     * 处理内容（清理HTML、过滤敏感词等）
-     *
-     * @param content 原始内容
-     * @return 处理后的内容
-     */
-    private String processContent(String content) {
-        if (content == null || content.trim().isEmpty()) {
-            return content;
-        }
-
-        String processed = content.trim();
-        processed = Jsoup.clean(processed, Safelist.none());
-        processed = processSensitiveWords(processed, "*");
-
-        return processed;
+    private String normalize(String content) {
+        return Jsoup.clean(content.trim(), Safelist.none());
     }
 
-    /**
-     * 检查内容是否包含敏感词
-     *
-     * @param content 待检查的内容
-     * @return 是否包含敏感词
-     */
     private boolean containsSensitiveWords(String content) {
-        if (content == null || content.isEmpty()) {
-            return false;
-        }
-
-        String lowerContent = content.toLowerCase();
-        for (String word : DEFAULT_SENSITIVE_WORDS) {
-            if (word != null && !word.trim().isEmpty() && lowerContent.contains(word.toLowerCase())) {
-                return true;
-            }
-        }
-
-        return false;
+        return content != null && !content.isEmpty() && sensitiveWordBs.contains(content);
     }
 
-    /**
-     * 处理敏感词（如替换、屏蔽等）
-     *
-     * @param content 包含敏感词的内容
-     * @param replacement 替换字符（如 *、# 等），传 null 则使用默认替换方式
-     * @return 处理后的内容
-     */
-    private String processSensitiveWords(String content, String replacement) {
-        if (content == null || content.isEmpty()) {
-            return content;
-        }
-
-        String repl = replacement != null ? replacement : "*";
-        String result = content;
-
-        for (String word : DEFAULT_SENSITIVE_WORDS) {
-            if (word != null && !word.trim().isEmpty()) {
-                String masked = repl.repeat(word.length());
-                result = result.replaceAll("(?i)" + Pattern.quote(word), masked);
-            }
-        }
-
-        return result;
+    private List<String> findSensitiveWords(String content) {
+        return (content == null || content.isEmpty())
+                ? Collections.emptyList()
+                : sensitiveWordBs.findAll(content);
     }
 }
