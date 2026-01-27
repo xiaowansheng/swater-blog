@@ -135,7 +135,10 @@
     "routeLoadingScene3": "时空隧道穿越中...",
     "routeLoadingScene4": "次元壁突破中...",
     "routeLoadingScene5": "即将到达目的地...",
-    "castingTeleportMagic": "正在施展传送魔法，请稍候片刻~ ✨"
+    "castingTeleportMagic": "正在施展传送魔法，请稍候片刻~ ✨",
+    "notFoundTitle": "页面未找到",
+    "notFoundDesc": "您查找的页面可能已被移除、更名或暂时不可用。",
+    "backToHome": "返回首页"
   },
   "guestbook": {
     "title": "留言板",

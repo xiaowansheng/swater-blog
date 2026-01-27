@@ -135,7 +135,10 @@
     "routeLoadingScene3": "Crossing time tunnel...",
     "routeLoadingScene4": "Breaking dimensional wall...",
     "routeLoadingScene5": "Arriving at destination...",
-    "castingTeleportMagic": "Casting teleport magic, please wait~ ✨"
+    "castingTeleportMagic": "Casting teleport magic, please wait~ ✨",
+    "notFoundTitle": "Page Not Found",
+    "notFoundDesc": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.",
+    "backToHome": "Back to Home"
   },
   "guestbook": {
     "title": "Guestbook",
