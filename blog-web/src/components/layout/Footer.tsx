@@ -12,7 +12,7 @@ export default async function Footer() {
   const defaultCopyright = `© ${new Date().getFullYear()} ${site.name || 'Blog'}. All rights reserved.`;
 
   return (
-    <footer className="relative mt-auto overflow-hidden py-16 bg-white/70 dark:bg-black/70 backdrop-blur-xl border-t border-white/20 dark:border-white/5">
+    <footer className="relative mt-auto overflow-hidden py-16 bg-white/10 dark:bg-black/70 backdrop-blur-xl border-t border-white/20 dark:border-white/5">
       {/* Cute Wavy Divider */}
       <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] transform rotate-180 opacity-50">
          <svg className="relative block w-[calc(100%+1.3px)] h-12 text-primary/10 fill-current" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
