@@ -245,7 +245,7 @@ sa-token:
   token-name: Authorization
   token-prefix: Bearer
   timeout: -1
-  active-timeout: 86400
+  active-timeout: ${SA_TOKEN_ACTIVE_TIMEOUT:86400}
   is-read-timeout: true
   is-concurrent: true
   is-share: true
