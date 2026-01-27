@@ -44,6 +44,7 @@ export default function GuestbookSection({
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
+    // 如果 URL 中有 size 参数，保持它
     router.push(`${pathname}?${params.toString()}`);
   };
 

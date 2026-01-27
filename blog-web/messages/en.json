@@ -150,6 +150,8 @@
     "tipsContent": "Please keep messages civil and help maintain a positive environment",
     "messageCount": "messages",
     "total": "Total {count}",
+    "latest": "Latest",
+    "oldest": "Oldest",
     "nicknameRequired": "Nickname is required",
     "emailRequired": "Email is required",
     "emailCodeRequired": "Email code is required",
