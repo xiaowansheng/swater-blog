@@ -32,8 +32,9 @@ const ArticleEdit: React.FC = () => {
   const [articleStatus, setArticleStatus] = useState<number>(ArticleStatus.DRAFT)
   const [showConflictModal, setShowConflictModal] = useState(false)
   const [showCoverGenerator, setShowCoverGenerator] = useState(false)
-  const type = Form.useWatch('type', form)
-  const title = Form.useWatch('title', form)
+  const [currentType, setCurrentType] = useState<ArticleType>(ArticleType.ORIGINAL)
+  const [currentTitle, setCurrentTitle] = useState<string>('')
+  const [currentContent, setCurrentContent] = useState<string>('')
 
   // 用于跟踪内容变化
   const contentRef = useRef<string>('')
@@ -72,7 +73,7 @@ const ArticleEdit: React.FC = () => {
     const articleId = saveState.articleId ?? (pageId ? Number(pageId) : null)
     if (!articleId) return
 
-    const rawTitle = String(title || '').trim()
+    const rawTitle = String(currentTitle || '').trim()
     if (!rawTitle) return
 
     const titleChars = Array.from(rawTitle)
@@ -80,7 +81,7 @@ const ArticleEdit: React.FC = () => {
       titleChars.length > 7 ? `${titleChars.slice(0, 7).join('')}...` : rawTitle
 
     setTabLabel(`[${articleId}]${shortTitle}`)
-  }, [pageId, saveState.articleId, setTabLabel, title])
+  }, [pageId, saveState.articleId, setTabLabel, currentTitle])
 
   useEffect(() => {
     if (!pageId && routeId) {
@@ -254,6 +255,9 @@ const ArticleEdit: React.FC = () => {
       })
       
       contentRef.current = article.content
+      setCurrentType((article.type as ArticleType) || ArticleType.ORIGINAL)
+      setCurrentTitle(article.title || '')
+      setCurrentContent(article.content || '')
       
       // 加载完成后启动自动保存定时器
       startAutoSaveTimer(getFormData)
@@ -265,6 +269,7 @@ const ArticleEdit: React.FC = () => {
   // 处理内容变化，触发防抖自动保存
   const handleContentChange = useCallback((content: string) => {
     form.setFieldValue('content', content)
+    setCurrentContent(content)
     
     // 只有内容真正变化时才触发自动保存
     if (content !== contentRef.current) {
@@ -280,6 +285,7 @@ const ArticleEdit: React.FC = () => {
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value
     form.setFieldValue('title', title)
+    setCurrentTitle(title)
 
     const formData = getFormData()
     if (formData.content) {
@@ -358,6 +364,7 @@ const ArticleEdit: React.FC = () => {
     if (saveState.conflictData) {
       form.setFieldValue('content', saveState.conflictData.serverContent)
       contentRef.current = saveState.conflictData.serverContent
+      setCurrentContent(saveState.conflictData.serverContent)
     }
     resolveConflictWithServer()
     setShowConflictModal(false)
@@ -378,6 +385,18 @@ const ArticleEdit: React.FC = () => {
   const handleRetry = () => {
     const formData = getFormData()
     retry(formData)
+  }
+
+  const handleValuesChange = (changedValues: Record<string, any>) => {
+    if (Object.prototype.hasOwnProperty.call(changedValues, 'title')) {
+      setCurrentTitle(changedValues.title || '')
+    }
+    if (Object.prototype.hasOwnProperty.call(changedValues, 'type')) {
+      setCurrentType((changedValues.type as ArticleType) ?? ArticleType.ORIGINAL)
+    }
+    if (Object.prototype.hasOwnProperty.call(changedValues, 'content')) {
+      setCurrentContent(changedValues.content || '')
+    }
   }
 
   const getStatusTag = () => {
@@ -451,6 +470,7 @@ const ArticleEdit: React.FC = () => {
         form={form} 
         layout="vertical" 
         initialValues={{ isTop: 0 }}
+        onValuesChange={handleValuesChange}
       >
         <div className="w-full">
           <Card className="shadow-sm mb-6" variant="borderless">
@@ -578,7 +598,7 @@ const ArticleEdit: React.FC = () => {
                   />
                 </Form.Item>
 
-                {(type === ArticleType.REPOST || type === ArticleType.TRANSLATION || type === ArticleType.QUOTE) && (
+                {(currentType === ArticleType.REPOST || currentType === ArticleType.TRANSLATION || currentType === ArticleType.QUOTE) && (
                   <>
                     <Form.Item name="originalAuthor" label="原文作者">
                       <Input placeholder="请输入原文作者" />
@@ -616,7 +636,7 @@ const ArticleEdit: React.FC = () => {
       {/* 冲突解决对话框 */}
       <ConflictResolutionModal
         visible={showConflictModal}
-        localContent={form.getFieldValue('content') || ''}
+        localContent={currentContent}
         serverContent={saveState.conflictData?.serverContent || ''}
         serverUpdateTime={saveState.conflictData?.serverUpdateTime || ''}
         onUseServer={handleUseServerVersion}
@@ -629,7 +649,7 @@ const ArticleEdit: React.FC = () => {
         visible={showCoverGenerator}
         onCancel={() => setShowCoverGenerator(false)}
         onConfirm={handleCoverGenerated}
-        initialText={title || ''}
+        initialText={currentTitle}
       />
     </div>
   )
