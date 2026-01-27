@@ -3,6 +3,7 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth'
 import { useTabsStore } from '@/store/tabs'
+import { useLockscreenStore } from '@/store/lockscreen'
 import { useState } from 'react'
 import ForgotPasswordModal from '@/components/common/ForgotPasswordModal'
 
@@ -24,6 +25,9 @@ const Login: React.FC = () => {
     try {
       await login(values.username, values.password)
       message.success('登录成功')
+      
+      // 登录成功后，如果有锁屏状态，则重置
+      useLockscreenStore.getState().resetLock()
       
       // 检查是否有缓存的标签页
       if (cachedTabs.length > 0) {

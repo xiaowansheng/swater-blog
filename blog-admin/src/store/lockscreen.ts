@@ -6,6 +6,7 @@ interface LockscreenState {
   lockScreen: () => void
   unlockScreen: (password: string) => boolean
   getCorrectPassword: () => string
+  resetLock: () => void
 }
 
 export const useLockscreenStore = create<LockscreenState>()(
@@ -28,6 +29,10 @@ export const useLockscreenStore = create<LockscreenState>()(
 
       getCorrectPassword: () => {
         return String(new Date().getFullYear())
+      },
+
+      resetLock: () => {
+        set({ isLocked: false })
       },
     }),
     {
