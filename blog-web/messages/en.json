@@ -143,7 +143,8 @@
     "effects": "Effects",
     "effectOff": "Off",
     "effectLight": "Light",
-    "effectFull": "Full"
+    "effectFull": "Full",
+    "language": "Language"
   },
   "guestbook": {
     "title": "Guestbook",

@@ -111,23 +111,23 @@ export default function MobileMenu({ open, onClose, navItems, onOpenSearch }: Mo
                         </span>
                       </button>
 
-                      {/* 语言切换 */}
-                      <div className="flex-1 flex gap-2">
-                        {locales.map((loc) => (
-                          <button
-                            key={loc.code}
-                            onClick={() => handleLanguageChange(loc.code)}
-                            className={`flex-1 min-h-[50px] flex flex-col items-center justify-center gap-0.5 px-2 rounded-lg transition-all text-xs font-medium ${
-                              locale === loc.code
-                                ? 'bg-gradient-to-r from-primary to-accent text-white shadow-md shadow-primary/20 border border-primary/30'
-                                : 'bg-secondary/50 text-foreground/60 hover:bg-secondary hover:text-foreground/80 border border-border/50'
-                            }`}
-                          >
-                            <span className="text-sm">{loc.icon}</span>
-                            <span className="text-[10px] font-semibold leading-tight">{loc.name}</span>
-                          </button>
-                        ))}
-                      </div>
+                      {/* 语言切换 - 单按钮 */}
+                      <button
+                        onClick={() => {
+                          const currentLocaleIndex = locales.findIndex(l => l.code === locale);
+                          const nextLocaleIndex = (currentLocaleIndex + 1) % locales.length;
+                          handleLanguageChange(locales[nextLocaleIndex].code);
+                        }}
+                        className="flex-1 min-h-[50px] flex flex-col items-center justify-center gap-0.5 px-3 rounded-xl bg-gradient-to-br from-primary/5 to-accent/5 hover:from-primary/10 hover:to-accent/10 active:from-primary/15 active:to-accent/15 transition-all border border-primary/10 hover:border-primary/20 text-xs font-medium text-foreground/80"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-base">{locales.find(l => l.code === locale)?.icon}</span>
+                          <span className="text-[10px] text-muted-foreground">{t('language')}</span>
+                        </div>
+                        <span className="text-[10px] font-semibold text-primary">
+                          {locales.find(l => l.code === locale)?.name}
+                        </span>
+                      </button>
                     </div>
 
                     {/* 第二行：搜索按钮 */}
