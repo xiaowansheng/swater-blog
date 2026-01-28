@@ -4,10 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSimpleRouteLoading } from '@/lib/hooks/useSimpleRouteLoading';
 import { useTranslations } from 'next-intl';
+import { useTheme } from '@/lib/utils/theme';
 
 export default function RouteLoading() {
   const t = useTranslations('common');
   const { isLoading } = useSimpleRouteLoading();
+  const { theme } = useTheme();
   const [currentMascot, setCurrentMascot] = useState(0);
   const [sparkles, setSparkles] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([]);
 
@@ -20,6 +22,39 @@ export default function RouteLoading() {
     t('pageLoadingText4'),
     t('pageLoadingText5')
   ];
+
+  // 根据主题获取背景颜色类名
+  const getBackgroundClass = () => {
+    if (theme === 'dark') {
+      return 'from-gray-900/95 via-slate-800/95 to-gray-900/95';
+    }
+    return 'from-pink-50/95 via-purple-50/95 to-blue-50/95';
+  };
+
+  const getBackgroundGlowClass = (index: number) => {
+    if (theme === 'dark') {
+      return index === 0
+        ? 'from-purple-600/20 to-blue-600/20'
+        : 'from-blue-600/20 to-cyan-600/20';
+    }
+    return index === 0
+      ? 'from-pink-300/20 to-purple-300/20'
+      : 'from-blue-300/20 to-cyan-300/20';
+  };
+
+  const getMascotBgClass = () => {
+    if (theme === 'dark') {
+      return 'from-gray-700/80 via-slate-600/80 to-gray-700/80 border-gray-500/50 shadow-purple-500/30';
+    }
+    return 'from-pink-200/80 via-purple-200/80 to-blue-200/80 border-white/50 shadow-pink-300/30';
+  };
+
+  const getCircleBorderClass = (index: number) => {
+    if (theme === 'dark') {
+      return index === 0 ? 'border-pink-500/40' : 'border-purple-500/30';
+    }
+    return index === 0 ? 'border-pink-300/40' : 'border-purple-300/30';
+  };
 
   useEffect(() => {
     if (isLoading) {
@@ -49,13 +84,13 @@ export default function RouteLoading() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[9998] flex items-center justify-center bg-gradient-to-br from-pink-50/95 via-purple-50/95 to-blue-50/95 backdrop-blur-md"
+          className={`fixed inset-0 z-[9998] flex items-center justify-center bg-gradient-to-br ${getBackgroundClass()} backdrop-blur-md`}
         >
           {/* 背景装饰 - 更加分散和柔和 */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {/* 渐变光晕 - 更大更柔和 */}
             <motion.div
-              className="absolute top-1/6 left-1/6 w-96 h-96 bg-gradient-to-r from-pink-300/20 to-purple-300/20 rounded-full blur-3xl"
+              className={`absolute top-1/6 left-1/6 w-96 h-96 bg-gradient-to-r ${getBackgroundGlowClass(0)} rounded-full blur-3xl`}
               animate={{
                 scale: [1, 1.3, 1],
                 rotate: [0, 180, 360],
@@ -67,7 +102,7 @@ export default function RouteLoading() {
               }}
             />
             <motion.div
-              className="absolute bottom-1/6 right-1/6 w-96 h-96 bg-gradient-to-r from-blue-300/20 to-cyan-300/20 rounded-full blur-3xl"
+              className={`absolute bottom-1/6 right-1/6 w-96 h-96 bg-gradient-to-r ${getBackgroundGlowClass(1)} rounded-full blur-3xl`}
               animate={{
                 scale: [1.3, 1, 1.3],
                 rotate: [360, 180, 0],
@@ -145,10 +180,15 @@ export default function RouteLoading() {
               }}
             >
               <motion.div
-                className="w-28 h-28 rounded-full bg-gradient-to-br from-pink-200/80 via-purple-200/80 to-blue-200/80 backdrop-blur-sm border-3 border-white/50 flex items-center justify-center shadow-2xl shadow-pink-300/30"
+                className={`w-28 h-28 rounded-full bg-gradient-to-br backdrop-blur-sm border-3 flex items-center justify-center shadow-2xl ${getMascotBgClass()}`}
                 whileHover={{ scale: 1.1 }}
                 animate={{
-                  boxShadow: [
+                  boxShadow: theme === 'dark' ? [
+                    '0 25px 50px rgba(236, 72, 153, 0.4)',
+                    '0 25px 50px rgba(147, 51, 234, 0.4)',
+                    '0 25px 50px rgba(59, 130, 246, 0.4)',
+                    '0 25px 50px rgba(236, 72, 153, 0.4)',
+                  ] : [
                     '0 25px 50px rgba(236, 72, 153, 0.25)',
                     '0 25px 50px rgba(147, 51, 234, 0.25)',
                     '0 25px 50px rgba(59, 130, 246, 0.25)',
@@ -198,7 +238,7 @@ export default function RouteLoading() {
 
             {/* 旋转的魔法圈 - 增大间距和透明度 */}
             <motion.div
-              className="absolute w-40 h-40 border-2 border-dashed border-pink-300/40 rounded-full"
+              className={`absolute w-40 h-40 border-2 border-dashed rounded-full ${getCircleBorderClass(0)}`}
               animate={{ rotate: 360 }}
               transition={{
                 duration: 6,
@@ -207,7 +247,7 @@ export default function RouteLoading() {
               }}
             />
             <motion.div
-              className="absolute w-52 h-52 border-2 border-dashed border-purple-300/30 rounded-full"
+              className={`absolute w-52 h-52 border-2 border-dashed rounded-full ${getCircleBorderClass(1)}`}
               animate={{ rotate: -360 }}
               transition={{
                 duration: 8,
@@ -231,7 +271,7 @@ export default function RouteLoading() {
               >
                 {loadingTexts[currentMascot]}
               </motion.p>
-              <p className="text-sm text-gray-500 mt-3">
+              <p className={`text-sm mt-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                 {t('preparingContent')}
               </p>
             </motion.div>

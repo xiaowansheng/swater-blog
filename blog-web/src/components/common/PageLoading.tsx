@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+import { useTheme } from '@/lib/utils/theme';
 
 interface PageLoadingProps {
   onComplete?: () => void;
@@ -32,6 +33,7 @@ export default function PageLoading({
   maxDuration = 3000
 }: PageLoadingProps) {
   const t = useTranslations('common');
+  const { theme } = useTheme();
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentScene, setCurrentScene] = useState(0);
@@ -39,44 +41,89 @@ export default function PageLoading({
   const [stars, setStars] = useState<Star[]>([]);
   const [mounted, setMounted] = useState(false);
 
-  // 首屏加载的故事场景
-  const loadingScenes = [
-    {
-      mascot: '(◕‿◕)',
-      text: t('loadingScene1Welcome'),
-      subtext: t('loadingScene1Subtitle'),
-      color: 'from-pink-400 via-rose-400 to-pink-500',
-      bgColor: 'from-pink-100/80 via-rose-100/80 to-pink-200/80'
-    },
-    {
-      mascot: '(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧',
-      text: t('loadingScene2Summon'),
-      subtext: t('loadingScene2Subtitle'),
-      color: 'from-purple-400 via-violet-400 to-purple-500',
-      bgColor: 'from-purple-100/80 via-violet-100/80 to-purple-200/80'
-    },
-    {
-      mascot: '(*^▽^*)',
-      text: t('loadingScene3Energy'),
-      subtext: t('loadingScene3Subtitle'),
-      color: 'from-blue-400 via-cyan-400 to-blue-500',
-      bgColor: 'from-blue-100/80 via-cyan-100/80 to-blue-200/80'
-    },
-    {
-      mascot: '(≧◡≦)',
-      text: t('loadingScene4Dream'),
-      subtext: t('loadingScene4Subtitle'),
-      color: 'from-green-400 via-emerald-400 to-green-500',
-      bgColor: 'from-green-100/80 via-emerald-100/80 to-green-200/80'
-    },
-    {
-      mascot: '(◡ ‿ ◡ ✿)',
-      text: t('loadingScene5Ready'),
-      subtext: t('loadingScene5Subtitle'),
-      color: 'from-yellow-400 via-orange-400 to-yellow-500',
-      bgColor: 'from-yellow-100/80 via-orange-100/80 to-yellow-200/80'
-    },
-  ];
+  // 根据主题定义场景配置
+  const getLoadingScenes = (isDark: boolean) => {
+    if (isDark) {
+      return [
+        {
+          mascot: '(◕‿◕)',
+          text: t('loadingScene1Welcome'),
+          subtext: t('loadingScene1Subtitle'),
+          color: 'from-pink-500 via-rose-500 to-pink-600',
+          bgColor: 'from-gray-900/95 via-gray-800/95 to-gray-900/95'
+        },
+        {
+          mascot: '(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧',
+          text: t('loadingScene2Summon'),
+          subtext: t('loadingScene2Subtitle'),
+          color: 'from-purple-500 via-violet-500 to-purple-600',
+          bgColor: 'from-gray-900/95 via-slate-800/95 to-gray-900/95'
+        },
+        {
+          mascot: '(*^▽^*)',
+          text: t('loadingScene3Energy'),
+          subtext: t('loadingScene3Subtitle'),
+          color: 'from-blue-500 via-cyan-500 to-blue-600',
+          bgColor: 'from-gray-900/95 via-blue-950/95 to-gray-900/95'
+        },
+        {
+          mascot: '(≧◡≦)',
+          text: t('loadingScene4Dream'),
+          subtext: t('loadingScene4Subtitle'),
+          color: 'from-green-500 via-emerald-500 to-green-600',
+          bgColor: 'from-gray-900/95 via-emerald-950/95 to-gray-900/95'
+        },
+        {
+          mascot: '(◡ ‿ ◡ ✿)',
+          text: t('loadingScene5Ready'),
+          subtext: t('loadingScene5Subtitle'),
+          color: 'from-yellow-500 via-orange-500 to-yellow-600',
+          bgColor: 'from-gray-900/95 via-amber-950/95 to-gray-900/95'
+        },
+      ];
+    }
+
+    // 亮色主题
+    return [
+      {
+        mascot: '(◕‿◕)',
+        text: t('loadingScene1Welcome'),
+        subtext: t('loadingScene1Subtitle'),
+        color: 'from-pink-400 via-rose-400 to-pink-500',
+        bgColor: 'from-pink-100/80 via-rose-100/80 to-pink-200/80'
+      },
+      {
+        mascot: '(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧',
+        text: t('loadingScene2Summon'),
+        subtext: t('loadingScene2Subtitle'),
+        color: 'from-purple-400 via-violet-400 to-purple-500',
+        bgColor: 'from-purple-100/80 via-violet-100/80 to-purple-200/80'
+      },
+      {
+        mascot: '(*^▽^*)',
+        text: t('loadingScene3Energy'),
+        subtext: t('loadingScene3Subtitle'),
+        color: 'from-blue-400 via-cyan-400 to-blue-500',
+        bgColor: 'from-blue-100/80 via-cyan-100/80 to-blue-200/80'
+      },
+      {
+        mascot: '(≧◡≦)',
+        text: t('loadingScene4Dream'),
+        subtext: t('loadingScene4Subtitle'),
+        color: 'from-green-400 via-emerald-400 to-green-500',
+        bgColor: 'from-green-100/80 via-emerald-100/80 to-green-200/80'
+      },
+      {
+        mascot: '(◡ ‿ ◡ ✿)',
+        text: t('loadingScene5Ready'),
+        subtext: t('loadingScene5Subtitle'),
+        color: 'from-yellow-400 via-orange-400 to-yellow-500',
+        bgColor: 'from-yellow-100/80 via-orange-100/80 to-yellow-200/80'
+      },
+    ];
+  };
+
+  const loadingScenes = getLoadingScenes(theme === 'dark');
 
   useEffect(() => {
     // 标记组件已挂载
@@ -139,7 +186,7 @@ export default function PageLoading({
       clearInterval(sceneInterval);
       clearTimeout(timer);
     };
-  }, [minDuration, maxDuration, onComplete, loadingScenes.length]);
+  }, [minDuration, maxDuration, onComplete, loadingScenes.length, theme]);
 
   // 在挂载前不渲染内容，避免 hydration mismatch
   if (!mounted) {
@@ -289,14 +336,22 @@ export default function PageLoading({
                 animate={{ rotate: 360 }}
                 transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
               >
-                <div className="w-full h-full border-2 border-dashed border-pink-300/40 rounded-full" />
-                <div className="absolute inset-4 border-2 border-dotted border-purple-300/40 rounded-full" />
-                <div className="absolute inset-8 border-2 border-solid border-blue-300/40 rounded-full" />
+                <div className={`w-full h-full border-2 border-dashed rounded-full ${
+                  theme === 'dark' ? 'border-pink-500/30' : 'border-pink-300/40'
+                }`} />
+                <div className={`absolute inset-4 border-2 border-dotted rounded-full ${
+                  theme === 'dark' ? 'border-purple-500/30' : 'border-purple-300/40'
+                }`} />
+                <div className={`absolute inset-8 border-2 border-solid rounded-full ${
+                  theme === 'dark' ? 'border-blue-500/30' : 'border-blue-300/40'
+                }`} />
               </motion.div>
 
               {/* 主角色 */}
               <motion.div
-                className={`w-40 h-40 rounded-full bg-gradient-to-br ${currentSceneData.color} backdrop-blur-sm border-4 border-white/70 flex items-center justify-center shadow-2xl relative z-10`}
+                className={`w-40 h-40 rounded-full bg-gradient-to-br ${currentSceneData.color} backdrop-blur-sm border-4 flex items-center justify-center shadow-2xl relative z-10 ${
+                  theme === 'dark' ? 'border-gray-600/70' : 'border-white/70'
+                }`}
                 animate={{
                   boxShadow: [
                     '0 30px 60px rgba(236, 72, 153, 0.4)',
@@ -375,7 +430,7 @@ export default function PageLoading({
               </motion.h1>
               <motion.p
                 key={`${currentScene}-sub`}
-                className="text-lg text-gray-600 font-medium"
+                className={`text-lg font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{
@@ -392,7 +447,11 @@ export default function PageLoading({
             {/* 进度条区域 */}
             <div className="w-full max-w-sm space-y-4">
               {/* 主进度条 */}
-              <div className="h-4 bg-white/30 rounded-full overflow-hidden backdrop-blur-sm border-2 border-white/40 shadow-lg">
+              <div className={`h-4 rounded-full overflow-hidden backdrop-blur-sm border-2 shadow-lg ${
+                theme === 'dark'
+                  ? 'bg-gray-700/30 border-gray-600/40'
+                  : 'bg-white/30 border-white/40'
+              }`}>
                 <motion.div
                   className={`h-full bg-gradient-to-r ${currentSceneData.color} rounded-full relative overflow-hidden`}
                   animate={{
@@ -405,7 +464,9 @@ export default function PageLoading({
                 >
                   {/* 进度条光效 */}
                   <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent"
+                    className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent ${
+                      theme === 'dark' ? 'via-white/40' : ''
+                    }`}
                     animate={{
                       x: ['-100%', '100%'],
                     }}
@@ -420,7 +481,9 @@ export default function PageLoading({
 
               {/* 进度信息 */}
               <div className="flex justify-between items-center text-sm font-medium">
-                <span className="text-gray-600">{t('magicProgress')}</span>
+                <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
+                  {t('magicProgress')}
+                </span>
                 <motion.span
                   key={Math.floor(progress / 10)}
                   className={`bg-gradient-to-r ${currentSceneData.color} bg-clip-text text-transparent font-bold text-lg`}
