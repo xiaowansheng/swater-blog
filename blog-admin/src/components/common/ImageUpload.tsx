@@ -64,8 +64,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     try {
       const res = await uploadFile(file as File);
       onSuccess(res);
-      // 使用 getFullUrl 拼接完整路径，优先使用 url 字段，其次使用 storagePath
-      const path = getFullUrl(res.url || res.storagePath);
+      // 直接使用后端返回的相对路径，不要在这里转换为完整URL
+      // 这样数据库中存储的是相对路径，前端展示时再根据环境转换
+      const path = res.url || res.storagePath;
       onChange?.(path);
       message.success('上传成功');
     } catch (error) {
@@ -143,7 +144,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               {/* 图片预览 - 始终保持 cover 样式占满空间 */}
               <div className="overflow-hidden absolute inset-0 w-full h-full">
                 <Image 
-                  src={value} 
+                  src={getFullUrl(value)} 
                   alt="preview" 
                   className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" 
                   style={{ width: '100%', height: '100%', display: 'block' }}
@@ -220,7 +221,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         centered
         width={800}
       >
-        <Image alt="preview" style={{ width: '100%' }} src={value} previewEnabled={false} />
+        <Image alt="preview" style={{ width: '100%' }} src={getFullUrl(value)} previewEnabled={false} />
       </Modal>
 
       <style dangerouslySetInnerHTML={{ __html: `
