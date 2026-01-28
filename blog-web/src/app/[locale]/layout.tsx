@@ -17,6 +17,7 @@ import TopProgressBar from '@/components/common/TopProgressBar';
 import FloatingToolbar from '@/components/widgets/FloatingToolbar';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import CursorFollower from '@/components/ui/CursorFollower';
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteInfo();
@@ -83,6 +84,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <SiteConfigProvider initialConfig={config}>
             <DecorationProvider>
+              <CursorFollower />
               <TopProgressBar />
               <PageLoadingWrapper>
                 <div className="flex min-h-screen flex-col relative">

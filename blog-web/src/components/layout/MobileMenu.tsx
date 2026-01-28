@@ -130,6 +130,8 @@ export default function MobileMenu({ open, onClose, navItems, onOpenSearch }: Mo
                       </button>
                     </div>
 
+
+
                     {/* 第二行：搜索按钮 */}
                     <button
                       onClick={() => {

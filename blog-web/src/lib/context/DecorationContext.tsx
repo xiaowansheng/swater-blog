@@ -3,23 +3,51 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type DecorationLevel = 'none' | 'light' | 'full';
+export type WeatherType = 'sakura' | 'rain' | 'thunder' | 'snow' | 'leaves';
 
 interface DecorationContextType {
   level: DecorationLevel;
   setLevel: (level: DecorationLevel) => void;
+  weather: WeatherType;
 }
 
 const DecorationContext = createContext<DecorationContextType | undefined>(undefined);
 
 export function DecorationProvider({ children }: { children: React.ReactNode }) {
   const [level, setLevel] = useState<DecorationLevel>('full');
+  const [weather, setWeather] = useState<WeatherType>('sakura');
 
-  // Load from localStorage on mount
+  // Load level from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('decoration-level') as DecorationLevel;
-    if (saved && ['none', 'light', 'full'].includes(saved)) {
-      setLevel(saved);
+    const savedLevel = localStorage.getItem('decoration-level') as DecorationLevel;
+    if (savedLevel && ['none', 'light', 'full'].includes(savedLevel)) {
+      setLevel(savedLevel);
     }
+  }, []);
+
+  // Determine weather based on date
+  useEffect(() => {
+    const month = new Date().getMonth(); // 0-11
+    let newWeather: WeatherType = 'sakura';
+
+    // Spring: March (2), April (3)
+    if (month >= 2 && month <= 3) {
+      newWeather = 'sakura';
+    } 
+    // Summer: May (4) - August (7)
+    else if (month >= 4 && month <= 7) {
+      newWeather = 'rain';
+    } 
+    // Autumn: September (8) - November (10)
+    else if (month >= 8 && month <= 10) {
+      newWeather = 'leaves';
+    } 
+    // Winter: December (11), January (0), February (1)
+    else {
+      newWeather = 'snow';
+    }
+    
+    setWeather(newWeather);
   }, []);
 
   const handleSetLevel = (newLevel: DecorationLevel) => {
@@ -28,7 +56,11 @@ export function DecorationProvider({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <DecorationContext.Provider value={{ level, setLevel: handleSetLevel }}>
+    <DecorationContext.Provider value={{ 
+      level, 
+      setLevel: handleSetLevel,
+      weather
+    }}>
       {children}
     </DecorationContext.Provider>
   );

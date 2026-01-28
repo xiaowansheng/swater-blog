@@ -232,6 +232,8 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
             <span className="absolute inset-0 bg-primary/5 opacity-0 transition-opacity group-hover:opacity-100"></span>
           </button>
 
+
+
           {mounted && (
           <button
             onClick={toggleTheme}

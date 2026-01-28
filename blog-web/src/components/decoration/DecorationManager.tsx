@@ -6,10 +6,15 @@ import SakuraRain from '@/components/decoration/SakuraRain';
 import CornerDecoration from '@/components/decoration/CornerDecoration';
 import AnimeMusicPlayer from '@/components/decoration/AnimeMusicPlayer';
 import ClickEffects from '@/components/decoration/ClickEffects';
+// Weather Components
+import Rain from '@/components/decoration/weather/Rain';
+import Snow from '@/components/decoration/weather/Snow';
+import Thunder from '@/components/decoration/weather/Thunder';
+import Leaves from '@/components/decoration/weather/Leaves';
 // import Mascot from '@/components/decoration/Mascot';
 
 export default function DecorationManager() {
-  const { level } = useDecoration();
+  const { level, weather } = useDecoration();
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -20,6 +25,17 @@ export default function DecorationManager() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  const renderWeather = () => {
+    switch (weather) {
+        case 'rain': return <Rain />;
+        case 'thunder': return <Thunder />;
+        case 'snow': return <Snow />;
+        case 'leaves': return <Leaves />;
+        case 'sakura': 
+        default: return <SakuraRain />;
+    }
+  };
 
   return (
     <>
@@ -32,7 +48,7 @@ export default function DecorationManager() {
       {level !== 'none' && !isMobile && (
         <>
           <CornerDecoration />
-          {level === 'full' && <SakuraRain />}
+          {level === 'full' && renderWeather()}
           {/* <Mascot /> */}
         </>
       )}
