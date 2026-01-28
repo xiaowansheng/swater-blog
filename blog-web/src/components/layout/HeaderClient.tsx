@@ -120,21 +120,21 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
           <span className="tracking-tight leading-tight">{siteName}</span>
         </Link>
 
-        <nav className="hidden gap-2 items-center md:flex">
+        <nav className="hidden gap-1.5 lg:gap-2 items-center md:flex">
           {navItems.map((item) => {
             const isActive = pathname === item.href || pathname === `/${pathname.split('/')[1]}${item.href}`;
             return (
-              <Link 
+              <Link
                 key={item.href}
                 href={item.href}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 relative group ${
-                  scrolled 
+                className={`px-3 lg:px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 relative group whitespace-nowrap ${
+                  scrolled
                     ? isActive ? 'text-primary bg-primary/10' : 'text-foreground/70 hover:text-primary hover:bg-primary/5'
                     : isActive ? 'text-white bg-white/20' : 'text-white/80 hover:text-white hover:bg-white/10'
                 }`}
               >
                 <span className="relative z-10">{item.label}</span>
-                
+
                 {/* Little Stars Hover Effect */}
                 <span className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                   <span className="absolute animate-twinkle text-[10px]">✨</span>
@@ -144,7 +144,7 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
                 </span>
 
                 {isActive && (
-                  <motion.span 
+                  <motion.span
                     layoutId="nav-active"
                     className="absolute inset-0 rounded-full border-2 border-primary/20 pointer-events-none"
                   />
@@ -154,24 +154,24 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
           })}
         </nav>
 
-        <div className="flex gap-1.5 sm:gap-2 items-center">
-          {/* Search Button - 隐藏在移动端，在菜单内显示 */}
+        <div className="flex gap-1 sm:gap-1.5 items-center">
+          {/* Search Button - 中等屏幕及以上显示 */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className={`hidden md:block min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
+            className={`hidden md:block min-h-[40px] lg:min-h-[44px] min-w-[40px] lg:min-w-[44px] p-2 lg:p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
               scrolled
                 ? 'hover:bg-primary/10'
                 : 'hover:bg-white/10 text-white'
             }`}
             title="搜索 (按 / 或 Ctrl+K)"
           >
-            <svg className="relative z-10 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="relative z-10 w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <span className="absolute inset-0 bg-primary/5 opacity-0 transition-opacity group-hover:opacity-100"></span>
           </button>
 
-          {/* Language Switcher - 隐藏在移动端，在菜单内显示 */}
+          {/* Language Switcher - 中等屏幕及以上显示 */}
           <div className="hidden md:block">
             <LanguageSwitcher scrolled={scrolled} />
           </div>
@@ -179,24 +179,24 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
           {/* Music Player Toggle */}
           <MusicPlayerButton scrolled={scrolled} />
 
-          {/* Decoration Level Toggle - 隐藏在移动端，在菜单内显示 */}
+          {/* Decoration Level Toggle - 大屏幕显示 */}
           <button
             onClick={() => {
               const levels: ('none' | 'light' | 'full')[] = ['none', 'light', 'full'];
               const nextIndex = (levels.indexOf(level) + 1) % levels.length;
               setLevel(levels[nextIndex]);
             }}
-            className={`hidden md:flex min-h-[44px] items-center justify-center gap-1.5 px-3 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
+            className={`hidden lg:flex min-h-[40px] lg:min-h-[44px] items-center justify-center gap-1 lg:gap-1.5 px-2 lg:px-3 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group text-xs lg:text-sm ${
               scrolled
                 ? 'hover:bg-primary/10'
                 : 'hover:bg-white/10 text-white'
             }`}
             title={`${t('effects')}: ${level === 'none' ? t('effectOff') : level === 'light' ? t('effectLight') : t('effectFull')}`}
           >
-            <span className="relative z-10 text-base">
+            <span className="relative z-10 text-base lg:text-base">
               {level === 'none' ? '🍃' : level === 'light' ? '🌸' : '✨'}
             </span>
-            <span className="relative z-10 text-xs font-medium">
+            <span className="relative z-10 font-medium hidden xl:inline">
               {level === 'none' ? t('effectOff') : level === 'light' ? t('effectLight') : t('effectFull')}
             </span>
             <span className="absolute inset-0 bg-primary/5 opacity-0 transition-opacity group-hover:opacity-100"></span>
@@ -205,27 +205,27 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
           {mounted && (
           <button
             onClick={toggleTheme}
-            className={`min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
+            className={`min-h-[40px] lg:min-h-[44px] min-w-[40px] lg:min-w-[44px] p-2 lg:p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
               scrolled
                 ? 'hover:bg-primary/10'
                 : 'hover:bg-white/10 text-white'
             }`}
             aria-label="Toggle theme"
           >
-            <span className="relative z-10 text-lg">{theme === 'dark' ? '☀️' : '🌙'}</span>
+            <span className="relative z-10 text-base lg:text-lg">{theme === 'dark' ? '☀️' : '🌙'}</span>
             <span className="absolute inset-0 bg-primary/5 opacity-0 transition-opacity group-hover:opacity-100"></span>
           </button>
           )}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`md:hidden min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 ${
+            className={`md:hidden min-h-[40px] lg:min-h-[44px] min-w-[40px] lg:min-w-[44px] p-2 lg:p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 ${
               scrolled
                 ? 'hover:bg-primary/10'
                 : 'hover:bg-white/10 text-white'
             }`}
             aria-label="Toggle menu"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
