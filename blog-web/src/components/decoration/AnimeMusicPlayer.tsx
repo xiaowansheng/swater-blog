@@ -134,6 +134,25 @@ export default function AnimeMusicPlayer() {
     }
   }, [currentTime, isDragging]);
 
+  // 禁止/恢复页面滚动
+  useEffect(() => {
+    if (isPlayerOpen || isPlaylistOpen) {
+      // 禁止滚动
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = '0px';
+    } else {
+      // 恢复滚动
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+
+    // 组件卸载时恢复滚动
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, [isPlayerOpen, isPlaylistOpen]);
+
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
