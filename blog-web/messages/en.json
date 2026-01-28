@@ -138,7 +138,12 @@
     "castingTeleportMagic": "Casting teleport magic, please wait~ ✨",
     "notFoundTitle": "Page Not Found",
     "notFoundDesc": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.",
-    "backToHome": "Back to Home"
+    "backToHome": "Back to Home",
+    "navigationMenu": "Navigation Menu",
+    "effects": "Effects",
+    "effectOff": "Off",
+    "effectLight": "Light",
+    "effectFull": "Full"
   },
   "guestbook": {
     "title": "Guestbook",

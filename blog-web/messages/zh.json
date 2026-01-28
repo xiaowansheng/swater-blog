@@ -138,7 +138,12 @@
     "castingTeleportMagic": "正在施展传送魔法，请稍候片刻~ ✨",
     "notFoundTitle": "页面未找到",
     "notFoundDesc": "您查找的页面可能已被移除、更名或暂时不可用。",
-    "backToHome": "返回首页"
+    "backToHome": "返回首页",
+    "navigationMenu": "导航菜单",
+    "effects": "特效",
+    "effectOff": "关闭",
+    "effectLight": "简约",
+    "effectFull": "全开"
   },
   "guestbook": {
     "title": "留言板",

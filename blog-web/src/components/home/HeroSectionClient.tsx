@@ -237,44 +237,44 @@ export default function HeroSectionClient({
             </div>
           </motion.div>
 
-          <motion.h1 
-            variants={itemVariants} 
-            className="relative mb-6 text-6xl font-black md:text-8xl gradient-text"
+          <motion.h1
+            variants={itemVariants}
+            className="relative mb-6 text-4xl font-black sm:text-5xl md:text-7xl lg:text-8xl gradient-text"
           >
             {siteName}
             <span className="absolute -bottom-4 left-1/2 w-32 h-1 bg-gradient-to-r rounded-full opacity-60 -translate-x-1/2 from-primary via-accent to-primary"></span>
           </motion.h1>
 
-          <motion.p variants={itemVariants} className="mb-8 text-xl leading-relaxed md:text-2xl drop-shadow-lg">
-            <span className="inline-block px-6 py-2 rounded-lg bg-white/10 dark:bg-black/30 backdrop-blur-sm border border-white/20 dark:border-white/10">
+          <motion.p variants={itemVariants} className="mb-8 text-base leading-relaxed sm:text-lg md:text-xl lg:text-2xl drop-shadow-lg">
+            <span className="inline-block px-4 sm:px-6 py-2 rounded-lg bg-white/10 dark:bg-black/30 backdrop-blur-sm border border-white/20 dark:border-white/10">
               <span className={fullCoverImage ? "text-white font-medium" : "text-transparent bg-clip-text bg-gradient-to-r from-foreground via-foreground/95 to-foreground/90 font-medium"}>
                 {siteDescription || '分享技术，记录生活'}
               </span>
             </span>
           </motion.p>
 
-          <motion.div variants={itemVariants} className="flex flex-wrap gap-4 justify-center text-sm">
-            <div className="flex gap-2.5 items-center px-5 py-2.5 rounded-full border backdrop-blur-md transition-all bg-card/70 dark:bg-card/60 border-border/60 hover:border-primary hover:bg-card/80 dark:hover:bg-card/70 hover:shadow-lg hover:shadow-primary/20 hover:scale-105 group">
-              <svg className="w-5 h-5 text-primary dark:text-primary drop-shadow-sm transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+          <motion.div variants={itemVariants} className="flex flex-wrap gap-3 sm:gap-4 justify-center text-xs sm:text-sm">
+            <div className="flex gap-2 sm:gap-2.5 items-center px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full border backdrop-blur-md transition-all bg-card/70 dark:bg-card/60 border-border/60 hover:border-primary hover:bg-card/80 dark:hover:bg-card/70 hover:shadow-lg hover:shadow-primary/20 hover:scale-105 group">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-primary dark:text-primary drop-shadow-sm transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span className="font-semibold text-foreground/90 dark:text-foreground/95 group-hover:text-foreground drop-shadow-sm">{articleCount} {t('articleCount')}</span>
             </div>
-            <div className="flex gap-2.5 items-center px-5 py-2.5 rounded-full border backdrop-blur-md transition-all bg-card/70 dark:bg-card/60 border-border/60 hover:border-primary hover:bg-card/80 dark:hover:bg-card/70 hover:shadow-lg hover:shadow-primary/20 hover:scale-105 group">
-              <svg className="w-5 h-5 text-primary dark:text-primary drop-shadow-sm transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+            <div className="flex gap-2 sm:gap-2.5 items-center px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full border backdrop-blur-md transition-all bg-card/70 dark:bg-card/60 border-border/60 hover:border-primary hover:bg-card/80 dark:hover:bg-card/70 hover:shadow-lg hover:shadow-primary/20 hover:scale-105 group">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-primary dark:text-primary drop-shadow-sm transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
               </svg>
               <span className="font-semibold text-foreground/90 dark:text-foreground/95 group-hover:text-foreground drop-shadow-sm">{tagCount} {t('tagCount')}</span>
             </div>
-            <div className="flex gap-2.5 items-center px-5 py-2.5 rounded-full border backdrop-blur-md transition-all bg-card/70 dark:bg-card/60 border-border/60 hover:border-primary hover:bg-card/80 dark:hover:bg-card/70 hover:shadow-lg hover:shadow-primary/20 hover:scale-105 group" role="status">
-              <svg className="w-5 h-5 text-primary dark:text-primary drop-shadow-sm transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5} aria-hidden="true">
+            <div className="flex gap-2 sm:gap-2.5 items-center px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full border backdrop-blur-md transition-all bg-card/70 dark:bg-card/60 border-border/60 hover:border-primary hover:bg-card/80 dark:hover:bg-card/70 hover:shadow-lg hover:shadow-primary/20 hover:scale-105 group" role="status">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-primary dark:text-primary drop-shadow-sm transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
               <span className="font-semibold text-foreground/90 dark:text-foreground/95 group-hover:text-foreground drop-shadow-sm">{categoryCount} {t('categoryCount')}</span>
             </div>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="mt-12 flex justify-center">
+          <motion.div variants={itemVariants} className="mt-8 sm:mt-12 flex justify-center">
             <div className="animate-float">
               <button
                 onClick={handleScrollToContent}
@@ -283,11 +283,11 @@ export default function HeroSectionClient({
               >
                 {/* 呼吸灯光晕效果 */}
                 <div className="absolute inset-0 rounded-full blur-xl opacity-0 transition-opacity bg-primary/30 group-hover:opacity-100"></div>
-                
-                <svg 
-                    className="relative z-10 mx-auto w-10 h-10 transition-all text-primary hover:text-primary drop-shadow-[0_0_12px_rgba(var(--primary),0.6)]" 
-                    fill="none" 
-                    stroke="currentColor" 
+
+                <svg
+                    className="relative z-10 mx-auto w-8 h-8 sm:w-10 sm:h-10 transition-all text-primary hover:text-primary drop-shadow-[0_0_12px_rgba(var(--primary),0.6)]"
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />

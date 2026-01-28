@@ -5,6 +5,7 @@ import { useTheme } from '@/lib/utils/theme';
 import { useState, useEffect } from 'react';
 import { usePathname } from '@/lib/i18n/routing';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import MobileMenu from './MobileMenu';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 import { useDecoration } from '@/lib/context/DecorationContext';
@@ -22,6 +23,7 @@ interface HeaderClientProps {
 }
 
 export default function HeaderClient({ siteName, navItems }: HeaderClientProps) {
+  const t = useTranslations('common');
   const { theme, toggleTheme, mounted } = useTheme();
   const { level, setLevel } = useDecoration();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -109,15 +111,13 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
       <div className={`absolute inset-0 transition-opacity duration-500 ${
         scrolled ? 'bg-primary/5 opacity-100' : 'opacity-0'
       }`}></div>
-      <div className="container flex relative z-10 justify-between items-center px-6 mx-auto h-16 max-w-7xl">
-        <Link href="/" className={`text-xl font-bold transition-all hover:scale-105 relative group font-title ${
+      <div className="container flex relative z-10 justify-between items-center px-4 sm:px-6 mx-auto h-16 max-w-7xl">
+        <Link href="/" className={`flex items-center gap-2 text-lg sm:text-xl font-bold transition-all hover:scale-105 relative group font-title ${
           scrolled ? 'text-foreground' : 'text-white drop-shadow-lg'
         }`}>
-          <span className="flex relative z-10 gap-2 items-center">
-            <span className={`w-2.5 h-2.5 rounded-full bg-primary ${
-              scrolled ? 'animate-pulse' : 'bg-white'}`}></span>
-            <span className="tracking-tight">{siteName}</span>
-          </span>
+          <span className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-primary flex-shrink-0 ${
+            scrolled ? 'animate-pulse' : 'bg-white'}`}></span>
+          <span className="tracking-tight leading-tight">{siteName}</span>
         </Link>
 
         <nav className="hidden gap-2 items-center md:flex">
@@ -155,10 +155,10 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
         </nav>
 
         <div className="flex gap-1.5 sm:gap-2 items-center">
-          {/* Search Button */}
+          {/* Search Button - 隐藏在移动端，在菜单内显示 */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className={`min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
+            className={`hidden md:block min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
               scrolled
                 ? 'hover:bg-primary/10'
                 : 'hover:bg-white/10 text-white'
@@ -171,27 +171,33 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
             <span className="absolute inset-0 bg-primary/5 opacity-0 transition-opacity group-hover:opacity-100"></span>
           </button>
 
-          <LanguageSwitcher scrolled={scrolled} />
+          {/* Language Switcher - 隐藏在移动端，在菜单内显示 */}
+          <div className="hidden md:block">
+            <LanguageSwitcher scrolled={scrolled} />
+          </div>
 
           {/* Music Player Toggle */}
           <MusicPlayerButton scrolled={scrolled} />
 
-          {/* Decoration Level Toggle */}
+          {/* Decoration Level Toggle - 隐藏在移动端，在菜单内显示 */}
           <button
             onClick={() => {
               const levels: ('none' | 'light' | 'full')[] = ['none', 'light', 'full'];
               const nextIndex = (levels.indexOf(level) + 1) % levels.length;
               setLevel(levels[nextIndex]);
             }}
-            className={`min-h-[44px] min-w-[44px] p-2.5 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
+            className={`hidden md:flex min-h-[44px] items-center justify-center gap-1.5 px-3 rounded-full transition-all hover:scale-110 active:scale-95 relative overflow-hidden group ${
               scrolled
                 ? 'hover:bg-primary/10'
                 : 'hover:bg-white/10 text-white'
             }`}
-            title={`装饰等级: ${level === 'none' ? '关闭' : level === 'light' ? '简约' : '全开'}`}
+            title={`${t('effects')}: ${level === 'none' ? t('effectOff') : level === 'light' ? t('effectLight') : t('effectFull')}`}
           >
-            <span className="relative z-10 text-lg">
+            <span className="relative z-10 text-base">
               {level === 'none' ? '🍃' : level === 'light' ? '🌸' : '✨'}
+            </span>
+            <span className="relative z-10 text-xs font-medium">
+              {level === 'none' ? t('effectOff') : level === 'light' ? t('effectLight') : t('effectFull')}
             </span>
             <span className="absolute inset-0 bg-primary/5 opacity-0 transition-opacity group-hover:opacity-100"></span>
           </button>
@@ -225,7 +231,12 @@ export default function HeaderClient({ siteName, navItems }: HeaderClientProps) 
           </button>
         </div>
       </div>
-      <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} navItems={navItems} />
+      <MobileMenu
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        navItems={navItems}
+        onOpenSearch={() => setSearchModalOpen(true)}
+      />
       <SearchModal isOpen={searchModalOpen} onClose={() => setSearchModalOpen(false)} />
     </header>
   );
