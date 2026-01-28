@@ -93,23 +93,25 @@ export default function GuestbookSection({
 
       {/* 留言列表区域 - 全宽瀑布流 */}
       <section className={`relative min-h-[500px] transition-opacity duration-300 ${isPendingNav ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-        <div className="flex items-center justify-between mb-8 px-2">
-            <h2 className="text-2xl font-bold flex items-center gap-3">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
-                </span>
-                {tGuestbook('messageList')}
-                 <span className="text-sm font-normal text-muted-foreground ml-2 px-3 py-1 rounded-full bg-secondary/50 border border-secondary">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 px-2">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2 sm:gap-3">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary flex-shrink-0">
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>
+                    </span>
+                    <span className="break-all">{tGuestbook('messageList')}</span>
+                </h2>
+                <span className="text-xs sm:text-sm font-normal text-muted-foreground px-2 sm:px-3 py-1 rounded-full bg-secondary/50 border border-secondary">
                     {tGuestbook('total', { count: total })}
                 </span>
-            </h2>
+            </div>
 
-            <div className="flex items-center gap-1 p-1 bg-secondary/30 rounded-xl border border-primary/5">
+            <div className="flex items-center gap-1 p-1 bg-secondary/30 rounded-xl border border-primary/5 self-start sm:self-auto">
                 <button
                     onClick={() => handleSortChange('desc')}
-                    className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
-                        sort === 'desc' 
-                        ? 'bg-white dark:bg-card text-primary shadow-sm ring-1 ring-primary/10 dark:ring-primary/20' 
+                    className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all ${
+                        sort === 'desc'
+                        ? 'bg-white dark:bg-card text-primary shadow-sm ring-1 ring-primary/10 dark:ring-primary/20'
                         : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-white/10'
                     }`}
                 >
@@ -117,9 +119,9 @@ export default function GuestbookSection({
                 </button>
                 <button
                     onClick={() => handleSortChange('asc')}
-                    className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
-                        sort === 'asc' 
-                        ? 'bg-white dark:bg-card text-primary shadow-sm ring-1 ring-primary/10 dark:ring-primary/20' 
+                    className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all ${
+                        sort === 'asc'
+                        ? 'bg-white dark:bg-card text-primary shadow-sm ring-1 ring-primary/10 dark:ring-primary/20'
                         : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-white/10'
                     }`}
                 >
