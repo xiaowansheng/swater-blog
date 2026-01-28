@@ -11,6 +11,7 @@ import Rain from '@/components/decoration/weather/Rain';
 import Snow from '@/components/decoration/weather/Snow';
 import Thunder from '@/components/decoration/weather/Thunder';
 import Leaves from '@/components/decoration/weather/Leaves';
+import CursorFollower from '@/components/ui/CursorFollower';
 // import Mascot from '@/components/decoration/Mascot';
 
 export default function DecorationManager() {
@@ -48,6 +49,7 @@ export default function DecorationManager() {
       {level !== 'none' && !isMobile && (
         <>
           <CornerDecoration />
+          <CursorFollower level={level === 'light' ? 'light' : 'full'} />
           {level === 'full' && renderWeather()}
           {/* <Mascot /> */}
         </>

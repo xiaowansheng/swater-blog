@@ -25,28 +25,27 @@ export function DecorationProvider({ children }: { children: React.ReactNode }) 
     }
   }, []);
 
-  // Determine weather based on date
+  // Determine weather based on date and probability
   useEffect(() => {
     const month = new Date().getMonth(); // 0-11
-    let newWeather: WeatherType = 'sakura';
+    const random = Math.random();
+    let newWeather: WeatherType = 'sakura'; // Default weather
 
-    // Spring: March (2), April (3)
-    if (month >= 2 && month <= 3) {
-      newWeather = 'sakura';
-    } 
     // Summer: May (4) - August (7)
-    else if (month >= 4 && month <= 7) {
-      newWeather = 'rain';
+    if (month >= 4 && month <= 7) {
+      if (random < 0.1) newWeather = 'thunder';      // 10% Thunder
+      else if (random < 0.4) newWeather = 'rain';    // 30% Rain (0.1 to 0.4)
     } 
     // Autumn: September (8) - November (10)
     else if (month >= 8 && month <= 10) {
-      newWeather = 'leaves';
+      if (random < 0.3) newWeather = 'leaves';       // 30% Leaves
     } 
     // Winter: December (11), January (0), February (1)
-    else {
-      newWeather = 'snow';
+    else if (month === 11 || month <= 1) {
+      if (random < 0.3) newWeather = 'snow';         // 30% Snow
     }
-    
+    // Spring (default Sakura) is covered by initialization
+
     setWeather(newWeather);
   }, []);
 

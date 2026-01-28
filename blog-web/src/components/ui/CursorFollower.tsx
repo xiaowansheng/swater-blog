@@ -27,7 +27,7 @@ interface Particle {
   rotationSpeed: number;
 }
 
-export default function CursorFollower() {
+export default function CursorFollower({ level = 'full' }: { level?: 'light' | 'full' }) {
   const [particles, setParticles] = useState<Particle[]>([]);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -40,10 +40,14 @@ export default function CursorFollower() {
   const GRAVITY = 0.5;
   const DRAG = 0.96; // Air resistance
 
+  // Limits based on level
+  const IS_FULL = level === 'full';
+  const MAX_PARTICLES = IS_FULL ? 100 : 40;
+  const BURST_COUNT = IS_FULL ? 30 : 10;
+
   const spawnParticles = useCallback((x: number, y: number, isBurst = false) => {
     const newParticles: Particle[] = [];
-    // Burst = Firework (approx 20-30 particles), Move = Sparkle (1 particle)
-    const count = isBurst ? 30 : 1; 
+    const count = isBurst ? BURST_COUNT : 1; 
 
     for (let i = 0; i < count; i++) {
         const id = particleIdCounter.current++;
@@ -81,8 +85,8 @@ export default function CursorFollower() {
         });
     }
 
-    setParticles(prev => [...prev.slice(-100), ...newParticles]); // Cap at 100
-  }, []);
+    setParticles(prev => [...prev.slice(-MAX_PARTICLES), ...newParticles]); // Cap at limit
+  }, [BURST_COUNT, MAX_PARTICLES]);
 
   // Game Loop for Physics
   const animate = useCallback((time: number) => {
