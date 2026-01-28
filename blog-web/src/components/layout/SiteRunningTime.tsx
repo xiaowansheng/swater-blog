@@ -22,7 +22,30 @@ export default function SiteRunningTime({ createTime }: SiteRunningTimeProps) {
     // 计算时间差的函数
     const calculateTimeDiff = () => {
       const now = new Date().getTime();
-      const created = new Date(createTime).getTime();
+      // 统一按 UTC 时间解析 createTime（后端存储时已转换为 UTC）
+      // 这样无论访问者在哪个时区，看到的运行时间都是一致的
+      let normalizedCreateTime = createTime;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(createTime)) {
+        // 纯日期格式，按 UTC 时间的 00:00:00 解析
+        normalizedCreateTime = `${createTime}T00:00:00Z`;
+      } else if (!createTime.endsWith('Z') && !createTime.includes('+') && !createTime.includes('T00:00:00Z')) {
+        // 如果已有时间部分但没有时区信息，补充 UTC 标识
+        normalizedCreateTime = createTime.replace(' ', 'T') + 'Z';
+      }
+
+      // 调试信息：输出时间解析详情（开发环境）
+      if (process.env.NODE_ENV === 'development') {
+        const createdDate = new Date(normalizedCreateTime);
+        console.group('🕐 SiteRunningTime Debug');
+        console.log('原始输入:', createTime);
+        console.log('标准化后:', normalizedCreateTime);
+        console.log('UTC时间:', createdDate.toISOString());
+        console.log('本地时间:', createdDate.toLocaleString());
+        console.log('时区偏移:', createdDate.getTimezoneOffset(), '分钟');
+        console.groupEnd();
+      }
+
+      const created = new Date(normalizedCreateTime).getTime();
       const diff = now - created;
 
       if (diff < 0) {

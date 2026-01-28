@@ -1,3 +1,48 @@
+/**
+ * 网站配置管理页面
+ *
+ * ## 时区处理方案
+ *
+ * 本页面实现了完整的时区转换机制，确保网站运行时间在全球范围内保持一致：
+ *
+ * ### 1. 用户输入（管理员）
+ * - 管理员在本地时区输入建站时间（如北京时间：2025-01-25）
+ * - 含义：本地时间 2025-01-25 00:00:00
+ *
+ * ### 2. 上传转换（本地时间 → UTC）
+ * - 函数：convertToUTC()
+ * - 转换：北京 2025-01-25 00:00:00 → UTC 2025-01-24T16:00:00.000Z
+ * - 存储：统一以 UTC ISO 格式存储到数据库
+ *
+ * ### 3. 回显转换（UTC → 本地时间）
+ * - 函数：convertFromUTC()
+ * - 转换：UTC 2025-01-24T16:00:00.000Z → 北京 2025-01-25 00:00:00
+ * - 显示：管理员看到的是本地时区的时间
+ *
+ * ### 4. 前台展示（统一 UTC 计算）
+ * - 组件：SiteRunningTime
+ * - 解析：统一按 UTC 时间计算运行时间
+ * - 效果：无论访问者身在何处，看到的运行时间一致
+ *
+ * ### 示例流程
+ * ```
+ * 北京管理员输入：2025-01-25
+ *       ↓ convertToUTC()
+ * 存储到数据库：2025-01-24T16:00:00.000Z (UTC)
+ *       ↓ convertFromUTC()
+ * 北京管理后台：2025-01-25 00:00:00 (回显)
+ *       ↓ SiteRunningTime 按UTC计算
+ * 全球用户看到：统一的运行时间 ✅
+ * ```
+ *
+ * ### 关键技术点
+ * - new Date("2025-01-25") 被解析为 UTC 时间（不是本地时间）
+ * - new Date("2025-01-25T00:00:00") 被解析为本地时间 ✅
+ * - 纯日期格式需要添加 T00:00:00 后缀才能正确解析为本地时间
+ *
+ * @author Claude Code
+ * @since 2025-01-28
+ */
 import { useState, useEffect } from "react";
 import {
   message,
@@ -24,11 +69,11 @@ import {
   ExclamationCircleOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
-import { 
+import {
   ImageUpload,
-  CoverUpload, 
-  AvatarUpload, 
-  SquareUpload 
+  CoverUpload,
+  AvatarUpload,
+  SquareUpload
 } from "@/components/common/ImageUpload";
 import * as configApi from "@/api/config";
 
@@ -90,6 +135,57 @@ const ConfigPage: React.FC = () => {
   const loadAllConfigs = async () => {
     setLoading(true);
     try {
+      /**
+       * 将 UTC 时间字符串转换为本地时间格式（用于管理后台回显）
+       *
+       * ### 转换规则
+       * - 输入：UTC ISO 格式（如 "2025-01-24T16:00:00.000Z"）
+       * - 输出：本地时间格式（如 "2025-01-25 00:00:00"）
+       *
+       * ### 示例（北京时间 UTC+8）
+       * ```
+       * "2025-01-24T16:00:00.000Z" → "2025-01-25 00:00:00"
+       * ```
+       *
+       * ### 兼容性
+       * - 支持纯日期格式（如 "2025-01-25"）
+       * - 支持本地时间格式（如 "2025-01-25 00:00:00"）
+       * - 支持标准 UTC 格式（如 "2025-01-24T16:00:00.000Z"）
+       *
+       * @param utcStr - UTC 时间字符串或本地时间字符串
+       * @returns 本地时间格式字符串 "yyyy-MM-dd HH:mm:ss"
+       */
+      const convertFromUTC = (utcStr: string): string => {
+        if (!utcStr) return utcStr;
+
+        // 如果不是 UTC 格式（不带 Z），直接返回
+        if (!utcStr.endsWith('Z') && !utcStr.includes('+')) {
+          // 尝试解析为日期
+          const date = new Date(utcStr);
+          if (!isNaN(date.getTime())) {
+            // 纯日期格式或本地时间格式，转换为 yyyy-MM-dd HH:mm:ss 格式
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+          }
+          return utcStr;
+        }
+
+        // UTC 格式，转换为本地时间
+        const date = new Date(utcStr);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      };
+
       const [
         site,
         author,
@@ -129,7 +225,12 @@ const ConfigPage: React.FC = () => {
               acc[key] = '';
             }
           } else {
-            acc[key] = value;
+            // 特殊处理 createTime：从 UTC 转换为本地时间显示
+            if (key === 'createTime' && typeof value === 'string' && value.trim()) {
+              acc[key] = convertFromUTC(value.trim());
+            } else {
+              acc[key] = value;
+            }
           }
           return acc;
         }, {} as any);
@@ -218,6 +319,35 @@ const ConfigPage: React.FC = () => {
     );
   };
 
+  // 将本地时间转换为 UTC 字符串（用于上传）
+  const convertToUTC = (localTimeStr: string): string => {
+    if (!localTimeStr) return localTimeStr;
+
+    // 如果已经是 UTC 格式（带 Z），直接返回
+    if (localTimeStr.endsWith('Z')) return localTimeStr;
+
+    // 关键修复：纯日期格式需要特殊处理
+    // new Date("2025-01-25") 会被解析为 UTC 时间，不是本地时间
+    // new Date("2025-01-25T00:00:00") 会被解析为本地时间 ✅
+    let inputToParse = localTimeStr;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(localTimeStr)) {
+      // 纯日期格式：添加时间部分 T00:00:00，使其被解析为本地时间
+      inputToParse = `${localTimeStr}T00:00:00`;
+    } else if (!localTimeStr.includes('T')) {
+      // 带空格的格式：2025-01-25 00:00:00 → 2025-01-25T00:00:00
+      inputToParse = localTimeStr.replace(' ', 'T');
+    }
+
+    // 解析为本地时间
+    const date = new Date(inputToParse);
+
+    // 检查是否是有效日期
+    if (isNaN(date.getTime())) return localTimeStr;
+
+    // 转换为 UTC ISO 字符串
+    return date.toISOString();
+  };
+
   // 保存配置
   const handleSave = async (
     type: string,
@@ -239,7 +369,12 @@ const ConfigPage: React.FC = () => {
             acc[key] = '';
           }
         } else {
-          acc[key] = value;
+          // 特殊处理 createTime：转换为 UTC 时间
+          if (key === 'createTime' && typeof value === 'string' && value.trim()) {
+            acc[key] = convertToUTC(value.trim());
+          } else {
+            acc[key] = value;
+          }
         }
         return acc;
       }, {} as any);
@@ -247,7 +382,7 @@ const ConfigPage: React.FC = () => {
       await updateFn(processedValues);
       message.success("保存成功");
       clearTabUnsaved(type); // 保存成功后清除未保存标记
-      
+
       // 更新原始值
       setOriginalValues(prev => ({
         ...prev,
