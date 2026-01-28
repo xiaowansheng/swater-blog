@@ -21,10 +21,24 @@ export default async function ArchiveListPage() {
     console.error('Failed to load cover config:', error);
   }
 
-  const [categories, tags] = await Promise.all([
-    categoryApi.getList().catch((): CategoryVO[] => []),
-    tagApi.getList().catch((): TagVO[] => []),
-  ]);
+  let categories: CategoryVO[] = [];
+  let tags: TagVO[] = [];
+  let hasCategoriesError = false;
+  let hasTagsError = false;
+
+  try {
+    categories = await categoryApi.getList();
+  } catch (error) {
+    console.error('Failed to load categories:', error);
+    hasCategoriesError = true;
+  }
+
+  try {
+    tags = await tagApi.getList();
+  } catch (error) {
+    console.error('Failed to load tags:', error);
+    hasTagsError = true;
+  }
 
   return (
     <>
@@ -81,10 +95,32 @@ export default async function ArchiveListPage() {
               </div>
             ) : (
               <Card className="p-6 sm:p-8 text-center">
-                <div className="absolute inset-0 bg-gradient-to-br via-transparent from-primary/5 to-accent/5"></div>
-                <div className="relative z-10">
-                  <p className="text-muted-foreground">{t('noCategories')}</p>
-                </div>
+                {hasCategoriesError ? (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-br via-transparent from-red-500/10 to-orange-500/10"></div>
+                    <div className="relative z-10">
+                      <div className="flex justify-center items-center mx-auto mb-4 w-12 h-12 bg-gradient-to-br rounded-xl from-red-500/20 to-orange-500/20">
+                        <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                          />
+                        </svg>
+                      </div>
+                      <p className="text-muted-foreground text-sm mb-1">{t('error')}</p>
+                      <p className="text-muted-foreground/70 text-xs">{t('apiNotConnected')}</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-br via-transparent from-primary/5 to-accent/5"></div>
+                    <div className="relative z-10">
+                      <p className="text-muted-foreground">{t('noCategories')}</p>
+                    </div>
+                  </>
+                )}
               </Card>
             )}
           </div>
@@ -138,10 +174,32 @@ export default async function ArchiveListPage() {
               </div>
             ) : (
               <Card className="p-6 sm:p-8 text-center">
-                <div className="absolute inset-0 bg-gradient-to-br via-transparent from-accent/5 to-primary/5"></div>
-                <div className="relative z-10">
-                  <p className="text-muted-foreground">{t('noTags')}</p>
-                </div>
+                {hasTagsError ? (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-br via-transparent from-red-500/10 to-orange-500/10"></div>
+                    <div className="relative z-10">
+                      <div className="flex justify-center items-center mx-auto mb-4 w-12 h-12 bg-gradient-to-br rounded-xl from-red-500/20 to-orange-500/20">
+                        <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                          />
+                        </svg>
+                      </div>
+                      <p className="text-muted-foreground text-sm mb-1">{t('error')}</p>
+                      <p className="text-muted-foreground/70 text-xs">{t('apiNotConnected')}</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-br via-transparent from-accent/5 to-primary/5"></div>
+                    <div className="relative z-10">
+                      <p className="text-muted-foreground">{t('noTags')}</p>
+                    </div>
+                  </>
+                )}
               </Card>
             )}
           </div>

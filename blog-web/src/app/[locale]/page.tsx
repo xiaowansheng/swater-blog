@@ -24,11 +24,13 @@ export default async function HomePage({
   let hotArticles: PostVO[] = [];
   let categories: CategoryVO[] = [];
   let tags: TagVO[] = [];
+  let hasArticleError = false;
 
   try {
     articleList = await articleApi.getList({ page: currentPage, size: PAGINATION_DEFAULT_SIZE });
   } catch (error) {
     console.warn('Failed to load articles (API server may not be running):', error);
+    hasArticleError = true;
   }
 
   try {
@@ -76,21 +78,38 @@ export default async function HomePage({
               </>
             ) : (
               <div className="overflow-hidden relative p-8 sm:p-12 md:p-16 text-center modern-card">
-                <div className="absolute inset-0 bg-gradient-to-br via-transparent from-primary/5 to-accent/5"></div>
-                <div className="relative z-10">
-                  <div className="flex justify-center items-center mx-auto mb-4 sm:mb-6 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br rounded-2xl from-primary/20 to-accent/20">
-                    <svg className="w-8 h-8 sm:w-10 sm:h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <h3 className="mb-3 text-xl sm:text-2xl font-semibold text-foreground/80">{t('noArticles')}</h3>
-                  <p className="text-sm sm:text-base text-muted-foreground mb-2">{t('noArticlesHint')}</p>
-                  {process.env.NODE_ENV === 'development' && (
-                    <p className="mt-4 text-xs sm:text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-4 py-2 rounded-lg inline-block">
-                      {t('apiNotConnected')}
-                    </p>
-                  )}
-                </div>
+                {hasArticleError ? (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-br via-transparent from-red-500/10 to-orange-500/10"></div>
+                    <div className="relative z-10">
+                      <div className="flex justify-center items-center mx-auto mb-4 sm:mb-6 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br rounded-2xl from-red-500/20 to-orange-500/20">
+                        <svg className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="mb-3 text-xl sm:text-2xl font-semibold text-foreground/80">{t('error')}</h3>
+                      <p className="text-sm sm:text-base text-muted-foreground">{t('apiNotConnected')}</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-br via-transparent from-primary/5 to-accent/5"></div>
+                    <div className="relative z-10">
+                      <div className="flex justify-center items-center mx-auto mb-4 sm:mb-6 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br rounded-2xl from-primary/20 to-accent/20">
+                        <svg className="w-8 h-8 sm:w-10 sm:h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <h3 className="mb-3 text-xl sm:text-2xl font-semibold text-foreground/80">{t('noArticles')}</h3>
+                      <p className="text-sm sm:text-base text-muted-foreground">{t('noArticlesHint')}</p>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
