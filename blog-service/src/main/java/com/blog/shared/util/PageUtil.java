@@ -7,8 +7,28 @@ import com.blog.shared.PageResult;
 import com.blog.shared.model.dto.BaseDTO;
 import java.util.List;
 public class PageUtil {
+    private static final long MAX_PAGE = 100;
+    private static final long MAX_SIZE = 100;
+
     public static <T> Page<T> buildPage(Long current, Long size) {
-        return new Page<>(current != null ? current : 1, size != null ? size : 10);
+        Long page = current != null ? current : 1;
+        Long pageSize = size != null ? size : 10;
+
+        // 限制最大页数和每页大小
+        if (page > MAX_PAGE) {
+            page = MAX_PAGE;
+        }
+        if (page < 1) {
+            page = 1L;
+        }
+        if (pageSize > MAX_SIZE) {
+            pageSize = MAX_SIZE;
+        }
+        if (pageSize < 1) {
+            pageSize = 10L;
+        }
+
+        return new Page<>(page, pageSize);
     }
 
     public static <T> Page<T> buildPage(BaseDTO dto) {
