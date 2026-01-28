@@ -4,8 +4,8 @@ import toast from 'react-hot-toast';
 import { getVerifyToken, VERIFY_TOKEN_HEADER } from '../auth/emailSession';
 
 const API_BASE_URL = typeof window !== 'undefined' 
-  ? process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8888'
-  : 'http://localhost:8888';
+  ? process.env.NEXT_PUBLIC_API_BASE_URL || ''
+  : '';
 
 function normalizeApiUrl(base: string, path: string) {
   const baseTrim = base.endsWith('/') ? base.slice(0, -1) : base;

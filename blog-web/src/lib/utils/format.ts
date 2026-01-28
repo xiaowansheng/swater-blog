@@ -42,7 +42,7 @@ export function getFullUrl(path: string | undefined): string {
     return path;
   }
   
-  const resourcePrefix = process.env.NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX || (process.env as any).VITE_UPLOAD_RESOURCE_PREFIX;
+  const resourcePrefix = process.env.NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX
   
   if (resourcePrefix) {
     // 如果路径已经包含了 resourcePrefix，则直接返回
