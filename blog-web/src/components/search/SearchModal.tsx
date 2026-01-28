@@ -162,7 +162,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
           {/* 搜索弹窗容器 */}
           <div
-            className="fixed left-0 right-0 top-0 bottom-0 w-screen h-screen z-[10000] flex items-start justify-center pt-[12vh] px-4"
+            className="fixed left-0 right-0 top-0 bottom-0 w-screen h-screen z-[10000] flex items-start justify-center pt-[8vh] sm:pt-[12vh] px-3 sm:px-4"
             style={{
               position: 'fixed',
               top: 0,
@@ -178,10 +178,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             >
             <div className="bg-background/95 backdrop-blur-xl border border-border/50 rounded-2xl overflow-hidden">
               {/* 搜索头部 */}
-              <div className="flex items-center gap-3 p-5 border-b border-border/50">
+              <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-5 border-b border-border/50">
                 <div className="flex-shrink-0">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
@@ -193,7 +193,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                     placeholder={t('placeholder')}
-                    className="w-full px-4 py-2.5 bg-muted/50 border border-border/50 rounded-lg text-base outline-none focus:border-primary/50 focus:bg-background transition-all placeholder:text-muted-foreground"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-muted/50 border border-border/50 rounded-lg text-sm sm:text-base outline-none focus:border-primary/50 focus:bg-background transition-all placeholder:text-muted-foreground"
                   />
                   {keyword && (
                     <button
@@ -201,10 +201,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         setKeyword('');
                         setResults([]);
                       }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md hover:bg-muted transition-colors"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 sm:p-1.5 rounded-md hover:bg-muted transition-colors"
                       title="清空"
                     >
-                      <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
@@ -212,17 +212,17 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 </div>
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-lg hover:bg-muted transition-colors"
+                  className="p-1.5 sm:p-2 rounded-lg hover:bg-muted transition-colors"
                   title="关闭 (ESC)"
                 >
-                  <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
 
               {/* 搜索类型筛选 */}
-              <div className="flex gap-2 px-5 py-3 border-b border-border/50 bg-muted/30">
+              <div className="flex gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 border-b border-border/50 bg-muted/30">
                 {[
                   { value: 'all', label: '全部', icon: '🔍' },
                   { value: 'post', label: '文章', icon: '📝' },
@@ -232,37 +232,37 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   <button
                     key={type.value}
                     onClick={() => setSearchType(type.value as SearchType)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                    className={`flex items-center justify-center gap-1 sm:gap-1.5 flex-1 px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                       searchType === type.value
                         ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
                         : 'hover:bg-muted/50 text-muted-foreground'
                     }`}
                   >
-                    <span>{type.icon}</span>
+                    <span className="text-sm sm:text-base">{type.icon}</span>
                     <span>{type.label}</span>
                   </button>
                 ))}
               </div>
 
               {/* 搜索结果 */}
-              <div className="max-h-[50vh] overflow-y-auto">
+              <div className="max-h-[45vh] sm:max-h-[50vh] overflow-y-auto">
                 {keyword.length < 2 ? (
-                  <div className="py-16 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 mb-4">
-                      <svg className="w-8 h-8 text-primary/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="py-12 sm:py-16 text-center px-4">
+                    <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 mb-3 sm:mb-4">
+                      <svg className="w-7 h-7 sm:w-8 sm:h-8 text-primary/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
-                    <p className="text-muted-foreground">输入至少 2 个字符开始搜索</p>
+                    <p className="text-sm sm:text-base text-muted-foreground">输入至少 2 个字符开始搜索</p>
                   </div>
                 ) : loading ? (
-                  <div className="py-16 text-center">
-                    <div className="inline-block w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <p className="text-muted-foreground">搜索中...</p>
+                  <div className="py-12 sm:py-16 text-center px-4">
+                    <div className="inline-block w-9 h-9 sm:w-10 sm:h-10 border-3 border-primary border-t-transparent rounded-full animate-spin mb-3 sm:mb-4"></div>
+                    <p className="text-sm sm:text-base text-muted-foreground">搜索中...</p>
                   </div>
                 ) : results.length > 0 ? (
                   <div className="py-2">
-                    <div className="px-5 py-2 text-xs text-muted-foreground border-b border-border/30">
+                    <div className="px-4 sm:px-5 py-2 text-xs text-muted-foreground border-b border-border/30">
                       找到 {results.length} 条结果
                     </div>
                     {results.map((result, index) => {
@@ -274,38 +274,23 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                           return `/moment/${result.articleKey || result.id}`;
                         } else if (result.type === 'comment') {
                           // 对于评论，后端已经在articleKey字段中返回了目标文章/说说的key
-                          console.log('=== 评论详细信息 ===');
-                          console.log('完整数据:', JSON.stringify(result, null, 2));
-                          console.log('targetType:', result.targetType);
-                          console.log('targetType类型:', typeof result.targetType);
-                          console.log('articleKey:', result.articleKey);
-                          console.log('targetId:', result.targetId);
-
                           if (!result.targetType) {
-                            console.log('❌ targetType 为空或未定义');
                             return '#';
                           }
 
                           const targetTypeLower = result.targetType.toLowerCase();
-                          console.log('targetType转小写:', targetTypeLower);
 
                           if (targetTypeLower.includes('article') || targetTypeLower.includes('post')) {
-                            const url = `/post/${result.articleKey || result.targetId}`;
-                            console.log('✅ 文章URL:', url);
-                            return url;
+                            return `/post/${result.articleKey || result.targetId}`;
                           } else if (targetTypeLower.includes('moment') || targetTypeLower.includes('talk')) {
-                            const url = `/moment/${result.articleKey || result.targetId}`;
-                            console.log('✅ 说说URL:', url);
-                            return url;
+                            return `/moment/${result.articleKey || result.targetId}`;
                           }
-                          console.log('❌ 评论类型不匹配，返回#');
                           return '#';
                         }
                         return '#';
                       };
 
                       const url = getUrl(result);
-                      console.log('最终URL:', url, '类型:', result.type);
 
                       return (
                         <motion.a
@@ -319,22 +304,22 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                             setKeyword('');
                             setResults([]);
                           }}
-                          className={`flex gap-3 items-start p-4 mx-3 my-1.5 rounded-xl transition-all duration-200 ${
+                          className={`flex gap-2 sm:gap-3 items-start p-3 sm:p-4 mx-2 sm:mx-3 my-1 sm:my-1.5 rounded-xl transition-all duration-200 ${
                             index === selectedIndex
                               ? 'bg-accent/80 shadow-md'
                               : 'hover:bg-accent/40'
                           }`}
                         >
-                          <div className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-semibold border ${getTypeColor(result.type)}`}>
+                          <div className={`flex-shrink-0 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[10px] sm:text-xs font-semibold border ${getTypeColor(result.type)}`}>
                             {getTypeLabel(result.type)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground mb-1.5 truncate text-sm">{result.title || '无标题'}</h3>
-                            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                            <h3 className="font-semibold text-foreground mb-1 sm:mb-1.5 truncate text-xs sm:text-sm">{result.title || '无标题'}</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                               {result.content || result.excerpt}
                             </p>
                           </div>
-                          <div className="flex-shrink-0">
+                          <div className="flex-shrink-0 hidden sm:block">
                             <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
@@ -350,27 +335,27 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                           setKeyword('');
                           setResults([]);
                         }}
-                        className="block mx-3 my-2 p-3 text-center text-sm font-medium text-primary hover:underline rounded-xl hover:bg-accent/40 transition-colors"
+                        className="block mx-2 sm:mx-3 my-2 p-2.5 sm:p-3 text-center text-xs sm:text-sm font-medium text-primary hover:underline rounded-xl hover:bg-accent/40 transition-colors"
                       >
                         查看全部结果 →
                       </a>
                     )}
                   </div>
                 ) : (
-                  <div className="py-16 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-muted/50 mb-4">
-                      <svg className="w-8 h-8 text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="py-12 sm:py-16 text-center px-4">
+                    <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-muted/50 mb-3 sm:mb-4">
+                      <svg className="w-7 h-7 sm:w-8 sm:h-8 text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
-                    <p className="text-muted-foreground font-medium">未找到相关结果</p>
-                    <p className="text-sm text-muted-foreground/70 mt-1">试试其他关键词</p>
+                    <p className="text-sm sm:text-base text-muted-foreground font-medium">未找到相关结果</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground/70 mt-1">试试其他关键词</p>
                   </div>
                 )}
               </div>
 
-              {/* 底部提示 */}
-              <div className="flex items-center justify-between px-5 py-3 border-t border-border/50 bg-muted/20">
+              {/* 底部提示 - 仅在桌面端显示键盘快捷键 */}
+              <div className="hidden sm:flex items-center justify-between px-5 py-3 border-t border-border/50 bg-muted/20">
                 <div className="flex gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1.5">
                     <kbd className="px-2 py-1 rounded-md bg-background border border-border font-sans">↑↓</kbd>
