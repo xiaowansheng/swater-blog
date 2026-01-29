@@ -5,6 +5,7 @@ import { articleApi } from '@/lib/api/article'
 import type { PostVO } from '@/types'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { stripMarkdown } from '@/lib/utils/format'
 
 interface MonthGroup {
   year: number
@@ -133,9 +134,8 @@ export default function ArchiveTimeline() {
     return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
   }
 
-  const stripHtml = (html: string) => {
-    return html.replace(/<[^>]*>/g, '').substring(0, 150)
-  }
+  // 去除 Markdown 和 HTML 标签的工具函数
+
 
   const totalPosts = allArticles.length
   const totalYears = groupedData.length
@@ -157,184 +157,155 @@ export default function ArchiveTimeline() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* 统计卡片 */}
-      {/* 统计卡片已注释
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="group relative bg-card border border-border rounded-xl p-6 text-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent"></div>
-          <div className="absolute top-2 right-2 w-8 h-8 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-lg"></div>
-          <div className="relative z-10">
-            <div className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">{totalYears}</div>
-            <div className="text-muted text-sm">{t('archiveYears')}</div>
-          </div>
-        </div>
-        <div className="group relative bg-card border border-border rounded-xl p-6 text-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.02] via-transparent to-transparent"></div>
-          <div className="absolute bottom-2 left-2 w-8 h-8 bg-gradient-to-tr from-accent/10 to-primary/10 rounded-full blur-lg"></div>
-          <div className="relative z-10">
-            <div className="text-3xl font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">{totalPosts}</div>
-            <div className="text-muted text-sm">{t('loadedArticles')}</div>
-          </div>
-        </div>
-        <div className="group relative bg-card border border-border rounded-xl p-6 text-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-accent/[0.02]"></div>
-          <div className="absolute top-2 left-2 w-8 h-8 bg-gradient-to-br from-primary/10 to-accent/10 rounded-full blur-lg"></div>
-          <div className="relative z-10">
-            <div className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] group-hover:animate-gradient mb-2 group-hover:scale-110 transition-transform duration-300">
-              {groupedData.reduce((sum, year) => sum + year.months.length, 0)}
-            </div>
-            <div className="text-muted text-sm">{t('archiveMonths')}</div>
-          </div>
-        </div>
-      </div>
-      */}
+    <div className="space-y-8 pb-12">
+      {/* 顶部统计区域 - 可选，目前注释掉 */}
 
-      {/* 时间轴 */}
-      <div className="space-y-12">
-        {groupedData.map((yearGroup) => (
-          <div key={yearGroup.year} className="relative group/year">
-            {/* 年份节点 */}
-            <div className="flex items-center gap-4 mb-8">
-              <div className="relative">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-primary/30 group-hover/year:scale-110 transition-transform duration-300 relative overflow-hidden">
-                  <span className="relative z-10">📅</span>
-                  {/* 光泽效果 */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover/year:opacity-100 transition-opacity duration-300"></div>
+      {/* 统一的时间轴容器 */}
+      <div className="relative min-h-[500px]">
+        {/* Global Continuous Rail */}
+        {/* Mobile: left-6 (24px center) | Desktop: left-9 (36px center) */}
+        {/* -ml-[1px] centers the 2px line exactly on the coordinate */}
+        <div className="absolute left-6 md:left-9 top-0 bottom-0 w-0.5 -ml-[1px] bg-gradient-to-b from-primary via-accent to-transparent"></div>
+
+        <div className="space-y-12">
+          {groupedData.map((yearGroup) => (
+            <div key={yearGroup.year} className="relative">
+              {/* 年份头部 */}
+              <div className="relative flex items-center mb-8">
+                {/* 年份节点圆环 - 居中对齐线 */}
+                <div className="absolute left-6 md:left-9 -translate-x-1/2 z-10">
+                  <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center text-white text-xl md:text-2xl font-bold shadow-lg shadow-primary/30 relative overflow-hidden group hover:scale-110 transition-transform duration-300">
+                    <span className="relative z-10">📅</span>
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                  {/* 装饰星星 */}
+                  <div className="absolute -top-1 -right-1 text-primary/40 text-xs animate-twinkle">✦</div>
                 </div>
-                {/* 时间轴连接线 */}
-                <div className="absolute top-16 left-1/2 w-0.5 h-8 bg-gradient-to-b from-primary/50 via-accent/50 to-transparent -translate-x-1/2"></div>
-                {/* 装饰星星 */}
-                <div className="absolute -top-2 -right-2 text-primary/40 text-xs animate-twinkle">✦</div>
-              </div>
-              <div>
-                <h3 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{yearGroup.year}{t('year')}</h3>
-                <p className="text-muted text-sm mt-1 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse"></span>
-                  {t('totalArticlesInYear', { count: yearGroup.months.reduce((sum, m) => sum + m.articles.length, 0) })}
-                </p>
-              </div>
-            </div>
 
-            {/* 月份列表 */}
-            <div className="ml-8 pl-8 space-y-8 border-l-2 border-gradient-to-b from-primary/30 via-accent/30 to-transparent">
-              {yearGroup.months.map((monthGroup) => (
-                <div key={`${yearGroup.year}-${monthGroup.month}`} className="relative group/month">
-                  {/* 月份节点 */}
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="absolute -left-[41px] top-0 w-5 h-5 bg-gradient-to-br from-primary to-accent rounded-full border-4 border-background shadow-md shadow-primary/30 group-hover/month:scale-125 transition-transform duration-300 relative">
-                      {/* 装饰光晕 */}
-                      <div className="absolute inset-0 rounded-full bg-primary/30 blur-md opacity-0 group-hover/month:opacity-100 transition-opacity duration-300"></div>
+                {/* 年份标题内容 - padding避开节点 */}
+                <div className="pl-16 md:pl-24 pt-1 md:pt-2">
+                  <h3 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                    {yearGroup.year}{t('year')}
+                  </h3>
+                  <p className="text-muted text-sm mt-1 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse"></span>
+                    {t('totalArticlesInYear', { count: yearGroup.months.reduce((sum, m) => sum + m.articles.length, 0) })}
+                  </p>
+                </div>
+              </div>
+
+              {/* 月份分组列表 */}
+              <div className="space-y-10">
+                {yearGroup.months.map((monthGroup) => (
+                  <div key={`${yearGroup.year}-${monthGroup.month}`} className="relative">
+                    {/* 月份头部 */}
+                    <div className="relative flex items-center mb-6">
+                      {/* 月份节点点 - 居中对齐线 */}
+                      <div className="absolute left-6 md:left-9 -translate-x-1/2 z-10">
+                        <div className="w-5 h-5 bg-background border-4 border-primary rounded-full shadow-sm shadow-primary/20 group hover:scale-125 transition-transform duration-300"></div>
+                      </div>
+
+                      {/* 月份标题 - padding避开节点 */}
+                      <div className="pl-16 md:pl-24">
+                        <h4 className="text-xl md:text-3xl font-semibold bg-gradient-to-r from-primary/90 to-accent/90 bg-clip-text text-transparent flex items-center gap-3">
+                          {monthGroup.month}{t('month')}
+                          <span className="px-2 py-0.5 bg-primary/5 text-primary rounded-full text-xs border border-primary/10 font-normal">
+                            {monthGroup.articles.length}
+                          </span>
+                        </h4>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="text-xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
-                        {monthGroup.month}{t('month')}
-                        <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-primary/10 to-accent/10 text-primary rounded-full text-sm border border-primary/20">
-                          {monthGroup.articles.length} {t('articlesUnit')}
-                        </span>
-                      </h4>
 
-                      {/* 文章列表 */}
-                      <div className="space-y-3 ml-2">
-                        {monthGroup.articles.map((article, index) => (
-                          <div
-                            key={article.id}
-                            className={`relative ${index < monthGroup.articles.length - 1 ? 'pb-4' : ''}`}
-                          >
-                            {/* 时间轴连接点 */}
-                            <div className="absolute -left-6 top-3 w-2 h-2 bg-gradient-to-r from-primary/50 to-accent/50 rounded-full group-hover/month:scale-150 transition-transform duration-300"></div>
+                    {/* 文章列表 */}
+                    <div className="space-y-5">
+                      {monthGroup.articles.map((article) => (
+                        <div key={article.id} className="relative group/article">
+                          {/* 文章节点点 - 居中对齐线 */}
+                          <div className="absolute left-6 md:left-9 top-6 -translate-x-1/2 z-10">
+                            <div className="w-2.5 h-2.5 bg-gradient-to-r from-primary/40 to-accent/40 rounded-full group-hover/article:scale-150 group-hover/article:bg-primary transition-all duration-300"></div>
+                          </div>
 
-                            {/* 文章卡片 */}
-                            <div className="group/article bg-card border border-border rounded-xl p-4 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10">
-                              {/* 悬停背景 */}
-                              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-accent/[0.02] opacity-0 group-hover/article:opacity-100 transition-opacity duration-300"></div>
-
-                              <div className="space-y-3 relative z-10">
-                                {/* 标题和日期 */}
-                                <div className="flex items-start justify-between gap-4">
+                          {/* 文章卡片 - padding避开节点 */}
+                          <div className="pl-16 md:pl-24 pr-2">
+                            <div className="bg-card border border-border/50 hover:border-primary/20 rounded-xl p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 relative overflow-hidden">
+                              {/* 悬停光泽 */}
+                              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] via-transparent to-accent/[0.01] opacity-0 group-hover/article:opacity-100 transition-opacity duration-300"></div>
+                              
+                              <div className="relative z-10 flex flex-col gap-3">
+                                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
                                   <Link
                                     href={`/post/${article.articleKey || article.id}`}
-                                    className="text-lg font-semibold hover:text-primary transition-colors flex-1 line-clamp-2 group-hover/article:translate-x-1 transition-transform duration-300"
+                                    className="text-lg font-bold text-foreground/90 hover:text-primary transition-colors line-clamp-2"
                                   >
                                     {article.title}
                                   </Link>
-                                  <span className="text-sm text-muted whitespace-nowrap flex items-center gap-1 px-2 py-1 bg-secondary/30 rounded-md">
-                                    <span>📅</span>
+                                  <span className="text-xs text-muted/60 font-mono whitespace-nowrap bg-secondary/30 px-2 py-1 rounded">
                                     {formatDate(article.publishedAt || article.createTime)}
                                   </span>
                                 </div>
 
-                                {/* 分类和标签 */}
-                                <div className="flex items-center gap-2 flex-wrap text-sm">
+                                {/* Content Preview */}
+                                {article.content && (
+                                  <p className="text-sm text-muted-foreground/80 line-clamp-2 font-normal leading-relaxed">
+                                    {stripMarkdown(article.content).substring(0, 150)}
+                                  </p>
+                                )}
+
+                                {/* Tags & Category */}
+                                <div className="flex flex-wrap items-center gap-2 text-xs">
                                   {article.categoryName && (
-                                    <Link
+                                    <Link 
                                       href={`/category/${article.categoryKey || article.categoryId}`}
-                                      className="group/tag px-2 py-1 bg-gradient-to-r from-blue-100/50 to-blue-200/50 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-700 dark:text-blue-300 rounded-md hover:from-blue-200/70 dark:hover:from-blue-800/50 transition-all duration-300 flex items-center gap-1 text-xs border border-blue-200/50 dark:border-blue-700/50 hover:scale-105"
+                                      className="px-2 py-0.5 rounded-md bg-blue-500/5 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 transition-colors"
                                     >
                                       📁 {article.categoryName}
                                     </Link>
                                   )}
-                                  {article.tags && article.tags.length > 0 && (
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      {article.tags.map((tag) => (
-                                        <Link
-                                          key={tag.id}
-                                          href={`/tag/${tag.tagKey || tag.id}`}
-                                          className="group/tag px-2 py-1 bg-gradient-to-r from-green-100/50 to-green-200/50 dark:from-green-900/30 dark:to-green-800/30 text-green-700 dark:text-green-300 rounded-md hover:from-green-200/70 dark:hover:from-green-800/50 transition-all duration-300 text-xs border border-green-200/50 dark:border-green-700/50 hover:scale-105"
-                                        >
-                                          🏷️ {tag.name}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  )}
+                                  {article.tags?.map(tag => (
+                                    <Link
+                                      key={tag.id}
+                                      href={`/tag/${tag.tagKey || tag.id}`}
+                                      className="px-2 py-0.5 rounded-md bg-green-500/5 text-green-600 dark:text-green-400 hover:bg-green-500/10 transition-colors"
+                                    >
+                                      # {tag.name}
+                                    </Link>
+                                  ))}
                                 </div>
 
-                                {/* 摘要 */}
-                                {article.content && (
-                                  <p className="text-muted text-sm line-clamp-2 px-3 py-2 bg-secondary/20 rounded-lg border border-primary/5">
-                                    {stripHtml(article.content)}
-                                  </p>
-                                )}
-
-                                {/* 统计信息 */}
-                                <div className="flex items-center gap-4 text-xs text-muted">
-                                  <span className="flex items-center gap-1 group/stat hover:text-foreground/80 transition-colors">
-                                    <span className="group-hover/stat:scale-125 transition-transform duration-300">👁️</span>
-                                    {article.viewCount || 0}
+                                {/* Stats */}
+                                <div className="flex items-center gap-4 text-xs text-muted/50 pt-1 border-t border-border/30 mt-1">
+                                  <span className="flex items-center gap-1">
+                                    👁️ {article.viewCount || 0}
                                   </span>
-                                  <span className="flex items-center gap-1 group/stat hover:text-foreground/80 transition-colors">
-                                    <span className="group-hover/stat:scale-125 transition-transform duration-300">👍</span>
-                                    {article.likeCount || 0}
+                                  <span className="flex items-center gap-1">
+                                    👍 {article.likeCount || 0}
                                   </span>
-                                  <span className="flex items-center gap-1 group/stat hover:text-foreground/80 transition-colors">
-                                    <span className="group-hover/stat:scale-125 transition-transform duration-300">💬</span>
-                                    {article.commentCount || 0}
+                                  <span className="flex items-center gap-1">
+                                    💬 {article.commentCount || 0}
                                   </span>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* 加载更多按钮 */}
       {hasMore && (
-        <div className="flex justify-center pt-8">
+        <div className="flex justify-center pt-8 pb-8">
           <button
             onClick={handleLoadMore}
             disabled={loadingMore}
-            className="group relative px-8 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-primary/30 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-2 overflow-hidden"
+            className="group relative px-8 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-full font-medium transition-all duration-300 hover:shadow-xl hover:shadow-primary/20 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {/* 按钮光泽效果 */}
-            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <span className="relative z-10 flex items-center gap-2">
               {loadingMore ? (
                 <>
