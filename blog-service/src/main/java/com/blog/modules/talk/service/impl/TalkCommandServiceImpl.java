@@ -56,6 +56,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public Long create(TalkDTO dto) {
         Talk talk = BeanUtil.copyProperties(dto, Talk.class);
         talk.setTalkKey(KeyUtil.generateKey("talk"));
