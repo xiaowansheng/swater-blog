@@ -59,7 +59,7 @@ const defaultConfig: PublicConfigVO = {
  */
 export const getServerConfig = cache(async (): Promise<PublicConfigVO> => {
   try {
-    return await fetchServer<PublicConfigVO>('/api/public/config');
+    return await fetchServer<PublicConfigVO>('/api/public/config', { next: { tags: ['site:config'] } });
   } catch (error) {
     console.warn('Failed to load site config from server:', error);
     return defaultConfig;

@@ -16,6 +16,8 @@ import com.blog.modules.system.config.model.entity.SysConfig;
 import com.blog.modules.system.config.model.vo.ConfigVO;
 import com.blog.modules.system.config.service.ConfigService;
 import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.EventUtil;
+import com.blog.infrastructure.revalidate.RevalidateClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -39,6 +41,9 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Autowired
     private FileMetaMapper fileMetaMapper;
+
+    @Autowired(required = false)
+    private RevalidateClient revalidateClient;
 
     @Override
     @Cacheable(value = "configs", key = "'list:' + (#groupName != null ? #groupName : 'all')", unless = "#result == null || #result.isEmpty()")
@@ -121,7 +126,9 @@ public class ConfigServiceImpl implements ConfigService {
                 }
             }
 
-            return convertToVOWithoutFiles(config);
+            ConfigVO result = convertToVOWithoutFiles(config);
+            triggerSiteConfigRevalidate();
+            return result;
         } catch (Exception e) {
             log.error("创建配置失败: error={}", e.getMessage());
             throw new BusinessException("配置创建失败: " + e.getMessage());
@@ -192,7 +199,9 @@ public class ConfigServiceImpl implements ConfigService {
             );
 
             SysConfig finalConfig = sysConfigMapper.selectById(existingConfig.getId());
-            return convertToVOWithoutFiles(finalConfig);
+            ConfigVO result = convertToVOWithoutFiles(finalConfig);
+            triggerSiteConfigRevalidate();
+            return result;
         } catch (Exception e) {
             log.error("更新配置失败: key={}, error={}", key, e.getMessage());
             throw new BusinessException("配置更新失败: " + e.getMessage());
@@ -218,6 +227,7 @@ public class ConfigServiceImpl implements ConfigService {
                 sysConfigMapper.updateById(config);
             }
         }
+        triggerSiteConfigRevalidate();
     }
 
     /**
@@ -239,6 +249,13 @@ public class ConfigServiceImpl implements ConfigService {
      */
     private ConfigVO convertToVOWithoutFiles(SysConfig config) {
         return BeanUtil.copyProperties(config, ConfigVO.class);
+    }
+
+    private void triggerSiteConfigRevalidate() {
+        if (revalidateClient == null) {
+            return;
+        }
+        EventUtil.publishEventAfterCommit(() -> revalidateClient.revalidateTags(java.util.List.of("site:config")));
     }
 
     /**

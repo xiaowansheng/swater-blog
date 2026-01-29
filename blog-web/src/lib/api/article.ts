@@ -18,27 +18,36 @@ export const articleApi = {
     if (params.categoryId) searchParams.append('categoryId', params.categoryId.toString());
     if (params.tagId) searchParams.append('tagId', params.tagId.toString());
     if (params.keyword) searchParams.append('keyword', params.keyword);
-    return fetchServer<PageResult<PostVO>>(`/api/public/post/list?${searchParams.toString()}`);
+    return fetchServer<PageResult<PostVO>>(
+      `/api/public/post/list?${searchParams.toString()}`,
+      { next: { tags: ['article:list'] } }
+    );
   },
 
   getById: (id: number) => {
-    return fetchServer<PostVO>(`/api/public/post/${id}`);
+    return fetchServer<PostVO>(`/api/public/post/${id}`, { next: { tags: ['article:detail'] } });
   },
 
   getBySlug: (slug: string) => {
-    return fetchServer<PostVO>(`/api/public/post/slug/${slug}`);
+    return fetchServer<PostVO>(`/api/public/post/slug/${slug}`, { next: { tags: ['article:detail'] } });
   },
 
   getByKey: (key: string) => {
-    return fetchServer<PostVO>(`/api/public/post/key/${key}`);
+    return fetchServer<PostVO>(`/api/public/post/key/${key}`, { next: { tags: ['article:detail'] } });
   },
 
   getHot: (limit: number = 10) => {
-    return fetchServer<PostVO[]>(`/api/public/post/hot?limit=${limit}`);
+    return fetchServer<PostVO[]>(
+      `/api/public/post/hot?limit=${limit}`,
+      { next: { tags: ['article:hot'] } }
+    );
   },
 
   getLatest: (limit: number = 10) => {
-    return fetchServer<PostVO[]>(`/api/public/post/latest?limit=${limit}`);
+    return fetchServer<PostVO[]>(
+      `/api/public/post/latest?limit=${limit}`,
+      { next: { tags: ['article:latest'] } }
+    );
   },
 
   client: {

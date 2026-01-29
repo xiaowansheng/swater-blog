@@ -208,6 +208,11 @@ log:
   storage:
     type: mysql
 
+# Next.js revalidate 配置（可选）
+revalidate:
+  url: ${REVALIDATE_URL:}
+  token: ${REVALIDATE_TOKEN:}
+
 # MyBatis Plus配置 - 开发环境
 mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml

@@ -97,7 +97,7 @@ public class CacheConfig {
 
         // 文章列表缓存（实际使用的缓存名）
         cacheConfigurations.put("article:list", defaultConfig
-                .entryTtl(Duration.ofMinutes(15))
+                .entryTtl(Duration.ofMinutes(5))
                 .prefixCacheNameWith("blog:article:list:"));
         
         // 热门文章缓存 - 30分钟过期
@@ -107,12 +107,12 @@ public class CacheConfig {
 
         // 热门文章缓存（实际使用的缓存名）
         cacheConfigurations.put("article:hot", defaultConfig
-                .entryTtl(Duration.ofMinutes(30))
+                .entryTtl(Duration.ofMinutes(5))
                 .prefixCacheNameWith("blog:article:hot:"));
 
         // 最新文章缓存（实际使用的缓存名）
         cacheConfigurations.put("article:latest", defaultConfig
-                .entryTtl(Duration.ofMinutes(30))
+                .entryTtl(Duration.ofMinutes(5))
                 .prefixCacheNameWith("blog:article:latest:"));
         
         // 分类缓存 - 6小时过期（变化较少）
@@ -147,12 +147,12 @@ public class CacheConfig {
 
         // 前台聚合配置缓存（实际使用的缓存名）
         cacheConfigurations.put("siteConfig", defaultConfig
-                .entryTtl(Duration.ofHours(12))
+                .entryTtl(Duration.ofMinutes(5))
                 .prefixCacheNameWith("blog:site:config:"));
 
         // 说说列表缓存（实际使用的缓存名）
         cacheConfigurations.put("talk:list", defaultConfig
-                .entryTtl(Duration.ofMinutes(15))
+                .entryTtl(Duration.ofMinutes(1))
                 .prefixCacheNameWith("blog:talk:list:"));
         
         // 统计数据缓存 - 5分钟过期（实时性要求高）

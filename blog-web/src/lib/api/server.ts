@@ -23,7 +23,16 @@ function normalizeApiUrl(base: string, path: string) {
   return baseTrim + pathTrim;
 }
 
-export async function fetchServer<T>(url: string, options?: RequestInit): Promise<T> {
+type NextFetchOptions = {
+  tags?: string[];
+  revalidate?: number;
+};
+
+export type FetchServerOptions = RequestInit & {
+  next?: NextFetchOptions;
+};
+
+export async function fetchServer<T>(url: string, options?: FetchServerOptions): Promise<T> {
   const mockData = getMockResponse<T>(url, options);
   if (mockData !== null) {
     return mockData;
