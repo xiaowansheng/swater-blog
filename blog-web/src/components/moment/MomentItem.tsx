@@ -127,7 +127,7 @@ export default function MomentItem({ moment }: MomentItemProps) {
       {/* 置顶标识 - 右上角 */}
       {!!moment.isTop && (
         <div className="absolute top-4 right-4 z-30 pointer-events-none">
-          <span className="relative inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-br from-red-500 to-orange-500 text-white rounded-lg text-xs font-bold shadow-lg shadow-red-500/30">
+          <span className="relative inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-lg text-xs font-bold shadow-lg shadow-blue-500/30">
             <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6l1 1 1-1v-6h5v-2l-2-2z" />
             </svg>
