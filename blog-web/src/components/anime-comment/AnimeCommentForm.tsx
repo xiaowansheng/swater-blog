@@ -10,6 +10,7 @@ import { authApi } from '@/lib/api/auth';
 import { clearVerifyToken, getVerifyToken, isVerifyTokenValidForEmail, saveVerifyToken } from '@/lib/auth/emailSession';
 import { useUserInfo } from './UserInfoContext';
 import { Card } from '@/components/ui/Card';
+import { compressImageIfNeeded } from '@/lib/utils/imageCompress';
 
 interface AnimeCommentFormProps {
   config: AnimeCommentConfig;
@@ -84,7 +85,7 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
     }
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const validFiles = files.filter((file) => {
       if (file.size > config.maxImageSize * 1024 * 1024) {
@@ -103,7 +104,10 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
       return;
     }
 
-    const nextImages = [...images, ...validFiles];
+    const processedFiles = await Promise.all(
+      validFiles.map((file) => compressImageIfNeeded(file))
+    );
+    const nextImages = [...images, ...processedFiles];
     setImages(nextImages);
 
     const nextPreviews = nextImages.map((file) => URL.createObjectURL(file));
