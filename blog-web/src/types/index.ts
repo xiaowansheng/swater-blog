@@ -254,6 +254,7 @@ export interface MomentVO {
   ipLocation?: string;
   device?: string;
   browser?: string;
+  isTop?: boolean;
   createTime: string;
 }
 

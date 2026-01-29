@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Image from '@/components/common/ImageWithPreview';
 import type { MomentVO } from '@/types';
 import { formatDate, getFullUrl } from '@/lib/utils/format';
@@ -56,6 +57,7 @@ const MIN_IMAGE_WIDTH = 100;
 const MAX_IMAGE_WIDTH = 300;
 
 export default function MomentItem({ moment }: MomentItemProps) {
+  const t = useTranslations('common');
   const router = useRouter();
   const { author, privacy } = useSiteConfig();
   const contentRef = useRef<HTMLDivElement>(null);
@@ -65,6 +67,7 @@ export default function MomentItem({ moment }: MomentItemProps) {
   const [displayCount, setDisplayCount] = useState(0);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
+  const pinnedText = t('pinned');
 
   useEffect(() => {
     if (contentRef.current) {
@@ -121,13 +124,25 @@ export default function MomentItem({ moment }: MomentItemProps) {
 
   return (
     <Card className="p-6 relative overflow-hidden group">
+      {/* 置顶标识 - 右上角 */}
+      {moment.isTop && (
+        <div className="absolute top-4 right-4 z-30">
+          <span className="relative inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-br from-red-500 to-orange-500 text-white rounded-lg text-xs font-bold shadow-lg shadow-red-500/30">
+            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6l1 1 1-1v-6h5v-2l-2-2z" />
+            </svg>
+            {pinnedText}
+          </span>
+        </div>
+      )}
+
       {/* 装饰性背景 - kept for specific moment style if needed, or rely on Card's default. Card implies simple background. I will keep specific decorators for consistency with previous design if they are distinct. */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-accent/[0.02] pointer-events-none"></div>
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-accent/[0.03] to-transparent rounded-bl-full pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-primary/[0.03] to-transparent rounded-tr-full pointer-events-none"></div>
 
       {/* 星星装饰 */}
-      <div className="absolute top-4 right-4 text-accent/20 text-xs animate-twinkle pointer-events-none">✦</div>
+      <div className="absolute top-4 left-4 text-accent/20 text-xs animate-twinkle pointer-events-none">✦</div>
       <div className="absolute bottom-8 right-8 text-primary/20 text-xs animate-twinkle pointer-events-none" style={{ animationDelay: '0.5s' }}>✧</div>
 
       {/* 内容区域 */}
