@@ -16,6 +16,7 @@ import com.blog.shared.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -157,80 +158,100 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     // ========== 更新配置 ==========
     
     @Override
-    @CacheEvict(value = "configs", key = "'site'")
-    @CacheEvict(value = "siteConfig", key = "'all'")
+    @Caching(evict = {
+        @CacheEvict(value = "configs", key = "'site'"),
+        @CacheEvict(value = "siteConfig", key = "'all'")
+    })
     @Transactional
     public void updateSiteConfig(SiteConfigDTO config) {
         updateConfig(KEY_SITE, config);
     }
     
     @Override
-    @CacheEvict(value = "configs", key = "'author'")
-    @CacheEvict(value = "siteConfig", key = "'all'")
+    @Caching(evict = {
+        @CacheEvict(value = "configs", key = "'author'"),
+        @CacheEvict(value = "siteConfig", key = "'all'")
+    })
     @Transactional
     public void updateAuthorConfig(AuthorConfigDTO config) {
         updateConfig(KEY_AUTHOR, config);
     }
     
     @Override
-    @CacheEvict(value = "configs", key = "'cover'")
-    @CacheEvict(value = "siteConfig", key = "'all'")
+    @Caching(evict = {
+        @CacheEvict(value = "configs", key = "'cover'"),
+        @CacheEvict(value = "siteConfig", key = "'all'")
+    })
     @Transactional
     public void updateCoverConfig(CoverConfigDTO config) {
         updateConfig(KEY_COVER, config);
     }
     
     @Override
-    @CacheEvict(value = "configs", key = "'social'")
-    @CacheEvict(value = "siteConfig", key = "'all'")
+    @Caching(evict = {
+        @CacheEvict(value = "configs", key = "'social'"),
+        @CacheEvict(value = "siteConfig", key = "'all'")
+    })
     @Transactional
     public void updateSocialConfig(SocialConfigDTO config) {
         updateConfig(KEY_SOCIAL, config);
     }
     
     @Override
-    @CacheEvict(value = "configs", key = "'privacy'")
-    @CacheEvict(value = "siteConfig", key = "'all'")
+    @Caching(evict = {
+        @CacheEvict(value = "configs", key = "'privacy'"),
+        @CacheEvict(value = "siteConfig", key = "'all'")
+    })
     @Transactional
     public void updatePrivacyConfig(PrivacyConfigDTO config) {
         updateConfig(KEY_PRIVACY, config);
     }
     
     @Override
-    @CacheEvict(value = "configs", key = "'comment'")
-    @CacheEvict(value = "siteConfig", key = "'all'")
+    @Caching(evict = {
+        @CacheEvict(value = "configs", key = "'comment'"),
+        @CacheEvict(value = "siteConfig", key = "'all'")
+    })
     @Transactional
     public void updateCommentConfig(CommentConfigDTO config) {
         updateConfig(KEY_COMMENT, config);
     }
 
     @Override
-    @CacheEvict(value = "configs", allEntries = true)
-    @CacheEvict(value = "siteConfig", key = "'all'")
+    @Caching(evict = {
+        @CacheEvict(value = "configs", allEntries = true),
+        @CacheEvict(value = "siteConfig", key = "'all'")
+    })
     @Transactional
     public void updateComponentConfig(ComponentConfigDTO config) {
         updateConfig(KEY_COMPONENT, config);
     }
 
     @Override
-    @CacheEvict(value = "configs", key = "'notify'")
-    @CacheEvict(value = "siteConfig", key = "'all'")
+    @Caching(evict = {
+        @CacheEvict(value = "configs", key = "'notify'"),
+        @CacheEvict(value = "siteConfig", key = "'all'")
+    })
     @Transactional
     public void updateNotifyConfig(NotifyConfigDTO config) {
         updateConfig(KEY_NOTIFY, config);
     }
     
     @Override
-    @CacheEvict(value = "configs", key = "'upload'")
-    @CacheEvict(value = "siteConfig", key = "'all'")
+    @Caching(evict = {
+        @CacheEvict(value = "configs", key = "'upload'"),
+        @CacheEvict(value = "siteConfig", key = "'all'")
+    })
     @Transactional
     public void updateUploadConfig(UploadConfigDTO config) {
         updateConfig(KEY_UPLOAD, config);
     }
     
     @Override
-    @CacheEvict(value = "configs", key = "'email'")
-    @CacheEvict(value = "siteConfig", key = "'all'")
+    @Caching(evict = {
+        @CacheEvict(value = "configs", key = "'email'"),
+        @CacheEvict(value = "siteConfig", key = "'all'")
+    })
     @Transactional
     public void updateEmailConfig(EmailConfigDTO config) {
         updateConfig(KEY_EMAIL, config);

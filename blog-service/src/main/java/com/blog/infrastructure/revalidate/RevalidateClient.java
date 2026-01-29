@@ -7,6 +7,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
@@ -26,8 +27,12 @@ public class RevalidateClient {
 
     public RevalidateClient(RestTemplateBuilder builder) {
         this.restTemplate = builder
-                .setConnectTimeout(Duration.ofSeconds(2))
-                .setReadTimeout(Duration.ofSeconds(4))
+                .requestFactory(() -> {
+                    SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+                    factory.setConnectTimeout(Duration.ofSeconds(2));
+                    factory.setReadTimeout(Duration.ofSeconds(4));
+                    return factory;
+                })
                 .build();
     }
 
