@@ -90,9 +90,9 @@ public class CacheConfig {
                 .entryTtl(Duration.ofHours(1))
                 .prefixCacheNameWith("blog:article:"));
         
-        // 文章列表缓存 - 15分钟过期（更新频繁）
+        // 文章列表缓存 - 5分钟过期（与前台首页刷新频率对齐）
         cacheConfigurations.put("article-list", defaultConfig
-                .entryTtl(Duration.ofMinutes(15))
+                .entryTtl(Duration.ofMinutes(5))
                 .prefixCacheNameWith("blog:article:list:"));
 
         // 文章列表缓存（实际使用的缓存名）
@@ -100,9 +100,9 @@ public class CacheConfig {
                 .entryTtl(Duration.ofMinutes(5))
                 .prefixCacheNameWith("blog:article:list:"));
         
-        // 热门文章缓存 - 30分钟过期
+        // 热门文章缓存 - 5分钟过期（与前台首页刷新频率对齐）
         cacheConfigurations.put("hot-articles", defaultConfig
-                .entryTtl(Duration.ofMinutes(30))
+                .entryTtl(Duration.ofMinutes(5))
                 .prefixCacheNameWith("blog:article:hot:"));
 
         // 热门文章缓存（实际使用的缓存名）

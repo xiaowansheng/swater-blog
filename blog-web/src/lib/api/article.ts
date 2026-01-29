@@ -25,15 +25,21 @@ export const articleApi = {
   },
 
   getById: (id: number) => {
-    return fetchServer<PostVO>(`/api/public/post/${id}`, { next: { tags: ['article:detail'] } });
+    return fetchServer<PostVO>(`/api/public/post/${id}`, {
+      next: { tags: [`article:detail:id:${id}`] },
+    });
   },
 
   getBySlug: (slug: string) => {
-    return fetchServer<PostVO>(`/api/public/post/slug/${slug}`, { next: { tags: ['article:detail'] } });
+    return fetchServer<PostVO>(`/api/public/post/slug/${slug}`, {
+      next: { tags: [`article:detail:slug:${slug}`] },
+    });
   },
 
   getByKey: (key: string) => {
-    return fetchServer<PostVO>(`/api/public/post/key/${key}`, { next: { tags: ['article:detail'] } });
+    return fetchServer<PostVO>(`/api/public/post/key/${key}`, {
+      next: { tags: [`article:detail:key:${key}`] },
+    });
   },
 
   getHot: (limit: number = 10) => {

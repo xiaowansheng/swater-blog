@@ -11,11 +11,15 @@ export const momentApi = {
   },
 
   getById: (id: number) => {
-    return fetchServer<MomentVO>(`/api/public/moment/${id}`, { next: { tags: ['moment:detail'] } });
+    return fetchServer<MomentVO>(`/api/public/moment/${id}`, {
+      next: { tags: [`moment:detail:id:${id}`] },
+    });
   },
 
   getByKey: (key: string) => {
-    return fetchServer<MomentVO>(`/api/public/moment/key/${key}`, { next: { tags: ['moment:detail'] } });
+    return fetchServer<MomentVO>(`/api/public/moment/key/${key}`, {
+      next: { tags: [`moment:detail:key:${key}`] },
+    });
   },
 
   client: {
