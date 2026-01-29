@@ -90,29 +90,29 @@ public class CacheConfig {
                 .entryTtl(Duration.ofHours(1))
                 .prefixCacheNameWith("blog:article:"));
         
-        // 文章列表缓存 - 5分钟过期（与前台首页刷新频率对齐）
+        // 文章列表缓存 - 30分钟过期（由前台tag刷新兜底）
         cacheConfigurations.put("article-list", defaultConfig
-                .entryTtl(Duration.ofMinutes(5))
+                .entryTtl(Duration.ofMinutes(30))
                 .prefixCacheNameWith("blog:article:list:"));
 
         // 文章列表缓存（实际使用的缓存名）
         cacheConfigurations.put("article:list", defaultConfig
-                .entryTtl(Duration.ofMinutes(5))
+                .entryTtl(Duration.ofMinutes(30))
                 .prefixCacheNameWith("blog:article:list:"));
         
-        // 热门文章缓存 - 5分钟过期（与前台首页刷新频率对齐）
+        // 热门文章缓存 - 30分钟过期（由前台tag刷新兜底）
         cacheConfigurations.put("hot-articles", defaultConfig
-                .entryTtl(Duration.ofMinutes(5))
+                .entryTtl(Duration.ofMinutes(30))
                 .prefixCacheNameWith("blog:article:hot:"));
 
         // 热门文章缓存（实际使用的缓存名）
         cacheConfigurations.put("article:hot", defaultConfig
-                .entryTtl(Duration.ofMinutes(5))
+                .entryTtl(Duration.ofMinutes(30))
                 .prefixCacheNameWith("blog:article:hot:"));
 
         // 最新文章缓存（实际使用的缓存名）
         cacheConfigurations.put("article:latest", defaultConfig
-                .entryTtl(Duration.ofMinutes(5))
+                .entryTtl(Duration.ofMinutes(30))
                 .prefixCacheNameWith("blog:article:latest:"));
         
         // 分类缓存 - 6小时过期（变化较少）
@@ -147,12 +147,12 @@ public class CacheConfig {
 
         // 前台聚合配置缓存（实际使用的缓存名）
         cacheConfigurations.put("siteConfig", defaultConfig
-                .entryTtl(Duration.ofMinutes(5))
+                .entryTtl(Duration.ofMinutes(30))
                 .prefixCacheNameWith("blog:site:config:"));
 
         // 说说列表缓存（实际使用的缓存名）
         cacheConfigurations.put("talk:list", defaultConfig
-                .entryTtl(Duration.ofMinutes(1))
+                .entryTtl(Duration.ofMinutes(10))
                 .prefixCacheNameWith("blog:talk:list:"));
         
         // 统计数据缓存 - 5分钟过期（实时性要求高）

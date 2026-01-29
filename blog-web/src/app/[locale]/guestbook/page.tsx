@@ -7,8 +7,6 @@ import { getCoverConfig, getComponentConfig } from '@/lib/api/config.server';
 import type { GuestbookVO } from '@/types';
 
 
-export const revalidate = 60;
-
 export const dynamic = 'force-dynamic';
 
 export default async function GuestbookPage({
