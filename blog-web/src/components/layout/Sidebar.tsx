@@ -165,7 +165,7 @@ export default async function Sidebar({ categories = [], tags = [], hotArticles 
               <Link
                 key={tag.id}
                 href={`/tag/${tag.id}`}
-                className="group relative px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-full transition-all duration-300 font-medium"
+                className="group relative px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-full transition-all duration-300 font-medium inline-flex items-center !min-h-0 !min-w-0 !h-auto !w-auto"
                 style={{ animationDelay: `${index * 0.03}s` }}
               >
                 {/* 渐变背景 */}

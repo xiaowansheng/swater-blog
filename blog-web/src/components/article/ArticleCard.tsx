@@ -125,13 +125,16 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             {/* 分类标签 - 二次元蓝色样式 */}
             {article.categoryName && article.categoryKey && (
-              <LoadingLink href={`/category/${article.categoryKey}`}>
-                <span className="group/category relative inline-flex items-center gap-1 px-2 py-1 sm:gap-1.5 sm:px-3 sm:py-1.5 bg-gradient-to-br from-blue-400/90 to-blue-500/90 text-white rounded-full text-xs font-bold overflow-hidden transition-all duration-300 hover:scale-110 hover:rotate-[-2deg] shadow-md sm:shadow-lg shadow-blue-400/30 hover:shadow-xl hover:shadow-blue-400/50">
+              <LoadingLink
+                href={`/category/${article.categoryKey}`}
+                className="inline-flex !min-h-0 !min-w-0 !h-auto !w-auto"
+              >
+                <span className="group/category relative inline-flex items-center gap-1 px-2 py-0.5 sm:gap-1.5 sm:px-3 sm:py-1.5 bg-gradient-to-br from-blue-400/90 to-blue-500/90 text-white rounded-full text-[11px] sm:text-xs font-bold overflow-hidden transition-all duration-300 sm:hover:scale-110 sm:hover:rotate-[-2deg] shadow-sm sm:shadow-lg shadow-blue-400/30 sm:hover:shadow-xl sm:hover:shadow-blue-400/50 whitespace-nowrap max-w-full min-w-0">
                   {/* 分类图标 */}
                   <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 relative z-10 drop-shadow-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                   </svg>
-                  <span className="relative z-10 drop-shadow-sm">{article.categoryName}</span>
+                  <span className="relative z-10 drop-shadow-sm truncate max-w-[10rem] sm:max-w-none">{article.categoryName}</span>
                   {/* 高光效果 */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-transparent opacity-60"></div>
                   {/* 悬停闪光 */}
@@ -139,7 +142,7 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
                   {/* 边缘高光 */}
                   <div className="absolute inset-0 rounded-full border-2 border-white/30"></div>
                   {/* 星星装饰 */}
-                  <div className="absolute -top-1 -right-1 text-yellow-300 text-[10px] opacity-0 group-hover/category:opacity-100 transition-opacity duration-300 animate-pulse">✦</div>
+                  <div className="absolute -top-1 -right-1 text-yellow-300 text-[10px] opacity-0 group-hover/category:opacity-100 transition-opacity duration-300 animate-pulse hidden sm:block">✦</div>
                 </span>
               </LoadingLink>
             )}
@@ -150,10 +153,10 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
                 <LoadingLink
                   key={tag.id}
                   href={`/tag/${tag.tagKey}`}
-                  className="group/tag relative inline-flex items-center text-xs px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-gradient-to-br from-emerald-400/80 to-green-500/80 text-white font-semibold transition-all duration-300 hover:scale-110 hover:rotate-[2deg] shadow-sm sm:shadow-md shadow-emerald-400/30 hover:shadow-lg hover:shadow-emerald-400/50 overflow-hidden"
+                  className="group/tag relative inline-flex items-center text-[11px] sm:text-xs px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-full bg-gradient-to-br from-emerald-400/80 to-green-500/80 text-white font-bold transition-all duration-300 sm:hover:scale-110 sm:hover:rotate-[2deg] shadow-sm sm:shadow-lg shadow-emerald-400/30 sm:hover:shadow-xl sm:hover:shadow-emerald-400/50 overflow-hidden whitespace-nowrap max-w-full min-w-0 min-h-0 h-auto w-auto !min-h-0 !min-w-0 !h-auto !w-auto"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <span className="relative z-10 drop-shadow-sm">#{tag.name}</span>
+                  <span className="relative z-10 drop-shadow-sm truncate max-w-[10rem] sm:max-w-none">#{tag.name}</span>
                   {/* 高光效果 */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-60"></div>
                   {/* 悬停闪光 */}
@@ -161,7 +164,7 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
                   {/* 边缘高光 */}
                   <div className="absolute inset-0 rounded-full border border-white/30"></div>
                   {/* 小星星装饰 */}
-                  <div className="absolute -top-0.5 -right-0.5 text-yellow-300 text-[8px] opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300 animate-pulse">✧</div>
+                  <div className="absolute -top-0.5 -right-0.5 text-yellow-300 text-[8px] opacity-0 group-hover/tag:opacity-100 transition-opacity duration-300 animate-pulse hidden sm:block">✧</div>
                 </LoadingLink>
               ))
             )}

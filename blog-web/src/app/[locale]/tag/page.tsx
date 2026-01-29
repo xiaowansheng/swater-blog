@@ -66,8 +66,8 @@ export default async function TagListPage() {
         description={t('tagDescription')}
         coverImage={cover.tag}
       />
-      <main className="container flex-1 px-4 py-12 mx-auto">
-        <div className="flex flex-wrap gap-3">
+      <main className="container flex-1 px-3 sm:px-4 py-8 sm:py-12 mx-auto">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           {tags.map((tag, index) => (
             <Link key={tag.id} href={`/tag/${tag.tagKey}`} className="block focus:outline-none">
               <Card
