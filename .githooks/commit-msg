@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+msg_file="$1"
+subject_line="$(head -n 1 "$msg_file")"
+
+# Allow merge/revert commits.
+if [[ "$subject_line" =~ ^(Merge|Revert)\  ]]; then
+  exit 0
+fi
+
+# <type>(<scope>): <subject>
+# type: feat|fix|docs|style|refactor|test|chore
+regex='^(feat|fix|docs|style|refactor|test|chore)\([a-zA-Z0-9_-]+\):\ .+'
+
+if [[ ! "$subject_line" =~ $regex ]]; then
+  cat <<'MSG'
+ERROR: Commit message does not follow the required format:
+  <type>(<scope>): <subject>
+
+Allowed types: feat, fix, docs, style, refactor, test, chore
+Example:
+  feat(post): add pinned posts
+MSG
+  exit 1
+fi
