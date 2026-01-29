@@ -57,3 +57,4 @@ node_modules/
 # 缓存
 .cache/
 *.cache
+dist*
