@@ -200,8 +200,8 @@ log:
 
 # Next.js revalidate 配置（可选）
 revalidate:
-  url: ${REVALIDATE_URL:}
-  token: ${REVALIDATE_TOKEN:}
+  url: ${REVALIDATE_URL:http://blog-web:3000}
+  token: ${REVALIDATE_TOKEN:change-me}
 
 # MyBatis Plus配置 - Docker环境
 mybatis-plus:

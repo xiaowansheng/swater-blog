@@ -210,8 +210,8 @@ log:
 
 # Next.js revalidate 配置（可选）
 revalidate:
-  url: ${REVALIDATE_URL:}
-  token: ${REVALIDATE_TOKEN:}
+  url: ${REVALIDATE_URL:http://127.0.0.1:3000}
+  token: ${REVALIDATE_TOKEN:change-me}
 
 # MyBatis Plus配置 - 开发环境
 mybatis-plus:
