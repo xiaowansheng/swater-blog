@@ -159,6 +159,7 @@ export default function ArchiveTimeline() {
   return (
     <div className="space-y-8">
       {/* 统计卡片 */}
+      {/* 统计卡片已注释
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="group relative bg-card border border-border rounded-xl p-6 text-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-transparent"></div>
@@ -187,6 +188,7 @@ export default function ArchiveTimeline() {
           </div>
         </div>
       </div>
+      */}
 
       {/* 时间轴 */}
       <div className="space-y-12">
