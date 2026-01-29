@@ -3,6 +3,8 @@ package com.blog.infrastructure.revalidate;
 import com.blog.modules.article.event.*;
 import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.article.model.enums.ArticleStatus;
+import com.blog.modules.friendlink.event.FriendLinkApprovedEvent;
+import com.blog.modules.friendlink.event.FriendLinkCreatedEvent;
 import com.blog.modules.talk.event.talk.*;
 import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.talk.model.enums.TalkStatus;
@@ -25,6 +27,8 @@ public class RevalidateEventListener {
     );
 
     private static final List<String> MOMENT_LIST_TAGS = List.of("moment:list");
+    private static final List<String> FRIENDLINK_TAGS = List.of("friendlink:list");
+    private static final List<String> ARCHIVE_LIST_TAGS = List.of("archive:list");
 
     @Autowired(required = false)
     private RevalidateClient revalidateClient;
@@ -81,12 +85,28 @@ public class RevalidateEventListener {
         revalidate(List.of("moment:detail:id:" + talkId));
     }
 
+    private void revalidateArchiveByArticle(Article article) {
+        if (article == null) {
+            return;
+        }
+        java.time.LocalDateTime time = article.getPublishedAt();
+        if (time == null) {
+            time = article.getCreateTime();
+        }
+        if (time == null) {
+            return;
+        }
+        String monthTag = "archive:month:" + time.getYear() + "-" + String.format("%02d", time.getMonthValue());
+        revalidate(List.of("archive:list", monthTag));
+    }
+
     @Async("eventTaskExecutor")
     @EventListener
     public void handleArticleCreated(ArticleCreatedEvent event) {
         if (event.getArticle() != null && ArticleStatus.PUBLISHED.getCode().equals(event.getArticle().getStatus())) {
             revalidate(ARTICLE_LIST_TAGS);
             revalidateArticleDetail(event.getArticleId(), event.getArticle());
+            revalidateArchiveByArticle(event.getArticle());
         }
     }
 
@@ -96,6 +116,7 @@ public class RevalidateEventListener {
         if (event.getArticle() != null) {
             revalidate(ARTICLE_LIST_TAGS);
             revalidateArticleDetail(event.getArticleId(), event.getArticle());
+            revalidateArchiveByArticle(event.getArticle());
         }
     }
 
@@ -104,6 +125,7 @@ public class RevalidateEventListener {
     public void handleArticleDeleted(ArticleDeletedEvent event) {
         revalidate(ARTICLE_LIST_TAGS);
         revalidateArticleDetailById(event.getArticleId());
+        revalidate(ARCHIVE_LIST_TAGS);
     }
 
     @Async("eventTaskExecutor")
@@ -111,6 +133,7 @@ public class RevalidateEventListener {
     public void handleArticlePublished(ArticlePublishedEvent event) {
         revalidate(ARTICLE_LIST_TAGS);
         revalidateArticleDetail(event.getArticleId(), event.getArticle());
+        revalidateArchiveByArticle(event.getArticle());
     }
 
     @Async("eventTaskExecutor")
@@ -118,6 +141,7 @@ public class RevalidateEventListener {
     public void handleArticleUnpublished(ArticleUnpublishedEvent event) {
         revalidate(ARTICLE_LIST_TAGS);
         revalidateArticleDetail(event.getArticleId(), event.getArticle());
+        revalidateArchiveByArticle(event.getArticle());
     }
 
     @Async("eventTaskExecutor")
@@ -143,5 +167,17 @@ public class RevalidateEventListener {
     public void handleTalkDeleted(TalkDeletedEvent event) {
         revalidate(MOMENT_LIST_TAGS);
         revalidateMomentDetailById(event.getTalkId());
+    }
+
+    @Async("eventTaskExecutor")
+    @EventListener
+    public void handleFriendLinkCreated(FriendLinkCreatedEvent event) {
+        revalidate(FRIENDLINK_TAGS);
+    }
+
+    @Async("eventTaskExecutor")
+    @EventListener
+    public void handleFriendLinkApproved(FriendLinkApprovedEvent event) {
+        revalidate(FRIENDLINK_TAGS);
     }
 }

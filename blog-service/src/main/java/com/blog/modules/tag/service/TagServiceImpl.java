@@ -10,15 +10,21 @@ import com.blog.modules.tag.model.enums.TagStatus;
 import com.blog.modules.tag.model.vo.TagVO;
 import com.blog.modules.tag.service.TagService;
 import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.KeyUtil;
+import com.blog.infrastructure.revalidate.RevalidateClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 @Service
 public class TagServiceImpl implements TagService {
     @Autowired
     private TagMapper tagMapper;
+
+    @Autowired(required = false)
+    private RevalidateClient revalidateClient;
 
     @Override
     public List<TagVO> list() {
@@ -64,6 +70,7 @@ public class TagServiceImpl implements TagService {
             tag.setStatus(TagStatus.PUBLISHED.getCode());
         }
         tagMapper.insert(tag);
+        triggerRevalidate(tag);
         return tag.getId();
     }
 
@@ -80,6 +87,7 @@ public class TagServiceImpl implements TagService {
         tag.setDescription(dto.getDescription());
         tag.setStatus(dto.getStatus());
         tagMapper.updateById(tag);
+        triggerRevalidate(tag);
     }
 
     @Override
@@ -90,6 +98,7 @@ public class TagServiceImpl implements TagService {
             throw new BusinessException("标签不存在");
         }
         tagMapper.deleteById(id);
+        triggerRevalidate(tag);
     }
 
     @Override
@@ -109,6 +118,25 @@ public class TagServiceImpl implements TagService {
         dto.setName(name.trim());
         dto.setSlug(name.trim().toLowerCase().replaceAll("\\s+", "-"));
         return create(dto);
+    }
+
+    private void triggerRevalidate(Tag tag) {
+        if (revalidateClient == null) {
+            return;
+        }
+        EventUtil.publishEventAfterCommit(() -> {
+            List<String> tags = new ArrayList<>();
+            tags.add("tag:list");
+            if (tag != null) {
+                if (tag.getId() != null) {
+                    tags.add("tag:detail:id:" + tag.getId());
+                }
+                if (tag.getTagKey() != null && !tag.getTagKey().isBlank()) {
+                    tags.add("tag:detail:key:" + tag.getTagKey());
+                }
+            }
+            revalidateClient.revalidateTags(tags);
+        });
     }
 }
 

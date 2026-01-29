@@ -10,16 +10,22 @@ import com.blog.modules.category.model.enums.CategoryStatus;
 import com.blog.modules.category.model.vo.CategoryVO;
 import com.blog.modules.category.service.CategoryService;
 import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.KeyUtil;
+import com.blog.infrastructure.revalidate.RevalidateClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
 public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private CategoryMapper categoryMapper;
+
+    @Autowired(required = false)
+    private RevalidateClient revalidateClient;
 
     @Override
     public List<CategoryVO> list() {
@@ -73,6 +79,7 @@ public class CategoryServiceImpl implements CategoryService {
             category.setSort(0);
         }
         categoryMapper.insert(category);
+        triggerRevalidate(category);
         return category.getId();
     }
 
@@ -90,6 +97,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setSort(dto.getSort());
         category.setStatus(dto.getStatus());
         categoryMapper.updateById(category);
+        triggerRevalidate(category);
     }
 
     @Override
@@ -100,6 +108,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new BusinessException("分类不存在");
         }
         categoryMapper.deleteById(id);
+        triggerRevalidate(category);
     }
 
     @Override
@@ -119,6 +128,25 @@ public class CategoryServiceImpl implements CategoryService {
         dto.setName(name.trim());
         dto.setSlug(name.trim().toLowerCase().replaceAll("\\s+", "-"));
         return create(dto);
+    }
+
+    private void triggerRevalidate(Category category) {
+        if (revalidateClient == null) {
+            return;
+        }
+        EventUtil.publishEventAfterCommit(() -> {
+            List<String> tags = new ArrayList<>();
+            tags.add("category:list");
+            if (category != null) {
+                if (category.getId() != null) {
+                    tags.add("category:detail:id:" + category.getId());
+                }
+                if (category.getCategoryKey() != null && !category.getCategoryKey().isBlank()) {
+                    tags.add("category:detail:key:" + category.getCategoryKey());
+                }
+            }
+            revalidateClient.revalidateTags(tags);
+        });
     }
 
     private List<CategoryVO> buildTree(List<CategoryVO> categories) {

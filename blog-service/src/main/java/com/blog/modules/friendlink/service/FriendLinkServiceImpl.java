@@ -8,7 +8,9 @@ import com.blog.modules.friendlink.model.entity.FriendLink;
 import com.blog.modules.friendlink.model.vo.FriendLinkVO;
 import com.blog.modules.friendlink.event.FriendLinkCreatedEvent;
 import com.blog.modules.friendlink.event.FriendLinkApprovedEvent;
+import com.blog.infrastructure.revalidate.RevalidateClient;
 import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.EventUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -23,6 +25,9 @@ public class FriendLinkServiceImpl implements FriendLinkService {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    @Autowired(required = false)
+    private RevalidateClient revalidateClient;
 
     @Override
     public List<FriendLinkVO> list(FriendLinkQueryDTO queryDTO) {
@@ -103,6 +108,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
         }
         BeanUtils.copyProperties(dto, friendLink);
         friendLinkMapper.updateById(friendLink);
+        triggerRevalidate();
     }
 
     @Override
@@ -113,6 +119,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
             return;
         }
         friendLinkMapper.deleteById(id);
+        triggerRevalidate();
     }
 
     @Override
@@ -140,5 +147,13 @@ public class FriendLinkServiceImpl implements FriendLinkService {
         friendLink.setReviewStatus(2);
         friendLink.setIsVisible(0);
         friendLinkMapper.updateById(friendLink);
+        triggerRevalidate();
+    }
+
+    private void triggerRevalidate() {
+        if (revalidateClient == null) {
+            return;
+        }
+        EventUtil.publishEventAfterCommit(() -> revalidateClient.revalidateTags(List.of("friendlink:list")));
     }
 }

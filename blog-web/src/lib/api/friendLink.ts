@@ -3,7 +3,9 @@ import type { FriendLinkVO, FriendLinkApplicationDTO } from '@/types';
 
 export const friendLinkApi = {
   getList: () => {
-    return fetchServer<FriendLinkVO[]>('/api/public/friend-link/list');
+    return fetchServer<FriendLinkVO[]>('/api/public/friend-link/list', {
+      next: { tags: ['friendlink:list'] },
+    });
   },
 
   apply: (data: FriendLinkApplicationDTO) => {
