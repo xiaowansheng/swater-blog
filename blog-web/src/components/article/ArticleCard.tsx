@@ -50,7 +50,7 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
 
       {showCover && (
         <LoadingLink href={`/post/${article.articleKey}`} className="md:w-[40%] lg:w-[35%] shrink-0 relative z-20">
-          <div className="overflow-hidden relative h-48 sm:h-56 md:h-full min-h-[240px]">
+          <div className="overflow-hidden relative w-full h-auto aspect-[16/9] md:aspect-auto md:h-full md:min-h-[240px]">
             <Image
               src={article.cover!}
               alt={article.title}
