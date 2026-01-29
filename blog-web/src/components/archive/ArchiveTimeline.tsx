@@ -5,7 +5,7 @@ import { articleApi } from '@/lib/api/article'
 import type { PostVO } from '@/types'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { stripMarkdown } from '@/lib/utils/format'
+import { stripMarkdown, formatDate } from '@/lib/utils/format'
 
 interface MonthGroup {
   year: number
@@ -126,13 +126,7 @@ export default function ArchiveTimeline() {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const year = date.getFullYear()
-    const month = date.getMonth() + 1
-    const day = date.getDate()
-    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-  }
+
 
   // 去除 Markdown 和 HTML 标签的工具函数
 
