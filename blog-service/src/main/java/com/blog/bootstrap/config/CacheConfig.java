@@ -94,11 +94,26 @@ public class CacheConfig {
         cacheConfigurations.put("article-list", defaultConfig
                 .entryTtl(Duration.ofMinutes(15))
                 .prefixCacheNameWith("blog:article:list:"));
+
+        // 文章列表缓存（实际使用的缓存名）
+        cacheConfigurations.put("article:list", defaultConfig
+                .entryTtl(Duration.ofMinutes(15))
+                .prefixCacheNameWith("blog:article:list:"));
         
         // 热门文章缓存 - 30分钟过期
         cacheConfigurations.put("hot-articles", defaultConfig
                 .entryTtl(Duration.ofMinutes(30))
                 .prefixCacheNameWith("blog:article:hot:"));
+
+        // 热门文章缓存（实际使用的缓存名）
+        cacheConfigurations.put("article:hot", defaultConfig
+                .entryTtl(Duration.ofMinutes(30))
+                .prefixCacheNameWith("blog:article:hot:"));
+
+        // 最新文章缓存（实际使用的缓存名）
+        cacheConfigurations.put("article:latest", defaultConfig
+                .entryTtl(Duration.ofMinutes(30))
+                .prefixCacheNameWith("blog:article:latest:"));
         
         // 分类缓存 - 6小时过期（变化较少）
         cacheConfigurations.put("categories", defaultConfig
@@ -114,6 +129,11 @@ public class CacheConfig {
         cacheConfigurations.put("users", defaultConfig
                 .entryTtl(Duration.ofHours(2))
                 .prefixCacheNameWith("blog:user:"));
+
+        // 用户信息缓存（实际使用的缓存名）
+        cacheConfigurations.put("user", defaultConfig
+                .entryTtl(Duration.ofHours(2))
+                .prefixCacheNameWith("blog:user:"));
         
         // 评论缓存 - 30分钟过期
         cacheConfigurations.put("comments", defaultConfig
@@ -124,6 +144,16 @@ public class CacheConfig {
         cacheConfigurations.put("configs", defaultConfig
                 .entryTtl(Duration.ofHours(12))
                 .prefixCacheNameWith("blog:config:"));
+
+        // 前台聚合配置缓存（实际使用的缓存名）
+        cacheConfigurations.put("siteConfig", defaultConfig
+                .entryTtl(Duration.ofHours(12))
+                .prefixCacheNameWith("blog:site:config:"));
+
+        // 说说列表缓存（实际使用的缓存名）
+        cacheConfigurations.put("talk:list", defaultConfig
+                .entryTtl(Duration.ofMinutes(15))
+                .prefixCacheNameWith("blog:talk:list:"));
         
         // 统计数据缓存 - 5分钟过期（实时性要求高）
         cacheConfigurations.put("statistics", defaultConfig

@@ -90,7 +90,8 @@ public class ConfigServiceImpl implements ConfigService {
         put = @CachePut(value = "configs", key = "'key:' + #configDTO.configKey"),
         evict = {
             @CacheEvict(value = "configs", key = "'list:' + (#configDTO.groupName != null ? #configDTO.groupName : 'all')"),
-            @CacheEvict(value = "configs", key = "'groups'")
+            @CacheEvict(value = "configs", key = "'groups'"),
+            @CacheEvict(value = "siteConfig", key = "'all'")
         }
     )
     public ConfigVO create(ConfigDTO configDTO) {
@@ -131,7 +132,10 @@ public class ConfigServiceImpl implements ConfigService {
     @Transactional(rollbackFor = Exception.class)
     @Caching(
         put = @CachePut(value = "configs", key = "'key:' + #key"),
-        evict = @CacheEvict(value = "configs", allEntries = true)
+        evict = {
+            @CacheEvict(value = "configs", allEntries = true),
+            @CacheEvict(value = "siteConfig", key = "'all'")
+        }
     )
     public ConfigVO updateByKey(String key, ConfigDTO configDTO) {
         try {
@@ -197,7 +201,10 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = "configs", allEntries = true)
+    @Caching(evict = {
+        @CacheEvict(value = "configs", allEntries = true),
+        @CacheEvict(value = "siteConfig", key = "'all'")
+    })
     public void updateBatch(Map<String, Object> configs) {
         for (Map.Entry<String, Object> entry : configs.entrySet()) {
             String key = entry.getKey();

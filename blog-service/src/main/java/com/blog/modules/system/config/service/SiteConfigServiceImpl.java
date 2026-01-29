@@ -158,6 +158,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     
     @Override
     @CacheEvict(value = "configs", key = "'site'")
+    @CacheEvict(value = "siteConfig", key = "'all'")
     @Transactional
     public void updateSiteConfig(SiteConfigDTO config) {
         updateConfig(KEY_SITE, config);
@@ -165,6 +166,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     
     @Override
     @CacheEvict(value = "configs", key = "'author'")
+    @CacheEvict(value = "siteConfig", key = "'all'")
     @Transactional
     public void updateAuthorConfig(AuthorConfigDTO config) {
         updateConfig(KEY_AUTHOR, config);
@@ -172,6 +174,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     
     @Override
     @CacheEvict(value = "configs", key = "'cover'")
+    @CacheEvict(value = "siteConfig", key = "'all'")
     @Transactional
     public void updateCoverConfig(CoverConfigDTO config) {
         updateConfig(KEY_COVER, config);
@@ -179,6 +182,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     
     @Override
     @CacheEvict(value = "configs", key = "'social'")
+    @CacheEvict(value = "siteConfig", key = "'all'")
     @Transactional
     public void updateSocialConfig(SocialConfigDTO config) {
         updateConfig(KEY_SOCIAL, config);
@@ -186,6 +190,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     
     @Override
     @CacheEvict(value = "configs", key = "'privacy'")
+    @CacheEvict(value = "siteConfig", key = "'all'")
     @Transactional
     public void updatePrivacyConfig(PrivacyConfigDTO config) {
         updateConfig(KEY_PRIVACY, config);
@@ -193,6 +198,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     
     @Override
     @CacheEvict(value = "configs", key = "'comment'")
+    @CacheEvict(value = "siteConfig", key = "'all'")
     @Transactional
     public void updateCommentConfig(CommentConfigDTO config) {
         updateConfig(KEY_COMMENT, config);
@@ -200,6 +206,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
 
     @Override
     @CacheEvict(value = "configs", allEntries = true)
+    @CacheEvict(value = "siteConfig", key = "'all'")
     @Transactional
     public void updateComponentConfig(ComponentConfigDTO config) {
         updateConfig(KEY_COMPONENT, config);
@@ -207,6 +214,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
 
     @Override
     @CacheEvict(value = "configs", key = "'notify'")
+    @CacheEvict(value = "siteConfig", key = "'all'")
     @Transactional
     public void updateNotifyConfig(NotifyConfigDTO config) {
         updateConfig(KEY_NOTIFY, config);
@@ -214,6 +222,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     
     @Override
     @CacheEvict(value = "configs", key = "'upload'")
+    @CacheEvict(value = "siteConfig", key = "'all'")
     @Transactional
     public void updateUploadConfig(UploadConfigDTO config) {
         updateConfig(KEY_UPLOAD, config);
@@ -221,6 +230,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     
     @Override
     @CacheEvict(value = "configs", key = "'email'")
+    @CacheEvict(value = "siteConfig", key = "'all'")
     @Transactional
     public void updateEmailConfig(EmailConfigDTO config) {
         updateConfig(KEY_EMAIL, config);
