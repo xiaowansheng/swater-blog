@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
   }
 
   for (const tag of tags) {
-    revalidateTag(tag);
+    revalidateTag(tag, 'default');
   }
 
   return NextResponse.json({ ok: true, revalidated: tags });
@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
   }
 
   for (const tag of tags) {
-    revalidateTag(tag);
+    revalidateTag(tag, 'default');
   }
 
   return NextResponse.json({ ok: true, revalidated: tags });
