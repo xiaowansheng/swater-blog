@@ -1,5 +1,6 @@
 import request from './request'
 import { FileMeta, PageResult } from '@/types'
+import { compressImageIfNeeded } from '@/utils/imageCompress'
 
 export const getFileList = (params: {
   page?: number
@@ -14,9 +15,10 @@ export const getFileById = (id: number): Promise<FileMeta> => {
   return request.get(`/admin/file/${id}`)
 }
 
-export const uploadFile = (file: File): Promise<FileMeta> => {
+export const uploadFile = async (file: File): Promise<FileMeta> => {
   const formData = new FormData()
-  formData.append('file', file)
+  const processed = await compressImageIfNeeded(file)
+  formData.append('file', processed)
   return request.post('/admin/file/upload', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
