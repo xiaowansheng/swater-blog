@@ -7,6 +7,10 @@ import { usePathname } from '@/lib/i18n/routing';
 import { useSiteConfig } from '@/lib/context/SiteConfigContext';
 import { Card } from '@/components/ui/Card';
 
+function formatIp(ip: string | undefined): string {
+  if (!ip) return '';
+  return `IP: ${ip}`;
+}
 interface GuestbookItemProps {
   message: GuestbookVO;
 }
@@ -46,6 +50,18 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
   const isHidden = message.isVisible === 0;
   const isPending = message.reviewStatus === 0;
   const isRejected = message.reviewStatus === 2;
+
+  const locationText = privacy.showLocation
+    ? formatLocation(message.country, message.province, message.city, message.location, message.ipLocation)
+    : '';
+  const ipText = privacy.showIp ? formatIp(message.ip) : '';
+  const deviceText = (privacy.showDevice || privacy.showBrowser)
+    ? formatDeviceAndBrowser(
+      privacy.showDevice ? message.device : undefined,
+      privacy.showBrowser ? message.browser : undefined
+    )
+    : '';
+  const hasMeta = Boolean(locationText || ipText);
 
   const getStatusBadge = () => {
     if (isPending) {
@@ -118,14 +134,13 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
                 <span className="flex items-center gap-1">
                   {formatDate(message.createTime, 'MM-DD HH:mm', locale)}
                 </span>
-                <span className="w-0.5 h-2.5 bg-border/50 rounded-full"></span>
-                {/* 简化后的位置显示 */}
-                {(privacy.showLocation && (message.location || message.ipLocation || message.country || message.province || message.city)) ? (
-                  <span className="truncate max-w-[120px]">
-                    {formatLocation(message.country, message.province, message.city, message.location, message.ipLocation)}
+                                {hasMeta && <span className="w-0.5 h-2.5 bg-border/50 rounded-full"></span>}
+                {hasMeta && (
+                  <span className="truncate max-w-[160px] inline-flex items-center gap-2">
+                    {locationText && <span>{locationText}</span>}
+                    {locationText && ipText && <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />}
+                    {ipText && <span>{ipText}</span>}
                   </span>
-                ) : (
-                  <span>Earth</span>
                 )}
               </div>
             </div>
@@ -156,13 +171,9 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
           </div>
 
           {/* 底部设备信息 - 更加隐晦 */}
-          {(privacy.showDevice || privacy.showBrowser) && 
-          (message.device || message.browser) && (
+                    {deviceText && (
             <div className="mt-4 pt-3 border-t border-dashed border-primary/10 flex items-center justify-end gap-2 text-[10px] text-muted-foreground/50 opacity-0 group-hover:opacity-70 transition-opacity">
-                {formatDeviceAndBrowser(
-                    privacy.showDevice ? message.device : undefined,
-                    privacy.showBrowser ? message.browser : undefined
-                )}
+                {deviceText}
             </div>
           )}
         </div>

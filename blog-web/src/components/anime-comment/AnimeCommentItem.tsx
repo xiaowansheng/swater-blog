@@ -16,6 +16,11 @@ interface ReplyState {
   expanded: boolean;
 }
 
+function formatIp(ip: string | undefined): string {
+  if (!ip) return '';
+  return `IP: ${ip}`;
+}
+
 interface AnimeCommentItemProps {
   comment: CommentVO;
   replyState?: ReplyState;
@@ -157,42 +162,53 @@ export default function AnimeCommentItem({
         </div>
 
         {/* 第三部分：地址和设备信息 */}
-        {(privacy.showLocation || privacy.showDevice || privacy.showBrowser) &&
-         (comment.location || comment.ipLocation || comment.country || comment.province || comment.city || comment.device || comment.browser) && (
-          <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">
-            {/* 左边：地址 */}
-            <div className="flex items-center gap-1 flex-1">
-              {privacy.showLocation && formatLocation(comment.country, comment.province, comment.city, comment.location, comment.ipLocation) && (
-                <>
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>{formatLocation(comment.country, comment.province, comment.city, comment.location, comment.ipLocation)}</span>
-                </>
-              )}
-            </div>
+        {(() => {
+          const locationText = privacy.showLocation
+            ? formatLocation(comment.country, comment.province, comment.city, comment.location, comment.ipLocation)
+            : '';
+          const ipText = privacy.showIp ? formatIp(comment.ip) : '';
+          const deviceText = (privacy.showDevice || privacy.showBrowser)
+            ? formatDeviceAndBrowser(
+              privacy.showDevice ? comment.device : undefined,
+              privacy.showBrowser ? comment.browser : undefined
+            )
+            : '';
+          const hasLeft = Boolean(locationText || ipText);
+          const hasRight = Boolean(deviceText);
 
-            {/* 右边：设备和浏览器 */}
-            <div className="flex items-center gap-1 flex-1 justify-end">
-              {(privacy.showDevice || privacy.showBrowser) && formatDeviceAndBrowser(
-                privacy.showDevice ? comment.device : undefined,
-                privacy.showBrowser ? comment.browser : undefined
-              ) && (
-                <>
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  <span>{formatDeviceAndBrowser(
-                    privacy.showDevice ? comment.device : undefined,
-                    privacy.showBrowser ? comment.browser : undefined
-                  )}</span>
-                </>
-              )}
-            </div>
-          </div>
-        )}
+          if (!hasLeft && !hasRight) return null;
 
+          return (
+            <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">
+              <div className="flex items-center gap-1 flex-1">
+                {hasLeft && (
+                  <>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span className="flex items-center gap-2">
+                      {locationText && <span>{locationText}</span>}
+                      {locationText && ipText && <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />}
+                      {ipText && <span>{ipText}</span>}
+                    </span>
+                  </>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1 flex-1 justify-end">
+                {hasRight && (
+                  <>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>{deviceText}</span>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        })()}
         {/* 操作按钮 */}
         <div className="flex items-center gap-4 mt-3">
           <button
@@ -305,42 +321,53 @@ export default function AnimeCommentItem({
               </div>
 
               {/* 第三部分：地址和设备信息 */}
-              {(privacy.showLocation || privacy.showDevice || privacy.showBrowser) &&
-               (child.location || child.ipLocation || child.country || child.province || child.city || child.device || child.browser) && (
-                <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">
-                  {/* 左边：地址 */}
-                  <div className="flex items-center gap-1 flex-1">
-                    {privacy.showLocation && formatLocation(child.country, child.province, child.city, child.location, child.ipLocation) && (
-                      <>
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>{formatLocation(child.country, child.province, child.city, child.location, child.ipLocation)}</span>
-                      </>
-                    )}
-                  </div>
+              {(() => {
+                const locationText = privacy.showLocation
+                  ? formatLocation(child.country, child.province, child.city, child.location, child.ipLocation)
+                  : '';
+                const ipText = privacy.showIp ? formatIp(child.ip) : '';
+                const deviceText = (privacy.showDevice || privacy.showBrowser)
+                  ? formatDeviceAndBrowser(
+                    privacy.showDevice ? child.device : undefined,
+                    privacy.showBrowser ? child.browser : undefined
+                  )
+                  : '';
+                const hasLeft = Boolean(locationText || ipText);
+                const hasRight = Boolean(deviceText);
 
-                  {/* 右边：设备和浏览器 */}
-                  <div className="flex items-center gap-1 flex-1 justify-end">
-                    {(privacy.showDevice || privacy.showBrowser) && formatDeviceAndBrowser(
-                      privacy.showDevice ? child.device : undefined,
-                      privacy.showBrowser ? child.browser : undefined
-                    ) && (
-                      <>
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        <span>{formatDeviceAndBrowser(
-                          privacy.showDevice ? child.device : undefined,
-                          privacy.showBrowser ? child.browser : undefined
-                        )}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
+                if (!hasLeft && !hasRight) return null;
 
+                return (
+                  <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">
+                    <div className="flex items-center gap-1 flex-1">
+                      {hasLeft && (
+                        <>
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span className="flex items-center gap-2">
+                            {locationText && <span>{locationText}</span>}
+                            {locationText && ipText && <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />}
+                            {ipText && <span>{ipText}</span>}
+                          </span>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1 flex-1 justify-end">
+                      {hasRight && (
+                        <>
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                          <span>{deviceText}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
               {/* 回复按钮和表单 */}
               <div className="mt-2">
                 <button

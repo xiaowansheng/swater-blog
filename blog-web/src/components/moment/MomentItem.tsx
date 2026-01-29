@@ -46,6 +46,10 @@ function formatDeviceAndBrowser(device: string | undefined, browser: string | un
   return parts.join(' · ');
 }
 
+function formatIp(ip: string | undefined): string {
+  if (!ip) return '';
+  return `IP: ${ip}`;
+}
 interface MomentItemProps {
   moment: MomentVO;
 }
@@ -264,34 +268,59 @@ export default function MomentItem({ moment }: MomentItemProps) {
         </div>
 
         {/* 位置和设备信息 */}
-        {(privacy.showLocation || privacy.showDevice || privacy.showBrowser) &&
-         (moment.location || moment.ipLocation || moment.country || moment.province || moment.city || moment.device || moment.browser) && (
+                {(() => {
+          const locationText = privacy.showLocation
+            ? formatLocation(moment.country, moment.province, moment.city, moment.location, moment.ipLocation)
+            : '';
+          const ipText = privacy.showIp ? formatIp(moment.ip) : '';
+          const deviceText = (privacy.showDevice || privacy.showBrowser)
+            ? formatDeviceAndBrowser(
+              privacy.showDevice ? moment.device : undefined,
+              privacy.showBrowser ? moment.browser : undefined
+            )
+            : '';
+          const hasLeft = Boolean(locationText || ipText);
+          const hasRight = Boolean(deviceText);
+
+          if (!hasLeft && !hasRight) return null;
+
+          return (
           <div className="flex items-center justify-between mt-3 pt-3 text-xs text-muted-foreground border-t border-border/30 relative">
-            {/* 装饰星星 */}
-            <div className="absolute top-2 left-4 text-primary/10 text-[10px]">✦</div>
-            <div className="absolute top-2 right-4 text-accent/10 text-[10px]">✧</div>
+            {/* Decorations */}
+            <div className="absolute top-2 left-4 text-primary/10 text-[10px]">*</div>
+            <div className="absolute top-2 right-4 text-accent/10 text-[10px]">*</div>
 
-            {/* 左边：地址 */}
-            <div className="flex items-center gap-1.5 flex-1 group/location">
-              <svg className="w-3.5 h-3.5 text-primary/60 group-hover/location:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span className="group-hover/location:text-foreground/80 transition-colors">{formatLocation(moment.country, moment.province, moment.city, moment.location, moment.ipLocation)}</span>
-            </div>
+            {/* Left: Location/IP */}
+            {hasLeft && (
+              <div className="flex items-center gap-1.5 flex-1 group/location">
+                <svg className="w-3.5 h-3.5 text-primary/60 group-hover/location:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <div className="flex items-center gap-2">
+                  {locationText && (
+                    <span className="group-hover/location:text-foreground/80 transition-colors">{locationText}</span>
+                  )}
+                  {locationText && ipText && <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />}
+                  {ipText && (
+                    <span className="group-hover/location:text-foreground/80 transition-colors">{ipText}</span>
+                  )}
+                </div>
+              </div>
+            )}
 
-            {/* 右边：设备和浏览器 */}
-            <div className="flex items-center gap-1.5 flex-1 justify-end group/device">
-              <svg className="w-3.5 h-3.5 text-accent/60 group-hover/device:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span className="group-hover/device:text-foreground/80 transition-colors">{formatDeviceAndBrowser(
-                privacy.showDevice ? moment.device : undefined,
-                privacy.showBrowser ? moment.browser : undefined
-              )}</span>
-            </div>
+            {/* Right: Device/Browser */}
+            {hasRight && (
+              <div className="flex items-center gap-1.5 flex-1 justify-end group/device">
+                <svg className="w-3.5 h-3.5 text-accent/60 group-hover/device:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span className="group-hover/device:text-foreground/80 transition-colors">{deviceText}</span>
+              </div>
+            )}
           </div>
-        )}
+          );
+        })()}
       </div>
 
       {fullUrlImages.length > 0 && (

@@ -27,8 +27,8 @@ export default function Snow() {
             }}
             className="absolute bg-white rounded-full blur-[1px]"
             style={{ 
-                width: `${2 + Math.random() * 4}px`,
-                height: `${2 + Math.random() * 4}px`,
+                width: `${4 + Math.random() * 8}px`,
+                height: `${4 + Math.random() * 8}px`,
                 boxShadow: '0 0 5px rgba(255, 255, 255, 0.8)'
             }}
           />
