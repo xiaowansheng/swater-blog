@@ -48,12 +48,17 @@ services:
       - redis_dev_data:/data
     networks:
       - blog-dev-network
+    # 限制容器内存（宿主机保护）
+    mem_limit: 96m
+
+    # 同时限制 Redis 自己可用内存（避免 Redis 顶满容器导致 OOM）
     command: >
       sh -c "
+        EXTRA_ARGS='--maxmemory 64mb --maxmemory-policy allkeys-lru';
         if [ -n \"$REDIS_PASSWORD\" ]; then
-          redis-server --requirepass \"$REDIS_PASSWORD\";
+          redis-server --requirepass \"$REDIS_PASSWORD\" $$EXTRA_ARGS;
         else
-          redis-server;
+          redis-server $$EXTRA_ARGS;
         fi
       "
     healthcheck:
@@ -73,10 +78,16 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-admin123}
+
+      # 可选：限制 Erlang VM 使用内存（相对保守，先开这个）
+      # RabbitMQ 3.8+ 支持用内存百分比触发流控
+      RABBITMQ_VM_MEMORY_HIGH_WATERMARK: "0.35"
     volumes:
-      - rabbitmq_dev_data:/var/lib/rabbitmq
+      - rabbitmq_dev_data:/var/lib/rabbitmqd
     networks:
       - blog-dev-network
+    # 限制容器内存（宿主机保护）
+    mem_limit: 320m
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 30s
