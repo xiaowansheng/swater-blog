@@ -279,7 +279,15 @@
     "replyPublished": "Reply published successfully",
     "replyingTo2": "Replying to",
     "replyPlaceholder": "Write your reply...",
-    "publishReply": "Publish Reply"
+    "publishReply": "Publish Reply",
+    "author": "Author",
+    "pending": "Pending, visible only to yourself",
+    "hidden": "Hidden, visible only to yourself",
+    "commentHidden": "Comment has been hidden",
+    "collapseReply": "Collapse",
+    "loading": "Loading...",
+    "noReplies": "No replies yet",
+    "loadMore": "Load more replies"
   },
   "nav": {
     "home": "Home",

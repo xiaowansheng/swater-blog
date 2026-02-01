@@ -6,6 +6,7 @@ import { formatDate } from '@/lib/utils/format';
 import { usePathname } from '@/lib/i18n/routing';
 import { useSiteConfig } from '@/lib/context/SiteConfigContext';
 import { Card } from '@/components/ui/Card';
+import { UAList } from '@/components/common/UAIcon';
 
 function formatIp(ip: string | undefined): string {
   if (!ip) return '';
@@ -33,14 +34,6 @@ function formatLocation(
   return parts.length > 0 ? parts.join(' · ') : '';
 }
 
-// 格式化设备和浏览器信息
-function formatDeviceAndBrowser(device: string | undefined, browser: string | undefined): string {
-  const parts = [];
-  if (device) parts.push(device);
-  if (browser) parts.push(browser);
-  return parts.join(' · ');
-}
-
 export default function GuestbookItem({ message }: GuestbookItemProps) {
   const pathname = usePathname();
   const { privacy } = useSiteConfig();
@@ -55,12 +48,6 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
     ? formatLocation(message.country, message.province, message.city, message.location, message.ipLocation)
     : '';
   const ipText = privacy.showIp ? formatIp(message.ip) : '';
-  const deviceText = (privacy.showDevice || privacy.showBrowser)
-    ? formatDeviceAndBrowser(
-      privacy.showDevice ? message.device : undefined,
-      privacy.showBrowser ? message.browser : undefined
-    )
-    : '';
   const hasMeta = Boolean(locationText || ipText);
 
   const getStatusBadge = () => {
@@ -134,21 +121,13 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
                 <span className="flex items-center gap-1">
                   {formatDate(message.createTime, 'MM-DD HH:mm', locale)}
                 </span>
-                                {hasMeta && <span className="w-0.5 h-2.5 bg-border/50 rounded-full"></span>}
-                {hasMeta && (
-                  <span className="truncate max-w-[160px] inline-flex items-center gap-2">
-                    {locationText && <span>{locationText}</span>}
-                    {locationText && ipText && <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />}
-                    {ipText && <span>{ipText}</span>}
-                  </span>
-                )}
               </div>
             </div>
           </div>
 
           {/* 内容区域 - 类似气泡风格 */}
           <div className="relative z-10">
-              <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed text-[15px] font-medium">
+              <p className="text-foreground/90 whitespace-pre-wrap break-words leading-relaxed text-[15px] font-medium">
                   {isHidden && <span className="text-muted-foreground/60 italic text-sm block mb-1">Passerby whispers... (Hidden)</span>}
                   {message.content}
               </p>
@@ -170,12 +149,38 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
               )}
           </div>
 
-          {/* 底部设备信息 - 更加隐晦 */}
-                    {deviceText && (
-            <div className="mt-4 pt-3 border-t border-dashed border-primary/10 flex items-center justify-end gap-2 text-[10px] text-muted-foreground/50 opacity-0 group-hover:opacity-70 transition-opacity">
-                {deviceText}
+          {/* 隐私信息 - 放在内容下面，避免影响头部布局 */}
+          {hasMeta && (
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground/80">
+              {locationText && (
+                <span className="flex items-center gap-1 min-w-0 group/location">
+                  <svg className="w-3.5 h-3.5 text-primary/60 group-hover/location:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="truncate max-w-[8rem] sm:max-w-none">{locationText}</span>
+                </span>
+              )}
+              {ipText && (
+                <span className="flex items-center gap-1 min-w-0 group/ip">
+                  <svg className="w-3.5 h-3.5 text-primary/60 group-hover/ip:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+                    <circle cx="12" cy="12" r="3" strokeWidth={2} />
+                  </svg>
+                  <span className="truncate max-w-[6rem] sm:max-w-none">{ipText}</span>
+                </span>
+              )}
+              {(privacy.showDevice || privacy.showBrowser) && (message.device || message.browser) && (
+                <UAList 
+                  device={privacy.showDevice ? message.device : undefined} 
+                  browser={privacy.showBrowser ? message.browser : undefined}
+                  className="text-[10px] text-muted-foreground/50"
+                />
+              )}
             </div>
           )}
+
+          {/* 设备信息已合并到隐私信息区域 */}
         </div>
     </Card>
   );

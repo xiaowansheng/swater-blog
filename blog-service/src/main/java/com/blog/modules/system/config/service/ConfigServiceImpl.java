@@ -94,6 +94,7 @@ public class ConfigServiceImpl implements ConfigService {
     @Caching(
         put = @CachePut(value = "configs", key = "'key:' + #configDTO.configKey"),
         evict = {
+            @CacheEvict(value = "configs", allEntries = true),
             @CacheEvict(value = "configs", key = "'list:' + (#configDTO.groupName != null ? #configDTO.groupName : 'all')"),
             @CacheEvict(value = "configs", key = "'groups'"),
             @CacheEvict(value = "siteConfig", key = "'all'")

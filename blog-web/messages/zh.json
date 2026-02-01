@@ -279,7 +279,15 @@
     "replyPublished": "回复发布成功",
     "replyingTo2": "正在回复",
     "replyPlaceholder": "写下你的回复...",
-    "publishReply": "发布回复"
+    "publishReply": "发布回复",
+    "author": "作者",
+    "pending": "审核中，仅自己可见",
+    "hidden": "已隐藏，仅自己可见",
+    "commentHidden": "评论已被隐藏",
+    "collapseReply": "收起回复",
+    "loading": "加载中...",
+    "noReplies": "暂无回复",
+    "loadMore": "查看更多回复"
   },
   "nav": {
     "home": "首页",

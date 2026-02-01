@@ -1,12 +1,14 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { formatDate } from '@/lib/utils/format';
 import type { CommentVO, PrivacyConfig } from '@/types';
 import { AnimeCommentConfig } from './types';
 import { getRandomAnimeAvatar } from './constants';
 import ReplyForm from './ReplyForm';
 import { Card } from '@/components/ui/Card';
+import { UAList } from '@/components/common/UAIcon';
 
 interface ReplyState {
   items: CommentVO[];
@@ -17,8 +19,7 @@ interface ReplyState {
 }
 
 function formatIp(ip: string | undefined): string {
-  if (!ip) return '';
-  return `IP: ${ip}`;
+  return ip || '';
 }
 
 interface AnimeCommentItemProps {
@@ -36,15 +37,10 @@ interface AnimeCommentItemProps {
   privacy: PrivacyConfig;
 }
 
-const STATUS_LABEL = {
-  pending: '审核中，仅自己可见',
-  hidden: '已隐藏，仅自己可见',
-};
-
-function getStatusLabel(status: number | string | undefined) {
+function getStatusLabel(status: number | string | undefined, t: (key: string) => string) {
   if (status === 1 || status === 'published' || status === undefined) return null;
-  if (status === 0 || status === 'pending') return STATUS_LABEL.pending;
-  return STATUS_LABEL.hidden;
+  if (status === 0 || status === 'pending') return t('pending');
+  return t('hidden');
 }
 
 // 格式化位置信息
@@ -75,14 +71,6 @@ function formatLocation(
   return parts.length > 0 ? parts.join(' · ') : '';
 }
 
-// 格式化设备和浏览器信息
-function formatDeviceAndBrowser(device: string | undefined, browser: string | undefined): string {
-  const parts = [];
-  if (device) parts.push(device);
-  if (browser) parts.push(browser);
-  return parts.join(' · ');
-}
-
 export default function AnimeCommentItem({
   comment,
   replyState,
@@ -97,9 +85,10 @@ export default function AnimeCommentItem({
   config,
   privacy,
 }: AnimeCommentItemProps) {
+  const t = useTranslations('comment');
   const avatar = comment.avatar || getRandomAnimeAvatar(comment.nickname);
   const showReplyForm = activeReplyFormId === comment.id;
-  const statusLabel = useMemo(() => getStatusLabel(comment.status), [comment.status]);
+  const statusLabel = useMemo(() => getStatusLabel(comment.status, t), [comment.status, t]);
   const replies = replyState?.items || [];
   const expanded = replyState?.expanded;
   const hasMoreReplies = replyState ? replyState.page < replyState.pages : false;
@@ -137,7 +126,7 @@ export default function AnimeCommentItem({
               </span>
               {comment.isAuthor && (
                 <span className="text-xs text-white bg-primary px-2 py-0.5 rounded-full">
-                  作者
+                  {t('author')}
                 </span>
               )}
               {statusLabel && comment.isOwner && (
@@ -154,7 +143,7 @@ export default function AnimeCommentItem({
 
         {/* 第二部分：评论内容 */}
         <div className="text-card-foreground leading-relaxed whitespace-pre-wrap break-words mb-3">
-          {isHiddenByModeration && <span className="text-muted-foreground italic">评论已被隐藏 </span>}
+          {isHiddenByModeration && <span className="text-muted-foreground italic">{t('commentHidden')} </span>}
           {comment.replyToUser?.nickname && (
             <span className="text-primary">@{comment.replyToUser.nickname} </span>
           )}
@@ -167,45 +156,37 @@ export default function AnimeCommentItem({
             ? formatLocation(comment.country, comment.province, comment.city, comment.location, comment.ipLocation)
             : '';
           const ipText = privacy.showIp ? formatIp(comment.ip) : '';
-          const deviceText = (privacy.showDevice || privacy.showBrowser)
-            ? formatDeviceAndBrowser(
-              privacy.showDevice ? comment.device : undefined,
-              privacy.showBrowser ? comment.browser : undefined
-            )
-            : '';
-          const hasLeft = Boolean(locationText || ipText);
-          const hasRight = Boolean(deviceText);
+          const hasMeta = Boolean(locationText || ipText)
+            || ((privacy.showDevice || privacy.showBrowser) && (comment.device || comment.browser));
 
-          if (!hasLeft && !hasRight) return null;
+          if (!hasMeta) return null;
 
           return (
-            <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">
-              <div className="flex items-center gap-1 flex-1">
-                {hasLeft && (
-                  <>
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span className="flex items-center gap-2">
-                      {locationText && <span>{locationText}</span>}
-                      {locationText && ipText && <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />}
-                      {ipText && <span>{ipText}</span>}
-                    </span>
-                  </>
-                )}
-              </div>
-
-              <div className="flex items-center gap-1 flex-1 justify-end">
-                {hasRight && (
-                  <>
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <span>{deviceText}</span>
-                  </>
-                )}
-              </div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground border-t border-border/50 pt-3">
+              {locationText && (
+                <span className="flex items-center gap-1 min-w-0 group/location">
+                  <svg className="w-3.5 h-3.5 text-primary/60 group-hover/location:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="truncate max-w-[14rem] sm:max-w-none">{locationText}</span>
+                </span>
+              )}
+              {ipText && (
+                <span className="flex items-center gap-1 min-w-0 group/ip">
+                  <svg className="w-3.5 h-3.5 text-primary/60 group-hover/ip:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+                    <circle cx="12" cy="12" r="3" strokeWidth={2} />
+                  </svg>
+                  <span className="truncate max-w-[10rem] sm:max-w-none">{ipText}</span>
+                </span>
+              )}
+              {(privacy.showDevice || privacy.showBrowser) && (comment.device || comment.browser) && (
+                <UAList 
+                  device={privacy.showDevice ? comment.device : undefined} 
+                  browser={privacy.showBrowser ? comment.browser : undefined}
+                />
+              )}
             </div>
           );
         })()}
@@ -222,7 +203,7 @@ export default function AnimeCommentItem({
             <svg className="w-4 h-4 group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
             </svg>
-            {showReplyForm ? '收起回复' : '回复'}
+            {showReplyForm ? t('collapseReply') : t('reply')}
           </button>
           {typeof comment.replyCount === 'number' && comment.replyCount > 0 && (
             <button
@@ -234,14 +215,14 @@ export default function AnimeCommentItem({
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                  收起 {comment.replyCount} 条回复
+                  {t('collapseReplies', { count: comment.replyCount })}
                 </>
               ) : (
                 <>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                  展开 {comment.replyCount} 条回复
+                  {t('expandReplies', { count: comment.replyCount })}
                 </>
               )}
             </button>
@@ -267,10 +248,10 @@ export default function AnimeCommentItem({
       {expanded && (
         <div className="mt-4 ml-8 md:ml-12 space-y-4">
           {replyState?.loading && (
-            <div className="text-sm text-muted-foreground">回复加载中...</div>
+            <div className="text-sm text-muted-foreground">{t('loading')}</div>
           )}
           {!replyState?.loading && replies.length === 0 && (
-            <div className="text-sm text-muted-foreground">暂无回复</div>
+            <div className="text-sm text-muted-foreground">{t('noReplies')}</div>
           )}
           {replies.map((child) => (
             <Card
@@ -296,12 +277,12 @@ export default function AnimeCommentItem({
                     </span>
                     {child.isAuthor && (
                       <span className="text-xs text-white bg-primary px-2 py-0.5 rounded-full">
-                        作者
+                        {t('author')}
                       </span>
                     )}
-                    {getStatusLabel(child.status) && child.isOwner && (
+                    {getStatusLabel(child.status, t) && child.isOwner && (
                       <span className="text-xs text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30 px-2 py-0.5 rounded-full">
-                        {getStatusLabel(child.status)}
+                        {getStatusLabel(child.status, t)}
                       </span>
                     )}
                   </div>
@@ -313,7 +294,7 @@ export default function AnimeCommentItem({
 
               {/* 第二部分：回复内容 */}
               <div className="text-card-foreground whitespace-pre-wrap break-words mb-3">
-                {child.isVisible === 0 && <span className="text-muted-foreground italic">评论已被隐藏 </span>}
+                {child.isVisible === 0 && <span className="text-muted-foreground italic">{t('commentHidden')} </span>}
                 {child.replyToUser?.nickname && (
                   <span className="text-primary">@{child.replyToUser.nickname} </span>
                 )}
@@ -326,45 +307,37 @@ export default function AnimeCommentItem({
                   ? formatLocation(child.country, child.province, child.city, child.location, child.ipLocation)
                   : '';
                 const ipText = privacy.showIp ? formatIp(child.ip) : '';
-                const deviceText = (privacy.showDevice || privacy.showBrowser)
-                  ? formatDeviceAndBrowser(
-                    privacy.showDevice ? child.device : undefined,
-                    privacy.showBrowser ? child.browser : undefined
-                  )
-                  : '';
-                const hasLeft = Boolean(locationText || ipText);
-                const hasRight = Boolean(deviceText);
+                const hasMeta = Boolean(locationText || ipText)
+                  || ((privacy.showDevice || privacy.showBrowser) && (child.device || child.browser));
 
-                if (!hasLeft && !hasRight) return null;
+                if (!hasMeta) return null;
 
                 return (
-                  <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-3">
-                    <div className="flex items-center gap-1 flex-1">
-                      {hasLeft && (
-                        <>
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          <span className="flex items-center gap-2">
-                            {locationText && <span>{locationText}</span>}
-                            {locationText && ipText && <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />}
-                            {ipText && <span>{ipText}</span>}
-                          </span>
-                        </>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1 flex-1 justify-end">
-                      {hasRight && (
-                        <>
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                          <span>{deviceText}</span>
-                        </>
-                      )}
-                    </div>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground border-t border-border/50 pt-3">
+                    {locationText && (
+                      <span className="flex items-center gap-1 min-w-0 group/location">
+                        <svg className="w-3.5 h-3.5 text-primary/60 group-hover/location:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span className="truncate max-w-[14rem] sm:max-w-none">{locationText}</span>
+                      </span>
+                    )}
+                    {ipText && (
+                <span className="flex items-center gap-1 min-w-0 group/ip">
+                  <svg className="w-3.5 h-3.5 text-primary/60 group-hover/ip:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+                    <circle cx="12" cy="12" r="3" strokeWidth={2} />
+                  </svg>
+                  <span className="truncate max-w-[10rem] sm:max-w-none">{ipText}</span>
+                </span>
+              )}
+                    {(privacy.showDevice || privacy.showBrowser) && (child.device || child.browser) && (
+                      <UAList 
+                        device={privacy.showDevice ? child.device : undefined} 
+                        browser={privacy.showBrowser ? child.browser : undefined}
+                      />
+                    )}
                   </div>
                 );
               })()}
@@ -374,7 +347,7 @@ export default function AnimeCommentItem({
                   onClick={() => onReply(child.id)}
                   className="text-xs text-primary hover:text-primary/80"
                 >
-                  回复
+                  {t('reply')}
                 </button>
                 {activeReplyFormId === child.id && (
                   <div className="mt-3">
@@ -400,7 +373,7 @@ export default function AnimeCommentItem({
               disabled={replyState?.loading}
               className="text-sm text-primary hover:text-primary/80"
             >
-              {replyState?.loading ? '加载中...' : '查看更多回复'}
+              {replyState?.loading ? t('loading') : t('loadMore')}
             </button>
           )}
         </div>

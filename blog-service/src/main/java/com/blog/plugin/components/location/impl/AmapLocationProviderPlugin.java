@@ -33,6 +33,16 @@ public class AmapLocationProviderPlugin implements LocationProviderPlugin, Plugi
         return StrUtil.isNotBlank(apiKey);
     }
     
+    /**
+     * 清理位置字段值，处理空字符串和空数组
+     */
+    private String cleanLocationValue(String value) {
+        if (StrUtil.isBlank(value) || "[]".equals(value)) {
+            return "";
+        }
+        return value;
+    }
+
     @Override
     public LocationInfo getLocationInfo(String ip) {
         if (StrUtil.isBlank(apiKey)) {
@@ -51,14 +61,22 @@ public class AmapLocationProviderPlugin implements LocationProviderPlugin, Plugi
                 return null;
             }
 
+            // 检查是否查询到位置信息（空数组表示未查询到）
+            String province = cleanLocationValue(jsonObject.getStr("province"));
+            String city = cleanLocationValue(jsonObject.getStr("city"));
+            String district = cleanLocationValue(jsonObject.getStr("district"));
+
+            if (StrUtil.isBlank(province)) {
+                log.debug("高德地图未查询到位置信息, IP: {}", ip);
+                return null;
+            }
+
             LocationInfo locationInfo = new LocationInfo();
             locationInfo.setCountry("中国");
-            locationInfo.setProvince(jsonObject.getStr("province", ""));
-            locationInfo.setCity(jsonObject.getStr("city", ""));
-            locationInfo.setDistrict(jsonObject.getStr("district", ""));
-            locationInfo.setLocation(jsonObject.getStr("province", "") +
-                    jsonObject.getStr("city", "") +
-                    jsonObject.getStr("district", ""));
+            locationInfo.setProvince(province);
+            locationInfo.setCity(city);
+            locationInfo.setDistrict(district);
+            locationInfo.setLocation(province + city + district);
             locationInfo.setIp(locationInfo.getLocation());
 
             return locationInfo;

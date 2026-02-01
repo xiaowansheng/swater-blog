@@ -9,6 +9,7 @@ import { formatDate, getFullUrl } from '@/lib/utils/format';
 import ImagePreview from '@/components/ImagePreview';
 import { useSiteConfig } from '@/lib/context/SiteConfigContext';
 import { Card } from '@/components/ui/Card';
+import { UAList } from '@/components/common/UAIcon';
 
 // 格式化位置信息
 function formatLocation(
@@ -36,14 +37,6 @@ function formatLocation(
     parts.push(city);
   }
   return parts.length > 0 ? parts.join(' · ') : '';
-}
-
-// 格式化设备和浏览器信息
-function formatDeviceAndBrowser(device: string | undefined, browser: string | undefined): string {
-  const parts = [];
-  if (device) parts.push(device);
-  if (browser) parts.push(browser);
-  return parts.join(' · ');
 }
 
 function formatIp(ip: string | undefined): string {
@@ -254,15 +247,22 @@ export default function MomentItem({ moment }: MomentItemProps) {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-0.5 bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
 
           <div className="flex items-center gap-1.5 group/stat">
-            <span className="text-lg group-hover/stat:scale-125 transition-transform duration-300">👀</span>
+            <svg className="w-4 h-4 text-primary/60 group-hover/stat:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
             <span className="group-hover/stat:text-foreground/80 transition-colors">{moment.viewCount || 0}</span>
           </div>
           <div className="flex items-center gap-1.5 group/stat">
-            <span className="text-lg group-hover/stat:scale-125 transition-transform duration-300">❤️</span>
+            <svg className="w-4 h-4 text-red-500/70 group-hover/stat:text-red-500 transition-colors" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
             <span className="group-hover/stat:text-foreground/80 transition-colors">{moment.likeCount || 0}</span>
           </div>
           <div className="flex items-center gap-1.5 group/stat">
-            <span className="text-lg group-hover/stat:scale-125 transition-transform duration-300">💬</span>
+            <svg className="w-4 h-4 text-accent/60 group-hover/stat:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
             <span className="group-hover/stat:text-foreground/80 transition-colors">{moment.commentCount || 0}</span>
           </div>
         </div>
@@ -273,50 +273,40 @@ export default function MomentItem({ moment }: MomentItemProps) {
             ? formatLocation(moment.country, moment.province, moment.city, moment.location, moment.ipLocation)
             : '';
           const ipText = privacy.showIp ? formatIp(moment.ip) : '';
-          const deviceText = (privacy.showDevice || privacy.showBrowser)
-            ? formatDeviceAndBrowser(
-              privacy.showDevice ? moment.device : undefined,
-              privacy.showBrowser ? moment.browser : undefined
-            )
-            : '';
-          const hasLeft = Boolean(locationText || ipText);
-          const hasRight = Boolean(deviceText);
+          const hasMeta = Boolean(locationText || ipText)
+            || ((privacy.showDevice || privacy.showBrowser) && (moment.device || moment.browser));
 
-          if (!hasLeft && !hasRight) return null;
+          if (!hasMeta) return null;
 
           return (
-          <div className="flex items-center justify-between mt-3 pt-3 text-xs text-muted-foreground border-t border-border/30 relative">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 pt-3 text-xs text-muted-foreground border-t border-border/30 relative">
             {/* Decorations */}
             <div className="absolute top-2 left-4 text-primary/10 text-[10px]">*</div>
             <div className="absolute top-2 right-4 text-accent/10 text-[10px]">*</div>
 
-            {/* Left: Location/IP */}
-            {hasLeft && (
-              <div className="flex items-center gap-1.5 flex-1 group/location">
+            {locationText && (
+              <span className="flex items-center gap-1 min-w-0 group/location">
                 <svg className="w-3.5 h-3.5 text-primary/60 group-hover/location:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <div className="flex items-center gap-2">
-                  {locationText && (
-                    <span className="group-hover/location:text-foreground/80 transition-colors">{locationText}</span>
-                  )}
-                  {locationText && ipText && <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />}
-                  {ipText && (
-                    <span className="group-hover/location:text-foreground/80 transition-colors">{ipText}</span>
-                  )}
-                </div>
-              </div>
+                <span className="group-hover/location:text-foreground/80 transition-colors truncate max-w-[14rem] sm:max-w-none">{locationText}</span>
+              </span>
             )}
-
-            {/* Right: Device/Browser */}
-            {hasRight && (
-              <div className="flex items-center gap-1.5 flex-1 justify-end group/device">
-                <svg className="w-3.5 h-3.5 text-accent/60 group-hover/device:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            {ipText && (
+              <span className="flex items-center gap-1 min-w-0 group/ip">
+                <svg className="w-3.5 h-3.5 text-primary/60 group-hover/ip:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+                  <circle cx="12" cy="12" r="3" strokeWidth={2} />
                 </svg>
-                <span className="group-hover/device:text-foreground/80 transition-colors">{deviceText}</span>
-              </div>
+                <span className="truncate max-w-[10rem] sm:max-w-none">{ipText}</span>
+              </span>
+            )}
+            {(privacy.showDevice || privacy.showBrowser) && (moment.device || moment.browser) && (
+              <UAList 
+                device={privacy.showDevice ? moment.device : undefined} 
+                browser={privacy.showBrowser ? moment.browser : undefined}
+              />
             )}
           </div>
           );

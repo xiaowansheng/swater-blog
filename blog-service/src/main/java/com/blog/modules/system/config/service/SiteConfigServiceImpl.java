@@ -13,6 +13,7 @@ import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
 import com.blog.modules.system.config.model.dto.config.ComponentConfigDTO;
 import com.blog.modules.system.config.model.vo.ConfigVO;
 import com.blog.shared.util.JsonUtil;
+import com.blog.infrastructure.revalidate.RevalidateClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -21,14 +22,18 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 @Slf4j
 @Service
 public class SiteConfigServiceImpl implements SiteConfigService {
-    
+
     @Autowired
     private ConfigService configService;
-    
+
+    @Autowired(required = false)
+    private RevalidateClient revalidateClient;
+
     // 配置key常量
     private static final String KEY_SITE = "site";
     private static final String KEY_AUTHOR = "author";
@@ -40,7 +45,10 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     private static final String KEY_UPLOAD = "upload";
     private static final String KEY_EMAIL = "email";
     private static final String KEY_COMPONENT = "component.enabled";
-    
+
+    // Next.js revalidate tags
+    private static final List<String> SITE_CONFIG_TAGS = List.of("site:config");
+
     // ========== 通用方法 ==========
     
     private <T> T getConfig(String key, Class<T> clazz) {
@@ -64,6 +72,15 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         }
     }
     
+    /**
+     * 触发 Next.js 缓存重新验证
+     */
+    private void revalidateSiteConfig() {
+        if (revalidateClient != null) {
+            revalidateClient.revalidateTags(SITE_CONFIG_TAGS);
+        }
+    }
+
     @Transactional(rollbackFor = Exception.class)
     protected void updateConfig(String key, Object config) {
         String jsonValue = JsonUtil.toJson(config);
@@ -205,6 +222,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Transactional
     public void updatePrivacyConfig(PrivacyConfigDTO config) {
         updateConfig(KEY_PRIVACY, config);
+        revalidateSiteConfig();
     }
     
     @Override

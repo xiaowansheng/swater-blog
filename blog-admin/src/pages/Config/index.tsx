@@ -86,6 +86,26 @@ const ConfigPage: React.FC = () => {
   const [unsavedTabs, setUnsavedTabs] = useState<Set<string>>(new Set());
   const [originalValues, setOriginalValues] = useState<Record<string, any>>({});
 
+  const defaultPrivacyConfig = {
+    showIp: false,
+    showLocation: true,
+    showDevice: false,
+    showBrowser: false,
+  };
+
+  const normalizeBooleanValue = (value: any, defaultValue = false): boolean => {
+    if (value === null || value === undefined) return defaultValue;
+    if (typeof value === "boolean") return value;
+    if (typeof value === "number") return value === 1;
+    if (typeof value === "string") {
+      const trimmed = value.trim().toLowerCase();
+      if (!trimmed) return defaultValue;
+      if (trimmed === "true" || trimmed === "1") return true;
+      if (trimmed === "false" || trimmed === "0") return false;
+    }
+    return Boolean(value);
+  };
+
   const [siteForm] = Form.useForm();
   const [authorForm] = Form.useForm();
   const [coverForm] = Form.useForm();
@@ -200,7 +220,6 @@ const ConfigPage: React.FC = () => {
         configApi.getSiteConfig(),
         configApi.getAuthorConfig(),
         configApi.getCoverConfig(),
-        configApi.getSocialConfig(),
         configApi.getPrivacyConfig(),
         configApi.getCommentConfig(),
         configApi.getNotifyConfig(),
@@ -236,23 +255,99 @@ const ConfigPage: React.FC = () => {
         }, {} as any);
       };
 
+      const normalizePrivacyConfig = (config: any) => ({
+        showIp: normalizeBooleanValue(config?.showIp, defaultPrivacyConfig.showIp),
+        showLocation: normalizeBooleanValue(config?.showLocation, defaultPrivacyConfig.showLocation),
+        showDevice: normalizeBooleanValue(config?.showDevice, defaultPrivacyConfig.showDevice),
+        showBrowser: normalizeBooleanValue(config?.showBrowser, defaultPrivacyConfig.showBrowser),
+      });
+
+      const normalizeBooleanConfig = (
+        config: any,
+        keys: string[],
+        defaults: Record<string, boolean> = {}
+      ) => {
+        const processed = processConfig(config);
+        keys.forEach((key) => {
+          processed[key] = normalizeBooleanValue(processed[key], defaults[key] ?? false);
+        });
+        return processed;
+      };
+
+      const normalizeNestedVisibility = (group: any, keys: string[]) => {
+        const source = group ?? {};
+        const normalized = { ...source };
+        keys.forEach((key) => {
+          const item = source?.[key] ?? {};
+          normalized[key] = {
+            ...item,
+            visible: normalizeBooleanValue(item?.visible, false),
+          };
+        });
+        return normalized;
+      };
+
+      const normalizedPrivacy = normalizePrivacyConfig(privacy);
+      const normalizedComment = normalizeBooleanConfig(comment, [
+        "enabled",
+        "needApproval",
+        "allowAnonymous",
+        "emailNotification",
+      ]);
+      const normalizedNotify = normalizeBooleanConfig(notify, [
+        "loginNotify",
+        "commentNotify",
+        "replyNotify",
+        "guestbookNotify",
+        "friendLinkNotify",
+      ]);
+      const normalizedComponent = normalizeBooleanConfig(
+        component,
+        ["articleCommentEnabled", "talkCommentEnabled", "guestbookMessageEnabled"],
+        {
+          articleCommentEnabled: true,
+          talkCommentEnabled: true,
+          guestbookMessageEnabled: true,
+        }
+      );
+
+      const normalizedAuthor = processConfig(author);
+      normalizedAuthor.contactMethods = normalizeNestedVisibility(
+        normalizedAuthor.contactMethods,
+        ["email", "qq", "wechat"]
+      );
+      normalizedAuthor.socialLinks = normalizeNestedVisibility(
+        normalizedAuthor.socialLinks,
+        [
+          "github",
+          "gitee",
+          "weibo",
+          "zhihu",
+          "bilibili",
+          "twitter",
+          "telegram",
+          "facebook",
+          "youtube",
+        ]
+      );
+
       siteForm.setFieldsValue(processConfig(site));
-      authorForm.setFieldsValue(processConfig(author));
+      authorForm.setFieldsValue(normalizedAuthor);
       coverForm.setFieldsValue(processConfig(cover));
-      privacyForm.setFieldsValue(processConfig(privacy));
-      commentForm.setFieldsValue(processConfig(comment));
-      notifyForm.setFieldsValue(processConfig(notify));
-      componentForm.setFieldsValue(processConfig(component));
+      privacyForm.setFieldsValue(normalizedPrivacy);
+      commentForm.setFieldsValue(normalizedComment);
+      notifyForm.setFieldsValue(normalizedNotify);
+      componentForm.setFieldsValue(normalizedComponent);
       
       // 保存原始值用于撤销
       setOriginalValues({
         site: processConfig(site),
-        author: processConfig(author),
+        author: normalizedAuthor,
         cover: processConfig(cover),
-        privacy: processConfig(privacy),
-        comment: processConfig(comment),
-        notify: processConfig(notify),
-        component: processConfig(component),
+        privacy: normalizedPrivacy,
+        comment: normalizedComment,
+        notify: normalizedNotify,
+        component: normalizedComponent,
       });
       // uploadForm.setFieldsValue(upload);
       // emailForm.setFieldsValue(email);
