@@ -67,7 +67,10 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
                     .or().like(Article::getContent, keyword)
                     .or().like(Article::getExcerpt, keyword));
         }
-        wrapper.orderByDesc(Article::getIsTop);
+        // 只有首页查询（无分类、无标签）才按置顶排序，分类/标签查询按时间排序
+        if (categoryId == null && tagId == null) {
+            wrapper.orderByDesc(Article::getIsTop);
+        }
         wrapper.orderByDesc(Article::getPublishedAt);
 
         Page<Article> result = articleMapper.selectPage(pageParam, wrapper);
