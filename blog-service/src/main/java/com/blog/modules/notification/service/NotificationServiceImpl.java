@@ -134,10 +134,6 @@ public class NotificationServiceImpl implements NotificationService {
         Long notificationId = create(dto);
         
         SysNotification notification = sysNotificationMapper.selectById(notificationId);
-        notification.setStatus("QUEUED");
-        notification.setIsRead(0);
-        sysNotificationMapper.updateById(notification);
-
         NotificationMessage message = new NotificationMessage();
         message.setNotificationId(notificationId);
         message.setUserId(userId);
@@ -147,10 +143,7 @@ public class NotificationServiceImpl implements NotificationService {
         message.setTimestamp(LocalDateTime.now());
         message.setData(Map.of());
 
-        boolean queued = mqService.sendNotification(message);
-        if (!queued) {
-            notification.setStatus("FAILED");
-            sysNotificationMapper.updateById(notification);
+        if (!enqueueMessage(notification, message)) {
             log.warn("通知消息入队失败，notificationId: {}", notificationId);
         }
     }
@@ -175,13 +168,54 @@ public class NotificationServiceImpl implements NotificationService {
             notification.setIsRead(0);
             notification.setSentTime(LocalDateTime.now());
             notification.setSendCount(notification.getSendCount() == null ? 1 : notification.getSendCount() + 1);
+            notification.setNextRetryTime(null);
             sysNotificationMapper.updateById(notification);
         } catch (Exception e) {
             int sendCount = notification.getSendCount() == null ? 0 : notification.getSendCount();
             notification.setSendCount(sendCount + 1);
             notification.setStatus("FAILED");
+            notification.setNextRetryTime(nextRetryTime(notification));
             sysNotificationMapper.updateById(notification);
             log.error("通知消息处理失败，notificationId: {}", message.getNotificationId(), e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void retryNotification(Long id) {
+        SysNotification notification = sysNotificationMapper.selectById(id);
+        if (notification == null) {
+            return;
+        }
+        if ("SENT".equals(notification.getStatus())) {
+            return;
+        }
+        NotificationMessage message = buildMessage(notification);
+        if (!enqueueMessage(notification, message)) {
+            log.warn("通知重试入队失败，notificationId: {}", id);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void retryFailedNotifications() {
+        LocalDateTime now = LocalDateTime.now();
+        LambdaQueryWrapper<SysNotification> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysNotification::getStatus, "FAILED")
+                .and(w -> w.isNull(SysNotification::getNextRetryTime).or().le(SysNotification::getNextRetryTime, now))
+                .and(w -> w.isNull(SysNotification::getMaxRetryCount)
+                        .or()
+                        .isNull(SysNotification::getSendCount)
+                        .or()
+                        .lt(SysNotification::getSendCount, SysNotification::getMaxRetryCount))
+                .orderByAsc(SysNotification::getNextRetryTime);
+
+        List<SysNotification> notifications = sysNotificationMapper.selectList(wrapper);
+        for (SysNotification notification : notifications) {
+            NotificationMessage message = buildMessage(notification);
+            if (!enqueueMessage(notification, message)) {
+                log.warn("通知重试入队失败，notificationId: {}", notification.getId());
+            }
         }
     }
 
@@ -202,6 +236,39 @@ public class NotificationServiceImpl implements NotificationService {
                 log.error("通知渠道 {} 发送失败", channel.getId(), e);
             }
         }
+    }
+
+    private NotificationMessage buildMessage(SysNotification notification) {
+        NotificationMessage message = new NotificationMessage();
+        message.setNotificationId(notification.getId());
+        message.setUserId(notification.getUserId());
+        message.setType(notification.getType());
+        message.setTitle(notification.getTitle());
+        message.setContent(notification.getContent());
+        message.setTimestamp(LocalDateTime.now());
+        message.setData(Map.of());
+        return message;
+    }
+
+    private boolean enqueueMessage(SysNotification notification, NotificationMessage message) {
+        boolean queued = mqService.sendNotification(message);
+        if (queued) {
+            notification.setStatus("QUEUED");
+            notification.setIsRead(0);
+            notification.setNextRetryTime(null);
+            sysNotificationMapper.updateById(notification);
+            return true;
+        }
+        notification.setStatus("FAILED");
+        notification.setNextRetryTime(nextRetryTime(notification));
+        sysNotificationMapper.updateById(notification);
+        return false;
+    }
+
+    private LocalDateTime nextRetryTime(SysNotification notification) {
+        int sendCount = notification.getSendCount() == null ? 0 : notification.getSendCount();
+        int delaySeconds = Math.min(60 * (sendCount + 1), 3600);
+        return LocalDateTime.now().plusSeconds(delaySeconds);
     }
 
     private NotificationVO convertToVO(SysNotification notification) {

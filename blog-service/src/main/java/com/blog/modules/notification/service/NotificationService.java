@@ -18,5 +18,8 @@ public interface NotificationService {
     void delete(Long id);
 
     void sendNotification(Long userId, String type, String title, String content);
-}
 
+    void retryNotification(Long id);
+
+    void retryFailedNotifications();
+}

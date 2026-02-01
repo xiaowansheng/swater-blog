@@ -66,5 +66,12 @@ public class NotificationController {
         notificationService.delete(id);
         return Result.success();
     }
+
+    @PutMapping("/{id}/retry")
+    @ApiOperation(name = "重试通知发送", type = ApiOperationType.UPDATE, description = "手动重试通知发送")
+    public Result<Void> retry(@PathVariable Long id) {
+        notificationService.retryNotification(id);
+        return Result.success();
+    }
 }
 
