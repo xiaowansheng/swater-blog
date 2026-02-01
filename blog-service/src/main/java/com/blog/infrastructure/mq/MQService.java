@@ -1,10 +1,10 @@
 package com.blog.infrastructure.mq;
 
 
+import com.blog.modules.message.model.message.VerificationCodeMessage;
 import com.blog.modules.notification.model.message.NotificationMessage;
 import com.blog.plugin.components.mq.MessageQueuePlugin;
 import com.blog.plugin.components.mq.MessageQueuePluginFactory;
-import com.blog.shared.constant.ExchangeConstant;
 import com.blog.shared.constant.QueueConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,37 +17,49 @@ public class MQService {
     @Autowired(required = false)
     private MessageQueuePluginFactory mqPluginFactory;
     
-    public void sendNotification(NotificationMessage message) {
+    public boolean sendNotification(NotificationMessage message) {
         if (mqPluginFactory == null) {
             log.warn("MQ插件工厂未配置，跳过消息发送");
-            return;
+            return false;
         }
         
-        MessageQueuePlugin plugin = mqPluginFactory.getActivePlugin();
-        
-        if (plugin == null) {
-            log.warn("没有启用的MQ插件，跳过消息发送");
-            return;
+        MessageQueuePlugin plugin;
+        try {
+            plugin = mqPluginFactory.getActivePlugin();
+        } catch (Exception e) {
+            log.warn("没有启用的MQ插件，跳过消息发送", e);
+            return false;
         }
         
         try {
-            String routingKey = getRoutingKey(message.getType());
-            plugin.send(ExchangeConstant.NOTIFICATION_EXCHANGE, routingKey, message);
+            plugin.sendToQueue(QueueConstant.NOTIFICATION_QUEUE, message);
+            return true;
         } catch (Exception e) {
             log.error("发送通知消息到MQ失败，插件 {}", plugin, e);
+            return false;
         }
     }
-    
-    private String getRoutingKey(String type) {
-        switch (type) {
-            case "comment":
-                return QueueConstant.COMMENT_NOTIFICATION_ROUTING_KEY;
-            case "guestbook":
-                return QueueConstant.GUESTBOOK_NOTIFICATION_ROUTING_KEY;
-            case "login":
-                return QueueConstant.LOGIN_NOTIFICATION_ROUTING_KEY;
-            default:
-                return QueueConstant.COMMENT_NOTIFICATION_ROUTING_KEY;
+
+    public boolean sendVerificationCode(VerificationCodeMessage message) {
+        if (mqPluginFactory == null) {
+            log.warn("MQ插件工厂未配置，跳过验证码消息发送");
+            return false;
+        }
+
+        MessageQueuePlugin plugin;
+        try {
+            plugin = mqPluginFactory.getActivePlugin();
+        } catch (Exception e) {
+            log.warn("没有启用的MQ插件，跳过验证码消息发送", e);
+            return false;
+        }
+
+        try {
+            plugin.sendToQueue(QueueConstant.VERIFICATION_CODE_QUEUE, message);
+            return true;
+        } catch (Exception e) {
+            log.error("发送验证码消息到MQ失败，插件 {}", plugin, e);
+            return false;
         }
     }
 }

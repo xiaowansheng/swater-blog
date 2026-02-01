@@ -8,8 +8,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.shared.PageResult;
 import com.blog.modules.notification.mapper.SysNotificationMapper;
 import com.blog.modules.user.mapper.UserMapper;
+import com.blog.infrastructure.mq.MQService;
 import com.blog.modules.notification.model.dto.NotificationDTO;
 import com.blog.modules.notification.model.entity.SysNotification;
+import com.blog.modules.notification.model.message.NotificationMessage;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.notification.model.vo.NotificationVO;
 import com.blog.modules.notification.service.NotificationService;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 @Slf4j
 @Service
@@ -35,6 +38,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Autowired(required = false)
     private NotificationChannelFactory notificationChannelFactory;
+
+    @Autowired
+    private MQService mqService;
 
     @Override
     @Transactional
@@ -128,12 +134,55 @@ public class NotificationServiceImpl implements NotificationService {
         Long notificationId = create(dto);
         
         SysNotification notification = sysNotificationMapper.selectById(notificationId);
-        notification.setStatus("SENT");
+        notification.setStatus("QUEUED");
         notification.setIsRead(0);
-        notification.setSentTime(LocalDateTime.now());
         sysNotificationMapper.updateById(notification);
 
-        dispatchChannels(userId, type, title, content);
+        NotificationMessage message = new NotificationMessage();
+        message.setNotificationId(notificationId);
+        message.setUserId(userId);
+        message.setType(type);
+        message.setTitle(title);
+        message.setContent(content);
+        message.setTimestamp(LocalDateTime.now());
+        message.setData(Map.of());
+
+        boolean queued = mqService.sendNotification(message);
+        if (!queued) {
+            notification.setStatus("FAILED");
+            sysNotificationMapper.updateById(notification);
+            log.warn("通知消息入队失败，notificationId: {}", notificationId);
+        }
+    }
+
+    @Transactional
+    public void processNotificationMessage(NotificationMessage message) {
+        if (message == null || message.getNotificationId() == null) {
+            log.warn("通知消息为空或缺少ID，跳过处理");
+            return;
+        }
+
+        SysNotification notification = sysNotificationMapper.selectById(message.getNotificationId());
+        if (notification == null) {
+            log.warn("未找到通知记录，notificationId: {}", message.getNotificationId());
+            return;
+        }
+
+        try {
+            dispatchChannels(message.getUserId(), message.getType(), message.getTitle(), message.getContent());
+
+            notification.setStatus("SENT");
+            notification.setIsRead(0);
+            notification.setSentTime(LocalDateTime.now());
+            notification.setSendCount(notification.getSendCount() == null ? 1 : notification.getSendCount() + 1);
+            sysNotificationMapper.updateById(notification);
+        } catch (Exception e) {
+            int sendCount = notification.getSendCount() == null ? 0 : notification.getSendCount();
+            notification.setSendCount(sendCount + 1);
+            notification.setStatus("FAILED");
+            sysNotificationMapper.updateById(notification);
+            log.error("通知消息处理失败，notificationId: {}", message.getNotificationId(), e);
+        }
     }
 
     private void dispatchChannels(Long userId, String type, String title, String content) {

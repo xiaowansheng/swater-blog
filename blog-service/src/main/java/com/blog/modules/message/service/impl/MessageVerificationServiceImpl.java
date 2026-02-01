@@ -1,6 +1,8 @@
 package com.blog.modules.message.service.impl;
 
 import com.blog.infrastructure.mail.EmailService;
+import com.blog.infrastructure.mq.MQService;
+import com.blog.modules.message.model.message.VerificationCodeMessage;
 import com.blog.modules.message.service.MessageVerificationService;
 import com.blog.shared.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,9 @@ public class MessageVerificationServiceImpl implements MessageVerificationServic
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private MQService mqService;
 
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -53,11 +58,16 @@ public class MessageVerificationServiceImpl implements MessageVerificationServic
         variables.put("code", code);
         variables.put("expiryText", "The verification code is valid for 5 minutes. Please use it as soon as possible.");
 
-        try {
-            emailService.sendEmailWithTemplate(email, subject, templateName, variables);
-        } catch (Exception e) {
-            log.error("Failed to send verification email", e);
-            throw new BusinessException(500, "Failed to send verification email");
+        VerificationCodeMessage message = new VerificationCodeMessage();
+        message.setEmail(email);
+        message.setSubject(subject);
+        message.setTemplateName(templateName);
+        message.setVariables(variables);
+
+        boolean queued = mqService.sendVerificationCode(message);
+        if (!queued) {
+            redisTemplate.delete(key);
+            throw new BusinessException(500, "Failed to enqueue verification email");
         }
     }
 
@@ -80,5 +90,26 @@ public class MessageVerificationServiceImpl implements MessageVerificationServic
         int floor = bound / 10;
         int code = secureRandom.nextInt(bound - floor) + floor;
         return String.valueOf(code);
+    }
+
+    public void processVerificationMessage(VerificationCodeMessage message) {
+        if (message == null) {
+            log.warn("验证码消息为空，跳过处理");
+            return;
+        }
+        if (!emailService.isConfigured()) {
+            log.warn("邮件服务未配置，跳过验证码邮件发送");
+            return;
+        }
+        try {
+            emailService.sendEmailWithTemplate(
+                    message.getEmail(),
+                    message.getSubject(),
+                    message.getTemplateName(),
+                    message.getVariables() == null ? new HashMap<>() : message.getVariables()
+            );
+        } catch (Exception e) {
+            log.error("Failed to send verification email", e);
+        }
     }
 }

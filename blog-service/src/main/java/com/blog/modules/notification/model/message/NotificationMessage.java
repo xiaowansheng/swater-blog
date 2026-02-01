@@ -9,6 +9,7 @@ import java.util.Map;
 public class NotificationMessage implements Serializable {
     private static final long serialVersionUID = 1L;
     
+    private Long notificationId;
     private String type;
     private Long userId;
     private String title;
@@ -16,4 +17,3 @@ public class NotificationMessage implements Serializable {
     private LocalDateTime timestamp;
     private Map<String, Object> data;
 }
-
