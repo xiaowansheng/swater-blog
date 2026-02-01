@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service
 public class AboutPublicServiceImpl implements AboutPublicService {
-    private static final String ABOUT_CONFIG_KEY = "about.content";
+    private static final String ABOUT_CONFIG_KEY = "about";
 
     @Autowired
     private ConfigPublicService configPublicService;

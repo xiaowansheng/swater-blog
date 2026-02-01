@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AboutServiceImpl implements AboutService {
-    private static final String ABOUT_CONFIG_KEY = "about.content";
+    private static final String ABOUT_CONFIG_KEY = "about";
 
     @Autowired
     private ConfigService configService;
@@ -40,7 +40,7 @@ public class AboutServiceImpl implements AboutService {
             // 创建新配置
             com.blog.modules.system.config.model.dto.ConfigDTO configDTO = new com.blog.modules.system.config.model.dto.ConfigDTO();
             configDTO.setConfigKey(ABOUT_CONFIG_KEY);
-            configDTO.setName("关于页面内容");
+            configDTO.setName(ABOUT_CONFIG_KEY);
             configDTO.setValue(dto.getContent());
             configDTO.setGroupName("content");
             configDTO.setType("text");
