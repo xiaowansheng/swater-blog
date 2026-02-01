@@ -73,5 +73,12 @@ public class NotificationController {
         notificationService.retryNotification(id);
         return Result.success();
     }
+
+    @PutMapping("/retry")
+    @ApiOperation(name = "批量重试通知发送", type = ApiOperationType.UPDATE, description = "批量重试通知发送")
+    public Result<Void> retryBatch(@RequestBody java.util.List<Long> ids) {
+        notificationService.retryNotifications(ids);
+        return Result.success();
+    }
 }
 

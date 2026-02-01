@@ -21,5 +21,7 @@ public interface NotificationService {
 
     void retryNotification(Long id);
 
+    void retryNotifications(java.util.List<Long> ids);
+
     void retryFailedNotifications();
 }

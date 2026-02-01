@@ -21,3 +21,11 @@ export const deleteNotification = (id: number): Promise<void> => {
   return request.delete(`/admin/notification/${id}`)
 }
 
+export const retryNotification = (id: number): Promise<void> => {
+  return request.put(`/admin/notification/${id}/retry`)
+}
+
+export const retryNotifications = (ids: number[]): Promise<void> => {
+  return request.put('/admin/notification/retry', ids)
+}
+

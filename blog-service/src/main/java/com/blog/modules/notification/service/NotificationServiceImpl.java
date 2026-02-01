@@ -198,6 +198,20 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
+    public void retryNotifications(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        for (Long id : ids) {
+            if (id == null) {
+                continue;
+            }
+            retryNotification(id);
+        }
+    }
+
+    @Override
+    @Transactional
     public void retryFailedNotifications() {
         LocalDateTime now = LocalDateTime.now();
         LambdaQueryWrapper<SysNotification> wrapper = new LambdaQueryWrapper<>();

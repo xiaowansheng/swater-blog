@@ -192,9 +192,11 @@ export interface Notification {
   title: string
   content: string
   isRead: number
+  status?: string
   targetType?: string
   targetId?: number
   createTime: string
+  sentTime?: string
 }
 
 // 友链相关
