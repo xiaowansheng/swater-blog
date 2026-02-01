@@ -25,15 +25,16 @@ public class ArchivePublicController {
         return Result.success(archives);
     }
 
-    @GetMapping("/{year}/{month}")
-    @ApiOperation(name = "获取归档文章列表", type = ApiOperationType.QUERY, description = "根据年份和月份获取文章列表")
-    public Result<PageResult<ArticleVO>> getArticlesByYearAndMonth(
-            @PathVariable Integer year,
-            @PathVariable Integer month,
-            @RequestParam(required = false) Long page,
-            @RequestParam(required = false) Long size) {
-        PageResult<ArticleVO> result = archivePublicService.getArticlesByYearAndMonth(year, month, page, size);
-        return Result.success(result);
-    }
+    // 前台暂未使用此接口，先注释
+    // @GetMapping("/{year}/{month}")
+    // @ApiOperation(name = "获取归档文章列表", type = ApiOperationType.QUERY, description = "根据年份和月份获取文章列表")
+    // public Result<PageResult<ArticleVO>> getArticlesByYearAndMonth(
+    //         @PathVariable Integer year,
+    //         @PathVariable Integer month,
+    //         @RequestParam(required = false) Long page,
+    //         @RequestParam(required = false) Long size) {
+    //     PageResult<ArticleVO> result = archivePublicService.getArticlesByYearAndMonth(year, month, page, size);
+    //     return Result.success(result);
+    // }
 }
 
