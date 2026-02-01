@@ -217,15 +217,13 @@ public class NotificationServiceImpl implements NotificationService {
         LambdaQueryWrapper<SysNotification> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysNotification::getStatus, "FAILED")
                 .and(w -> w.isNull(SysNotification::getNextRetryTime).or().le(SysNotification::getNextRetryTime, now))
-                .and(w -> w.isNull(SysNotification::getMaxRetryCount)
-                        .or()
-                        .isNull(SysNotification::getSendCount)
-                        .or()
-                        .lt(SysNotification::getSendCount, SysNotification::getMaxRetryCount))
                 .orderByAsc(SysNotification::getNextRetryTime);
 
         List<SysNotification> notifications = sysNotificationMapper.selectList(wrapper);
         for (SysNotification notification : notifications) {
+            if (!shouldRetry(notification)) {
+                continue;
+            }
             NotificationMessage message = buildMessage(notification);
             if (!enqueueMessage(notification, message)) {
                 log.warn("通知重试入队失败，notificationId: {}", notification.getId());
@@ -283,6 +281,18 @@ public class NotificationServiceImpl implements NotificationService {
         int sendCount = notification.getSendCount() == null ? 0 : notification.getSendCount();
         int delaySeconds = Math.min(60 * (sendCount + 1), 3600);
         return LocalDateTime.now().plusSeconds(delaySeconds);
+    }
+
+    private boolean shouldRetry(SysNotification notification) {
+        Integer maxRetryCount = notification.getMaxRetryCount();
+        Integer sendCount = notification.getSendCount();
+        if (maxRetryCount == null) {
+            return true;
+        }
+        if (sendCount == null) {
+            return true;
+        }
+        return sendCount < maxRetryCount;
     }
 
     private NotificationVO convertToVO(SysNotification notification) {
