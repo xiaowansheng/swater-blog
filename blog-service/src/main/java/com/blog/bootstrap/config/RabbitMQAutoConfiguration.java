@@ -8,10 +8,10 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * RabbitMQ 条件配置类
- * 只有当 mq.provider.type = rabbitmq 时才启用 RabbitMQ 相关配置
+ * 只有当 plugin.mq.active = rabbitmq 时才启用 RabbitMQ 相关配置
  */
 @Configuration
-@ConditionalOnProperty(name = "mq.provider.type", havingValue = "rabbitmq")
+@ConditionalOnProperty(name = "plugin.mq.active", havingValue = "rabbitmq")
 public class RabbitMQAutoConfiguration {
 
     /**
