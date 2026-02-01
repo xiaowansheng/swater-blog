@@ -14,6 +14,8 @@ public class RevalidateTags {
     public static final List<String> FRIENDLINK_LIST = List.of("friendlink:list");
     public static final List<String> ARCHIVE_LIST = List.of("archive:list");
     public static final List<String> SITE_CONFIG = List.of("site:config");
+    public static final List<String> CATEGORY_LIST = List.of("category:list");
+    public static final List<String> TAG_LIST = List.of("tag:list");
 
     private RevalidateTags() {}
 }

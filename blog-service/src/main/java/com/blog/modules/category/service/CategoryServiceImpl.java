@@ -13,6 +13,7 @@ import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.KeyUtil;
 import com.blog.infrastructure.revalidate.RevalidateClient;
+import com.blog.infrastructure.revalidate.RevalidateTags;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -135,8 +136,7 @@ public class CategoryServiceImpl implements CategoryService {
             return;
         }
         EventUtil.publishEventAfterCommit(() -> {
-            List<String> tags = new ArrayList<>();
-            tags.add("category:list");
+            List<String> tags = new ArrayList<>(RevalidateTags.CATEGORY_LIST);
             if (category != null) {
                 if (category.getId() != null) {
                     tags.add("category:detail:id:" + category.getId());

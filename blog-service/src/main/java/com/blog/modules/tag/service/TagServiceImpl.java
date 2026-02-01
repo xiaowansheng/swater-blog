@@ -13,6 +13,7 @@ import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.KeyUtil;
 import com.blog.infrastructure.revalidate.RevalidateClient;
+import com.blog.infrastructure.revalidate.RevalidateTags;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,8 +126,7 @@ public class TagServiceImpl implements TagService {
             return;
         }
         EventUtil.publishEventAfterCommit(() -> {
-            List<String> tags = new ArrayList<>();
-            tags.add("tag:list");
+            List<String> tags = new ArrayList<>(RevalidateTags.TAG_LIST);
             if (tag != null) {
                 if (tag.getId() != null) {
                     tags.add("tag:detail:id:" + tag.getId());
