@@ -15,6 +15,7 @@ import com.blog.modules.system.config.model.vo.ConfigVO;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.EventUtil;
 import com.blog.infrastructure.revalidate.RevalidateClient;
+import com.blog.infrastructure.revalidate.RevalidateTags;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,9 +23,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 @Slf4j
 @Service
 public class SiteConfigServiceImpl implements SiteConfigService {
@@ -46,9 +45,6 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     private static final String KEY_UPLOAD = "upload";
     private static final String KEY_EMAIL = "email";
     private static final String KEY_COMPONENT = "component";
-
-    // Next.js revalidate tags
-    private static final List<String> SITE_CONFIG_TAGS = List.of("site:config");
 
     // ========== 通用方法 ==========
     
@@ -78,7 +74,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
      */
     private void revalidateSiteConfig() {
         if (revalidateClient != null) {
-            revalidateClient.revalidateTags(SITE_CONFIG_TAGS);
+            revalidateClient.revalidateTags(RevalidateTags.SITE_CONFIG);
         }
     }
 
@@ -286,42 +282,4 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         updateConfig(KEY_EMAIL, config);
     }
     
-    // ========== 前台公开接口 ==========
-    
-    @Override
-    @Cacheable(value = "configs", key = "'public'", unless = "#result == null || #result.isEmpty()")
-    public Map<String, Object> getPublicConfig() {
-        Map<String, Object> result = new LinkedHashMap<>();
-
-        // 网站信息 - 全部公开
-        result.put("site", getSiteConfig());
-
-        // 作者信息 - 过滤敏感字段
-        AuthorConfigDTO author = getAuthorConfig();
-        if (author != null) {
-            result.put("author", author.toPublicView());
-        }
-
-        // 封面配置 - 全部公开
-        result.put("cover", getCoverConfig());
-
-        // 社交链接 - 全部公开
-        result.put("social", getSocialConfig());
-
-        // 隐私配置 - 全部公开（前台需要知道显示什么）
-        result.put("privacy", getPrivacyConfig());
-
-        // 评论配置 - 部分公开
-        CommentConfigDTO comment = getCommentConfig();
-        if (comment != null) {
-            result.put("comment", comment.toPublicView());
-        }
-
-        // 组件配置 - 全部公开
-        result.put("component", getComponentConfig());
-
-        // notify、upload、email 不返回给前台
-
-        return result;
-    }
 }

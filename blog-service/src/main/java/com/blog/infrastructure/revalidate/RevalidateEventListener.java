@@ -20,16 +20,6 @@ import java.util.List;
 @Component
 public class RevalidateEventListener {
 
-    private static final List<String> ARTICLE_LIST_TAGS = List.of(
-            "article:list",
-            "article:latest",
-            "article:hot"
-    );
-
-    private static final List<String> MOMENT_LIST_TAGS = List.of("moment:list");
-    private static final List<String> FRIENDLINK_TAGS = List.of("friendlink:list");
-    private static final List<String> ARCHIVE_LIST_TAGS = List.of("archive:list");
-
     @Autowired(required = false)
     private RevalidateClient revalidateClient;
 
@@ -104,7 +94,7 @@ public class RevalidateEventListener {
     @EventListener
     public void handleArticleCreated(ArticleCreatedEvent event) {
         if (event.getArticle() != null && ArticleStatus.PUBLISHED.getCode().equals(event.getArticle().getStatus())) {
-            revalidate(ARTICLE_LIST_TAGS);
+            revalidate(RevalidateTags.ARTICLE_LIST);
             revalidateArticleDetail(event.getArticleId(), event.getArticle());
             revalidateArchiveByArticle(event.getArticle());
         }
@@ -114,7 +104,7 @@ public class RevalidateEventListener {
     @EventListener
     public void handleArticleUpdated(ArticleUpdatedEvent event) {
         if (event.getArticle() != null) {
-            revalidate(ARTICLE_LIST_TAGS);
+            revalidate(RevalidateTags.ARTICLE_LIST);
             revalidateArticleDetail(event.getArticleId(), event.getArticle());
             revalidateArchiveByArticle(event.getArticle());
         }
@@ -123,15 +113,15 @@ public class RevalidateEventListener {
     @Async("eventTaskExecutor")
     @EventListener
     public void handleArticleDeleted(ArticleDeletedEvent event) {
-        revalidate(ARTICLE_LIST_TAGS);
+        revalidate(RevalidateTags.ARTICLE_LIST);
         revalidateArticleDetailById(event.getArticleId());
-        revalidate(ARCHIVE_LIST_TAGS);
+        revalidate(RevalidateTags.ARCHIVE_LIST);
     }
 
     @Async("eventTaskExecutor")
     @EventListener
     public void handleArticlePublished(ArticlePublishedEvent event) {
-        revalidate(ARTICLE_LIST_TAGS);
+        revalidate(RevalidateTags.ARTICLE_LIST);
         revalidateArticleDetail(event.getArticleId(), event.getArticle());
         revalidateArchiveByArticle(event.getArticle());
     }
@@ -139,7 +129,7 @@ public class RevalidateEventListener {
     @Async("eventTaskExecutor")
     @EventListener
     public void handleArticleUnpublished(ArticleUnpublishedEvent event) {
-        revalidate(ARTICLE_LIST_TAGS);
+        revalidate(RevalidateTags.ARTICLE_LIST);
         revalidateArticleDetail(event.getArticleId(), event.getArticle());
         revalidateArchiveByArticle(event.getArticle());
     }
@@ -148,7 +138,7 @@ public class RevalidateEventListener {
     @EventListener
     public void handleTalkCreated(TalkCreatedEvent event) {
         if (event.getTalk() != null && TalkStatus.PUBLISHED.getCode().equals(event.getTalk().getStatus())) {
-            revalidate(MOMENT_LIST_TAGS);
+            revalidate(RevalidateTags.MOMENT_LIST);
             revalidateMomentDetail(event.getTalkId(), event.getTalk());
         }
     }
@@ -157,7 +147,7 @@ public class RevalidateEventListener {
     @EventListener
     public void handleTalkUpdated(TalkUpdatedEvent event) {
         if (event.getTalk() != null) {
-            revalidate(MOMENT_LIST_TAGS);
+            revalidate(RevalidateTags.MOMENT_LIST);
             revalidateMomentDetail(event.getTalkId(), event.getTalk());
         }
     }
@@ -165,19 +155,19 @@ public class RevalidateEventListener {
     @Async("eventTaskExecutor")
     @EventListener
     public void handleTalkDeleted(TalkDeletedEvent event) {
-        revalidate(MOMENT_LIST_TAGS);
+        revalidate(RevalidateTags.MOMENT_LIST);
         revalidateMomentDetailById(event.getTalkId());
     }
 
     @Async("eventTaskExecutor")
     @EventListener
     public void handleFriendLinkCreated(FriendLinkCreatedEvent event) {
-        revalidate(FRIENDLINK_TAGS);
+        revalidate(RevalidateTags.FRIENDLINK_LIST);
     }
 
     @Async("eventTaskExecutor")
     @EventListener
     public void handleFriendLinkApproved(FriendLinkApprovedEvent event) {
-        revalidate(FRIENDLINK_TAGS);
+        revalidate(RevalidateTags.FRIENDLINK_LIST);
     }
 }

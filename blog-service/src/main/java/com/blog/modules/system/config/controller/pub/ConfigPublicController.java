@@ -5,7 +5,7 @@ package com.blog.modules.system.config.controller.pub;
 import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.Result;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
-import com.blog.modules.system.config.service.SiteConfigService;
+import com.blog.modules.system.config.service.ConfigPublicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -15,7 +15,7 @@ import java.util.Map;
 public class ConfigPublicController {
     
     @Autowired
-    private SiteConfigService siteConfigService;
+    private ConfigPublicService configPublicService;
 
     /**
      * 获取前台所有需要的配置（已过滤敏感信息）
@@ -24,7 +24,7 @@ public class ConfigPublicController {
     @GetMapping
     @ApiOperation(name = "获取公开配置", type = ApiOperationType.QUERY, description = "获取前台所有需要的配置，已过滤敏感信息")
     public Result<Map<String, Object>> getPublicConfig() {
-        Map<String, Object> configs = siteConfigService.getPublicConfig();
+        Map<String, Object> configs = configPublicService.getSiteConfig();
         return Result.success(configs);
     }
 }

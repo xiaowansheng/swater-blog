@@ -18,6 +18,7 @@ import com.blog.modules.system.config.service.ConfigService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
 import com.blog.infrastructure.revalidate.RevalidateClient;
+import com.blog.infrastructure.revalidate.RevalidateTags;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -256,7 +257,7 @@ public class ConfigServiceImpl implements ConfigService {
         if (revalidateClient == null) {
             return;
         }
-        EventUtil.publishEventAfterCommit(() -> revalidateClient.revalidateTags(java.util.List.of("site:config")));
+        EventUtil.publishEventAfterCommit(() -> revalidateClient.revalidateTags(RevalidateTags.SITE_CONFIG));
     }
 
     /**

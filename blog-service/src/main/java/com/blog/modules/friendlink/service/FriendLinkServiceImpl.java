@@ -9,6 +9,7 @@ import com.blog.modules.friendlink.model.vo.FriendLinkVO;
 import com.blog.modules.friendlink.event.FriendLinkCreatedEvent;
 import com.blog.modules.friendlink.event.FriendLinkApprovedEvent;
 import com.blog.infrastructure.revalidate.RevalidateClient;
+import com.blog.infrastructure.revalidate.RevalidateTags;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
 import org.springframework.beans.BeanUtils;
@@ -154,6 +155,6 @@ public class FriendLinkServiceImpl implements FriendLinkService {
         if (revalidateClient == null) {
             return;
         }
-        EventUtil.publishEventAfterCommit(() -> revalidateClient.revalidateTags(List.of("friendlink:list")));
+        EventUtil.publishEventAfterCommit(() -> revalidateClient.revalidateTags(RevalidateTags.FRIENDLINK_LIST));
     }
 }

@@ -10,7 +10,6 @@ import com.blog.modules.system.config.model.dto.config.CoverConfigDTO;
 import com.blog.modules.system.config.model.dto.config.AuthorConfigDTO;
 import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
 import com.blog.modules.system.config.model.dto.config.ComponentConfigDTO;
-import java.util.Map;
 /**
  * 网站配置服务
  */
@@ -60,10 +59,4 @@ public interface SiteConfigService {
     
     void updateEmailConfig(EmailConfigDTO config);
     
-    // ========== 前台公开接口 ==========
-    
-    /**
-     * 获取前台所需的所有配置（过滤敏感信息）
-     */
-    Map<String, Object> getPublicConfig();
 }
