@@ -45,7 +45,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     private static final String KEY_NOTIFY = "notify";
     private static final String KEY_UPLOAD = "upload";
     private static final String KEY_EMAIL = "email";
-    private static final String KEY_COMPONENT = "component.enabled";
+    private static final String KEY_COMPONENT = "component";
 
     // Next.js revalidate tags
     private static final List<String> SITE_CONFIG_TAGS = List.of("site:config");
