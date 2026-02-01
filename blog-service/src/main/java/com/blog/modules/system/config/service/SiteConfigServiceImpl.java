@@ -13,6 +13,7 @@ import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
 import com.blog.modules.system.config.model.dto.config.ComponentConfigDTO;
 import com.blog.modules.system.config.model.vo.ConfigVO;
 import com.blog.shared.util.JsonUtil;
+import com.blog.shared.util.EventUtil;
 import com.blog.infrastructure.revalidate.RevalidateClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,6 +101,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
             createDTO.setGroupName("site"); // 默认分组
             configService.create(createDTO);
         }
+        EventUtil.publishEventAfterCommit(this::revalidateSiteConfig);
     }
     
     // ========== 获取配置 ==========
@@ -173,10 +175,11 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     }
     
     // ========== 更新配置 ==========
-    
+        
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'site'"),
+        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -187,6 +190,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'author'"),
+        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -197,6 +201,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'cover'"),
+        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -207,6 +212,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'social'"),
+        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -217,17 +223,18 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'privacy'"),
+        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
     public void updatePrivacyConfig(PrivacyConfigDTO config) {
         updateConfig(KEY_PRIVACY, config);
-        revalidateSiteConfig();
     }
     
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'comment'"),
+        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -238,6 +245,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", allEntries = true),
+        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -248,6 +256,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'notify'"),
+        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -258,6 +267,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'upload'"),
+        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -268,6 +278,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'email'"),
+        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
