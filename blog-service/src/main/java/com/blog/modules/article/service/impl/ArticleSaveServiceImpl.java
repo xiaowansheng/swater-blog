@@ -344,7 +344,7 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
                         articleTag.setTagId(tagId);
                         return articleTag;
                     })
-                    .collect(Collectors.toList());
+                    .toList();
             
             for (ArticleTag articleTag : articleTags) {
                 articleTagMapper.insert(articleTag);
