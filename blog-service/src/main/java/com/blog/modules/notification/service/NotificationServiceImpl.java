@@ -18,6 +18,7 @@ import com.blog.modules.notification.service.NotificationService;
 import com.blog.plugin.components.notification.NotificationChannelFactory;
 import com.blog.plugin.components.notification.NotificationChannelPlugin;
 import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.PageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,18 +135,20 @@ public class NotificationServiceImpl implements NotificationService {
         Long notificationId = create(dto);
         
         SysNotification notification = sysNotificationMapper.selectById(notificationId);
-        NotificationMessage message = new NotificationMessage();
-        message.setNotificationId(notificationId);
-        message.setUserId(userId);
-        message.setType(type);
-        message.setTitle(title);
-        message.setContent(content);
-        message.setTimestamp(LocalDateTime.now());
-        message.setData(Map.of());
+        EventUtil.publishEventAfterCommit(() -> {
+            NotificationMessage message = new NotificationMessage();
+            message.setNotificationId(notificationId);
+            message.setUserId(userId);
+            message.setType(type);
+            message.setTitle(title);
+            message.setContent(content);
+            message.setTimestamp(LocalDateTime.now());
+            message.setData(Map.of());
 
-        if (!enqueueMessage(notification, message)) {
-            log.warn("通知消息入队失败，notificationId: {}", notificationId);
-        }
+            if (!enqueueMessage(notification, message)) {
+                log.warn("通知消息入队失败，notificationId: {}", notificationId);
+            }
+        });
     }
 
     @Transactional
@@ -190,10 +193,12 @@ public class NotificationServiceImpl implements NotificationService {
         if ("SENT".equals(notification.getStatus())) {
             return;
         }
-        NotificationMessage message = buildMessage(notification);
-        if (!enqueueMessage(notification, message)) {
-            log.warn("通知重试入队失败，notificationId: {}", id);
-        }
+        EventUtil.publishEventAfterCommit(() -> {
+            NotificationMessage message = buildMessage(notification);
+            if (!enqueueMessage(notification, message)) {
+                log.warn("通知重试入队失败，notificationId: {}", id);
+            }
+        });
     }
 
     @Override
@@ -224,10 +229,12 @@ public class NotificationServiceImpl implements NotificationService {
             if (!shouldRetry(notification)) {
                 continue;
             }
-            NotificationMessage message = buildMessage(notification);
-            if (!enqueueMessage(notification, message)) {
-                log.warn("通知重试入队失败，notificationId: {}", notification.getId());
-            }
+            EventUtil.publishEventAfterCommit(() -> {
+                NotificationMessage message = buildMessage(notification);
+                if (!enqueueMessage(notification, message)) {
+                    log.warn("通知重试入队失败，notificationId: {}", notification.getId());
+                }
+            });
         }
     }
 

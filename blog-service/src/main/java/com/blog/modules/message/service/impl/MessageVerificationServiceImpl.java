@@ -5,6 +5,7 @@ import com.blog.infrastructure.mq.MQService;
 import com.blog.modules.message.model.message.VerificationCodeMessage;
 import com.blog.modules.message.service.MessageVerificationService;
 import com.blog.shared.exception.BusinessException;
+import com.blog.shared.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -14,6 +15,7 @@ import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 @Slf4j
@@ -64,10 +66,20 @@ public class MessageVerificationServiceImpl implements MessageVerificationServic
         message.setTemplateName(templateName);
         message.setVariables(variables);
 
-        boolean queued = mqService.sendVerificationCode(message);
-        if (!queued) {
-            redisTemplate.delete(key);
-            throw new BusinessException(500, "Failed to enqueue verification email");
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            EventUtil.publishEventAfterCommit(() -> {
+                boolean queued = mqService.sendVerificationCode(message);
+                if (!queued) {
+                    redisTemplate.delete(key);
+                    log.warn("Failed to enqueue verification email after commit");
+                }
+            });
+        } else {
+            boolean queued = mqService.sendVerificationCode(message);
+            if (!queued) {
+                redisTemplate.delete(key);
+                throw new BusinessException(500, "Failed to enqueue verification email");
+            }
         }
     }
 
