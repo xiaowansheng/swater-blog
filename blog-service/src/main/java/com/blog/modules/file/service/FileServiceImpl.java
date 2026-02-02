@@ -206,9 +206,8 @@ public class FileServiceImpl implements FileService {
         fileMeta.setRefCount(1);
         
         fileMetaMapper.insert(fileMeta);
-        
-        FileMeta savedFileMeta = fileMetaMapper.selectById(fileMeta.getId());
-        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new FileUploadedEvent(this, fileMeta.getId(), savedFileMeta)));
+
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new FileUploadedEvent(this, fileMeta.getId(), fileMeta)));
         
         return fileMeta;
     }

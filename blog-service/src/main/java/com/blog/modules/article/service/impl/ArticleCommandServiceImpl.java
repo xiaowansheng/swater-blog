@@ -100,8 +100,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                 saveArticleTags(article.getId(), new java.util.ArrayList<>(allTagIds));
             }
             
-            Article savedArticle = articleMapper.selectById(article.getId());
-            publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleCreatedEvent(this, article.getId(), savedArticle)));
+            publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleCreatedEvent(this, article.getId(), article)));
             
             // 记录监控指标
             blogMetrics.incrementArticleCreated(

@@ -159,8 +159,7 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
         saveArticleTags(article.getId(), dto.getTagIds(), dto.getTagNames());
 
         // 发布事件
-        Article savedArticle = articleMapper.selectById(article.getId());
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleCreatedEvent(this, article.getId(), savedArticle)));
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleCreatedEvent(this, article.getId(), article)));
 
         log.info("文章创建成功: id={}, title={}, autoSave={}", article.getId(), article.getTitle(), dto.getAutoSave());
 

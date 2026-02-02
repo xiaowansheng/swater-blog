@@ -121,9 +121,8 @@ public class UserServiceImpl implements UserService {
 
         userMapper.insert(user);
 
-        User savedUser = userMapper.selectById(user.getId());
         EventUtil.publishEventAfterCommit(
-                () -> eventPublisher.publishEvent(new UserCreatedEvent(this, user.getId(), savedUser)));
+                () -> eventPublisher.publishEvent(new UserCreatedEvent(this, user.getId(), user)));
 
         return user.getId();
     }

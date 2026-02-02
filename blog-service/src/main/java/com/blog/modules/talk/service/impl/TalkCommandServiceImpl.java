@@ -142,8 +142,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
             }
         }
 
-        Talk savedTalk = talkMapper.selectById(talk.getId());
-        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new TalkCreatedEvent(this, talk.getId(), savedTalk)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new TalkCreatedEvent(this, talk.getId(), talk)));
         
         return talk.getId();
     }
