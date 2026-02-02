@@ -3,6 +3,7 @@ package com.blog.modules.file.service;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.shared.PageResult;
 import com.blog.bootstrap.context.UserContext;
@@ -358,37 +359,62 @@ public class FileServiceImpl implements FileService {
             return;
         }
 
-        for (Long fileId : fileIds) {
-            // 检查文件是否存在
-            FileMeta fileMeta = fileMetaMapper.selectById(fileId);
-            if (fileMeta == null) {
-                continue;
-            }
-
-            // 检查引用关系是否已存在
-            Long existingCount = fileReferenceMapper.selectCount(
-                new LambdaQueryWrapper<FileReference>()
-                    .eq(FileReference::getFileId, fileId)
-                    .eq(FileReference::getRefType, refType)
-                    .eq(FileReference::getRefId, refId)
-            );
-
-            if (existingCount > 0) {
-                continue;
-            }
-
-            // 创建引用关系
-            FileReference reference = new FileReference();
-            reference.setFileId(fileId);
-            reference.setRefType(refType);
-            reference.setRefId(refId);
-            reference.setCreateTime(LocalDateTime.now());
-            fileReferenceMapper.insert(reference);
-
-            // 增加文件引用计数
-            fileMeta.setRefCount((fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0) + 1);
-            fileMetaMapper.updateById(fileMeta);
+        List<Long> distinctFileIds = fileIds.stream()
+                .filter(id -> id != null && id > 0)
+                .distinct()
+                .collect(Collectors.toList());
+        if (distinctFileIds.isEmpty()) {
+            return;
         }
+
+        // 批量查询存在的文件，过滤不存在的 fileId
+        List<FileMeta> fileMetas = fileMetaMapper.selectBatchIds(distinctFileIds);
+        if (fileMetas == null || fileMetas.isEmpty()) {
+            return;
+        }
+        List<Long> existingFileIds = fileMetas.stream()
+                .map(FileMeta::getId)
+                .collect(Collectors.toList());
+
+        // 批量查询已有引用，避免逐条 selectCount
+        List<FileReference> existedReferences = fileReferenceMapper.selectList(
+                new LambdaQueryWrapper<FileReference>()
+                        .eq(FileReference::getRefType, refType)
+                        .eq(FileReference::getRefId, refId)
+                        .in(FileReference::getFileId, existingFileIds)
+        );
+        java.util.Set<Long> existedFileIdSet = existedReferences.stream()
+                .map(FileReference::getFileId)
+                .collect(Collectors.toSet());
+
+        List<Long> toInsertFileIds = existingFileIds.stream()
+                .filter(fileId -> !existedFileIdSet.contains(fileId))
+                .collect(Collectors.toList());
+        if (toInsertFileIds.isEmpty()) {
+            return;
+        }
+
+        // 批量插入引用关系
+        LocalDateTime now = LocalDateTime.now();
+        List<FileReference> newReferences = toInsertFileIds.stream()
+                .map(fileId -> {
+                    FileReference reference = new FileReference();
+                    reference.setFileId(fileId);
+                    reference.setRefType(refType);
+                    reference.setRefId(refId);
+                    reference.setCreateTime(now);
+                    return reference;
+                })
+                .collect(Collectors.toList());
+        fileReferenceMapper.insertBatch(newReferences);
+
+        // 批量更新引用计数
+        fileMetaMapper.update(
+                null,
+                new LambdaUpdateWrapper<FileMeta>()
+                        .in(FileMeta::getId, toInsertFileIds)
+                        .setSql("ref_count = COALESCE(ref_count, 0) + 1")
+        );
     }
 
     @Override

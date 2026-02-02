@@ -11,7 +11,7 @@ fi
 
 # <type>(<scope>): <subject>
 # type: feat|fix|docs|style|refactor|test|chore
-regex='^(feat|fix|docs|style|refactor|test|chore)\([a-zA-Z0-9_-]+\):\ .+'
+regex='^(feat|fix|docs|style|refactor|test|chore|perf)\([a-zA-Z0-9_-]+\):\ .+'
 
 if [[ ! "$subject_line" =~ $regex ]]; then
   cat <<'MSG'

@@ -207,11 +207,26 @@ public class NotificationServiceImpl implements NotificationService {
         if (ids == null || ids.isEmpty()) {
             return;
         }
-        for (Long id : ids) {
-            if (id == null) {
+
+        List<Long> validIds = ids.stream()
+                .filter(id -> id != null && id > 0)
+                .distinct()
+                .collect(Collectors.toList());
+        if (validIds.isEmpty()) {
+            return;
+        }
+
+        List<SysNotification> notifications = sysNotificationMapper.selectBatchIds(validIds);
+        for (SysNotification notification : notifications) {
+            if (notification == null || "SENT".equals(notification.getStatus())) {
                 continue;
             }
-            retryNotification(id);
+            EventUtil.publishEventAfterCommit(() -> {
+                NotificationMessage message = buildMessage(notification);
+                if (!enqueueMessage(notification, message)) {
+                    log.warn("通知重试入队失败，notificationId: {}", notification.getId());
+                }
+            });
         }
     }
 

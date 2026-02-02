@@ -14,5 +14,6 @@ public interface FileReferenceMapper extends com.blog.shared.model.BaseMapper<Fi
     void deleteByFileId(@Param("fileId") Long fileId);
 
     void deleteByRefTypeAndRefId(@Param("refType") String refType, @Param("refId") Long refId);
-}
 
+    int insertBatch(@Param("references") List<FileReference> references);
+}

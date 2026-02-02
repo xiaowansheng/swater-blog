@@ -13,5 +13,13 @@
     <delete id="deleteByRefTypeAndRefId">
         DELETE FROM file_reference WHERE ref_type = #{refType} AND ref_id = #{refId}
     </delete>
+
+    <insert id="insertBatch">
+        INSERT INTO file_reference (file_id, ref_type, ref_id, create_time)
+        VALUES
+        <foreach collection="references" item="item" separator=",">
+            (#{item.fileId}, #{item.refType}, #{item.refId}, #{item.createTime})
+        </foreach>
+    </insert>
 </mapper>
 

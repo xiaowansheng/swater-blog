@@ -217,13 +217,33 @@ public class ConfigServiceImpl implements ConfigService {
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     public void updateBatch(Map<String, Object> configs) {
+        if (configs == null || configs.isEmpty()) {
+            return;
+        }
+
+        List<String> keys = configs.keySet().stream()
+                .filter(key -> key != null && !key.isBlank())
+                .distinct()
+                .collect(Collectors.toList());
+        if (keys.isEmpty()) {
+            return;
+        }
+
+        List<SysConfig> existingConfigs = sysConfigMapper.selectList(
+                new LambdaQueryWrapper<SysConfig>().in(SysConfig::getConfigKey, keys)
+        );
+        Map<String, SysConfig> configMap = existingConfigs.stream()
+                .collect(Collectors.toMap(SysConfig::getConfigKey, c -> c));
+
         for (Map.Entry<String, Object> entry : configs.entrySet()) {
             String key = entry.getKey();
+            if (key == null || key.isBlank()) {
+                continue;
+            }
             Object value = entry.getValue();
             String valueStr = value != null ? value.toString() : "";
 
-            SysConfig config = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
-                    .eq(SysConfig::getConfigKey, key));
+            SysConfig config = configMap.get(key);
             if (config != null) {
                 config.setValue(valueStr);
                 sysConfigMapper.updateById(config);
