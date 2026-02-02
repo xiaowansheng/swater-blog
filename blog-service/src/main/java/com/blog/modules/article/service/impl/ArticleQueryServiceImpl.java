@@ -73,8 +73,9 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         }
         if (queryDTO.getKeyword() != null && !queryDTO.getKeyword().trim().isEmpty()) {
             String keyword = queryDTO.getKeyword().trim();
+            // 避免在后台列表中对 LONGTEXT(content) 做 LIKE 全表扫描；
+            // 需要全文检索时应走搜索模块（ES/FTS）。
             wrapper.and(w -> w.like(Article::getTitle, keyword)
-                    .or().like(Article::getContent, keyword)
                     .or().like(Article::getExcerpt, keyword));
         }
         wrapper.orderByDesc(Article::getIsTop);
