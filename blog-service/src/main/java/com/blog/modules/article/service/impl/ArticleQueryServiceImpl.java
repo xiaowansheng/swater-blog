@@ -2,6 +2,7 @@ package com.blog.modules.article.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.shared.PageResult;
 import com.blog.modules.article.mapper.ArticleMapper;
@@ -176,23 +177,38 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         draftWrapper.eq(Article::getStatus, ArticleStatus.DRAFT.getCode());
         statistics.setDraftCount(articleMapper.selectCount(draftWrapper).longValue());
 
-        LambdaQueryWrapper<Article> allWrapper = new LambdaQueryWrapper<>();
-        List<Article> articles = articleMapper.selectList(allWrapper);
-        long totalViewCount = 0;
-        long totalLikeCount = 0;
-        long totalCommentCount = 0;
-        
-        if (articles != null && !articles.isEmpty()) {
-            totalViewCount = articles.stream().mapToLong(a -> a.getViewCount() != null ? a.getViewCount() : 0L).sum();
-            totalLikeCount = articles.stream().mapToLong(a -> a.getLikeCount() != null ? a.getLikeCount() : 0L).sum();
-            totalCommentCount = articles.stream().mapToLong(a -> a.getCommentCount() != null ? a.getCommentCount() : 0L).sum();
-        }
+        QueryWrapper<Article> aggregateWrapper = new QueryWrapper<>();
+        aggregateWrapper.select(
+                "COALESCE(SUM(view_count), 0) AS totalViewCount",
+                "COALESCE(SUM(like_count), 0) AS totalLikeCount",
+                "COALESCE(SUM(comment_count), 0) AS totalCommentCount"
+        );
+        Map<String, Object> aggregate = articleMapper.selectMaps(aggregateWrapper).stream()
+                .findFirst()
+                .orElse(Map.of());
+        long totalViewCount = toLong(aggregate.get("totalViewCount"));
+        long totalLikeCount = toLong(aggregate.get("totalLikeCount"));
+        long totalCommentCount = toLong(aggregate.get("totalCommentCount"));
         
         statistics.setTotalViewCount(totalViewCount);
         statistics.setTotalLikeCount(totalLikeCount);
         statistics.setTotalCommentCount(totalCommentCount);
         
         return statistics;
+    }
+
+    private long toLong(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        if (value == null) {
+            return 0L;
+        }
+        try {
+            return Long.parseLong(value.toString());
+        } catch (NumberFormatException e) {
+            return 0L;
+        }
     }
 
     private ArticleVO convertToVO(Article article, List<FileVO> referencedFiles) {
