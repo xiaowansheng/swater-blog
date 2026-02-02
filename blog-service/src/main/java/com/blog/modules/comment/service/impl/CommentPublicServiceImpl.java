@@ -3,6 +3,7 @@ package com.blog.modules.comment.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.article.model.entity.Article;
@@ -351,13 +352,19 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         }
 
         if ("ARTICLE".equalsIgnoreCase(dto.getTargetType())) {
-            Article article = articleMapper.selectById(dto.getTargetId());
-            article.setCommentCount((article.getCommentCount() != null ? article.getCommentCount() : 0) + 1);
-            articleMapper.updateById(article);
+            articleMapper.update(
+                    null,
+                    new LambdaUpdateWrapper<Article>()
+                            .eq(Article::getId, dto.getTargetId())
+                            .setSql("comment_count = COALESCE(comment_count, 0) + 1")
+            );
         } else if ("TALK".equalsIgnoreCase(dto.getTargetType())) {
-            Talk talk = talkMapper.selectById(dto.getTargetId());
-            talk.setCommentCount((talk.getCommentCount() != null ? talk.getCommentCount() : 0) + 1);
-            talkMapper.updateById(talk);
+            talkMapper.update(
+                    null,
+                    new LambdaUpdateWrapper<Talk>()
+                            .eq(Talk::getId, dto.getTargetId())
+                            .setSql("comment_count = COALESCE(comment_count, 0) + 1")
+            );
         }
 
         Comment savedComment = commentMapper.selectById(comment.getId());
