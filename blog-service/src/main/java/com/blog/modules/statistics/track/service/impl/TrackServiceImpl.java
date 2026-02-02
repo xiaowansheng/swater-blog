@@ -2,37 +2,26 @@ package com.blog.modules.statistics.track.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.blog.modules.article.mapper.ArticleMapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.blog.modules.statistics.track.mapper.ContentReadMapper;
-import com.blog.modules.statistics.track.mapper.ContentMetricEventMapper;
 import com.blog.modules.statistics.track.mapper.PageViewMapper;
 import com.blog.modules.statistics.track.mapper.VisitorSessionMapper;
 import com.blog.modules.statistics.track.model.dto.TrackEnterDTO;
-import com.blog.modules.statistics.track.model.entity.ContentRead;
-import com.blog.modules.statistics.track.model.entity.ContentMetricEvent;
-import com.blog.modules.statistics.track.model.entity.PageView;
 import com.blog.modules.statistics.track.model.entity.VisitorSession;
 import com.blog.modules.statistics.track.model.vo.TrackEnterResultVO;
 import com.blog.modules.statistics.track.service.TrackService;
 import com.blog.modules.statistics.visitor.mapper.VisitorMapper;
 import com.blog.modules.statistics.visitor.model.entity.Visitor;
-import com.blog.plugin.components.location.LocationInfo;
-import com.blog.plugin.components.location.LocationProviderFactory;
-import com.blog.plugin.components.location.LocationProviderPlugin;
 import com.blog.shared.model.UserAgentInfo;
 import com.blog.shared.util.RequestUtil;
 import com.blog.shared.util.UserAgentUtil;
-import com.blog.modules.talk.mapper.TalkMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -43,8 +32,8 @@ public class TrackServiceImpl implements TrackService {
     @Autowired
     private VisitorMapper visitorMapper;
 
-    @Autowired(required = false)
-    private LocationProviderFactory locationProviderFactory;
+    @Autowired
+    private TrackAsyncEnrichmentService trackAsyncEnrichmentService;
 
     @Autowired
     private VisitorSessionMapper visitorSessionMapper;
@@ -56,16 +45,9 @@ public class TrackServiceImpl implements TrackService {
     private ContentReadMapper contentReadMapper;
 
     @Autowired
-    private ContentMetricEventMapper contentMetricEventMapper;
-
-    @Autowired(required = false)
-    private ArticleMapper articleMapper;
-
-    @Autowired(required = false)
-    private TalkMapper talkMapper;
+    private TrackAsyncMetricService trackAsyncMetricService;
 
     @Override
-    @Transactional
     public TrackEnterResultVO enter(TrackEnterDTO dto, HttpServletRequest request) {
         TrackEnterDTO safeDto = dto != null ? dto : new TrackEnterDTO();
         LocalDateTime now = LocalDateTime.now();
@@ -90,29 +72,15 @@ public class TrackServiceImpl implements TrackService {
 
     private VisitorResolveResult resolveVisitor(TrackEnterDTO dto, String ip, String userAgent, LocalDateTime now) {
         String visitorUuid = StringUtils.hasText(dto.getVisitorUuid()) ? dto.getVisitorUuid() : UUID.randomUUID().toString();
-        Visitor visitor = visitorMapper.selectOne(new LambdaQueryWrapper<Visitor>()
+        Visitor existingVisitor = visitorMapper.selectOne(new LambdaQueryWrapper<Visitor>()
+                .select(Visitor::getId, Visitor::getVisitorUuid, Visitor::getDeleted)
                 .eq(Visitor::getVisitorUuid, visitorUuid)
                 .last("LIMIT 1"));
 
-        boolean isNewVisitor = false;
-        boolean within24h = false;
-        if (visitor == null) {
-            isNewVisitor = true;
-            visitor = new Visitor();
-            visitor.setVisitorUuid(visitorUuid);
-            visitor.setFirstVisitTime(now);
-            visitor.setVisitCount(1);
-            visitor.setStatus("ACTIVE");
-        } else {
-            within24h = visitor.getLastVisitTime() != null
-                    && !visitor.getLastVisitTime().isBefore(now.minusHours(24));
-            if (!within24h) {
-                visitor.setVisitCount((visitor.getVisitCount() != null ? visitor.getVisitCount() : 0) + 1);
-            }
-        }
-
-        visitor.setLastVisitTime(now);
-        applyLocation(visitor, ip);
+        Visitor visitor = new Visitor();
+        visitor.setVisitorUuid(visitorUuid);
+        visitor.setIp(StringUtils.hasText(ip) ? ip : "UNKNOWN");
+        visitor.setStatus("ACTIVE");
 
         UserAgentInfo uaInfo = UserAgentUtil.parse(userAgent);
         visitor.setDeviceType(uaInfo.getDeviceType());
@@ -125,56 +93,55 @@ public class TrackServiceImpl implements TrackService {
 
         populateTraffic(visitor, dto.getReferer(), dto.getUtmSource(), dto.getUtmMedium(), dto.getUtmCampaign());
 
-        if (isNewVisitor) {
-            visitorMapper.insert(visitor);
+        visitorMapper.upsertVisitorHeartbeat(
+                visitor.getVisitorUuid(),
+                visitor.getIp(),
+                visitor.getCountry(),
+                visitor.getProvince(),
+                visitor.getCity(),
+                visitor.getDistrict(),
+                visitor.getLatitude(),
+                visitor.getLongitude(),
+                visitor.getLocation(),
+                visitor.getIsp(),
+                visitor.getTimezone(),
+                visitor.getDeviceType(),
+                visitor.getDeviceBrand(),
+                visitor.getDeviceModel(),
+                visitor.getOsName(),
+                visitor.getOsVersion(),
+                visitor.getBrowserName(),
+                visitor.getBrowserVersion(),
+                visitor.getRefererUrl(),
+                visitor.getTrafficSource(),
+                visitor.getSearchEngine(),
+                visitor.getSearchKeywords(),
+                visitor.getUtmSource(),
+                visitor.getUtmMedium(),
+                visitor.getUtmCampaign(),
+                now
+        );
+
+        boolean isNewVisitor = existingVisitor == null;
+        Visitor persisted;
+        if (existingVisitor != null && existingVisitor.getId() != null) {
+            persisted = visitor;
+            persisted.setId(existingVisitor.getId());
+            trackAsyncEnrichmentService.enrichVisitorLocation(persisted.getId(), ip);
         } else {
-            visitorMapper.updateById(visitor);
-        }
-
-        return new VisitorResolveResult(visitor, isNewVisitor);
-    }
-
-    private void applyLocation(Visitor visitor, String ip) {
-        if (!StringUtils.hasText(ip)) {
-            if (!StringUtils.hasText(visitor.getIp())) {
-                visitor.setIp("UNKNOWN");
-            }
-            return;
-        }
-
-        if (locationProviderFactory == null) {
-            visitor.setIp(ip);
-            return;
-        }
-
-        try {
-            List<LocationProviderPlugin> providers = locationProviderFactory.getProviders();
-            LocationInfo locationInfo = null;
-            for (LocationProviderPlugin locationProvider : providers) {
-                locationInfo = locationProvider.getLocationInfo(ip);
-                if (locationInfo != null) {
-                    break;
-                }
-            }
-
-            if (locationInfo != null) {
-                visitor.setCountry(firstNonBlank(locationInfo.getCountry(), visitor.getCountry()));
-                visitor.setProvince(firstNonBlank(locationInfo.getProvince(), visitor.getProvince()));
-                visitor.setCity(firstNonBlank(locationInfo.getCity(), visitor.getCity()));
-                visitor.setDistrict(firstNonBlank(locationInfo.getDistrict(), visitor.getDistrict()));
-                visitor.setLatitude(locationInfo.getLatitude());
-                visitor.setLongitude(locationInfo.getLongitude());
-                visitor.setLocation(firstNonBlank(locationInfo.getLocation(), visitor.getLocation()));
-                visitor.setIsp(firstNonBlank(locationInfo.getIsp(), visitor.getIsp()));
-                visitor.setTimezone(firstNonBlank(locationInfo.getTimezone(), visitor.getTimezone()));
-                visitor.setIp(firstNonBlank(locationInfo.getIp(), ip));
+            persisted = visitorMapper.selectOne(new LambdaQueryWrapper<Visitor>()
+                    .select(Visitor::getId, Visitor::getVisitorUuid)
+                    .eq(Visitor::getVisitorUuid, visitorUuid)
+                    .eq(Visitor::getDeleted, 0)
+                    .last("LIMIT 1"));
+            if (persisted == null) {
+                persisted = visitor;
             } else {
-                visitor.setIp(ip);
+                trackAsyncEnrichmentService.enrichVisitorLocation(persisted.getId(), ip);
             }
-        } catch (Exception e) {
-            log.warn("IP定位失败，IP: {}", ip, e);
-            visitor.setIp(ip);
         }
+
+        return new VisitorResolveResult(persisted, isNewVisitor);
     }
 
     private void populateTraffic(Visitor visitor, String referer, String utmSource, String utmMedium, String utmCampaign) {
@@ -246,8 +213,15 @@ public class TrackServiceImpl implements TrackService {
 
     private SessionResolveResult resolveSession(Long visitorId, TrackEnterDTO dto, LocalDateTime now) {
         VisitorSession lastSession = visitorSessionMapper.selectOne(new LambdaQueryWrapper<VisitorSession>()
+                .select(
+                        VisitorSession::getId,
+                        VisitorSession::getVisitorId,
+                        VisitorSession::getSessionId,
+                        VisitorSession::getLastActivityAt
+                )
                 .eq(VisitorSession::getVisitorId, visitorId)
                 .eq(VisitorSession::getDeleted, 0)
+                .ge(VisitorSession::getLastActivityAt, now.minusMinutes(SESSION_TIMEOUT_MINUTES))
                 .orderByDesc(VisitorSession::getLastActivityAt)
                 .last("LIMIT 1"));
 
@@ -269,8 +243,13 @@ public class TrackServiceImpl implements TrackService {
             visitorSessionMapper.insert(session);
         } else {
             session = lastSession;
+            visitorSessionMapper.update(
+                    null,
+                    new LambdaUpdateWrapper<VisitorSession>()
+                            .eq(VisitorSession::getId, session.getId())
+                            .set(VisitorSession::getLastActivityAt, now)
+            );
             session.setLastActivityAt(now);
-            visitorSessionMapper.updateById(session);
         }
 
         return new SessionResolveResult(session, newSession);
@@ -280,20 +259,16 @@ public class TrackServiceImpl implements TrackService {
         if (!StringUtils.hasText(dto.getPageKey())) {
             return false;
         }
-        PageView pv = new PageView();
-        pv.setVisitorId(visitorId);
-        pv.setSessionId(sessionId);
-        pv.setPageKey(dto.getPageKey());
-        pv.setPageUrl(dto.getPageUrl());
-        pv.setReferer(dto.getReferer());
-        pv.setOccurredAt(now);
-
-        try {
-            pageViewMapper.insert(pv);
-            return true;
-        } catch (DuplicateKeyException e) {
-            return false;
-        }
+        int affected = pageViewMapper.insertIgnore(
+                visitorId,
+                sessionId,
+                dto.getPageKey(),
+                dto.getPageUrl(),
+                dto.getReferer(),
+                now,
+                now
+        );
+        return affected > 0;
     }
 
     private boolean recordContentRead(Long visitorId, TrackEnterDTO dto, LocalDateTime now) {
@@ -305,78 +280,13 @@ public class TrackServiceImpl implements TrackService {
             return false;
         }
 
-        ContentRead existing = contentReadMapper.selectOne(new LambdaQueryWrapper<ContentRead>()
-                .eq(ContentRead::getVisitorId, visitorId)
-                .eq(ContentRead::getContentType, contentType)
-                .eq(ContentRead::getContentId, dto.getContentId())
-                .eq(ContentRead::getDeleted, 0)
-                .last("LIMIT 1"));
-
-        boolean counted;
-        if (existing == null) {
-            try {
-                ContentRead row = new ContentRead();
-                row.setVisitorId(visitorId);
-                row.setContentType(contentType);
-                row.setContentId(dto.getContentId());
-                row.setLastCountedAt(now);
-                contentReadMapper.insert(row);
-                counted = true;
-            } catch (DuplicateKeyException e) {
-                ContentRead raced = contentReadMapper.selectOne(new LambdaQueryWrapper<ContentRead>()
-                        .eq(ContentRead::getVisitorId, visitorId)
-                        .eq(ContentRead::getContentType, contentType)
-                        .eq(ContentRead::getContentId, dto.getContentId())
-                        .eq(ContentRead::getDeleted, 0)
-                        .last("LIMIT 1"));
-                counted = raced == null || raced.getLastCountedAt() == null || raced.getLastCountedAt().isBefore(now.minusHours(24));
-                if (counted && raced != null) {
-                    raced.setLastCountedAt(now);
-                    contentReadMapper.updateById(raced);
-                }
-            }
-        } else if (existing.getLastCountedAt() == null || existing.getLastCountedAt().isBefore(now.minusHours(24))) {
-            existing.setLastCountedAt(now);
-            contentReadMapper.updateById(existing);
-            counted = true;
-        } else {
-            counted = false;
-        }
+        int affected = contentReadMapper.upsertReadAndTouch(visitorId, contentType, dto.getContentId(), now);
+        boolean counted = affected > 0;
 
         if (counted) {
-            incrementContentViewCount(contentType, dto.getContentId());
-            recordMetricEvent(visitorId, "READ", contentType, dto.getContentId(), 1, now);
+            trackAsyncMetricService.onContentReadCounted(visitorId, contentType, dto.getContentId(), now);
         }
         return counted;
-    }
-
-    private void incrementContentViewCount(String contentType, Long contentId) {
-        try {
-            if ("ARTICLE".equals(contentType) && articleMapper != null) {
-                articleMapper.incrementViewCount(contentId);
-                return;
-            }
-            if ("TALK".equals(contentType) && talkMapper != null) {
-                talkMapper.incrementViewCount(contentId);
-            }
-        } catch (Exception e) {
-            log.warn("Failed to increment view count: type={}, id={}", contentType, contentId, e);
-        }
-    }
-
-    private void recordMetricEvent(Long visitorId, String metric, String contentType, Long contentId, int delta, LocalDateTime now) {
-        try {
-            ContentMetricEvent event = new ContentMetricEvent();
-            event.setVisitorId(visitorId);
-            event.setMetric(metric);
-            event.setContentType(contentType);
-            event.setContentId(contentId);
-            event.setDelta(delta);
-            event.setOccurredAt(now);
-            contentMetricEventMapper.insert(event);
-        } catch (Exception e) {
-            log.warn("Failed to record metric event: metric={}, type={}, id={}", metric, contentType, contentId, e);
-        }
     }
 
     private record VisitorResolveResult(Visitor visitor, boolean newVisitor) {

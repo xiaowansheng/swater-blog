@@ -3,7 +3,6 @@ package com.blog.modules.comment.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.article.model.entity.Article;
@@ -23,9 +22,6 @@ import com.blog.modules.talk.mapper.TalkMapper;
 import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.user.model.entity.User;
-import com.blog.plugin.components.location.LocationInfo;
-import com.blog.plugin.components.location.LocationProviderFactory;
-import com.blog.plugin.components.location.LocationProviderPlugin;
 import com.blog.shared.PageResult;
 import com.blog.shared.SensitiveWordHelper;
 import com.blog.shared.exception.BusinessException;
@@ -53,9 +49,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class CommentPublicServiceImpl implements CommentPublicService {
-    @Autowired(required = false)
-    private LocationProviderFactory locationProviderFactory;
-
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
@@ -108,7 +101,6 @@ public class CommentPublicServiceImpl implements CommentPublicService {
 
         String ip = RequestUtil.getClientIp();
         dto.setIp(ip);
-        fillLocationInfo(dto, ip);
 
         String userAgent = RequestUtil.getUserAgent();
         UserAgentInfo userAgentInfo = UserAgentUtil.parse(userAgent);
@@ -248,42 +240,6 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         }
     }
 
-    private void fillLocationInfo(CommentDTO dto, String ip) {
-        if (locationProviderFactory == null || ip == null || ip.isBlank()) return;
-        try {
-            List<LocationProviderPlugin> providers = locationProviderFactory.getProviders();
-            LocationInfo locationInfo = null;
-            for (LocationProviderPlugin provider : providers) {
-                locationInfo = provider.getLocationInfo(ip);
-                if (locationInfo != null) break;
-            }
-            if (locationInfo == null) return;
-
-            dto.setCountry(locationInfo.getCountry());
-            dto.setProvince(locationInfo.getProvince());
-            dto.setCity(locationInfo.getCity());
-            dto.setLatitude(locationInfo.getLatitude());
-            dto.setLongitude(locationInfo.getLongitude());
-            dto.setLocation(locationInfo.getLocation());
-
-            if (locationInfo.getIp() != null && !locationInfo.getIp().isEmpty()) {
-                dto.setIp(locationInfo.getIp());
-            }
-
-            if (locationInfo.getIpLocation() != null && !locationInfo.getIpLocation().isEmpty()) {
-                dto.setIpLocation(locationInfo.getIpLocation());
-            }
-
-            if (dto.getLocation() == null || dto.getLocation().isEmpty()) {
-                if (locationInfo.getProvince() != null && locationInfo.getCity() != null) {
-                    dto.setLocation(locationInfo.getProvince() + locationInfo.getCity());
-                }
-            }
-        } catch (Exception e) {
-            log.warn("评论IP定位失败: {}", e.getMessage());
-        }
-    }
-
     private CommentVO createAndPersist(CommentDTO dto, String ownerEmailForView) {
         Comment comment = BeanUtil.copyProperties(dto, Comment.class);
 
@@ -349,22 +305,6 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         if (comment.getParentId() == 0) {
             comment.setRootId(comment.getId());
             commentMapper.updateById(comment);
-        }
-
-        if ("ARTICLE".equalsIgnoreCase(dto.getTargetType())) {
-            articleMapper.update(
-                    null,
-                    new LambdaUpdateWrapper<Article>()
-                            .eq(Article::getId, dto.getTargetId())
-                            .setSql("comment_count = COALESCE(comment_count, 0) + 1")
-            );
-        } else if ("TALK".equalsIgnoreCase(dto.getTargetType())) {
-            talkMapper.update(
-                    null,
-                    new LambdaUpdateWrapper<Talk>()
-                            .eq(Talk::getId, dto.getTargetId())
-                            .setSql("comment_count = COALESCE(comment_count, 0) + 1")
-            );
         }
 
         Comment savedComment = commentMapper.selectById(comment.getId());
