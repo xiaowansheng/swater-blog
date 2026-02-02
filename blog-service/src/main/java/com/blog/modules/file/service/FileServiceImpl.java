@@ -430,30 +430,65 @@ public class FileServiceImpl implements FileService {
                 .eq(FileReference::getRefType, refType)
                 .eq(FileReference::getRefId, refId)
         );
+        if (references == null || references.isEmpty()) {
+            return;
+        }
 
-        for (FileReference reference : references) {
-            FileMeta fileMeta = fileMetaMapper.selectById(reference.getFileId());
-            if (fileMeta != null) {
-                // 减少引用计数
-                int newRefCount = (fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0) - 1;
-                fileMeta.setRefCount(Math.max(0, newRefCount));
+        // 同一个 fileId 可能有多条引用，先聚合减少次数
+        Map<Long, Long> decreaseByFileId = references.stream()
+                .collect(Collectors.groupingBy(FileReference::getFileId, Collectors.counting()));
+        List<Long> fileIds = new ArrayList<>(decreaseByFileId.keySet());
+        List<FileMeta> fileMetas = fileMetaMapper.selectBatchIds(fileIds);
 
-                // 如果引用计数为0，删除物理文件和元数据
-                if (fileMeta.getRefCount() <= 0) {
-                    try {
-                        List<StoragePlugin> plugins = storagePluginFactory.getPlugins();
-                        if (!plugins.isEmpty()) {
-                            plugins.get(0).delete(fileMeta.getFilePath());
-                        }
-                    } catch (Exception e) {
-                        // 记录日志但继续执行
-                    }
-                    fileMetaMapper.deleteById(fileMeta.getId());
-                    fileReferenceMapper.deleteByFileId(reference.getFileId());
-                } else {
-                    fileMetaMapper.updateById(fileMeta);
-                }
+        List<Long> deleteFileIds = new ArrayList<>();
+        List<String> deleteFilePaths = new ArrayList<>();
+        Map<Long, Integer> remainRefCount = new HashMap<>();
+
+        for (FileMeta fileMeta : fileMetas) {
+            if (fileMeta == null || fileMeta.getId() == null) {
+                continue;
             }
+            int current = fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0;
+            int decrease = decreaseByFileId.getOrDefault(fileMeta.getId(), 0L).intValue();
+            int newRefCount = Math.max(0, current - decrease);
+            if (newRefCount <= 0) {
+                deleteFileIds.add(fileMeta.getId());
+                deleteFilePaths.add(fileMeta.getFilePath());
+            } else {
+                remainRefCount.put(fileMeta.getId(), newRefCount);
+            }
+        }
+
+        // 更新仍保留的文件引用计数
+        for (Map.Entry<Long, Integer> entry : remainRefCount.entrySet()) {
+            fileMetaMapper.update(
+                    null,
+                    new LambdaUpdateWrapper<FileMeta>()
+                            .eq(FileMeta::getId, entry.getKey())
+                            .set(FileMeta::getRefCount, entry.getValue())
+            );
+        }
+
+        // 引用归零时删除物理文件和元数据，并清理其全部引用关系
+        if (!deleteFileIds.isEmpty()) {
+            try {
+                List<StoragePlugin> plugins = storagePluginFactory.getPlugins();
+                if (!plugins.isEmpty()) {
+                    for (String path : deleteFilePaths) {
+                        if (path != null && !path.isBlank()) {
+                            plugins.get(0).delete(path);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // 记录日志但继续执行
+            }
+
+            fileMetaMapper.deleteBatchIds(deleteFileIds);
+            fileReferenceMapper.delete(
+                    new LambdaQueryWrapper<FileReference>()
+                            .in(FileReference::getFileId, deleteFileIds)
+            );
         }
 
         // 删除所有引用关系
