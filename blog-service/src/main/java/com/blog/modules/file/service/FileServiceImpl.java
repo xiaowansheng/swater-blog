@@ -38,9 +38,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 @Service
 public class FileServiceImpl implements FileService {
@@ -332,9 +334,16 @@ public class FileServiceImpl implements FileService {
     }
 
     private FileVO convertToVO(FileMeta fileMeta) {
+        return convertToVO(fileMeta, null);
+    }
+
+    private FileVO convertToVO(FileMeta fileMeta, Map<Long, User> userMap) {
         FileVO vo = BeanUtil.copyProperties(fileMeta, FileVO.class);
         if (fileMeta.getUploadUserId() != null) {
-            User user = userMapper.selectById(fileMeta.getUploadUserId());
+            User user = userMap != null ? userMap.get(fileMeta.getUploadUserId()) : null;
+            if (user == null) {
+                user = userMapper.selectById(fileMeta.getUploadUserId());
+            }
             if (user != null) {
                 vo.setUploadUserName(user.getNickname());
             }
@@ -499,8 +508,10 @@ public class FileServiceImpl implements FileService {
                 .in(FileMeta::getId, fileIds)
         );
 
+        Map<Long, User> userMap = buildUserMap(fileMetas);
+
         return fileMetas.stream()
-            .map(this::convertToVO)
+            .map(fileMeta -> convertToVO(fileMeta, userMap))
             .collect(Collectors.toList());
     }
 
@@ -534,28 +545,43 @@ public class FileServiceImpl implements FileService {
                 .in(FileMeta::getId, fileIds)
         );
 
-        // 转换为VO
-        List<FileVO> fileVOs = fileMetas.stream()
-            .map(this::convertToVO)
-            .toList();
+        Map<Long, User> userMap = buildUserMap(fileMetas);
+
+        Map<Long, FileVO> fileVOMap = new HashMap<>();
+        for (FileMeta fileMeta : fileMetas) {
+            fileVOMap.put(fileMeta.getId(), convertToVO(fileMeta, userMap));
+        }
 
         // 按refId分组
-        Map<Long, List<FileVO>> result = refIds.stream()
-            .collect(Collectors.toMap(
-                id -> id,
-                id -> List.of()
-            ));
+        Map<Long, List<FileVO>> result = new HashMap<>();
+        for (Long refId : refIds) {
+            result.put(refId, new ArrayList<>());
+        }
 
         // 填充文件列表
         for (FileReference reference : references) {
-            for (FileVO fileVO : fileVOs) {
-                if (fileVO.getId().equals(reference.getFileId())) {
-                    result.get(reference.getRefId()).add(fileVO);
-                    break;
-                }
+            FileVO fileVO = fileVOMap.get(reference.getFileId());
+            if (fileVO != null) {
+                result.get(reference.getRefId()).add(fileVO);
             }
         }
 
         return result;
+    }
+
+    private Map<Long, User> buildUserMap(List<FileMeta> fileMetas) {
+        if (fileMetas == null || fileMetas.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> userIds = fileMetas.stream()
+                .map(FileMeta::getUploadUserId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        if (userIds.isEmpty()) {
+            return Map.of();
+        }
+        return userMapper.selectBatchIds(userIds).stream()
+                .collect(Collectors.toMap(User::getId, u -> u));
     }
 }

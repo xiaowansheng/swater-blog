@@ -19,8 +19,6 @@ import com.blog.shared.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 @Service
 public class TalkQueryServiceImpl implements TalkQueryService {
     @Autowired
@@ -56,14 +54,8 @@ public class TalkQueryServiceImpl implements TalkQueryService {
 
         Page<Talk> result = talkMapper.selectPage(pageParam, wrapper);
 
-        // 批量查询引用文件
-        List<Long> talkIds = result.getRecords().stream()
-                .map(Talk::getId)
-                .collect(Collectors.toList());
-        Map<Long, List<FileVO>> fileMap = fileService.listByReferencesBatch("TALK", talkIds);
-
         List<TalkVO> voList = result.getRecords().stream()
-                .map(talk -> convertToVO(talk, fileMap.get(talk.getId())))
+                .map(talk -> convertToVO(talk, List.of()))
                 .collect(Collectors.toList());
 
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());

@@ -7,6 +7,7 @@ import com.blog.shared.PageResult;
 import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.article.mapper.ArticleTagMapper;
 import com.blog.modules.article.model.dto.ArticleQueryDTO;
+import com.blog.modules.article.model.entity.ArticleTag;
 import com.blog.modules.category.mapper.CategoryMapper;
 import com.blog.modules.tag.mapper.TagMapper;
 import com.blog.modules.article.model.entity.Article;
@@ -23,8 +24,11 @@ import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 @Service
 public class ArticleQueryServiceImpl implements ArticleQueryService {
@@ -77,14 +81,72 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
 
         Page<Article> result = articleMapper.selectPage(pageParam, wrapper);
 
-        // 批量查询引用文件
-        List<Long> articleIds = result.getRecords().stream()
+        List<Article> records = result.getRecords();
+
+        List<Long> articleIds = records.stream()
                 .map(Article::getId)
                 .collect(Collectors.toList());
-        Map<Long, List<FileVO>> fileMap = fileService.listByReferencesBatch("ARTICLE", articleIds);
 
-        List<ArticleVO> voList = result.getRecords().stream()
-                .map(article -> convertToVO(article, fileMap.get(article.getId())))
+        // 批量查询分类
+        Map<Long, Category> categoryMap = Map.of();
+        List<Long> categoryIds = records.stream()
+                .map(Article::getCategoryId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        if (!categoryIds.isEmpty()) {
+            categoryMap = categoryMapper.selectBatchIds(categoryIds).stream()
+                    .collect(Collectors.toMap(Category::getId, c -> c));
+        }
+
+        // 批量查询标签
+        Map<Long, List<TagVO>> tagsByArticleId = Map.of();
+        if (!articleIds.isEmpty()) {
+            List<ArticleTag> articleTags =
+                    articleTagMapper.selectByArticleIds(articleIds);
+            if (!articleTags.isEmpty()) {
+                Map<Long, List<Long>> tagIdsByArticleId = articleTags.stream()
+                        .collect(Collectors.groupingBy(
+                                ArticleTag::getArticleId,
+                                Collectors.mapping(
+                                        ArticleTag::getTagId,
+                                        Collectors.toList()
+                                )
+                        ));
+                List<Long> tagIds = articleTags.stream()
+                        .map(ArticleTag::getTagId)
+                        .distinct()
+                        .collect(Collectors.toList());
+                Map<Long, TagVO> tagVOMap = new HashMap<>();
+                if (!tagIds.isEmpty()) {
+                    List<Tag> tags = tagMapper.selectBatchIds(tagIds);
+                    for (Tag tag : tags) {
+                        TagVO tagVO = BeanUtil.copyProperties(tag, TagVO.class);
+                        tagVOMap.put(tag.getId(), tagVO);
+                    }
+                }
+                Map<Long, List<TagVO>> grouped = new HashMap<>();
+                for (Map.Entry<Long, List<Long>> entry : tagIdsByArticleId.entrySet()) {
+                    List<TagVO> tagVOs = new ArrayList<>();
+                    for (Long tagId : entry.getValue()) {
+                        TagVO tagVO = tagVOMap.get(tagId);
+                        if (tagVO != null) {
+                            tagVOs.add(tagVO);
+                        }
+                    }
+                    grouped.put(entry.getKey(), tagVOs);
+                }
+                tagsByArticleId = grouped;
+            }
+        }
+
+        List<ArticleVO> voList = records.stream()
+                .map(article -> convertToVO(
+                        article,
+                        List.of(),
+                        categoryMap,
+                        tagsByArticleId
+                ))
                 .collect(Collectors.toList());
 
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
@@ -146,6 +208,35 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
             List<Tag> tags = tagMapper.selectBatchIds(tagIds);
             List<TagVO> tagVOs = BeanUtil.copyList(tags, TagVO.class);
             vo.setTags(tagVOs);
+        }
+
+        // 如果提供了文件列表则使用，否则查询
+        if (referencedFiles == null) {
+            referencedFiles = fileService.listByReference("ARTICLE", article.getId());
+        }
+        vo.setReferencedFiles(referencedFiles);
+
+        return vo;
+    }
+
+    private ArticleVO convertToVO(
+            Article article,
+            List<FileVO> referencedFiles,
+            Map<Long, Category> categoryMap,
+            Map<Long, List<TagVO>> tagsByArticleId
+    ) {
+        ArticleVO vo = BeanUtil.copyProperties(article, ArticleVO.class);
+        if (article.getCategoryId() != null && categoryMap != null && !categoryMap.isEmpty()) {
+            Category category = categoryMap.get(article.getCategoryId());
+            if (category != null) {
+                vo.setCategoryName(category.getName());
+            }
+        }
+        if (tagsByArticleId != null && !tagsByArticleId.isEmpty()) {
+            List<TagVO> tagVOs = tagsByArticleId.get(article.getId());
+            if (tagVOs != null) {
+                vo.setTags(tagVOs);
+            }
         }
 
         // 如果提供了文件列表则使用，否则查询

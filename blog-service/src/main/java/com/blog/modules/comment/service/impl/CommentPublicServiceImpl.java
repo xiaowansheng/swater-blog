@@ -2,6 +2,7 @@ package com.blog.modules.comment.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.article.model.entity.Article;
@@ -42,7 +43,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -169,15 +174,49 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         Page<Comment> result = commentMapper.selectPage(pageParam, wrapper);
         List<Comment> records = result.getRecords();
 
-        List<Long> idsNeedingCount = new ArrayList<>();
+        Set<Long> idsNeedingCount = Set.of();
         if ((parentId == null || parentId == 0) && (rootId == null || rootId == 0)) {
-            idsNeedingCount = records.stream().map(Comment::getId).toList();
+            idsNeedingCount = records.stream().map(Comment::getId).collect(Collectors.toSet());
+        }
+
+        Map<Long, User> userMap = Map.of();
+        List<Long> userIds = records.stream()
+                .map(Comment::getUserId)
+                .filter(id -> id != null && id > 0)
+                .distinct()
+                .collect(Collectors.toList());
+        if (!userIds.isEmpty()) {
+            userMap = userMapper.selectBatchIds(userIds).stream()
+                    .collect(Collectors.toMap(User::getId, u -> u));
+        }
+
+        Map<Long, Integer> replyCountMap = Map.of();
+        if (!idsNeedingCount.isEmpty()) {
+            QueryWrapper<Comment> countWrapper = new QueryWrapper<>();
+            countWrapper.select("root_id", "COUNT(*) AS cnt");
+            countWrapper.in("root_id", idsNeedingCount);
+            countWrapper.ne("parent_id", 0);
+            countWrapper.and(w -> w.eq("status", 1)
+                    .or(ownerEmail != null && !ownerEmail.isBlank(), w2 -> w2.eq("email", ownerEmail)));
+            countWrapper.groupBy("root_id");
+            List<Map<String, Object>> rows = commentMapper.selectMaps(countWrapper);
+            Map<Long, Integer> counts = new HashMap<>();
+            for (Map<String, Object> row : rows) {
+                Object rootIdObj = row.get("root_id");
+                Object cntObj = row.get("cnt");
+                if (rootIdObj instanceof Number) {
+                    long rootId = ((Number) rootIdObj).longValue();
+                    int cnt = cntObj instanceof Number ? ((Number) cntObj).intValue() : 0;
+                    counts.put(rootId, cnt);
+                }
+            }
+            replyCountMap = counts;
         }
 
         List<CommentVO> voList = new ArrayList<>();
         for (Comment c : records) {
             boolean withCount = idsNeedingCount.contains(c.getId());
-            voList.add(convertToVO(c, ownerEmail, withCount));
+            voList.add(convertToVO(c, ownerEmail, withCount, userMap, replyCountMap));
         }
 
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
@@ -358,9 +397,22 @@ public class CommentPublicServiceImpl implements CommentPublicService {
     }
 
     private CommentVO convertToVO(Comment comment, String ownerEmail, boolean withReplyCount) {
+        return convertToVO(comment, ownerEmail, withReplyCount, null, null);
+    }
+
+    private CommentVO convertToVO(
+            Comment comment,
+            String ownerEmail,
+            boolean withReplyCount,
+            Map<Long, User> userMap,
+            Map<Long, Integer> replyCountMap
+    ) {
         CommentVO vo = BeanUtil.copyProperties(comment, CommentVO.class);
         if (comment.getUserId() != null) {
-            User user = userMapper.selectById(comment.getUserId());
+            User user = userMap != null ? userMap.get(comment.getUserId()) : null;
+            if (user == null) {
+                user = userMapper.selectById(comment.getUserId());
+            }
             if (user != null) {
                 vo.setUserName(user.getUsername());
                 vo.setUserNickname(user.getNickname());
@@ -389,6 +441,10 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         }
 
         if (withReplyCount) {
+            if (replyCountMap != null && replyCountMap.containsKey(comment.getId())) {
+                vo.setReplyCount(replyCountMap.get(comment.getId()));
+                return vo;
+            }
             LambdaQueryWrapper<Comment> countWrapper = new LambdaQueryWrapper<>();
             countWrapper.eq(Comment::getRootId, comment.getId());
             countWrapper.ne(Comment::getParentId, 0);
