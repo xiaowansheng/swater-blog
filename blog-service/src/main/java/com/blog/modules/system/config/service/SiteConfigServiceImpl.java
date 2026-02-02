@@ -175,7 +175,6 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'site'"),
-        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -186,7 +185,6 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'author'"),
-        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -197,7 +195,6 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'cover'"),
-        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -208,7 +205,6 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'social'"),
-        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -219,7 +215,6 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'privacy'"),
-        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -230,7 +225,6 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'comment'"),
-        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -241,7 +235,6 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", allEntries = true),
-        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -252,7 +245,6 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'notify'"),
-        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -263,7 +255,6 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'upload'"),
-        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional
@@ -274,7 +265,6 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Override
     @Caching(evict = {
         @CacheEvict(value = "configs", key = "'email'"),
-        @CacheEvict(value = "configs", key = "'public'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
     @Transactional

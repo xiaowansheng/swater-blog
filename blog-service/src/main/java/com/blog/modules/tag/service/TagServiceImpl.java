@@ -15,6 +15,9 @@ import com.blog.shared.util.KeyUtil;
 import com.blog.infrastructure.revalidate.RevalidateClient;
 import com.blog.infrastructure.revalidate.RevalidateTags;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
@@ -28,6 +31,7 @@ public class TagServiceImpl implements TagService {
     private RevalidateClient revalidateClient;
 
     @Override
+    @Cacheable(value = "tag:list", key = "'all'", unless = "#result == null")
     public List<TagVO> list() {
         LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
         List<Tag> tags = tagMapper.selectList(wrapper);
@@ -35,6 +39,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Cacheable(value = "tag:list", key = "'public'", unless = "#result == null")
     public List<TagVO> listPublic() {
         LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Tag::getStatus, TagStatus.PUBLISHED.getCode());
@@ -43,6 +48,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Cacheable(value = "tag", key = "'id:' + #id", unless = "#result == null")
     public TagVO getById(Long id) {
         Tag tag = tagMapper.selectById(id);
         if (tag == null) {
@@ -52,6 +58,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Cacheable(value = "tag", key = "'key:' + #key", unless = "#result == null")
     public TagVO getByKey(String key) {
         LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Tag::getTagKey, key);
@@ -64,6 +71,10 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "tag:list", allEntries = true),
+            @CacheEvict(value = "tag", allEntries = true)
+    })
     public Long create(TagDTO dto) {
         Tag tag = BeanUtil.copyProperties(dto, Tag.class);
         tag.setTagKey(KeyUtil.generateKey("tag"));
@@ -77,6 +88,10 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "tag:list", allEntries = true),
+            @CacheEvict(value = "tag", allEntries = true)
+    })
     public void update(Long id, TagDTO dto) {
         Tag tag = tagMapper.selectById(id);
         if (tag == null) {
@@ -93,6 +108,10 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "tag:list", allEntries = true),
+            @CacheEvict(value = "tag", allEntries = true)
+    })
     public void delete(Long id) {
         Tag tag = tagMapper.selectById(id);
         if (tag == null) {
@@ -104,6 +123,10 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "tag:list", allEntries = true),
+            @CacheEvict(value = "tag", allEntries = true)
+    })
     public Long findOrCreateByName(String name) {
         if (name == null || name.trim().isEmpty()) {
             return null;

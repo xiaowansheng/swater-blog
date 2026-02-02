@@ -15,6 +15,9 @@ import com.blog.shared.util.KeyUtil;
 import com.blog.infrastructure.revalidate.RevalidateClient;
 import com.blog.infrastructure.revalidate.RevalidateTags;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
@@ -29,6 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
     private RevalidateClient revalidateClient;
 
     @Override
+    @Cacheable(value = "category:list", key = "'all'", unless = "#result == null")
     public List<CategoryVO> list() {
         LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
         wrapper.orderByAsc(Category::getSort);
@@ -37,6 +41,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Cacheable(value = "category:list", key = "'public'", unless = "#result == null")
     public List<CategoryVO> listPublic() {
         LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Category::getStatus, CategoryStatus.PUBLISHED.getCode());
@@ -46,6 +51,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Cacheable(value = "category", key = "'id:' + #id", unless = "#result == null")
     public CategoryVO getById(Long id) {
         Category category = categoryMapper.selectById(id);
         if (category == null) {
@@ -55,6 +61,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Cacheable(value = "category", key = "'key:' + #key", unless = "#result == null")
     public CategoryVO getByKey(String key) {
         LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Category::getCategoryKey, key);
@@ -67,6 +74,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "category:list", allEntries = true),
+            @CacheEvict(value = "category", allEntries = true)
+    })
     public Long create(CategoryDTO dto) {
         Category category = BeanUtil.copyProperties(dto, Category.class);
         category.setCategoryKey(KeyUtil.generateKey("category"));
@@ -86,6 +97,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "category:list", allEntries = true),
+            @CacheEvict(value = "category", allEntries = true)
+    })
     public void update(Long id, CategoryDTO dto) {
         Category category = categoryMapper.selectById(id);
         if (category == null) {
@@ -103,6 +118,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "category:list", allEntries = true),
+            @CacheEvict(value = "category", allEntries = true)
+    })
     public void delete(Long id) {
         Category category = categoryMapper.selectById(id);
         if (category == null) {
@@ -114,6 +133,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "category:list", allEntries = true),
+            @CacheEvict(value = "category", allEntries = true)
+    })
     public Long findOrCreateByName(String name) {
         if (name == null || name.trim().isEmpty()) {
             return null;

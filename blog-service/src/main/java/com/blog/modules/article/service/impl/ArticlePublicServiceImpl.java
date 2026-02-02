@@ -45,7 +45,11 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
     private ArticleTagMapper articleTagMapper;
 
     @Override
-    @Cacheable(value = "article:list", key = "#page + ':' + #size + ':' + (#categoryId != null ? #categoryId : 'null') + ':' + (#tagId != null ? #tagId : 'null') + ':' + (#keyword != null ? #keyword : 'null')")
+    @Cacheable(
+            value = "article:list",
+            key = "#page + ':' + #size + ':' + (#categoryId != null ? #categoryId : 'null') + ':' + (#tagId != null ? #tagId : 'null')",
+            unless = "#keyword != null && !#keyword.trim().isEmpty()"
+    )
     public PageResult<ArticleVO> list(Long page, Long size, Long categoryId, Long tagId, String keyword) {
         Page<Article> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
