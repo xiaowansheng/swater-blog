@@ -502,22 +502,51 @@ public class FileServiceImpl implements FileService {
             return;
         }
 
-        // 删除旧引用
+        // 删除旧引用（批量）
         if (oldFileIds != null && !oldFileIds.isEmpty()) {
-            for (Long oldFileId : oldFileIds) {
-                fileReferenceMapper.delete(
-                    new LambdaQueryWrapper<FileReference>()
-                        .eq(FileReference::getFileId, oldFileId)
-                        .eq(FileReference::getRefType, refType)
-                        .eq(FileReference::getRefId, refId)
+            List<Long> distinctOldFileIds = oldFileIds.stream()
+                    .filter(id -> id != null && id > 0)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            if (!distinctOldFileIds.isEmpty()) {
+                // 先查询实际存在的关联关系，按 fileId 聚合需要扣减的数量
+                List<FileReference> oldReferences = fileReferenceMapper.selectList(
+                        new LambdaQueryWrapper<FileReference>()
+                                .eq(FileReference::getRefType, refType)
+                                .eq(FileReference::getRefId, refId)
+                                .in(FileReference::getFileId, distinctOldFileIds)
                 );
 
-                // 减少引用计数
-                FileMeta fileMeta = fileMetaMapper.selectById(oldFileId);
-                if (fileMeta != null) {
-                    int newRefCount = (fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0) - 1;
-                    fileMeta.setRefCount(Math.max(0, newRefCount));
-                    fileMetaMapper.updateById(fileMeta);
+                if (!oldReferences.isEmpty()) {
+                    Map<Long, Long> decreaseByFileId = oldReferences.stream()
+                            .collect(Collectors.groupingBy(FileReference::getFileId, Collectors.counting()));
+                    List<Long> affectedFileIds = new ArrayList<>(decreaseByFileId.keySet());
+
+                    // 批量删除旧引用
+                    fileReferenceMapper.delete(
+                            new LambdaQueryWrapper<FileReference>()
+                                    .eq(FileReference::getRefType, refType)
+                                    .eq(FileReference::getRefId, refId)
+                                    .in(FileReference::getFileId, affectedFileIds)
+                    );
+
+                    // 批量减少引用计数
+                    List<FileMeta> fileMetas = fileMetaMapper.selectBatchIds(affectedFileIds);
+                    for (FileMeta fileMeta : fileMetas) {
+                        if (fileMeta == null || fileMeta.getId() == null) {
+                            continue;
+                        }
+                        int current = fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0;
+                        int decrease = decreaseByFileId.getOrDefault(fileMeta.getId(), 0L).intValue();
+                        int latestRefCount = Math.max(0, current - decrease);
+                        fileMetaMapper.update(
+                                null,
+                                new LambdaUpdateWrapper<FileMeta>()
+                                        .eq(FileMeta::getId, fileMeta.getId())
+                                        .set(FileMeta::getRefCount, latestRefCount)
+                        );
+                    }
                 }
             }
         }
