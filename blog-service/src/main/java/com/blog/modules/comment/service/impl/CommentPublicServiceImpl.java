@@ -40,7 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,8 +85,10 @@ public class CommentPublicServiceImpl implements CommentPublicService {
     @Autowired
     private SensitiveWordHelper sensitiveWordHelper;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     @Override
-    @Transactional
     public CommentVO create(CommentDTO dto) {
         validateCommentTarget(dto);
 
@@ -112,18 +114,21 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         dto.setDevice(userAgentInfo.getDeviceDescription() != null ? userAgentInfo.getDeviceDescription() : userAgent);
         dto.setBrowser(userAgentInfo.getBrowserDescription() != null ? userAgentInfo.getBrowserDescription() : userAgent);
 
-        CommentVO vo = createAndPersist(dto, emailVerifiedBySession ? sessionEmail : dto.getEmail());
-        if (vo.getId() != null) {
-            Long commentId = vo.getId();
-            EventUtil.publishEventAfterCommit(() -> {
-                // 在事件发布时重新查询最新的评论数据
-                Comment comment = commentMapper.selectById(commentId);
-                if (comment != null) {
-                    eventPublisher.publishEvent(new CommentCreatedEvent(this, commentId, comment));
-                }
-            });
-        }
-        return vo;
+        String ownerEmailForView = emailVerifiedBySession ? sessionEmail : dto.getEmail();
+        return transactionTemplate.execute(status -> {
+            CommentVO vo = createAndPersist(dto, ownerEmailForView);
+            if (vo != null && vo.getId() != null) {
+                Long commentId = vo.getId();
+                EventUtil.publishEventAfterCommit(() -> {
+                    // 在事件发布时重新查询最新的评论数据
+                    Comment comment = commentMapper.selectById(commentId);
+                    if (comment != null) {
+                        eventPublisher.publishEvent(new CommentCreatedEvent(this, commentId, comment));
+                    }
+                });
+            }
+            return vo;
+        });
     }
 
     @Override
