@@ -19,7 +19,6 @@ import com.blog.modules.article.service.ArticleSaveService;
 import com.blog.modules.file.model.entity.FileMeta;
 import com.blog.modules.category.service.CategoryService;
 import com.blog.modules.file.service.FileService;
-import com.blog.modules.file.util.ContentImageExtractor;
 import com.blog.modules.tag.service.TagService;
 import com.blog.bootstrap.context.UserContext;
 import com.blog.shared.util.BeanUtil;
@@ -402,33 +401,6 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
         } else {
             runnable.run();
         }
-    }
-
-    /**
-     * 从内容中提取文件ID列表
-     */
-    private List<Long> extractFileIdsFromContent(String content) {
-        if (content == null || content.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        // 提取内容中的图片URL
-        Set<String> imageUrls = ContentImageExtractor.extractImageUrls(content);
-
-        if (imageUrls.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        // 将URL转换为文件ID
-        List<Long> fileIds = new ArrayList<>();
-        for (String url : imageUrls) {
-            Long fileId = fileService.getFileIdByUrl(url);
-            if (fileId != null) {
-                fileIds.add(fileId);
-            }
-        }
-
-        return fileIds;
     }
 
     /**

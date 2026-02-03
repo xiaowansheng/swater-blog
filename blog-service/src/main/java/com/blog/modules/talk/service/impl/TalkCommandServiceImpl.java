@@ -32,10 +32,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class TalkCommandServiceImpl implements TalkCommandService {
+    private static final String REFERENCE_TYPE_TALK = "TALK";
+
     private final TalkMapper talkMapper;
 
     @Autowired
@@ -128,18 +131,9 @@ public class TalkCommandServiceImpl implements TalkCommandService {
         talkMapper.insert(talk);
 
         // 处理文件引用关系：验证前端提交的引用列表
-        if (dto.getReferencedFileIds() != null && !dto.getReferencedFileIds().isEmpty()) {
-            List<Long> validFileIds = new ArrayList<>();
-            for (Long fileId : dto.getReferencedFileIds()) {
-                // 检查文件是否在说说内容或图片列表中使用
-                if (isFileInTalk(fileId, dto.getContent(), dto.getImages())) {
-                    validFileIds.add(fileId);
-                }
-            }
-            // 只为在内容中找到的文件建立引用关系
-            if (!validFileIds.isEmpty()) {
-                fileService.addReferences(validFileIds, "TALK", talk.getId());
-            }
+        List<Long> validFileIds = findValidReferencedFileIds(dto.getReferencedFileIds(), dto.getContent(), dto.getImages());
+        if (!validFileIds.isEmpty()) {
+            fileService.addReferences(validFileIds, REFERENCE_TYPE_TALK, talk.getId());
         }
 
         EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new TalkCreatedEvent(this, talk.getId(), talk)));
@@ -171,24 +165,16 @@ public class TalkCommandServiceImpl implements TalkCommandService {
         talkMapper.updateById(talk);
 
         // 处理文件引用关系：验证前端提交的引用列表
-        List<Long> validFileIds = new ArrayList<>();
-        if (dto.getReferencedFileIds() != null && !dto.getReferencedFileIds().isEmpty()) {
-            for (Long fileId : dto.getReferencedFileIds()) {
-                // 检查文件是否在说说内容或图片列表中使用
-                if (isFileInTalk(fileId, dto.getContent(), dto.getImages())) {
-                    validFileIds.add(fileId);
-                }
-            }
-        }
+        List<Long> validFileIds = findValidReferencedFileIds(dto.getReferencedFileIds(), dto.getContent(), dto.getImages());
 
         // 获取旧的引用文件列表（从数据库查询）
-        List<Long> oldFileIds = fileService.listByReference("TALK", id)
+        List<Long> oldFileIds = fileService.listByReference(REFERENCE_TYPE_TALK, id)
                 .stream()
                 .map(FileVO::getId)
                 .collect(Collectors.toList());
 
         // 更新文件引用关系（删除旧的，添加验证过的新引用）
-        fileService.updateReferences(oldFileIds, validFileIds, "TALK", id);
+        fileService.updateReferences(oldFileIds, validFileIds, REFERENCE_TYPE_TALK, id);
 
         Talk updatedTalk = talkMapper.selectById(id);
         EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new TalkUpdatedEvent(this, id, updatedTalk)));
@@ -204,7 +190,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
         }
 
         // 清理文件引用关系
-        fileService.removeReferences("TALK", id);
+        fileService.removeReferences(REFERENCE_TYPE_TALK, id);
 
         talkMapper.deleteById(id);
 
@@ -237,23 +223,19 @@ public class TalkCommandServiceImpl implements TalkCommandService {
 
     /**
      * 检查文件是否在说说中使用
-     * @param fileId 文件ID
+     * @param fileMeta 文件
      * @param content 说说内容
      * @param images 图片列表
      * @return 是否在使用中
      */
-    private boolean isFileInTalk(Long fileId, String content, List<String> images) {
-        if (fileId == null) {
-            return false;
-        }
-
-        // 查询文件信息
-        FileMeta fileMeta = fileMetaMapper.selectById(fileId);
+    private boolean isFileInTalk(FileMeta fileMeta, String content, List<String> images) {
         if (fileMeta == null) {
             return false;
         }
-
         String fileUrl = fileMeta.getUrl();
+        if (fileUrl == null || fileUrl.isEmpty()) {
+            return false;
+        }
 
         // 检查是否在内容中
         if (content != null && content.contains(fileUrl)) {
@@ -270,6 +252,30 @@ public class TalkCommandServiceImpl implements TalkCommandService {
         }
 
         return false;
+    }
+
+    private List<Long> findValidReferencedFileIds(List<Long> referencedFileIds, String content, List<String> images) {
+        if (referencedFileIds == null || referencedFileIds.isEmpty()) {
+            return List.of();
+        }
+        List<Long> uniqueIds = referencedFileIds.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        if (uniqueIds.isEmpty()) {
+            return List.of();
+        }
+        List<FileMeta> files = fileMetaMapper.selectBatchIds(uniqueIds);
+        if (files == null || files.isEmpty()) {
+            return List.of();
+        }
+        List<Long> validIds = new ArrayList<>();
+        for (FileMeta fileMeta : files) {
+            if (isFileInTalk(fileMeta, content, images)) {
+                validIds.add(fileMeta.getId());
+            }
+        }
+        return validIds;
     }
 }
 

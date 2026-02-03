@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Service
 public class TrackAsyncMetricService {
     private static final int MAX_RETRIES = 3;
-    private static final long RETRY_DELAY_MS = 50L;
 
     @Autowired(required = false)
     private ArticleMapper articleMapper;
@@ -79,12 +78,6 @@ public class TrackAsyncMetricService {
                 lastError = e;
                 if (i < MAX_RETRIES) {
                     log.warn("Retry {}/{} for action={}", i, MAX_RETRIES, action, e);
-                    try {
-                        Thread.sleep(RETRY_DELAY_MS);
-                    } catch (InterruptedException interrupted) {
-                        Thread.currentThread().interrupt();
-                        break;
-                    }
                 }
             }
         }
