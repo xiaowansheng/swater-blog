@@ -1,17 +1,10 @@
 package com.blog.modules.comment.service.impl;
-
-
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.modules.comment.event.CommentApprovedEvent;
 import com.blog.modules.comment.event.CommentDeletedEvent;
 import com.blog.modules.comment.event.CommentUpdatedEvent;
 import com.blog.shared.exception.BusinessException;
-import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.comment.mapper.CommentMapper;
-import com.blog.modules.talk.mapper.TalkMapper;
-import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.comment.model.entity.Comment;
-import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.comment.service.CommentCommandService;
 import com.blog.modules.file.service.FileService;
 import com.blog.shared.util.EventUtil;
@@ -21,14 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CommentCommandServiceImpl implements CommentCommandService {
+    private static final String REFERENCE_TYPE_COMMENT = "COMMENT";
+
     @Autowired
     private CommentMapper commentMapper;
-
-    @Autowired
-    private ArticleMapper articleMapper;
-
-    @Autowired
-    private TalkMapper talkMapper;
 
     @Autowired
     private FileService fileService;
@@ -37,7 +26,7 @@ public class CommentCommandServiceImpl implements CommentCommandService {
     private ApplicationEventPublisher eventPublisher;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void approve(Long id) {
         Comment comment = commentMapper.selectById(id);
         if (comment == null) {
@@ -52,7 +41,7 @@ public class CommentCommandServiceImpl implements CommentCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void reject(Long id) {
         Comment comment = commentMapper.selectById(id);
         if (comment == null) {
@@ -66,7 +55,7 @@ public class CommentCommandServiceImpl implements CommentCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         Comment comment = commentMapper.selectById(id);
         if (comment == null) {
@@ -74,7 +63,7 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         }
 
         // 清理文件引用关系
-        fileService.removeReferences("COMMENT", id);
+        fileService.removeReferences(REFERENCE_TYPE_COMMENT, id);
 
         commentMapper.deleteById(id);
 
@@ -82,7 +71,7 @@ public class CommentCommandServiceImpl implements CommentCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void setVisible(Long id) {
         Comment comment = commentMapper.selectById(id);
         if (comment == null) {
@@ -96,7 +85,7 @@ public class CommentCommandServiceImpl implements CommentCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void setHidden(Long id) {
         Comment comment = commentMapper.selectById(id);
         if (comment == null) {

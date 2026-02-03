@@ -31,8 +31,9 @@ public class TrackAsyncMetricService {
             log.warn("Skip metric handling due to invalid input: type={}, id={}", contentType, contentId);
             return;
         }
+        LocalDateTime occurredAt = now != null ? now : LocalDateTime.now();
         boolean incremented = incrementContentViewCount(contentType, contentId);
-        boolean recorded = recordMetricEvent(visitorId, "READ", contentType, contentId, 1, now);
+        boolean recorded = recordMetricEvent(visitorId, "READ", contentType, contentId, 1, occurredAt);
         if (!incremented || !recorded) {
             log.error("Partial metric processing failure: incremented={}, recorded={}, type={}, id={}",
                     incremented, recorded, contentType, contentId);

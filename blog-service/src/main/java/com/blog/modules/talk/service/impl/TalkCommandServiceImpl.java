@@ -58,7 +58,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public Long create(TalkDTO dto) {
         Talk talk = BeanUtil.copyProperties(dto, Talk.class);
@@ -142,7 +142,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public void update(Long id, TalkDTO dto) {
         Talk talk = talkMapper.selectById(id);
@@ -181,7 +181,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public void delete(Long id) {
         Talk talk = talkMapper.selectById(id);
@@ -198,7 +198,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public void setTop(Long id) {
         Talk talk = talkMapper.selectById(id);
@@ -210,7 +210,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public void cancelTop(Long id) {
         Talk talk = talkMapper.selectById(id);

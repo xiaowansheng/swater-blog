@@ -20,7 +20,7 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
     private ApplicationEventPublisher eventPublisher;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void approve(Long id) {
         Guestbook guestbook = getRequiredGuestbook(id);
         guestbook.setReviewStatus(1);
@@ -31,7 +31,7 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void reject(Long id) {
         Guestbook guestbook = getRequiredGuestbook(id);
         guestbook.setReviewStatus(2);
@@ -42,7 +42,7 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         getRequiredGuestbook(id);
         guestbookMapper.deleteById(id);
@@ -51,7 +51,7 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void setVisible(Long id, Integer isVisible) {
         Guestbook guestbook = getRequiredGuestbook(id);
         guestbook.setIsVisible(isVisible);
