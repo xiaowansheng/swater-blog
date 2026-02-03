@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -135,6 +136,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             Long size
     ) {
         String ownerEmail = getOwnerEmailFromRequest();
+        boolean hasOwnerEmail = ownerEmail != null && !ownerEmail.isBlank();
 
         Page<Comment> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Comment> wrapper = new LambdaQueryWrapper<>();
@@ -142,7 +144,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         // 公开：所有 status=1 的评论都返回（包含 is_visible=0 的隐藏评论，内容会在 VO 里被置空）
         // 私有：若携带邮箱会话 token，则额外返回该邮箱自己的非公开评论（例如待审核）
         wrapper.and(w -> w.eq(Comment::getStatus, 1)
-                .or(ownerEmail != null && !ownerEmail.isBlank(), w2 -> w2.eq(Comment::getEmail, ownerEmail)));
+                .or(hasOwnerEmail, w2 -> w2.eq(Comment::getEmail, ownerEmail)));
 
         if (targetId != null) {
             wrapper.eq(Comment::getTargetId, targetId);
@@ -195,7 +197,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             countWrapper.in("root_id", idsNeedingCount);
             countWrapper.ne("parent_id", 0);
             countWrapper.and(w -> w.eq("status", 1)
-                    .or(ownerEmail != null && !ownerEmail.isBlank(), w2 -> w2.eq("email", ownerEmail)));
+                    .or(hasOwnerEmail, w2 -> w2.eq("email", ownerEmail)));
             countWrapper.groupBy("root_id");
             List<Map<String, Object>> rows = commentMapper.selectMaps(countWrapper);
             Map<Long, Integer> counts = new HashMap<>();
@@ -289,13 +291,11 @@ public class CommentPublicServiceImpl implements CommentPublicService {
 
         // 处理文件引用关系：验证前端提交的引用列表
         if (dto.getReferencedFileIds() != null && !dto.getReferencedFileIds().isEmpty()) {
-            List<Long> validFileIds = new ArrayList<>();
-            for (Long fileId : dto.getReferencedFileIds()) {
-                // 检查文件是否在评论内容或图片列表中使用
-                if (isFileInComment(fileId, dto.getContent(), dto.getImages())) {
-                    validFileIds.add(fileId);
-                }
-            }
+            List<Long> validFileIds = findValidReferencedFileIds(
+                    dto.getReferencedFileIds(),
+                    dto.getContent(),
+                    dto.getImages()
+            );
             // 只为在内容中找到的文件建立引用关系
             if (!validFileIds.isEmpty()) {
                 fileService.addReferences(validFileIds, "COMMENT", comment.getId());
@@ -312,24 +312,44 @@ public class CommentPublicServiceImpl implements CommentPublicService {
     }
 
     /**
-     * 检查文件是否在评论中使用
-     * @param fileId 文件ID
+     * 从前端提交的文件ID里筛出确实在评论内容中使用的文件
+     * @param referencedFileIds 前端提交的文件ID列表
      * @param content 评论内容
      * @param images 图片列表
-     * @return 是否在使用中
+     * @return 有效的文件ID列表
      */
-    private boolean isFileInComment(Long fileId, String content, List<String> images) {
-        if (fileId == null) {
-            return false;
+    private List<Long> findValidReferencedFileIds(List<Long> referencedFileIds, String content, List<String> images) {
+        List<Long> uniqueIds = referencedFileIds.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        if (uniqueIds.isEmpty()) {
+            return List.of();
         }
 
-        // 查询文件信息
-        FileMeta fileMeta = fileMetaMapper.selectById(fileId);
+        List<FileMeta> files = fileMetaMapper.selectBatchIds(uniqueIds);
+        if (files == null || files.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> validIds = new ArrayList<>();
+        for (FileMeta fileMeta : files) {
+            if (isFileInComment(fileMeta, content, images)) {
+                validIds.add(fileMeta.getId());
+            }
+        }
+        return validIds;
+    }
+
+    private boolean isFileInComment(FileMeta fileMeta, String content, List<String> images) {
         if (fileMeta == null) {
             return false;
         }
 
         String fileUrl = fileMeta.getUrl();
+        if (fileUrl == null || fileUrl.isEmpty()) {
+            return false;
+        }
 
         // 检查是否在内容中
         if (content != null && content.contains(fileUrl)) {
@@ -361,10 +381,9 @@ public class CommentPublicServiceImpl implements CommentPublicService {
     ) {
         CommentVO vo = BeanUtil.copyProperties(comment, CommentVO.class);
         if (comment.getUserId() != null) {
-            User user = userMap != null ? userMap.get(comment.getUserId()) : null;
-            if (user == null) {
-                user = userMapper.selectById(comment.getUserId());
-            }
+            User user = userMap != null
+                    ? userMap.get(comment.getUserId())
+                    : userMapper.selectById(comment.getUserId());
             if (user != null) {
                 vo.setUserName(user.getUsername());
                 vo.setUserNickname(user.getNickname());
@@ -393,8 +412,8 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         }
 
         if (withReplyCount) {
-            if (replyCountMap != null && replyCountMap.containsKey(comment.getId())) {
-                vo.setReplyCount(replyCountMap.get(comment.getId()));
+            if (replyCountMap != null) {
+                vo.setReplyCount(replyCountMap.getOrDefault(comment.getId(), 0));
                 return vo;
             }
             LambdaQueryWrapper<Comment> countWrapper = new LambdaQueryWrapper<>();
