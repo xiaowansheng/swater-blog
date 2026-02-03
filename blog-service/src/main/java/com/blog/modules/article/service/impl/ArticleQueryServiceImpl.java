@@ -142,12 +142,15 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
             }
         }
 
+        final Map<Long, Category> finalCategoryMap = categoryMap;
+        final Map<Long, List<TagVO>> finalTagsByArticleId = tagsByArticleId;
+
         List<ArticleVO> voList = records.stream()
                 .map(article -> convertToVO(
                         article,
                         List.of(),
-                        categoryMap,
-                        tagsByArticleId
+                        finalCategoryMap,
+                        finalTagsByArticleId
                 ))
                 .collect(Collectors.toList());
 
