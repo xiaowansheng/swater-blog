@@ -166,8 +166,19 @@ public class CommentQueryServiceImpl implements CommentQueryService {
             talkTitleMap = titles;
         }
 
+        final Map<Long, User> finalUserMap = userMap;
+        final Map<Long, Integer> finalReplyCountMap = replyCountMap;
+        final Map<Long, String> finalArticleTitleMap = articleTitleMap;
+        final Map<Long, String> finalTalkTitleMap = talkTitleMap;
+
         List<CommentVO> voList = records.stream()
-                .map(comment -> convertToVO(comment, userMap, replyCountMap, articleTitleMap, talkTitleMap))
+                .map(comment -> convertToVO(
+                        comment,
+                        finalUserMap,
+                        finalReplyCountMap,
+                        finalArticleTitleMap,
+                        finalTalkTitleMap
+                ))
                 .collect(Collectors.toList());
 
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());

@@ -16,7 +16,6 @@ import com.blog.modules.user.event.UserPasswordResetEvent;
 import com.blog.shared.exception.BusinessException;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.system.role.model.vo.RoleVO;
-import com.blog.modules.user.model.vo.UserVO;
 import com.blog.modules.system.role.service.RoleService;
 import com.blog.modules.user.service.UserService;
 import com.blog.shared.util.BeanUtil;

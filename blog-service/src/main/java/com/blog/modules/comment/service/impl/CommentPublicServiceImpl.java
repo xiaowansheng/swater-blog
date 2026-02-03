@@ -203,9 +203,9 @@ public class CommentPublicServiceImpl implements CommentPublicService {
                 Object rootIdObj = row.get("root_id");
                 Object cntObj = row.get("cnt");
                 if (rootIdObj instanceof Number) {
-                    long rootId = ((Number) rootIdObj).longValue();
+                    long rootCommentId = ((Number) rootIdObj).longValue();
                     int cnt = cntObj instanceof Number ? ((Number) cntObj).intValue() : 0;
-                    counts.put(rootId, cnt);
+                    counts.put(rootCommentId, cnt);
                 }
             }
             replyCountMap = counts;
