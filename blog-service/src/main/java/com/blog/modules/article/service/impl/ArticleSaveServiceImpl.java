@@ -78,7 +78,7 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
     private final ConcurrentHashMap<Long, LockHolder> articleLocks = new ConcurrentHashMap<>();
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public ArticleSaveResultVO save(ArticleSaveDTO dto) {
         boolean isNew = dto.getId() == null;
@@ -304,7 +304,7 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
 
     private void validateUpdatePermission(Article article) {
         if (!UserContext.isLoggedIn()) {
-            return;
+            throw new BusinessException("用户未登录");
         }
         if (UserContext.hasRole(ADMIN_ROLE)) {
             return;
