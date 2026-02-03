@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long create(UserDTO dto) {
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getUsername, dto.getUsername());
@@ -127,7 +127,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = "user", key = "#id")
     public void update(Long id, UserDTO dto) {
         User user = userMapper.selectById(id);
@@ -172,7 +172,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = "user", key = "#id")
     public void delete(Long id) {
         User user = userMapper.selectById(id);
@@ -185,7 +185,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = "user", key = "#id")
     public void resetPassword(Long id, AdminResetPasswordDTO dto) {
         User user = userMapper.selectById(id);
@@ -199,7 +199,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = "user", key = "#id")
     public void assignRoles(Long id, List<Long> roleIds) {
         User user = userMapper.selectById(id);
@@ -241,7 +241,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateProfile(UpdateProfileDTO dto) {
         Long userId = UserContext.getCurrentUserId();
         User user = userMapper.selectById(userId);
@@ -292,7 +292,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updatePassword(UpdatePasswordDTO dto) {
         Long userId = UserContext.getCurrentUserId();
         User user = userMapper.selectById(userId);

@@ -85,7 +85,7 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public GuestbookVO submit(GuestbookDTO dto) {
         if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
             throw new BusinessException(400, "Email is required");
