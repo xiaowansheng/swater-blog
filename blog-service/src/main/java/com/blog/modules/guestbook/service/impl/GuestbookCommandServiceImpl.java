@@ -5,6 +5,7 @@ import com.blog.modules.guestbook.event.*;
 import com.blog.modules.guestbook.mapper.GuestbookMapper;
 import com.blog.modules.guestbook.model.entity.Guestbook;
 import com.blog.modules.guestbook.service.GuestbookCommandService;
+import com.blog.shared.exception.BusinessException;
 import com.blog.shared.util.EventUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -21,10 +22,7 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
     @Override
     @Transactional
     public void approve(Long id) {
-        Guestbook guestbook = guestbookMapper.selectById(id);
-        if (guestbook == null) {
-            return;
-        }
+        Guestbook guestbook = getRequiredGuestbook(id);
         guestbook.setReviewStatus(1);
         guestbookMapper.updateById(guestbook);
         
@@ -35,10 +33,7 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
     @Override
     @Transactional
     public void reject(Long id) {
-        Guestbook guestbook = guestbookMapper.selectById(id);
-        if (guestbook == null) {
-            return;
-        }
+        Guestbook guestbook = getRequiredGuestbook(id);
         guestbook.setReviewStatus(2);
         guestbookMapper.updateById(guestbook);
         
@@ -49,10 +44,7 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
     @Override
     @Transactional
     public void delete(Long id) {
-        Guestbook guestbook = guestbookMapper.selectById(id);
-        if (guestbook == null) {
-            return;
-        }
+        getRequiredGuestbook(id);
         guestbookMapper.deleteById(id);
         
         EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new GuestbookDeletedEvent(this, id)));
@@ -61,15 +53,20 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
     @Override
     @Transactional
     public void setVisible(Long id, Integer isVisible) {
-        Guestbook guestbook = guestbookMapper.selectById(id);
-        if (guestbook == null) {
-            return;
-        }
+        Guestbook guestbook = getRequiredGuestbook(id);
         guestbook.setIsVisible(isVisible);
         guestbookMapper.updateById(guestbook);
         
         Guestbook updatedGuestbook = guestbookMapper.selectById(id);
         EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new GuestbookVisibilityChangedEvent(this, id, updatedGuestbook, isVisible)));
+    }
+
+    private Guestbook getRequiredGuestbook(Long id) {
+        Guestbook guestbook = guestbookMapper.selectById(id);
+        if (guestbook == null) {
+            throw new BusinessException("留言不存在");
+        }
+        return guestbook;
     }
 }
 

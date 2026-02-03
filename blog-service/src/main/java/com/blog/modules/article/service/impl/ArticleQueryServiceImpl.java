@@ -86,12 +86,14 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         List<Article> records = result.getRecords();
 
         List<Long> articleIds = records.stream()
+                .filter(Objects::nonNull)
                 .map(Article::getId)
                 .collect(Collectors.toList());
 
         // 批量查询分类
         Map<Long, Category> categoryMap = Map.of();
         List<Long> categoryIds = records.stream()
+                .filter(Objects::nonNull)
                 .map(Article::getCategoryId)
                 .filter(Objects::nonNull)
                 .distinct()

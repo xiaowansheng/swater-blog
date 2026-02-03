@@ -21,6 +21,7 @@ import com.blog.modules.category.service.CategoryService;
 import com.blog.modules.file.service.FileService;
 import com.blog.modules.file.util.ContentImageExtractor;
 import com.blog.modules.tag.service.TagService;
+import com.blog.bootstrap.context.UserContext;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.KeyUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +36,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 /**
@@ -45,6 +48,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class ArticleSaveServiceImpl implements ArticleSaveService {
+    private static final String ADMIN_ROLE = "admin";
+    private static final String REFERENCE_TYPE_ARTICLE = "ARTICLE";
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -70,7 +75,7 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
     /**
      * 文章保存锁，防止同一文章并发保存
      */
-    private final ConcurrentHashMap<Long, ReentrantLock> articleLocks = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, LockHolder> articleLocks = new ConcurrentHashMap<>();
 
     @Override
     @Transactional
@@ -129,6 +134,9 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
         article.setNote(dto.getNote());
         article.setStatus(dto.getStatus() != null ? dto.getStatus() : ArticleStatus.DRAFT.getCode());
         article.setIsTop(dto.getIsTop() != null ? dto.getIsTop() : 0);
+        if (UserContext.isLoggedIn()) {
+            article.setAuthorId(UserContext.getCurrentUserId());
+        }
         article.setViewCount(0);
         article.setLikeCount(0);
         article.setCommentCount(0);
@@ -142,16 +150,14 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
 
         // 处理文件引用关系：验证前端提交的引用列表
         if (dto.getReferencedFileIds() != null && !dto.getReferencedFileIds().isEmpty()) {
-            List<Long> validFileIds = new ArrayList<>();
-            for (Long fileId : dto.getReferencedFileIds()) {
-                // 检查文件是否在封面或内容中使用
-                if (isFileInUse(fileId, dto.getCover(), dto.getContent())) {
-                    validFileIds.add(fileId);
-                }
-            }
+            List<Long> validFileIds = findValidReferencedFileIds(
+                    dto.getReferencedFileIds(),
+                    dto.getCover(),
+                    dto.getContent()
+            );
             // 只为在内容中找到的文件建立引用关系
             if (!validFileIds.isEmpty()) {
-                fileService.addReferences(validFileIds, "ARTICLE", article.getId());
+                fileService.addReferences(validFileIds, REFERENCE_TYPE_ARTICLE, article.getId());
             }
         }
 
@@ -182,7 +188,8 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
         Long articleId = dto.getId();
         
         // 获取文章锁，防止并发更新
-        ReentrantLock lock = articleLocks.computeIfAbsent(articleId, k -> new ReentrantLock());
+        LockHolder lockHolder = acquireArticleLock(articleId);
+        ReentrantLock lock = lockHolder.lock;
         
         lock.lock();
         try {
@@ -190,6 +197,7 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
             if (article == null) {
                 throw new BusinessException("文章不存在");
             }
+            validateUpdatePermission(article);
 
             // 检查版本冲突
             if (dto.getClientVersion() != null && !dto.getClientVersion().equals(article.getVersion())) {
@@ -244,18 +252,14 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
             articleMapper.updateById(article);
 
             // 处理文件引用关系：验证前端提交的引用列表
-            List<Long> validFileIds = new ArrayList<>();
-            if (dto.getReferencedFileIds() != null && !dto.getReferencedFileIds().isEmpty()) {
-                for (Long fileId : dto.getReferencedFileIds()) {
-                    // 检查文件是否在封面或内容中使用
-                    if (isFileInUse(fileId, dto.getCover(), dto.getContent())) {
-                        validFileIds.add(fileId);
-                    }
-                }
-            }
+            List<Long> validFileIds = findValidReferencedFileIds(
+                    dto.getReferencedFileIds(),
+                    dto.getCover(),
+                    dto.getContent()
+            );
 
             // 获取旧的引用文件列表（从数据库查询）
-            List<Long> oldFileIds = fileService.listByReference("ARTICLE", articleId)
+            List<Long> oldFileIds = fileService.listByReference(REFERENCE_TYPE_ARTICLE, articleId)
                     .stream()
                     .map(FileVO::getId)
                     .collect(Collectors.toList());
@@ -264,7 +268,7 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
             fileService.updateReferences(
                 oldFileIds.isEmpty() ? null : oldFileIds,
                 validFileIds.isEmpty() ? null : validFileIds,
-                "ARTICLE",
+                REFERENCE_TYPE_ARTICLE,
                 articleId
             );
 
@@ -294,11 +298,44 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
                     
         } finally {
             lock.unlock();
-            // 清理不再使用的锁
-            if (!lock.hasQueuedThreads()) {
-                articleLocks.remove(articleId, lock);
-            }
+            releaseArticleLock(articleId, lockHolder);
         }
+    }
+
+    private void validateUpdatePermission(Article article) {
+        if (!UserContext.isLoggedIn()) {
+            return;
+        }
+        if (UserContext.hasRole(ADMIN_ROLE)) {
+            return;
+        }
+        Long currentUserId = UserContext.getCurrentUserId();
+        if (currentUserId == null) {
+            throw new BusinessException("用户未登录");
+        }
+        if (article.getAuthorId() == null || !currentUserId.equals(article.getAuthorId())) {
+            throw new BusinessException("无权修改他人文章");
+        }
+    }
+
+    private LockHolder acquireArticleLock(Long articleId) {
+        return articleLocks.compute(articleId, (k, existing) -> {
+            LockHolder holder = existing != null ? existing : new LockHolder();
+            holder.refCount.incrementAndGet();
+            return holder;
+        });
+    }
+
+    private void releaseArticleLock(Long articleId, LockHolder lockHolder) {
+        int remaining = lockHolder.refCount.decrementAndGet();
+        if (remaining == 0) {
+            articleLocks.remove(articleId, lockHolder);
+        }
+    }
+
+    private static final class LockHolder {
+        private final ReentrantLock lock = new ReentrantLock();
+        private final AtomicInteger refCount = new AtomicInteger(0);
     }
 
     @Override
@@ -396,23 +433,19 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
 
     /**
      * 检查文件是否在文章内容中使用
-     * @param fileId 文件ID
+     * @param fileMeta 文件
      * @param cover 封面URL
      * @param content 文章内容
      * @return 是否在使用中
      */
-    private boolean isFileInUse(Long fileId, String cover, String content) {
-        if (fileId == null) {
-            return false;
-        }
-
-        // 查询文件信息
-        FileMeta fileMeta = fileMetaMapper.selectById(fileId);
+    private boolean isFileInUse(FileMeta fileMeta, String cover, String content) {
         if (fileMeta == null) {
             return false;
         }
-
         String fileUrl = fileMeta.getUrl();
+        if (fileUrl == null || fileUrl.isEmpty()) {
+            return false;
+        }
 
         // 检查是否在封面中
         if (cover != null && cover.contains(fileUrl)) {
@@ -425,5 +458,32 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
         }
 
         return false;
+    }
+
+    private List<Long> findValidReferencedFileIds(List<Long> referencedFileIds, String cover, String content) {
+        if (referencedFileIds == null || referencedFileIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> uniqueIds = referencedFileIds.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        if (uniqueIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<FileMeta> files = fileMetaMapper.selectBatchIds(uniqueIds);
+        if (files == null || files.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> validIds = new ArrayList<>();
+        for (FileMeta fileMeta : files) {
+            if (isFileInUse(fileMeta, cover, content)) {
+                validIds.add(fileMeta.getId());
+            }
+        }
+        return validIds;
     }
 }

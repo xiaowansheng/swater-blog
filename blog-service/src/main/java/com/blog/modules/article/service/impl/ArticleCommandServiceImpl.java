@@ -52,7 +52,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
     private BlogMetrics blogMetrics;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long create(ArticleDTO dto) {
         Timer.Sample sample = blogMetrics.startTimer();
         
@@ -118,7 +118,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public void update(Long id, ArticleDTO dto) {
         Article article = articleMapper.selectById(id);
@@ -176,7 +176,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public void delete(Long id) {
         Article article = articleMapper.selectById(id);
@@ -194,7 +194,8 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public void deleteBatch(List<Long> ids) {
         for (Long id : ids) {
             delete(id);
@@ -202,7 +203,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public void publish(Long id) {
         Article article = articleMapper.selectById(id);
@@ -220,7 +221,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
     public void unpublish(Long id) {
         Article article = articleMapper.selectById(id);
