@@ -260,6 +260,10 @@ sa-token:
 
 # 认证配置 - 开发环境
 auth:
+  crypto:
+    nonce-ttl-seconds: ${AUTH_CRYPTO_NONCE_TTL_SECONDS:120}
+    nonce-max-size: ${AUTH_CRYPTO_NONCE_MAX_SIZE:10000}
+    nonce-cleanup-interval: ${AUTH_CRYPTO_NONCE_CLEANUP_INTERVAL:200}
   email-session:
     secret: ${AUTH_EMAIL_SESSION_SECRET:dev-change-me}
     ttl-seconds: 2592000
@@ -491,10 +495,11 @@ dev:
     actuator: true
     devtools: true
   
-  # 跨域配置
+# 跨域配置（供 WebCorsConfig 使用）
+app:
   cors:
     enabled: true
-    allowed-origins: 
+    allowed-origins:
       - http://localhost:3000
       - http://localhost:8888
       - http://127.0.0.1:3000
@@ -506,7 +511,10 @@ dev:
       - DELETE
       - OPTIONS
     allowed-headers:
-      - '*'
+      - Authorization
+      - Content-Type
+      - X-Verify-Token
+      - X-Requested-With
     exposed-headers:
       - Content-Disposition
       - Content-Type

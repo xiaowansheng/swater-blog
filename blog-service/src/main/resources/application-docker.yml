@@ -203,6 +203,30 @@ revalidate:
   url: ${REVALIDATE_URL:http://blog-web:3000}
   token: ${REVALIDATE_TOKEN:change-me}
 
+# 跨域配置（供 WebCorsConfig 使用）
+app:
+  cors:
+    enabled: ${APP_CORS_ENABLED:false}
+    # 生产环境请设置明确域名，示例: https://blog.example.com
+    allowed-origins:
+      - ${APP_CORS_ORIGIN:https://blog.example.com}
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    allowed-headers:
+      - Authorization
+      - Content-Type
+      - X-Verify-Token
+      - X-Requested-With
+    exposed-headers:
+      - Content-Disposition
+      - Content-Type
+      - Content-Length
+    allow-credentials: true
+
 # MyBatis Plus配置 - Docker环境
 mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml
@@ -250,6 +274,10 @@ sa-token:
 
 # 认证配置 - Docker环境
 auth:
+  crypto:
+    nonce-ttl-seconds: ${AUTH_CRYPTO_NONCE_TTL_SECONDS:120}
+    nonce-max-size: ${AUTH_CRYPTO_NONCE_MAX_SIZE:10000}
+    nonce-cleanup-interval: ${AUTH_CRYPTO_NONCE_CLEANUP_INTERVAL:200}
   email-session:
     secret: ${AUTH_EMAIL_SESSION_SECRET:change-me-in-production}
     ttl-seconds: 2592000
