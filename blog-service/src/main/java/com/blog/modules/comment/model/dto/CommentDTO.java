@@ -3,6 +3,8 @@ package com.blog.modules.comment.model.dto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import java.math.BigDecimal;
 import java.util.List;
 @Data
@@ -18,8 +20,11 @@ public class CommentDTO extends com.blog.shared.model.dto.BaseDTO {
      */
     private List<Long> referencedFileIds;
 
+    @NotNull(message = "评论目标ID不能为空")
     private Long targetId;
 
+    @NotBlank(message = "评论目标类型不能为空")
+    @Pattern(regexp = "ARTICLE|TALK", message = "评论目标类型只能是 ARTICLE 或 TALK")
     private String targetType;
     
     private Long rootId;
