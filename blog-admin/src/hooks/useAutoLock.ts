@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import { useLockscreenStore } from '@/store/lockscreen'
 import { useAuthStore } from '@/store/auth'
 
@@ -8,6 +8,16 @@ const AUTO_LOCK_TIME = 30 * 60 * 1000
 export const useAutoLock = (lockTime: number = AUTO_LOCK_TIME) => {
   const { lockScreen, isLocked } = useLockscreenStore()
   const { isAuthenticated } = useAuthStore()
+  const isLockedRef = useRef(isLocked)
+  const isAuthenticatedRef = useRef(isAuthenticated)
+
+  useEffect(() => {
+    isLockedRef.current = isLocked
+  }, [isLocked])
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated
+  }, [isAuthenticated])
 
   const resetTimer = useCallback(() => {
     // 移除旧的定时器
@@ -17,11 +27,11 @@ export const useAutoLock = (lockTime: number = AUTO_LOCK_TIME) => {
 
     // 设置新的定时器
     window.autoLockTimer = setTimeout(() => {
-      if (isAuthenticated() && !isLocked) {
+      if (isAuthenticatedRef.current() && !isLockedRef.current) {
         lockScreen()
       }
     }, lockTime)
-  }, [lockTime, isAuthenticated, isLocked, lockScreen])
+  }, [lockTime, lockScreen])
 
   useEffect(() => {
     // 如果未登录或已锁定，不启动自动锁屏

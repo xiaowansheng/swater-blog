@@ -168,6 +168,7 @@ export default function PageLoading({
     }, 1200);
 
     // 完成加载（使用 maxDuration 作为最大等待时间）
+    let finishTimer: ReturnType<typeof setTimeout> | null = null;
     const timer = setTimeout(() => {
       setProgress(100);
       
@@ -175,7 +176,7 @@ export default function PageLoading({
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, minDuration - elapsed);
       
-      setTimeout(() => {
+      finishTimer = setTimeout(() => {
         setIsLoading(false);
         onComplete?.();
       }, remaining);
@@ -185,6 +186,9 @@ export default function PageLoading({
       clearInterval(interval);
       clearInterval(sceneInterval);
       clearTimeout(timer);
+      if (finishTimer) {
+        clearTimeout(finishTimer);
+      }
     };
   }, [minDuration, maxDuration, onComplete, loadingScenes.length, theme]);
 

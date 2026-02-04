@@ -46,10 +46,17 @@ export default function ReplyForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  useEffect(() => {
+    return () => {
+      previewImages.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [previewImages]);
+
   const normalizedEmail = useMemo(() => userInfo.email?.trim() || '', [userInfo.email]);
 
   useEffect(() => {
-    setTimeout(() => textareaRef.current?.focus(), 100);
+    const timer = window.setTimeout(() => textareaRef.current?.focus(), 100);
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {

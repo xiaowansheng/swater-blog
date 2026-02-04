@@ -43,7 +43,7 @@
  */
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 interface SiteRunningTimeProps {
@@ -60,69 +60,39 @@ interface TimeDifference {
 export default function SiteRunningTime({ createTime }: SiteRunningTimeProps) {
   const t = useTranslations('common');
   const [timeDiff, setTimeDiff] = useState<TimeDifference>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const createdAtRef = useRef<number>(0);
+
+  const calculateTimeDiff = useCallback(() => {
+    const now = Date.now();
+    const diff = now - createdAtRef.current;
+    if (diff < 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    return { days, hours, minutes, seconds };
+  }, []);
 
   useEffect(() => {
-    /**
-     * 计算网站运行时间差
-     *
-     * ### 算法说明
-     * 1. 获取当前时间戳（毫秒）
-     * 2. 标准化 createTime 为 UTC 时间
-     * 3. 计算时间差（当前时间 - 创建时间）
-     * 4. 转换为天、小时、分钟、秒
-     *
-     * ### 时间标准化规则
-     * - 纯日期：`"2025-01-25"` → `"2025-01-25T00:00:00Z"`
-     * - 带时间：`"2025-01-25 00:00:00"` → `"2025-01-25T00:00:00Z"`
-     * - 已有Z：直接使用
-     *
-     * ### 边界情况
-     * - 如果时间差为负（创建时间在未来），返回全零
-     * - 如果时间无效，返回全零
-     *
-     * @returns 时间差对象 { days, hours, minutes, seconds }
-     */
-    const calculateTimeDiff = () => {
-      const now = new Date().getTime();
-
-      // 统一按 UTC 时间解析 createTime（后端存储时已转换为 UTC）
-      // 这样无论访问者在哪个时区，看到的运行时间都是一致的
-      let normalizedCreateTime = createTime;
-      if (/^\d{4}-\d{2}-\d{2}$/.test(createTime)) {
-        // 纯日期格式，按 UTC 时间的 00:00:00 解析
-        normalizedCreateTime = `${createTime}T00:00:00Z`;
-      } else if (!createTime.endsWith('Z') && !createTime.includes('+') && !createTime.includes('T00:00:00Z')) {
-        // 如果已有时间部分但没有时区信息，补充 UTC 标识
-        normalizedCreateTime = createTime.replace(' ', 'T') + 'Z';
-      }
-
-      const created = new Date(normalizedCreateTime).getTime();
-      const diff = now - created;
-
-      // 边界情况：如果创建时间在未来，返回全零
-      if (diff < 0) {
-        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-      }
-
-      // 计算天、小时、分钟、秒
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-      return { days, hours, minutes, seconds };
-    };
-
-    // 立即计算一次
+    let normalizedCreateTime = createTime;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(createTime)) {
+      normalizedCreateTime = `${createTime}T00:00:00Z`;
+    } else if (!createTime.endsWith('Z') && !createTime.includes('+') && !createTime.includes('T00:00:00Z')) {
+      normalizedCreateTime = createTime.replace(' ', 'T') + 'Z';
+    }
+    createdAtRef.current = new Date(normalizedCreateTime).getTime();
     setTimeDiff(calculateTimeDiff());
+  }, [createTime, calculateTimeDiff]);
 
-    // 每秒更新一次
+  useEffect(() => {
     const timer = setInterval(() => {
       setTimeDiff(calculateTimeDiff());
     }, 1000);
-
     return () => clearInterval(timer);
-  }, [createTime]);
+  }, [calculateTimeDiff]);
 
   return (
     <div className="flex items-center gap-1.5">

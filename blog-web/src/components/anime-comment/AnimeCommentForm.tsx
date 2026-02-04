@@ -35,6 +35,12 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    return () => {
+      previewImages.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [previewImages]);
+
   const normalizedEmail = useMemo(() => userInfo.email?.trim() || '', [userInfo.email]);
 
   useEffect(() => {

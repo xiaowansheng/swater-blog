@@ -12,10 +12,12 @@ interface MarkdownRendererProps {
 
 export default function MarkdownRenderer({ content, onRendered }: MarkdownRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const onRenderedTimerRef = useRef<number | null>(null);
   const { theme } = useTheme();
   const currentTheme = theme === 'dark' ? 'dark' : 'light';
 
   useEffect(() => {
+    let disposed = false;
     if (containerRef.current && content) {
       // 清空容器
       containerRef.current.innerHTML = '';
@@ -38,6 +40,7 @@ export default function MarkdownRenderer({ content, onRendered }: MarkdownRender
           enable: false
         },
         after: () => {
+          if (disposed) return;
           // 渲染完成后的回调
           if (containerRef.current) {
             // 触发自定义事件通知其他组件
@@ -49,11 +52,21 @@ export default function MarkdownRenderer({ content, onRendered }: MarkdownRender
           
           // 执行回调
           if (onRendered) {
-            setTimeout(onRendered, 50);
+            onRenderedTimerRef.current = window.setTimeout(onRendered, 50);
           }
         }
       });
     }
+    return () => {
+      disposed = true;
+      if (onRenderedTimerRef.current !== null) {
+        window.clearTimeout(onRenderedTimerRef.current);
+        onRenderedTimerRef.current = null;
+      }
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+    };
   }, [content, onRendered, currentTheme]);
 
   return (
