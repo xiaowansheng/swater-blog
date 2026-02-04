@@ -57,16 +57,21 @@ interface TimeDifference {
   seconds: number;
 }
 
+const ZERO_DIFF: TimeDifference = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+
 export default function SiteRunningTime({ createTime }: SiteRunningTimeProps) {
   const t = useTranslations('common');
-  const [timeDiff, setTimeDiff] = useState<TimeDifference>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [timeDiff, setTimeDiff] = useState<TimeDifference>(ZERO_DIFF);
   const createdAtRef = useRef<number>(0);
 
   const calculateTimeDiff = useCallback(() => {
+    if (!Number.isFinite(createdAtRef.current)) {
+      return ZERO_DIFF;
+    }
     const now = Date.now();
     const diff = now - createdAtRef.current;
     if (diff < 0) {
-      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+      return ZERO_DIFF;
     }
 
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -83,7 +88,8 @@ export default function SiteRunningTime({ createTime }: SiteRunningTimeProps) {
     } else if (!createTime.endsWith('Z') && !createTime.includes('+') && !createTime.includes('T00:00:00Z')) {
       normalizedCreateTime = createTime.replace(' ', 'T') + 'Z';
     }
-    createdAtRef.current = new Date(normalizedCreateTime).getTime();
+    const parsedTimestamp = new Date(normalizedCreateTime).getTime();
+    createdAtRef.current = Number.isFinite(parsedTimestamp) ? parsedTimestamp : 0;
     setTimeDiff(calculateTimeDiff());
   }, [createTime, calculateTimeDiff]);
 
