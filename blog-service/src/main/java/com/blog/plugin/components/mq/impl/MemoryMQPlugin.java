@@ -5,8 +5,8 @@ package com.blog.plugin.components.mq.impl;
 import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.mq.MessageQueuePlugin;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -16,6 +16,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Component
 @ConditionalOnProperty(name = "plugin.mq.active", havingValue = "memory", matchIfMissing = false)
 public class MemoryMQPlugin implements MessageQueuePlugin, Plugin {
+    @Value("${plugin.mq.memory.queue-capacity:2000}")
+    private int queueCapacity;
+
     
     private final ConcurrentHashMap<String, BlockingQueue<Object>> queues = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<MessageListener>> listeners = new ConcurrentHashMap<>();
@@ -65,14 +68,18 @@ public class MemoryMQPlugin implements MessageQueuePlugin, Plugin {
     @Override
     public void send(String exchange, String routingKey, Object message) throws Exception {
         String queueKey = exchange + "." + routingKey;
-        BlockingQueue<Object> queue = queues.computeIfAbsent(queueKey, k -> new LinkedBlockingQueue<>());
-        queue.offer(message);
+        BlockingQueue<Object> queue = queues.computeIfAbsent(queueKey, k -> new LinkedBlockingQueue<>(queueCapacity));
+        if (!queue.offer(message)) {
+            throw new IllegalStateException("内存MQ队列已满: " + queueKey + ", capacity=" + queueCapacity);
+        }
     }
     
     @Override
     public void sendToQueue(String queue, Object message) throws Exception {
-        BlockingQueue<Object> queueInstance = queues.computeIfAbsent(queue, k -> new LinkedBlockingQueue<>());
-        queueInstance.offer(message);
+        BlockingQueue<Object> queueInstance = queues.computeIfAbsent(queue, k -> new LinkedBlockingQueue<>(queueCapacity));
+        if (!queueInstance.offer(message)) {
+            throw new IllegalStateException("内存MQ队列已满: " + queue + ", capacity=" + queueCapacity);
+        }
     }
     
     @Override
@@ -98,7 +105,7 @@ public class MemoryMQPlugin implements MessageQueuePlugin, Plugin {
     }
     
     public BlockingQueue<Object> getQueue(String queue) {
-        return queues.computeIfAbsent(queue, k -> new LinkedBlockingQueue<>());
+        return queues.computeIfAbsent(queue, k -> new LinkedBlockingQueue<>(queueCapacity));
     }
     
     private final ConcurrentHashMap<String, AtomicBoolean> consumerStarted = new ConcurrentHashMap<>();
@@ -109,7 +116,7 @@ public class MemoryMQPlugin implements MessageQueuePlugin, Plugin {
         }
         Future<?> future = executorService.submit(() -> {
             Thread.currentThread().setName("memory-mq-consumer-" + queueKey);
-            BlockingQueue<Object> queue = queues.computeIfAbsent(queueKey, k -> new LinkedBlockingQueue<>());
+            BlockingQueue<Object> queue = queues.computeIfAbsent(queueKey, k -> new LinkedBlockingQueue<>(queueCapacity));
             while (running.get() && !Thread.currentThread().isInterrupted()) {
                 try {
                     Object message = queue.poll(1, TimeUnit.SECONDS);
