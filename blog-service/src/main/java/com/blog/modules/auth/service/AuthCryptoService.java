@@ -2,6 +2,8 @@ package com.blog.modules.auth.service;
 
 import com.blog.modules.auth.model.vo.LoginNonceVO;
 import com.blog.shared.exception.BusinessException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Cipher;
@@ -15,15 +17,26 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 @Service
 public class AuthCryptoService {
-    private static final long NONCE_TTL_SECONDS = 120;
     private static final int NONCE_SIZE_BYTES = 16;
+
+    @Value("${auth.crypto.nonce-ttl-seconds:120}")
+    private long nonceTtlSeconds;
+
+    @Value("${auth.crypto.nonce-max-size:1000}")
+    private int nonceMaxSize;
+
+    @Value("${auth.crypto.nonce-cleanup-interval:200}")
+    private int nonceCleanupInterval;
 
     private final KeyPair keyPair;
     private final SecureRandom secureRandom = new SecureRandom();
     private final Map<String, Long> nonceCache = new ConcurrentHashMap<>();
+    private final AtomicInteger cleanupCounter = new AtomicInteger(0);
 
     public AuthCryptoService() {
         try {
@@ -36,13 +49,20 @@ public class AuthCryptoService {
     }
 
     public LoginNonceVO createLoginNonce() {
+        long now = System.currentTimeMillis();
+        cleanupIfNeeded(now);
+        if (nonceCache.size() >= nonceMaxSize) {
+            log.warn("Nonce cache is full: size={}, max={}", nonceCache.size(), nonceMaxSize);
+            throw new BusinessException("系统繁忙，请稍后重试");
+        }
+
         String nonce = generateNonce();
-        nonceCache.put(nonce, System.currentTimeMillis() + NONCE_TTL_SECONDS * 1000);
+        nonceCache.put(nonce, now + nonceTtlSeconds * 1000);
 
         LoginNonceVO vo = new LoginNonceVO();
         vo.setNonce(nonce);
         vo.setPublicKey(getPublicKeyPem());
-        vo.setExpiresIn(NONCE_TTL_SECONDS);
+        vo.setExpiresIn(nonceTtlSeconds);
         return vo;
     }
 
@@ -80,6 +100,14 @@ public class AuthCryptoService {
     private boolean consumeNonce(String nonce) {
         Long expireAt = nonceCache.remove(nonce);
         return expireAt != null && expireAt >= System.currentTimeMillis();
+    }
+
+    private void cleanupIfNeeded(long now) {
+        int counter = cleanupCounter.incrementAndGet();
+        if (counter % Math.max(1, nonceCleanupInterval) != 0) {
+            return;
+        }
+        nonceCache.entrySet().removeIf(entry -> entry.getValue() < now);
     }
 
     private String getPublicKeyPem() {
