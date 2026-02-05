@@ -140,11 +140,11 @@ export default async function PostDetailPage({
           )}
         </PageHeader>
 
-        <main className="container mx-auto px-4 py-12 flex-1">
+        <main className="container mx-auto px-3 sm:px-4 py-8 sm:py-12 flex-1">
           <div className="min-w-0 lg:flex lg:gap-8">
             {/* 主要内容 */}
             <article className="min-w-0 flex-1">
-              <Card hoverEffect={false} className="w-full overflow-x-hidden p-8 md:p-12 rounded-2xl shadow-sm border border-border bg-card">
+              <Card hoverEffect={false} className="w-full overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-12 rounded-2xl shadow-sm border border-border bg-card">
                   {/* <ArticleMeta article={article} /> */}
                   <div className="vditor-reset" data-reading-target>
                     <MarkdownRenderer content={article.content} />
