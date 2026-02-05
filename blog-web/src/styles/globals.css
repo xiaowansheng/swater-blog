@@ -487,6 +487,23 @@ button, a {
   box-sizing: border-box !important;
 }
 
+/* Reduce anchor gutter on small screens to preserve reading width */
+.vditor-reset--anchor {
+  padding-left: 8px;
+}
+
+@media (min-width: 640px) {
+  .vditor-reset--anchor {
+    padding-left: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .vditor-reset--anchor {
+    padding-left: 20px;
+  }
+}
+
 /* 标题样式 */
 .vditor-reset h1,
 .vditor-reset h2,
@@ -822,4 +839,3 @@ aside.lg\:overflow-y-auto::-webkit-scrollbar {
   background: rgba(96, 165, 250, 0.2);
   color: var(--primary);
 }
-
