@@ -141,10 +141,10 @@ export default async function PostDetailPage({
         </PageHeader>
 
         <main className="container mx-auto px-4 py-12 flex-1">
-          <div className="lg:flex lg:gap-8">
+          <div className="min-w-0 lg:flex lg:gap-8">
             {/* 主要内容 */}
-            <article className="flex-1">
-              <Card hoverEffect={false} className="p-8 md:p-12 rounded-2xl shadow-sm border border-border bg-card">
+            <article className="min-w-0 flex-1">
+              <Card hoverEffect={false} className="w-full overflow-x-hidden p-8 md:p-12 rounded-2xl shadow-sm border border-border bg-card">
                   {/* <ArticleMeta article={article} /> */}
                   <div className="vditor-reset" data-reading-target>
                     <MarkdownRenderer content={article.content} />
@@ -181,4 +181,3 @@ export default async function PostDetailPage({
     notFound();
   }
 }
-
