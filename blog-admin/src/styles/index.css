@@ -205,23 +205,46 @@ body {
 
 /* 登录页面样式 */
 .login-page {
-  @apply min-h-screen flex items-center justify-center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  @apply min-h-screen flex items-center justify-center relative overflow-hidden;
+  background: #f0f2f5;
+}
+
+.login-background-circle {
+  @apply absolute rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob;
 }
 
 .login-card {
-  @apply w-96 bg-white rounded-xl p-8;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  @apply w-full max-w-md bg-white/80 backdrop-blur-md rounded-2xl p-10 relative z-10;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .login-card .login-title {
-  @apply text-2xl font-bold text-center mb-2;
-  color: var(--heading-color);
+  @apply text-3xl font-bold text-center mb-3 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600;
 }
 
 .login-card .login-subtitle {
-  @apply text-center mb-8;
-  color: var(--text-color-secondary);
+  @apply text-center mb-10 text-gray-500 font-medium;
+}
+
+/* 动画定义 */
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
 }
 
 /* 响应式调整 */

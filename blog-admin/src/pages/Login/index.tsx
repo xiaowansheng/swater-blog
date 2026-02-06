@@ -52,10 +52,15 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-page">
+      {/* 背景装饰圆圈 */}
+      <div className="login-background-circle w-96 h-96 bg-purple-300 top-0 -left-20"></div>
+      <div className="login-background-circle w-96 h-96 bg-blue-300 bottom-0 -right-20 animation-delay-2000"></div>
+      <div className="login-background-circle w-80 h-80 bg-pink-300 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animation-delay-4000"></div>
+
       <div className="login-card">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
-            <span className="text-white text-2xl font-bold">B</span>
+          <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-300">
+            <span className="text-white text-4xl font-bold">B</span>
           </div>
           <h1 className="login-title">博客管理后台</h1>
           <p className="login-subtitle">欢迎回来，请登录您的账户</p>
@@ -74,7 +79,7 @@ const Login: React.FC = () => {
             <Input
               prefix={<UserOutlined className="text-gray-400" />}
               placeholder="用户名"
-              className="rounded-lg h-12"
+              className="rounded-lg h-12 bg-gray-50/50 border-gray-200 hover:bg-white focus:bg-white transition-all duration-300"
             />
           </Form.Item>
           <Form.Item
@@ -84,16 +89,16 @@ const Login: React.FC = () => {
             <Input.Password
               prefix={<LockOutlined className="text-gray-400" />}
               placeholder="密码"
-              className="rounded-lg h-12"
+              className="rounded-lg h-12 bg-gray-50/50 border-gray-200 hover:bg-white focus:bg-white transition-all duration-300"
             />
           </Form.Item>
           <Form.Item>
             <div className="flex justify-between items-center">
               <Form.Item name="remember" valuePropName="checked" noStyle>
-                <Checkbox>记住我</Checkbox>
+                <Checkbox className="text-gray-500">记住我</Checkbox>
               </Form.Item>
               <a 
-                className="text-blue-500 hover:text-blue-600 cursor-pointer" 
+                className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer transition-colors" 
                 onClick={handleForgotPassword}
               >
                 忘记密码？
@@ -106,13 +111,13 @@ const Login: React.FC = () => {
               htmlType="submit" 
               block 
               loading={loading}
-              className="h-12 rounded-lg text-base font-medium bg-gradient-to-r from-blue-500 to-purple-600 border-none hover:opacity-90"
+              className="h-12 rounded-lg text-base font-bold bg-gradient-to-r from-blue-600 to-purple-600 border-none hover:shadow-lg hover:opacity-90 transition-all duration-300 transform hover:-translate-y-0.5"
             >
-              登录
+              登 录
             </Button>
           </Form.Item>
         </Form>
-        <div className="text-center text-gray-400 text-sm">
+        <div className="text-center text-gray-400 text-sm mt-6">
           © 2024 Blog Admin. All rights reserved.
         </div>
       </div>
