@@ -45,6 +45,13 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       },
       preview: {
         actions: [],
+        transform: (html) => {
+          // 匹配所有非 http(s) 开头的 img src 属性，使用 getFullUrl 处理路径
+          return html.replace(/<img ([^>]*)src="(?!(http|https|data):\/?\/?([^"]*))([^"]+)"([^>]*)>/g, (_match, before, _p1, _p2, path, after) => {
+            const fullUrl = getFullUrl(path)
+            return `<img ${before}src="${fullUrl}"${after}>`
+          })
+        }
       },
       toolbarConfig: {
         pin: true,
@@ -60,8 +67,8 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           if (files.length === 0) return null
           try {
             const res = await uploadFile(files[0])
-            // 使用 getFullUrl 拼接完整路径，优先使用 url 字段，其次使用 storagePath
-            const url = getFullUrl(res.url || res.storagePath)
+            // 直接使用返回的路径，预览时 transform 会处理前缀
+            const url = res.url || res.storagePath
             const name = res.originalName || files[0].name
             // 插入图片到编辑器
             vditor.insertValue(`![${name}](${url})`)
@@ -339,7 +346,8 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   return (
     <div className="overflow-hidden w-full rounded-md border vditor-container">
       <div ref={editorRef} />
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .vditor {
           border: none !important;
         }
