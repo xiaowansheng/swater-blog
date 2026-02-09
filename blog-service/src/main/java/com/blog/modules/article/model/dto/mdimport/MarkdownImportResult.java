@@ -100,6 +100,22 @@ public class MarkdownImportResult {
     }
 
     /**
+     * 上传的资源文件列表
+     */
+    private List<UploadedAsset> uploadedAssets = new ArrayList<>();
+
+    /**
+     * 添加上传的资源文件
+     */
+    public void addUploadedAsset(String originalPath, String newUrl) {
+        UploadedAsset asset = new UploadedAsset();
+        asset.setOriginalPath(originalPath);
+        asset.setNewUrl(newUrl);
+        this.uploadedAssets.add(asset);
+        this.importedAssetCount++;
+    }
+
+    /**
      * 是否有错误
      */
     public boolean hasErrors() {
@@ -277,5 +293,21 @@ public class MarkdownImportResult {
          * 堆栈跟踪（可选，用于调试）
          */
         private String stackTrace;
+    }
+
+    /**
+     * 上传的资源文件信息
+     */
+    @Data
+    public static class UploadedAsset {
+        /**
+         * 原始路径
+         */
+        private String originalPath;
+
+        /**
+         * 新的 URL
+         */
+        private String newUrl;
     }
 }

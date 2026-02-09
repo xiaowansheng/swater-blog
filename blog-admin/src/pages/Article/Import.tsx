@@ -54,6 +54,7 @@ const ArticleImport: React.FC = () => {
   const [importResult, setImportResult] = useState<MarkdownImportResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [importProgress, setImportProgress] = useState(0)
+  const [fileLoading, setFileLoading] = useState(false)
 
   // 调试：监控 fileList 变化
   useEffect(() => {
@@ -113,8 +114,30 @@ const ArticleImport: React.FC = () => {
       return false // 阻止自动上传
     },
     onChange: (info) => {
-      // 使用 onChange 来正确更新文件列表
-      setFileList(info.fileList)
+      // 当文件数量变化时显示加载状态
+      const newCount = info.fileList.length
+      const oldCount = fileList.length
+      
+      if (newCount !== oldCount && newCount > 0) {
+        // 开始加载
+        if (!fileLoading) {
+          setFileLoading(true)
+          message.loading({ content: '正在读取文件...', key: 'fileLoading', duration: 0 })
+        }
+        
+        // 使用 setTimeout 让 UI 有机会更新
+        setTimeout(() => {
+          setFileList(info.fileList)
+          setFileLoading(false)
+          message.success({ content: `已加载 ${info.fileList.length} 个文件`, key: 'fileLoading', duration: 2 })
+        }, 0)
+      } else {
+        setFileList(info.fileList)
+        if (fileLoading) {
+          setFileLoading(false)
+          message.destroy('fileLoading')
+        }
+      }
     },
     customRequest: () => {
       // 阻止自动上传
@@ -276,15 +299,17 @@ const ArticleImport: React.FC = () => {
             style={{ marginBottom: 16 }}
           />
 
-          <Dragger {...uploadProps} style={{ marginBottom: 16 }}>
-            <p className="ant-upload-drag-icon">
-              <InboxOutlined />
-            </p>
-            <p className="ant-upload-text">点击选择文件夹，或将文件夹拖拽到此区域</p>
-            <p className="ant-upload-hint">
-              将自动读取文件夹中的所有 Markdown 文件和资源文件
-            </p>
-          </Dragger>
+          <Spin spinning={fileLoading} tip="正在读取文件...">
+            <Dragger {...uploadProps} style={{ marginBottom: 16 }}>
+              <p className="ant-upload-drag-icon">
+                <InboxOutlined />
+              </p>
+              <p className="ant-upload-text">点击选择文件夹，或将文件夹拖拽到此区域</p>
+              <p className="ant-upload-hint">
+                将自动读取文件夹中的所有 Markdown 文件和资源文件
+              </p>
+            </Dragger>
+          </Spin>
 
           <div className={styles.fileStats}>
             <Space size="large" wrap>

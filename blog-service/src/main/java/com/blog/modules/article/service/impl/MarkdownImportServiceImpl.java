@@ -10,6 +10,9 @@ import com.blog.modules.article.service.ArticleCommandService;
 import com.blog.modules.article.util.*;
 import com.blog.modules.category.model.entity.Category;
 import com.blog.modules.category.mapper.CategoryMapper;
+import com.blog.modules.file.service.FileService;
+import com.blog.modules.file.model.dto.FileUploadDTO;
+import com.blog.modules.file.model.vo.FileVO;
 import com.blog.bootstrap.context.UserContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,9 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
 
     @Autowired
     private CategoryMapper categoryMapper;
+
+    @Autowired
+    private FileService fileService;
 
     @Override
     public MarkdownImportPreview previewImport(MultipartFile[] files, String basePath) throws Exception {
@@ -148,10 +154,24 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
         long startTime = System.currentTimeMillis();
         MarkdownImportResult result = new MarkdownImportResult();
 
-        // 分类文件
-        List<MultipartFile> mdFiles = Arrays.stream(files)
-                .filter(f -> isMarkdownFile(f.getOriginalFilename()))
-                .collect(Collectors.toList());
+        // 分类文件：MD 文件和资源文件
+        List<MultipartFile> mdFiles = new ArrayList<>();
+        Map<String, MultipartFile> assetFileMap = new HashMap<>();
+
+        for (MultipartFile file : files) {
+            String filename = file.getOriginalFilename();
+            if (isMarkdownFile(filename)) {
+                mdFiles.add(file);
+            } else if (isAssetFile(filename)) {
+                // 构建资源文件映射，key 为相对路径（保留文件夹结构）
+                // 文件名可能包含路径信息，如 "images/photo.png" 或 "folder/images/photo.png"
+                String normalizedPath = normalizeAssetPath(filename);
+                assetFileMap.put(normalizedPath, file);
+                log.debug("Registered asset file: {} -> {}", filename, normalizedPath);
+            }
+        }
+
+        log.info("Found {} MD files and {} asset files", mdFiles.size(), assetFileMap.size());
 
         // 预览导入以构建分类结构
         MarkdownImportPreview preview = previewImport(files, config.getBasePath());
@@ -171,8 +191,8 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
                     categoryId = categoryKeyToIdMap.get(categoryKey);
                 }
 
-                // 处理内容
-                String processedContent = processContent(doc, mdFile.getOriginalFilename(), config);
+                // 处理内容（包含资源上传和路径替换）
+                String processedContent = processContentWithAssets(doc, mdFile.getOriginalFilename(), config, assetFileMap, result);
 
                 // 创建文章
                 Article article = createArticleFromDocument(doc, mdFile.getOriginalFilename(), categoryId, processedContent, config);
@@ -498,6 +518,130 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
         }
 
         return content;
+    }
+
+    /**
+     * 处理内容（包含资源上传和路径替换）
+     */
+    private String processContentWithAssets(MarkdownParser.MarkdownDocument doc, String mdFilename,
+                                            MarkdownImportConfig config,
+                                            Map<String, MultipartFile> assetFileMap,
+                                            MarkdownImportResult result) {
+        String content = doc.getContent();
+        List<String> images = doc.getImages();
+
+        if (images.isEmpty() || assetFileMap.isEmpty()) {
+            return processContent(doc, mdFilename, config);
+        }
+
+        log.info("Processing {} images in file: {}", images.size(), mdFilename);
+
+        // 获取 MD 文件的目录路径，用于解析相对路径
+        String mdFileDir = getDirectoryPath(mdFilename);
+
+        // 遍历所有图片引用
+        for (String imagePath : images) {
+            // 跳过已经是绝对 URL 的图片
+            if (imagePath.startsWith("http://") || imagePath.startsWith("https://") || imagePath.startsWith("data:")) {
+                continue;
+            }
+
+            // 尝试解析图片路径并匹配资源文件
+            MultipartFile assetFile = resolveAssetFile(imagePath, mdFileDir, assetFileMap);
+
+            if (assetFile != null) {
+                try {
+                    // 上传资源文件
+                    FileUploadDTO uploadDTO = new FileUploadDTO();
+                    uploadDTO.setCategory("article_content");
+
+                    FileVO uploadedFile = fileService.upload(assetFile, uploadDTO);
+                    String newUrl = uploadedFile.getUrl();
+
+                    if (StringUtils.hasText(newUrl)) {
+                        // 替换内容中的图片路径
+                        content = content.replace("(" + imagePath + ")", "(" + newUrl + ")");
+                        log.debug("Replaced image path: {} -> {}", imagePath, newUrl);
+                        
+                        // 记录上传的资源
+                        if (result != null) {
+                            result.addUploadedAsset(assetFile.getOriginalFilename(), newUrl);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to upload asset file for image: {}, error: {}", imagePath, e.getMessage());
+                }
+            } else {
+                log.debug("No matching asset file found for image: {} (mdDir: {})", imagePath, mdFileDir);
+            }
+        }
+
+        return content;
+    }
+
+    /**
+     * 规范化资源文件路径
+     * 将文件路径转换为统一格式，便于匹配
+     */
+    private String normalizeAssetPath(String path) {
+        if (path == null) return "";
+        // 统一使用正斜杠，去除前导斜杠
+        return path.replace("\\", "/").replaceFirst("^[./]+", "").toLowerCase();
+    }
+
+    /**
+     * 获取文件的目录路径
+     */
+    private String getDirectoryPath(String filePath) {
+        if (filePath == null) return "";
+        filePath = filePath.replace("\\", "/");
+        int lastSlash = filePath.lastIndexOf('/');
+        return lastSlash > 0 ? filePath.substring(0, lastSlash) : "";
+    }
+
+    /**
+     * 解析并匹配资源文件
+     * 尝试多种路径方式来匹配资源文件
+     */
+    private MultipartFile resolveAssetFile(String imagePath, String mdFileDir,
+                                           Map<String, MultipartFile> assetFileMap) {
+        // 规范化图片路径
+        String normalizedImagePath = normalizeAssetPath(imagePath);
+
+        // 尝试直接匹配
+        if (assetFileMap.containsKey(normalizedImagePath)) {
+            return assetFileMap.get(normalizedImagePath);
+        }
+
+        // 尝试相对于 MD 文件目录的路径
+        if (StringUtils.hasText(mdFileDir)) {
+            String resolvedPath = normalizeAssetPath(mdFileDir + "/" + imagePath);
+            if (assetFileMap.containsKey(resolvedPath)) {
+                return assetFileMap.get(resolvedPath);
+            }
+        }
+
+        // 尝试只匹配文件名
+        String fileName = normalizedImagePath;
+        int lastSlash = normalizedImagePath.lastIndexOf('/');
+        if (lastSlash >= 0) {
+            fileName = normalizedImagePath.substring(lastSlash + 1);
+        }
+
+        for (Map.Entry<String, MultipartFile> entry : assetFileMap.entrySet()) {
+            String assetPath = entry.getKey();
+            String assetFileName = assetPath;
+            int assetLastSlash = assetPath.lastIndexOf('/');
+            if (assetLastSlash >= 0) {
+                assetFileName = assetPath.substring(assetLastSlash + 1);
+            }
+
+            if (assetFileName.equals(fileName)) {
+                return entry.getValue();
+            }
+        }
+
+        return null;
     }
 
     /**
