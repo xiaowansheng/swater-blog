@@ -160,18 +160,25 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
 
         for (MultipartFile file : files) {
             String filename = file.getOriginalFilename();
+            log.debug("Processing file: {}", filename);
             if (isMarkdownFile(filename)) {
                 mdFiles.add(file);
+                log.info("Added MD file: {}", filename);
             } else if (isAssetFile(filename)) {
                 // 构建资源文件映射，key 为相对路径（保留文件夹结构）
                 // 文件名可能包含路径信息，如 "images/photo.png" 或 "folder/images/photo.png"
                 String normalizedPath = normalizeAssetPath(filename);
                 assetFileMap.put(normalizedPath, file);
-                log.debug("Registered asset file: {} -> {}", filename, normalizedPath);
+                log.info("Registered asset file: '{}' -> normalizedPath: '{}'", filename, normalizedPath);
+            } else {
+                log.debug("Skipped file (not MD or asset): {}", filename);
             }
         }
 
         log.info("Found {} MD files and {} asset files", mdFiles.size(), assetFileMap.size());
+        if (!assetFileMap.isEmpty()) {
+            log.info("Asset file paths: {}", assetFileMap.keySet());
+        }
 
         // 预览导入以构建分类结构
         MarkdownImportPreview preview = previewImport(files, config.getBasePath());
@@ -531,13 +538,16 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
         List<String> images = doc.getImages();
 
         if (images.isEmpty() || assetFileMap.isEmpty()) {
+            log.info("Skipping asset processing: images={}, assets={}", images.size(), assetFileMap.size());
             return processContent(doc, mdFilename, config);
         }
 
         log.info("Processing {} images in file: {}", images.size(), mdFilename);
+        log.info("Image paths found in MD: {}", images);
 
         // 获取 MD 文件的目录路径，用于解析相对路径
         String mdFileDir = getDirectoryPath(mdFilename);
+        log.info("MD file directory: '{}'", mdFileDir);
 
         // 遍历所有图片引用
         for (String imagePath : images) {
@@ -607,21 +617,45 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
                                            Map<String, MultipartFile> assetFileMap) {
         // 规范化图片路径
         String normalizedImagePath = normalizeAssetPath(imagePath);
+        
+        log.info("Trying to match image: '{}' (normalized: '{}'), mdDir: '{}'", imagePath, normalizedImagePath, mdFileDir);
+        log.info("Available asset files: {}", assetFileMap.keySet());
 
-        // 尝试直接匹配
+        // 策略1: 直接匹配规范化路径
         if (assetFileMap.containsKey(normalizedImagePath)) {
+            log.info("Matched by direct path: {}", normalizedImagePath);
             return assetFileMap.get(normalizedImagePath);
         }
 
-        // 尝试相对于 MD 文件目录的路径
+        // 策略2: 尝试相对于 MD 文件目录的路径
         if (StringUtils.hasText(mdFileDir)) {
             String resolvedPath = normalizeAssetPath(mdFileDir + "/" + imagePath);
+            log.debug("Trying resolved path: {}", resolvedPath);
             if (assetFileMap.containsKey(resolvedPath)) {
+                log.info("Matched by resolved path: {}", resolvedPath);
                 return assetFileMap.get(resolvedPath);
             }
         }
 
-        // 尝试只匹配文件名
+        // 策略3: 提取图片路径的尾部部分进行匹配
+        // 例如 ./img/abc/file.png -> img/abc/file.png
+        for (Map.Entry<String, MultipartFile> entry : assetFileMap.entrySet()) {
+            String assetPath = entry.getKey();
+            
+            // 检查资源路径是否以图片路径结尾
+            if (assetPath.endsWith(normalizedImagePath)) {
+                log.info("Matched by suffix: {} ends with {}", assetPath, normalizedImagePath);
+                return entry.getValue();
+            }
+            
+            // 检查图片路径是否以资源路径结尾
+            if (normalizedImagePath.endsWith(assetPath)) {
+                log.info("Matched by reverse suffix: {} ends with {}", normalizedImagePath, assetPath);
+                return entry.getValue();
+            }
+        }
+
+        // 策略4: 只匹配文件名
         String fileName = normalizedImagePath;
         int lastSlash = normalizedImagePath.lastIndexOf('/');
         if (lastSlash >= 0) {
@@ -637,10 +671,12 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
             }
 
             if (assetFileName.equals(fileName)) {
+                log.info("Matched by filename: {}", fileName);
                 return entry.getValue();
             }
         }
 
+        log.warn("No match found for image: {}", imagePath);
         return null;
     }
 
