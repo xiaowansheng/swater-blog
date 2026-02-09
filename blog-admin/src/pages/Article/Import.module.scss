@@ -19,6 +19,32 @@
   .fileStats {
     margin-top: 16px;
   }
+
+  // 限制文件列表高度，超出部分滚动
+  :global {
+    .ant-upload-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+      padding: 8px;
+      margin-top: 16px;
+      background: #fafafa;
+
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: #d9d9d9;
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: #bfbfbf;
+      }
+    }
+  }
 }
 
 .importConfig {

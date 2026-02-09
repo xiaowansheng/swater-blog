@@ -245,6 +245,15 @@ const ArticleImport: React.FC = () => {
             <Text>
               <PictureOutlined /> 资源文件: {fileList.filter((f) => !f.name.endsWith('.md')).length} 个
             </Text>
+            {fileList.length > 0 && (
+              <Button 
+                size="small" 
+                danger 
+                onClick={() => setFileList([])}
+              >
+                清空文件
+              </Button>
+            )}
           </Space>
         </div>
 
