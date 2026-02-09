@@ -21,13 +21,17 @@ export default function MarkdownRenderer({ content, onRendered }: MarkdownRender
     if (containerRef.current && content) {
       // 清空容器
       containerRef.current.innerHTML = '';
-      
+
       // 使用 Vditor.preview 渲染 Markdown
       Vditor.preview(containerRef.current, content, {
         // 跟随站点主题
         mode: currentTheme as any,
         theme: currentTheme as any,
         anchor: 1,
+        markdown: {
+          // 相对路径图片的基础 URL 前缀
+          linkBase: process.env.NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX,
+        },
         hljs: {
           enable: true,
           style: currentTheme === 'dark' ? 'atom-one-dark' : 'github'
@@ -49,7 +53,7 @@ export default function MarkdownRenderer({ content, onRendered }: MarkdownRender
             });
             window.dispatchEvent(event);
           }
-          
+
           // 执行回调
           if (onRendered) {
             onRenderedTimerRef.current = window.setTimeout(onRendered, 50);
@@ -70,7 +74,7 @@ export default function MarkdownRenderer({ content, onRendered }: MarkdownRender
   }, [content, onRendered, currentTheme]);
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="vditor-reset prose prose-lg max-w-none"
       style={{

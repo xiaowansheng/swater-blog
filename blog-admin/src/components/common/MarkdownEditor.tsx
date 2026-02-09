@@ -71,8 +71,12 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           if (files.length === 0) return null
           try {
             const res = await uploadFile(files[0])
-            // 直接使用返回的路径，预览时 transform 会处理前缀
-            const url = res.url || res.storagePath
+            // 使用相对路径格式，预览时 linkBase 会处理前缀
+            // 规范化路径：确保以斜杠开头，去除多余斜杠
+            let path = res.url || res.storagePath || ''
+            path = path.startsWith('/') ? path : '/' + path
+            path = path.replace(/\/+/g, '/') // 去除多余斜杠
+            const url = '.' + path
             const name = res.originalName || files[0].name
             // 插入图片到编辑器
             vditor.insertValue(`![${name}](${url})`)
