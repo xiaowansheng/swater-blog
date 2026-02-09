@@ -4,6 +4,7 @@ import 'vditor/dist/index.css'
 import { uploadFile, uploadExternalImage, uploadExternalWebpage, isExternalImageUrl, isExternalWebUrl, extractUrls } from '@/api/file'
 import { getFullUrl } from '@/utils/format'
 import { message } from 'antd'
+import config from '@/config'
 
 interface MarkdownEditorProps {
   value?: string
@@ -44,14 +45,17 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         enable: false, // 禁用缓存，由外部状态控制
       },
       preview: {
+        markdown: {
+          linkBase: config.resourcePrefix,
+        },
         actions: [],
-        transform: (html) => {
-          // 匹配所有非 http(s) 开头的 img src 属性，使用 getFullUrl 处理路径
-          return html.replace(/<img ([^>]*)src="(?!(http|https|data):\/?\/?([^"]*))([^"]+)"([^>]*)>/g, (_match, before, _p1, _p2, path, after) => {
-            const fullUrl = getFullUrl(path)
-            return `<img ${before}src="${fullUrl}"${after}>`
-          })
-        }
+        // transform: (html) => {
+        //   // 匹配所有非 http(s) 开头的 img src 属性，使用 getFullUrl 处理路径
+        //   return html.replace(/<img ([^>]*)src="(?!(http|https|data):\/?\/?([^"]*))([^"]+)"([^>]*)>/g, (_match, before, _p1, _p2, path, after) => {
+        //     const fullUrl = getFullUrl(path)
+        //     return `<img ${before}src="${fullUrl}"${after}>`
+        //   })
+        // }
       },
       toolbarConfig: {
         pin: true,
