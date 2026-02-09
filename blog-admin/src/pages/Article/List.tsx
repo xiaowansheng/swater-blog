@@ -12,6 +12,7 @@ import {
   VerticalAlignTopOutlined,
   EyeFilled,
   ImportOutlined,
+  ExportOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -377,6 +378,12 @@ const ArticleList: React.FC = () => {
               onClick={() => navigate('/article/import')}
             >
               导入 MD 文档
+            </Button>
+            <Button
+              icon={<ExportOutlined />}
+              onClick={() => navigate('/article/export')}
+            >
+              导出 MD 文档
             </Button>
             <Button
               type="primary"

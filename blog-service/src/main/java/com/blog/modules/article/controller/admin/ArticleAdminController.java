@@ -18,10 +18,20 @@ import com.blog.modules.article.service.MarkdownImportService;
 import com.blog.modules.article.model.dto.mdimport.MarkdownImportConfig;
 import com.blog.modules.article.model.dto.mdimport.MarkdownImportPreview;
 import com.blog.modules.article.model.dto.mdimport.MarkdownImportResult;
+import com.blog.modules.article.model.dto.mdexport.MarkdownExportConfig;
+import com.blog.modules.article.model.dto.mdexport.MarkdownExportPreview;
+import com.blog.modules.article.model.dto.mdexport.MarkdownExportResult;
+import com.blog.modules.article.service.MarkdownExportService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 @RestController
 @RequestMapping("/api/admin/post")
@@ -38,6 +48,9 @@ public class ArticleAdminController {
 
     @Autowired
     private MarkdownImportService markdownImportService;
+
+    @Autowired
+    private MarkdownExportService markdownExportService;
 
     @GetMapping("/list")
     @ApiOperation(name = "查询文章列表", type = ApiOperationType.QUERY,
@@ -221,6 +234,58 @@ public class ArticleAdminController {
         } catch (Exception e) {
             return Result.error(500, "批量导入失败: " + e.getMessage());
         }
+    }
+
+    // ==================== Markdown 导出相关接口 ====================
+
+    /**
+     * 预览 Markdown 导出
+     */
+    @PostMapping("/export-md/preview")
+    @ApiOperation(name = "预览 MD 导出", type = ApiOperationType.QUERY,
+            description = "预览将要导出的文章和资源统计")
+    public Result<MarkdownExportPreview> previewExport(@RequestBody MarkdownExportConfig config) {
+        try {
+            MarkdownExportPreview preview = markdownExportService.preview(config);
+            return Result.success(preview);
+        } catch (Exception e) {
+            return Result.error(500, "预览失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 执行 Markdown 导出
+     */
+    @PostMapping("/export-md")
+    @ApiOperation(name = "导出 Markdown", type = ApiOperationType.CREATE,
+            description = "导出网站的 Markdown 文档及资源，生成 ZIP 文件")
+    public Result<MarkdownExportResult> exportMarkdown(@RequestBody MarkdownExportConfig config) {
+        try {
+            MarkdownExportResult result = markdownExportService.export(config);
+            return Result.success(result);
+        } catch (Exception e) {
+            return Result.error(500, "导出失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 下载导出文件
+     */
+    @GetMapping("/export-md/download/{taskId}")
+    @ApiOperation(name = "下载导出文件", type = ApiOperationType.QUERY,
+            description = "根据任务ID下载已生成的导出文件")
+    public ResponseEntity<Resource> downloadExport(@PathVariable String taskId) {
+        Resource file = markdownExportService.getExportFile(taskId);
+        if (file == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        String filename = "blog-export-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".zip";
+        
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(file);
     }
 }
 
