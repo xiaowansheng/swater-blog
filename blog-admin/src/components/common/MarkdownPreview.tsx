@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import Vditor from 'vditor'
 import 'vditor/dist/index.css'
 import '@/styles/markdown-preview.css'
+import { getFullUrl } from '@/utils/format'
 
 interface MarkdownPreviewProps {
   value: string
@@ -24,6 +25,13 @@ const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({ value, className }) =
       Vditor.preview(container, value, {
         theme: { current: 'light' },
         mode: 'light',
+        transform: (html) => {
+          // 匹配所有非 http(s) 开头的 img src 属性，使用 getFullUrl 处理路径
+          return html.replace(/<img ([^>]*)src="(?!(http|https|data):\/?\/?([^"]*))([^"]+)"([^>]*)>/g, (_match, before, _p1, _p2, path, after) => {
+            const fullUrl = getFullUrl(path)
+            return `<img ${before}src="${fullUrl}"${after}>`
+          })
+        }
       })
     }, 0)
 
@@ -34,3 +42,4 @@ const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({ value, className }) =
 }
 
 export default MarkdownPreview
+
