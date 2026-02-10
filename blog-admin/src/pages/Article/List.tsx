@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   Table, Button, Space, Popconfirm, message, Input, Select, Tag,
-  Dropdown, Modal,
+  Dropdown, Modal, Tooltip,
 } from 'antd'
 import type { MenuProps } from 'antd'
 import Image from '@/components/common/ImageWithPreview'
@@ -243,7 +243,9 @@ const ArticleList: React.FC = () => {
                   置顶
                 </Tag>
               )}
-              <span className="font-medium text-gray-800 truncate">{record.title}</span>
+              <Tooltip title={record.title}>
+                <span className="font-medium text-gray-800 block truncate" style={{ maxWidth: 320 }}>{record.title}</span>
+              </Tooltip>
             </div>
             <div className="text-xs text-gray-400 mt-1 flex items-center gap-3">
               <Tag color="cyan" className="text-xs">{record.categoryName}</Tag>
