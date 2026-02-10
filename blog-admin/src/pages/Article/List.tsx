@@ -256,8 +256,8 @@ const ArticleList: React.FC = () => {
             <div className="text-xs text-gray-400 mt-1 flex items-center gap-3">
               <Tag color="cyan" className="text-xs">{record.categoryName}</Tag>
 
-              <span className="flex items-center gap-1" title="创建时间">
-                <ClockCircleOutlined /> {record.createTime}
+              <span className="flex items-center gap-1" title="修改时间">
+                <ClockCircleOutlined /> {record.updateTime || record.createTime}
               </span>
 
               <span className="flex items-center gap-1">
