@@ -55,151 +55,84 @@ enum TextureStyle {
 
 // 预设模板
 const templates = [
-  {
-    name: '简约白',
-    backgroundColor: '#ffffff',
-    textColor: '#333333',
-    accentColor: '#1890ff',
-  },
-  {
-    name: '深邃黑',
-    backgroundColor: '#1a1a1a',
-    textColor: '#ffffff',
-    accentColor: '#52c41a',
-  },
-  {
-    name: '渐变蓝紫',
-    backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    textColor: '#ffffff',
-    accentColor: '#ffd700',
-  },
-  {
-    name: '渐变粉红',
-    backgroundColor: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    textColor: '#ffffff',
-    accentColor: '#ffffff',
-  },
-  {
-    name: '渐变青蓝',
-    backgroundColor: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    textColor: '#ffffff',
-    accentColor: '#ffffff',
-  },
-  {
-    name: '渐变暖橙',
-    backgroundColor: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-    textColor: '#333333',
-    accentColor: '#ff6b6b',
-  },
-  {
-    name: '渐落紫',
-    backgroundColor: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
-    textColor: '#ffffff',
-    accentColor: '#fff',
-  },
-  {
-    name: '渐变极光',
-    backgroundColor: 'linear-gradient(135deg, #a6c0fe 0%, #f68084 100%)',
-    textColor: '#ffffff',
-    accentColor: '#fff',
-  },
-  {
-    name: '渐变星空',
-    backgroundColor: 'linear-gradient(135deg, #0c3483 0%, #a2b6df 100%)',
-    textColor: '#ffffff',
-    accentColor: '#ffd700',
-  },
-  {
-    name: '渐变日落',
-    backgroundColor: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-    textColor: '#ffffff',
-    accentColor: '#fff',
-  },
-  {
-    name: '渐变海洋',
-    backgroundColor: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
-    textColor: '#ffffff',
-    accentColor: '#fff',
-  },
-  {
-    name: '清新绿',
-    backgroundColor: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-    textColor: '#ffffff',
-    accentColor: '#fff',
-  },
-  {
-    name: '活力橙',
-    backgroundColor: '#ff6b35',
-    textColor: '#ffffff',
-    accentColor: '#fff700',
-  },
-  {
-    name: '薄荷绿',
-    backgroundColor: '#00b894',
-    textColor: '#ffffff',
-    accentColor: '#fdcb6e',
-  },
-  {
-    name: '深海蓝',
-    backgroundColor: '#0984e3',
-    textColor: '#ffffff',
-    accentColor: '#fdcb6e',
-  },
-  {
-    name: '樱花粉',
-    backgroundColor: '#fd79a8',
-    textColor: '#ffffff',
-    accentColor: '#fff',
-  },
-  {
-    name: '优雅紫',
-    backgroundColor: '#6c5ce7',
-    textColor: '#ffffff',
-    accentColor: '#ffeaa7',
-  },
-  {
-    name: '活力红',
-    backgroundColor: '#d63031',
-    textColor: '#ffffff',
-    accentColor: '#ffeaa7',
-  },
-  {
-    name: '暗夜灰',
-    backgroundColor: '#2d3436',
-    textColor: '#ffffff',
-    accentColor: '#00cec9',
-  },
-  {
-    name: '奶茶色',
-    backgroundColor: '#f5f0e6',
-    textColor: '#2d3436',
-    accentColor: '#e17055',
-  },
-  {
-    name: '渐变深蓝',
-    backgroundColor: 'linear-gradient(135deg, #232526 0%, #414345 100%)',
-    textColor: '#ffffff',
-    accentColor: '#00cec9',
-  },
-  {
-    name: '渐变绿意',
-    backgroundColor: 'linear-gradient(135deg, #134e5e 0%, #71b280 100%)',
-    textColor: '#ffffff',
-    accentColor: '#fff',
-  },
-  {
-    name: '渐变玫瑰',
-    backgroundColor: 'linear-gradient(135deg, #cc2b5e 0%, #753a88 100%)',
-    textColor: '#ffffff',
-    accentColor: '#fff',
-  },
-  {
-    name: '渐变金黄',
-    backgroundColor: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)',
-    textColor: '#333333',
-    accentColor: '#fff',
-  },
+  // ===== 经典纯色 =====
+  { name: '简约白', backgroundColor: '#ffffff', textColor: '#333333', accentColor: '#1890ff' },
+  { name: '深邃黑', backgroundColor: '#1a1a1a', textColor: '#ffffff', accentColor: '#52c41a' },
+  { name: '活力橙', backgroundColor: '#ff6b35', textColor: '#ffffff', accentColor: '#fff700' },
+  { name: '薄荷绿', backgroundColor: '#00b894', textColor: '#ffffff', accentColor: '#fdcb6e' },
+  { name: '深海蓝', backgroundColor: '#0984e3', textColor: '#ffffff', accentColor: '#fdcb6e' },
+  { name: '樱花粉', backgroundColor: '#fd79a8', textColor: '#ffffff', accentColor: '#fff' },
+  { name: '优雅紫', backgroundColor: '#6c5ce7', textColor: '#ffffff', accentColor: '#ffeaa7' },
+  { name: '活力红', backgroundColor: '#d63031', textColor: '#ffffff', accentColor: '#ffeaa7' },
+  { name: '暗夜灰', backgroundColor: '#2d3436', textColor: '#ffffff', accentColor: '#00cec9' },
+  { name: '奶茶色', backgroundColor: '#f5f0e6', textColor: '#2d3436', accentColor: '#e17055' },
+  { name: '墨绿', backgroundColor: '#1b4332', textColor: '#d8f3dc', accentColor: '#95d5b2' },
+  { name: '藏蓝', backgroundColor: '#003566', textColor: '#ffffff', accentColor: '#ffc300' },
+  { name: '酒红', backgroundColor: '#590d22', textColor: '#fff0f3', accentColor: '#ff758f' },
+  { name: '琥珀', backgroundColor: '#b08968', textColor: '#ffffff', accentColor: '#ede0d4' },
+  { name: '石板蓝', backgroundColor: '#334155', textColor: '#e2e8f0', accentColor: '#38bdf8' },
+  { name: '象牙白', backgroundColor: '#faf3e0', textColor: '#4a4a4a', accentColor: '#d4a574' },
+  { name: '深紫', backgroundColor: '#240046', textColor: '#e0aaff', accentColor: '#c77dff' },
+  { name: '靛青', backgroundColor: '#023e8a', textColor: '#caf0f8', accentColor: '#48cae4' },
+  // ===== 经典渐变 =====
+  { name: '渐变蓝紫', backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', textColor: '#ffffff', accentColor: '#ffd700' },
+  { name: '渐变粉红', backgroundColor: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', textColor: '#ffffff', accentColor: '#ffffff' },
+  { name: '渐变青蓝', backgroundColor: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', textColor: '#ffffff', accentColor: '#ffffff' },
+  { name: '渐变暖橙', backgroundColor: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)', textColor: '#333333', accentColor: '#ff6b6b' },
+  { name: '渐落紫', backgroundColor: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)', textColor: '#ffffff', accentColor: '#fff' },
+  { name: '渐变极光', backgroundColor: 'linear-gradient(135deg, #a6c0fe 0%, #f68084 100%)', textColor: '#ffffff', accentColor: '#fff' },
+  { name: '渐变星空', backgroundColor: 'linear-gradient(135deg, #0c3483 0%, #a2b6df 100%)', textColor: '#ffffff', accentColor: '#ffd700' },
+  { name: '渐变日落', backgroundColor: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', textColor: '#ffffff', accentColor: '#fff' },
+  { name: '渐变海洋', backgroundColor: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)', textColor: '#ffffff', accentColor: '#fff' },
+  { name: '清新绿', backgroundColor: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', textColor: '#ffffff', accentColor: '#fff' },
+  { name: '渐变深蓝', backgroundColor: 'linear-gradient(135deg, #232526 0%, #414345 100%)', textColor: '#ffffff', accentColor: '#00cec9' },
+  { name: '渐变绿意', backgroundColor: 'linear-gradient(135deg, #134e5e 0%, #71b280 100%)', textColor: '#ffffff', accentColor: '#fff' },
+  { name: '渐变玫瑰', backgroundColor: 'linear-gradient(135deg, #cc2b5e 0%, #753a88 100%)', textColor: '#ffffff', accentColor: '#fff' },
+  { name: '渐变金黄', backgroundColor: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)', textColor: '#333333', accentColor: '#fff' },
+  // ===== 赛博朋克 & 科技 =====
+  { name: '赛博霓虹', backgroundColor: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)', textColor: '#00f0ff', accentColor: '#ff00ff' },
+  { name: '暗黑科技', backgroundColor: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%)', textColor: '#00d4ff', accentColor: '#e94560' },
+  { name: '矩阵绿', backgroundColor: '#0d1117', textColor: '#00ff41', accentColor: '#39d353' },
+  { name: '电光紫', backgroundColor: 'linear-gradient(135deg, #12002e 0%, #2d1b69 100%)', textColor: '#bf5af2', accentColor: '#ff375f' },
+  { name: '量子蓝', backgroundColor: 'linear-gradient(135deg, #020024 0%, #090979 50%, #00d4ff 100%)', textColor: '#ffffff', accentColor: '#00d4ff' },
+  // ===== 自然 & 四季 =====
+  { name: '春樱', backgroundColor: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%)', textColor: '#880e4f', accentColor: '#ad1457' },
+  { name: '夏日', backgroundColor: 'linear-gradient(135deg, #f9a825 0%, #ff6f00 100%)', textColor: '#ffffff', accentColor: '#fff9c4' },
+  { name: '秋叶', backgroundColor: 'linear-gradient(135deg, #bf360c 0%, #ff8f00 100%)', textColor: '#fff3e0', accentColor: '#ffe0b2' },
+  { name: '冬雪', backgroundColor: 'linear-gradient(135deg, #cfd8dc 0%, #eceff1 100%)', textColor: '#263238', accentColor: '#546e7a' },
+  { name: '森林', backgroundColor: 'linear-gradient(135deg, #1b5e20 0%, #388e3c 100%)', textColor: '#e8f5e9', accentColor: '#a5d6a7' },
+  { name: '沙漠', backgroundColor: 'linear-gradient(135deg, #e0c3a0 0%, #d4a574 100%)', textColor: '#3e2723', accentColor: '#795548' },
+  { name: '深海', backgroundColor: 'linear-gradient(135deg, #006064 0%, #00838f 100%)', textColor: '#e0f7fa', accentColor: '#4dd0e1' },
+  { name: '极地冰川', backgroundColor: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%)', textColor: '#0d47a1', accentColor: '#1565c0' },
+  // ===== 复古 & 文艺 =====
+  { name: '复古牛皮纸', backgroundColor: '#d4a574', textColor: '#3e2723', accentColor: '#5d4037' },
+  { name: '老报纸', backgroundColor: '#f5f0dc', textColor: '#2c2c2c', accentColor: '#8b0000' },
+  { name: '暗红复古', backgroundColor: 'linear-gradient(135deg, #2c1320 0%, #6b2645 100%)', textColor: '#f5deb3', accentColor: '#daa520' },
+  { name: '怀旧蓝', backgroundColor: '#4a6fa5', textColor: '#eee8d5', accentColor: '#fdf6e3' },
+  { name: '胶片', backgroundColor: 'linear-gradient(135deg, #3c3b3f 0%, #605c3c 100%)', textColor: '#faf0ca', accentColor: '#e0c097' },
+  // ===== 柔和马卡龙 =====
+  { name: '马卡龙蓝', backgroundColor: '#a8d8ea', textColor: '#2c3e50', accentColor: '#3498db' },
+  { name: '马卡龙粉', backgroundColor: '#ffcad4', textColor: '#6b4c5a', accentColor: '#e75480' },
+  { name: '马卡龙绿', backgroundColor: '#b5ead7', textColor: '#2d5a3d', accentColor: '#27ae60' },
+  { name: '马卡龙紫', backgroundColor: '#c9b1ff', textColor: '#3d2c5e', accentColor: '#7c4dff' },
+  { name: '马卡龙黄', backgroundColor: '#fff1b8', textColor: '#5d4e37', accentColor: '#f5a623' },
+  // ===== 高级暗色 =====
+  { name: '暗金', backgroundColor: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)', textColor: '#d4af37', accentColor: '#ffd700' },
+  { name: '暗银', backgroundColor: 'linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%)', textColor: '#c0c0c0', accentColor: '#e8e8e8' },
+  { name: '深空', backgroundColor: 'linear-gradient(135deg, #0b0b1a 0%, #1a1a3e 100%)', textColor: '#8b8bcd', accentColor: '#6c63ff' },
+  { name: '碳灰', backgroundColor: '#1e1e1e', textColor: '#a0a0a0', accentColor: '#ff6b6b' },
+  { name: '午夜蓝', backgroundColor: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)', textColor: '#b8d4e3', accentColor: '#64ffda' },
+  // ===== 创意渐变 =====
+  { name: '彩虹糖', backgroundColor: 'linear-gradient(135deg, #f72585 0%, #b5179e 25%, #7209b7 50%, #560bad 75%, #480ca8 100%)', textColor: '#ffffff', accentColor: '#f9c74f' },
+  { name: '薰衣草', backgroundColor: 'linear-gradient(135deg, #e8d5f5 0%, #c39bd3 100%)', textColor: '#4a235a', accentColor: '#7d3c98' },
+  { name: '火焰', backgroundColor: 'linear-gradient(135deg, #f12711 0%, #f5af19 100%)', textColor: '#ffffff', accentColor: '#fff' },
+  { name: '极光绿', backgroundColor: 'linear-gradient(135deg, #004d40 0%, #00e676 100%)', textColor: '#e0f2f1', accentColor: '#69f0ae' },
+  { name: '珊瑚橘', backgroundColor: 'linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%)', textColor: '#ffffff', accentColor: '#fff' },
+  { name: '北极光', backgroundColor: 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)', textColor: '#ffffff', accentColor: '#e0f7fa' },
+  { name: '蜜桃', backgroundColor: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 50%, #ff9a9e 100%)', textColor: '#5d3a1a', accentColor: '#e17055' },
+  { name: '宇宙尘埃', backgroundColor: 'linear-gradient(135deg, #1f1c2c 0%, #928dab 100%)', textColor: '#e8e8e8', accentColor: '#bb86fc' },
 ]
+
 
 // 预设字体
 const fonts = [
@@ -239,6 +172,13 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({
   const [borderStyle, setBorderStyle] = useState<BorderStyle>(BorderStyle.SOLID)
   const [textureStyle, setTextureStyle] = useState<TextureStyle>(TextureStyle.NONE)
   const [opacity, setOpacity] = useState(1.0)
+
+  // 每次打开时同步 initialText（如文章标题）到封面文字
+  useEffect(() => {
+    if (visible && initialText) {
+      setText(initialText)
+    }
+  }, [visible, initialText])
 
   // 随机样式
   const randomizeStyle = () => {
@@ -549,7 +489,7 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({
       width={1100}
       okText="使用此封面"
       cancelText="取消"
-      styles={{ body: { height: '70vh', padding: '24px', overflow: 'hidden' } }}
+      styles={{ body: { height: '55vh', padding: '24px', overflow: 'hidden' } }}
       footer={(
         <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: '16px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
           <Button onClick={onCancel}>取消</Button>
