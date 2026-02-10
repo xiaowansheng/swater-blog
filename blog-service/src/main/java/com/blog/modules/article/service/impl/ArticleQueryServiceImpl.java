@@ -80,8 +80,8 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         }
         // 列表查询排除 content 字段（LONGTEXT），避免不必要的大数据传输
         wrapper.select(Article.class, info -> !"content".equals(info.getColumn()));
-        wrapper.orderByDesc(Article::getIsTop);
-        wrapper.orderByDesc(Article::getCreateTime);
+
+        wrapper.orderByDesc(Article::getUpdateTime);
 
         Page<Article> result = articleMapper.selectPage(pageParam, wrapper);
 

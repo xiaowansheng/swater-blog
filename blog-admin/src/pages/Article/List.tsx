@@ -21,6 +21,7 @@ import {
   FormOutlined,
   CheckCircleOutlined,
   StopOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -243,12 +244,22 @@ const ArticleList: React.FC = () => {
                   置顶
                 </Tag>
               )}
+              {/* 文章类型 */}
+              {(() => {
+                const t = ARTICLE_TYPE_MAP[record.type as keyof typeof ARTICLE_TYPE_MAP] || ARTICLE_TYPE_MAP[ArticleType.ORIGINAL]
+                return <Tag color={t.color} className="mr-0">{t.label}</Tag>
+              })()}
               <Tooltip title={record.title}>
-                <span className="font-medium text-gray-800 block truncate" style={{ maxWidth: 320 }}>{record.title}</span>
+                <span className="font-medium text-gray-800 block truncate" style={{ maxWidth: 280 }}>{record.title}</span>
               </Tooltip>
             </div>
             <div className="text-xs text-gray-400 mt-1 flex items-center gap-3">
               <Tag color="cyan" className="text-xs">{record.categoryName}</Tag>
+
+              <span className="flex items-center gap-1" title="发布/创建时间">
+                <ClockCircleOutlined /> {record.publishedAt || record.createTime}
+              </span>
+
               <span className="flex items-center gap-1">
                 <EyeOutlined /> {record.viewCount}
               </span>
@@ -281,16 +292,7 @@ const ArticleList: React.FC = () => {
         </div>
       ),
     },
-    {
-      title: '类型',
-      dataIndex: 'type',
-      key: 'type',
-      width: 80,
-      render: (type: string) => {
-        const t = ARTICLE_TYPE_MAP[type as keyof typeof ARTICLE_TYPE_MAP] || ARTICLE_TYPE_MAP[ArticleType.ORIGINAL]
-        return <Tag color={t.color}>{t.label}</Tag>
-      },
-    },
+
     {
       title: '状态',
       dataIndex: 'status',
@@ -302,9 +304,9 @@ const ArticleList: React.FC = () => {
       },
     },
     {
-      title: '创建时间',
-      dataIndex: 'createTime',
-      key: 'createTime',
+      title: '修改时间',
+      dataIndex: 'updateTime',
+      key: 'updateTime',
       width: 160,
     },
     {
