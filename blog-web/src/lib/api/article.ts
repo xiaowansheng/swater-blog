@@ -8,6 +8,7 @@ export interface ArticleListParams {
   categoryId?: number;
   tagId?: number;
   keyword?: string;
+  sort?: string;
 }
 
 export const articleApi = {
@@ -18,6 +19,7 @@ export const articleApi = {
     if (params.categoryId) searchParams.append('categoryId', params.categoryId.toString());
     if (params.tagId) searchParams.append('tagId', params.tagId.toString());
     if (params.keyword) searchParams.append('keyword', params.keyword);
+    if (params.sort) searchParams.append('sort', params.sort);
     return fetchServer<PageResult<PostVO>>(
       `/api/public/post/list?${searchParams.toString()}`,
       { next: { tags: ['article:list'] } }
@@ -64,6 +66,7 @@ export const articleApi = {
       if (params.categoryId) searchParams.append('categoryId', params.categoryId.toString());
       if (params.tagId) searchParams.append('tagId', params.tagId.toString());
       if (params.keyword) searchParams.append('keyword', params.keyword);
+      if (params.sort) searchParams.append('sort', params.sort);
       return fetchClient<PageResult<PostVO>>(`/api/public/post/list?${searchParams.toString()}`);
     },
 

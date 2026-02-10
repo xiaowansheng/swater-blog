@@ -47,10 +47,10 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
     @Override
     @Cacheable(
             value = "article:list",
-            key = "#page + ':' + #size + ':' + (#categoryId != null ? #categoryId : 'null') + ':' + (#tagId != null ? #tagId : 'null')",
+            key = "#page + ':' + #size + ':' + (#categoryId != null ? #categoryId : 'null') + ':' + (#tagId != null ? #tagId : 'null') + ':' + (#sort != null ? #sort : 'default')",
             unless = "#keyword != null && !#keyword.trim().isEmpty()"
     )
-    public PageResult<ArticleVO> list(Long page, Long size, Long categoryId, Long tagId, String keyword) {
+    public PageResult<ArticleVO> list(Long page, Long size, Long categoryId, Long tagId, String keyword, String sort) {
         Page<Article> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode());
@@ -71,11 +71,16 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
                     .or().like(Article::getContent, keyword)
                     .or().like(Article::getExcerpt, keyword));
         }
-        // 只有首页查询（无分类、无标签）才按置顶排序，分类/标签查询按时间排序
-        if (categoryId == null && tagId == null) {
-            wrapper.orderByDesc(Article::getIsTop);
+        // 归档查询按创建时间排序，其他查询按发布时间排序
+        if ("createTime".equals(sort)) {
+            wrapper.orderByDesc(Article::getCreateTime);
+        } else {
+            // 只有首页查询（无分类、无标签）才按置顶排序，分类/标签查询按时间排序
+            if (categoryId == null && tagId == null) {
+                wrapper.orderByDesc(Article::getIsTop);
+            }
+            wrapper.orderByDesc(Article::getPublishedAt);
         }
-        wrapper.orderByDesc(Article::getPublishedAt);
 
         Page<Article> result = articleMapper.selectPage(pageParam, wrapper);
         List<ArticleVO> voList = convertToListVO(result.getRecords());

@@ -51,7 +51,8 @@ export default function ArchiveTimeline() {
 
       const data = await articleApi.client.getList({
         page,
-        size: PAGE_SIZE
+        size: PAGE_SIZE,
+        sort: 'createTime'
       })
 
       const newArticles = data.records || []
@@ -76,7 +77,7 @@ export default function ArchiveTimeline() {
     const yearMap = new Map<number, Map<number, PostVO[]>>()
 
     articles.forEach((article) => {
-      const date = new Date(article.publishedAt || article.createTime)
+      const date = new Date(article.createTime || article.publishedAt || Date.now())
       const year = date.getFullYear()
       const month = date.getMonth() + 1
 
@@ -224,7 +225,7 @@ export default function ArchiveTimeline() {
                             <div className="bg-card border border-border/50 hover:border-primary/20 rounded-xl p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 relative overflow-hidden">
                               {/* 悬停光泽 */}
                               <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] via-transparent to-accent/[0.01] opacity-0 group-hover/article:opacity-100 transition-opacity duration-300"></div>
-                              
+
                               <div className="relative z-10 flex flex-col gap-3">
                                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
                                   <Link
@@ -248,7 +249,7 @@ export default function ArchiveTimeline() {
                                 {/* Tags & Category */}
                                 <div className="flex flex-wrap items-center gap-2 text-xs">
                                   {article.categoryName && (
-                                    <Link 
+                                    <Link
                                       href={`/category/${article.categoryKey || article.categoryId}`}
                                       className="px-2 py-0.5 rounded-md bg-blue-500/5 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 transition-colors"
                                     >

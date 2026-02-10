@@ -5,7 +5,7 @@ import com.blog.shared.PageResult;
 import com.blog.modules.article.model.vo.ArticleVO;
 import java.util.List;
 public interface ArticlePublicService {
-    PageResult<ArticleVO> list(Long page, Long size, Long categoryId, Long tagId, String keyword);
+    PageResult<ArticleVO> list(Long page, Long size, Long categoryId, Long tagId, String keyword, String sort);
 
     ArticleVO getById(Long id);
     ArticleVO getBySlug(String slug);
