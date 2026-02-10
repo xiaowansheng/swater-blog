@@ -64,11 +64,8 @@ public class ArticlePublicController {
             @RequestParam(required = false) Long tagId,
             
             @Parameter(description = "搜索关键词，在标题和内容中搜索", example = "Spring Boot")
-            @RequestParam(required = false) String keyword,
-
-            @Parameter(description = "排序方式，可选值：createTime（按创建时间排序，用于归档页）", example = "createTime")
-            @RequestParam(required = false) String sort) {
-        PageResult<ArticleVO> result = articlePublicService.list(page, size, categoryId, tagId, keyword, sort);
+            @RequestParam(required = false) String keyword) {
+        PageResult<ArticleVO> result = articlePublicService.list(page, size, categoryId, tagId, keyword);
         return Result.success(result);
     }
 

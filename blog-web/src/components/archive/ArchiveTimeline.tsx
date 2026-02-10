@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { articleApi } from '@/lib/api/article'
+import { archiveApi } from '@/lib/api/archive'
 import type { PostVO } from '@/types'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -49,11 +49,7 @@ export default function ArchiveTimeline() {
         setLoading(true)
       }
 
-      const data = await articleApi.client.getList({
-        page,
-        size: PAGE_SIZE,
-        sort: 'createTime'
-      })
+      const data = await archiveApi.client.list(page, PAGE_SIZE)
 
       const newArticles = data.records || []
 
