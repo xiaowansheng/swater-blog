@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Table, Button, Space, Popconfirm, message, Input, Select, Tag, Tooltip } from 'antd'
+import {
+  Table, Button, Space, Popconfirm, message, Input, Select, Tag,
+  Dropdown, Modal,
+} from 'antd'
+import type { MenuProps } from 'antd'
 import Image from '@/components/common/ImageWithPreview'
 import {
   PlusOutlined,
@@ -13,6 +17,10 @@ import {
   EyeFilled,
   ImportOutlined,
   ExportOutlined,
+  DownOutlined,
+  FormOutlined,
+  CheckCircleOutlined,
+  StopOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -23,6 +31,7 @@ import {
   unpublishArticle,
 } from '@/api/article'
 import { getCategoryList } from '@/api/category'
+import ArticleEditModal from './components/ArticleEditModal'
 import { Article, Category, ArticleStatus, ArticleType, ARTICLE_STATUS_MAP, ARTICLE_TYPE_MAP } from '@/types'
 
 const ArticleList: React.FC = () => {
@@ -41,6 +50,10 @@ const ArticleList: React.FC = () => {
     type: string | undefined
     isTop: number | undefined
   }>({ keyword: '', id: '', articleKey: '', status: undefined, categoryId: undefined, type: undefined, isTop: undefined })
+
+  // 修改弹窗相关状态
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null)
 
   useEffect(() => {
     loadCategories()
@@ -124,6 +137,75 @@ const ArticleList: React.FC = () => {
 
   const handlePreview = (id: number) => {
     navigate(`/article/preview/${id}`)
+  }
+
+  // 打开修改弹窗
+  const handleOpenEditModal = (record: Article) => {
+    setEditingArticle(record)
+    setEditModalOpen(true)
+  }
+
+  // 构建操作下拉菜单
+  const getDropdownItems = (record: Article): MenuProps['items'] => {
+    const items: MenuProps['items'] = [
+      {
+        key: 'preview',
+        icon: <EyeFilled />,
+        label: '预览',
+        onClick: () => handlePreview(record.id),
+      },
+      {
+        key: 'edit',
+        icon: <EditOutlined />,
+        label: '编辑内容',
+        onClick: () => navigate(`/article/edit/${record.id}`),
+      },
+      {
+        key: 'modify',
+        icon: <FormOutlined />,
+        label: '修改属性',
+        onClick: () => handleOpenEditModal(record),
+      },
+      { type: 'divider' },
+    ]
+
+    if (record.status === ArticleStatus.PUBLISHED) {
+      items.push({
+        key: 'unpublish',
+        icon: <StopOutlined />,
+        label: '下架',
+        onClick: () => handleUnpublish(record.id),
+      })
+    } else {
+      items.push({
+        key: 'publish',
+        icon: <CheckCircleOutlined />,
+        label: '发布',
+        onClick: () => handlePublish(record.id),
+      })
+    }
+
+    items.push(
+      { type: 'divider' },
+      {
+        key: 'delete',
+        icon: <DeleteOutlined />,
+        label: '删除',
+        danger: true,
+        onClick: () => {
+          Modal.confirm({
+            title: '确认删除',
+            content: `确定删除文章「${record.title}」吗？此操作不可恢复。`,
+            okText: '确定删除',
+            okType: 'danger',
+            cancelText: '取消',
+            onOk: () => handleDelete(record.id),
+          })
+        },
+      },
+    )
+
+    return items
   }
 
   const columns = [
@@ -226,52 +308,17 @@ const ArticleList: React.FC = () => {
     {
       title: '操作',
       key: 'action',
-      width: 200,
+      width: 100,
       render: (_: any, record: Article) => {
         return (
-          <Space>
-            <Tooltip title="预览">
-              <Button
-                type="text"
-                icon={<EyeFilled />}
-                onClick={() => handlePreview(record.id)}
-              >
-                预览
-              </Button>
-            </Tooltip>
-            <Tooltip title="编辑">
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => navigate(`/article/edit/${record.id}`)}
-              />
-            </Tooltip>
-            {record.status === ArticleStatus.PUBLISHED ? (
-              <Tooltip title="下架">
-                <Button
-                  type="text"
-                  onClick={() => handleUnpublish(record.id)}
-                >
-                  下架
-                </Button>
-              </Tooltip>
-            ) : (
-              <Tooltip title="发布">
-                <Button
-                  type="text"
-                  className="text-green-500"
-                  onClick={() => handlePublish(record.id)}
-                >
-                  发布
-                </Button>
-              </Tooltip>
-            )}
-            <Popconfirm title="确定删除这篇文章吗？" onConfirm={() => handleDelete(record.id)}>
-              <Tooltip title="删除">
-                <Button type="text" danger icon={<DeleteOutlined />} />
-              </Tooltip>
-            </Popconfirm>
-          </Space>
+          <Dropdown
+            menu={{ items: getDropdownItems(record) }}
+            trigger={['click']}
+          >
+            <Button type="primary" ghost size="small">
+              操作 <DownOutlined />
+            </Button>
+          </Dropdown>
         )
       },
     },
@@ -419,6 +466,21 @@ const ArticleList: React.FC = () => {
           }}
         />
       </div>
+
+      {/* 修改属性弹窗 */}
+      <ArticleEditModal
+        open={editModalOpen}
+        article={editingArticle}
+        onClose={() => {
+          setEditModalOpen(false)
+          setEditingArticle(null)
+        }}
+        onSuccess={() => {
+          setEditModalOpen(false)
+          setEditingArticle(null)
+          loadArticles()
+        }}
+      />
     </div>
   )
 }
