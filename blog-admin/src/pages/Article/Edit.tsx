@@ -3,6 +3,7 @@ import { Form, Input, Button, message, Switch, Card, Row, Col, Space, Breadcrumb
 import { useNavigate, useParams, Link, useLocation } from 'react-router-dom'
 import { ArrowLeftOutlined, SaveOutlined, SendOutlined, PlusOutlined } from '@ant-design/icons'
 import { getArticleById, ArticleSaveDTO } from '@/api/article'
+import { toRelativeUrl } from '@/utils/format'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
 import { uploadFile } from '@/api/file'
@@ -106,11 +107,11 @@ const ArticleEdit: React.FC = () => {
   // 获取当前表单数据
   const getFormData = useCallback((): Omit<ArticleSaveDTO, 'autoSave' | 'clientVersion'> => {
     const values = form.getFieldsValue()
-    
+
     // 分离已有的 ID 和新输入的名称
     const tagIds: number[] = []
     const tagNames: string[] = []
-    
+
     if (values.tagIds) {
       values.tagIds.forEach((item: any) => {
         if (typeof item === 'number') {
@@ -197,7 +198,7 @@ const ArticleEdit: React.FC = () => {
       pathname: location.pathname,
       timestamp: new Date().toISOString()
     })
-    
+
     loadCategories()
     loadTags()
     if (pageId) {
@@ -241,10 +242,10 @@ const ArticleEdit: React.FC = () => {
     try {
       const article = await getArticleById(Number(pageId))
       setArticleStatus(article.status)
-      
+
       // 初始化自动保存的文章ID和版本号
       initArticle(article.id, (article as any).version || 1, (article as any).articleKey)
-      
+
       form.setFieldsValue({
         ...article,
         type: article.type || ArticleType.ORIGINAL,
@@ -253,12 +254,12 @@ const ArticleEdit: React.FC = () => {
         tagIds: article.tags?.map((t) => t.id) || [],
         summary: article.excerpt,
       })
-      
+
       contentRef.current = article.content
       setCurrentType((article.type as ArticleType) || ArticleType.ORIGINAL)
       setCurrentTitle(article.title || '')
       setCurrentContent(article.content || '')
-      
+
       // 加载完成后启动自动保存定时器
       startAutoSaveTimer(getFormData)
     } catch (error) {
@@ -270,7 +271,7 @@ const ArticleEdit: React.FC = () => {
   const handleContentChange = useCallback((content: string) => {
     form.setFieldValue('content', content)
     setCurrentContent(content)
-    
+
     // 只有内容真正变化时才触发自动保存
     if (content !== contentRef.current) {
       contentRef.current = content
@@ -316,7 +317,7 @@ const ArticleEdit: React.FC = () => {
         filePath: result.filePath,
       })
 
-      const coverUrl = result.url || result.storagePath || result.filePath || ''
+      const coverUrl = toRelativeUrl(result.url || result.storagePath || result.filePath || '')
 
       // 设置封面URL并触发表单更新
       form.setFieldsValue({
@@ -426,8 +427,8 @@ const ArticleEdit: React.FC = () => {
 
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-4">
-          <Button 
-            icon={<ArrowLeftOutlined />} 
+          <Button
+            icon={<ArrowLeftOutlined />}
             onClick={() => navigate('/article')}
             className="flex items-center"
           >
@@ -466,50 +467,50 @@ const ArticleEdit: React.FC = () => {
         </Space>
       </div>
 
-      <Form 
-        form={form} 
-        layout="vertical" 
+      <Form
+        form={form}
+        layout="vertical"
         initialValues={{ isTop: 0 }}
         onValuesChange={handleValuesChange}
       >
         <div className="w-full">
           <Card className="shadow-sm mb-6" variant="borderless">
-            <Form.Item 
-                name="title" 
-                rules={[{ required: true, message: '请输入文章标题' }]}
-              >
-                <Input 
-                  placeholder="文章标题" 
-                  size="large" 
-                  variant="borderless"
-                  className="text-3xl font-bold border-none px-0 focus:shadow-none hover:bg-transparent" 
-                  onChange={handleTitleChange}
-                />
-              </Form.Item>
+            <Form.Item
+              name="title"
+              rules={[{ required: true, message: '请输入文章标题' }]}
+            >
+              <Input
+                placeholder="文章标题"
+                size="large"
+                variant="borderless"
+                className="text-3xl font-bold border-none px-0 focus:shadow-none hover:bg-transparent"
+                onChange={handleTitleChange}
+              />
+            </Form.Item>
 
-              <Form.Item 
-                name="slug" 
-                className="mb-4"
-              >
-                <div className="flex items-center text-gray-400 text-sm">
-                  <span className="mr-2">访问路径:</span>
-                  <Input 
-                    placeholder="example-article-slug" 
-                    variant="borderless"
-                    className="p-0 text-sm w-fit focus:shadow-none" 
-                  />
-                </div>
-              </Form.Item>
-              
-              <Form.Item
-                name="content"
-                rules={[{ required: true, message: '请输入文章内容' }]}
-              >
-                <MarkdownEditor
-                  onChange={handleContentChange}
-                  onSave={handleSaveDraft}
+            <Form.Item
+              name="slug"
+              className="mb-4"
+            >
+              <div className="flex items-center text-gray-400 text-sm">
+                <span className="mr-2">访问路径:</span>
+                <Input
+                  placeholder="example-article-slug"
+                  variant="borderless"
+                  className="p-0 text-sm w-fit focus:shadow-none"
                 />
-              </Form.Item>
+              </div>
+            </Form.Item>
+
+            <Form.Item
+              name="content"
+              rules={[{ required: true, message: '请输入文章内容' }]}
+            >
+              <MarkdownEditor
+                onChange={handleContentChange}
+                onSave={handleSaveDraft}
+              />
+            </Form.Item>
           </Card>
         </div>
 
@@ -564,9 +565,9 @@ const ArticleEdit: React.FC = () => {
           <div className="py-4">
             <Row gutter={24}>
               <Col span={12}>
-                <Form.Item 
-                  name="categoryId" 
-                  label="文章分类" 
+                <Form.Item
+                  name="categoryId"
+                  label="文章分类"
                   rules={[{ required: true, message: '请选择或输入文章分类' }]}
                 >
                   <CategorySelector categories={categories} />
@@ -589,9 +590,9 @@ const ArticleEdit: React.FC = () => {
                 </Form.Item>
 
                 <Form.Item name="summary" label="文章摘要">
-                  <Input.TextArea 
-                    rows={4} 
-                    placeholder="如果不填写，将自动截取正文前 100 个字符" 
+                  <Input.TextArea
+                    rows={4}
+                    placeholder="如果不填写，将自动截取正文前 100 个字符"
                     className="rounded-md"
                     showCount
                     maxLength={200}

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import Vditor from 'vditor'
 import 'vditor/dist/index.css'
 import { uploadFile, uploadExternalImage, uploadExternalWebpage, isExternalImageUrl, isExternalWebUrl, extractUrls } from '@/api/file'
-import { getFullUrl } from '@/utils/format'
+import { toRelativeUrl } from '@/utils/format'
 import { message } from 'antd'
 import config from '@/config'
 
@@ -72,11 +72,8 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           try {
             const res = await uploadFile(files[0])
             // 使用相对路径格式，预览时 linkBase 会处理前缀
-            // 规范化路径：确保以斜杠开头，去除多余斜杠
-            let path = res.url || res.storagePath || ''
-            path = path.startsWith('/') ? path : '/' + path
-            path = path.replace(/\/+/g, '/') // 去除多余斜杠
-            const url = '.' + path
+            // 使用 toRelativeUrl 规范化路径
+            const url = toRelativeUrl(res.url || res.storagePath)
             const name = res.originalName || files[0].name
             // 插入图片到编辑器
             vditor.insertValue(`![${name}](${url})`)
@@ -171,7 +168,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         const imagePromises = externalImageUrls.map(async (oldUrl) => {
           try {
             const res = await uploadExternalImage(oldUrl)
-            const newUrl = getFullUrl(res.url || res.storagePath)
+            const newUrl = toRelativeUrl(res.url || res.storagePath)
             return { oldUrl, newUrl, type: '??????', success: true }
           } catch (error) {
             console.error(`????????????????????????: ${oldUrl}`, error)
@@ -192,7 +189,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         const webPromises = externalWebUrls.map(async (oldUrl) => {
           try {
             const res = await uploadExternalWebpage(oldUrl)
-            const newUrl = getFullUrl(res.url || res.storagePath)
+            const newUrl = toRelativeUrl(res.url || res.storagePath)
             return { oldUrl, newUrl, type: '??????', success: true }
           } catch (error) {
             console.error(`????????????????????????: ${oldUrl}`, error)
@@ -227,7 +224,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       const uploadPromises = images.map(async ({ src, alt }) => {
         try {
           const res = await uploadExternalImage(src)
-          const newUrl = getFullUrl(res.url || res.storagePath)
+          const newUrl = toRelativeUrl(res.url || res.storagePath)
           return { oldSrc: src, newSrc: newUrl, alt, success: true }
         } catch (error) {
           console.error(`????????????????????????: ${src}`, error)

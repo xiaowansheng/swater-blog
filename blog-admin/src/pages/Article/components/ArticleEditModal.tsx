@@ -11,6 +11,7 @@ import {
     saveArticle,
 } from '@/api/article'
 import { uploadFile } from '@/api/file'
+import { toRelativeUrl } from '@/utils/format'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
 import TagSelector from './TagSelector'
@@ -142,7 +143,7 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
 
             message.loading({ content: '正在上传封面...', key: 'uploadCover' })
             const result = await uploadFile(file)
-            const coverUrl = result.url || result.storagePath || result.filePath || ''
+            const coverUrl = toRelativeUrl(result.url || result.storagePath || result.filePath || '')
 
             form.setFieldsValue({ cover: coverUrl })
             setTimeout(() => form.validateFields(['cover']), 0)

@@ -30,14 +30,20 @@ export const getFullUrl = (path: string | undefined): string => {
   if (!path) return ''
   
   // 如果是完整 URL 或 base64，直接返回
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:') || path.startsWith('//')) {
     return path
   }
 
   const { resourcePrefix } = config
   
+  // 处理以 ./ 开头的相对路径
+  let normalizedPath = path;
+  if (normalizedPath.startsWith('./')) {
+    normalizedPath = normalizedPath.substring(1); // 移除 .
+  }
+  
   // 标准化路径，确保以 / 开头
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  normalizedPath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`
   
   // 如果路径已经包含了 resourcePrefix，则直接返回
   if (normalizedPath.startsWith(resourcePrefix)) {
@@ -48,3 +54,26 @@ export const getFullUrl = (path: string | undefined): string => {
   return `${resourcePrefix}${normalizedPath}`
 }
 
+/**
+ * 转换为相对路径 (以 ./ 开头)
+ * 用于统一入库格式
+ * @param path 原始路径
+ */
+export const toRelativeUrl = (path: string): string => {
+  if (!path) return ''
+  
+  // 如果是完整 URL，不处理
+  if (/^(http:|https:|data:|\/\/)/i.test(path)) {
+    return path
+  }
+  
+  if (path.startsWith('./')) {
+    return path
+  }
+  
+  if (path.startsWith('/')) {
+    return '.' + path
+  }
+  
+  return './' + path
+}

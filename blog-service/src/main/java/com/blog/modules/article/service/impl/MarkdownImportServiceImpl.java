@@ -569,10 +569,16 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
                     String newUrl = uploadedFile.getUrl();
 
                     if (StringUtils.hasText(newUrl)) {
-                        // 规范化路径：确保以斜杠开头，去除多余斜杠，添加点号前缀
-                        String normalizedUrl = newUrl.startsWith("/") ? newUrl : "/" + newUrl;
-                        normalizedUrl = normalizedUrl.replaceAll("/+", "/"); // 去除多余斜杠
-                        String relativeUrl = "." + normalizedUrl;
+                        // 规范化路径：统一使用 ./ 相对路径格式
+                        String relativeUrl;
+                        if (newUrl.startsWith("./")) {
+                            relativeUrl = newUrl;
+                        } else if (newUrl.startsWith("/")) {
+                            relativeUrl = "." + newUrl;
+                        } else {
+                            relativeUrl = "./" + newUrl;
+                        }
+                        relativeUrl = relativeUrl.replaceAll("/+", "/"); // 去除多余斜杠
                         
                         // 替换内容中的图片路径
                         content = content.replace("(" + imagePath + ")", "(" + relativeUrl + ")");

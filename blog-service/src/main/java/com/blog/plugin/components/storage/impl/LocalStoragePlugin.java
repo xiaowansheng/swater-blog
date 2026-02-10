@@ -82,10 +82,11 @@ public class LocalStoragePlugin implements StoragePlugin, Plugin {
             return null;
         }
         String normalizedPath = filePath.replace("\\", "/");
-        if (!normalizedPath.startsWith("/")) {
-            normalizedPath = "/" + normalizedPath;
+        // 去掉开头的 / 再加上 ./
+        if (normalizedPath.startsWith("/")) {
+            normalizedPath = normalizedPath.substring(1);
         }
-        return normalizedPath;
+        return "./" + normalizedPath;
     }
     
     @Override

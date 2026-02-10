@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 import type { RcFile } from 'antd/es/upload/interface';
 import { uploadFile } from '@/api/file';
-import { getFullUrl } from '@/utils/format';
+import { getFullUrl, toRelativeUrl } from '@/utils/format';
 
 interface ImageUploadProps {
   value?: string;
@@ -64,9 +64,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     try {
       const res = await uploadFile(file as File);
       onSuccess(res);
-      // 直接使用后端返回的相对路径，不要在这里转换为完整URL
-      // 这样数据库中存储的是相对路径，前端展示时再根据环境转换
-      const path = res.url || res.storagePath;
+      // 使用 toRelativeUrl 统一转为 ./ 开头的相对路径
+      const path = toRelativeUrl(res.url || res.storagePath);
       onChange?.(path);
       message.success('上传成功');
     } catch (error) {
@@ -101,7 +100,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   // 容器样式和类名
   const getContainerProps = () => {
     const baseClasses = "relative group flex flex-col items-center justify-center border-2 border-dashed transition-all duration-500 cursor-pointer overflow-hidden shadow-sm hover:shadow-md w-full";
-    
+
     let shapeClass = "rounded-xl";
     const style: React.CSSProperties = {};
 
@@ -143,16 +142,16 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             <>
               {/* 图片预览 - 始终保持 cover 样式占满空间 */}
               <div className="overflow-hidden absolute inset-0 w-full h-full">
-                <Image 
-                  src={getFullUrl(value)} 
-                  alt="preview" 
-                  className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" 
+                <Image
+                  src={getFullUrl(value)}
+                  alt="preview"
+                  className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
                   style={{ width: '100%', height: '100%', display: 'block' }}
                   wrapperClassName="w-full h-full block"
                   previewEnabled={false}
                 />
               </div>
-              
+
               {/* 遮罩层 - 悬停显示操作 */}
               <div className={`absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center backdrop-blur-[1px] ${isSmall ? 'gap-1' : 'gap-3'}`}>
                 {/* 重新上传提示 - 只有在空间足够时显示 */}
@@ -162,17 +161,17 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                     <span className="text-xs font-medium">点击或拖拽重新上传</span>
                   </div>
                 )}
-                
+
                 {/* 操作按钮 */}
                 <div className={`flex items-center ${isSmall ? 'gap-2' : 'gap-4'}`}>
-                  <div 
+                  <div
                     className={`flex justify-center items-center text-white rounded-full transition-all duration-200 bg-white/20 hover:bg-white/40 hover:scale-110 active:scale-95 ${isSmall ? 'w-8 h-8' : 'w-10 h-10'}`}
                     onClick={handlePreview}
                     title="预览"
                   >
                     <EyeOutlined className={isSmall ? 'text-base' : 'text-lg'} />
                   </div>
-                  <div 
+                  <div
                     className={`flex justify-center items-center text-white rounded-full transition-all duration-200 bg-white/20 hover:bg-red-500/60 hover:scale-110 active:scale-95 ${isSmall ? 'w-8 h-8' : 'w-10 h-10'}`}
                     onClick={handleRemove}
                     title="删除"
@@ -194,7 +193,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                   </div>
                   {shouldShowHint && (
                     <div className="flex-shrink-0 mt-1 text-xs leading-relaxed text-gray-400">
-                      建议比例 {aspectRatio === 'video' ? '16:9' : aspectRatio === 'square' ? '1:1' : '3:4'}<br/>
+                      建议比例 {aspectRatio === 'video' ? '16:9' : aspectRatio === 'square' ? '1:1' : '3:4'}<br />
                       支持 JPG, PNG, WEBP (最大 {limitSize}MB)
                     </div>
                   )}
@@ -202,7 +201,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               )}
             </div>
           )}
-          
+
           {/* 上传中状态 */}
           {loading && (
             <div className="flex absolute inset-0 z-10 flex-col justify-center items-center backdrop-blur-sm bg-white/80">
@@ -224,7 +223,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         <Image alt="preview" style={{ width: '100%' }} src={getFullUrl(value)} previewEnabled={false} />
       </Modal>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .single-image-upload-wrapper.ant-upload-wrapper {
           width: 100% !important;
         }
@@ -263,9 +263,9 @@ export default ImageUpload;
  * 扩展组件：头像上传
  */
 export const AvatarUpload: React.FC<Omit<ImageUploadProps, 'shape' | 'aspectRatio'>> = (props) => (
-  <ImageUpload 
-    {...props} 
-    shape="circle" 
+  <ImageUpload
+    {...props}
+    shape="circle"
     aspectRatio="square"
     width={props.width || 120}
     height={props.height || 120}
@@ -276,8 +276,8 @@ export const AvatarUpload: React.FC<Omit<ImageUploadProps, 'shape' | 'aspectRati
  * 扩展组件：封面图上传 (16:9)
  */
 export const CoverUpload: React.FC<ImageUploadProps> = (props) => (
-  <ImageUpload 
-    {...props} 
+  <ImageUpload
+    {...props}
     aspectRatio="video"
   />
 );
@@ -286,8 +286,8 @@ export const CoverUpload: React.FC<ImageUploadProps> = (props) => (
  * 扩展组件：正方形上传 (1:1)
  */
 export const SquareUpload: React.FC<Omit<ImageUploadProps, 'aspectRatio'>> = (props) => (
-  <ImageUpload 
-    {...props} 
+  <ImageUpload
+    {...props}
     aspectRatio="square"
   />
 );
@@ -297,7 +297,7 @@ export const SquareUpload: React.FC<Omit<ImageUploadProps, 'aspectRatio'>> = (pr
  * 支持完全自定义内部显示内容
  */
 export const CustomUpload: React.FC<ImageUploadProps> = (props) => (
-  <ImageUpload 
-    {...props} 
+  <ImageUpload
+    {...props}
   />
 );
