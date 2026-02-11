@@ -220,14 +220,13 @@ public class ArticleAdminController {
     @ApiOperation(name = "批量导入 MD 文件", type = ApiOperationType.CREATE,
             description = "批量导入多个 Markdown 文件，支持自动创建分类和层级结构")
     public Result<MarkdownImportResult> importMarkdownBatch(
-            @RequestParam("files") MultipartFile[] files,
+            @RequestParam(value = "files", required = false) MultipartFile[] files,
             @RequestParam(value = "configJson", required = false) String configJson) {
         try {
             // 如果没有提供配置，使用默认配置
             MarkdownImportConfig config;
             if (configJson != null && !configJson.isEmpty()) {
-                com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                config = objectMapper.readValue(configJson, MarkdownImportConfig.class);
+                config = com.blog.shared.util.JsonUtil.fromJson(configJson, MarkdownImportConfig.class);
             } else {
                 config = new MarkdownImportConfig();
             }

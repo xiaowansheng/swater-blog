@@ -193,6 +193,8 @@ export interface MarkdownImportResult {
   importedAssetCount: number
   articles: MarkdownImportedArticle[]
   categories: MarkdownImportCreatedCategory[]
+  documents?: any[]
+  warnings?: string[]
   errors: MarkdownImportError[]
   duration: number
 }
@@ -229,7 +231,10 @@ export interface MarkdownImportError {
 // 预览 Markdown 导入
 export const previewMarkdownImport = (files: File[], basePath?: string): Promise<MarkdownImportPreview> => {
   const formData = new FormData()
-  files.forEach(file => formData.append('files', file))
+  files.forEach(file => {
+    const path = (file as any).webkitRelativePath || file.name
+    formData.append('files', file, path)
+  })
   if (basePath) {
     formData.append('basePath', basePath)
   }
@@ -254,7 +259,11 @@ export const importMarkdown = (file: File, config?: Partial<MarkdownImportConfig
 // 批量导入 Markdown 文件
 export const importMarkdownBatch = (files: File[], config?: MarkdownImportConfig): Promise<MarkdownImportResult> => {
   const formData = new FormData()
-  files.forEach(file => formData.append('files', file))
+  files.forEach(file => {
+    // 优先使用相对路径（文件夹上传），否则使用文件名
+    const path = (file as any).webkitRelativePath || file.name
+    formData.append('files', file, path)
+  })
 
   if (config) {
     formData.append('configJson', JSON.stringify(config))

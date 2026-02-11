@@ -232,6 +232,15 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
 
                 // 创建文章对象
                 Article article = createArticleFromDocument(doc, mdFile.getOriginalFilename(), categoryId, processedContent, config);
+                
+                // 应用生成的封面 (如果有)
+                if (config.getGeneratedCovers() != null && config.getGeneratedCovers().containsKey(mdFile.getOriginalFilename())) {
+                    String coverUrl = config.getGeneratedCovers().get(mdFile.getOriginalFilename());
+                    if (StringUtils.hasText(coverUrl)) {
+                        article.setCover(coverUrl);
+                    }
+                }
+
                 Long articleId;
 
                 // 检查重复
@@ -614,7 +623,7 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
                 try {
                     // 上传资源文件
                     FileUploadDTO uploadDTO = new FileUploadDTO();
-                    uploadDTO.setCategory("article_content");
+                    // uploadDTO.setCategory("article_content");
 
                     FileVO uploadedFile = fileService.upload(assetFile, uploadDTO);
                     String newUrl = uploadedFile.getUrl();
@@ -631,9 +640,14 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
                         }
                         relativeUrl = relativeUrl.replaceAll("/+", "/"); // 去除多余斜杠
                         
-                        // 替换内容中的图片路径
+                        // 替换内容中的资源路径
+                        // 1. 尝试替换 Markdown 格式: (path)
                         content = content.replace("(" + imagePath + ")", "(" + relativeUrl + ")");
-                        log.debug("Replaced image path: {} -> {}", imagePath, relativeUrl);
+                        // 2. 尝试替换 HTML 属性格式: "path" 或 'path'
+                        content = content.replace("\"" + imagePath + "\"", "\"" + relativeUrl + "\"");
+                        content = content.replace("'" + imagePath + "'", "'" + relativeUrl + "'");
+                        
+                        log.debug("Replaced asset path: {} -> {}", imagePath, relativeUrl);
                         
                         // 记录上传的资源
                         if (result != null) {

@@ -25,7 +25,11 @@ public class MarkdownParser {
 
     private static final Pattern FRONTMATTER_PATTERN = Pattern.compile("^---\\s*\\n([\\s\\S]*?)\\n---\\s*\\n?");
     private static final Pattern IMAGE_PATTERN = Pattern.compile("!\\[.*?]\\(([^)]+)\\)");
+    private static final Pattern MD_REF_PATTERN = Pattern.compile("!?\\[.*?]\\(([^)]+)\\)");
+    private static final Pattern HTML_REF_PATTERN = Pattern.compile("(?:src|href)=[\"']([^\"']+)[\"']");
     private static final Pattern TAGS_PATTERN = Pattern.compile("\\[(.*?)]");
+
+    // ... (parse methods use extractImages)
 
     /**
      * 解析 MD 文件
@@ -232,16 +236,27 @@ public class MarkdownParser {
     /**
      * 提取图片引用
      */
+    /**
+     * 提取资源引用 (图片、链接、音视频等)
+     */
     public static List<String> extractImages(String content) {
-        List<String> images = new ArrayList<>();
-        Matcher matcher = IMAGE_PATTERN.matcher(content);
-
-        while (matcher.find()) {
-            String imagePath = matcher.group(1).trim();
-            images.add(imagePath);
+        Set<String> assets = new HashSet<>();
+        
+        // 1. 提取 Markdown 引用 (![]() 和 []())
+        Matcher mdMatcher = MD_REF_PATTERN.matcher(content);
+        while (mdMatcher.find()) {
+            String path = mdMatcher.group(1).trim();
+            if (!path.isEmpty()) assets.add(path);
         }
 
-        return images;
+        // 2. 提取 HTML 引用 (src="" 和 href="")
+        Matcher htmlMatcher = HTML_REF_PATTERN.matcher(content);
+        while (htmlMatcher.find()) {
+            String path = htmlMatcher.group(1).trim();
+            if (!path.isEmpty()) assets.add(path);
+        }
+
+        return new ArrayList<>(assets);
     }
 
     /**
