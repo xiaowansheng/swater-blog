@@ -35,7 +35,7 @@ public class SqlInjectionProtector {
         Pattern.compile("(?i).*(load_file|into\\s+outfile|into\\s+dumpfile).*"),
         
         // 系统函数
-        Pattern.compile("(?i).*(system|exec|shell|cmd|eval).*")
+        Pattern.compile("(?i).*\\b(system|exec|shell|cmd|eval)\\b.*")
     };
     
     // 危险字符模式
