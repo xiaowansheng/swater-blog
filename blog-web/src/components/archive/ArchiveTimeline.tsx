@@ -230,8 +230,8 @@ export default function ArchiveTimeline() {
                                   >
                                     {article.title}
                                   </Link>
-                                  <span className="text-xs text-muted/60 font-mono whitespace-nowrap bg-secondary/30 px-2 py-1 rounded">
-                                    {formatDate(article.publishedAt || article.createTime)}
+                                  <span className="text-xs font-mono whitespace-nowrap bg-secondary/30 px-2 py-1 rounded text-muted/70">
+                                    {formatDate(article.createTime)}
                                   </span>
                                 </div>
 
@@ -264,16 +264,23 @@ export default function ArchiveTimeline() {
                                 </div>
 
                                 {/* Stats */}
-                                <div className="flex items-center gap-4 text-xs text-muted/50 pt-1 border-t border-border/30 mt-1">
-                                  <span className="flex items-center gap-1">
-                                    👁️ {article.viewCount || 0}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    👍 {article.likeCount || 0}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    💬 {article.commentCount || 0}
-                                  </span>
+                                <div className="flex items-center justify-between gap-4 text-xs text-muted/50 pt-1 border-t border-border/30 mt-1">
+                                  <div className="flex items-center gap-4">
+                                    <span className="flex items-center gap-1">
+                                      👁️ {article.viewCount || 0}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      👍 {article.likeCount || 0}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      💬 {article.commentCount || 0}
+                                    </span>
+                                  </div>
+                                  {/* {article.updateTime && article.updateTime !== article.createTime && (
+                                    <span className="text-muted/50 font-mono">
+                                      更新于 {formatDate(article.updateTime)}
+                                    </span>
+                                  )} */}
                                 </div>
                               </div>
                             </div>
