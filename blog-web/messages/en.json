@@ -83,6 +83,7 @@
     "printArticle": "Print Article",
     "jumpToTop": "Back to Top",
     "jumpToBottom": "Jump to Bottom",
+    "jumpToComment": "Jump to Comments",
     "totalArticlesWithCount": "Total {count} articles",
     "totalArticlesInYear": "{count} articles in total",
     "momentsDescription": "Record moments of life",

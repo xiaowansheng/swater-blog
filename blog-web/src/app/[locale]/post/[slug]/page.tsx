@@ -128,7 +128,7 @@ export default async function PostDetailPage({
                   {/* 文章摘要 */}
                   {article.excerpt && (
                     <div className="mb-8 p-5 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl border-l-4 border-primary">
-                      <p className="text-sm text-muted-foreground leading-relaxed">
+                      <p className="text-sm text-muted-foreground leading-relaxed break-words">
                         {article.excerpt}
                       </p>
                     </div>
@@ -182,7 +182,7 @@ export default async function PostDetailPage({
 
                   {/* 二次元评论组件 - 根据配置显示 */}
                   {componentConfig.articleCommentEnabled && (
-                    <div className="mt-12">
+                    <div id="anime-comment" className="mt-12">
                       <AnimeComment postId={article.id} />
                     </div>
                   )}

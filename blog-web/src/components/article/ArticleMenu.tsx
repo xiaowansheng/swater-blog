@@ -39,9 +39,9 @@ export default function ArticleMenu({ article }: ArticleMenuProps) {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
+  // const handlePrint = () => {
+  //   window.print();
+  // };
 
   const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -49,6 +49,13 @@ export default function ArticleMenu({ article }: ArticleMenuProps) {
 
   const handleScrollToBottom = () => {
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  };
+
+  const handleScrollToComment = () => {
+    const commentSection = document.getElementById('anime-comment');
+    if (commentSection) {
+      commentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
@@ -153,7 +160,7 @@ export default function ArticleMenu({ article }: ArticleMenuProps) {
 
           {activeTab === 'tools' && (
             <div className="space-y-3">
-              <button
+              {/* <button
                 onClick={handlePrint}
                 className="flex items-center gap-3 w-full p-2 text-sm text-left hover:bg-muted/50 rounded transition-colors"
               >
@@ -161,7 +168,7 @@ export default function ArticleMenu({ article }: ArticleMenuProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                 </svg>
                 <span>{t('printArticle')}</span>
-              </button>
+              </button> */}
 
               <button
                 onClick={handleScrollToTop}
@@ -173,7 +180,7 @@ export default function ArticleMenu({ article }: ArticleMenuProps) {
                 <span>{t('jumpToTop')}</span>
               </button>
 
-              <button
+              {/* <button
                 onClick={handleScrollToBottom}
                 className="flex items-center gap-3 w-full p-2 text-sm text-left hover:bg-muted/50 rounded transition-colors"
               >
@@ -181,6 +188,16 @@ export default function ArticleMenu({ article }: ArticleMenuProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                 </svg>
                 <span>{t('jumpToBottom')}</span>
+              </button> */}
+
+              <button
+                onClick={handleScrollToComment}
+                className="flex items-center gap-3 w-full p-2 text-sm text-left hover:bg-muted/50 rounded transition-colors"
+              >
+                <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <span>{t('jumpToComment')}</span>
               </button>
             </div>
           )}

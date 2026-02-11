@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCopyToClipboard } from '@/lib/hooks/useCopyToClipboard';
+import { useTranslations } from 'next-intl';
 import ArticleToc from './ArticleToc';
 import type { PostVO } from '@/types';
 
@@ -11,6 +12,7 @@ interface ArticleMenuMobileProps {
 }
 
 export default function ArticleMenuMobile({ article }: ArticleMenuMobileProps) {
+  const t = useTranslations('common');
   const { copyToClipboard, isCopied } = useCopyToClipboard();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'toc' | 'share' | 'tools'>('toc');
@@ -39,12 +41,20 @@ export default function ArticleMenuMobile({ article }: ArticleMenuMobileProps) {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
+  // const handlePrint = () => {
+  //   window.print();
+  // };
 
   const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleScrollToComment = () => {
+    const commentSection = document.getElementById('anime-comment');
+    if (commentSection) {
+      commentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -356,7 +366,7 @@ export default function ArticleMenuMobile({ article }: ArticleMenuMobileProps) {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
               >
-                <motion.button
+                {/* <motion.button
                   onClick={handlePrint}
                   className="flex items-center gap-3 w-full p-3 text-sm text-left hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-pink-500/10 rounded-lg transition-all duration-300 border border-transparent hover:border-purple-200/30"
                   whileHover={{ scale: 1.02, x: 4 }}
@@ -368,7 +378,7 @@ export default function ArticleMenuMobile({ article }: ArticleMenuMobileProps) {
                     </svg>
                   </div>
                   <span className="font-medium">🖨️ 打印文章</span>
-                </motion.button>
+                </motion.button> */}
 
                 <motion.button
                   onClick={handleScrollToTop}
@@ -381,7 +391,21 @@ export default function ArticleMenuMobile({ article }: ArticleMenuMobileProps) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
                   </div>
-                  <span className="font-medium">⬆️ 回到顶部</span>
+                  <span className="font-medium">⬆️ {t('jumpToTop')}</span>
+                </motion.button>
+
+                <motion.button
+                  onClick={handleScrollToComment}
+                  className="flex items-center gap-3 w-full p-3 text-sm text-left hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-cyan-500/10 rounded-lg transition-all duration-300 border border-transparent hover:border-blue-200/30"
+                  whileHover={{ scale: 1.02, x: 4 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <span className="font-medium">💬 {t('jumpToComment')}</span>
                 </motion.button>
               </motion.div>
             )}

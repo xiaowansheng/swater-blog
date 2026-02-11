@@ -83,6 +83,7 @@
     "printArticle": "打印文章",
     "jumpToTop": "回到顶部",
     "jumpToBottom": "跳到底部",
+    "jumpToComment": "跳转评论",
     "totalArticlesWithCount": "共 {count} 篇文章",
     "totalArticlesInYear": "共 {count} 篇文章",
     "momentsDescription": "记录生活的瞬间",
