@@ -7,7 +7,10 @@ import com.blog.modules.article.model.dto.mdimport.MarkdownImportPreview.*;
 import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.article.service.MarkdownImportService;
 import com.blog.modules.article.service.ArticleCommandService;
-import com.blog.modules.article.util.*;
+import com.blog.modules.article.mapper.ArticleMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.blog.modules.article.model.dto.ArticleDTO;
+import com.blog.modules.article.util.MarkdownParser;
 import com.blog.modules.category.model.entity.Category;
 import com.blog.modules.category.mapper.CategoryMapper;
 import com.blog.modules.file.service.FileService;
@@ -40,6 +43,9 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private ArticleMapper articleMapper;
 
     @Override
     public MarkdownImportPreview previewImport(MultipartFile[] files, String basePath) throws Exception {
@@ -124,9 +130,32 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
         // 处理内容
         String processedContent = processContent(doc, file.getOriginalFilename(), config);
 
-        // 创建文章
+        // 创建文章对象
         Article article = createArticleFromDocument(doc, file.getOriginalFilename(), categoryId, processedContent, config);
-        Long articleId = articleCommandService.create(convertToArticleDTO(article));
+        Long articleId;
+
+        // 检查重复
+        Article existing = articleMapper.selectOne(new LambdaQueryWrapper<Article>().eq(Article::getSlug, article.getSlug()));
+        if (existing != null) {
+            MarkdownImportConfig.DuplicateResolution resolution = config.getDuplicateResolution();
+            if (resolution == MarkdownImportConfig.DuplicateResolution.SKIP) {
+                result.addSkippedArticle(file.getOriginalFilename(), "Slug already exists: " + article.getSlug());
+                result.setStatus(MarkdownImportResult.ImportStatus.PARTIAL_SUCCESS);
+                return result;
+            } else if (resolution == MarkdownImportConfig.DuplicateResolution.OVERWRITE) {
+                // 覆盖更新
+                ArticleDTO dto = convertToArticleDTO(article);
+                articleCommandService.update(existing.getId(), dto);
+                articleId = existing.getId();
+            } else {
+                // 重命名 (RENAME)
+                String newSlug = resolveUniqueSlug(article.getSlug());
+                article.setSlug(newSlug);
+                articleId = articleCommandService.create(convertToArticleDTO(article));
+            }
+        } else {
+            articleId = articleCommandService.create(convertToArticleDTO(article));
+        }
 
         // 添加到结果
         MarkdownImportResult.ImportedArticle importedArticle = new MarkdownImportResult.ImportedArticle();
@@ -201,9 +230,31 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
                 // 处理内容（包含资源上传和路径替换）
                 String processedContent = processContentWithAssets(doc, mdFile.getOriginalFilename(), config, assetFileMap, result);
 
-                // 创建文章
+                // 创建文章对象
                 Article article = createArticleFromDocument(doc, mdFile.getOriginalFilename(), categoryId, processedContent, config);
-                Long articleId = articleCommandService.create(convertToArticleDTO(article));
+                Long articleId;
+
+                // 检查重复
+                Article existing = articleMapper.selectOne(new LambdaQueryWrapper<Article>().eq(Article::getSlug, article.getSlug()));
+                if (existing != null) {
+                    MarkdownImportConfig.DuplicateResolution resolution = config.getDuplicateResolution();
+                    if (resolution == MarkdownImportConfig.DuplicateResolution.SKIP) {
+                        result.addSkippedArticle(mdFile.getOriginalFilename(), "Slug already exists: " + article.getSlug());
+                        continue;
+                    } else if (resolution == MarkdownImportConfig.DuplicateResolution.OVERWRITE) {
+                        // 覆盖更新
+                        ArticleDTO dto = convertToArticleDTO(article);
+                        articleCommandService.update(existing.getId(), dto);
+                        articleId = existing.getId();
+                    } else {
+                        // 重命名 (RENAME)
+                        String newSlug = resolveUniqueSlug(article.getSlug());
+                        article.setSlug(newSlug);
+                        articleId = articleCommandService.create(convertToArticleDTO(article));
+                    }
+                } else {
+                    articleId = articleCommandService.create(convertToArticleDTO(article));
+                }
 
                 // 添加到结果
                 MarkdownImportResult.ImportedArticle importedArticle = new MarkdownImportResult.ImportedArticle();
@@ -772,6 +823,20 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
         dto.setCategoryId(article.getCategoryId());
         dto.setType(article.getType());
         dto.setStatus(article.getStatus());
+//        dto.setAuthorId(article.getAuthorId()); // Ensure authorId is passed
         return dto;
+    }
+
+    /**
+     * 解析唯一 Slug
+     */
+    private String resolveUniqueSlug(String originalSlug) {
+        String slug = originalSlug;
+        int counter = 1;
+        while (articleMapper.selectCount(new LambdaQueryWrapper<Article>().eq(Article::getSlug, slug)) > 0) {
+            slug = originalSlug + "-" + counter;
+            counter++;
+        }
+        return slug;
     }
 }

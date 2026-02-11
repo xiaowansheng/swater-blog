@@ -104,27 +104,27 @@ const ArticleImport: React.FC = () => {
         message.error('文件大小不能超过 50MB')
         return Upload.LIST_IGNORE
       }
-      
+
       // 过滤掉隐藏文件和不需要的文件
       const fileName = file.name
       if (fileName.startsWith('.') || fileName === 'Thumbs.db' || fileName === '.DS_Store') {
         return Upload.LIST_IGNORE
       }
-      
+
       return false // 阻止自动上传
     },
     onChange: (info) => {
       // 当文件数量变化时显示加载状态
       const newCount = info.fileList.length
       const oldCount = fileList.length
-      
+
       if (newCount !== oldCount && newCount > 0) {
         // 开始加载
         if (!fileLoading) {
           setFileLoading(true)
           message.loading({ content: '正在读取文件...', key: 'fileLoading', duration: 0 })
         }
-        
+
         // 使用 setTimeout 让 UI 有机会更新
         setTimeout(() => {
           setFileList(info.fileList)
@@ -187,7 +187,8 @@ const ArticleImport: React.FC = () => {
         return
       }
 
-      const preview = await previewMarkdownImport(validFiles)
+      const basePath = form.getFieldValue('basePath')
+      const preview = await previewMarkdownImport(validFiles, basePath)
 
       setPreviewData(preview)
       setCurrentStep(2)
@@ -211,6 +212,7 @@ const ArticleImport: React.FC = () => {
       basePath: values.basePath || 'articles',
       defaultStatus: values.defaultStatus,
       importAssets: values.importAssets,
+      duplicateResolution: values.duplicateResolution,
       articleType: 'post',
     }
 
@@ -325,9 +327,9 @@ const ArticleImport: React.FC = () => {
                 </Text>
               )}
               {fileList.length > 0 && (
-                <Button 
-                  size="small" 
-                  danger 
+                <Button
+                  size="small"
+                  danger
                   onClick={() => setFileList([])}
                 >
                   清空文件
@@ -336,31 +338,29 @@ const ArticleImport: React.FC = () => {
             </Space>
           </div>
 
-        <Divider />
+          <Divider />
 
-        <Space>
-          <Button
-            type="primary"
-            onClick={() => {
-              console.log('点击了下一步按钮，当前 fileList 长度:', fileList.length)
-              console.log('fileList 内容:', fileList)
-              handlePreview()
-            }}
-            disabled={fileList.length === 0}
-            loading={loading}
-          >
-            下一步：配置导入 {fileList.length > 0 && `(${fileList.length} 个文件)`}
-          </Button>
-          <Button onClick={() => {
-            console.log('当前 fileList:', fileList)
-            navigate('/article')
-          }}>
-            取消
-          </Button>
-        </Space>
-      </Card>
-    </div>
-  )
+          <Space>
+            <Button
+              type="primary"
+              onClick={() => {
+                setCurrentStep(1)
+              }}
+              disabled={fileList.length === 0}
+              loading={loading}
+            >
+              下一步：配置导入 {fileList.length > 0 && `(${fileList.length} 个文件)`}
+            </Button>
+            <Button onClick={() => {
+              console.log('当前 fileList:', fileList)
+              navigate('/article')
+            }}>
+              取消
+            </Button>
+          </Space>
+        </Card>
+      </div>
+    )
   }
 
   // 渲染第二步：导入配置
@@ -373,6 +373,7 @@ const ArticleImport: React.FC = () => {
           assetMode: 'ABSOLUTE_URL',
           importAssets: true,
           defaultStatus: 'DRAFT',
+          duplicateResolution: 'SKIP',
           basePath: 'articles',
         }}>
           <Title level={5}>分类映射规则</Title>
@@ -457,6 +458,19 @@ const ArticleImport: React.FC = () => {
             <Radio.Group>
               <Radio value="DRAFT">草稿</Radio>
               <Radio value="PUBLISHED">直接发布</Radio>
+            </Radio.Group>
+          </Form.Item>
+
+          <Form.Item
+            label="重复文章处理"
+            name="duplicateResolution"
+            rules={[{ required: true }]}
+            tooltip="当文章 Slug (URL路径) 重复时的处理方式"
+          >
+            <Radio.Group>
+              <Radio value="SKIP">跳过 (默认)</Radio>
+              <Radio value="OVERWRITE">覆盖更新</Radio>
+              <Radio value="RENAME">自动重命名</Radio>
             </Radio.Group>
           </Form.Item>
         </Form>

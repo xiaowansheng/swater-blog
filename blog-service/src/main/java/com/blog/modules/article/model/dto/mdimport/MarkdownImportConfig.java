@@ -75,6 +75,11 @@ public class MarkdownImportConfig {
     private String articleType = "post";
 
     /**
+     * 重复处理策略
+     */
+    private DuplicateResolution duplicateResolution = DuplicateResolution.SKIP;
+
+    /**
      * 分类映射模式枚举
      */
     public enum CategoryMode {
@@ -107,5 +112,25 @@ public class MarkdownImportConfig {
          * 已发布
          */
         PUBLISHED
+    }
+
+    /**
+     * 重复处理策略枚举
+     */
+    public enum DuplicateResolution {
+        /**
+         * 跳过
+         */
+        SKIP,
+
+        /**
+         * 覆盖（更新现有文章）
+         */
+        OVERWRITE,
+
+        /**
+         * 重命名（自动生成新 Slug）
+         */
+        RENAME
     }
 }

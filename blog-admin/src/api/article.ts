@@ -134,6 +134,7 @@ export interface MarkdownImportConfig {
   authorId?: number
   importAssets?: boolean
   articleType?: string
+  duplicateResolution?: 'SKIP' | 'OVERWRITE' | 'RENAME'
 }
 
 // Markdown 导入预览
