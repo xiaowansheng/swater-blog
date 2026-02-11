@@ -61,13 +61,6 @@ export default async function PostDetailPage({
             {article.title}
           </h1>
 
-          {/* 文章摘要 */}
-          {article.excerpt && (
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mt-6">
-              {article.excerpt}
-            </p>
-          )}
-
           {/* 文章元信息 */}
           <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-sm mt-6">
             {/* 作者 */}
@@ -146,6 +139,14 @@ export default async function PostDetailPage({
             <article className="min-w-0 flex-1">
               <Card hoverEffect={false} className="w-full overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-12 rounded-2xl shadow-sm border border-border bg-card">
                   {/* <ArticleMeta article={article} /> */}
+                  {/* 文章摘要 */}
+                  {article.excerpt && (
+                    <div className="mb-6 p-4 bg-muted/30 rounded-lg border-l-4 border-primary">
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {article.excerpt}
+                      </p>
+                    </div>
+                  )}
                   <div className="vditor-reset" data-reading-target>
                     <MarkdownRenderer content={article.content} />
                   </div>
