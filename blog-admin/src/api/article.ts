@@ -135,6 +135,9 @@ export interface MarkdownImportConfig {
   importAssets?: boolean
   articleType?: string
   duplicateResolution?: 'SKIP' | 'OVERWRITE' | 'RENAME'
+  coverStrategy?: 'NONE' | 'FIRST_IMAGE' | 'DEFAULT' | 'GENERATE'
+  defaultCover?: string
+  generatedCovers?: Record<string, string>
 }
 
 // Markdown 导入预览

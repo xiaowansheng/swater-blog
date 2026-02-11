@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   Card,
   Steps,
@@ -38,6 +38,8 @@ import {
   MarkdownImportResult,
   MarkdownImportConfig,
 } from '@/api/article'
+import { uploadFile } from '@/api/file'
+import { generateCoverBlob, blobToFile } from '@/utils/coverGenerator'
 import styles from './Import.module.scss'
 
 const { Dragger } = Upload
@@ -55,12 +57,7 @@ const ArticleImport: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [importProgress, setImportProgress] = useState(0)
   const [fileLoading, setFileLoading] = useState(false)
-
-  // 调试：监控 fileList 变化
-  useEffect(() => {
-    console.log('fileList 状态更新:', fileList)
-    console.log('fileList 长度:', fileList.length)
-  }, [fileList])
+  const [savedConfig, setSavedConfig] = useState<MarkdownImportConfig | null>(null)
 
   // 步骤配置
   const steps = [
@@ -162,32 +159,39 @@ const ArticleImport: React.FC = () => {
 
     setLoading(true)
     try {
-      console.log('原始 fileList:', fileList)
-      console.log('fileList 长度:', fileList.length)
+      // 在离开配置表单之前，先保存表单的值
+      const values = await form.validateFields()
+      const config: MarkdownImportConfig = {
+        categoryMode: values.categoryMode,
+        manualCategoryId: values.categoryId,
+        autoCreateCategory: values.autoCreateCategory,
+        assetMode: values.assetMode,
+        cdnDomain: values.cdnDomain,
+        basePath: values.basePath || 'articles',
+        defaultStatus: values.defaultStatus,
+        importAssets: values.importAssets,
+        duplicateResolution: values.duplicateResolution,
+        coverStrategy: values.coverStrategy,
+        defaultCover: values.defaultCover,
+        articleType: 'post',
+      }
+      setSavedConfig(config)
 
       // 提取有效的文件对象
       const validFiles: File[] = []
 
       for (const file of fileList) {
-        console.log('处理文件:', file.name, 'originFileObj:', file.originFileObj)
-
-        // originFileObj 是实际的 File 对象
         if (file.originFileObj instanceof File) {
           validFiles.push(file.originFileObj)
-        } else {
-          console.warn('文件缺少 originFileObj:', file)
         }
       }
-
-      console.log('有效文件数量:', validFiles.length)
-      console.log('有效文件列表:', validFiles.map(f => ({ name: f.name, size: f.size, type: f.type })))
 
       if (validFiles.length === 0) {
         message.error('没有有效的文件，请重新选择')
         return
       }
 
-      const basePath = form.getFieldValue('basePath')
+      const basePath = values.basePath || 'articles'
       const preview = await previewMarkdownImport(validFiles, basePath)
 
       setPreviewData(preview)
@@ -202,19 +206,12 @@ const ArticleImport: React.FC = () => {
 
   // 开始导入
   const handleImport = async () => {
-    const values = await form.validateFields()
-    const config: MarkdownImportConfig = {
-      categoryMode: values.categoryMode,
-      manualCategoryId: values.categoryId,
-      autoCreateCategory: values.autoCreateCategory,
-      assetMode: values.assetMode,
-      cdnDomain: values.cdnDomain,
-      basePath: values.basePath || 'articles',
-      defaultStatus: values.defaultStatus,
-      importAssets: values.importAssets,
-      duplicateResolution: values.duplicateResolution,
-      articleType: 'post',
+    if (!savedConfig) {
+      message.error('配置丢失，请返回上一步重新配置')
+      return
     }
+    // 使用之前保存的配置（因为 form 在 Step 2 已被卸载）
+    const config: MarkdownImportConfig = { ...savedConfig }
 
     setLoading(true)
     setImportProgress(0)
@@ -244,6 +241,30 @@ const ArticleImport: React.FC = () => {
         message.error('没有有效的文件，请重新选择')
         clearInterval(progressTimer)
         return
+      }
+
+      // 如果选择了「随机生成封面」，为每篇文章生成封面并上传
+      if (config.coverStrategy === 'GENERATE' && previewData?.articles) {
+        message.loading({ content: '正在生成封面...', key: 'coverGen', duration: 0 })
+        const generatedCovers: Record<string, string> = {}
+
+        for (const article of previewData.articles) {
+          // 只为没有 frontmatter 封面的文章生成
+          if (!article.cover) {
+            try {
+              const blob = await generateCoverBlob(article.title)
+              const file = blobToFile(blob, `cover-${article.slug || Date.now()}.png`)
+              const uploaded = await uploadFile(file)
+              generatedCovers[article.originalFilename] = uploaded.url
+            } catch (err) {
+              console.warn('生成封面失败:', article.title, err)
+            }
+          }
+        }
+
+        // 将生成的封面 URL 传给后端
+        config.generatedCovers = generatedCovers
+        message.success({ content: `已生成 ${Object.keys(generatedCovers).length} 张封面`, key: 'coverGen', duration: 2 })
       }
 
       const result = await importMarkdownBatch(validFiles, config)
@@ -374,6 +395,7 @@ const ArticleImport: React.FC = () => {
           importAssets: true,
           defaultStatus: 'DRAFT',
           duplicateResolution: 'SKIP',
+          coverStrategy: 'FIRST_IMAGE',
           basePath: 'articles',
         }}>
           <Title level={5}>分类映射规则</Title>
@@ -444,6 +466,37 @@ const ArticleImport: React.FC = () => {
                   </Form.Item>
                 </>
               )
+            }}
+          </Form.Item>
+
+          <Form.Item
+            label="封面生成策略"
+            name="coverStrategy"
+            tooltip="当 Frontmatter 中没有指定封面时，如何生成封面"
+          >
+            <Radio.Group>
+              <Radio value="FIRST_IMAGE">使用第一张图片</Radio>
+              <Radio value="GENERATE">随机生成封面</Radio>
+              <Radio value="DEFAULT">使用默认封面</Radio>
+              <Radio value="NONE">不处理 (为空)</Radio>
+            </Radio.Group>
+          </Form.Item>
+
+          <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.coverStrategy !== currentValues.coverStrategy}>
+            {({ getFieldValue }) => {
+              const coverStrategy = getFieldValue('coverStrategy')
+              if (coverStrategy === 'DEFAULT') {
+                return (
+                  <Form.Item
+                    label="默认封面 URL"
+                    name="defaultCover"
+                    rules={[{ required: true, message: '请输入默认封面 URL' }]}
+                  >
+                    <Input placeholder="例如: https://example.com/cover.jpg" />
+                  </Form.Item>
+                )
+              }
+              return null
             }}
           </Form.Item>
 

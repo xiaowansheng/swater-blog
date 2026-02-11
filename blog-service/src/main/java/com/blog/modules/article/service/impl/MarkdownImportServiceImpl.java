@@ -775,7 +775,26 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
         article.setExcerpt(excerpt);
 
         // 封面
-        article.setCover(doc.getFrontmatter().getCover());
+        String cover = doc.getFrontmatter().getCover();
+        
+        // 如果没有封面，根据策略处理
+        if (!StringUtils.hasText(cover)) {
+            MarkdownImportConfig.CoverStrategy coverStrategy = config.getCoverStrategy();
+            if (coverStrategy == MarkdownImportConfig.CoverStrategy.FIRST_IMAGE && StringUtils.hasText(content)) {
+                // 尝试从内容提取第一张图片
+                cover = MarkdownParser.extractFirstImage(content);
+            } else if (coverStrategy == MarkdownImportConfig.CoverStrategy.DEFAULT && StringUtils.hasText(config.getDefaultCover())) {
+                // 使用默认封面
+                cover = config.getDefaultCover();
+            } else if (coverStrategy == MarkdownImportConfig.CoverStrategy.GENERATE) {
+                // 使用前端生成并上传的封面
+                if (config.getGeneratedCovers() != null && config.getGeneratedCovers().containsKey(filename)) {
+                    cover = config.getGeneratedCovers().get(filename);
+                }
+            }
+        }
+        
+        article.setCover(cover);
 
         // 分类
         article.setCategoryId(categoryId);

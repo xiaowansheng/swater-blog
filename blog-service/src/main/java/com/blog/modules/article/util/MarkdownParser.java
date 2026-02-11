@@ -245,6 +245,22 @@ public class MarkdownParser {
     }
 
     /**
+     * 提取第一张图片
+     */
+    public static String extractFirstImage(String content) {
+        if (!StringUtils.hasText(content)) {
+            return null;
+        }
+        
+        Matcher matcher = IMAGE_PATTERN.matcher(content);
+        if (matcher.find()) {
+            return matcher.group(1).trim();
+        }
+        
+        return null;
+    }
+
+    /**
      * 替换图片路径为绝对 URL
      */
     public static String replaceImageUrls(String content, String basePath, String cdnDomain) {

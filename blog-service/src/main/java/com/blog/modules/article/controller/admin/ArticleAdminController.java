@@ -224,9 +224,12 @@ public class ArticleAdminController {
             @RequestParam(value = "configJson", required = false) String configJson) {
         try {
             // 如果没有提供配置，使用默认配置
-            MarkdownImportConfig config = new MarkdownImportConfig();
+            MarkdownImportConfig config;
             if (configJson != null && !configJson.isEmpty()) {
-                // TODO: 解析 JSON 配置
+                com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                config = objectMapper.readValue(configJson, MarkdownImportConfig.class);
+            } else {
+                config = new MarkdownImportConfig();
             }
 
             MarkdownImportResult result = markdownImportService.importBatch(files, config);

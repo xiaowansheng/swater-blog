@@ -2,11 +2,13 @@ package com.blog.modules.article.model.dto.mdimport;
 
 import lombok.Data;
 import com.blog.modules.article.util.AssetPathProcessor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Markdown 导入配置
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MarkdownImportConfig {
 
     /**
@@ -75,6 +77,21 @@ public class MarkdownImportConfig {
     private String articleType = "post";
 
     /**
+     * 封面处理策略
+     */
+    private CoverStrategy coverStrategy = CoverStrategy.NONE;
+
+    /**
+     * 默认封面图（当策略为 DEFAULT 时使用）
+     */
+    private String defaultCover;
+
+    /**
+     * 前端生成的封面 URL 映射（文件名 -> 封面 URL，当策略为 GENERATE 时使用）
+     */
+    private java.util.Map<String, String> generatedCovers;
+
+    /**
      * 重复处理策略
      */
     private DuplicateResolution duplicateResolution = DuplicateResolution.SKIP;
@@ -132,5 +149,30 @@ public class MarkdownImportConfig {
          * 重命名（自动生成新 Slug）
          */
         RENAME
+    }
+
+    /**
+     * 封面处理策略枚举
+     */
+    public enum CoverStrategy {
+        /**
+         * 不处理（如果没有 frontmatter 封面，则为空）
+         */
+        NONE,
+
+        /**
+         * 使用文章第一张图片
+         */
+        FIRST_IMAGE,
+
+        /**
+         * 使用默认封面
+         */
+        DEFAULT,
+
+        /**
+         * 随机生成封面（由前端生成后上传）
+         */
+        GENERATE
     }
 }
