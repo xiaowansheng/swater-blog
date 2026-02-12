@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { LOADING_CONFIG } from '@/lib/constants/loading';
 import { resetPageReady, getPageReadyState } from './usePageReady';
 
@@ -153,8 +153,10 @@ const ensureClickListener = () => {
 export function useSimpleRouteLoading() {
   const [isLoading, setIsLoading] = useState(globalLoading);
   const pathname = usePathname();
-  const prevPathnameRef = useRef<string | undefined>(undefined);
+  const searchParams = useSearchParams();
+  const prevRouteKeyRef = useRef<string | undefined>(undefined);
   const tokenRef = useRef<number>(0);
+  const routeKey = `${pathname}?${searchParams.toString()}`;
 
   // 订阅全局加载状态
   useEffect(() => {
@@ -173,7 +175,7 @@ export function useSimpleRouteLoading() {
   // 监听路由变化
   useEffect(() => {
     // 路由开始变化
-    if (prevPathnameRef.current && prevPathnameRef.current !== pathname) {
+    if (prevRouteKeyRef.current && prevRouteKeyRef.current !== routeKey) {
       const token = startGlobalLoading();
       tokenRef.current = token;
       
@@ -181,8 +183,8 @@ export function useSimpleRouteLoading() {
       resetPageReady();
     }
     
-    // 路由变化完成（pathname 更新说明路由已完成）
-    if (prevPathnameRef.current && prevPathnameRef.current !== pathname) {
+    // 路由变化完成（pathname/search 更新说明导航已完成）
+    if (prevRouteKeyRef.current && prevRouteKeyRef.current !== routeKey) {
       // 使用 requestAnimationFrame 确保 DOM 已更新
       requestAnimationFrame(() => {
         // 再给一帧时间让 React 完成渲染
@@ -207,8 +209,8 @@ export function useSimpleRouteLoading() {
       });
     }
     
-    prevPathnameRef.current = pathname;
-  }, [pathname]);
+    prevRouteKeyRef.current = routeKey;
+  }, [routeKey]);
 
   /**
    * 手动启动加载（用于程序化导航）
