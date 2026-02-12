@@ -213,7 +213,9 @@ export default function ReplyForm({
     <div className="mt-4 ml-8 md:ml-12">
       <Card className="p-5 relative overflow-hidden" hoverEffect={false}>
         <div className="mb-4 p-3 bg-secondary/50 rounded-xl flex items-center justify-between">
-          <div className="text-secondary-foreground text-sm font-medium">{t('replyingTo')} {parentNickname}</div>
+          <div className="text-secondary-foreground text-sm font-medium">
+            {t('replyingTo', { name: parentNickname || t('author') })}
+          </div>
           <button type="button" onClick={onCancel} className="text-secondary-foreground hover:text-foreground transition-colors">
             ×
           </button>
