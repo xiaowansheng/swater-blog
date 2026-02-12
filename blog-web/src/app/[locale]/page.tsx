@@ -65,16 +65,14 @@ export default async function HomePage({
               <>
                 <ArticleList articles={articleList.records} />
                 {/* 分页组件 */}
-                {articleList.pages > 1 && (
-                  <Pagination
-                    current={articleList.current}
-                    total={articleList.pages}
-                    totalCount={articleList.total}
-                    basePath="/"
-                    pageSize={articleList.size}
-                    scrollToId="article-list"
-                  />
-                )}
+                <Pagination
+                  current={articleList.current}
+                  total={articleList.pages}
+                  totalCount={articleList.total}
+                  basePath="/"
+                  pageSize={articleList.size}
+                  scrollToId="article-list"
+                />
               </>
             ) : (
               <div className="overflow-hidden relative p-8 sm:p-12 md:p-16 text-center modern-card">
