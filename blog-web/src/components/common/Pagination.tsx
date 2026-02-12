@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Link, usePathname, useRouter } from '@/lib/i18n/routing';
 import { useTranslations } from 'next-intl';
+import { useSimpleRouteLoading } from '@/lib/hooks/useSimpleRouteLoading';
 
 interface PaginationProps {
   current: number;
@@ -13,10 +14,11 @@ interface PaginationProps {
   scrollToId?: string; // 滚动到指定元素的 ID
 }
 
-export default function Pagination({ current, total, basePath, totalCount, pageSize = 10, scrollToId }: PaginationProps) {
+export default function Pagination({ current, total, basePath, totalCount, scrollToId }: PaginationProps) {
   const t = useTranslations('common');
   const router = useRouter();
   const pathname = usePathname();
+  const { isQueryLoading } = useSimpleRouteLoading();
   const [jumpInput, setJumpInput] = useState('');
   const [isJumpFocused, setIsJumpFocused] = useState(false);
 
@@ -73,6 +75,8 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
   };
 
   const handleJump = () => {
+    if (isQueryLoading) return;
+
     const normalized = normalizeJumpValue(jumpInput);
     if (!normalized) return;
 
@@ -89,7 +93,7 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
     if (targetId) {
       const targetElement = document.getElementById(targetId);
       if (targetElement) {
-        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        targetElement.scrollIntoView({ behavior: 'auto', block: 'start' });
         return;
       }
     }
@@ -97,19 +101,19 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
     // 默认降级策略：尝试滚动到常见的内容区域
     const articleListElement = document.getElementById('article-list');
     if (articleListElement) {
-      articleListElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      articleListElement.scrollIntoView({ behavior: 'auto', block: 'start' });
       return;
     }
 
     // 降级到 #articles
     const articlesElement = document.getElementById('articles');
     if (articlesElement) {
-      articlesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      articlesElement.scrollIntoView({ behavior: 'auto', block: 'start' });
       return;
     }
 
     // 最终降级：滚动到页面顶部
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
   useEffect(() => {
@@ -138,10 +142,33 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
     }
   };
 
+  const handlePageLinkClick = (
+    targetPage: number,
+    e: React.MouseEvent<HTMLAnchorElement>
+  ) => {
+    if (isQueryLoading) {
+      e.preventDefault();
+      return;
+    }
+    queueScrollAfterNavigation(targetPage);
+  };
+
   const visiblePages = getVisiblePages();
 
   return (
-    <nav className="flex flex-col items-center gap-6 mt-16">
+    <nav
+      className={`flex flex-col items-center gap-6 mt-16 transition-opacity ${
+        isQueryLoading ? 'opacity-80' : 'opacity-100'
+      }`}
+      aria-busy={isQueryLoading}
+    >
+      {isQueryLoading && (
+        <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs text-primary">
+          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+          {t('loading')}
+        </div>
+      )}
+
       {/* 统计信息 */}
       {totalCount !== undefined && (
         <div className="text-sm text-muted-foreground">
@@ -154,12 +181,18 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
       <div className="flex justify-center items-center gap-2">
         {/* 上一页 */}
         {current > 1 && (
-          <Link
-            href={`${basePath}?page=${current - 1}`}
-            scroll={false}
-            onClick={() => queueScrollAfterNavigation(current - 1)}
-            className="px-4 py-2.5 border border-border rounded-xl hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 hover:border-primary/50 transition-all flex items-center gap-2 font-medium hover:scale-105 active:scale-95 relative overflow-hidden group"
-          >
+            <Link
+              href={`${basePath}?page=${current - 1}`}
+              scroll={false}
+              onClick={(e) => handlePageLinkClick(current - 1, e)}
+              aria-disabled={isQueryLoading}
+              tabIndex={isQueryLoading ? -1 : undefined}
+              className={`px-4 py-2.5 border border-border rounded-xl transition-all flex items-center gap-2 font-medium relative overflow-hidden group ${
+                isQueryLoading
+                  ? 'pointer-events-none opacity-50'
+                  : 'hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 hover:border-primary/50 hover:scale-105 active:scale-95'
+              }`}
+            >
             <span className="relative z-10 flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -190,11 +223,15 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
                 key={pageNum}
                 href={`${basePath}?page=${pageNum}`}
                 scroll={false}
-                onClick={() => queueScrollAfterNavigation(pageNum)}
+                onClick={(e) => handlePageLinkClick(pageNum, e)}
+                aria-disabled={isQueryLoading}
+                tabIndex={isQueryLoading ? -1 : undefined}
                 className={`px-4 py-2.5 min-w-[2.75rem] text-center border rounded-xl transition-all font-medium relative overflow-hidden group ${
                   pageNum === current
                     ? 'bg-gradient-to-r from-primary to-accent text-white border-transparent shadow-lg shadow-primary/30 scale-110'
-                    : 'border-border hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 hover:border-primary/50 hover:scale-105 active:scale-95'
+                    : isQueryLoading
+                      ? 'border-border pointer-events-none opacity-50'
+                      : 'border-border hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 hover:border-primary/50 hover:scale-105 active:scale-95'
                 }`}
               >
                 <span className="relative z-10">{pageNum}</span>
@@ -211,8 +248,14 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
           <Link
             href={`${basePath}?page=${current + 1}`}
             scroll={false}
-            onClick={() => queueScrollAfterNavigation(current + 1)}
-            className="px-4 py-2.5 border border-border rounded-xl hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 hover:border-primary/50 transition-all flex items-center gap-2 font-medium hover:scale-105 active:scale-95 relative overflow-hidden group"
+            onClick={(e) => handlePageLinkClick(current + 1, e)}
+            aria-disabled={isQueryLoading}
+            tabIndex={isQueryLoading ? -1 : undefined}
+            className={`px-4 py-2.5 border border-border rounded-xl transition-all flex items-center gap-2 font-medium relative overflow-hidden group ${
+              isQueryLoading
+                ? 'pointer-events-none opacity-50'
+                : 'hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10 hover:border-primary/50 hover:scale-105 active:scale-95'
+            }`}
           >
             <span className="relative z-10 flex items-center gap-2">
               <span className="hidden sm:inline">{t('next')}</span>
@@ -237,6 +280,7 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
             onChange={(e) => setJumpInput(normalizeJumpValue(e.target.value))}
             onKeyDown={handleKeyPress}
             onFocus={() => setIsJumpFocused(true)}
+            disabled={isQueryLoading}
             onBlur={() => {
               setTimeout(() => {
                 const normalized = normalizeJumpValue(jumpInput);
@@ -254,6 +298,7 @@ export default function Pagination({ current, total, basePath, totalCount, pageS
           {isJumpFocused && (
             <button
               onClick={handleJump}
+              disabled={isQueryLoading}
               className="absolute right-2 px-2 py-1 text-xs bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
             >
               GO

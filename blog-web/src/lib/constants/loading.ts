@@ -30,7 +30,7 @@ export const LOADING_CONFIG = {
    * 加载显示阈值（毫秒）
    * 如果加载时间低于此值，不显示 loading（可选优化）
    */
-  SHOW_THRESHOLD: 100,
+  SHOW_THRESHOLD: 0,
 
   /**
    * 进度条模拟增长速度（毫秒）

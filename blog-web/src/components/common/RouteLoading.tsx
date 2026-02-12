@@ -8,10 +8,15 @@ import { useTheme } from '@/lib/utils/theme';
 
 export default function RouteLoading() {
   const t = useTranslations('common');
-  const { isLoading } = useSimpleRouteLoading();
+  const { isRouteLoading } = useSimpleRouteLoading();
   const { theme } = useTheme();
   const [currentMascot, setCurrentMascot] = useState(0);
-  const [sparkles, setSparkles] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([]);
+  const sparkles = Array.from({ length: 8 }, (_, i) => ({
+    id: i,
+    x: (i * 13 + 17) % 100,
+    y: (i * 29 + 23) % 100,
+    delay: ((i * 17) % 20) / 10,
+  }));
 
   // 可爱的二次元表情和文字
   const mascots = ['(◕‿◕✿)', '(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧', '(*^▽^*)', '(≧◡≦)', '(◡ ‿ ◡ ✿)'];
@@ -57,16 +62,7 @@ export default function RouteLoading() {
   };
 
   useEffect(() => {
-    if (isLoading) {
-      // 生成随机闪光点
-      const newSparkles = Array.from({ length: 8 }, (_, i) => ({
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        delay: Math.random() * 2,
-      }));
-      setSparkles(newSparkles);
-
+    if (isRouteLoading) {
       // 切换表情动画
       const interval = setInterval(() => {
         setCurrentMascot((prev) => (prev + 1) % mascots.length);
@@ -74,11 +70,11 @@ export default function RouteLoading() {
 
       return () => clearInterval(interval);
     }
-  }, [isLoading, mascots.length]);
+  }, [isRouteLoading, mascots.length]);
 
   return (
     <AnimatePresence>
-      {isLoading && (
+      {isRouteLoading && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
