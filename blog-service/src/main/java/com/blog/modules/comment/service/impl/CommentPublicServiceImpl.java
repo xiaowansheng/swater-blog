@@ -132,6 +132,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             Long parentId,
             Long rootId,
             String sort,
+            String order,
             Long page,
             Long size
     ) {
@@ -163,6 +164,8 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         boolean isReplyList = rootId != null && rootId > 0;
         if ("time".equalsIgnoreCase(sort) || sort == null || sort.isEmpty()) {
             if (isReplyList) {
+                wrapper.orderByAsc(Comment::getCreateTime);
+            } else if ("asc".equalsIgnoreCase(order) || "oldest".equalsIgnoreCase(order)) {
                 wrapper.orderByAsc(Comment::getCreateTime);
             } else {
                 wrapper.orderByDesc(Comment::getCreateTime);

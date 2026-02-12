@@ -87,6 +87,7 @@ const mockHandlers: MockHandler[] = [
       const parentIdParam = params.get('parentId');
       const targetId = params.get('targetId');
       const targetType = params.get('targetType');
+      const order = params.get('order');
 
       const flatRecords = commentData.list.flatMap((c) => {
         const top = { ...c, replyCount: c.children?.length || 0 };
@@ -111,8 +112,13 @@ const mockHandlers: MockHandler[] = [
         const parentId = parseInt(parentIdParam);
         if (parentId === 0) {
           records = records.filter((c: any) => !c.parentId);
+          records.sort((a: any, b: any) => {
+            const diff = new Date(a.createTime).getTime() - new Date(b.createTime).getTime();
+            return order === 'asc' ? diff : -diff;
+          });
         } else {
           records = records.filter((c: any) => c.parentId === parentId);
+          records.sort((a: any, b: any) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime());
         }
       }
 

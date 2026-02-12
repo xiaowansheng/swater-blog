@@ -32,6 +32,7 @@ export default function GuestbookSection({
   
   const [isPendingNav, startTransition] = useTransition();
   const [jumpPage, setJumpPage] = useState<string>('');
+  const [isPageChanging, setIsPageChanging] = useState(false);
   
   // 当初始消息变化时同步更新（如翻页、排序改变）
   useEffect(() => {
@@ -43,10 +44,20 @@ export default function GuestbookSection({
   const totalPages = Math.ceil(total / pageSize);
 
   const handlePageChange = (page: number) => {
+    if (isPageChanging) return;
+    setIsPageChanging(true);
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
     startTransition(() => {
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
+        // 分页切换后滚动到留言区域顶部
+        setTimeout(() => {
+          const element = document.getElementById('guestbook-messages');
+          if (element) {
+            element.scrollIntoView({ behavior: 'auto', block: 'start' });
+          }
+          setIsPageChanging(false);
+        }, 100);
     });
   };
 
@@ -92,7 +103,7 @@ export default function GuestbookSection({
       </section>
 
       {/* 留言列表区域 - 全宽瀑布流 */}
-      <section className={`relative min-h-[500px] transition-opacity duration-300 ${isPendingNav ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+      <section id="guestbook-messages" className={`relative min-h-[500px] transition-opacity duration-300 ${isPageChanging ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 px-2">
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2 sm:gap-3">
@@ -165,11 +176,19 @@ export default function GuestbookSection({
       
       {/* 分页 */}
        {totalPages > 1 && (
-        <div className="flex justify-center pt-8 pb-4">
-            <div className="inline-flex items-center gap-1 p-1 bg-white/40 dark:bg-black/20 backdrop-blur-sm rounded-full border border-primary/10 dark:border-primary/5 shadow-sm">
+        <div className="flex flex-col items-center justify-center pt-8 pb-4 gap-4">
+          {/* 加载指示器 */}
+          {isPageChanging && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs text-primary">
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+              {t('loading')}
+            </div>
+          )}
+
+          <div className="inline-flex items-center gap-1 p-1 bg-white/40 dark:bg-black/20 backdrop-blur-sm rounded-full border border-primary/10 dark:border-primary/5 shadow-sm">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage <= 1}
+                disabled={currentPage <= 1 || isPageChanging}
                 className="p-3 rounded-full hover:bg-primary/10 text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-all active:scale-95"
                 aria-label="Previous page"
               >
@@ -184,7 +203,7 @@ export default function GuestbookSection({
 
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages}
+                disabled={currentPage >= totalPages || isPageChanging}
                 className="p-3 rounded-full hover:bg-primary/10 text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-all active:scale-95"
                 aria-label="Next page"
               >
@@ -198,12 +217,13 @@ export default function GuestbookSection({
                     type="text"
                     value={jumpPage}
                     onChange={(e) => setJumpPage(e.target.value.replace(/\D/g, ''))}
-                    className="w-10 h-7 bg-transparent border-b border-primary/20 text-center text-sm focus:outline-none focus:border-primary transition-colors"
+                    disabled={isPageChanging}
+                    className="w-10 h-7 bg-transparent border-b border-primary/20 text-center text-sm focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
                 />
                 <span className="text-xs text-muted-foreground whitespace-nowrap">{t('page')}</span>
-                <button 
+                <button
                   type="submit"
-                  disabled={!jumpPage}
+                  disabled={!jumpPage || isPageChanging}
                   className="p-1.5 rounded-full hover:bg-primary/10 text-primary transition-all disabled:opacity-30"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>

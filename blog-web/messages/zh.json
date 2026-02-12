@@ -288,7 +288,16 @@
     "collapseReply": "收起回复",
     "loading": "加载中...",
     "noReplies": "暂无回复",
-    "loadMore": "查看更多回复"
+    "loadMore": "查看更多回复",
+    "sortBy": "排序",
+    "sortLatest": "最新",
+    "sortOldest": "最早",
+    "prevPage": "上一页",
+    "nextPage": "下一页",
+    "jumpPage": "跳转",
+    "jumpPagePlaceholder": "页码",
+    "pageIndicator": "第 {current} / {total} 页",
+    "pageInfo": "共 {count} 条评论，当前第 {current} / {total} 页"
   },
   "nav": {
     "home": "首页",

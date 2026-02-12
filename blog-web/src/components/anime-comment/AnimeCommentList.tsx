@@ -1,6 +1,8 @@
 'use client';
 
 import type { CommentVO, PrivacyConfig } from '@/types';
+import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import { AnimeCommentConfig } from './types';
 import AnimeCommentItem from './AnimeCommentItem';
 
@@ -15,9 +17,12 @@ interface ReplyState {
 interface AnimeCommentListProps {
   comments: CommentVO[];
   loading: boolean;
-  loadingMore: boolean;
-  hasMore: boolean;
-  onLoadMore: () => void;
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  sortOrder: 'latest' | 'oldest';
+  onSortChange: (order: 'latest' | 'oldest') => void;
+  onPageChange: (page: number) => void;
   onReply: (commentId: number) => void;
   activeReplyFormId: number | null;
   onCloseReplyForm: () => void;
@@ -37,9 +42,12 @@ interface AnimeCommentListProps {
 export default function AnimeCommentList({
   comments,
   loading,
-  loadingMore,
-  hasMore,
-  onLoadMore,
+  currentPage,
+  totalPages,
+  totalCount,
+  sortOrder,
+  onSortChange,
+  onPageChange,
   onReply,
   activeReplyFormId,
   onCloseReplyForm,
@@ -52,6 +60,18 @@ export default function AnimeCommentList({
   config,
   privacy,
 }: AnimeCommentListProps) {
+  const t = useTranslations('comment');
+  const [jumpInput, setJumpInput] = useState('');
+
+  const handleJump = () => {
+    const value = Number.parseInt(jumpInput, 10);
+    if (!Number.isFinite(value)) return;
+    const targetPage = Math.min(Math.max(value, 1), totalPages);
+    if (targetPage === currentPage) return;
+    onPageChange(targetPage);
+    setJumpInput('');
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -61,7 +81,7 @@ export default function AnimeCommentList({
             ✨
           </div>
         </div>
-        <p className="mt-4 text-muted-foreground">加载评论中...</p>
+        <p className="mt-4 text-muted-foreground">{t('loading')}</p>
       </div>
     );
   }
@@ -70,13 +90,33 @@ export default function AnimeCommentList({
     return (
       <div className="text-center py-12">
         <div className="text-6xl mb-4 animate-float">٩(◕‿◕｡)۶</div>
-        <p className="text-muted-foreground text-lg">还没有评论哦，快来抢沙发吧~</p>
+        <p className="text-muted-foreground text-lg">{t('noComments')}</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-card/40 p-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          {t('pageInfo', { current: currentPage, total: totalPages, count: totalCount })}
+        </p>
+        <div className="flex items-center gap-2">
+          <label htmlFor="comment-sort" className="text-sm text-muted-foreground">
+            {t('sortBy')}
+          </label>
+          <select
+            id="comment-sort"
+            value={sortOrder}
+            onChange={(e) => onSortChange(e.target.value as 'latest' | 'oldest')}
+            className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none transition-colors focus:border-primary"
+          >
+            <option value="latest">{t('sortLatest')}</option>
+            <option value="oldest">{t('sortOldest')}</option>
+          </select>
+        </div>
+      </div>
+
       {comments.map((comment) => (
         <AnimeCommentItem
           key={comment.id}
@@ -95,16 +135,52 @@ export default function AnimeCommentList({
         />
       ))}
 
-      {hasMore && (
-        <div className="flex justify-center">
+      {totalPages > 1 && (
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <button
             type="button"
-            onClick={onLoadMore}
-            disabled={loadingMore}
-            className="px-6 py-2 rounded-full border border-border text-primary hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage <= 1}
+            className="px-4 py-2 rounded-lg border border-border text-sm text-primary hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loadingMore ? '加载中...' : '加载更多评论'}
+            {t('prevPage')}
           </button>
+
+          <span className="text-sm text-muted-foreground">
+            {t('pageIndicator', { current: currentPage, total: totalPages })}
+          </span>
+
+          <button
+            type="button"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage >= totalPages}
+            className="px-4 py-2 rounded-lg border border-border text-sm text-primary hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {t('nextPage')}
+          </button>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min={1}
+              max={totalPages}
+              value={jumpInput}
+              onChange={(e) => setJumpInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleJump();
+              }}
+              placeholder={t('jumpPagePlaceholder')}
+              className="w-24 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-primary"
+            />
+            <button
+              type="button"
+              onClick={handleJump}
+              disabled={!jumpInput.trim()}
+              className="px-3 py-2 rounded-lg border border-border text-sm text-primary hover:bg-muted/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t('jumpPage')}
+            </button>
+          </div>
         </div>
       )}
     </div>

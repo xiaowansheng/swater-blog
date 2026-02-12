@@ -288,7 +288,16 @@
     "collapseReply": "Collapse",
     "loading": "Loading...",
     "noReplies": "No replies yet",
-    "loadMore": "Load more replies"
+    "loadMore": "Load more replies",
+    "sortBy": "Sort",
+    "sortLatest": "Latest",
+    "sortOldest": "Oldest",
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "jumpPage": "Go",
+    "jumpPagePlaceholder": "Page",
+    "pageIndicator": "Page {current} / {total}",
+    "pageInfo": "{count} comments, page {current} / {total}"
   },
   "nav": {
     "home": "Home",

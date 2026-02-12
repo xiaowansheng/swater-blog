@@ -24,6 +24,7 @@ export const commentApi = {
     page?: number;
     size?: number;
     sort?: 'time' | 'hot';
+    order?: 'asc' | 'desc';
   }) => {
     const searchParams = new URLSearchParams();
     if (params.targetId) searchParams.append('targetId', params.targetId.toString());
@@ -33,6 +34,7 @@ export const commentApi = {
     if (params.page) searchParams.append('page', params.page.toString());
     if (params.size) searchParams.append('size', params.size.toString());
     if (params.sort) searchParams.append('sort', params.sort);
+    if (params.order) searchParams.append('order', params.order);
     return fetchServer<PageResult<CommentVO>>(
       `/api/public/comment/list?${searchParams.toString()}`
     );
@@ -44,6 +46,7 @@ export const commentApi = {
     page?: number;
     size?: number;
     sort?: 'time' | 'hot';
+    order?: 'asc' | 'desc';
   }) => {
     return commentApi.getList({ ...params, parentId: 0 });
   },
@@ -54,6 +57,7 @@ export const commentApi = {
     page?: number;
     size?: number;
     sort?: 'time' | 'hot';
+    order?: 'asc' | 'desc';
   }) => {
     return commentApi.getList({ ...params });
   },
