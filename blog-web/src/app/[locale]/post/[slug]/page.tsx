@@ -135,7 +135,7 @@ export default async function PostDetailPage({
                   )}
 
                   {/* 文章正文 */}
-                  <div className="vditor-reset data-reading-target">
+                  <div className="vditor-reset" data-reading-target>
                     <MarkdownRenderer content={article.content} />
                   </div>
 
