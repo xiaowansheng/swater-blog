@@ -21,13 +21,9 @@ public class YauaaUserAgentParser implements UserAgentParser {
                 .withField("DeviceBrand")
                 .withField("DeviceName")
                 .withField("OperatingSystemName")
-                .withField("OperatingSystemVersionMajor")
-                .withField("OperatingSystemVersionMinor")
-                .withField("OperatingSystemVersionPatch")
+                .withField("OperatingSystemVersion")
                 .withField("AgentName")
-                .withField("AgentVersionMajor")
-                .withField("AgentVersionMinor")
-                .withField("AgentVersionPatch")
+                .withField("AgentVersion")
                 .build();
     }
 
@@ -42,15 +38,9 @@ public class YauaaUserAgentParser implements UserAgentParser {
             String deviceBrand = getValue(ua, "DeviceBrand");
             String deviceModel = getValue(ua, "DeviceName");
             String osName = getValue(ua, "OperatingSystemName");
-            String osVersion = buildVersion(
-                    getValue(ua, "OperatingSystemVersionMajor"),
-                    getValue(ua, "OperatingSystemVersionMinor"),
-                    getValue(ua, "OperatingSystemVersionPatch"));
+            String osVersion = getValue(ua, "OperatingSystemVersion");
             String browserName = getValue(ua, "AgentName");
-            String browserVersion = buildVersion(
-                    getValue(ua, "AgentVersionMajor"),
-                    getValue(ua, "AgentVersionMinor"),
-                    getValue(ua, "AgentVersionPatch"));
+            String browserVersion = getValue(ua, "AgentVersion");
             return UserAgentInfo.builder()
                     .deviceType(deviceType)
                     .deviceBrand(deviceBrand)

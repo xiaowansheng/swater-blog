@@ -25,8 +25,10 @@ public class UapJavaUserAgentParser implements UserAgentParser {
             Client client = parser.parse(userAgent);
 
             String deviceType = "Desktop"; // Default
-            String deviceBrand = client.device.brand;
-            String deviceModel = client.device.model;
+            // uap-java 1.6.1 Device 类仅包含 family 字段，不包含 brand 和 model
+            // 因此我们将 family 映射为 deviceModel，deviceBrand 暂时置空
+            String deviceBrand = null;
+            String deviceModel = client.device.family;
             
             // 简单的设备类型推断，uap-java 对设备类型的支持不如 Yauaa
             if ("Spider".equals(client.device.family)) {
