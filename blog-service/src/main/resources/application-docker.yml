@@ -1,4 +1,4 @@
-﻿# ========================================
+# ========================================
 # Docker环境Spring Boot配置
 # 针对容器化部署优化
 # ========================================
@@ -480,3 +480,7 @@ plugin:
   # 定时任务插件配置
   scheduler:
     active: spring  # spring/quartz
+
+  # User-Agent 解析插件配置
+  user-agent:
+    active: ${USER_AGENT_PARSER_TYPE:yauaa}  # yauaa/uap-java
