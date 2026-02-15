@@ -6,11 +6,13 @@ export interface LoginDTO {
   password?: string
   encryptedPassword?: string
   nonce?: string
+  rememberMe?: boolean
 }
 
 export interface EmailLoginDTO {
   email: string
   code: string
+  rememberMe?: boolean
 }
 
 export interface SendCodeDTO {

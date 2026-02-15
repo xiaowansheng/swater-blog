@@ -92,7 +92,9 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException("用户名或密码错误");
         }
         
-        StpUtil.login(user.getId());
+        // 如果勾选了记住我，登录有效期30天，否则默认2小时
+        long timeout = (dto.getRememberMe() != null && dto.getRememberMe()) ? 2592000 : 7200;
+        StpUtil.login(user.getId(), timeout);
         String token = StpUtil.getTokenValue();
         
         user.setLastLoginTime(LocalDateTime.now());
@@ -113,7 +115,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public LoginVO loginWithEmail(String email, String code) {
+    public LoginVO loginWithEmail(EmailVerifyDTO dto) {
+        String email = dto.getEmail();
+        String code = dto.getCode();
         log.info("用户尝试使用邮箱验证码登录: {}", email);
 
         // 验证邮箱验证码
@@ -139,7 +143,9 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 登录成功
-        StpUtil.login(user.getId());
+        // 如果勾选了记住我，登录有效期30天，否则默认2小时
+        long timeout = (dto.getRememberMe() != null && dto.getRememberMe()) ? 2592000 : 7200;
+        StpUtil.login(user.getId(), timeout);
         String token = StpUtil.getTokenValue();
 
         user.setLastLoginTime(LocalDateTime.now());

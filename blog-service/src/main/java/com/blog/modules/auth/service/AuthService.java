@@ -11,7 +11,7 @@ import com.blog.modules.user.model.vo.UserVO;
 public interface AuthService {
     LoginVO login(LoginDTO dto);
 
-    LoginVO loginWithEmail(String email, String code);
+    LoginVO loginWithEmail(EmailVerifyDTO dto);
 
     EmailVerifyVO verifyEmail(EmailVerifyDTO dto);
 

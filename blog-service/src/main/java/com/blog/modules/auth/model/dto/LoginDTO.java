@@ -19,5 +19,10 @@ public class LoginDTO {
      * 登录随机数，用于防重放
      */
     private String nonce;
+
+    /**
+     * 记住我
+     */
+    private Boolean rememberMe;
 }
 

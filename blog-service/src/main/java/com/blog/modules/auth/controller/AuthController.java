@@ -329,7 +329,7 @@ public class AuthController {
         message = "登录尝试过于频繁，请5分钟后再试"
     )
     public Result<LoginVO> loginWithEmail(@Valid @RequestBody EmailVerifyDTO dto) {
-        LoginVO loginVO = authService.loginWithEmail(dto.getEmail(), dto.getCode());
+        LoginVO loginVO = authService.loginWithEmail(dto);
         return Result.success(loginVO);
     }
 

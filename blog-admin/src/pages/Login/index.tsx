@@ -20,10 +20,10 @@ const Login: React.FC = () => {
     setForgotPasswordOpen(true)
   }
 
-  const onFinish = async (values: { username: string; password: string }) => {
+  const onFinish = async (values: { username: string; password: string; remember: boolean }) => {
     setLoading(true)
     try {
-      await login(values.username, values.password)
+      await login(values.username, values.password, values.remember)
       message.success('登录成功')
       
       // 登录成功后，如果有锁屏状态，则重置
@@ -70,7 +70,7 @@ const Login: React.FC = () => {
           onFinish={onFinish}
           autoComplete="off"
           size="large"
-          initialValues={{ remember: true }}
+          initialValues={{ remember: false }}
         >
           <Form.Item
             name="username"
