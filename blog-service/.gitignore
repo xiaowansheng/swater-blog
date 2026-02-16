@@ -43,3 +43,4 @@ out/
 config/*.yml
 config/*.properties
 uploads/
+temp/
