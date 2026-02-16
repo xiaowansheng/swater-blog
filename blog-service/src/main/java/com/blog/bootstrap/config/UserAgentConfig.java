@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class UserAgentConfig {
 
-    @Value("${plugin.user-agent.active:yauaa}")
+    @Value("${user-agent.parser:yauaa}")
     private String parserType;
 
     @Bean

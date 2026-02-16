@@ -481,6 +481,6 @@ plugin:
   scheduler:
     active: spring  # spring/quartz
 
-  # User-Agent 解析插件配置
+  # User-Agent 解析配置
   user-agent:
-    active: ${USER_AGENT_PARSER_TYPE:yauaa}  # yauaa/uap-java
+    parser: ${USER_AGENT_PARSER:yauaa}  # yauaa/uap-java
