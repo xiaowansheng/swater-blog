@@ -48,8 +48,9 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
     private ArticleMapper articleMapper;
 
     @Override
-    public MarkdownImportPreview previewImport(MultipartFile[] files, String basePath) throws Exception {
+    public MarkdownImportPreview previewImport(MultipartFile[] files, MarkdownImportConfig config) throws Exception {
         MarkdownImportPreview preview = new MarkdownImportPreview();
+        String basePath = config.getBasePath();
 
         // 分类 MD 文件和资源文件
         List<MultipartFile> mdFiles = new ArrayList<>();
@@ -81,7 +82,7 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
                 parsedDoc.setFilePath(basePath + "/" + mdFile.getOriginalFilename());
 
                 // 创建文章预览
-                ArticlePreview articlePreview = createArticlePreview(mdFile.getOriginalFilename(), doc, basePath);
+                ArticlePreview articlePreview = createArticlePreview(mdFile.getOriginalFilename(), doc, config);
                 parsedDoc.setPreview(articlePreview);
 
                 // 处理分类
@@ -210,7 +211,7 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
         }
 
         // 预览导入以构建分类结构
-        MarkdownImportPreview preview = previewImport(files, config.getBasePath());
+        MarkdownImportPreview preview = previewImport(files, config);
 
         // 创建分类
         Map<String, Long> categoryKeyToIdMap = createCategories(preview.getCategories(), config, result);
@@ -335,10 +336,10 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
     /**
      * 创建文章预览
      */
-    private ArticlePreview createArticlePreview(String filename, MarkdownParser.MarkdownDocument doc, String basePath) {
+    private ArticlePreview createArticlePreview(String filename, MarkdownParser.MarkdownDocument doc, MarkdownImportConfig config) {
         ArticlePreview preview = new ArticlePreview();
         preview.setOriginalFilename(filename);
-        preview.setFilePath(basePath + "/" + filename);
+        preview.setFilePath(config.getBasePath() + "/" + filename);
 
         // 提取标题
         String title = doc.getFrontmatter().getTitle();
@@ -357,17 +358,41 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
         preview.setSlug(slug);
 
         // 分类
-        String category = doc.getFrontmatter().getCategory();
-        if (StringUtils.hasText(category)) {
-            preview.setCategory(category);
-            preview.setCategoryKey(toCategoryKey(category));
-        } else {
-            // 从文件路径推断分类
-            String inferredCategory = inferCategoryFromPath(filename);
-            if (StringUtils.hasText(inferredCategory)) {
-                preview.setCategory(inferredCategory);
-                preview.setCategoryKey(toCategoryKey(inferredCategory));
-            }
+        switch (config.getCategoryMode()) {
+            case MANUAL:
+                if (config.getManualCategoryId() != null) {
+                    Category manualCat = categoryMapper.selectById(config.getManualCategoryId());
+                    if (manualCat != null) {
+                        preview.setCategory(manualCat.getName());
+                        preview.setCategoryKey(manualCat.getCategoryKey());
+                    }
+                }
+                break;
+
+            case FRONTMATTER:
+                String cat = doc.getFrontmatter().getCategory();
+                if (StringUtils.hasText(cat)) {
+                    preview.setCategory(cat);
+                    preview.setCategoryKey(toCategoryKey(cat));
+                }
+                break;
+
+            case AUTO:
+            default:
+                // 优先 Frontmatter
+                String autoCat = doc.getFrontmatter().getCategory();
+                if (StringUtils.hasText(autoCat)) {
+                    preview.setCategory(autoCat);
+                    preview.setCategoryKey(toCategoryKey(autoCat));
+                } else {
+                    // 兜底路径
+                    String infCat = inferCategoryFromPath(filename);
+                    if (StringUtils.hasText(infCat)) {
+                        preview.setCategory(infCat);
+                        preview.setCategoryKey(toCategoryKey(infCat));
+                    }
+                }
+                break;
         }
 
         // 标签
@@ -486,6 +511,12 @@ public class MarkdownImportServiceImpl implements MarkdownImportService {
 
             case AUTO:
             default:
+                // 优先使用 frontmatter 中的分类
+                String autoCategory = frontmatter.getCategory();
+                if (StringUtils.hasText(autoCategory)) {
+                    return findOrCreateCategory(autoCategory, null, config, result);
+                }
+
                 // 从文件路径推断
                 String inferredCategory = inferCategoryFromPath(filename);
                 if (StringUtils.hasText(inferredCategory)) {

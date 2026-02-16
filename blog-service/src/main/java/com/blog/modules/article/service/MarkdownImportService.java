@@ -14,10 +14,10 @@ public interface MarkdownImportService {
      * 预览导入（解析文件但不创建文章）
      *
      * @param files 上传的文件
-     * @param basePath 基础路径
+     * @param config 导入配置
      * @return 导入预览
      */
-    MarkdownImportPreview previewImport(MultipartFile[] files, String basePath) throws Exception;
+    MarkdownImportPreview previewImport(MultipartFile[] files, MarkdownImportConfig config) throws Exception;
 
     /**
      * 导入单个 Markdown 文件

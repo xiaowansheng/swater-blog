@@ -177,9 +177,18 @@ public class ArticleAdminController {
             description = "解析上传的 Markdown 文件，预览将要创建的文章和分类结构")
     public Result<MarkdownImportPreview> previewImport(
             @RequestParam("files") MultipartFile[] files,
-            @RequestParam(value = "basePath", defaultValue = "") String basePath) {
+            @RequestParam(value = "basePath", defaultValue = "") String basePath,
+            @RequestParam(value = "configJson", required = false) String configJson) {
         try {
-            MarkdownImportPreview preview = markdownImportService.previewImport(files, basePath);
+            MarkdownImportConfig config;
+            if (configJson != null && !configJson.isEmpty()) {
+                config = com.blog.shared.util.JsonUtil.fromJson(configJson, MarkdownImportConfig.class);
+            } else {
+                config = new MarkdownImportConfig();
+                config.setBasePath(basePath);
+            }
+
+            MarkdownImportPreview preview = markdownImportService.previewImport(files, config);
             return Result.success(preview);
         } catch (Exception e) {
             return Result.error(500, "预览失败: " + e.getMessage());
