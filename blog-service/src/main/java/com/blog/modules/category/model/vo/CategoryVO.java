@@ -23,6 +23,8 @@ public class CategoryVO extends com.blog.shared.model.vo.BaseVO {
 
     private String status;
 
+    private Integer articleCount;
+
     private List<CategoryVO> children;
 }
 

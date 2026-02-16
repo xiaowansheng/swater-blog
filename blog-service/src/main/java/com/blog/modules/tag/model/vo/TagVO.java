@@ -19,5 +19,7 @@ public class TagVO extends com.blog.shared.model.vo.BaseVO {
     private String description;
 
     private String status;
+
+    private Integer articleCount;
 }
 

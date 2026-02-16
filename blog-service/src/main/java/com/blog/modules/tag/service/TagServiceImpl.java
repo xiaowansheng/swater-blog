@@ -33,17 +33,14 @@ public class TagServiceImpl implements TagService {
     @Override
     @Cacheable(value = "tag:list", key = "'all'", unless = "#result == null")
     public List<TagVO> list() {
-        LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
-        List<Tag> tags = tagMapper.selectList(wrapper);
+        List<Tag> tags = tagMapper.selectListWithArticleCount();
         return BeanUtil.copyList(tags, TagVO.class);
     }
 
     @Override
     @Cacheable(value = "tag:list", key = "'public'", unless = "#result == null")
     public List<TagVO> listPublic() {
-        LambdaQueryWrapper<Tag> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Tag::getStatus, TagStatus.PUBLISHED.getCode());
-        List<Tag> tags = tagMapper.selectList(wrapper);
+        List<Tag> tags = tagMapper.selectPublicListWithArticleCount();
         return BeanUtil.copyList(tags, TagVO.class);
     }
 

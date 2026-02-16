@@ -24,5 +24,8 @@ public class Category extends com.blog.shared.model.entity.BaseEntity {
     private Integer sort;
 
     private String status;
+
+    @TableField(exist = false)
+    private Integer articleCount;
 }
 

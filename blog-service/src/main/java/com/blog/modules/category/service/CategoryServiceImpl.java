@@ -34,19 +34,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Cacheable(value = "category:list", key = "'all'", unless = "#result == null")
     public List<CategoryVO> list() {
-        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
-        wrapper.orderByAsc(Category::getSort);
-        List<Category> categories = categoryMapper.selectList(wrapper);
+        List<Category> categories = categoryMapper.selectListWithArticleCount();
         return buildTree(BeanUtil.copyList(categories, CategoryVO.class));
     }
 
     @Override
     @Cacheable(value = "category:list", key = "'public'", unless = "#result == null")
     public List<CategoryVO> listPublic() {
-        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Category::getStatus, CategoryStatus.PUBLISHED.getCode());
-        wrapper.orderByAsc(Category::getSort);
-        List<Category> categories = categoryMapper.selectList(wrapper);
+        List<Category> categories = categoryMapper.selectPublicListWithArticleCount();
         return buildTree(BeanUtil.copyList(categories, CategoryVO.class));
     }
 

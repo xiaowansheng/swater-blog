@@ -21,5 +21,8 @@ public class Tag extends com.blog.shared.model.entity.BaseEntity {
     private String description;
 
     private String status;
+
+    @TableField(exist = false)
+    private Integer articleCount;
 }
 
