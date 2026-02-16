@@ -88,7 +88,7 @@ const Header: React.FC = () => {
             type="text"
             icon={<GithubOutlined className="text-gray-500" />}
             className="flex items-center justify-center"
-            onClick={() => window.open('https://github.com', '_blank')}
+            onClick={() => window.open(import.meta.env.VITE_GITHUB_URL || 'https://github.com', '_blank')}
           />
         </Tooltip>
         <Tooltip title={isFullscreen ? '退出全屏' : '全屏'}>
