@@ -4,6 +4,7 @@ import { Card, Button, Space, message, Spin, Breadcrumb, Tag, Image, Description
 import { ArrowLeftOutlined, FilePdfOutlined, FileMarkdownOutlined, DownloadOutlined, EditOutlined } from '@ant-design/icons'
 import { getArticleById } from '@/api/article'
 import { Article, ArticleStatus, ArticleType, ARTICLE_STATUS_MAP, ARTICLE_TYPE_MAP } from '@/types'
+import { usePageTab } from '@/hooks/usePageTab'
 import { printMarkdownAsPdf } from '@/utils/printMarkdown'
 import { exportElementAsPdf } from '@/utils/exportPdf'
 import { getFullUrl } from '@/utils/format'
@@ -12,6 +13,7 @@ import MarkdownPreview from '@/components/common/MarkdownPreview'
 const ArticlePreview: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { setTabLabel } = usePageTab()
   const [article, setArticle] = useState<Article | null>(null)
   const [loading, setLoading] = useState(true)
   const loadedIdRef = useRef<string | null>(null)
@@ -31,6 +33,19 @@ const ArticlePreview: React.FC = () => {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (!article || !article.id) return
+
+    const rawTitle = String(article.title || '').trim()
+    if (!rawTitle) return
+
+    const titleChars = Array.from(rawTitle)
+    const shortTitle =
+      titleChars.length > 7 ? `${titleChars.slice(0, 7).join('')}...` : rawTitle
+
+    setTabLabel(`[${article.id}]${shortTitle}`)
+  }, [article, setTabLabel])
 
   useEffect(() => {
     if (!id) return
