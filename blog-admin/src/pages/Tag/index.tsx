@@ -113,10 +113,18 @@ const TagPage: React.FC = () => {
             onClick={() => handleEdit(record)}
           />
           <Popconfirm
-            title="确定删除这个标签吗？"
+            title="确定要删除这个标签吗？"
+            description={record.articleCount > 0 ? "该标签下有文章，无法删除" : "删除后不可恢复"}
             onConfirm={() => handleDelete(record.id)}
+            okButtonProps={{ disabled: record.articleCount > 0 }}
           >
-            <Button type="text" danger icon={<DeleteOutlined />} />
+            <Button 
+              type="text" 
+              danger 
+              icon={<DeleteOutlined />} 
+              disabled={record.articleCount > 0}
+              title={record.articleCount > 0 ? "该标签下有文章，无法删除" : "删除"}
+            />
           </Popconfirm>
         </Space>
       ),

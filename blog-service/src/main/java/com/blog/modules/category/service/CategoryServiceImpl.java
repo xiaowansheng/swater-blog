@@ -9,6 +9,8 @@ import com.blog.modules.category.model.entity.Category;
 import com.blog.modules.category.model.enums.CategoryStatus;
 import com.blog.modules.category.model.vo.CategoryVO;
 import com.blog.modules.category.service.CategoryService;
+import com.blog.modules.article.mapper.ArticleMapper;
+import com.blog.modules.article.model.entity.Article;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.KeyUtil;
@@ -27,6 +29,9 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private CategoryMapper categoryMapper;
+
+    @Autowired
+    private ArticleMapper articleMapper;
 
     @Autowired(required = false)
     private RevalidateClient revalidateClient;
@@ -122,6 +127,14 @@ public class CategoryServiceImpl implements CategoryService {
         if (category == null) {
             throw new BusinessException("分类不存在");
         }
+
+        Long count = articleMapper.selectCount(new LambdaQueryWrapper<Article>()
+                .eq(Article::getCategoryId, id)
+                .eq(Article::getDeleted, 0));
+        if (count > 0) {
+            throw new BusinessException("该分类下有文章，禁止删除");
+        }
+
         categoryMapper.deleteById(id);
         triggerRevalidate(category);
     }

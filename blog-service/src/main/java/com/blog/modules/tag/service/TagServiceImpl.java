@@ -9,6 +9,8 @@ import com.blog.modules.tag.model.entity.Tag;
 import com.blog.modules.tag.model.enums.TagStatus;
 import com.blog.modules.tag.model.vo.TagVO;
 import com.blog.modules.tag.service.TagService;
+import com.blog.modules.article.mapper.ArticleTagMapper;
+import com.blog.modules.article.model.entity.ArticleTag;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.KeyUtil;
@@ -26,6 +28,9 @@ import java.util.List;
 public class TagServiceImpl implements TagService {
     @Autowired
     private TagMapper tagMapper;
+
+    @Autowired
+    private ArticleTagMapper articleTagMapper;
 
     @Autowired(required = false)
     private RevalidateClient revalidateClient;
@@ -114,6 +119,13 @@ public class TagServiceImpl implements TagService {
         if (tag == null) {
             throw new BusinessException("标签不存在");
         }
+
+        Long count = articleTagMapper.selectCount(new LambdaQueryWrapper<ArticleTag>()
+                .eq(ArticleTag::getTagId, id));
+        if (count > 0) {
+            throw new BusinessException("该标签下有文章，禁止删除");
+        }
+
         tagMapper.deleteById(id);
         triggerRevalidate(tag);
     }
