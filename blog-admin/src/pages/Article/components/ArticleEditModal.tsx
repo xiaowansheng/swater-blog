@@ -7,8 +7,6 @@ import {
     FormOutlined,
 } from '@ant-design/icons'
 import {
-    getArticleById,
-    saveArticle,
     updateArticleMeta,
 } from '@/api/article'
 import { uploadFile } from '@/api/file'
