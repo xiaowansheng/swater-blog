@@ -15,6 +15,7 @@ import { toRelativeUrl } from '@/utils/format'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
 import TagSelector from './TagSelector'
+import CategorySelector from './CategorySelector'
 import ImageUpload from '@/components/common/ImageUpload'
 import CoverGenerator from '@/components/article/CoverGenerator'
 import { Article, Category, Tag as TagType, ArticleStatus, ArticleType } from '@/types'
@@ -245,14 +246,9 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
                         <Form.Item
                             label="分类"
                             name="categoryId"
+                            rules={[{ required: true, message: '请选择或输入文章分类' }]}
                         >
-                            <Select placeholder="选择分类" allowClear>
-                                {categories.map((cat) => (
-                                    <Select.Option key={cat.id} value={cat.id}>
-                                        {cat.name}
-                                    </Select.Option>
-                                ))}
-                            </Select>
+                            <CategorySelector categories={categories} />
                         </Form.Item>
                         <Form.Item
                             label="文章类型"
