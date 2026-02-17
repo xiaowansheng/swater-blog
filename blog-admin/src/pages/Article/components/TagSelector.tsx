@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Popover, Input, Button, Tag, Empty, Tooltip } from 'antd';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { Popover, Input, Button, Tag, Empty, Tooltip, InputRef } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { Tag as TagType } from '@/types';
 
@@ -13,6 +13,15 @@ interface TagSelectorProps {
 const TagSelector: React.FC<TagSelectorProps> = ({ value = [], onChange, tags, maxCount = 10 }) => {
   const [open, setOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const inputRef = useRef<InputRef>(null);
+
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [open]);
 
   const selectedTags = useMemo(() => {
     return value.map(v => {
@@ -65,6 +74,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({ value = [], onChange, tags, m
   const content = (
     <div className="w-72">
       <Input
+        ref={inputRef}
         placeholder="搜索或输入新标签..."
         prefix={<SearchOutlined className="text-gray-400" />}
         value={searchText}

@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Popover, Input, Button, Tag, Empty } from 'antd';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { Popover, Input, Button, Tag, Empty, InputRef } from 'antd';
 import { PlusOutlined, SearchOutlined, CheckOutlined } from '@ant-design/icons';
 import { Category } from '@/types';
 
@@ -12,6 +12,15 @@ interface CategorySelectorProps {
 const CategorySelector: React.FC<CategorySelectorProps> = ({ value, onChange, categories }) => {
   const [open, setOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const inputRef = useRef<InputRef>(null);
+
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [open]);
 
   const selectedCategory = useMemo(() => {
     if (!value) return null;
@@ -44,6 +53,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ value, onChange, ca
   const content = (
     <div className="w-64">
       <Input
+        ref={inputRef}
         placeholder="搜索或输入新分类..."
         prefix={<SearchOutlined className="text-gray-400" />}
         value={searchText}
