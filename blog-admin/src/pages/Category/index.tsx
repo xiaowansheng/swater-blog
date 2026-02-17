@@ -113,16 +113,16 @@ const CategoryPage: React.FC = () => {
           />
           <Popconfirm
             title="确定要删除这个分类吗？"
-            description={record.articleCount > 0 ? "该分类下有文章，无法删除" : "删除后不可恢复"}
+            description={(record.articleCount || 0) > 0 ? "该分类下有文章，无法删除" : "删除后不可恢复"}
             onConfirm={() => handleDelete(record.id)}
-            okButtonProps={{ disabled: record.articleCount > 0 }}
+            okButtonProps={{ disabled: (record.articleCount || 0) > 0 }}
           >
             <Button 
               type="text" 
               danger 
               icon={<DeleteOutlined />} 
-              disabled={record.articleCount > 0}
-              title={record.articleCount > 0 ? "该分类下有文章，无法删除" : "删除"}
+              disabled={(record.articleCount || 0) > 0}
+              title={(record.articleCount || 0) > 0 ? "该分类下有文章，无法删除" : "删除"}
             />
           </Popconfirm>
         </Space>
