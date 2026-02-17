@@ -15,5 +15,7 @@ public interface ArticleCommandService {
     void publish(Long id);
 
     void unpublish(Long id);
+
+    void updateMeta(Long id, com.blog.modules.article.model.dto.ArticleMetaDTO dto);
 }
 

@@ -9,6 +9,7 @@ import {
 import {
     getArticleById,
     saveArticle,
+    updateArticleMeta,
 } from '@/api/article'
 import { uploadFile } from '@/api/file'
 import { toRelativeUrl } from '@/utils/format'
@@ -99,14 +100,9 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
             const values = await form.validateFields()
             setLoading(true)
 
-            // 先获取完整文章以得到 content
-            const fullArticle = await getArticleById(article.id)
-
-            await saveArticle({
-                id: article.id,
+            await updateArticleMeta(article.id, {
                 title: values.title,
                 slug: values.slug || undefined,
-                content: fullArticle.content,
                 excerpt: values.excerpt || undefined,
                 cover: values.cover || undefined,
                 categoryId: typeof values.categoryId === 'number' ? values.categoryId : undefined,

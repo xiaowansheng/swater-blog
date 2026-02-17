@@ -56,6 +56,29 @@ export interface ArticleSaveResult {
   serverUpdateTime?: string
 }
 
+export interface ArticleMetaDTO {
+  title: string
+  slug?: string
+  excerpt?: string
+  cover?: string
+  categoryId?: number
+  categoryName?: string
+  type?: string
+  originalAuthor?: string
+  originalTitle?: string
+  originalUrl?: string
+  note?: string
+  status?: number
+  isTop?: number
+  tagIds?: number[]
+  tagNames?: string[]
+  articleKey?: string
+}
+
+export const updateArticleMeta = (id: number, data: ArticleMetaDTO): Promise<void> => {
+  return request.put(`/admin/post/${id}/meta`, data)
+}
+
 export const getArticleList = (params: {
   page?: number
   size?: number

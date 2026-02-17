@@ -28,6 +28,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.blog.modules.article.model.dto.ArticleMetaDTO;
+
 @Service
 public class ArticleCommandServiceImpl implements ArticleCommandService {
     @Autowired
@@ -234,6 +236,60 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         
         Article unpublishedArticle = articleMapper.selectById(id);
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUnpublishedEvent(this, id, unpublishedArticle)));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
+    public void updateMeta(Long id, ArticleMetaDTO dto) {
+        Article article = articleMapper.selectById(id);
+        if (article == null) {
+            throw new BusinessException("文章不存在");
+        }
+
+        // 处理自定义分类
+        if (dto.getCategoryId() == null && dto.getCategoryName() != null && !dto.getCategoryName().trim().isEmpty()) {
+            dto.setCategoryId(categoryService.findOrCreateByName(dto.getCategoryName()));
+        }
+
+        if (dto.getTitle() != null) article.setTitle(dto.getTitle());
+        if (dto.getSlug() != null) article.setSlug(dto.getSlug());
+        if (dto.getExcerpt() != null) article.setExcerpt(dto.getExcerpt());
+        if (dto.getCover() != null) article.setCover(dto.getCover());
+        if (dto.getCategoryId() != null) article.setCategoryId(dto.getCategoryId());
+        if (dto.getType() != null) article.setType(dto.getType());
+        if (dto.getOriginalAuthor() != null) article.setOriginalAuthor(dto.getOriginalAuthor());
+        if (dto.getOriginalTitle() != null) article.setOriginalTitle(dto.getOriginalTitle());
+        if (dto.getOriginalUrl() != null) article.setOriginalUrl(dto.getOriginalUrl());
+        if (dto.getNote() != null) article.setNote(dto.getNote());
+        if (dto.getStatus() != null) article.setStatus(dto.getStatus());
+        if (dto.getIsTop() != null) article.setIsTop(dto.getIsTop());
+        if (dto.getArticleKey() != null) article.setArticleKey(dto.getArticleKey());
+
+        if (dto.getStatus() != null && dto.getStatus().equals(ArticleStatus.PUBLISHED.getCode()) && article.getPublishedAt() == null) {
+            article.setPublishedAt(LocalDateTime.now());
+        }
+
+        articleMapper.updateById(article);
+
+        // 处理标签
+        if (dto.getTagIds() != null || dto.getTagNames() != null) {
+            java.util.Set<Long> allTagIds = new java.util.HashSet<>();
+            if (dto.getTagIds() != null) {
+                allTagIds.addAll(dto.getTagIds());
+            }
+            if (dto.getTagNames() != null) {
+                for (String tagName : dto.getTagNames()) {
+                    Long tagId = tagService.findOrCreateByName(tagName);
+                    if (tagId != null) {
+                        allTagIds.add(tagId);
+                    }
+                }
+            }
+            saveArticleTags(article.getId(), new java.util.ArrayList<>(allTagIds));
+        }
+
+        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUpdatedEvent(this, article.getId(), article)));
     }
 
     private void saveArticleTags(Long articleId, List<Long> tagIds) {

@@ -87,6 +87,14 @@ public class ArticleAdminController {
         return Result.success();
     }
 
+    @PutMapping("/{id}/meta")
+    @ApiOperation(name = "更新文章属性", type = ApiOperationType.UPDATE,
+            description = "更新文章属性（不包含内容）")
+    public Result<Void> updateMeta(@PathVariable Long id, @RequestBody com.blog.modules.article.model.dto.ArticleMetaDTO dto) {
+        articleCommandService.updateMeta(id, dto);
+        return Result.success();
+    }
+
     @DeleteMapping("/{id}")
     @ApiOperation(name = "删除文章", type = ApiOperationType.DELETE,
             description = "删除单篇文章")
