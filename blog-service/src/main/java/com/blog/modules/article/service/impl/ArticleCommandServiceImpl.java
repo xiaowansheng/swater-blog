@@ -274,6 +274,8 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
 
         // 处理标签
         if (dto.getTagIds() != null || dto.getTagNames() != null) {
+            // updateMeta 是覆盖语义：先清空旧关联，再写入新标签，避免重复键冲突
+            articleTagMapper.deleteByArticleId(id);
             java.util.Set<Long> allTagIds = new java.util.HashSet<>();
             if (dto.getTagIds() != null) {
                 allTagIds.addAll(dto.getTagIds());
