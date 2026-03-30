@@ -117,7 +117,10 @@ const Login: React.FC = () => {
             </Button>
           </Form.Item>
         </Form>
-        <div className="text-center text-gray-400 text-sm mt-6">
+        <div className="text-center mt-6 px-4 py-3 bg-blue-50/80 rounded-lg border border-blue-100">
+          <p className="text-sm text-blue-600">体验测试账号：用户名 <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-blue-200 text-blue-700">test</span>，密码 <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-blue-200 text-blue-700">test</span></p>
+        </div>
+        <div className="text-center text-gray-400 text-sm mt-4">
           © 2024 Blog Admin. All rights reserved.
         </div>
       </div>
