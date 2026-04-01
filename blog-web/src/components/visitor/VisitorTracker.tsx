@@ -35,6 +35,18 @@ function stripLocalePrefix(pathname: string) {
   return '/' + segments.slice(startIndex).join('/');
 }
 
+/** 同一 pageKey 在此时间窗口内不重复上报（毫秒） */
+const THROTTLE_MS = 30_000;
+const lastSentAt = new Map<string, number>();
+
+function isThrottled(key: string): boolean {
+  const now = Date.now();
+  const last = lastSentAt.get(key);
+  if (last !== undefined && now - last < THROTTLE_MS) return true;
+  lastSentAt.set(key, now);
+  return false;
+}
+
 function isContentRoute(pathname: string) {
   const normalized = stripLocalePrefix(pathname);
   return normalized.startsWith('/post/') || normalized.startsWith('/moment/');
@@ -61,6 +73,8 @@ export default function VisitorTracker() {
 
     const normalizedPath = stripLocalePrefix(pathname) || '/';
     const pageKey = `PAGE:${normalizePageId(normalizedPath)}`;
+
+    if (isThrottled(pageKey)) return;
 
     trackEnter({
       visitorUuid,

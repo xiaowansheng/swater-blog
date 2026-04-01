@@ -12,6 +12,18 @@ function getOrCreateId(key: string, storage: Storage) {
   return id;
 }
 
+/** 同一内容在此时间窗口内不重复上报（毫秒） */
+const THROTTLE_MS = 30_000;
+const lastSentAt = new Map<string, number>();
+
+function isThrottled(key: string): boolean {
+  const now = Date.now();
+  const last = lastSentAt.get(key);
+  if (last !== undefined && now - last < THROTTLE_MS) return true;
+  lastSentAt.set(key, now);
+  return false;
+}
+
 export default function ContentTracker({
   contentType,
   contentId,
@@ -24,6 +36,7 @@ export default function ContentTracker({
   useEffect(() => {
     const key = `${contentType}:${contentId}`;
     if (lastKeyRef.current === key) return;
+    if (isThrottled(key)) return;
     lastKeyRef.current = key;
 
     const visitorKey = 'visitor_uuid';
