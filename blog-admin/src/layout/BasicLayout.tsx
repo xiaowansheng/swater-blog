@@ -48,6 +48,7 @@ const getBreadcrumbItems = (pathname: string) => {
     resource: '资源管理',
     about: '关于页面',
     dashboard: '仪表盘',
+    welcome: '欢迎页',
     profile: '个人资料',
   }
 

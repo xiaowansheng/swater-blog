@@ -2,8 +2,8 @@ import { TabItem } from '@/types'
 
 export function sortTabsForDisplay(tabs: TabItem[]) {
   return [...tabs].sort((a, b) => {
-    if (a.key === '/dashboard') return -1
-    if (b.key === '/dashboard') return 1
+    if (a.key === '/welcome') return -1
+    if (b.key === '/welcome') return 1
     return 0
   })
 }
@@ -11,7 +11,7 @@ export function sortTabsForDisplay(tabs: TabItem[]) {
 export function getNextPathAfterClose(
   tabs: TabItem[],
   targetKey: string,
-  fallbackPath: string = '/dashboard'
+  fallbackPath: string = '/welcome'
 ) {
   const sortedTabs = sortTabsForDisplay(tabs)
   if (sortedTabs.length <= 1) return fallbackPath

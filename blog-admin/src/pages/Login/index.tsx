@@ -41,7 +41,7 @@ const Login: React.FC = () => {
         clearCachedTabs()
       } else {
         // 没有缓存的标签页，跳转到默认页面
-        navigate('/dashboard')
+        navigate('/welcome')
       }
     } catch (error: any) {
       message.error(error.message || '登录失败')

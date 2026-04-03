@@ -50,10 +50,10 @@ export function usePageTab() {
   const closeSelf = useCallback(
     (options?: { navigateIfActive?: boolean; fallbackPath?: string }) => {
       const tabKey = tabKeyRef.current
-      if (tabKey === '/dashboard') return
+      if (tabKey === '/welcome') return
 
       const navigateIfActive = options?.navigateIfActive ?? true
-      const fallbackPath = options?.fallbackPath ?? '/dashboard'
+      const fallbackPath = options?.fallbackPath ?? '/welcome'
 
       const isActive = activeKey === tabKey
       const shouldNavigate = navigateIfActive && isActive

@@ -17,19 +17,19 @@ const Tabs: React.FC = () => {
   }, [location.pathname, setActiveTab])
 
   const getContextMenus = (key: string): MenuProps => {
-    const isDashboard = key === '/dashboard'
+    const isWelcome = key === '/welcome'
     const currentIndex = sortedTabs.findIndex((t) => t.key === key)
     return {
       items: [
         {
           key: 'closeOther',
           label: '关闭其他',
-          disabled: sortedTabs.length <= 1 || (sortedTabs.length === 2 && isDashboard),
+          disabled: sortedTabs.length <= 1 || (sortedTabs.length === 2 && isWelcome),
         },
         {
           key: 'closeLeft',
           label: '关闭左侧',
-          disabled: isDashboard || currentIndex === 0 || (currentIndex === 1 && sortedTabs[0].key === '/dashboard'),
+          disabled: isWelcome || currentIndex === 0 || (currentIndex === 1 && sortedTabs[0].key === '/welcome'),
         },
         {
           key: 'closeRight',
@@ -42,7 +42,7 @@ const Tabs: React.FC = () => {
         {
           key: 'closeAll',
           label: '关闭全部',
-          disabled: sortedTabs.length === 0 || (sortedTabs.length === 1 && isDashboard),
+          disabled: sortedTabs.length === 0 || (sortedTabs.length === 1 && isWelcome),
         },
       ],
       onClick: ({ key: menuKey }) => {
@@ -71,7 +71,7 @@ const Tabs: React.FC = () => {
             break
           case 'closeAll':
             closeAllTabs()
-            navigate('/dashboard')
+            navigate('/welcome')
             break
         }
       }
@@ -87,10 +87,10 @@ const Tabs: React.FC = () => {
     action: 'add' | 'remove'
   ) => {
     if (action === 'remove' && typeof targetKey === 'string') {
-      // 不允许关闭仪表盘标签
-      if (targetKey === '/dashboard') return
-      
-      const nextPath = getNextPathAfterClose(sortedTabs, targetKey, '/dashboard')
+      // 不允许关闭欢迎页标签
+      if (targetKey === '/welcome') return
+
+      const nextPath = getNextPathAfterClose(sortedTabs, targetKey, '/welcome')
       removeTab(targetKey)
 
       // 如果关闭的是当前标签，跳转到相邻标签

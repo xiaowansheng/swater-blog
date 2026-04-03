@@ -51,6 +51,12 @@ const config = {
   
   // 是否开启 Mock
   mockEnabled: import.meta.env.VITE_MOCK_ENABLED === 'true',
+
+  // 博客首页地址
+  blogUrl: import.meta.env.VITE_BLOG_URL || 'https://swater.blog',
+
+  // GitHub 仓库地址
+  githubUrl: import.meta.env.VITE_GITHUB_URL || 'https://github.com',
 };
 
 export default config;

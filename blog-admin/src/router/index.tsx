@@ -8,6 +8,7 @@ import BasicLayout from '@/layout/BasicLayout'
 
 // 懒加载页面组件
 const Login = lazy(() => import('@/pages/Login'))
+const Welcome = lazy(() => import('@/pages/Welcome'))
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
 const ArticleList = lazy(() => import('@/pages/Article/List'))
 const ArticleEdit = lazy(() => import('@/pages/Article/Edit'))
@@ -40,6 +41,7 @@ const NotFound = lazy(() => import('@/pages/404'))
 
 // 路由配置
 const routeConfig = [
+  { path: '/welcome', component: Welcome, title: '欢迎页', keepAlive: true },
   { path: '/dashboard', component: Dashboard, title: '仪表盘', keepAlive: true },
   { path: '/article', component: ArticleList, title: '文章管理', keepAlive: true },
   { path: '/article/import', component: ArticleImport, title: '导入文档', keepAlive: false },
@@ -119,7 +121,7 @@ const RouteGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (isAuthenticated() && location.pathname === '/login') {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/welcome" replace />
   }
 
   return <>{children}</>
@@ -132,7 +134,8 @@ const Router: React.FC = () => {
       <Routes>
         <Route path="/login" element={<Suspense fallback={<PageLoading />}><Login /></Suspense>} />
         <Route path="/" element={<BasicLayout />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route index element={<Navigate to="/welcome" replace />} />
+          <Route path="welcome" element={<Suspense fallback={<PageLoading />}><Welcome /></Suspense>} />
           <Route path="dashboard" element={<Suspense fallback={<PageLoading />}><Dashboard /></Suspense>} />
           <Route path="article" element={<Suspense fallback={<PageLoading />}><ArticleList /></Suspense>} />
           <Route path="article/import" element={<Suspense fallback={<PageLoading />}><ArticleImport /></Suspense>} />

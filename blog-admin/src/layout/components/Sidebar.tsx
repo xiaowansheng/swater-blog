@@ -19,6 +19,8 @@ import {
   PictureOutlined,
   BookOutlined,
   InfoCircleOutlined,
+  HomeOutlined,
+  SmileOutlined,
 } from '@ant-design/icons'
 import { useState } from 'react'
 import type { MenuProps } from 'antd'
@@ -27,9 +29,13 @@ const { Sider } = Layout
 
 const menuItems: MenuProps['items'] = [
   {
-    key: '/dashboard',
-    icon: <DashboardOutlined />,
-    label: '仪表盘',
+    key: 'home',
+    icon: <HomeOutlined />,
+    label: '首页',
+    children: [
+      { key: '/welcome', icon: <SmileOutlined />, label: '欢迎页' },
+      { key: '/dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
+    ],
   },
   {
     key: 'content',
@@ -111,6 +117,9 @@ const Sidebar: React.FC = () => {
 
   const getOpenKeys = () => {
     const path = location.pathname
+    if (['/welcome', '/dashboard'].some(p => path.startsWith(p))) {
+      return ['home']
+    }
     if (['/article', '/category', '/tag', '/talk'].some(p => path.startsWith(p))) {
       return ['content']
     }
