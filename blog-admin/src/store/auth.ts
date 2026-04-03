@@ -30,12 +30,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { publicKey, nonce } = await authApi.getLoginNonce()
     const encryptedPassword = await encryptPasswordRsaOaep(publicKey, password)
     const { token, user } = await authApi.login({ username, encryptedPassword, nonce, rememberMe })
-    setToken(token, rememberMe)
+    setToken(token)
     set({ token, user })
   },
   loginWithEmail: async (email: string, code: string, rememberMe?: boolean) => {
     const { token, user } = await authApi.loginWithEmail({ email, code, rememberMe })
-    setToken(token, rememberMe)
+    setToken(token)
     set({ token, user })
   },
   logout: async () => {

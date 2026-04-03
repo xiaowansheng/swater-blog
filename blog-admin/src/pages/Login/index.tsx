@@ -6,6 +6,7 @@ import { useTabsStore } from '@/store/tabs'
 import { useLockscreenStore } from '@/store/lockscreen'
 import { useState } from 'react'
 import ForgotPasswordModal from '@/components/common/ForgotPasswordModal'
+import { getRememberMe, setRememberMe } from '@/utils/storage'
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
@@ -23,6 +24,7 @@ const Login: React.FC = () => {
   const onFinish = async (values: { username: string; password: string; remember: boolean }) => {
     setLoading(true)
     try {
+      setRememberMe(values.remember)
       await login(values.username, values.password, values.remember)
       message.success('登录成功')
       
@@ -70,7 +72,7 @@ const Login: React.FC = () => {
           onFinish={onFinish}
           autoComplete="off"
           size="large"
-          initialValues={{ remember: false }}
+          initialValues={{ remember: getRememberMe() }}
         >
           <Form.Item
             name="username"
