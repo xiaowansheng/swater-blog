@@ -138,21 +138,32 @@ const BasicLayout: React.FC = () => {
 
   const keepAliveKey = `${location.pathname}:${refreshSeeds[location.pathname] ?? 0}`
 
+  const isWelcome = location.pathname === '/welcome'
+
   return (
     <Layout className="h-screen">
       <Sidebar />
       <Layout className="flex flex-col">
         <Header />
         <Tabs />
-        <Content className="overflow-auto flex-1 bg-gray-50">
-          <div className="page-container">
-            <div className="mb-4">
-              <Breadcrumb items={getBreadcrumbItems(location.pathname)} />
-            </div>
+        <Content
+          className="overflow-hidden flex-1 bg-gray-50"
+          style={isWelcome ? { position: 'relative', padding: 0 } : undefined}
+        >
+          {isWelcome ? (
             <KeepAlive name={location.pathname} when={shouldCache} key={keepAliveKey}>
               <Suspense fallback={<PageLoading />}>{outlet}</Suspense>
             </KeepAlive>
-          </div>
+          ) : (
+            <div className="page-container">
+              <div className="mb-4">
+                <Breadcrumb items={getBreadcrumbItems(location.pathname)} />
+              </div>
+              <KeepAlive name={location.pathname} when={shouldCache} key={keepAliveKey}>
+                <Suspense fallback={<PageLoading />}>{outlet}</Suspense>
+              </KeepAlive>
+            </div>
+          )}
         </Content>
       </Layout>
       <LoginModal />
