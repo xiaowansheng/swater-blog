@@ -120,15 +120,12 @@ const Welcome: React.FC = () => {
   return (
     <div
       style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        overflow: 'hidden',
+        position: 'relative',
+        minHeight: 'calc(100vh - 112px)',
         background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
       }}
     >
+      {/* 背景画布，铺满容器且不随滚动 */}
       <canvas
         ref={canvasRef}
         style={{
@@ -137,6 +134,7 @@ const Welcome: React.FC = () => {
           left: 0,
           width: '100%',
           height: '100%',
+          zIndex: 0,
         }}
       />
 
@@ -149,7 +147,7 @@ const Welcome: React.FC = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          height: '100%',
+          minHeight: 'calc(100vh - 112px)',
           gap: 48,
         }}
       >

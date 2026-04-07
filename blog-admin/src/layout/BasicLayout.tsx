@@ -147,8 +147,8 @@ const BasicLayout: React.FC = () => {
         <Header />
         <Tabs />
         <Content
-          className={`${isWelcome ? 'overflow-hidden' : 'overflow-auto'} flex-1 bg-gray-50`}
-          style={isWelcome ? { position: 'relative', padding: 0 } : undefined}
+          className="overflow-auto flex-1 bg-gray-50"
+          style={isWelcome ? { padding: 0 } : undefined}
         >
           {isWelcome ? (
             <KeepAlive name={location.pathname} when={shouldCache} key={keepAliveKey}>
