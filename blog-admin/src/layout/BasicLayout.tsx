@@ -147,7 +147,7 @@ const BasicLayout: React.FC = () => {
         <Header />
         <Tabs />
         <Content
-          className="overflow-hidden flex-1 bg-gray-50"
+          className={`${isWelcome ? 'overflow-hidden' : 'overflow-auto'} flex-1 bg-gray-50`}
           style={isWelcome ? { position: 'relative', padding: 0 } : undefined}
         >
           {isWelcome ? (
