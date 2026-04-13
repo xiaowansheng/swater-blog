@@ -4,6 +4,8 @@ package com.blog.modules.guestbook.service.impl;
 import com.blog.modules.guestbook.event.*;
 import com.blog.modules.guestbook.mapper.GuestbookMapper;
 import com.blog.modules.guestbook.model.entity.Guestbook;
+import com.blog.modules.guestbook.model.enums.GuestbookReviewStatus;
+import com.blog.modules.guestbook.model.enums.GuestbookVisibilityStatus;
 import com.blog.modules.guestbook.service.GuestbookCommandService;
 import com.blog.shared.exception.BusinessException;
 import com.blog.shared.util.EventUtil;
@@ -23,7 +25,7 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
     @Transactional(rollbackFor = Exception.class)
     public void approve(Long id) {
         Guestbook guestbook = getRequiredGuestbook(id);
-        guestbook.setReviewStatus(1);
+        guestbook.setReviewStatus(GuestbookReviewStatus.APPROVED.getCode());
         guestbookMapper.updateById(guestbook);
         
         Guestbook approvedGuestbook = guestbookMapper.selectById(id);
@@ -34,7 +36,7 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
     @Transactional(rollbackFor = Exception.class)
     public void reject(Long id) {
         Guestbook guestbook = getRequiredGuestbook(id);
-        guestbook.setReviewStatus(2);
+        guestbook.setReviewStatus(GuestbookReviewStatus.REJECTED.getCode());
         guestbookMapper.updateById(guestbook);
         
         Guestbook rejectedGuestbook = guestbookMapper.selectById(id);
@@ -53,12 +55,17 @@ public class GuestbookCommandServiceImpl implements GuestbookCommandService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void setVisible(Long id, Integer isVisible) {
+        GuestbookVisibilityStatus visibilityStatus = GuestbookVisibilityStatus.fromCode(isVisible);
+        if (visibilityStatus == null) {
+            throw new BusinessException("无效的留言可见状态");
+        }
+
         Guestbook guestbook = getRequiredGuestbook(id);
-        guestbook.setIsVisible(isVisible);
+        guestbook.setIsVisible(visibilityStatus.getCode());
         guestbookMapper.updateById(guestbook);
         
         Guestbook updatedGuestbook = guestbookMapper.selectById(id);
-        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new GuestbookVisibilityChangedEvent(this, id, updatedGuestbook, isVisible)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new GuestbookVisibilityChangedEvent(this, id, updatedGuestbook, visibilityStatus.getCode())));
     }
 
     private Guestbook getRequiredGuestbook(Long id) {

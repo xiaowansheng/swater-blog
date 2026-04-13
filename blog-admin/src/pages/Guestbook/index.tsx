@@ -37,6 +37,12 @@ import {
   setHiddenGuestbook,
 } from '@/api/guestbook'
 import { Guestbook } from '@/types'
+import {
+  GuestbookReviewStatus,
+  GuestbookVisibilityStatus,
+  GUESTBOOK_REVIEW_STATUS_MAP,
+  GUESTBOOK_VISIBILITY_STATUS_MAP,
+} from '@/types/enums'
 import { getFullUrl } from '@/utils/format'
 
 const GuestbookPage: React.FC = () => {
@@ -150,7 +156,7 @@ const GuestbookPage: React.FC = () => {
 
   const handleToggleVisible = async (id: number, visible: number) => {
     try {
-      if (visible === 1) {
+      if (visible === GuestbookVisibilityStatus.VISIBLE) {
         await setHiddenGuestbook(id)
         message.success('已隐藏')
       } else {
@@ -165,15 +171,35 @@ const GuestbookPage: React.FC = () => {
   }
 
   const getStatusTag = (status: number) => {
-    const statusMap: Record<number, { color: string; text: string }> = {
-      0: { color: 'warning', text: '待审核' },
-      1: { color: 'success', text: '已通过' },
-      2: { color: 'error', text: '已拒绝' },
-    }
-    
-    const { color, text } = statusMap[status] || { color: 'default', text: '未知' }
-    return <Tag color={color}>{text}</Tag>
+    const statusConfig = GUESTBOOK_REVIEW_STATUS_MAP[status as keyof typeof GUESTBOOK_REVIEW_STATUS_MAP]
+    const { color, label } = statusConfig || { color: 'default', label: '未知' }
+    return <Tag color={color}>{label}</Tag>
   }
+
+  const getVisibilityTag = (isVisible: number) => {
+    const visibilityConfig =
+      GUESTBOOK_VISIBILITY_STATUS_MAP[isVisible as keyof typeof GUESTBOOK_VISIBILITY_STATUS_MAP]
+    const { color, label } = visibilityConfig || { color: 'default', label: '未知' }
+    const icon = isVisible === GuestbookVisibilityStatus.VISIBLE ? <EyeOutlined /> : <EyeInvisibleOutlined />
+
+    return (
+      <Tag icon={icon} color={color}>
+        {label}
+      </Tag>
+    )
+  }
+
+  const getReviewStatus = (record: Guestbook) =>
+    record.reviewStatus ?? record.status ?? GuestbookReviewStatus.PENDING
+
+  const getVisibilityStatus = (record: Guestbook) =>
+    record.isVisible ?? GuestbookVisibilityStatus.HIDDEN
+
+  const isPendingReview = (record: Guestbook) =>
+    getReviewStatus(record) === GuestbookReviewStatus.PENDING
+
+  const isVisibleGuestbook = (record: Guestbook) =>
+    getVisibilityStatus(record) === GuestbookVisibilityStatus.VISIBLE
 
   const showDetail = (guestbook: Guestbook) => {
     setCurrentGuestbook(guestbook)
@@ -283,13 +309,8 @@ const GuestbookPage: React.FC = () => {
       width: 120,
       render: (_: any, record: Guestbook) => (
         <Space direction="vertical" size="small">
-          {getStatusTag(record.reviewStatus ?? record.status ?? 0)}
-          <Tag
-            icon={record.isVisible === 1 ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-            color={record.isVisible === 1 ? 'success' : 'default'}
-          >
-            {record.isVisible === 1 ? '可见' : '隐藏'}
-          </Tag>
+          {getStatusTag(getReviewStatus(record))}
+          {getVisibilityTag(getVisibilityStatus(record))}
         </Space>
       ),
     },
@@ -305,12 +326,12 @@ const GuestbookPage: React.FC = () => {
       width: 250,
       render: (_: any, record: Guestbook) => (
         <Space size="small">
-          <Tooltip title={record.isVisible === 1 ? '设置为隐藏' : '设置为可见'}>
+          <Tooltip title={isVisibleGuestbook(record) ? '设置为隐藏' : '设置为可见'}>
             <Button
               type="text"
-              icon={record.isVisible === 1 ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-              className={record.isVisible === 1 ? 'text-gray-500' : 'text-green-500'}
-              onClick={() => handleToggleVisible(record.id, record.isVisible!)}
+              icon={isVisibleGuestbook(record) ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+              className={isVisibleGuestbook(record) ? 'text-gray-500' : 'text-green-500'}
+              onClick={() => handleToggleVisible(record.id, getVisibilityStatus(record))}
             />
           </Tooltip>
           <Tooltip title="查看详情">
@@ -320,7 +341,7 @@ const GuestbookPage: React.FC = () => {
               onClick={() => showDetail(record)}
             />
           </Tooltip>
-          {((record.reviewStatus ?? record.status) === 0) && (
+          {isPendingReview(record) && (
             <>
               <Popconfirm title="确定通过这条留言吗？" onConfirm={() => handleApprove(record.id)}>
                 <Tooltip title="通过">
@@ -363,9 +384,9 @@ const GuestbookPage: React.FC = () => {
             style={{ width: 120 }}
             allowClear
           >
-            <Select.Option value={0}>待审核</Select.Option>
-            <Select.Option value={1}>已通过</Select.Option>
-            <Select.Option value={2}>已拒绝</Select.Option>
+            <Select.Option value={GuestbookReviewStatus.PENDING}>待审核</Select.Option>
+            <Select.Option value={GuestbookReviewStatus.APPROVED}>已通过</Select.Option>
+            <Select.Option value={GuestbookReviewStatus.REJECTED}>已拒绝</Select.Option>
           </Select>
           <Select
             placeholder="可见状态"
@@ -374,8 +395,8 @@ const GuestbookPage: React.FC = () => {
             style={{ width: 120 }}
             allowClear
           >
-            <Select.Option value={1}>可见</Select.Option>
-            <Select.Option value={0}>隐藏</Select.Option>
+            <Select.Option value={GuestbookVisibilityStatus.VISIBLE}>可见</Select.Option>
+            <Select.Option value={GuestbookVisibilityStatus.HIDDEN}>隐藏</Select.Option>
           </Select>
           <Input
             placeholder="搜索留言内容"
@@ -560,16 +581,11 @@ const GuestbookPage: React.FC = () => {
                 </Descriptions.Item>
               )}
               <Descriptions.Item label="审核状态">
-                {getStatusTag(currentGuestbook.reviewStatus ?? 0)}
+                {getStatusTag(getReviewStatus(currentGuestbook))}
               </Descriptions.Item>
               {currentGuestbook.isVisible !== undefined && (
                 <Descriptions.Item label="可见状态">
-                  <Tag
-                    icon={currentGuestbook.isVisible === 1 ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-                    color={currentGuestbook.isVisible === 1 ? 'success' : 'default'}
-                  >
-                    {currentGuestbook.isVisible === 1 ? '可见' : '隐藏'}
-                  </Tag>
+                  {getVisibilityTag(getVisibilityStatus(currentGuestbook))}
                 </Descriptions.Item>
               )}
               {currentGuestbook.ip && (
@@ -599,16 +615,16 @@ const GuestbookPage: React.FC = () => {
             <Space>
               {currentGuestbook.isVisible !== undefined && (
                 <Button
-                  icon={currentGuestbook.isVisible === 1 ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                  icon={isVisibleGuestbook(currentGuestbook) ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                   onClick={() => {
-                    handleToggleVisible(currentGuestbook.id, currentGuestbook.isVisible!)
+                    handleToggleVisible(currentGuestbook.id, getVisibilityStatus(currentGuestbook))
                     setDetailVisible(false)
                   }}
                 >
-                  {currentGuestbook.isVisible === 1 ? '设置为隐藏' : '设置为可见'}
+                  {isVisibleGuestbook(currentGuestbook) ? '设置为隐藏' : '设置为可见'}
                 </Button>
               )}
-              {(currentGuestbook.reviewStatus === 0 || currentGuestbook.status === 0) && (
+              {isPendingReview(currentGuestbook) && (
                 <>
                   <Popconfirm
                     title="确定通过这条留言吗？"

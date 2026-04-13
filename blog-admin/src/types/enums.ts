@@ -72,6 +72,23 @@ export enum FriendLinkReviewStatus {
 }
 
 /**
+ * 留言审核状态枚举
+ */
+export enum GuestbookReviewStatus {
+  PENDING = 0,
+  APPROVED = 1,
+  REJECTED = -1,
+}
+
+/**
+ * 留言可见状态枚举
+ */
+export enum GuestbookVisibilityStatus {
+  HIDDEN = 0,
+  VISIBLE = 1,
+}
+
+/**
  * 状态映射表，用于显示
  */
 export const ARTICLE_STATUS_MAP = {
@@ -121,4 +138,15 @@ export const FRIEND_LINK_REVIEW_STATUS_MAP = {
   [FriendLinkReviewStatus.PENDING]: { color: 'warning', label: '待审核' },
   [FriendLinkReviewStatus.APPROVED]: { color: 'success', label: '已审核' },
   [FriendLinkReviewStatus.REJECTED]: { color: 'error', label: '已拒绝' },
+}
+
+export const GUESTBOOK_REVIEW_STATUS_MAP = {
+  [GuestbookReviewStatus.PENDING]: { color: 'warning', label: '待审核' },
+  [GuestbookReviewStatus.APPROVED]: { color: 'success', label: '已通过' },
+  [GuestbookReviewStatus.REJECTED]: { color: 'error', label: '已拒绝' },
+}
+
+export const GUESTBOOK_VISIBILITY_STATUS_MAP = {
+  [GuestbookVisibilityStatus.HIDDEN]: { color: 'default', label: '隐藏' },
+  [GuestbookVisibilityStatus.VISIBLE]: { color: 'success', label: '可见' },
 }

@@ -203,6 +203,17 @@ export interface CommentVO {
   children?: CommentVO[];
 }
 
+export enum GuestbookReviewStatus {
+  PENDING = 0,
+  APPROVED = 1,
+  REJECTED = -1,
+}
+
+export enum GuestbookVisibilityStatus {
+  HIDDEN = 0,
+  VISIBLE = 1,
+}
+
 export interface GuestbookVO {
   id: number;
   content: string;

@@ -7,6 +7,8 @@ import com.blog.modules.auth.util.EmailSessionTokenUtil;
 import com.blog.shared.PageResult;
 import com.blog.modules.guestbook.event.GuestbookCreatedEvent;
 import com.blog.modules.guestbook.mapper.GuestbookMapper;
+import com.blog.modules.guestbook.model.enums.GuestbookReviewStatus;
+import com.blog.modules.guestbook.model.enums.GuestbookVisibilityStatus;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.guestbook.model.dto.GuestbookDTO;
 import com.blog.modules.guestbook.model.entity.Guestbook;
@@ -62,11 +64,14 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
     @Override
     public PageResult<GuestbookVO> list(Long page, Long size, String sort) {
         String ownerEmail = getOwnerEmailFromRequest();
+        boolean hasOwnerEmail = ownerEmail != null && !ownerEmail.isBlank();
         Page<Guestbook> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Guestbook> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Guestbook::getDeleted, 0);
-        wrapper.and(w -> w.eq(Guestbook::getReviewStatus, 1)
-                .or(ownerEmail != null && !ownerEmail.isBlank(), w2 -> w2.eq(Guestbook::getEmail, ownerEmail)));
+        // 公开列表只返回“已审核且可见”的留言；携带邮箱会话时，额外返回该邮箱自己的留言。
+        wrapper.and(w -> w.and(w2 -> w2.eq(Guestbook::getReviewStatus, GuestbookReviewStatus.APPROVED.getCode())
+                        .eq(Guestbook::getIsVisible, GuestbookVisibilityStatus.VISIBLE.getCode()))
+                .or(hasOwnerEmail, w2 -> w2.eq(Guestbook::getEmail, ownerEmail)));
 
         if ("asc".equalsIgnoreCase(sort)) {
             wrapper.orderByAsc(Guestbook::getCreateTime);
@@ -102,20 +107,16 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
 
         Guestbook guestbook = BeanUtil.copyProperties(dto, Guestbook.class);
 
-        // Set default values
-        guestbook.setIsVisible(1); // Visible by default
-        guestbook.setReviewStatus(0); // Pending review
-
         // 敏感词检测：如果包含敏感词则需要审核，否则自动通过
         if (sensitiveWordHelper.contains(guestbook.getContent())) {
             // 包含敏感词：需要审核，不可见
-            guestbook.setReviewStatus(0); // 待审核
-            guestbook.setIsVisible(0); // 不可见
+            guestbook.setReviewStatus(GuestbookReviewStatus.PENDING.getCode());
+            guestbook.setIsVisible(GuestbookVisibilityStatus.HIDDEN.getCode());
             log.info("留言包含敏感词，ID: {}, 需要人工审核", guestbook.getId());
         } else {
             // 无敏感词：自动审核通过，可见
-            guestbook.setReviewStatus(1); // 审核通过
-            guestbook.setIsVisible(1); // 可见
+            guestbook.setReviewStatus(GuestbookReviewStatus.APPROVED.getCode());
+            guestbook.setIsVisible(GuestbookVisibilityStatus.VISIBLE.getCode());
         }
 
         // Convert images list to JSON string if present
@@ -212,7 +213,7 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
         boolean isOwner = ownerEmail != null && !ownerEmail.isBlank()
                 && guestbook.getEmail() != null
                 && ownerEmail.equalsIgnoreCase(guestbook.getEmail());
-        if (!isOwner && guestbook.getIsVisible() != null && guestbook.getIsVisible() == 0) {
+        if (!isOwner && GuestbookVisibilityStatus.HIDDEN.matches(guestbook.getIsVisible())) {
             vo.setContent("");
             vo.setImages(List.of());
         }

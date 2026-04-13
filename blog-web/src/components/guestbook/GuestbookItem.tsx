@@ -1,7 +1,7 @@
 'use client';
 
 import Image from '@/components/common/ImageWithPreview';
-import type { GuestbookVO } from '@/types';
+import { GuestbookReviewStatus, GuestbookVisibilityStatus, type GuestbookVO } from '@/types';
 import { formatDate } from '@/lib/utils/format';
 import { usePathname } from '@/lib/i18n/routing';
 import { useSiteConfig } from '@/lib/context/SiteConfigContext';
@@ -40,9 +40,9 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
   const locale = pathname?.split('/')[1] || 'zh';
   const displayName = message.nickname || message.userName || 'Guest';
   const initial = displayName.charAt(0).toUpperCase();
-  const isHidden = message.isVisible === 0;
-  const isPending = message.reviewStatus === 0;
-  const isRejected = message.reviewStatus === 2;
+  const isHidden = message.isVisible === GuestbookVisibilityStatus.HIDDEN;
+  const isPending = message.reviewStatus === GuestbookReviewStatus.PENDING;
+  const isRejected = message.reviewStatus === GuestbookReviewStatus.REJECTED;
 
   const locationText = privacy.showLocation
     ? formatLocation(message.country, message.province, message.city, message.location, message.ipLocation)

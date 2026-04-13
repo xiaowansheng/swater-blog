@@ -7,6 +7,7 @@ import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.guestbook.model.vo.GuestbookVO;
 import com.blog.modules.guestbook.model.dto.GuestbookQueryDTO;
+import com.blog.modules.guestbook.model.enums.GuestbookVisibilityStatus;
 import com.blog.modules.guestbook.service.GuestbookCommandService;
 import com.blog.modules.guestbook.service.GuestbookQueryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,14 +70,14 @@ public class GuestbookAdminController {
     @PostMapping("/{id}/set-visible")
     @ApiOperation(name = "设置为可见", type = ApiOperationType.ENABLE, description = "设置留言为可见状态")
     public Result<Void> setAsVisible(@PathVariable Long id) {
-        guestbookCommandService.setVisible(id, 1);
+        guestbookCommandService.setVisible(id, GuestbookVisibilityStatus.VISIBLE.getCode());
         return Result.success();
     }
 
     @PostMapping("/{id}/set-hidden")
     @ApiOperation(name = "设置为隐藏", type = ApiOperationType.DISABLE, description = "设置留言为隐藏状态")
     public Result<Void> setAsHidden(@PathVariable Long id) {
-        guestbookCommandService.setVisible(id, 0);
+        guestbookCommandService.setVisible(id, GuestbookVisibilityStatus.HIDDEN.getCode());
         return Result.success();
     }
 }
