@@ -1,17 +1,18 @@
 import request from './request'
 import { Guestbook, PageResult } from '@/types'
+import { GuestbookReviewStatus, GuestbookVisibilityStatus } from '@/types/enums'
 
 export const getGuestbookList = (params: {
   page?: number
   size?: number
-  status?: number
-  reviewStatus?: number
+  status?: GuestbookReviewStatus
+  reviewStatus?: GuestbookReviewStatus
   id?: number
   userId?: number
   nickname?: string
   email?: string
   qq?: string
-  isVisible?: number
+  isVisible?: GuestbookVisibilityStatus
   keyword?: string
   country?: string
   province?: string

@@ -1,3 +1,5 @@
+import { GuestbookReviewStatus, GuestbookVisibilityStatus } from './enums'
+
 // API响应类型
 export * from './enums'
 export * from './api'
@@ -409,9 +411,9 @@ export interface Guestbook {
   qq?: string
   userId?: number
   type?: string
-  status?: number
-  reviewStatus?: number
-  isVisible?: number
+  status?: GuestbookReviewStatus
+  reviewStatus?: GuestbookReviewStatus
+  isVisible?: GuestbookVisibilityStatus
   parentId?: number
   replyTo?: string
   createTime: string

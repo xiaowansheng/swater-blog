@@ -51,14 +51,14 @@ const GuestbookPage: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
   const [filters, setFilters] = useState<{
-    status: number | undefined
+    status: GuestbookReviewStatus | undefined
     keyword: string
     id: number | undefined
     userId: number | undefined
     nickname: string
     email: string
     qq: string
-    isVisible: number | undefined
+    isVisible: GuestbookVisibilityStatus | undefined
     country: string
     province: string
     city: string
@@ -154,7 +154,7 @@ const GuestbookPage: React.FC = () => {
     }
   }
 
-  const handleToggleVisible = async (id: number, visible: number) => {
+  const handleToggleVisible = async (id: number, visible: GuestbookVisibilityStatus) => {
     try {
       if (visible === GuestbookVisibilityStatus.VISIBLE) {
         await setHiddenGuestbook(id)
@@ -170,13 +170,13 @@ const GuestbookPage: React.FC = () => {
     }
   }
 
-  const getStatusTag = (status: number) => {
+  const getStatusTag = (status: GuestbookReviewStatus) => {
     const statusConfig = GUESTBOOK_REVIEW_STATUS_MAP[status as keyof typeof GUESTBOOK_REVIEW_STATUS_MAP]
     const { color, label } = statusConfig || { color: 'default', label: '未知' }
     return <Tag color={color}>{label}</Tag>
   }
 
-  const getVisibilityTag = (isVisible: number) => {
+  const getVisibilityTag = (isVisible: GuestbookVisibilityStatus) => {
     const visibilityConfig =
       GUESTBOOK_VISIBILITY_STATUS_MAP[isVisible as keyof typeof GUESTBOOK_VISIBILITY_STATUS_MAP]
     const { color, label } = visibilityConfig || { color: 'default', label: '未知' }

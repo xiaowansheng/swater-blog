@@ -232,8 +232,8 @@ export interface GuestbookVO {
   ipLocation?: string;
   device?: string;
   browser?: string;
-  isVisible?: number;
-  reviewStatus?: number;
+  isVisible?: GuestbookVisibilityStatus;
+  reviewStatus?: GuestbookReviewStatus;
   createTime: string;
 }
 
