@@ -3,6 +3,7 @@ import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, InputNum
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, InfoCircleOutlined, CheckCircleOutlined, SearchOutlined } from '@ant-design/icons'
 import { getApiList, createApi, updateApi, deleteApi, refreshApi } from '@/api/api'
 import { ApiVO, ApiRefreshResultVO } from '@/types/api'
+import { ApiOpenStatus } from '@/types/enums'
 
 const ApiPage: React.FC = () => {
   const [apis, setApis] = useState<ApiVO[]>([])
@@ -16,7 +17,7 @@ const ApiPage: React.FC = () => {
     name: string
     path: string
     method: string | undefined
-    isOpen: number | undefined
+    isOpen: ApiOpenStatus | undefined
   }>({
     name: '',
     path: '',
@@ -79,7 +80,7 @@ const ApiPage: React.FC = () => {
     setEditingApi(api)
     form.setFieldsValue({
       ...api,
-      isOpen: api.isOpen === 1
+      isOpen: api.isOpen === ApiOpenStatus.OPEN
     })
     setModalVisible(true)
   }
@@ -99,7 +100,7 @@ const ApiPage: React.FC = () => {
       const values = await form.validateFields()
       const data = {
         ...values,
-        isOpen: values.isOpen ? 1 : 0
+        isOpen: values.isOpen ? ApiOpenStatus.OPEN : ApiOpenStatus.CLOSED
       }
       if (editingApi) {
         await updateApi(editingApi.id, data)
@@ -192,9 +193,9 @@ const ApiPage: React.FC = () => {
       dataIndex: 'isOpen',
       key: 'isOpen',
       width: 80,
-      render: (isOpen: number) => (
-        <Tag color={isOpen === 1 ? 'success' : 'default'}>
-          {isOpen === 1 ? '是' : '否'}
+      render: (isOpen: ApiOpenStatus) => (
+        <Tag color={isOpen === ApiOpenStatus.OPEN ? 'success' : 'default'}>
+          {isOpen === ApiOpenStatus.OPEN ? '是' : '否'}
         </Tag>
       ),
     },
@@ -275,8 +276,8 @@ const ApiPage: React.FC = () => {
             style={{ width: 110 }}
             allowClear
           >
-            <Select.Option value={1}>是</Select.Option>
-            <Select.Option value={0}>否</Select.Option>
+            <Select.Option value={ApiOpenStatus.OPEN}>是</Select.Option>
+            <Select.Option value={ApiOpenStatus.CLOSED}>否</Select.Option>
           </Select>
           <div className="flex-1" />
           <Space>

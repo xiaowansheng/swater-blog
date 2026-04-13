@@ -1,10 +1,11 @@
 import request from './request'
 import { Notification, PageResult } from '@/types'
+import { NotificationReadStatus } from '@/types/enums'
 
 export const getNotifications = (params: {
   page?: number
   size?: number
-  isRead?: number
+  isRead?: NotificationReadStatus
 }): Promise<PageResult<Notification>> => {
   return request.get('/admin/notification', { params })
 }

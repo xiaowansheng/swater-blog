@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { Notification } from '@/types'
+import { NotificationReadStatus } from '@/types/enums'
 
 interface NotificationState {
   notifications: Notification[]
@@ -20,34 +21,34 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     const { notifications } = get()
     set({
       notifications: [notification, ...notifications],
-      unreadCount: notification.isRead === 0 ? get().unreadCount + 1 : get().unreadCount,
+      unreadCount: notification.isRead === NotificationReadStatus.UNREAD ? get().unreadCount + 1 : get().unreadCount,
     })
   },
   markAsRead: (id) => {
     const { notifications, unreadCount } = get()
     const newNotifications = notifications.map((n) =>
-      n.id === id ? { ...n, isRead: 1 } : n
+      n.id === id ? { ...n, isRead: NotificationReadStatus.READ } : n
     )
     const newUnreadCount = Math.max(0, unreadCount - 1)
     set({ notifications: newNotifications, unreadCount: newUnreadCount })
   },
   markAllAsRead: () => {
     const { notifications } = get()
-    const newNotifications = notifications.map((n) => ({ ...n, isRead: 1 }))
+    const newNotifications = notifications.map((n) => ({ ...n, isRead: NotificationReadStatus.READ }))
     set({ notifications: newNotifications, unreadCount: 0 })
   },
   removeNotification: (id) => {
     const { notifications, unreadCount } = get()
     const notification = notifications.find((n) => n.id === id)
     const newNotifications = notifications.filter((n) => n.id !== id)
-    const newUnreadCount = notification?.isRead === 0 ? Math.max(0, unreadCount - 1) : unreadCount
+    const newUnreadCount = notification?.isRead === NotificationReadStatus.UNREAD ? Math.max(0, unreadCount - 1) : unreadCount
     set({ notifications: newNotifications, unreadCount: newUnreadCount })
   },
   clearNotifications: () => {
     set({ notifications: [], unreadCount: 0 })
   },
   setNotifications: (notifications) => {
-    const unreadCount = notifications.filter((n) => n.isRead === 0).length
+    const unreadCount = notifications.filter((n) => n.isRead === NotificationReadStatus.UNREAD).length
     set({ notifications, unreadCount })
   },
   setUnreadCount: (count) => {

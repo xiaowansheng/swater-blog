@@ -1,3 +1,5 @@
+import { ApiOpenStatus } from './enums'
+
 export interface ApiVO {
   id: number
   apiKey: string
@@ -6,7 +8,7 @@ export interface ApiVO {
   method: string
   description: string
   parentId: number
-  isOpen: number
+  isOpen: ApiOpenStatus
   perms: string
   sort: number
   children?: ApiVO[]
@@ -21,7 +23,7 @@ export interface ApiDTO {
   method?: string
   description?: string
   parentId?: number
-  isOpen?: number
+  isOpen?: ApiOpenStatus
   perms?: string
   sort?: number
 }

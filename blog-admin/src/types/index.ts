@@ -1,4 +1,16 @@
-import { GuestbookReviewStatus, GuestbookVisibilityStatus } from './enums'
+import {
+  FriendLinkReviewStatus,
+  FriendLinkVisibilityStatus,
+  CommentStatus,
+  CommentVisibilityStatus,
+  EnableStatus,
+  GuestbookReviewStatus,
+  GuestbookVisibilityStatus,
+  NotificationReadStatus,
+  NotificationSendStatus,
+  OperationResultStatus,
+  TopStatus,
+} from './enums'
 
 // API响应类型
 export * from './enums'
@@ -32,7 +44,7 @@ export interface User {
   website?: string
   introduction?: string
   roleKey?: string
-  status: number
+  status: EnableStatus
   disabled: number
   lastLoginTime?: string
   lastLoginIp?: string
@@ -46,7 +58,7 @@ export interface Role {
   name: string
   roleKey: string
   description?: string
-  status?: number
+  status?: EnableStatus
   createTime?: string
 }
 
@@ -70,7 +82,7 @@ export interface Article {
   originalUrl?: string
   note?: string
   status: number
-  isTop: number
+  isTop: TopStatus
   viewCount: number
   likeCount?: number
   commentCount: number
@@ -136,7 +148,7 @@ export interface Comment {
   authorEmail: string
   authorAvatar?: string
   authorUrl?: string
-  status: number
+  status: CommentStatus
   targetType: string
   targetId: number
   targetTitle?: string
@@ -147,7 +159,7 @@ export interface Comment {
   rootId?: number
   images?: string[]
   qq?: string
-  isVisible?: number
+  isVisible?: CommentVisibilityStatus
   replyCount?: number
   ip?: string
   userAgent?: string
@@ -169,7 +181,7 @@ export interface Talk {
   images?: string[]
   authorId?: number
   authorName?: string
-  isTop: number
+  isTop: TopStatus
   status: string
   likeCount: number
   commentCount: number
@@ -193,8 +205,8 @@ export interface Notification {
   type: string
   title: string
   content: string
-  isRead: number
-  status?: string
+  isRead: NotificationReadStatus
+  status?: NotificationSendStatus
   targetType?: string
   targetId?: number
   createTime: string
@@ -210,8 +222,8 @@ export interface FriendLink {
   description: string
   author: string
   sort?: number
-  isVisible?: number
-  reviewStatus: number
+  isVisible?: FriendLinkVisibilityStatus
+  reviewStatus: FriendLinkReviewStatus
   createTime: string
 }
 
@@ -270,6 +282,37 @@ export interface Visitor {
   status?: string
 }
 
+export interface VisitorSessionTrace {
+  id: number
+  visitorId: number
+  sessionId: string
+  startedAt: string
+  lastActivityAt: string
+  entryPageKey?: string
+  entryReferer?: string
+  utmSource?: string
+  utmMedium?: string
+  utmCampaign?: string
+  landingPageUrl?: string
+  pageCount?: number
+}
+
+export interface VisitorPageTrace {
+  id: number
+  visitorId: number
+  sessionId: string
+  pageKey: string
+  pageUrl?: string
+  referer?: string
+  occurredAt: string
+}
+
+export interface VisitorTrackingDetail {
+  visitorId: number
+  firstSession?: VisitorSessionTrace
+  latestSessions: VisitorSessionTrace[]
+}
+
 export interface VisitorStatistics {
   totalVisitors: number
   totalPageViews: number
@@ -301,7 +344,7 @@ export interface LogOperation {
   browser?: string
   userAgent?: string
   elapsedTime: number
-  status: number
+  status: OperationResultStatus
   callingMethod?: string
   version?: string
   errorMsg?: string
@@ -341,8 +384,8 @@ export interface Menu {
   icon?: string
   parentId?: number
   sort: number
-  visible: number
-  status: number
+  visible: EnableStatus
+  status: EnableStatus
   children?: Menu[]
   createTime?: string
 }
@@ -459,6 +502,8 @@ export interface DashboardStatistics {
   totalLikesTrend: TrendData[]
   totalCommentsTrend: TrendData[]
   topPages: TopPageItem[]
+  trafficSources: TrafficSourceItem[]
+  topLandingPages: LandingPageItem[]
   topViewedArticles: ChartData[]
   topLikedArticles: ChartData[]
   categoryDistribution: ChartData[]
@@ -513,4 +558,17 @@ export interface TopPageItem {
   pv: number
   uv: number
   sessions: number
+}
+
+export interface TrafficSourceItem {
+  source: string
+  sessions: number
+  uv: number
+}
+
+export interface LandingPageItem {
+  pageKey: string
+  landingPageUrl?: string
+  sessions: number
+  uv: number
 }

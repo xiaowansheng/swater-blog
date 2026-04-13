@@ -3,6 +3,7 @@ import { Table, Tag, Input, Select, Button, DatePicker, Space, Modal } from 'ant
 import { SearchOutlined, ReloadOutlined, EyeOutlined } from '@ant-design/icons'
 import { getOperationLogList } from '@/api/log'
 import { LogOperation } from '@/types'
+import { OperationResultStatus } from '@/types/enums'
 import { formatDate } from '@/utils/format'
 
 const { RangePicker } = DatePicker
@@ -20,7 +21,7 @@ const LogOperationPage: React.FC = () => {
     username?: string
     userId?: number
     ip?: string
-    status?: number
+    status?: OperationResultStatus
     startDate?: string
     endDate?: string
   }>({})
@@ -157,9 +158,9 @@ const LogOperationPage: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 80,
-      render: (status: number) => (
-        <Tag color={status === 1 ? 'success' : 'error'}>
-          {status === 1 ? '成功' : '失败'}
+      render: (status: OperationResultStatus) => (
+        <Tag color={status === OperationResultStatus.SUCCESS ? 'success' : 'error'}>
+          {status === OperationResultStatus.SUCCESS ? '成功' : '失败'}
         </Tag>
       ),
     },
@@ -246,8 +247,8 @@ const LogOperationPage: React.FC = () => {
             style={{ width: 100 }}
             allowClear
           >
-            <Select.Option value={1}>成功</Select.Option>
-            <Select.Option value={0}>失败</Select.Option>
+            <Select.Option value={OperationResultStatus.SUCCESS}>成功</Select.Option>
+            <Select.Option value={OperationResultStatus.FAILED}>失败</Select.Option>
           </Select>
           <Input
             placeholder="请求路径"
@@ -389,7 +390,7 @@ const LogOperationPage: React.FC = () => {
               <div>
                 <label className="text-gray-500 text-sm">状态</label>
                 <p className="font-medium">
-                  {selectedLog.status === 1 ? (
+                  {selectedLog.status === OperationResultStatus.SUCCESS ? (
                     <Tag color="success">成功</Tag>
                   ) : (
                     <Tag color="error">失败</Tag>
@@ -425,7 +426,7 @@ const LogOperationPage: React.FC = () => {
                 </pre>
               </div>
             )}
-            {selectedLog.status === 0 && selectedLog.errorMsg && (
+            {selectedLog.status === OperationResultStatus.FAILED && selectedLog.errorMsg && (
               <div>
                 <label className="text-gray-500 text-sm">错误信息</label>
                 <p className="text-red-500 font-medium">{selectedLog.errorMsg}</p>

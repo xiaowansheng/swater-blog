@@ -1,16 +1,17 @@
 import request from './request'
 import { Comment, PageResult } from '@/types'
+import { CommentStatus, CommentVisibilityStatus } from '@/types/enums'
 
 export const getCommentList = (params: {
   page?: number
   size?: number
-  status?: number
+  status?: CommentStatus
   targetId?: number
   id?: number
   parentId?: number
   rootId?: number
   targetType?: string
-  isVisible?: number
+  isVisible?: CommentVisibilityStatus
   keyword?: string
   country?: string
   province?: string

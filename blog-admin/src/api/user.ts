@@ -1,5 +1,6 @@
 import request from './request'
 import { User, PageResult } from '@/types'
+import { EnableStatus } from '@/types/enums'
 
 export interface UserDTO {
   username: string
@@ -12,7 +13,11 @@ export interface UserDTO {
 export const getUserList = (params: {
   page?: number
   size?: number
-  keyword?: string
+  username?: string
+  nickname?: string
+  email?: string
+  roleId?: number
+  status?: EnableStatus
 }): Promise<PageResult<User>> => {
   return request.get('/admin/user/list', { params })
 }

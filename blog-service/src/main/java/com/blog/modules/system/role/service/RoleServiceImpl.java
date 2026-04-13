@@ -9,6 +9,8 @@ import com.blog.modules.system.role.model.entity.Role;
 import com.blog.modules.system.role.model.entity.RoleApi;
 import com.blog.modules.system.role.model.vo.RoleVO;
 import com.blog.modules.system.role.service.RoleService;
+import com.blog.shared.model.enums.DisabledFlag;
+import com.blog.shared.model.enums.EnableStatus;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.KeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,10 +77,10 @@ public class RoleServiceImpl implements RoleService {
 
         Role role = BeanUtil.copyProperties(dto, Role.class);
         if (dto.getStatus() == null) {
-            role.setStatus(1);
+            role.setStatus(EnableStatus.ENABLED.getCode());
         }
         if (dto.getDisabled() == null) {
-            role.setDisabled(0);
+            role.setDisabled(DisabledFlag.NO.getCode());
         }
 
         roleMapper.insert(role);

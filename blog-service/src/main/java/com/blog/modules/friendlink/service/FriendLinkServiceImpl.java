@@ -5,6 +5,8 @@ import com.blog.modules.friendlink.mapper.FriendLinkMapper;
 import com.blog.modules.friendlink.model.dto.FriendLinkDTO;
 import com.blog.modules.friendlink.model.dto.FriendLinkQueryDTO;
 import com.blog.modules.friendlink.model.entity.FriendLink;
+import com.blog.modules.friendlink.model.enums.ReviewStatus;
+import com.blog.modules.friendlink.model.enums.VisibilityStatus;
 import com.blog.modules.friendlink.model.vo.FriendLinkVO;
 import com.blog.modules.friendlink.event.FriendLinkCreatedEvent;
 import com.blog.modules.friendlink.event.FriendLinkApprovedEvent;
@@ -59,7 +61,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
                 wrapper.eq(FriendLink::getIsVisible, queryDTO.getIsVisible());
             }
         }
-        // 未审核优先（reviewStatus=0），然后按序号升序，最后按创建时间降序
+        // 未审核优先，然后按序号升序，最后按创建时间降序
         wrapper.orderByAsc(FriendLink::getReviewStatus)
                 .orderByAsc(FriendLink::getSort)
                 .orderByDesc(FriendLink::getCreateTime);
@@ -84,10 +86,10 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     public Long create(FriendLinkDTO dto) {
         FriendLink friendLink = BeanUtil.copyProperties(dto, FriendLink.class);
         if (friendLink.getIsVisible() == null) {
-            friendLink.setIsVisible(0);
+            friendLink.setIsVisible(VisibilityStatus.HIDDEN.getCode());
         }
         if (friendLink.getReviewStatus() == null) {
-            friendLink.setReviewStatus(0);
+            friendLink.setReviewStatus(ReviewStatus.PENDING.getCode());
         }
         if (friendLink.getSort() == null) {
             friendLink.setSort(9999);
@@ -130,8 +132,8 @@ public class FriendLinkServiceImpl implements FriendLinkService {
         if (friendLink == null) {
             return;
         }
-        friendLink.setReviewStatus(1);
-        friendLink.setIsVisible(1);
+        friendLink.setReviewStatus(ReviewStatus.APPROVED.getCode());
+        friendLink.setIsVisible(VisibilityStatus.VISIBLE.getCode());
         friendLinkMapper.updateById(friendLink);
 
         // 发布友链审核通过事件
@@ -145,8 +147,8 @@ public class FriendLinkServiceImpl implements FriendLinkService {
         if (friendLink == null) {
             return;
         }
-        friendLink.setReviewStatus(2);
-        friendLink.setIsVisible(0);
+        friendLink.setReviewStatus(ReviewStatus.REJECTED.getCode());
+        friendLink.setIsVisible(VisibilityStatus.HIDDEN.getCode());
         friendLinkMapper.updateById(friendLink);
         triggerRevalidate();
     }

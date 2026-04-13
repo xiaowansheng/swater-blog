@@ -11,12 +11,14 @@ import com.blog.modules.user.mapper.UserMapper;
 import com.blog.infrastructure.mq.MQService;
 import com.blog.modules.notification.model.dto.NotificationDTO;
 import com.blog.modules.notification.model.entity.SysNotification;
+import com.blog.modules.notification.model.enums.NotificationSendStatus;
 import com.blog.modules.notification.model.message.NotificationMessage;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.notification.model.vo.NotificationVO;
 import com.blog.modules.notification.service.NotificationService;
 import com.blog.plugin.components.notification.NotificationChannelFactory;
 import com.blog.plugin.components.notification.NotificationChannelPlugin;
+import com.blog.shared.model.enums.ReadStatus;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.PageUtil;
@@ -47,8 +49,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public Long create(NotificationDTO dto) {
         SysNotification notification = BeanUtil.copyProperties(dto, SysNotification.class);
-        notification.setStatus("PENDING");
-        notification.setIsRead(0);
+        notification.setStatus(NotificationSendStatus.PENDING.getCode());
+        notification.setIsRead(ReadStatus.UNREAD.getCode());
         notification.setSendCount(0);
         notification.setMaxRetryCount(3);
         if (notification.getPriority() == null) {
@@ -98,7 +100,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (notification == null) {
             return;
         }
-        notification.setIsRead(1);
+        notification.setIsRead(ReadStatus.READ.getCode());
         sysNotificationMapper.updateById(notification);
     }
 
@@ -107,8 +109,8 @@ public class NotificationServiceImpl implements NotificationService {
     public void markAllAsRead(Long userId) {
         LambdaUpdateWrapper<SysNotification> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(SysNotification::getUserId, userId)
-                .eq(SysNotification::getIsRead, 0)
-                .set(SysNotification::getIsRead, 1);
+                .eq(SysNotification::getIsRead, ReadStatus.UNREAD.getCode())
+                .set(SysNotification::getIsRead, ReadStatus.READ.getCode());
         sysNotificationMapper.update(null, wrapper);
     }
 
@@ -167,8 +169,8 @@ public class NotificationServiceImpl implements NotificationService {
         try {
             dispatchChannels(message.getUserId(), message.getType(), message.getTitle(), message.getContent());
 
-            notification.setStatus("SENT");
-            notification.setIsRead(0);
+            notification.setStatus(NotificationSendStatus.SENT.getCode());
+            notification.setIsRead(ReadStatus.UNREAD.getCode());
             notification.setSentTime(LocalDateTime.now());
             notification.setSendCount(notification.getSendCount() == null ? 1 : notification.getSendCount() + 1);
             notification.setNextRetryTime(null);
@@ -176,7 +178,7 @@ public class NotificationServiceImpl implements NotificationService {
         } catch (Exception e) {
             int sendCount = notification.getSendCount() == null ? 0 : notification.getSendCount();
             notification.setSendCount(sendCount + 1);
-            notification.setStatus("FAILED");
+            notification.setStatus(NotificationSendStatus.FAILED.getCode());
             notification.setNextRetryTime(nextRetryTime(notification));
             sysNotificationMapper.updateById(notification);
             log.error("通知消息处理失败，notificationId: {}", message.getNotificationId(), e);
@@ -190,7 +192,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (notification == null) {
             return;
         }
-        if ("SENT".equals(notification.getStatus())) {
+        if (NotificationSendStatus.SENT.matches(notification.getStatus())) {
             return;
         }
         EventUtil.publishEventAfterCommit(() -> {
@@ -218,7 +220,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         List<SysNotification> notifications = sysNotificationMapper.selectBatchIds(validIds);
         for (SysNotification notification : notifications) {
-            if (notification == null || "SENT".equals(notification.getStatus())) {
+            if (notification == null || NotificationSendStatus.SENT.matches(notification.getStatus())) {
                 continue;
             }
             EventUtil.publishEventAfterCommit(() -> {
@@ -235,7 +237,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void retryFailedNotifications() {
         LocalDateTime now = LocalDateTime.now();
         LambdaQueryWrapper<SysNotification> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysNotification::getStatus, "FAILED")
+        wrapper.eq(SysNotification::getStatus, NotificationSendStatus.FAILED.getCode())
                 .and(w -> w.isNull(SysNotification::getNextRetryTime).or().le(SysNotification::getNextRetryTime, now))
                 .orderByAsc(SysNotification::getNextRetryTime);
 
@@ -287,13 +289,13 @@ public class NotificationServiceImpl implements NotificationService {
     private boolean enqueueMessage(SysNotification notification, NotificationMessage message) {
         boolean queued = mqService.sendNotification(message);
         if (queued) {
-            notification.setStatus("QUEUED");
-            notification.setIsRead(0);
+            notification.setStatus(NotificationSendStatus.QUEUED.getCode());
+            notification.setIsRead(ReadStatus.UNREAD.getCode());
             notification.setNextRetryTime(null);
             sysNotificationMapper.updateById(notification);
             return true;
         }
-        notification.setStatus("FAILED");
+        notification.setStatus(NotificationSendStatus.FAILED.getCode());
         notification.setNextRetryTime(nextRetryTime(notification));
         sysNotificationMapper.updateById(notification);
         return false;

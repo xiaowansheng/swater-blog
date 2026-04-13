@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeftOutlined, SendOutlined, SaveOutlined } from '@ant-design/icons'
 import { createTalk, updateTalk, getTalkById } from '@/api/talk'
 import { TalkStatus } from '@/types'
+import { TopStatus } from '@/types/enums'
 import { usePageTab } from '@/hooks/usePageTab'
 import RichTextEditor from '@/components/common/RichTextEditor'
 import MultiImageUpload from '@/components/common/MultiImageUpload'
@@ -56,7 +57,7 @@ const TalkEdit: React.FC = () => {
       const talk = await getTalkById(Number(pageId))
       form.setFieldsValue({
         ...talk,
-        isTop: talk.isTop === 1,
+        isTop: talk.isTop === TopStatus.PINNED,
         images: talk.images || []
       })
       // 设置已保存状态
@@ -76,7 +77,7 @@ const TalkEdit: React.FC = () => {
     try {
       const data = {
         ...values,
-        isTop: values.isTop ? 1 : 0,
+        isTop: values.isTop ? TopStatus.PINNED : TopStatus.NORMAL,
       }
 
       if (isEdit) {

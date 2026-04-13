@@ -3,6 +3,8 @@ package com.blog.modules.statistics.listener;
 
 import com.blog.modules.comment.event.*;
 import com.blog.modules.comment.model.entity.Comment;
+import com.blog.modules.comment.model.enums.CommentStatus;
+import com.blog.modules.comment.model.enums.CommentVisibilityStatus;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.talk.mapper.TalkMapper;
@@ -42,8 +44,8 @@ public class StatisticsUpdateEventListener {
                 return;
             }
             // 只有审核通过且可见的评论才增加统计
-            if (comment.getStatus() == null || comment.getStatus() != 1
-                    || comment.getIsVisible() == null || comment.getIsVisible() != 1
+            if (!CommentStatus.APPROVED.matches(comment.getStatus())
+                    || !CommentVisibilityStatus.VISIBLE.matches(comment.getIsVisible())
                     || comment.getTargetId() == null) {
                 return;
             }
@@ -164,12 +166,10 @@ public class StatisticsUpdateEventListener {
             Integer status = comment.getStatus();
             Integer isVisible = comment.getIsVisible();
             Integer delta = null;
-            if (isVisible != null && isVisible == 0 && status != null && status == 1) {
+            if (CommentStatus.APPROVED.matches(status) && CommentVisibilityStatus.HIDDEN.matches(isVisible)) {
                 delta = -1;
-            } else if (isVisible != null && isVisible == 1 && status != null && status == 1) {
+            } else if (CommentStatus.APPROVED.matches(status) && CommentVisibilityStatus.VISIBLE.matches(isVisible)) {
                 delta = 1;
-            } else if (status != null && status == 0) {
-                delta = -1;
             }
             if (delta == null) {
                 return;

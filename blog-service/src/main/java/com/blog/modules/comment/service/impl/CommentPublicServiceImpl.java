@@ -12,6 +12,8 @@ import com.blog.modules.comment.event.CommentCreatedEvent;
 import com.blog.modules.comment.mapper.CommentMapper;
 import com.blog.modules.comment.model.dto.CommentDTO;
 import com.blog.modules.comment.model.entity.Comment;
+import com.blog.modules.comment.model.enums.CommentStatus;
+import com.blog.modules.comment.model.enums.CommentVisibilityStatus;
 import com.blog.modules.comment.model.vo.CommentVO;
 import com.blog.modules.comment.service.CommentPublicService;
 import com.blog.modules.file.service.FileService;
@@ -144,7 +146,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         wrapper.eq(Comment::getDeleted, 0);
         // 公开：所有 status=1 的评论都返回（包含 is_visible=0 的隐藏评论，内容会在 VO 里被置空）
         // 私有：若携带邮箱会话 token，则额外返回该邮箱自己的非公开评论（例如待审核）
-        wrapper.and(w -> w.eq(Comment::getStatus, 1)
+        wrapper.and(w -> w.eq(Comment::getStatus, CommentStatus.APPROVED.getCode())
                 .or(hasOwnerEmail, w2 -> w2.eq(Comment::getEmail, ownerEmail)));
 
         if (targetId != null) {
@@ -199,7 +201,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             countWrapper.select("root_id", "COUNT(*) AS cnt");
             countWrapper.in("root_id", idsNeedingCount);
             countWrapper.ne("parent_id", 0);
-            countWrapper.and(w -> w.eq("status", 1)
+            countWrapper.and(w -> w.eq("status", CommentStatus.APPROVED.getCode())
                     .or(hasOwnerEmail, w2 -> w2.eq("email", ownerEmail)));
             countWrapper.groupBy("root_id");
             List<Map<String, Object>> rows = commentMapper.selectMaps(countWrapper);
@@ -281,13 +283,13 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         // 敏感词检测：如果包含敏感词则需要审核，否则自动通过
         if (sensitiveWordHelper.contains(comment.getContent())) {
             // 包含敏感词：需要审核，不可见
-            comment.setStatus(0);  // 待审核
-            comment.setIsVisible(0);  // 不可见
+            comment.setStatus(CommentStatus.PENDING.getCode());
+            comment.setIsVisible(CommentVisibilityStatus.HIDDEN.getCode());
             log.info("评论包含敏感词，ID: {}, 需要人工审核", comment.getId());
         } else {
             // 无敏感词：自动审核通过，可见
-            comment.setStatus(1);  // 审核通过
-            comment.setIsVisible(1);  // 可见
+            comment.setStatus(CommentStatus.APPROVED.getCode());
+            comment.setIsVisible(CommentVisibilityStatus.VISIBLE.getCode());
         }
 
         commentMapper.insert(comment);
@@ -409,7 +411,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         vo.setIsOwner(isOwner);
 
         // 隐藏评论：非发布者仍返回记录，但内容/图片置空，前端用 isVisible=0 渲染“已被隐藏”提示
-        if (!isOwner && comment.getIsVisible() != null && comment.getIsVisible() == 0) {
+        if (!isOwner && CommentVisibilityStatus.HIDDEN.matches(comment.getIsVisible())) {
             vo.setContent("");
             vo.setImages(new ArrayList<>());
         }
@@ -422,7 +424,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             LambdaQueryWrapper<Comment> countWrapper = new LambdaQueryWrapper<>();
             countWrapper.eq(Comment::getRootId, comment.getId());
             countWrapper.ne(Comment::getParentId, 0);
-            countWrapper.and(w -> w.eq(Comment::getStatus, 1)
+            countWrapper.and(w -> w.eq(Comment::getStatus, CommentStatus.APPROVED.getCode())
                     .or(ownerEmail != null && !ownerEmail.isBlank(), w2 -> w2.eq(Comment::getEmail, ownerEmail)));
             Long count = commentMapper.selectCount(countWrapper);
             vo.setReplyCount(count != null ? count.intValue() : 0);

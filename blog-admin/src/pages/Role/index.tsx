@@ -3,6 +3,7 @@ import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Too
 import { PlusOutlined, EditOutlined, DeleteOutlined, ApiOutlined, SearchOutlined } from '@ant-design/icons'
 import { getRoleList, createRole, updateRole, deleteRole } from '@/api/role'
 import { Role } from '@/types'
+import { EnableStatus } from '@/types/enums'
 import ApiAuthModal from './ApiAuthModal'
 
 const RolePage: React.FC = () => {
@@ -16,7 +17,7 @@ const RolePage: React.FC = () => {
   const [filters, setFilters] = useState<{
     name: string
     roleKey: string
-    status: number | undefined
+    status: EnableStatus | undefined
   }>({
     name: '',
     roleKey: '',
@@ -103,6 +104,12 @@ const RolePage: React.FC = () => {
     }
   }
 
+  const getRoleStatusTag = (status: EnableStatus | undefined) => (
+    <Tag color={status === EnableStatus.ENABLED ? 'success' : 'default'}>
+      {status === EnableStatus.ENABLED ? '启用' : '禁用'}
+    </Tag>
+  )
+
   const columns = [
     {
       title: '角色名称',
@@ -128,11 +135,7 @@ const RolePage: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 100,
-      render: (status: number) => (
-        <Tag color={status === 1 ? 'success' : 'default'}>
-          {status === 1 ? '启用' : '禁用'}
-        </Tag>
-      ),
+      render: (status: EnableStatus | undefined) => getRoleStatusTag(status),
     },
     {
       title: '操作',
@@ -193,8 +196,8 @@ const RolePage: React.FC = () => {
             style={{ width: 100 }}
             allowClear
           >
-            <Select.Option value={1}>启用</Select.Option>
-            <Select.Option value={0}>禁用</Select.Option>
+            <Select.Option value={EnableStatus.ENABLED}>启用</Select.Option>
+            <Select.Option value={EnableStatus.DISABLED}>禁用</Select.Option>
           </Select>
           <div className="flex-1" />
           <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>

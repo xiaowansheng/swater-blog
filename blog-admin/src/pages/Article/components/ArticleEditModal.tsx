@@ -18,6 +18,7 @@ import CategorySelector from './CategorySelector'
 import ImageUpload from '@/components/common/ImageUpload'
 import CoverGenerator from '@/components/article/CoverGenerator'
 import { Article, Category, Tag as TagType, ArticleStatus, ArticleType } from '@/types'
+import { TopStatus } from '@/types/enums'
 
 interface ArticleEditModalProps {
     open: boolean
@@ -60,7 +61,7 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
                 tagIds: article.tags?.map(t => t.id) || [],
                 type: article.type || ArticleType.ORIGINAL,
                 status: article.status,
-                isTop: article.isTop === 1,
+                isTop: article.isTop === TopStatus.PINNED,
                 originalAuthor: article.originalAuthor || '',
                 originalTitle: article.originalTitle || '',
                 originalUrl: article.originalUrl || '',
@@ -111,7 +112,7 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
                 originalUrl: values.originalUrl || undefined,
                 note: values.note || undefined,
                 status: values.status,
-                isTop: values.isTop ? 1 : 0,
+                isTop: values.isTop ? TopStatus.PINNED : TopStatus.NORMAL,
                 tagIds: values.tagIds?.filter((id: number | string) => typeof id === 'number') || [],
                 tagNames: values.tagIds?.filter((id: number | string) => typeof id === 'string') || [],
                 articleKey: values.articleKey || undefined,

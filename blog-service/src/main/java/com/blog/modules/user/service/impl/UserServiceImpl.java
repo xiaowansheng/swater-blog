@@ -14,6 +14,8 @@ import com.blog.modules.user.event.UserUpdatedEvent;
 import com.blog.modules.user.event.UserDeletedEvent;
 import com.blog.modules.user.event.UserPasswordResetEvent;
 import com.blog.shared.exception.BusinessException;
+import com.blog.shared.model.enums.DisabledFlag;
+import com.blog.shared.model.enums.EnableStatus;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.system.role.model.vo.RoleVO;
 import com.blog.modules.system.role.service.RoleService;
@@ -109,10 +111,10 @@ public class UserServiceImpl implements UserService {
             user.setPassword(PasswordUtil.encode(dto.getPassword()));
         }
         if (dto.getStatus() == null) {
-            user.setStatus(1);
+            user.setStatus(EnableStatus.ENABLED.getCode());
         }
         if (dto.getDisabled() == null) {
-            user.setDisabled(0);
+            user.setDisabled(DisabledFlag.NO.getCode());
         }
         if (dto.getRoleKey() == null) {
             user.setRoleKey("user");

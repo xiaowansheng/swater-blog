@@ -5,6 +5,7 @@ import { ArrowLeftOutlined, VerticalAlignTopOutlined, EnvironmentOutlined, Mobil
 import { getTalkById } from '@/api/talk'
 import { getAuthorConfig } from '@/api/config'
 import { Talk, TalkStatus, TALK_STATUS_MAP } from '@/types'
+import { TopStatus } from '@/types/enums'
 import { getFullUrl } from '@/utils/format'
 import Image from '@/components/common/ImageWithPreview'
 
@@ -94,7 +95,7 @@ const TalkDetail: React.FC = () => {
               </div>
             </div>
             <Space size={4}>
-              {talk.isTop === 1 && (
+              {talk.isTop === TopStatus.PINNED && (
                 <Tag color="red" icon={<VerticalAlignTopOutlined />}>
                   置顶
                 </Tag>

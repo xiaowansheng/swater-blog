@@ -24,6 +24,7 @@ import {
 import { getUserList, createUser, updateUser, deleteUser, resetPassword } from '@/api/user'
 import { getRoleList } from '@/api/role'
 import { User, Role } from '@/types'
+import { EnableStatus } from '@/types/enums'
 import { formatDate, getFullUrl } from '@/utils/format'
 
 const UserPage: React.FC = () => {
@@ -41,7 +42,7 @@ const UserPage: React.FC = () => {
     username: string
     email: string
     roleId: number | undefined
-    status: number | undefined
+    status: EnableStatus | undefined
   }>({
     username: '',
     email: '',
@@ -77,7 +78,10 @@ const UserPage: React.FC = () => {
       const result = await getUserList({
         page: pagination.current,
         size: pagination.pageSize,
-        keyword: filters.username || filters.email || undefined,
+        username: filters.username || undefined,
+        email: filters.email || undefined,
+        roleId: filters.roleId,
+        status: filters.status,
       })
       setUsers(result.records)
       setPagination((prev) => ({ ...prev, total: result.total }))
@@ -149,6 +153,12 @@ const UserPage: React.FC = () => {
     }
   }
 
+  const getUserStatusTag = (status: EnableStatus) => (
+    <Tag color={status === EnableStatus.ENABLED ? 'success' : 'error'}>
+      {status === EnableStatus.ENABLED ? '正常' : '禁用'}
+    </Tag>
+  )
+
   const columns = [
     {
       title: '用户信息',
@@ -190,11 +200,7 @@ const UserPage: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 100,
-      render: (status: number) => (
-        <Tag color={status === 1 ? 'success' : 'error'}>
-          {status === 1 ? '正常' : '禁用'}
-        </Tag>
-      ),
+      render: (status: EnableStatus) => getUserStatusTag(status),
     },
     {
       title: '最后登录',
@@ -275,8 +281,8 @@ const UserPage: React.FC = () => {
             style={{ width: 100 }}
             allowClear
           >
-            <Select.Option value={1}>正常</Select.Option>
-            <Select.Option value={0}>禁用</Select.Option>
+            <Select.Option value={EnableStatus.ENABLED}>正常</Select.Option>
+            <Select.Option value={EnableStatus.DISABLED}>禁用</Select.Option>
           </Select>
           <div className="flex-1" />
           <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>

@@ -34,6 +34,7 @@ import {
 import { getCategoryList } from '@/api/category'
 import ArticleEditModal from './components/ArticleEditModal'
 import { Article, Category, ArticleStatus, ArticleType, ARTICLE_STATUS_MAP, ARTICLE_TYPE_MAP } from '@/types'
+import { TopStatus } from '@/types/enums'
 
 const ArticleList: React.FC = () => {
   const navigate = useNavigate()
@@ -49,7 +50,7 @@ const ArticleList: React.FC = () => {
     status: number | undefined
     categoryId: number | undefined
     type: string | undefined
-    isTop: number | undefined
+    isTop: TopStatus | undefined
   }>({ keyword: '', id: '', articleKey: '', status: undefined, categoryId: undefined, type: undefined, isTop: undefined })
 
   // 修改弹窗相关状态
@@ -238,7 +239,7 @@ const ArticleList: React.FC = () => {
               )}
             </div>
             <div className="flex items-center gap-2">
-              {record.isTop === 1 && (
+              {record.isTop === TopStatus.PINNED && (
                 <Tag color="red" className="flex items-center gap-1">
                   <VerticalAlignTopOutlined />
                   置顶
@@ -388,8 +389,8 @@ const ArticleList: React.FC = () => {
             style={{ width: 120 }}
             allowClear
           >
-            <Select.Option value={1}>置顶</Select.Option>
-            <Select.Option value={0}>普通</Select.Option>
+            <Select.Option value={TopStatus.PINNED}>置顶</Select.Option>
+            <Select.Option value={TopStatus.NORMAL}>普通</Select.Option>
           </Select>
           <Select
             placeholder="选择分类"

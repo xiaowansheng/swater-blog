@@ -3,6 +3,7 @@ import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, InputNum
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { getMenuList, createMenu, updateMenu, deleteMenu } from '@/api/menu'
 import { Menu } from '@/types'
+import { EnableStatus } from '@/types/enums'
 
 const MenuPage: React.FC = () => {
   const [menus, setMenus] = useState<Menu[]>([])
@@ -38,7 +39,10 @@ const MenuPage: React.FC = () => {
 
   const handleEdit = (menu: Menu) => {
     setEditingMenu(menu)
-    form.setFieldsValue(menu)
+    form.setFieldsValue({
+      ...menu,
+      visible: menu.visible === EnableStatus.ENABLED,
+    })
     setModalVisible(true)
   }
 
@@ -55,11 +59,15 @@ const MenuPage: React.FC = () => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields()
+      const data = {
+        ...values,
+        visible: values.visible ? EnableStatus.ENABLED : EnableStatus.DISABLED,
+      }
       if (editingMenu) {
-        await updateMenu(editingMenu.id, values)
+        await updateMenu(editingMenu.id, data)
         message.success('更新成功')
       } else {
-        await createMenu(values)
+        await createMenu(data)
         message.success('创建成功')
       }
       setModalVisible(false)
@@ -105,9 +113,9 @@ const MenuPage: React.FC = () => {
       dataIndex: 'visible',
       key: 'visible',
       width: 80,
-      render: (visible: number) => (
-        <Tag color={visible === 1 ? 'success' : 'default'}>
-          {visible === 1 ? '是' : '否'}
+      render: (visible: EnableStatus) => (
+        <Tag color={visible === EnableStatus.ENABLED ? 'success' : 'default'}>
+          {visible === EnableStatus.ENABLED ? '是' : '否'}
         </Tag>
       ),
     },
@@ -116,9 +124,9 @@ const MenuPage: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 80,
-      render: (status: number) => (
-        <Tag color={status === 1 ? 'success' : 'error'}>
-          {status === 1 ? '启用' : '禁用'}
+      render: (status: EnableStatus) => (
+        <Tag color={status === EnableStatus.ENABLED ? 'success' : 'error'}>
+          {status === EnableStatus.ENABLED ? '启用' : '禁用'}
         </Tag>
       ),
     },

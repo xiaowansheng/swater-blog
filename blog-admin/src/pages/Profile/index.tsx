@@ -15,6 +15,7 @@ import { useAuthStore } from "@/store/auth";
 import { AvatarUpload } from "@/components/common/ImageUpload";
 import { getFullUrl } from "@/utils/format";
 import * as userApi from "@/api/user";
+import { EnableStatus } from "@/types/enums";
 
 const { TextArea } = Input;
 
@@ -177,7 +178,7 @@ const ProfilePage: React.FC = () => {
           {user?.roles?.map((role) => role.name).join("、") || "-"}
         </Descriptions.Item>
         <Descriptions.Item label="状态">
-          {user?.status === 1 ? (
+          {user?.status === EnableStatus.ENABLED ? (
             <span className="text-green-600">正常</span>
           ) : (
             <span className="text-red-600">禁用</span>

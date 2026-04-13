@@ -3,6 +3,7 @@ import { Card, Timeline, Badge, Statistic, Row, Col, Empty, Tag, Spin } from 'an
 import { ClockCircleOutlined, EyeOutlined, MessageOutlined, CalendarOutlined } from '@ant-design/icons'
 import { archiveApi } from '@/api/archive'
 import { ArchiveVO, Article } from '@/types'
+import { ArticleStatus } from '@/types/enums'
 import styles from './index.module.less'
 
 interface GroupedArchive {
@@ -227,8 +228,8 @@ const Archive: React.FC = () => {
                                     {tag.name}
                                   </Tag>
                                 ))}
-                                <Tag color={article.status === 1 ? 'green' : 'orange'}>
-                                  {article.status === 1 ? '已发布' : '草稿'}
+                                <Tag color={article.status === ArticleStatus.PUBLISHED ? 'green' : 'orange'}>
+                                  {article.status === ArticleStatus.PUBLISHED ? '已发布' : '草稿'}
                                 </Tag>
                               </div>
 

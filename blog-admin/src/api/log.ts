@@ -1,5 +1,6 @@
 import request from './request'
 import { LogOperation, LogError, PageResult } from '@/types'
+import { OperationResultStatus } from '@/types/enums'
 
 export const getOperationLogList = (params: {
   page?: number
@@ -12,7 +13,7 @@ export const getOperationLogList = (params: {
   requestUri?: string
   username?: string
   ip?: string
-  status?: number
+  status?: OperationResultStatus
   device?: string
   browser?: string
   ipSource?: string

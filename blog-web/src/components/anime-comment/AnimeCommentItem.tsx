@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { formatDate } from '@/lib/utils/format';
-import type { CommentVO, PrivacyConfig } from '@/types';
+import { CommentStatus, CommentVisibilityStatus, type CommentVO, type PrivacyConfig } from '@/types';
 import { AnimeCommentConfig } from './types';
 import { getRandomAnimeAvatar } from './constants';
 import ReplyForm from './ReplyForm';
@@ -37,9 +37,10 @@ interface AnimeCommentItemProps {
   privacy: PrivacyConfig;
 }
 
-function getStatusLabel(status: number | string | undefined, t: (key: string) => string) {
-  if (status === 1 || status === 'published' || status === undefined) return null;
-  if (status === 0 || status === 'pending') return t('pending');
+function getStatusLabel(status: CommentStatus | undefined, t: (key: string) => string) {
+  if (status === CommentStatus.APPROVED || status === undefined) return null;
+  if (status === CommentStatus.PENDING) return t('pending');
+  if (status === CommentStatus.REJECTED) return t('rejected');
   return t('hidden');
 }
 
@@ -95,7 +96,7 @@ export default function AnimeCommentItem({
   const rootId = comment.rootId && comment.rootId > 0 ? comment.rootId : comment.id;
   const isDirectChild = !comment.parentId || comment.parentId === 0 || comment.parentId === rootId;
   const parentId = comment.parentId ?? 0;
-  const isHiddenByModeration = comment.isVisible === 0;
+  const isHiddenByModeration = comment.isVisible === CommentVisibilityStatus.HIDDEN;
 
   return (
     <div className="animate-fade-in">
@@ -294,7 +295,7 @@ export default function AnimeCommentItem({
 
               {/* 第二部分：回复内容 */}
               <div className="text-card-foreground whitespace-pre-wrap break-words mb-3">
-                {child.isVisible === 0 && <span className="text-muted-foreground italic">{t('commentHidden')} </span>}
+                {child.isVisible === CommentVisibilityStatus.HIDDEN && <span className="text-muted-foreground italic">{t('commentHidden')} </span>}
                 {child.replyToUser?.nickname && (
                   <span className="text-primary">@{child.replyToUser.nickname} </span>
                 )}

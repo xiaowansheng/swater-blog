@@ -8,7 +8,7 @@ import AnimeCommentForm from './AnimeCommentForm';
 import AnimeCommentList from './AnimeCommentList';
 import { UserInfoProvider, useUserInfo } from './UserInfoContext';
 import { commentApi } from '@/lib/api/comment';
-import type { CommentVO } from '@/types';
+import { CommentStatus, type CommentVO } from '@/types';
 import { useSiteConfig } from '@/lib/context/SiteConfigContext';
 
 const COMMENT_PAGE_SIZE = 10;
@@ -37,7 +37,7 @@ function useVisibilityChecker() {
 
   const isVisible = (comment: CommentVO) => {
     const status = comment.status;
-    const published = status === 1;
+    const published = status === CommentStatus.APPROVED;
     if (published) return true;
     return isOwner(comment);
   };

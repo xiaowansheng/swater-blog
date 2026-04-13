@@ -1,5 +1,6 @@
 import request from './request'
 import { Article, PageResult, ArticleStatistics } from '@/types'
+import { TopStatus } from '@/types/enums'
 
 export interface ArticleDTO {
   title: string
@@ -8,7 +9,7 @@ export interface ArticleDTO {
   cover?: string
   categoryId: number
   tagIds?: number[]
-  isTop?: number
+  isTop?: TopStatus
   status?: number
   type?: string
   originalAuthor?: string
@@ -33,7 +34,7 @@ export interface ArticleSaveDTO {
   originalUrl?: string
   note?: string
   status?: number
-  isTop?: number
+  isTop?: TopStatus
   tagIds?: number[]
   tagNames?: string[]
   articleKey?: string
@@ -69,7 +70,7 @@ export interface ArticleMetaDTO {
   originalUrl?: string
   note?: string
   status?: number
-  isTop?: number
+  isTop?: TopStatus
   tagIds?: number[]
   tagNames?: string[]
   articleKey?: string
@@ -88,7 +89,7 @@ export const getArticleList = (params: {
   status?: number
   categoryId?: number
   type?: string
-  isTop?: number
+  isTop?: TopStatus
 }): Promise<PageResult<Article>> => {
   return request.get('/admin/post/list', { params })
 }

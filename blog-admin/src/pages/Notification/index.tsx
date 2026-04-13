@@ -19,13 +19,14 @@ import {
 } from '@/api/notification'
 import { useNotificationStore } from '@/store/notification'
 import { Notification } from '@/types'
+import { NotificationReadStatus, NotificationSendStatus, NOTIFICATION_SEND_STATUS_MAP } from '@/types/enums'
 
 const NotificationPage: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(false)
   const { setNotifications: setStoreNotifications, markAsRead: markStoreAsRead, markAllAsRead: markStoreAllAsRead } = useNotificationStore()
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
-  const [filters, setFilters] = useState<{ isRead?: number }>({})
+  const [filters, setFilters] = useState<{ isRead?: NotificationReadStatus }>({})
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([])
 
   useEffect(() => {
@@ -55,7 +56,7 @@ const NotificationPage: React.FC = () => {
       await markAsRead(id)
       markStoreAsRead(id)
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: 1 } : n))
+        prev.map((n) => (n.id === id ? { ...n, isRead: NotificationReadStatus.READ } : n))
       )
       message.success('已标记为已读')
     } catch (error) {
@@ -67,7 +68,7 @@ const NotificationPage: React.FC = () => {
     try {
       await markAllAsRead()
       markStoreAllAsRead()
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: 1 })))
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: NotificationReadStatus.READ })))
       message.success('已全部标记为已读')
     } catch (error) {
       message.error('操作失败')
@@ -155,16 +156,11 @@ const NotificationPage: React.FC = () => {
     return <Tag color={color}>{text}</Tag>
   }
 
-  const getStatusTag = (status?: string) => {
+  const getStatusTag = (status?: NotificationSendStatus) => {
     if (!status) return <Tag>未知</Tag>
-    const map: Record<string, { color: string; text: string }> = {
-      PENDING: { color: 'default', text: '待处理' },
-      QUEUED: { color: 'processing', text: '已入队' },
-      SENT: { color: 'success', text: '已发送' },
-      FAILED: { color: 'error', text: '失败' },
-    }
-    const item = map[status] || { color: 'default', text: status }
-    return <Tag color={item.color}>{item.text}</Tag>
+    const item = NOTIFICATION_SEND_STATUS_MAP[status as keyof typeof NOTIFICATION_SEND_STATUS_MAP]
+      || { color: 'default', label: status }
+    return <Tag color={item.color}>{item.label}</Tag>
   }
 
   const columns = [
@@ -179,11 +175,11 @@ const NotificationPage: React.FC = () => {
       title: '通知内容',
       key: 'content',
       render: (_: any, record: Notification) => (
-        <div className={`${record.isRead === 0 ? 'font-medium' : 'text-gray-500'}`}>
+        <div className={`${record.isRead === NotificationReadStatus.UNREAD ? 'font-medium' : 'text-gray-500'}`}>
           <div className="flex items-center gap-2">
             {getTypeIcon(record.type)}
             <span>{record.title}</span>
-            {record.isRead === 0 && (
+            {record.isRead === NotificationReadStatus.UNREAD && (
               <span className="w-2 h-2 bg-blue-500 rounded-full" />
             )}
           </div>
@@ -196,9 +192,9 @@ const NotificationPage: React.FC = () => {
       dataIndex: 'isRead',
       key: 'isRead',
       width: 100,
-      render: (isRead: number) => (
-        <Tag color={isRead === 1 ? 'default' : 'blue'}>
-          {isRead === 1 ? '已读' : '未读'}
+      render: (isRead: NotificationReadStatus) => (
+        <Tag color={isRead === NotificationReadStatus.READ ? 'default' : 'blue'}>
+          {isRead === NotificationReadStatus.READ ? '已读' : '未读'}
         </Tag>
       ),
     },
@@ -207,7 +203,7 @@ const NotificationPage: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 110,
-      render: (status: string) => getStatusTag(status),
+      render: (status?: NotificationSendStatus) => getStatusTag(status),
     },
     {
       title: '时间',
@@ -221,7 +217,7 @@ const NotificationPage: React.FC = () => {
       width: 150,
       render: (_: any, record: Notification) => (
         <Space>
-          {record.status === 'FAILED' && (
+          {record.status === NotificationSendStatus.FAILED && (
             <Tooltip title="重发">
               <Button
                 type="text"
@@ -230,7 +226,7 @@ const NotificationPage: React.FC = () => {
               />
             </Tooltip>
           )}
-          {record.isRead === 0 && (
+          {record.isRead === NotificationReadStatus.UNREAD && (
             <Tooltip title="标记已读">
               <Button
                 type="text"
@@ -252,7 +248,7 @@ const NotificationPage: React.FC = () => {
     },
   ]
 
-  const unreadCount = notifications.filter((n) => n.isRead === 0).length
+  const unreadCount = notifications.filter((n) => n.isRead === NotificationReadStatus.UNREAD).length
 
   return (
     <div className="page-container">
@@ -265,8 +261,8 @@ const NotificationPage: React.FC = () => {
             style={{ width: 140 }}
             allowClear
           >
-            <Select.Option value={0}>未读</Select.Option>
-            <Select.Option value={1}>已读</Select.Option>
+            <Select.Option value={NotificationReadStatus.UNREAD}>未读</Select.Option>
+            <Select.Option value={NotificationReadStatus.READ}>已读</Select.Option>
           </Select>
           <div className="flex-1" />
           {selectedRowKeys.length > 0 && (

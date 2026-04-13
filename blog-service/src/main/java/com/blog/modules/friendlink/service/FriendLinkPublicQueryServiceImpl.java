@@ -5,6 +5,8 @@ package com.blog.modules.friendlink.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.modules.friendlink.mapper.FriendLinkMapper;
 import com.blog.modules.friendlink.model.entity.FriendLink;
+import com.blog.modules.friendlink.model.enums.ReviewStatus;
+import com.blog.modules.friendlink.model.enums.VisibilityStatus;
 import com.blog.modules.friendlink.model.vo.FriendLinkVO;
 import com.blog.modules.friendlink.service.FriendLinkPublicQueryService;
 import com.blog.shared.util.BeanUtil;
@@ -20,8 +22,8 @@ public class FriendLinkPublicQueryServiceImpl implements FriendLinkPublicQuerySe
     @Override
     public List<FriendLinkVO> list() {
         LambdaQueryWrapper<FriendLink> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(FriendLink::getIsVisible, 1)
-                .eq(FriendLink::getReviewStatus, 1)
+        wrapper.eq(FriendLink::getIsVisible, VisibilityStatus.VISIBLE.getCode())
+                .eq(FriendLink::getReviewStatus, ReviewStatus.APPROVED.getCode())
                 .orderByAsc(FriendLink::getSort)
                 .orderByDesc(FriendLink::getCreateTime);
 
@@ -31,4 +33,3 @@ public class FriendLinkPublicQueryServiceImpl implements FriendLinkPublicQuerySe
                 .collect(Collectors.toList());
     }
 }
-

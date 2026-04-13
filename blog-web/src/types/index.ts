@@ -170,6 +170,17 @@ export interface TagVO {
   articleCount?: number;
 }
 
+export enum CommentStatus {
+  PENDING = 0,
+  APPROVED = 1,
+  REJECTED = 2,
+}
+
+export enum CommentVisibilityStatus {
+  HIDDEN = 0,
+  VISIBLE = 1,
+}
+
 export interface CommentVO {
   id: number;
   postId?: number;
@@ -180,8 +191,8 @@ export interface CommentVO {
   email?: string;
   avatar?: string;
   content: string;
-  status: number;
-  isVisible?: number;
+  status: CommentStatus;
+  isVisible?: CommentVisibilityStatus;
   statusText?: string;
   replyCount?: number;
   likeCount?: number;

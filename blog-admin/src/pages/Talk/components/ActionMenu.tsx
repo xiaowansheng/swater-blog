@@ -9,6 +9,7 @@ import {
 } from '@ant-design/icons'
 import { Talk, TalkStatus } from '@/types'
 import { updateTalk } from '@/api/talk'
+import { TopStatus } from '@/types/enums'
 
 interface ActionMenuProps {
   talk: Talk
@@ -30,10 +31,10 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ talk, onEdit, onDelete, onRefre
       await updateTalk(talk.id, {
         content: talk.content,
         images: talk.images,
-        isTop: talk.isTop === 1 ? 0 : 1,
+        isTop: talk.isTop === TopStatus.PINNED ? TopStatus.NORMAL : TopStatus.PINNED,
         status: talk.status,
       })
-      message.success(talk.isTop === 1 ? '已取消置顶' : '已置顶')
+      message.success(talk.isTop === TopStatus.PINNED ? '已取消置顶' : '已置顶')
       onRefresh()
     } catch (error) {
       message.error('操作失败')
@@ -91,8 +92,8 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ talk, onEdit, onDelete, onRefre
     },
     {
       key: 'top',
-      icon: talk.isTop === 1 ? <VerticalAlignBottomOutlined /> : <VerticalAlignTopOutlined />,
-      label: talk.isTop === 1 ? '取消置顶' : '置顶',
+      icon: talk.isTop === TopStatus.PINNED ? <VerticalAlignBottomOutlined /> : <VerticalAlignTopOutlined />,
+      label: talk.isTop === TopStatus.PINNED ? '取消置顶' : '置顶',
       onClick: handleTopChange,
     },
     // 只有非草稿状态才显示上架/下架选项

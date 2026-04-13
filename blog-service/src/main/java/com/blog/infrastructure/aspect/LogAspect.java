@@ -9,6 +9,7 @@ import com.blog.modules.system.log.model.entity.LogOperation;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.modules.system.log.service.LogErrorService;
 import com.blog.modules.system.log.service.LogOperationService;
+import com.blog.shared.model.enums.OperationResultStatus;
 import com.blog.shared.util.IpUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.RequestUtil;
@@ -105,7 +106,7 @@ public class LogAspect {
 
             // 更新操作日志（成功）
             logOperation.setElapsedTime(elapsedTime);
-            logOperation.setStatus(1); // 1-成功
+            logOperation.setStatus(OperationResultStatus.SUCCESS.getCode());
             if (result != null) {
                 try {
                     // 限制响应数据长度，避免数据过大
@@ -140,7 +141,7 @@ public class LogAspect {
             // 更新操作日志（失败）
             if (logOperation != null) {
                 logOperation.setElapsedTime(elapsedTime);
-                logOperation.setStatus(0); // 0-失败
+                logOperation.setStatus(OperationResultStatus.FAILED.getCode());
                 logOperation.setErrorMsg(e.getMessage());
 
                 // 异步保存操作日志

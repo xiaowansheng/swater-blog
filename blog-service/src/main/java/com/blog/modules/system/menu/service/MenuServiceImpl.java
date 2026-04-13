@@ -7,6 +7,7 @@ import com.blog.shared.exception.BusinessException;
 import com.blog.modules.system.role.mapper.RoleMenuMapper;
 import com.blog.modules.system.menu.mapper.SysMenuMapper;
 import com.blog.modules.system.menu.model.dto.MenuDTO;
+import com.blog.modules.system.menu.model.enums.MenuHiddenStatus;
 import com.blog.modules.system.role.model.entity.RoleMenu;
 import com.blog.modules.system.menu.model.entity.SysMenu;
 import com.blog.modules.system.menu.model.vo.MenuVO;
@@ -64,7 +65,7 @@ public class MenuServiceImpl implements MenuService {
 
         SysMenu menu = BeanUtil.copyProperties(dto, SysMenu.class);
         if (menu.getHidden() == null) {
-            menu.setHidden(0);
+            menu.setHidden(MenuHiddenStatus.VISIBLE.getCode());
         }
         if (menu.getSort() == null) {
             menu.setSort(0);

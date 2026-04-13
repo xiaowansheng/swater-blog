@@ -31,6 +31,12 @@ import {
 } from '@ant-design/icons'
 import { getCommentList, approveComment, rejectComment, deleteComment, setVisibleComment, setHiddenComment } from '@/api/comment'
 import { Comment } from '@/types'
+import {
+  COMMENT_STATUS_MAP,
+  COMMENT_VISIBILITY_STATUS_MAP,
+  CommentStatus,
+  CommentVisibilityStatus,
+} from '@/types/enums'
 import { getFullUrl } from '@/utils/format'
 
 const CommentPage: React.FC = () => {
@@ -39,14 +45,14 @@ const CommentPage: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
   const [filters, setFilters] = useState<{
-    status: number | undefined
+    status: CommentStatus | undefined
     keyword: string
     id: number | undefined
     parentId: number | undefined
     rootId: number | undefined
     targetType: string | undefined
     targetId: number | undefined
-    isVisible: number | undefined
+    isVisible: CommentVisibilityStatus | undefined
     country: string
     province: string
     city: string
@@ -130,9 +136,9 @@ const CommentPage: React.FC = () => {
     }
   }
 
-  const handleToggleVisible = async (id: number, visible: number) => {
+  const handleToggleVisible = async (id: number, visible: CommentVisibilityStatus) => {
     try {
-      if (visible === 1) {
+      if (visible === CommentVisibilityStatus.VISIBLE) {
         await setHiddenComment(id)
         message.success('已隐藏')
       } else {
@@ -146,20 +152,40 @@ const CommentPage: React.FC = () => {
     }
   }
 
-  const getStatusTag = (status: number) => {
-    const statusMap: Record<number, { color: string; text: string }> = {
-      0: { color: 'warning', text: '待审核' },
-      1: { color: 'success', text: '已通过' },
-      2: { color: 'error', text: '已拒绝' },
-    }
-    const { color, text } = statusMap[status] || { color: 'default', text: '未知' }
-    return <Tag color={color}>{text}</Tag>
+  const getStatusTag = (status: CommentStatus) => {
+    const statusConfig = COMMENT_STATUS_MAP[status as keyof typeof COMMENT_STATUS_MAP]
+    const { color, label } = statusConfig || { color: 'default', label: '未知' }
+    return <Tag color={color}>{label}</Tag>
+  }
+
+  const getVisibilityTag = (isVisible: CommentVisibilityStatus) => {
+    const visibilityConfig =
+      COMMENT_VISIBILITY_STATUS_MAP[isVisible as keyof typeof COMMENT_VISIBILITY_STATUS_MAP]
+    const { color, label } = visibilityConfig || { color: 'default', label: '未知' }
+    const icon = isVisible === CommentVisibilityStatus.VISIBLE ? <EyeOutlined /> : <EyeInvisibleOutlined />
+
+    return (
+      <Tag icon={icon} color={color}>
+        {label}
+      </Tag>
+    )
   }
 
   const showDetail = (comment: Comment) => {
     setCurrentComment(comment)
     setDetailVisible(true)
   }
+
+  const getCommentStatus = (comment: Comment) => comment.status
+
+  const getVisibilityStatus = (comment: Comment) =>
+    comment.isVisible ?? CommentVisibilityStatus.HIDDEN
+
+  const isPendingComment = (comment: Comment) =>
+    getCommentStatus(comment) === CommentStatus.PENDING
+
+  const isVisibleComment = (comment: Comment) =>
+    getVisibilityStatus(comment) === CommentVisibilityStatus.VISIBLE
 
   const columns = [
     {
@@ -310,13 +336,8 @@ const CommentPage: React.FC = () => {
       width: 120,
       render: (_: any, record: Comment) => (
         <Space direction="vertical" size="small">
-          {getStatusTag(record.status)}
-          <Tag
-            icon={record.isVisible === 1 ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-            color={record.isVisible === 1 ? 'success' : 'default'}
-          >
-            {record.isVisible === 1 ? '可见' : '隐藏'}
-          </Tag>
+          {getStatusTag(getCommentStatus(record))}
+          {getVisibilityTag(getVisibilityStatus(record))}
         </Space>
       ),
     },
@@ -332,12 +353,12 @@ const CommentPage: React.FC = () => {
       width: 250,
       render: (_: any, record: Comment) => (
         <Space size="small">
-          <Tooltip title={record.isVisible === 1 ? '设置为隐藏' : '设置为可见'}>
+          <Tooltip title={isVisibleComment(record) ? '设置为隐藏' : '设置为可见'}>
             <Button
               type="text"
-              icon={record.isVisible === 1 ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-              className={record.isVisible === 1 ? 'text-gray-500' : 'text-green-500'}
-              onClick={() => handleToggleVisible(record.id, record.isVisible!)}
+              icon={isVisibleComment(record) ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+              className={isVisibleComment(record) ? 'text-gray-500' : 'text-green-500'}
+              onClick={() => handleToggleVisible(record.id, getVisibilityStatus(record))}
             />
           </Tooltip>
           <Tooltip title="查看详情">
@@ -347,7 +368,7 @@ const CommentPage: React.FC = () => {
               onClick={() => showDetail(record)}
             />
           </Tooltip>
-          {record.status === 0 && (
+          {isPendingComment(record) && (
             <>
               <Popconfirm title="确定通过这条评论吗？" onConfirm={() => handleApprove(record.id)}>
                 <Tooltip title="通过">
@@ -390,9 +411,9 @@ const CommentPage: React.FC = () => {
             style={{ width: 120 }}
             allowClear
           >
-            <Select.Option value={0}>待审核</Select.Option>
-            <Select.Option value={1}>已通过</Select.Option>
-            <Select.Option value={2}>已拒绝</Select.Option>
+            <Select.Option value={CommentStatus.PENDING}>待审核</Select.Option>
+            <Select.Option value={CommentStatus.APPROVED}>已通过</Select.Option>
+            <Select.Option value={CommentStatus.REJECTED}>已拒绝</Select.Option>
           </Select>
           <Select
             placeholder="评论类型"
@@ -411,8 +432,8 @@ const CommentPage: React.FC = () => {
             style={{ width: 120 }}
             allowClear
           >
-            <Select.Option value={1}>可见</Select.Option>
-            <Select.Option value={0}>隐藏</Select.Option>
+            <Select.Option value={CommentVisibilityStatus.VISIBLE}>可见</Select.Option>
+            <Select.Option value={CommentVisibilityStatus.HIDDEN}>隐藏</Select.Option>
           </Select>
           <Input
             placeholder="搜索评论内容"
@@ -590,16 +611,11 @@ const CommentPage: React.FC = () => {
                 </div>
               </Descriptions.Item>
               <Descriptions.Item label="评论状态">
-                {getStatusTag(currentComment.status)}
+                {getStatusTag(getCommentStatus(currentComment))}
               </Descriptions.Item>
               {currentComment.isVisible !== undefined && (
                 <Descriptions.Item label="可见状态">
-                  <Tag
-                    icon={currentComment.isVisible === 1 ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-                    color={currentComment.isVisible === 1 ? 'success' : 'default'}
-                  >
-                    {currentComment.isVisible === 1 ? '可见' : '隐藏'}
-                  </Tag>
+                  {getVisibilityTag(getVisibilityStatus(currentComment))}
                 </Descriptions.Item>
               )}
               {currentComment.parentId && (
@@ -646,16 +662,16 @@ const CommentPage: React.FC = () => {
             <Space>
               {currentComment.isVisible !== undefined && (
                 <Button
-                  icon={currentComment.isVisible === 1 ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                  icon={isVisibleComment(currentComment) ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                   onClick={() => {
-                    handleToggleVisible(currentComment.id, currentComment.isVisible!)
+                    handleToggleVisible(currentComment.id, getVisibilityStatus(currentComment))
                     setDetailVisible(false)
                   }}
                 >
-                  {currentComment.isVisible === 1 ? '设置为隐藏' : '设置为可见'}
+                  {isVisibleComment(currentComment) ? '设置为隐藏' : '设置为可见'}
                 </Button>
               )}
-              {currentComment.status === 0 && (
+              {isPendingComment(currentComment) && (
                 <>
                   <Popconfirm
                     title="确定通过这条评论吗？"

@@ -1,5 +1,6 @@
 import request from './request'
 import { FriendLink } from '@/types'
+import { FriendLinkReviewStatus, FriendLinkVisibilityStatus } from '@/types/enums'
 
 export interface FriendLinkDTO {
   name: string
@@ -8,8 +9,8 @@ export interface FriendLinkDTO {
   description: string
   author: string
   sort?: number
-  reviewStatus?: number
-  isVisible?: number
+  reviewStatus?: FriendLinkReviewStatus
+  isVisible?: FriendLinkVisibilityStatus
 }
 
 export const getFriendLinkList = (params?: {
@@ -19,8 +20,8 @@ export const getFriendLinkList = (params?: {
   author?: string
   email?: string
   url?: string
-  reviewStatus?: number
-  isVisible?: number
+  reviewStatus?: FriendLinkReviewStatus
+  isVisible?: FriendLinkVisibilityStatus
 }): Promise<FriendLink[]> => {
   return request.get('/admin/friend-link/list', { params })
 }

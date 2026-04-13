@@ -12,6 +12,7 @@ import {
 import { getTalkList, deleteTalk } from '@/api/talk'
 import { getAuthorConfig } from '@/api/config'
 import { Talk, TalkStatus, TALK_STATUS_MAP } from '@/types'
+import { TopStatus } from '@/types/enums'
 import { getFullUrl } from '@/utils/format'
 import TalkContent from './components/TalkContent'
 import TalkImages from './components/TalkImages'
@@ -32,7 +33,7 @@ const TalkPage: React.FC = () => {
     talkKey?: string
     keyword?: string
     status?: string
-    isTop?: number
+    isTop?: TopStatus
   }>({})
   const [authorInfo, setAuthorInfo] = useState<AuthorInfo>({ name: '', avatar: '' })
 
@@ -146,8 +147,8 @@ const TalkPage: React.FC = () => {
             style={{ width: 120 }}
             allowClear
           >
-            <Select.Option value={1}>已置顶</Select.Option>
-            <Select.Option value={0}>未置顶</Select.Option>
+            <Select.Option value={TopStatus.PINNED}>已置顶</Select.Option>
+            <Select.Option value={TopStatus.NORMAL}>未置顶</Select.Option>
           </Select>
           <Input
             placeholder="搜索说说内容"
@@ -203,7 +204,7 @@ const TalkPage: React.FC = () => {
                       <div className="flex flex-col">
                         <span className="font-medium text-gray-800">{authorInfo.name}</span>
                         <Space size={4}>
-                          {talk.isTop === 1 && (
+                          {talk.isTop === TopStatus.PINNED && (
                             <Tag color="red" icon={<VerticalAlignTopOutlined />} className="mb-0">
                               置顶
                             </Tag>

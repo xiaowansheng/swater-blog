@@ -1,5 +1,6 @@
 import request from './request'
 import { Menu } from '@/types'
+import { EnableStatus } from '@/types/enums'
 
 export interface MenuDTO {
   name: string
@@ -8,8 +9,8 @@ export interface MenuDTO {
   icon?: string
   parentId?: number
   sort?: number
-  visible?: number
-  status?: number
+  visible?: EnableStatus
+  status?: EnableStatus
 }
 
 export const getMenuList = (): Promise<Menu[]> => {

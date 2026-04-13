@@ -1,10 +1,11 @@
 import request from './request'
 import { Talk, PageResult } from '@/types'
+import { TopStatus } from '@/types/enums'
 
 export interface TalkDTO {
   content: string
   images?: string[]
-  isTop?: number
+  isTop?: TopStatus
   status?: string
 }
 
@@ -15,7 +16,7 @@ export const getTalkList = (params: {
   talkKey?: string
   keyword?: string
   status?: string
-  isTop?: number
+  isTop?: TopStatus
 }): Promise<PageResult<Talk>> => {
   return request.get('/admin/moment/list', { params })
 }

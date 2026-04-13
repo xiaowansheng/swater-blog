@@ -2,6 +2,8 @@ package com.blog.modules.comment.service.impl;
 import com.blog.modules.comment.event.CommentApprovedEvent;
 import com.blog.modules.comment.event.CommentDeletedEvent;
 import com.blog.modules.comment.event.CommentUpdatedEvent;
+import com.blog.modules.comment.model.enums.CommentStatus;
+import com.blog.modules.comment.model.enums.CommentVisibilityStatus;
 import com.blog.shared.exception.BusinessException;
 import com.blog.modules.comment.mapper.CommentMapper;
 import com.blog.modules.comment.model.entity.Comment;
@@ -32,8 +34,8 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         if (comment == null) {
             throw new BusinessException("评论不存在");
         }
-        comment.setStatus(1);
-        comment.setIsVisible(1); // 审核通过时同时设置为可见
+        comment.setStatus(CommentStatus.APPROVED.getCode());
+        comment.setIsVisible(CommentVisibilityStatus.VISIBLE.getCode());
         commentMapper.updateById(comment);
 
         Comment approvedComment = commentMapper.selectById(id);
@@ -47,7 +49,8 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         if (comment == null) {
             throw new BusinessException("评论不存在");
         }
-        comment.setStatus(0);
+        comment.setStatus(CommentStatus.REJECTED.getCode());
+        comment.setIsVisible(CommentVisibilityStatus.HIDDEN.getCode());
         commentMapper.updateById(comment);
         
         Comment updatedComment = commentMapper.selectById(id);
@@ -77,7 +80,7 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         if (comment == null) {
             throw new BusinessException("评论不存在");
         }
-        comment.setIsVisible(1);
+        comment.setIsVisible(CommentVisibilityStatus.VISIBLE.getCode());
         commentMapper.updateById(comment);
 
         Comment updatedComment = commentMapper.selectById(id);
@@ -91,7 +94,7 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         if (comment == null) {
             throw new BusinessException("评论不存在");
         }
-        comment.setIsVisible(0);
+        comment.setIsVisible(CommentVisibilityStatus.HIDDEN.getCode());
         commentMapper.updateById(comment);
 
         Comment updatedComment = commentMapper.selectById(id);

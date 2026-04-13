@@ -2,6 +2,7 @@ import { Badge, Dropdown, List, Empty, Button, Spin, Tooltip } from 'antd'
 import { BellOutlined, CheckOutlined, WifiOutlined, DisconnectOutlined, LoadingOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useNotificationStore } from '@/store/notification'
 import { useWebSocketStore } from '@/store/websocket'
+import { NotificationReadStatus } from '@/types/enums'
 import { formatDate } from '@/utils/format'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -185,7 +186,7 @@ const NotificationBell: React.FC = () => {
           renderItem={(item) => (
             <List.Item
               className={`cursor-pointer hover:bg-gray-50 transition-colors ${
-                item.isRead === 0 ? 'bg-blue-50' : ''
+                item.isRead === NotificationReadStatus.UNREAD ? 'bg-blue-50' : ''
               }`}
               onClick={() => handleMarkAsRead(item.id)}
             >
@@ -198,7 +199,7 @@ const NotificationBell: React.FC = () => {
                     {formatDate(item.createTime)}
                   </div>
                 </div>
-                {item.isRead === 0 && (
+                {item.isRead === NotificationReadStatus.UNREAD && (
                   <span className="flex-shrink-0 mt-2 w-2 h-2 bg-blue-500 rounded-full" />
                 )}
               </div>

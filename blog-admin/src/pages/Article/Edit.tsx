@@ -8,6 +8,7 @@ import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
 import { uploadFile } from '@/api/file'
 import { Category, Tag, ArticleStatus, ArticleType } from '@/types'
+import { TopStatus } from '@/types/enums'
 import { usePageTab } from '@/hooks/usePageTab'
 import MarkdownEditor from '@/components/common/MarkdownEditor'
 import CategorySelector from './components/CategorySelector'
@@ -145,7 +146,7 @@ const ArticleEdit: React.FC = () => {
       originalTitle: values.originalTitle,
       originalUrl: values.originalUrl,
       status: values.publishStatus || ArticleStatus.DRAFT,
-      isTop: values.isTop ? 1 : 0,
+      isTop: values.isTop ? TopStatus.PINNED : TopStatus.NORMAL,
       tagIds,
       tagNames,
     }
@@ -581,7 +582,7 @@ const ArticleEdit: React.FC = () => {
                   <Radio.Group options={articleTypeOptions} optionType="button" buttonStyle="solid" />
                 </Form.Item>
 
-                <Form.Item name="publishStatus" label="发布状态" initialValue={1}>
+                <Form.Item name="publishStatus" label="发布状态" initialValue={ArticleStatus.PUBLISHED}>
                   <Radio.Group options={articleStatusOptions} optionType="button" buttonStyle="solid" />
                 </Form.Item>
 

@@ -6,6 +6,8 @@ import com.blog.modules.friendlink.event.FriendLinkCreatedEvent;
 import com.blog.modules.friendlink.mapper.FriendLinkMapper;
 import com.blog.modules.friendlink.model.dto.FriendLinkApplicationDTO;
 import com.blog.modules.friendlink.model.entity.FriendLink;
+import com.blog.modules.friendlink.model.enums.ReviewStatus;
+import com.blog.modules.friendlink.model.enums.VisibilityStatus;
 import com.blog.modules.message.service.MessageVerificationService;
 import com.blog.shared.exception.BusinessException;
 import com.blog.shared.util.BeanUtil;
@@ -63,8 +65,8 @@ public class FriendLinkPublicServiceImpl implements FriendLinkPublicService {
 
         // 设置默认值
         friendLink.setUserId(userId);
-        friendLink.setIsVisible(0);         // 未审核前不显示
-        friendLink.setReviewStatus(0);      // 待审核状态
+        friendLink.setIsVisible(VisibilityStatus.HIDDEN.getCode());
+        friendLink.setReviewStatus(ReviewStatus.PENDING.getCode());
         friendLink.setSort(0);
 
         friendLinkMapper.insert(friendLink);

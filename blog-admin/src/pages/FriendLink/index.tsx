@@ -3,6 +3,12 @@ import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Ava
 import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined, SearchOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons'
 import { getFriendLinkList, createFriendLink, updateFriendLink, deleteFriendLink, approveFriendLink, rejectFriendLink } from '@/api/friendLink'
 import { FriendLink } from '@/types'
+import {
+  FRIEND_LINK_REVIEW_STATUS_MAP,
+  FRIEND_LINK_VISIBILITY_STATUS_MAP,
+  FriendLinkReviewStatus,
+  FriendLinkVisibilityStatus,
+} from '@/types/enums'
 
 const FriendLinkPage: React.FC = () => {
   const [links, setLinks] = useState<FriendLink[]>([])
@@ -17,8 +23,8 @@ const FriendLinkPage: React.FC = () => {
     author: string
     email: string
     url: string
-    reviewStatus: number | undefined
-    isVisible: number | undefined
+    reviewStatus: FriendLinkReviewStatus | undefined
+    isVisible: FriendLinkVisibilityStatus | undefined
   }>({
     id: undefined,
     userId: undefined,
@@ -115,6 +121,25 @@ const FriendLinkPage: React.FC = () => {
     }
   }
 
+  const getReviewStatusTag = (reviewStatus: FriendLinkReviewStatus) => {
+    const statusConfig = FRIEND_LINK_REVIEW_STATUS_MAP[reviewStatus as keyof typeof FRIEND_LINK_REVIEW_STATUS_MAP]
+    const { label, color } = statusConfig || { label: '未知', color: 'default' }
+    return <Tag color={color}>{label}</Tag>
+  }
+
+  const getVisibilityTag = (isVisible: FriendLinkVisibilityStatus) => {
+    const visibilityConfig =
+      FRIEND_LINK_VISIBILITY_STATUS_MAP[isVisible as keyof typeof FRIEND_LINK_VISIBILITY_STATUS_MAP]
+    const { label, color } = visibilityConfig || { label: '未知', color: 'default' }
+    return <Tag color={color}>{label}</Tag>
+  }
+
+  const isPendingLink = (link: FriendLink) =>
+    link.reviewStatus === FriendLinkReviewStatus.PENDING
+
+  const isRejectedLink = (link: FriendLink) =>
+    link.reviewStatus === FriendLinkReviewStatus.REJECTED
+
   const columns = [
     {
       title: 'ID',
@@ -168,26 +193,14 @@ const FriendLinkPage: React.FC = () => {
       dataIndex: 'reviewStatus',
       key: 'reviewStatus',
       width: 100,
-      render: (reviewStatus: number) => {
-        const statusConfig = {
-          0: { text: '待审核', color: 'warning' },
-          1: { text: '已审核', color: 'success' },
-          2: { text: '已拒绝', color: 'error' },
-        }
-        const config = statusConfig[reviewStatus as keyof typeof statusConfig] || { text: '未知', color: 'default' }
-        return <Tag color={config.color}>{config.text}</Tag>
-      },
+      render: (reviewStatus: FriendLinkReviewStatus) => getReviewStatusTag(reviewStatus),
     },
     {
       title: '可见状态',
       dataIndex: 'isVisible',
       key: 'isVisible',
       width: 100,
-      render: (isVisible: number) => (
-        <Tag color={isVisible === 1 ? 'processing' : 'default'}>
-          {isVisible === 1 ? '可见' : '不可见'}
-        </Tag>
-      ),
+      render: (isVisible: FriendLinkVisibilityStatus) => getVisibilityTag(isVisible),
     },
     {
       title: '创建时间',
@@ -209,7 +222,7 @@ const FriendLinkPage: React.FC = () => {
             />
           </Tooltip>
 
-          {record.reviewStatus === 0 && (
+          {isPendingLink(record) && (
             <>
               <Popconfirm
                 title="确定通过这条友链申请吗？"
@@ -242,7 +255,7 @@ const FriendLinkPage: React.FC = () => {
             </>
           )}
 
-          {record.reviewStatus === 2 && (
+          {isRejectedLink(record) && (
             <Popconfirm
               title="确定通过这条友链申请吗？"
               onConfirm={() => handleApprove(record.id)}
@@ -314,9 +327,9 @@ const FriendLinkPage: React.FC = () => {
             style={{ width: 120 }}
             allowClear
           >
-            <Select.Option value={0}>待审核</Select.Option>
-            <Select.Option value={1}>已审核</Select.Option>
-            <Select.Option value={2}>已拒绝</Select.Option>
+            <Select.Option value={FriendLinkReviewStatus.PENDING}>待审核</Select.Option>
+            <Select.Option value={FriendLinkReviewStatus.APPROVED}>已审核</Select.Option>
+            <Select.Option value={FriendLinkReviewStatus.REJECTED}>已拒绝</Select.Option>
           </Select>
           <Select
             placeholder="可见状态"
@@ -325,8 +338,8 @@ const FriendLinkPage: React.FC = () => {
             style={{ width: 120 }}
             allowClear
           >
-            <Select.Option value={1}>可见</Select.Option>
-            <Select.Option value={0}>不可见</Select.Option>
+            <Select.Option value={FriendLinkVisibilityStatus.VISIBLE}>可见</Select.Option>
+            <Select.Option value={FriendLinkVisibilityStatus.HIDDEN}>不可见</Select.Option>
           </Select>
           <Input
             placeholder="友链ID"
@@ -410,22 +423,22 @@ const FriendLinkPage: React.FC = () => {
           <Form.Item
             name="reviewStatus"
             label="审核状态"
-            initialValue={0}
+            initialValue={FriendLinkReviewStatus.PENDING}
           >
             <Select>
-              <Select.Option value={0}>待审核</Select.Option>
-              <Select.Option value={1}>已审核</Select.Option>
-              <Select.Option value={2}>已拒绝</Select.Option>
+              <Select.Option value={FriendLinkReviewStatus.PENDING}>待审核</Select.Option>
+              <Select.Option value={FriendLinkReviewStatus.APPROVED}>已审核</Select.Option>
+              <Select.Option value={FriendLinkReviewStatus.REJECTED}>已拒绝</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item
             name="isVisible"
             label="可见状态"
-            initialValue={0}
+            initialValue={FriendLinkVisibilityStatus.HIDDEN}
           >
             <Select>
-              <Select.Option value={0}>不可见</Select.Option>
-              <Select.Option value={1}>可见</Select.Option>
+              <Select.Option value={FriendLinkVisibilityStatus.HIDDEN}>不可见</Select.Option>
+              <Select.Option value={FriendLinkVisibilityStatus.VISIBLE}>可见</Select.Option>
             </Select>
           </Form.Item>
         </Form>

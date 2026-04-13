@@ -6,6 +6,8 @@ import com.blog.modules.system.role.mapper.RoleMapper;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.system.role.model.entity.Role;
 import com.blog.modules.user.model.entity.User;
+import com.blog.shared.model.enums.DisabledFlag;
+import com.blog.shared.model.enums.EnableStatus;
 import com.blog.shared.util.PasswordUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,8 +64,8 @@ public class DataInitializer implements ApplicationRunner {
             admin.setIpAddressSignup("127.0.0.1");
             admin.setIpSourceSignup("本地");
             admin.setRoleKey("admin");
-            admin.setStatus(1);
-            admin.setDisabled(0);
+            admin.setStatus(EnableStatus.ENABLED.getCode());
+            admin.setDisabled(DisabledFlag.NO.getCode());
             userMapper.insert(admin);
             log.info("初始化管理员账号成功，用户名: admin，密码: 123456，用户ID: {}", admin.getId());
         } else {
