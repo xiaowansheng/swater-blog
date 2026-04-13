@@ -6,8 +6,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.blog.shared.PageResult;
 import com.blog.modules.statistics.visitor.mapper.VisitorMapper;
+import com.blog.modules.statistics.track.mapper.VisitorTrackAdminMapper;
+import com.blog.modules.statistics.visitor.model.vo.VisitorPageViewVO;
+import com.blog.modules.statistics.visitor.model.vo.VisitorSessionVO;
 import com.blog.modules.statistics.visitor.model.entity.Visitor;
 import com.blog.modules.statistics.visitor.model.vo.VisitorStatisticsVO;
+import com.blog.modules.statistics.visitor.model.vo.VisitorTrackingDetailVO;
 import com.blog.modules.statistics.visitor.model.vo.VisitorVO;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.PageUtil;
@@ -16,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +32,9 @@ public class VisitorServiceImpl implements VisitorService {
 
     @Autowired
     private TrackStatisticsMapper trackStatisticsMapper;
+
+    @Autowired
+    private VisitorTrackAdminMapper visitorTrackAdminMapper;
 
     @Override
     public PageResult<VisitorVO> list(Long page, Long size, String ip, String country, String province, String city, String deviceType, String osName, String browserName, String trafficSource) {
@@ -128,8 +136,35 @@ public class VisitorServiceImpl implements VisitorService {
         return statistics;
     }
 
+    @Override
+    public VisitorTrackingDetailVO getTrackingDetail(Long visitorId, Integer limit) {
+        VisitorTrackingDetailVO detail = new VisitorTrackingDetailVO();
+        detail.setVisitorId(visitorId);
+
+        if (visitorId == null) {
+            detail.setLatestSessions(Collections.emptyList());
+            return detail;
+        }
+
+        int safeLimit = limit != null && limit > 0 && limit <= 100 ? limit : 20;
+        VisitorSessionVO firstSession = visitorTrackAdminMapper.selectFirstSession(visitorId);
+        List<VisitorSessionVO> latestSessions = visitorTrackAdminMapper.selectLatestSessions(visitorId, safeLimit);
+
+        detail.setFirstSession(firstSession);
+        detail.setLatestSessions(latestSessions != null ? latestSessions : Collections.emptyList());
+        return detail;
+    }
+
+    @Override
+    public List<VisitorPageViewVO> getSessionPages(Long visitorId, String sessionId) {
+        if (visitorId == null || sessionId == null || sessionId.isBlank()) {
+            return Collections.emptyList();
+        }
+        List<VisitorPageViewVO> pages = visitorTrackAdminMapper.selectSessionPages(visitorId, sessionId);
+        return pages != null ? pages : Collections.emptyList();
+    }
+
     private long zeroIfNull(Long value) {
         return value != null ? value : 0L;
     }
 }
-

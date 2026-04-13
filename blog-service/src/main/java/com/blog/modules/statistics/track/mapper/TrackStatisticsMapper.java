@@ -2,6 +2,8 @@ package com.blog.modules.statistics.track.mapper;
 
 
 import com.blog.modules.statistics.track.model.vo.AdminStatisticsTopPageVO;
+import com.blog.modules.statistics.track.model.vo.AdminStatisticsLandingPageVO;
+import com.blog.modules.statistics.track.model.vo.AdminStatisticsTrafficSourceVO;
 import com.blog.modules.statistics.track.model.vo.AdminStatisticsTrendPointVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -187,6 +189,136 @@ public interface TrackStatisticsMapper {
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
             @Param("limit") Integer limit
+    );
+
+    @Select("""
+            SELECT
+                CASE
+                    WHEN vs.utm_source IS NOT NULL AND vs.utm_source <> '' THEN 'UTM'
+                    WHEN vs.entry_referer IS NULL OR vs.entry_referer = '' THEN 'DIRECT'
+                    WHEN LOWER(vs.entry_referer) LIKE '%google.%'
+                      OR LOWER(vs.entry_referer) LIKE '%bing.%'
+                      OR LOWER(vs.entry_referer) LIKE '%baidu.%'
+                      OR LOWER(vs.entry_referer) LIKE '%yahoo.%'
+                    THEN 'SEARCH'
+                    ELSE 'REFERRAL'
+                END AS source,
+                COUNT(*) AS sessions,
+                COUNT(DISTINCT vs.visitor_id) AS uv
+            FROM visitor_session vs
+            WHERE vs.deleted = 0
+              AND vs.started_at >= #{start}
+              AND vs.started_at <= #{end}
+            GROUP BY source
+            ORDER BY sessions DESC, uv DESC
+            """)
+    List<AdminStatisticsTrafficSourceVO> trafficSources(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    @Select("""
+            SELECT
+                t.pageKey AS pageKey,
+                MIN(t.landingPageUrl) AS landingPageUrl,
+                COUNT(*) AS sessions,
+                COUNT(DISTINCT t.visitorId) AS uv
+            FROM (
+                SELECT
+                    vs.visitor_id AS visitorId,
+                    vs.entry_page_key AS pageKey,
+                    (
+                        SELECT pv.page_url
+                        FROM page_view pv
+                        WHERE pv.deleted = 0
+                          AND pv.visitor_id = vs.visitor_id
+                          AND pv.session_id = vs.session_id
+                          AND pv.page_key = vs.entry_page_key
+                        ORDER BY pv.occurred_at ASC, pv.id ASC
+                        LIMIT 1
+                    ) AS landingPageUrl,
+                    CASE
+                        WHEN vs.utm_source IS NOT NULL AND vs.utm_source <> '' THEN 'UTM'
+                        WHEN vs.entry_referer IS NULL OR vs.entry_referer = '' THEN 'DIRECT'
+                        WHEN LOWER(vs.entry_referer) LIKE '%google.%'
+                          OR LOWER(vs.entry_referer) LIKE '%bing.%'
+                          OR LOWER(vs.entry_referer) LIKE '%baidu.%'
+                          OR LOWER(vs.entry_referer) LIKE '%yahoo.%'
+                        THEN 'SEARCH'
+                        ELSE 'REFERRAL'
+                    END AS source
+                FROM visitor_session vs
+                WHERE vs.deleted = 0
+                  AND vs.started_at >= #{start}
+                  AND vs.started_at <= #{end}
+                  AND vs.entry_page_key IS NOT NULL
+                  AND vs.entry_page_key <> ''
+            ) t
+            WHERE #{source} IS NULL
+               OR #{source} = ''
+               OR #{source} = 'ALL'
+               OR t.source = #{source}
+            GROUP BY t.pageKey
+            ORDER BY sessions DESC, uv DESC
+            LIMIT #{limit}
+            """)
+    List<AdminStatisticsLandingPageVO> topLandingPagesOrderBySessions(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("limit") Integer limit,
+            @Param("source") String source
+    );
+
+    @Select("""
+            SELECT
+                t.pageKey AS pageKey,
+                MIN(t.landingPageUrl) AS landingPageUrl,
+                COUNT(*) AS sessions,
+                COUNT(DISTINCT t.visitorId) AS uv
+            FROM (
+                SELECT
+                    vs.visitor_id AS visitorId,
+                    vs.entry_page_key AS pageKey,
+                    (
+                        SELECT pv.page_url
+                        FROM page_view pv
+                        WHERE pv.deleted = 0
+                          AND pv.visitor_id = vs.visitor_id
+                          AND pv.session_id = vs.session_id
+                          AND pv.page_key = vs.entry_page_key
+                        ORDER BY pv.occurred_at ASC, pv.id ASC
+                        LIMIT 1
+                    ) AS landingPageUrl,
+                    CASE
+                        WHEN vs.utm_source IS NOT NULL AND vs.utm_source <> '' THEN 'UTM'
+                        WHEN vs.entry_referer IS NULL OR vs.entry_referer = '' THEN 'DIRECT'
+                        WHEN LOWER(vs.entry_referer) LIKE '%google.%'
+                          OR LOWER(vs.entry_referer) LIKE '%bing.%'
+                          OR LOWER(vs.entry_referer) LIKE '%baidu.%'
+                          OR LOWER(vs.entry_referer) LIKE '%yahoo.%'
+                        THEN 'SEARCH'
+                        ELSE 'REFERRAL'
+                    END AS source
+                FROM visitor_session vs
+                WHERE vs.deleted = 0
+                  AND vs.started_at >= #{start}
+                  AND vs.started_at <= #{end}
+                  AND vs.entry_page_key IS NOT NULL
+                  AND vs.entry_page_key <> ''
+            ) t
+            WHERE #{source} IS NULL
+               OR #{source} = ''
+               OR #{source} = 'ALL'
+               OR t.source = #{source}
+            GROUP BY t.pageKey
+            ORDER BY uv DESC, sessions DESC
+            LIMIT #{limit}
+            """)
+    List<AdminStatisticsLandingPageVO> topLandingPagesOrderByUv(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("limit") Integer limit,
+            @Param("source") String source
     );
 
     @Select("""

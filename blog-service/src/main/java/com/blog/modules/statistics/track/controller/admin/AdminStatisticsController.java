@@ -3,6 +3,8 @@ package com.blog.modules.statistics.track.controller.admin;
 
 import com.blog.modules.statistics.track.model.vo.AdminStatisticsOverviewVO;
 import com.blog.modules.statistics.track.model.vo.AdminStatisticsTopPageVO;
+import com.blog.modules.statistics.track.model.vo.AdminStatisticsLandingPageVO;
+import com.blog.modules.statistics.track.model.vo.AdminStatisticsTrafficSourceVO;
 import com.blog.modules.statistics.track.model.vo.AdminStatisticsTrendVO;
 import com.blog.modules.statistics.track.service.AdminStatisticsService;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
@@ -53,6 +55,27 @@ public class AdminStatisticsController {
             @RequestParam(required = false) String orderBy
     ) {
         return Result.success(adminStatisticsService.topPages(start, end, limit, orderBy));
+    }
+
+    @GetMapping("/sources")
+    @ApiOperation(name = "来源分布", type = ApiOperationType.QUERY, description = "获取时间范围内来源分布")
+    public Result<List<AdminStatisticsTrafficSourceVO>> trafficSources(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
+    ) {
+        return Result.success(adminStatisticsService.trafficSources(start, end));
+    }
+
+    @GetMapping("/landing-pages/top")
+    @ApiOperation(name = "Top 落地页", type = ApiOperationType.QUERY, description = "获取时间范围内 Top 落地页")
+    public Result<List<AdminStatisticsLandingPageVO>> topLandingPages(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) String orderBy,
+            @RequestParam(required = false) String source
+    ) {
+        return Result.success(adminStatisticsService.topLandingPages(start, end, limit, orderBy, source));
     }
 }
 

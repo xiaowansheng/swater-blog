@@ -4,6 +4,8 @@ package com.blog.modules.statistics.track.service.impl;
 import com.blog.modules.statistics.track.mapper.TrackStatisticsMapper;
 import com.blog.modules.statistics.track.model.vo.AdminStatisticsOverviewVO;
 import com.blog.modules.statistics.track.model.vo.AdminStatisticsTopPageVO;
+import com.blog.modules.statistics.track.model.vo.AdminStatisticsLandingPageVO;
+import com.blog.modules.statistics.track.model.vo.AdminStatisticsTrafficSourceVO;
 import com.blog.modules.statistics.track.model.vo.AdminStatisticsTrendPointVO;
 import com.blog.modules.statistics.track.model.vo.AdminStatisticsTrendVO;
 import com.blog.modules.statistics.track.service.AdminStatisticsService;
@@ -90,6 +92,29 @@ public class AdminStatisticsServiceImpl implements AdminStatisticsService {
                 case "uv" -> trackStatisticsMapper.topPagesOrderByUv(start, end, safeLimit);
                 case "sessions" -> trackStatisticsMapper.topPagesOrderBySessions(start, end, safeLimit);
                 default -> trackStatisticsMapper.topPagesOrderByPv(start, end, safeLimit);
+            };
+        } catch (Exception e) {
+            throw toStatisticsException(e);
+        }
+    }
+
+    @Override
+    public List<AdminStatisticsTrafficSourceVO> trafficSources(LocalDateTime start, LocalDateTime end) {
+        try {
+            return trackStatisticsMapper.trafficSources(start, end);
+        } catch (Exception e) {
+            throw toStatisticsException(e);
+        }
+    }
+
+    @Override
+    public List<AdminStatisticsLandingPageVO> topLandingPages(LocalDateTime start, LocalDateTime end, Integer limit, String orderBy, String source) {
+        try {
+            int safeLimit = limit != null && limit > 0 && limit <= 200 ? limit : 20;
+            String normalized = StringUtils.hasText(orderBy) ? orderBy.trim() : "sessions";
+            return switch (normalized) {
+                case "uv" -> trackStatisticsMapper.topLandingPagesOrderByUv(start, end, safeLimit, source);
+                default -> trackStatisticsMapper.topLandingPagesOrderBySessions(start, end, safeLimit, source);
             };
         } catch (Exception e) {
             throw toStatisticsException(e);

@@ -5,13 +5,16 @@ import com.blog.shared.annotation.ApiOperation;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
+import com.blog.modules.statistics.visitor.model.vo.VisitorPageViewVO;
 import com.blog.modules.statistics.visitor.model.vo.VisitorStatisticsVO;
+import com.blog.modules.statistics.visitor.model.vo.VisitorTrackingDetailVO;
 import com.blog.modules.statistics.visitor.model.vo.VisitorVO;
 import com.blog.modules.statistics.visitor.service.VisitorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.util.List;
 @RestController
 @RequestMapping("/api/admin/visitor")
 @ApiOperation(name = "访客管理模块", description = "访客管理接口", open = false)
@@ -43,5 +46,21 @@ public class VisitorController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
         VisitorStatisticsVO statistics = visitorService.getStatistics(startDate, endDate);
         return Result.success(statistics);
+    }
+
+    @GetMapping("/tracking/{visitorId}")
+    @ApiOperation(name = "访客访问轨迹", type = ApiOperationType.QUERY, description = "查询访客首访会话和最近会话列表")
+    public Result<VisitorTrackingDetailVO> getTrackingDetail(
+            @PathVariable Long visitorId,
+            @RequestParam(required = false) Integer limit) {
+        return Result.success(visitorService.getTrackingDetail(visitorId, limit));
+    }
+
+    @GetMapping("/tracking/{visitorId}/sessions/{sessionId}/pages")
+    @ApiOperation(name = "访客会话页面路径", type = ApiOperationType.QUERY, description = "查询指定访客会话下的页面访问路径")
+    public Result<List<VisitorPageViewVO>> getSessionPages(
+            @PathVariable Long visitorId,
+            @PathVariable String sessionId) {
+        return Result.success(visitorService.getSessionPages(visitorId, sessionId));
     }
 }
