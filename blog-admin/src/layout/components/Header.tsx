@@ -22,7 +22,7 @@ const { Header: AntHeader } = Layout
 const Header: React.FC = () => {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
-  const { lockScreen } = useLockscreenStore()
+  const lockScreen = useLockscreenStore((state) => state.lockScreen)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   const handleLogout = async () => {

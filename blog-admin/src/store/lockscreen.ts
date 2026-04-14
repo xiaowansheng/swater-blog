@@ -3,16 +3,19 @@ import { persist } from 'zustand/middleware'
 
 interface LockscreenState {
   isLocked: boolean
+  lastActivityAt: number | null
   lockScreen: () => void
   unlockScreen: (password: string) => boolean
   getCorrectPassword: () => string
   resetLock: () => void
+  updateActivity: (timestamp?: number) => void
 }
 
 export const useLockscreenStore = create<LockscreenState>()(
   persist(
     (set, get) => ({
       isLocked: false,
+      lastActivityAt: null,
 
       lockScreen: () => {
         set({ isLocked: true })
@@ -21,7 +24,7 @@ export const useLockscreenStore = create<LockscreenState>()(
       unlockScreen: (password: string) => {
         const correctPassword = get().getCorrectPassword()
         if (password === correctPassword) {
-          set({ isLocked: false })
+          set({ isLocked: false, lastActivityAt: Date.now() })
           return true
         }
         return false
@@ -35,11 +38,19 @@ export const useLockscreenStore = create<LockscreenState>()(
       },
 
       resetLock: () => {
-        set({ isLocked: false })
+        set({ isLocked: false, lastActivityAt: Date.now() })
+      },
+
+      updateActivity: (timestamp = Date.now()) => {
+        set({ lastActivityAt: timestamp })
       },
     }),
     {
       name: 'lockscreen-storage',
+      partialize: (state) => ({
+        isLocked: state.isLocked,
+        lastActivityAt: state.lastActivityAt,
+      }),
     }
   )
 )

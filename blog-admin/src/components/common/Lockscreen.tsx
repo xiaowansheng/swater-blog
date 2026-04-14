@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { useLockscreenStore } from '@/store/lockscreen'
 
 const Lockscreen: React.FC = () => {
-  const { isLocked, unlockScreen } = useLockscreenStore()
+  const isLocked = useLockscreenStore((state) => state.isLocked)
+  const unlockScreen = useLockscreenStore((state) => state.unlockScreen)
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
