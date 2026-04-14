@@ -37,8 +37,6 @@ export const getDashboardStatistics = async (params?: {
   start?: string
   end?: string
   topPagesOrderBy?: 'pv' | 'uv' | 'sessions'
-  topLandingPagesOrderBy?: 'sessions' | 'uv'
-  topLandingPagesSource?: 'ALL' | 'DIRECT' | 'SEARCH' | 'REFERRAL' | 'UTM'
 }): Promise<DashboardStatistics> => {
   try {
     const end = params?.end ? dayjs(params.end) : dayjs().endOf('day')
@@ -46,8 +44,6 @@ export const getDashboardStatistics = async (params?: {
     const startStr = start.format('YYYY-MM-DDTHH:mm:ss')
     const endStr = end.format('YYYY-MM-DDTHH:mm:ss')
     const topPagesOrderBy = params?.topPagesOrderBy || 'pv'
-    const topLandingPagesOrderBy = params?.topLandingPagesOrderBy || 'sessions'
-    const topLandingPagesSource = params?.topLandingPagesSource || 'ALL'
     const dayKeys = generateDaysBetween(startStr, endStr)
 
     const [
@@ -68,8 +64,6 @@ export const getDashboardStatistics = async (params?: {
       articleCommentsTrendResp,
       talkCommentsTrendResp,
       topPages,
-      trafficSources,
-      topLandingPages,
     ] = await Promise.all([
       getArticleStatistics(),
       getCategoryList(),
@@ -88,8 +82,6 @@ export const getDashboardStatistics = async (params?: {
       getStatisticsTrendDaily({ metric: 'articleComments', start: startStr, end: endStr }),
       getStatisticsTrendDaily({ metric: 'talkComments', start: startStr, end: endStr }),
       getStatisticsTopPages({ start: startStr, end: endStr, limit: 10, orderBy: topPagesOrderBy }),
-      getStatisticsTrafficSources({ start: startStr, end: endStr }),
-      getStatisticsTopLandingPages({ start: startStr, end: endStr, limit: 10, orderBy: topLandingPagesOrderBy, source: topLandingPagesSource }),
     ])
 
     const articles = articlesResp.records || []
@@ -140,8 +132,6 @@ export const getDashboardStatistics = async (params?: {
       totalLikesTrend,
       totalCommentsTrend,
       topPages: topPages || [],
-      trafficSources: trafficSources || [],
-      topLandingPages: topLandingPages || [],
       topViewedArticles,
       topLikedArticles,
       categoryDistribution: [],
@@ -182,8 +172,6 @@ export const getDashboardStatistics = async (params?: {
       totalLikesTrend: [],
       totalCommentsTrend: [],
       topPages: [],
-      trafficSources: [],
-      topLandingPages: [],
       topViewedArticles: [],
       topLikedArticles: [],
       categoryDistribution: [],

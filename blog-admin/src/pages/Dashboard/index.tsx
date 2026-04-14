@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Row, Col, Card, Spin, List, Avatar, Tag, Space, Typography, DatePicker, Radio, Table, Tooltip, Select } from 'antd'
+import { Row, Col, Card, Spin, List, Avatar, Tag, Space, Typography, DatePicker, Radio, Table } from 'antd'
 import {
   FileTextOutlined,
   FolderOpenOutlined,
@@ -12,25 +12,14 @@ import {
   ArrowDownOutlined,
   LikeOutlined,
 } from '@ant-design/icons'
-import { getDashboardStatistics, getStatisticsTopLandingPages, getStatisticsTopPages } from '@/api/statistics'
-import { DashboardStatistics, LandingPageItem, TopPageItem } from '@/types'
+import { getDashboardStatistics, getStatisticsTopPages } from '@/api/statistics'
+import { DashboardStatistics, TopPageItem } from '@/types'
 import LineChart from '@/components/Chart/LineChart'
 import BarChart from '@/components/Chart/BarChart'
-import PieChart from '@/components/Chart/PieChart'
 import dayjs from 'dayjs'
 
 const { Title, Text } = Typography
 const { RangePicker } = DatePicker
-
-const getDisplayUrl = (value?: string, fallback?: string) => {
-  if (!value) return fallback || '-'
-  try {
-    const parsed = new URL(value)
-    return `${parsed.pathname}${parsed.search}${parsed.hash}` || parsed.href
-  } catch {
-    return value
-  }
-}
 
 const renderPageKey = (pageKey: string) => {
   const [type, ...rest] = String(pageKey || '').split(':')
@@ -79,15 +68,11 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [topPages, setTopPages] = useState<TopPageItem[]>([])
   const [topPagesLoading, setTopPagesLoading] = useState(false)
-  const [topLandingPages, setTopLandingPages] = useState<LandingPageItem[]>([])
-  const [topLandingPagesLoading, setTopLandingPagesLoading] = useState(false)
   const [range, setRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>(() => [
     dayjs().subtract(29, 'day'),
     dayjs(),
   ])
   const [topPagesOrderBy, setTopPagesOrderBy] = useState<'pv' | 'uv' | 'sessions'>('pv')
-  const [topLandingPagesOrderBy, setTopLandingPagesOrderBy] = useState<'sessions' | 'uv'>('sessions')
-  const [topLandingPagesSource, setTopLandingPagesSource] = useState<'ALL' | 'DIRECT' | 'SEARCH' | 'REFERRAL' | 'UTM'>('ALL')
 
   useEffect(() => {
     loadStatistics()
@@ -97,37 +82,18 @@ const Dashboard: React.FC = () => {
     loadTopPages()
   }, [topPagesOrderBy, range])
 
-  useEffect(() => {
-    loadTopLandingPages()
-  }, [topLandingPagesOrderBy, topLandingPagesSource, range])
-
   const loadStatistics = async () => {
     setLoading(true)
     try {
       const start = range[0].startOf('day').format('YYYY-MM-DDTHH:mm:ss')
       const end = range[1].endOf('day').format('YYYY-MM-DDTHH:mm:ss')
-      const data = await getDashboardStatistics({ start, end, topPagesOrderBy, topLandingPagesOrderBy, topLandingPagesSource })
+      const data = await getDashboardStatistics({ start, end, topPagesOrderBy })
       setStatistics(data)
       setTopPages(data.topPages || [])
-      setTopLandingPages(data.topLandingPages || [])
     } catch (error) {
       console.error('加载统计数据失败', error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const loadTopLandingPages = async () => {
-    setTopLandingPagesLoading(true)
-    try {
-      const start = range[0].startOf('day').format('YYYY-MM-DDTHH:mm:ss')
-      const end = range[1].endOf('day').format('YYYY-MM-DDTHH:mm:ss')
-      const data = await getStatisticsTopLandingPages({ start, end, limit: 10, orderBy: topLandingPagesOrderBy, source: topLandingPagesSource })
-      setTopLandingPages(data || [])
-    } catch (error) {
-      console.error('加载 Top 落地页失败', error)
-    } finally {
-      setTopLandingPagesLoading(false)
     }
   }
 
@@ -154,10 +120,6 @@ const Dashboard: React.FC = () => {
   }
 
   const overview = statistics?.overview
-  const trafficSourceChartData = (statistics?.trafficSources || []).map((item) => ({
-    name: item.source,
-    value: item.sessions || 0,
-  }))
 
   return (
     <div className="page-container fade-in">
@@ -400,70 +362,6 @@ const Dashboard: React.FC = () => {
           </Col>
         </Row>
 
-        <Row gutter={[16, 16]} className="mt-4">
-          <Col xs={24} lg={10}>
-            <Card title="来源分布（按会话）" className="chart-card" variant="borderless">
-              <PieChart data={trafficSourceChartData} />
-            </Card>
-          </Col>
-          <Col xs={24} lg={14}>
-            <Card
-              title="Top 落地页"
-              className="chart-card"
-              variant="borderless"
-              extra={
-                <Space wrap>
-                  <Select
-                    value={topLandingPagesSource}
-                    style={{ width: 120 }}
-                    onChange={(value) => setTopLandingPagesSource(value)}
-                    options={[
-                      { label: '全部来源', value: 'ALL' },
-                      { label: '直接访问', value: 'DIRECT' },
-                      { label: '搜索引擎', value: 'SEARCH' },
-                      { label: '外部链接', value: 'REFERRAL' },
-                      { label: 'UTM投放', value: 'UTM' },
-                    ]}
-                  />
-                  <Radio.Group
-                    value={topLandingPagesOrderBy}
-                    optionType="button"
-                    buttonStyle="solid"
-                    onChange={(e) => setTopLandingPagesOrderBy(e.target.value)}
-                    options={[
-                      { label: '按 会话', value: 'sessions' },
-                      { label: '按 UV', value: 'uv' },
-                    ]}
-                  />
-                </Space>
-              }
-            >
-              <Table
-                rowKey="pageKey"
-                pagination={false}
-                size="small"
-                loading={topLandingPagesLoading}
-                dataSource={topLandingPages}
-                columns={[
-                  {
-                    title: '落地页',
-                    dataIndex: 'pageKey',
-                    render: (_: string, record: LandingPageItem) => (
-                      <Space direction="vertical" size={2}>
-                        {renderPageKey(record.pageKey)}
-                        <Tooltip title={record.landingPageUrl || record.pageKey}>
-                          <Text type="secondary">{getDisplayUrl(record.landingPageUrl, record.pageKey)}</Text>
-                        </Tooltip>
-                      </Space>
-                    ),
-                  },
-                  { title: '会话', dataIndex: 'sessions', width: 120 },
-                  { title: 'UV', dataIndex: 'uv', width: 120 },
-                ]}
-              />
-            </Card>
-          </Col>
-        </Row>
       </div>
 
     </div>

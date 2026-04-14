@@ -502,8 +502,6 @@ export interface DashboardStatistics {
   totalLikesTrend: TrendData[]
   totalCommentsTrend: TrendData[]
   topPages: TopPageItem[]
-  trafficSources: TrafficSourceItem[]
-  topLandingPages: LandingPageItem[]
   topViewedArticles: ChartData[]
   topLikedArticles: ChartData[]
   categoryDistribution: ChartData[]
