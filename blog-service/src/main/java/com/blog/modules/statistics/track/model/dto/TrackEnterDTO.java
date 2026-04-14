@@ -16,6 +16,11 @@ public class TrackEnterDTO {
 
     private String referer;
 
+    /**
+     * 是否为当前文档的首次进入（整页导航），SPA 站内跳转为 false。
+     */
+    private Boolean documentNavigation;
+
     private String utmSource;
 
     private String utmMedium;
@@ -32,4 +37,3 @@ public class TrackEnterDTO {
      */
     private Long contentId;
 }
-

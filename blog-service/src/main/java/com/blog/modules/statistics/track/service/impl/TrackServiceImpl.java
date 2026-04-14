@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -54,10 +55,13 @@ public class TrackServiceImpl implements TrackService {
 
         String ip = RequestUtil.getClientIp(request);
         String userAgent = RequestUtil.getUserAgent(request);
+        boolean documentNavigation = safeDto.getDocumentNavigation() == null || safeDto.getDocumentNavigation();
+        safeDto.setDocumentNavigation(documentNavigation);
+        safeDto.setReferer(sanitizeExternalReferer(safeDto.getReferer(), safeDto.getPageUrl()));
 
         TrackEnterResultVO result = new TrackEnterResultVO();
 
-        VisitorResolveResult visitorResolveResult = resolveVisitor(safeDto, ip, userAgent, now);
+        VisitorResolveResult visitorResolveResult = resolveVisitor(safeDto, ip, userAgent, now, documentNavigation);
         result.setVisitorUuid(visitorResolveResult.visitor.getVisitorUuid());
         result.setNewVisitor(visitorResolveResult.newVisitor);
 
@@ -70,7 +74,7 @@ public class TrackServiceImpl implements TrackService {
         return result;
     }
 
-    private VisitorResolveResult resolveVisitor(TrackEnterDTO dto, String ip, String userAgent, LocalDateTime now) {
+    private VisitorResolveResult resolveVisitor(TrackEnterDTO dto, String ip, String userAgent, LocalDateTime now, boolean refreshSource) {
         String visitorUuid = StringUtils.hasText(dto.getVisitorUuid()) ? dto.getVisitorUuid() : UUID.randomUUID().toString();
         Visitor existingVisitor = visitorMapper.selectOne(new LambdaQueryWrapper<Visitor>()
                 .select(Visitor::getId, Visitor::getVisitorUuid, Visitor::getDeleted)
@@ -119,6 +123,7 @@ public class TrackServiceImpl implements TrackService {
                 visitor.getUtmSource(),
                 visitor.getUtmMedium(),
                 visitor.getUtmCampaign(),
+                refreshSource,
                 now
         );
 
@@ -209,6 +214,34 @@ public class TrackServiceImpl implements TrackService {
 
     private String firstNonBlank(String candidate, String fallback) {
         return StringUtils.hasText(candidate) ? candidate : fallback;
+    }
+
+    private String sanitizeExternalReferer(String referer, String pageUrl) {
+        if (!StringUtils.hasText(referer)) {
+            return null;
+        }
+        if (!StringUtils.hasText(pageUrl)) {
+            return referer;
+        }
+        try {
+            URI refererUri = new URI(referer);
+            URI pageUri = new URI(pageUrl);
+            String refererHost = normalizeHost(refererUri.getHost());
+            String pageHost = normalizeHost(pageUri.getHost());
+            if (!StringUtils.hasText(refererHost) || !StringUtils.hasText(pageHost)) {
+                return referer;
+            }
+            return refererHost.equals(pageHost) ? null : referer;
+        } catch (Exception e) {
+            return referer;
+        }
+    }
+
+    private String normalizeHost(String host) {
+        if (!StringUtils.hasText(host)) {
+            return null;
+        }
+        return host.trim().toLowerCase().replaceFirst("^www\\.", "");
     }
 
     private SessionResolveResult resolveSession(Long visitorId, TrackEnterDTO dto, LocalDateTime now) {

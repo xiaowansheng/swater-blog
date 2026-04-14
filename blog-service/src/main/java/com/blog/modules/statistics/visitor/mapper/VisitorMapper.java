@@ -43,13 +43,13 @@ public interface VisitorMapper extends com.blog.shared.model.BaseMapper<Visitor>
                 os_version = VALUES(os_version),
                 browser_name = VALUES(browser_name),
                 browser_version = VALUES(browser_version),
-                referer_url = VALUES(referer_url),
-                traffic_source = VALUES(traffic_source),
-                search_engine = VALUES(search_engine),
-                search_keywords = VALUES(search_keywords),
-                utm_source = VALUES(utm_source),
-                utm_medium = VALUES(utm_medium),
-                utm_campaign = VALUES(utm_campaign),
+                referer_url = IF(#{refreshSource}, VALUES(referer_url), referer_url),
+                traffic_source = IF(#{refreshSource}, VALUES(traffic_source), traffic_source),
+                search_engine = IF(#{refreshSource}, VALUES(search_engine), search_engine),
+                search_keywords = IF(#{refreshSource}, VALUES(search_keywords), search_keywords),
+                utm_source = IF(#{refreshSource}, VALUES(utm_source), utm_source),
+                utm_medium = IF(#{refreshSource}, VALUES(utm_medium), utm_medium),
+                utm_campaign = IF(#{refreshSource}, VALUES(utm_campaign), utm_campaign),
                 visit_count = IF(
                     deleted = 1 OR last_visit_time IS NULL OR last_visit_time < DATE_SUB(VALUES(last_visit_time), INTERVAL 24 HOUR),
                     COALESCE(visit_count, 0) + 1,
@@ -87,6 +87,7 @@ public interface VisitorMapper extends com.blog.shared.model.BaseMapper<Visitor>
             @Param("utmSource") String utmSource,
             @Param("utmMedium") String utmMedium,
             @Param("utmCampaign") String utmCampaign,
+            @Param("refreshSource") Boolean refreshSource,
             @Param("now") LocalDateTime now
     );
 }

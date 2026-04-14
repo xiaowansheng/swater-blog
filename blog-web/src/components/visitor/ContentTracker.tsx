@@ -3,6 +3,7 @@
 import { safeRandomUUID } from '@/lib/utils/uuid';
 import { useEffect, useRef } from 'react';
 import { trackEnter, type ContentType } from '@/lib/api/track';
+import { consumeDocumentNavigationEntry } from './documentReferrer';
 
 function getOrCreateId(key: string, storage: Storage) {
   const existing = storage.getItem(key);
@@ -43,7 +44,7 @@ export default function ContentTracker({
     const visitorUuid = getOrCreateId(visitorKey, window.localStorage);
 
     const url = window.location.href;
-    const referer = document.referrer || undefined;
+    const { documentNavigation, referer } = consumeDocumentNavigationEntry(url);
     const params = new URL(url).searchParams;
 
     const pageKey = key;
@@ -58,6 +59,7 @@ export default function ContentTracker({
       utmCampaign: params.get('utm_campaign'),
       contentType,
       contentId,
+      documentNavigation,
     })
       .then((res) => {
         if (res?.visitorUuid && res.visitorUuid !== visitorUuid) {
@@ -69,4 +71,3 @@ export default function ContentTracker({
 
   return null;
 }
-

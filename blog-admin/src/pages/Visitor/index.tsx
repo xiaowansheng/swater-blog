@@ -306,7 +306,7 @@ const VisitorPage: React.FC = () => {
       ),
     },
     {
-      title: '来源',
+      title: '最近入口',
       key: 'trafficSource',
       width: 160,
       render: (_: any, record: Visitor) => (
@@ -632,7 +632,7 @@ const VisitorPage: React.FC = () => {
           <div>
             <Descriptions bordered column={1} size="small">
               <Descriptions.Item label="访客标识">{currentVisitor.visitorUuid}</Descriptions.Item>
-              <Descriptions.Item label="当前来源">
+              <Descriptions.Item label="最近入口来源">
                 <Space size={4} direction="vertical">
                   <Tag color={getTrafficSourceColor(currentVisitor.trafficSource)} style={{ width: 'fit-content' }}>
                     {currentVisitor.trafficSource || 'UNKNOWN'}

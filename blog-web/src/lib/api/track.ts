@@ -7,6 +7,7 @@ export interface TrackEnterPayload {
   pageKey?: string;
   pageUrl?: string;
   referer?: string;
+  documentNavigation?: boolean;
   utmSource?: string | null;
   utmMedium?: string | null;
   utmCampaign?: string | null;
@@ -30,4 +31,3 @@ export async function trackEnter(payload: TrackEnterPayload): Promise<TrackEnter
     silent: true,
   });
 }
-

@@ -4,6 +4,7 @@ import { safeRandomUUID } from '@/lib/utils/uuid';
 import { useEffect, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { trackEnter } from '@/lib/api/track';
+import { consumeDocumentNavigationEntry } from './documentReferrer';
 
 function getOrCreateId(key: string, storage: Storage) {
   const existing = storage.getItem(key);
@@ -62,14 +63,14 @@ export default function VisitorTracker() {
     const fullPath = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ''}`;
     if (lastPathRef.current === fullPath) return;
     lastPathRef.current = fullPath;
+    if (isContentRoute(pathname)) return;
 
     const visitorKey = 'visitor_uuid';
     const visitorUuid = getOrCreateId(visitorKey, window.localStorage);
 
     const url = window.location.href;
-    const referer = document.referrer || undefined;
+    const { documentNavigation, referer } = consumeDocumentNavigationEntry(url);
     const params = new URL(url).searchParams;
-    if (isContentRoute(pathname)) return;
 
     const normalizedPath = stripLocalePrefix(pathname) || '/';
     const pageKey = `PAGE:${normalizePageId(normalizedPath)}`;
@@ -84,6 +85,7 @@ export default function VisitorTracker() {
       utmSource: params.get('utm_source'),
       utmMedium: params.get('utm_medium'),
       utmCampaign: params.get('utm_campaign'),
+      documentNavigation,
     })
       .then((res) => {
         if (res?.visitorUuid && res.visitorUuid !== visitorUuid) {
@@ -97,4 +99,3 @@ export default function VisitorTracker() {
 
   return null;
 }
-
