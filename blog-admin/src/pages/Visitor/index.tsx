@@ -463,6 +463,14 @@ const VisitorPage: React.FC = () => {
           </Card>
         </Col>
         <Col xs={24} lg={12}>
+          <Card title="来源分布（按会话）" className="chart-card" loading={trafficSourcesLoading}>
+            <PieChart data={trafficSourceData} />
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} className="mb-6">
+        <Col xs={24}>
           <Card title="国家/地区分布" className="chart-card" loading={statsLoading} extra={<ApartmentOutlined />}>
             <BarChart data={countryData} />
           </Card>
@@ -470,12 +478,7 @@ const VisitorPage: React.FC = () => {
       </Row>
 
       <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={24} lg={10}>
-          <Card title="来源分布（按会话）" className="chart-card" loading={trafficSourcesLoading}>
-            <PieChart data={trafficSourceData} />
-          </Card>
-        </Col>
-        <Col xs={24} lg={14}>
+        <Col xs={24}>
           <Card
             title="Top 落地页"
             className="chart-card"
