@@ -127,6 +127,7 @@ npm run dev
 - 管理后台: http://localhost:3000
 - 博客前端: http://localhost:3001
 - API 文档: http://localhost:8888/swagger-ui.html
+- 监控面板: http://localhost:8081/actuator
 
 #### 一键脚本（可选）
 ```bash
@@ -152,15 +153,17 @@ docker-compose -f docker-compose.dev.yml up -d
 
 ## 📚 文档导航
 
-| 文档类型 | 链接 | 描述 |
-|---------|------|------|
-| 🏗️ 系统设计 | [系统设计文档](docs/design/系统设计文档.md) | 整体架构和设计思路 |
-| 🗄️ 数据库设计 | [数据库设计文档](docs/design/数据库设计文档.md) | 数据表结构和关系 |
-| 🔌 接口文档 | [接口设计文档](docs/design/接口设计文档.md) | API 接口说明 |
-| 🛠️ 开发指南 | [开发指南](docs/tech/开发指南.md) | 开发环境搭建和规范 |
-| ⚙️ 配置说明 | [配置说明文档](docs/tech/配置说明文档.md) | 详细配置参数说明 |
-| 🚀 部署指南 | [部署文档](docs/tech/部署文档.md) | 生产环境部署指南 |
-| 🤝 贡献指南 | [CONTRIBUTING.md](CONTRIBUTING.md) | 如何参与项目贡献 |
+统一入口见 [docs/README.md](docs/README.md)。
+
+| 分类 | 链接 | 描述 |
+|------|------|------|
+| 🚀 开始使用 | [开发与本地启动](docs/01-开始/开发与本地启动.md) | 本地环境、脚本和启动顺序 |
+| 🚢 发布部署 | [部署与发布](docs/01-开始/部署与发布.md) | Compose 模式、环境变量和上线检查 |
+| 🏗️ 架构总览 | [系统架构总览](docs/02-架构设计/系统架构总览.md) | 系统分层、模块边界和关键链路 |
+| 🗄️ 数据设计 | [数据库设计](docs/02-架构设计/数据库设计.md) | 表结构、关系和配置键 |
+| 🔌 接口参考 | [接口设计](docs/03-开发参考/接口设计.md) | API 约定和主要端点 |
+| ⚙️ 配置参考 | [后端配置参考](docs/03-开发参考/后端配置参考.md) | `application*.yml`、环境变量和邮件配置 |
+| 🤝 贡献说明 | [CONTRIBUTING.md](CONTRIBUTING.md) | 提交流程和贡献约定 |
 
 ## 🎯 功能特性
 

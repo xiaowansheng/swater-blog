@@ -111,6 +111,10 @@ pnpm preview
 默认开发端口：`http://localhost:3000`  
 如需修改端口或代理配置，请查看 `vite.config.ts`。
 
+## 相关文档
+
+- [页面缓存机制](./docs/页面缓存机制.md)
+
 ## API对接
 
 后端API基础路径: `/api`

@@ -48,3 +48,10 @@ docker-compose -f docker-compose.dev.yml up -d
 
 启动后访问：`http://localhost:8888/swagger-ui.html`
 
+## 相关文档
+
+- [Blog API 文档说明](./docs/API-Documentation.md)
+- [测试指南](./docs/testing-guide.md)
+- [开发与本地启动](/home/xiaowansheng/projects/develop-projects/swater-blog/docs/01-开始/开发与本地启动.md)
+- [后端配置参考](/home/xiaowansheng/projects/develop-projects/swater-blog/docs/03-开发参考/后端配置参考.md)
+

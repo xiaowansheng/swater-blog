@@ -1,222 +1,93 @@
 # 语雀博客同步工具
 
-一个全功能的语雀知识库与博客数据库之间的双向同步工具，支持导入、导出和智能同步功能。
+当前实现是一个基于 Next.js 14 的独立工具，用于在语雀知识库和博客数据库之间执行导入、导出和双向同步。
 
-## 功能特性
+## 1. 当前状态
 
-### 核心功能
-- **导入**: 从语雀知识库批量导入文档到博客数据库
-- **导出**: 将博客文章批量导出到语雀知识库
-- **双向同步**: 智能双向同步，自动检测并处理冲突
-- **字段映射**: 灵活配置数据库表和字段映射关系
-- **增量同步**: 支持按最新更新时间增量同步
-- **异步任务**: 后台异步执行同步任务，实时查看进度
+已落地页面：
 
-### 管理功能
-- **映射管理**: 查看和管理文章与文档的映射关系
-- **日志查看**: 详细的同步操作日志记录
-- **任务跟踪**: 实时查看同步任务执行进度
-- **配置管理**: 可视化配置语雀和博客数据库连接
-- **统计仪表盘**: 查看同步统计信息和最近任务
+- `/dashboard`
+- `/config`
+- `/import`
+- `/export`
+- `/sync`
+- `/mapping`
+- `/logs`
 
-## 技术栈
+开发端口：`3002`
 
-### 前端
-- **Next.js 14**: App Router, Server Components, Server Actions
-- **React 18**: 客户端交互组件
-- **TypeScript**: 全栈类型安全
-- **Tailwind CSS**: 实用优先的样式框架
+## 2. 技术栈
 
-### 后端
-- **Next.js Server Actions**: 服务端数据处理
-- **Prisma ORM**: SQLite数据库访问
-- **MySQL2**: 博客数据库连接池
+- Next.js 14
+- React 18
+- Prisma + SQLite
+- MySQL2
+- Tailwind CSS
 
-### 数据库
-- **SQLite**: 同步元数据存储
-- **MySQL**: 博客主数据库
+## 3. 快速开始
 
-### 依赖库
-- **axios**: HTTP客户端
-- **marked**: Markdown转HTML
-- **turndown**: HTML转Markdown
-- **slugify**: URL友好的标识符生成
-- **sonner**: Toast通知
-- **prisma**: 数据库ORM
+### 3.1 安装依赖
 
-## 项目结构
-
-```
-yuque-sync/
-├── prisma/
-│   └── schema.prisma          # 数据库模型定义
-├── app/
-│   ├── dashboard/             # 仪表盘页面
-│   ├── config/                # 配置管理页面
-│   ├── import/                # 导入页面
-│   ├── export/                # 导出页面
-│   ├── sync/                  # 同步页面
-│   │   └── job/[jobId]/       # 任务进度页面
-│   ├── mapping/               # 映射管理页面
-│   ├── logs/                  # 日志查看页面
-│   └── actions/               # Server Actions
-│       ├── config.ts
-│       ├── import.ts
-│       ├── export.ts
-│       ├── sync.ts
-│       ├── mapping.ts
-│       ├── logs.ts
-│       └── job.ts
-├── components/
-│   ├── ui/                    # 基础UI组件
-│   ├── config/                # 配置相关组件
-│   ├── import/                # 导入相关组件
-│   ├── export/                # 导出相关组件
-│   ├── sync/                  # 同步相关组件
-│   ├── mapping/               # 映射管理组件
-│   ├── logs/                  # 日志查看组件
-│   └── job/                   # 任务进度组件
-├── lib/
-│   ├── db/
-│   │   ├── prisma.ts          # Prisma客户端
-│   │   └── seed.ts            # 初始数据
-│   ├── yuque/
-│   │   └── client.ts          # 语雀API客户端
-│   ├── blog/
-│   │   └── client.ts          # 博客数据库客户端
-│   └── sync/
-│       ├── engine.ts          # 同步引擎
-│       ├── mapper.ts          # 字段映射器
-│       └── transformer.ts     # 内容转换器
-└── types/
-    ├── yuque.ts               # 语雀类型定义
-    └── blog.ts                # 博客类型定义
-```
-
-## 快速开始
-
-### 环境要求
-- Node.js 18+
-- MySQL 5.7+
-
-### 安装步骤
-
-1. **安装依赖**
 ```bash
+cd blog-tools/yuque-sync
 npm install
 ```
 
-2. **配置环境变量**
+### 3.2 配置环境变量
+
 ```bash
 cp .env.example .env
 ```
 
-编辑 `.env` 文件，配置必要的环境变量：
-```env
-# 语雀配置
-YUQUE_TOKEN=your_yuque_token
-YUQUE_NAMESPACE=your_yuque_namespace
+关键变量：
 
-# 博客数据库配置
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=your_blog_database
+```env
+DATABASE_URL="file:./data/yuque-sync.db"
+YUQUE_TOKEN=""
+YUQUE_BASE_URL="https://www.yuque.com/api/v2"
+YUQUE_NAMESPACE=""
+BLOG_TYPE="mysql"
+BLOG_HOST="localhost"
+BLOG_PORT=3306
+BLOG_DATABASE="blog"
+BLOG_USERNAME="root"
+BLOG_PASSWORD=""
 ```
 
-3. **初始化数据库**
+### 3.3 初始化数据库
+
 ```bash
+npm run db:generate
 npm run db:migrate
 npm run db:seed
 ```
 
-4. **启动开发服务器**
+### 3.4 启动
+
 ```bash
 npm run dev
 ```
 
-5. **访问应用**
-打开浏览器访问 http://localhost:3002
+访问：`http://localhost:3002`
 
-### 生产部署
+## 4. 使用顺序
 
-1. **构建应用**
-```bash
-npm run build
-```
+1. 在 `/config` 完成语雀和博客数据库连接配置
+2. 在 `/import` 或 `/export` 执行单向同步
+3. 在 `/sync` 执行双向同步
+4. 在 `/mapping` 查看映射关系
+5. 在 `/logs` 查看任务日志
 
-2. **启动生产服务器**
-```bash
-npm start
-```
+## 5. 相关文档
 
-## 使用指南
+- [设计说明](./docs/设计说明.md)
+- [历史 CLI 方案](./docs/archive/DESIGN-cli.md)
+- [历史 Express + React 方案](./docs/archive/DESIGN-express-react.md)
 
-### 1. 配置管理
+## 6. 说明
 
-访问 http://localhost:3002/config 进行配置：
-
-**语雀配置**
-- 语雀Token: 在语雀个人设置中生成
-- 命名空间: 知识库的唯一标识
-- 知识库ID: 要同步的语雀知识库
-
-**博客数据库配置**
-- 数据库地址: MySQL服务器地址
-- 端口: 默认3306
-- 数据库名: 博客数据库名称
-- 用户名和密码: 数据库访问凭证
-
-**同步配置**
-- 自动发布: 导入时是否自动发布文章
-- 保留原文: 是否保留语雀原文
-- 增量同步: 是否只同步更新的内容
-- 发布状态: 导入文章的默认状态
-
-点击"测试连接"验证配置是否正确。
-
-### 2. 导入文章
-
-访问 http://localhost:3002/import
-
-1. 从语雀加载文档列表
-2. 选择要导入的文档
-3. 点击"开始导入"
-4. 系统会创建导入任务并跳转到进度页面
-
-### 3. 导出文章
-
-访问 http://localhost:3002/export
-
-1. 从博客加载文章列表
-2. 选择要导出的文章
-3. 点击"开始导出"
-4. 系统会创建导出任务并跳转到进度页面
-
-### 4. 双向同步
-
-访问 http://localhost:3002/sync
-
-1. 选择同步方向：
-   - **语雀→博客**: 从语雀导入所有未映射的文档
-   - **博客→语雀**: 将所有未导出的文章推送到语雀
-   - **双向同步**: 智能双向同步
-
-2. 可选勾选"强制覆盖"，强制覆盖冲突内容
-
-3. 点击"开始同步"
-
-### 5. 映射管理
-
-访问 http://localhost:3002/mapping
-
-查看所有文章-文档映射关系：
-- 查看映射详情（文章ID、文档ID、同步时间等）
-- 单个同步：更新特定映射的内容
-- 删除映射：解除文章与文档的关联
-
-### 6. 查看日志
+- 旧的 `GETTING_STARTED.md` 和 `QUICKSTART.md` 已并入本 README
+- 端口、脚本和环境变量以 [package.json](/home/xiaowansheng/projects/develop-projects/swater-blog/blog-tools/yuque-sync/package.json) 和 [.env.example](/home/xiaowansheng/projects/develop-projects/swater-blog/blog-tools/yuque-sync/.env.example) 为准
 
 访问 http://localhost:3002/logs
 

@@ -54,11 +54,11 @@ echo - 后端API: http://localhost:8888
 echo - 管理后台: http://localhost:3000
 echo - 博客前端: http://localhost:3001
 echo - API文档: http://localhost:8888/swagger-ui.html
-echo - 监控面板: http://localhost:8888/actuator
+echo - 监控面板: http://localhost:8081/actuator
 echo.
 echo 数据库连接:
 echo - MySQL: localhost:3306
 echo - Redis: localhost:6379
-echo - RabbitMQ管理: http://localhost:15672 (guest/guest)
+echo - RabbitMQ管理: http://localhost:15672 (admin/admin123)
 echo.
 pause

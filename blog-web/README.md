@@ -37,3 +37,7 @@ pnpm dev
 npm run build
 npm run start
 ```
+
+## 相关文档
+
+- [加载动画优化](./docs/加载动画优化.md)

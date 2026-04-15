@@ -77,7 +77,7 @@ class ArticleAdminControllerTest extends BaseWebTest {
 
 ### 测试环境配置
 
-**单元测试**: `application-test.yml`
+**单元测试**: 建议按需新增 `src/test/resources/application-test.yml`
 - H2内存数据库
 - 嵌入式Redis
 - Mock外部服务
