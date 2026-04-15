@@ -18,7 +18,7 @@
 请通过以下方式私下报告安全问题：
 
 1. **邮件报告**（推荐）
-   - 发送邮件至：[security@example.com]
+   - 发送邮件至：[xiaowansheng@foxmail.com](mailto:xiaowansheng@foxmail.com)
    - 邮件主题：`[SECURITY] Swater Blog 安全漏洞报告`
 
 2. **GitHub Security Advisory**

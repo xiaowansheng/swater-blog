@@ -213,9 +213,9 @@ docker-compose -f docker-compose.dev.yml up -d
 
 ## 📞 联系我们
 
-- 📧 邮箱: [your-email@example.com]
-- 💬 讨论: [GitHub Discussions](../../discussions)
-- 🐛 问题: [GitHub Issues](../../issues)
+- 📧 邮箱: [xiaowansheng@foxmail.com](mailto:xiaowansheng@foxmail.com)
+- 💬 讨论: [GitHub Discussions](https://github.com/xiaowansheng/swater-blog/discussions)
+- 🐛 问题: [GitHub Issues](https://github.com/xiaowansheng/swater-blog/issues)
 
 ---
 

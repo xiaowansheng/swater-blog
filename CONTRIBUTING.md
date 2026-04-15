@@ -5,7 +5,7 @@
 ## 🤝 如何贡献
 
 ### 报告问题
-- 使用 [GitHub Issues](../../issues) 报告 bug
+- 使用 [GitHub Issues](https://github.com/xiaowansheng/swater-blog/issues) 报告 bug
 - 提供详细的问题描述和复现步骤
 - 包含系统环境信息（操作系统、JDK版本等）
 
@@ -95,7 +95,7 @@ Closes #123
 
 - GitHub Issues: 问题报告和功能请求
 - GitHub Discussions: 技术讨论和问答
-- Email: [维护者邮箱]
+- Email: [xiaowansheng@foxmail.com](mailto:xiaowansheng@foxmail.com)
 
 ## 📄 许可证
 
@@ -107,4 +107,4 @@ Closes #123
 
 ---
 
-如有任何问题，请随时通过 Issues 或邮件联系我们。
+如有任何问题，请随时通过 [GitHub Issues](https://github.com/xiaowansheng/swater-blog/issues) 或邮件联系我们。
