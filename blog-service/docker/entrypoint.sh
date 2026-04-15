@@ -67,7 +67,7 @@ check_required_env() {
         export SPRING_DATASOURCE_USERNAME=${DB_USER:-blog}
     fi
     if [ -z "$SPRING_DATASOURCE_PASSWORD" ]; then
-        export SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-blog123456}
+        export SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-change_me_db_password}
     fi
 
     local required_vars=(

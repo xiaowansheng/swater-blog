@@ -54,7 +54,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/${DB_NAME:blog}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${DB_USER:blog}
-    password: ${DB_PASSWORD:blog123456}
+    password: ${DB_PASSWORD:change_me_dev_db_password}
     driver-class-name: com.mysql.cj.jdbc.Driver
     
     # 开发环境连接池配置
@@ -124,7 +124,7 @@ spring:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:admin}
-    password: ${RABBITMQ_PASSWORD:admin123}
+    password: ${RABBITMQ_PASSWORD:change_me_dev_rabbitmq_password}
     virtual-host: /
     connection-timeout: 15000
     publisher-confirm-type: correlated
@@ -147,7 +147,7 @@ spring:
     host: smtp.qq.com
     port: 587
     username: your-dev-email@qq.com
-    password: your-dev-password
+    password: ${MAIL_PASSWORD:change_me_dev_mail_app_password}
     from-name: Swater Blog Dev
     properties:
       mail:
@@ -256,7 +256,7 @@ sa-token:
   is-share: true
   token-style: uuid
   is-log: true  # 开发时启用日志
-  jwt-secret-key: dev-secret-key-change-in-production
+  jwt-secret-key: change_me_dev_jwt_secret
 
 # 认证配置 - 开发环境
 auth:
@@ -265,7 +265,7 @@ auth:
     nonce-max-size: ${AUTH_CRYPTO_NONCE_MAX_SIZE:10000}
     nonce-cleanup-interval: ${AUTH_CRYPTO_NONCE_CLEANUP_INTERVAL:200}
   email-session:
-    secret: ${AUTH_EMAIL_SESSION_SECRET:dev-change-me}
+    secret: ${AUTH_EMAIL_SESSION_SECRET:change_me_dev_email_session_secret}
     ttl-seconds: 2592000
     header-name: X-Verify-Token
 

@@ -77,7 +77,7 @@ cat > docs/api/Blog-API.postman_collection.json << 'EOF'
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"123456\"\n}"
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"your-password\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/login",

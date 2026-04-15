@@ -72,7 +72,7 @@ echo ""
 echo "数据库连接:"
 echo "- MySQL: localhost:3306"
 echo "- Redis: localhost:6379"
-echo "- RabbitMQ管理: http://localhost:15672 (admin/admin123)"
+echo "- RabbitMQ管理: http://localhost:15672 (admin / see RABBITMQ_PASSWORD in .env)"
 echo ""
 echo "按 Ctrl+C 停止所有服务"
 

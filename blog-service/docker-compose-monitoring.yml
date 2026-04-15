@@ -31,7 +31,7 @@ services:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_SECURITY_ADMIN_PASSWORD=change_me_grafana_admin_password
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana
@@ -86,7 +86,7 @@ services:
     ports:
       - "9104:9104"
     environment:
-      - DATA_SOURCE_NAME=root:root@(mysql:3306)/blog
+      - DATA_SOURCE_NAME=root:${MONITORING_MYSQL_ROOT_PASSWORD:-change_me_monitoring_root_password}@(mysql:3306)/blog
     networks:
       - monitoring
       - default
@@ -114,7 +114,7 @@ services:
     image: mysql:8.0
     container_name: blog-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: ${MONITORING_MYSQL_ROOT_PASSWORD:-change_me_monitoring_root_password}
       MYSQL_DATABASE: blog
     volumes:
       - mysql_data:/var/lib/mysql

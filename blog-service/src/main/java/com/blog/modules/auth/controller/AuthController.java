@@ -138,7 +138,7 @@ public class AuthController {
                         value = """
                             {
                               "username": "admin",
-                              "password": "123456",
+                              "password": "your-password",
                               "rememberMe": true
                             }
                             """

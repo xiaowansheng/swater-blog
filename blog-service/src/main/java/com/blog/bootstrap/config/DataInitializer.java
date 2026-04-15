@@ -20,6 +20,8 @@ import java.time.LocalDateTime;
 @Slf4j
 @Component
 public class DataInitializer implements ApplicationRunner {
+    private static final String DEV_ADMIN_PASSWORD = "ChangeMe_Dev_Only_2025!";
+
     @Autowired
     private UserMapper userMapper;
     
@@ -58,7 +60,7 @@ public class DataInitializer implements ApplicationRunner {
         if (admin == null) {
             admin = new User();
             admin.setUsername("admin");
-            admin.setPassword(PasswordUtil.encode("123456"));
+            admin.setPassword(PasswordUtil.encode(DEV_ADMIN_PASSWORD));
             admin.setNickname("管理员");
             admin.setEmail(emailService.getFrom());
             admin.setIpAddressSignup("127.0.0.1");
@@ -67,7 +69,7 @@ public class DataInitializer implements ApplicationRunner {
             admin.setStatus(EnableStatus.ENABLED.getCode());
             admin.setDisabled(DisabledFlag.NO.getCode());
             userMapper.insert(admin);
-            log.info("初始化管理员账号成功，用户名: admin，密码: 123456，用户ID: {}", admin.getId());
+            log.info("初始化管理员账号成功，用户名: admin，开发默认密码: {}，用户ID: {}", DEV_ADMIN_PASSWORD, admin.getId());
         } else {
             // // 确保管理员账号是启用状态且密码正确（可选，这里仅确保状态）
             // boolean updated = false;
@@ -79,8 +81,8 @@ public class DataInitializer implements ApplicationRunner {
             //     admin.setDisabled(0);
             //     updated = true;
             // }
-            // // 强制重置管理员密码为 123456 以解决登录问题
-            //  admin.setPassword(PasswordUtil.encode("123456"));
+            // // 强制重置管理员密码为开发默认密码以解决登录问题
+            //  admin.setPassword(PasswordUtil.encode(DEV_ADMIN_PASSWORD));
             //  updated = true;
              
             //  if (updated) {

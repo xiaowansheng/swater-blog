@@ -12,10 +12,10 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root123456}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-change_me_root_password}
       MYSQL_DATABASE: ${DB_NAME:-blog}
       MYSQL_USER: ${DB_USER:-blog}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-blog123456}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-change_me_db_password}
       TZ: Asia/Shanghai
     volumes:
       - mysql_data:/var/lib/mysql
@@ -75,7 +75,7 @@ services:
       - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-admin123}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-change_me_rabbitmq_password}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
       - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
@@ -126,7 +126,7 @@ services:
       DB_PORT: 3306
       DB_NAME: ${DB_NAME:-blog}
       DB_USER: ${DB_USER:-blog}
-      DB_PASSWORD: ${DB_PASSWORD:-blog123456}
+      DB_PASSWORD: ${DB_PASSWORD:-change_me_db_password}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
@@ -134,7 +134,7 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER:-admin}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin123}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-change_me_rabbitmq_password}
       # ES_URIS: ${ES_URIS:-http://elasticsearch:9200}  # 暂时禁用ES
       ES_USERNAME: ${ES_USERNAME:-}
       ES_PASSWORD: ${ES_PASSWORD:-}
@@ -143,7 +143,7 @@ services:
       MAIL_USERNAME: ${MAIL_USERNAME:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       AMAP_KEY: ${AMAP_KEY:-}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-swater_blog_jwt_secret_key_2024}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change_me_jwt_secret}
       FILE_STORAGE_TYPE: ${FILE_STORAGE_TYPE:-local}
       FILE_STORAGE_LOCAL_PATH: ${FILE_STORAGE_LOCAL_PATH:-/app/uploads}
       FILE_STORAGE_LOCAL_URL_PREFIX: ${FILE_STORAGE_LOCAL_URL_PREFIX:-/uploads}
