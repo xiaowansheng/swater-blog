@@ -26,8 +26,13 @@
 ## 开发运行
 
 ```bash
+set -a
+source ../.env
+set +a
 ./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
+
+如果通过 IDE 直接启动，也需要把根目录 `.env` 中的关键变量注入运行环境，尤其是 `DB_*`、`JWT_SECRET_KEY` 和 `AUTH_EMAIL_SESSION_SECRET`。
 
 ## Docker 启动（从项目根目录执行）
 
@@ -52,6 +57,6 @@ docker-compose -f docker-compose.dev.yml up -d
 
 - [Blog API 文档说明](./docs/API-Documentation.md)
 - [测试指南](./docs/testing-guide.md)
-- [开发与本地启动](/home/xiaowansheng/projects/develop-projects/swater-blog/docs/01-开始/开发与本地启动.md)
-- [后端配置参考](/home/xiaowansheng/projects/develop-projects/swater-blog/docs/03-开发参考/后端配置参考.md)
+- [开发与本地启动](../docs/01-开始/开发与本地启动.md)
+- [后端配置参考](../docs/03-开发参考/后端配置参考.md)
 

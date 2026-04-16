@@ -2,8 +2,10 @@ import type { ApiResponse } from '@/types';
 import { getMockResponse } from './mock';
 import { getVerifyToken, VERIFY_TOKEN_HEADER } from '../auth/emailSession';
 
-const CLIENT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ""
-const SERVER_BASE_URL = process.env.SERVER_API_BASE_URL;
+const CLIENT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+  || (process.env.NODE_ENV === 'development' ? 'http://localhost:8888' : '/');
+const SERVER_BASE_URL = process.env.SERVER_API_BASE_URL
+  || (process.env.NODE_ENV === 'development' ? 'http://localhost:8888' : 'http://127.0.0.1:8888');
 
 function resolveServerBaseUrl(base: string) {
   // Only rewrite relative base URLs when running on the server (SSR).

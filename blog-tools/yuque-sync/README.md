@@ -87,7 +87,7 @@ npm run dev
 ## 6. 说明
 
 - 旧的 `GETTING_STARTED.md` 和 `QUICKSTART.md` 已并入本 README
-- 端口、脚本和环境变量以 [package.json](/home/xiaowansheng/projects/develop-projects/swater-blog/blog-tools/yuque-sync/package.json) 和 [.env.example](/home/xiaowansheng/projects/develop-projects/swater-blog/blog-tools/yuque-sync/.env.example) 为准
+- 端口、脚本和环境变量以 [package.json](./package.json) 和 [.env.example](./.env.example) 为准
 
 访问 http://localhost:3002/logs
 

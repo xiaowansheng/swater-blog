@@ -201,7 +201,7 @@ log:
 # Next.js revalidate 配置（可选）
 revalidate:
   url: ${REVALIDATE_URL:http://blog-web:3000}
-  token: ${REVALIDATE_TOKEN:change-me}
+  token: ${REVALIDATE_TOKEN:}
 
 # 跨域配置（供 WebCorsConfig 使用）
 app:
@@ -270,7 +270,7 @@ sa-token:
   is-share: true
   token-style: uuid
   is-log: false  # 生产环境关闭日志
-  jwt-secret-key: ${JWT_SECRET_KEY:change_me_jwt_secret}
+  jwt-secret-key: ${JWT_SECRET_KEY:}
 
 # 认证配置 - Docker环境
 auth:
@@ -279,7 +279,7 @@ auth:
     nonce-max-size: ${AUTH_CRYPTO_NONCE_MAX_SIZE:10000}
     nonce-cleanup-interval: ${AUTH_CRYPTO_NONCE_CLEANUP_INTERVAL:200}
   email-session:
-    secret: ${AUTH_EMAIL_SESSION_SECRET:change_me_email_session_secret}
+    secret: ${AUTH_EMAIL_SESSION_SECRET:}
     ttl-seconds: 2592000
     header-name: X-Verify-Token
 

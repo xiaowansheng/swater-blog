@@ -11,7 +11,7 @@ public class EmailSessionProperties {
     /**
      * HMAC secret for email verification session tokens.
      */
-    private String secret = "change-me";
+    private String secret = "";
 
     /**
      * Token TTL in seconds.
@@ -23,4 +23,3 @@ public class EmailSessionProperties {
      */
     private String headerName = "X-Verify-Token";
 }
-

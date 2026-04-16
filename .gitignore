@@ -16,6 +16,12 @@ uploads/
 .env.local
 .env.prod
 .env.*.local
+**/.env
+**/.env.development
+**/.env.production
+**/.env.test
+**/.env.staging
+!**/.env.example
 
 # 日志文件
 logs/

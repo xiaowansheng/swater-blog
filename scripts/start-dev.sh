@@ -38,7 +38,8 @@ docker-compose ps
 echo ""
 echo "5. 启动后端服务..."
 cd blog-service
-gnome-terminal --title="后端服务" -- bash -c "./gradlew bootRun --args='--spring.profiles.active=dev'; exec bash" &
+BACKEND_CMD="set -a; source ../.env; set +a; ./gradlew bootRun --args='--spring.profiles.active=dev'; exec bash"
+gnome-terminal --title="后端服务" -- bash -lc "$BACKEND_CMD" &
 
 # 等待后端服务启动
 echo ""

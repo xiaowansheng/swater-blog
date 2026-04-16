@@ -211,7 +211,15 @@ log:
 # Next.js revalidate 配置（可选）
 revalidate:
   url: ${REVALIDATE_URL:http://127.0.0.1:3001}
-  token: ${REVALIDATE_TOKEN:change-me}
+  token: ${REVALIDATE_TOKEN:}
+
+blog:
+  dev-bootstrap:
+    enabled: ${BLOG_DEV_BOOTSTRAP_ENABLED:false}
+    admin:
+      username: ${BLOG_DEV_BOOTSTRAP_ADMIN_USERNAME:admin}
+      password: ${BLOG_DEV_BOOTSTRAP_ADMIN_PASSWORD:}
+      email: ${BLOG_DEV_BOOTSTRAP_ADMIN_EMAIL:admin@example.com}
 
 # MyBatis Plus配置 - 开发环境
 mybatis-plus:
@@ -256,7 +264,7 @@ sa-token:
   is-share: true
   token-style: uuid
   is-log: true  # 开发时启用日志
-  jwt-secret-key: change_me_dev_jwt_secret
+  jwt-secret-key: ${JWT_SECRET_KEY:}
 
 # 认证配置 - 开发环境
 auth:
@@ -265,7 +273,7 @@ auth:
     nonce-max-size: ${AUTH_CRYPTO_NONCE_MAX_SIZE:10000}
     nonce-cleanup-interval: ${AUTH_CRYPTO_NONCE_CLEANUP_INTERVAL:200}
   email-session:
-    secret: ${AUTH_EMAIL_SESSION_SECRET:change_me_dev_email_session_secret}
+    secret: ${AUTH_EMAIL_SESSION_SECRET:}
     ttl-seconds: 2592000
     header-name: X-Verify-Token
 

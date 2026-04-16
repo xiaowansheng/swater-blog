@@ -28,7 +28,7 @@ docker-compose ps
 echo.
 echo 5. 启动后端服务...
 cd blog-service
-start "后端服务" cmd /k "gradlew bootRun --args='--spring.profiles.active=dev'"
+start "后端服务" powershell -NoExit -Command "$envFile = Resolve-Path '..\.env'; Get-Content $envFile | ForEach-Object { if ($_ -match '^\s*#' -or $_ -notmatch '=') { return }; $pair = $_ -split '=', 2; Set-Item -Path Env:$($pair[0]) -Value $pair[1] }; .\gradlew.bat bootRun '--args=--spring.profiles.active=dev'"
 
 echo.
 echo 6. 等待后端服务启动...

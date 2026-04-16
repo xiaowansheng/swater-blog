@@ -102,8 +102,8 @@ pnpm preview
 
 ## 环境配置
 
-- `.env.development` - 开发环境配置
-- `.env.production` - 生产环境配置
+- 复制 `.env.example` 为 `.env.local` 按需覆盖本地配置
+- Docker 生产构建通过 build args 注入变量，不依赖提交 `.env.production`
 
 主要配置项：
 - `VITE_API_BASE_URL` - API基础路径

@@ -35,10 +35,33 @@ RUN pnpm install --frozen-lockfile --reporter=ndjson || (pnpm config set registr
 # 复制源代码
 COPY . .
 
-# 设置为生产环境，确保读取 .env.production
-ENV NODE_ENV=production
+# 构建期环境变量
+ARG VITE_API_BASE_URL=/api
+ARG VITE_WS_BASE_URL=
+ARG VITE_UPLOAD_URL=/api/upload
+ARG VITE_UPLOAD_RESOURCE_PREFIX=/uploads
+ARG VITE_UPLOAD_MAX_SIZE=10485760
+ARG VITE_APP_TITLE=博客管理系统
+ARG VITE_APP_VERSION=1.0.0
+ARG VITE_STORAGE_PREFIX=blog_admin_
+ARG VITE_MOCK_ENABLED=false
+ARG VITE_BLOG_URL=https://blog.example.com
+ARG VITE_GITHUB_URL=https://github.com/xiaowansheng/swater-blog
 
-# 构建应用（会自动读取 .env.production 文件）
+ENV NODE_ENV=production \
+    VITE_API_BASE_URL=${VITE_API_BASE_URL} \
+    VITE_WS_BASE_URL=${VITE_WS_BASE_URL} \
+    VITE_UPLOAD_URL=${VITE_UPLOAD_URL} \
+    VITE_UPLOAD_RESOURCE_PREFIX=${VITE_UPLOAD_RESOURCE_PREFIX} \
+    VITE_UPLOAD_MAX_SIZE=${VITE_UPLOAD_MAX_SIZE} \
+    VITE_APP_TITLE=${VITE_APP_TITLE} \
+    VITE_APP_VERSION=${VITE_APP_VERSION} \
+    VITE_STORAGE_PREFIX=${VITE_STORAGE_PREFIX} \
+    VITE_MOCK_ENABLED=${VITE_MOCK_ENABLED} \
+    VITE_BLOG_URL=${VITE_BLOG_URL} \
+    VITE_GITHUB_URL=${VITE_GITHUB_URL}
+
+# 构建应用
 RUN pnpm build --reporter=ndjson
 
 # 生产阶段

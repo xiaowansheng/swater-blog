@@ -28,8 +28,12 @@ pnpm dev
 
 ## 环境配置
 
+复制 `.env.example` 为 `.env.local` 可覆盖默认值。
+
 主要配置项：
-- `NEXT_PUBLIC_API_BASE_URL` - API 基础地址（例如 `http://localhost:8888/api`）
+- `NEXT_PUBLIC_API_BASE_URL` - 浏览器侧 API 基础地址
+- `SERVER_API_BASE_URL` - SSR/Server Components 访问后端的地址
+- `REVALIDATE_TOKEN` - `/api/revalidate` 的服务端令牌
 
 ## 生产构建
 
