@@ -120,10 +120,19 @@ services:
       MAIL_USERNAME: ${MAIL_USERNAME:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       AMAP_KEY: ${AMAP_KEY:-}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change_me_jwt_secret}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-}
+      AUTH_EMAIL_SESSION_SECRET: ${AUTH_EMAIL_SESSION_SECRET:-}
+      REVALIDATE_URL: ${REVALIDATE_URL:-http://host.docker.internal:3001}
+      REVALIDATE_TOKEN: ${REVALIDATE_TOKEN:-}
+      BLOG_DEV_BOOTSTRAP_ENABLED: ${BLOG_DEV_BOOTSTRAP_ENABLED:-false}
+      BLOG_DEV_BOOTSTRAP_ADMIN_USERNAME: ${BLOG_DEV_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      BLOG_DEV_BOOTSTRAP_ADMIN_PASSWORD: ${BLOG_DEV_BOOTSTRAP_ADMIN_PASSWORD:-}
+      BLOG_DEV_BOOTSTRAP_ADMIN_EMAIL: ${BLOG_DEV_BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
       FILE_STORAGE_TYPE: ${FILE_STORAGE_TYPE:-local}
       SERVER_PORT: ${SERVER_PORT:-8888}
       JAVA_OPTS: "-Xms512m -Xmx1024m -XX:+UseG1GC"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - blog_logs_dev:/app/logs
       - blog_uploads_dev:/app/uploads
