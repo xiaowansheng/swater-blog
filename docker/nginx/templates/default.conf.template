@@ -192,8 +192,8 @@ server {
 #}
 
 server {
-    listen 80;
-    server_name ${NGINX_WEB_DOMAIN};
+    listen 80 default_server;
+    server_name ${NGINX_WEB_DOMAIN} localhost 127.0.0.1 _;
 
     client_max_body_size 20m;
 
