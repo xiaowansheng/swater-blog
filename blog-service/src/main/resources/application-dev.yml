@@ -96,7 +96,7 @@ spring:
   # SQL初始化
   sql:
     init:
-      mode: never  # 禁用SQL初始化，避免重复插入数据
+      mode: always  # 开发环境自动初始化表结构
       schema-locations: classpath:schema.sql
       data-locations: classpath:data-dev.sql
       continue-on-error: true  # 开发时忽略错误
