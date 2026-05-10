@@ -1,6 +1,6 @@
 -- -- ========================================
 -- -- 开发环境初始化数据（历史样例，当前默认保持注释，不会执行）
--- -- 管理员账号由 blog.bootstrap.admin.* / BLOG_BOOTSTRAP_ADMIN_* 在启动时初始化
+-- -- 管理员账号由当前 profile YAML 中的 blog.bootstrap.admin.* 在启动时初始化
 -- -- 使用 INSERT IGNORE 避免重复插入错误
 -- -- ========================================
 --
@@ -10,7 +10,7 @@
 -- (2, '测试', 'test', '普通注册用户', 1);
 --
 -- -- 2. 插入用户数据
--- -- 当前不再提供固定默认密码；请使用 BLOG_BOOTSTRAP_ADMIN_PASSWORD 初始化管理员
+-- -- 当前不再由 SQL 提供固定默认密码；请修改当前 profile YAML 中的 blog.bootstrap.admin.password
 -- INSERT IGNORE INTO `user` (`id`, `username`, `email`, `password`, `nickname`, `avatar`, `role_key`, `status`, `disabled`, `ip_address_signup`, `ip_source_signup`) VALUES
 -- (1, 'admin', 'admin@example.com', '$2b$10$3HkRsI1UZP8pJzwfAaBQ2OpaNGIcWv2G7.Bngh951AkvzV8M4YMri', '管理员', '/uploads/avatar/admin.jpg', 'admin', 1, 0, '127.0.0.1', '本地'),
 -- (2, 'test', 'tester@example.com', '$2b$10$3HkRsI1UZP8pJzwfAaBQ2OpaNGIcWv2G7.Bngh951AkvzV8M4YMri', '测试用户', '/uploads/avatar/test.jpg', 'test', 1, 0, '127.0.0.1', '本地');

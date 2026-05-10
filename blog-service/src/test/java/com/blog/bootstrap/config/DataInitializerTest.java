@@ -33,7 +33,7 @@ class DataInitializerTest {
 
         assertThatIllegalStateException()
                 .isThrownBy(() -> initializer.run(mock(ApplicationArguments.class)))
-                .withMessageContaining("BLOG_BOOTSTRAP_ADMIN_PASSWORD");
+                .withMessageContaining("blog.bootstrap.admin.password");
 
         verify(roleMapper, never()).insert(any(Role.class));
         verify(userMapper, never()).insert(any(User.class));

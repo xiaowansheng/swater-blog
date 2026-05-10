@@ -61,7 +61,7 @@ public class DataInitializer implements ApplicationRunner {
 
     private void validateBootstrapConfig() {
         if (!StringUtils.hasText(adminPassword)) {
-            throw new IllegalStateException("缺少管理员初始密码，请设置 BLOG_BOOTSTRAP_ADMIN_PASSWORD");
+            throw new IllegalStateException("缺少管理员初始密码，请设置 blog.bootstrap.admin.password");
         }
     }
 
