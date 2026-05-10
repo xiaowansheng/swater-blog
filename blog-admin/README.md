@@ -103,7 +103,7 @@ pnpm preview
 ## 环境配置
 
 - 复制 `.env.example` 为 `.env.local` 按需覆盖本地配置
-- Docker 生产构建通过 build args 注入变量，不依赖提交 `.env.production`
+- 当前 Docker 构建不会从根目录 `.env` 注入前端变量；如需定制生产构建变量，需要先在 Compose/Dockerfile 中补充显式注入
 
 主要配置项：
 - `VITE_API_BASE_URL` - API基础路径

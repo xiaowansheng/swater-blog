@@ -99,23 +99,31 @@ COMPOSE_PROFILES=https docker compose up -d
 ```env
 COMPOSE_PROFILES=http
 SPRING_PROFILES_ACTIVE=docker
+SERVER_PORT=8888
 BLOG_ADMIN_PUBLISHED_PORT=3001
 BLOG_WEB_PUBLISHED_PORT=3002
 
-VITE_API_BASE_URL=/api
-VITE_BLOG_URL=http://localhost
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=blog
+DB_USER=blog
+DB_PASSWORD=change_me_db_password
+DB_ROOT_PASSWORD=change_me_root_password
 
-BLOG_BOOTSTRAP_ADMIN_USERNAME=admin
-BLOG_BOOTSTRAP_ADMIN_PASSWORD=你的初始密码
-BLOG_BOOTSTRAP_ADMIN_EMAIL=admin@example.com
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PUBLISHED_PORT=6379
+REDIS_PASSWORD=
+REDIS_DATABASE=0
 
-NEXT_PUBLIC_API_BASE_URL=/
-SERVER_API_BASE_URL=http://blog-service:8888
-NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX=/uploads
-NEXT_PUBLIC_SITE_URL=http://localhost
+RABBITMQ_HOST=localhost
+RABBITMQ_PORT=5672
+RABBITMQ_USER=admin
+RABBITMQ_PASSWORD=change_me_rabbitmq_password
+RABBITMQ_VHOST=/
 ```
 
-首次空库启动会自动创建管理后台账号。`BLOG_BOOTSTRAP_ADMIN_PASSWORD` 没有默认值，必须在 `.env` 中显式设置；管理员用户已存在时不会重置密码。
+首次空库启动会自动创建管理后台账号。当前配置以 Spring profile YAML 为准：本机 `dev` profile 默认 `admin/admin`，Docker profile 默认 `admin/change_me_admin_password`；管理员用户已存在时不会重置密码。生产部署前应先调整对应 profile 的 `blog.bootstrap.admin.*` 配置，或先改成环境变量占位再注入。
 
 ### 方式二：本地开发
 
@@ -137,7 +145,7 @@ docker compose -f docker-compose.env.yml up -d mysql redis rabbitmq
 2. **启动后端服务**
 ```bash
 cd blog-service
-# 修改配置文件 src/main/resources/application-dev.yml
+# 按需确认 .env 和 src/main/resources/application-dev.yml
 ./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
 
@@ -182,6 +190,8 @@ scripts\\dev-setup.bat
 # 启动基础服务 + 后端服务容器
 docker compose -f docker-compose.dev.yml up -d
 ```
+
+`docker-compose.dev.yml` 中的后端容器当前使用 `docker` profile；直接用 `./gradlew bootRun --args='--spring.profiles.active=dev'` 时才读取 `application-dev.yml`。
 
 ## 📚 文档导航
 

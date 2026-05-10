@@ -29,6 +29,7 @@ pnpm dev
 ## 环境配置
 
 复制 `.env.example` 为 `.env.local` 可覆盖默认值。
+根目录 `.env` 不会自动注入 `blog-web` Docker 镜像；如需定制生产构建或运行时变量，需要先在 Compose/Dockerfile 中补充显式注入。
 
 主要配置项：
 - `NEXT_PUBLIC_API_BASE_URL` - 浏览器侧 API 基础地址
