@@ -4,7 +4,7 @@
 # ========================================
 
 server:
-  port: 8888
+  port: ${SERVER_PORT:8888}
 
 blog:
   bootstrap:
@@ -352,6 +352,8 @@ management:
       enabled: true
     rabbit:
       enabled: true
+    mail:
+      enabled: false
     diskspace:
       enabled: true
       threshold: 1GB

@@ -102,7 +102,7 @@ services:
     restart: unless-stopped
     ports:
       - "${SERVER_PORT:-8888}:${SERVER_PORT:-8888}"
-    command: ["--spring.profiles.active=dev"]
+    command: ["--spring.profiles.active=docker"]
     environment:
       DB_HOST: mysql
       DB_PORT: 3306
@@ -134,7 +134,7 @@ services:
     networks:
       - blog-dev-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:$${SERVER_PORT:-8888}/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fs http://localhost:8081/actuator/health || curl -fs http://localhost:$${SERVER_PORT:-8888}/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -4,13 +4,13 @@
 # ========================================
 
 server:
-  port: 8888
+  port: ${SERVER_PORT:8888}
 
 blog:
   bootstrap:
     admin:
       username: admin
-      password: change_me_admin_password
+      password: admin
       email: admin@example.com
 
 spring:
@@ -43,14 +43,14 @@ spring:
     mode: HTML
     encoding: UTF-8
     cache: false  # 开发时禁用缓存
-  
+
   # Jackson 日期格式化配置
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
     serialization:
       write-dates-as-timestamps: false
-  
+
   # 配置多部分上传限制
   servlet:
     multipart:
@@ -63,7 +63,7 @@ spring:
     username: ${DB_USER:blog}
     password: ${DB_PASSWORD:change_me_db_password}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    
+
     # 开发环境连接池配置
     hikari:
       maximum-pool-size: 10
@@ -75,7 +75,7 @@ spring:
       leak-detection-threshold: 60000
       connection-test-query: SELECT 1
       auto-commit: true
-      
+
       # 开发环境连接参数
       data-source-properties:
         cachePrepStmts: true
@@ -88,7 +88,7 @@ spring:
         cacheServerConfiguration: true
         elideSetAutoCommits: true
         maintainTimeStats: false
-  
+
   # JPA配置 - 开发环境
   jpa:
     hibernate:
@@ -99,7 +99,7 @@ spring:
         format_sql: true
         use_sql_comments: true
         dialect: org.hibernate.dialect.MySQL8Dialect
-  
+
   # SQL初始化
   sql:
     init:
@@ -109,7 +109,7 @@ spring:
       continue-on-error: true  # 开发时忽略错误
       separator: ";"
       encoding: utf-8
-  
+
   # 开发环境Redis配置
   data:
     redis:
@@ -148,13 +148,13 @@ spring:
           max-attempts: 3
           max-interval: 10000
           multiplier: 1.0
-  
+
   # 开发环境邮件配置
   mail:
     host: ${MAIL_HOST:smtp.qq.com}
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:change_me_dev_mail_app_password}
+    password: ${MAIL_PASSWORD:}
     from-name: ${MAIL_FROM_NAME:Swater Blog Dev}
     properties:
       mail:
@@ -170,7 +170,7 @@ spring:
           timeout: 25000
           connection-timeout: 25000
           write-timeout: 25000
-  
+
   # 开发工具配置
   devtools:
     restart:
@@ -336,6 +336,8 @@ management:
       enabled: true
     rabbit:
       enabled: true
+    mail:
+      enabled: false
     diskspace:
       enabled: true
       threshold: 1GB
@@ -485,28 +487,28 @@ dev:
     watch-paths:
       - src/main/java
       - src/main/resources
-  
+
   # 调试配置
   debug:
     sql-log: true
     request-log: true
     response-log: true
     performance-log: true
-  
+
   # 模拟数据
   mock:
     enabled: true
     users: 100
     articles: 500
     comments: 1000
-  
+
   # 开发工具
   tools:
     h2-console: true
     swagger-ui: true
     actuator: true
     devtools: true
-  
+
 # 跨域配置（供 WebCorsConfig 使用）
 app:
   cors:

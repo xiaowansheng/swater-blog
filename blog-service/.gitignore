@@ -42,5 +42,6 @@ out/
 ### Config ###
 config/*.yml
 config/*.properties
+application-prod.yml
 uploads/
 temp/
