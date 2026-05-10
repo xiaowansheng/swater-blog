@@ -1,0 +1,4 @@
+ARG PROXY_VER=1.6
+FROM nginxproxy/nginx-proxy:${PROXY_VER}
+
+COPY limits.conf /etc/nginx/conf.d/zz-limits.conf
