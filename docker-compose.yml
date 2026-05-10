@@ -10,13 +10,12 @@ services:
     container_name: swater-mysql
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "${DB_PORT:-3306}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-change_me_root_password}
       MYSQL_DATABASE: ${DB_NAME:-blog}
       MYSQL_USER: ${DB_USER:-blog}
       MYSQL_PASSWORD: ${DB_PASSWORD:-change_me_db_password}
-      TZ: Asia/Shanghai
     volumes:
       - mysql_data:/var/lib/mysql
     command: >
@@ -75,7 +74,7 @@ services:
     container_name: swater-rabbitmq
     restart: unless-stopped
     ports:
-      - "5672:5672"
+      - "${RABBITMQ_PORT:-5672}:5672"
       - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
@@ -123,9 +122,9 @@ services:
     user: "0"
     restart: unless-stopped
     ports:
-      - "8888:8888"
+      - "${SERVER_PORT:-8888}:${SERVER_PORT:-8888}"
+    command: ["--spring.profiles.active=docker"]
     environment:
-      SPRING_PROFILES_ACTIVE: docker
       DB_HOST: mysql
       DB_PORT: 3306
       DB_NAME: ${DB_NAME:-blog}
@@ -140,34 +139,6 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-change_me_rabbitmq_password}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
-      MAIL_HOST: ${MAIL_HOST:-smtp.qq.com}
-      MAIL_PORT: ${MAIL_PORT:-587}
-      MAIL_USERNAME: ${MAIL_USERNAME:-}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Swater Blog}
-      AMAP_KEY: ${AMAP_KEY:-}
-      BAIDU_AK: ${BAIDU_AK:-}
-      IP2LOCATION_DB_PATH: ${IP2LOCATION_DB_PATH:-}
-      LOCATION_TYPE: ${LOCATION_TYPE:-amap}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-}
-      AUTH_EMAIL_SESSION_SECRET: ${AUTH_EMAIL_SESSION_SECRET:-}
-      BLOG_BOOTSTRAP_ADMIN_USERNAME: ${BLOG_BOOTSTRAP_ADMIN_USERNAME:-admin}
-      BLOG_BOOTSTRAP_ADMIN_PASSWORD: ${BLOG_BOOTSTRAP_ADMIN_PASSWORD:-}
-      BLOG_BOOTSTRAP_ADMIN_EMAIL: ${BLOG_BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
-      REVALIDATE_URL: ${REVALIDATE_URL:-http://blog-web:3000}
-      REVALIDATE_TOKEN: ${REVALIDATE_TOKEN:-}
-      FILE_STORAGE_TYPE: ${FILE_STORAGE_TYPE:-local}
-      FILE_STORAGE_LOCAL_PATH: ${FILE_STORAGE_LOCAL_PATH:-/app/uploads}
-      FILE_STORAGE_LOCAL_URL_PREFIX: ${FILE_STORAGE_LOCAL_URL_PREFIX:-/uploads}
-      OSS_ENDPOINT: ${OSS_ENDPOINT:-}
-      OSS_ACCESS_KEY_ID: ${OSS_ACCESS_KEY_ID:-}
-      OSS_ACCESS_KEY_SECRET: ${OSS_ACCESS_KEY_SECRET:-}
-      OSS_BUCKET_NAME: ${OSS_BUCKET_NAME:-}
-      OSS_DOMAIN: ${OSS_DOMAIN:-}
-      QINIU_ACCESS_KEY: ${QINIU_ACCESS_KEY:-}
-      QINIU_SECRET_KEY: ${QINIU_SECRET_KEY:-}
-      QINIU_BUCKET: ${QINIU_BUCKET:-}
-      QINIU_DOMAIN: ${QINIU_DOMAIN:-}
       SERVER_PORT: ${SERVER_PORT:-8888}
     volumes:
       - blog_logs:/app/logs
@@ -184,7 +155,7 @@ services:
     networks:
       - blog-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      test: ["CMD-SHELL", "curl -f http://localhost:$${SERVER_PORT:-8888}/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -195,13 +166,6 @@ services:
     build:
       context: ./blog-admin
       dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
-        VITE_WS_BASE_URL: ${VITE_WS_BASE_URL:-}
-        VITE_UPLOAD_URL: ${VITE_UPLOAD_URL:-/api/upload}
-        VITE_UPLOAD_RESOURCE_PREFIX: ${VITE_UPLOAD_RESOURCE_PREFIX:-/uploads}
-        VITE_BLOG_URL: ${VITE_BLOG_URL:-https://blog.example.com}
-        VITE_GITHUB_URL: ${VITE_GITHUB_URL:-https://github.com/xiaowansheng/swater-blog}
     container_name: swater-blog-admin
     restart: unless-stopped
     ports:
@@ -217,21 +181,10 @@ services:
     build:
       context: ./blog-web
       dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-/}
-        NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX: ${NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX:-/uploads}
-        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://blog.example.com}
-        SERVER_API_BASE_URL: ${SERVER_API_BASE_URL:-http://blog-service:8888}
     container_name: swater-blog-web
     restart: unless-stopped
-    environment:
-      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-/}
-      NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX: ${NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX:-/uploads}
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://blog.example.com}
-      SERVER_API_BASE_URL: ${SERVER_API_BASE_URL:-http://blog-service:8888}
-      REVALIDATE_TOKEN: ${REVALIDATE_TOKEN:-}
     ports:
-      - "${BLOG_WEB_PUBLISHED_PORT:-3000}:3000"
+      - "${BLOG_WEB_PUBLISHED_PORT:-3002}:3000"
     depends_on:
       blog-service:
         condition: service_healthy

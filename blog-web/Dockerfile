@@ -13,40 +13,21 @@ LABEL description="Blog Web build stage"
 
 WORKDIR /app
 
-# 可通过构建参数覆盖镜像源（主/备）
-ARG NPM_REGISTRY_PRIMARY=https://registry.npmmirror.com
-ARG NPM_REGISTRY_FALLBACK=https://mirrors.cloud.tencent.com/npm
-ARG PNPM_REGISTRY_PRIMARY=https://registry.npmmirror.com
-ARG PNPM_REGISTRY_FALLBACK=https://mirrors.cloud.tencent.com/npm
-
 # 复制 package 文件
 COPY package.json pnpm-lock.yaml ./
 
 # 安装 pnpm（输出更完整日志，主备切换）
-RUN npm config set registry ${NPM_REGISTRY_PRIMARY} \
-    && (npm install -g pnpm@9 --loglevel verbose || (npm config set registry ${NPM_REGISTRY_FALLBACK} && npm install -g pnpm@9 --loglevel verbose)) \
-    && pnpm config set registry ${PNPM_REGISTRY_PRIMARY} \
+RUN npm config set registry https://registry.npmmirror.com \
+    && (npm install -g pnpm@9 --loglevel verbose || (npm config set registry https://mirrors.cloud.tencent.com/npm && npm install -g pnpm@9 --loglevel verbose)) \
+    && pnpm config set registry https://registry.npmmirror.com \
     && pnpm config set fetch-retries 5 \
     && pnpm config set fetch-timeout 600000
 
 # 安装依赖
-RUN pnpm install --frozen-lockfile --reporter=ndjson || (pnpm config set registry ${PNPM_REGISTRY_FALLBACK} && pnpm install --frozen-lockfile --reporter=ndjson)
+RUN pnpm install --frozen-lockfile --reporter=ndjson || (pnpm config set registry https://mirrors.cloud.tencent.com/npm && pnpm install --frozen-lockfile --reporter=ndjson)
 
 # 复制源代码
 COPY . .
-
-# 构建期环境变量
-ARG NEXT_PUBLIC_API_BASE_URL=/
-ARG NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX=/uploads
-ARG NEXT_PUBLIC_SITE_URL=https://blog.example.com
-ARG SERVER_API_BASE_URL=http://blog-service:8888
-
-ENV NEXT_TELEMETRY_DISABLED=1 \
-    NODE_ENV=production \
-    NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL} \
-    NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX=${NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX} \
-    NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL} \
-    SERVER_API_BASE_URL=${SERVER_API_BASE_URL}
 
 # 构建 Next.js 应用
 RUN pnpm exec next build --webpack
@@ -76,12 +57,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/pnpm-lock.yaml ./pnpm-lock.yaml
 # 复制 .next 目录
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# 设置环境变量
-ENV NODE_ENV=production \
-    NEXT_TELEMETRY_DISABLED=1 \
-    PORT=3000 \
-    HOSTNAME="0.0.0.0"
 
 # 切换用户
 USER nextjs

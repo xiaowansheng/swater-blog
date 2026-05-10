@@ -14,17 +14,11 @@ LABEL description="Blog service build stage"
 # 设置工作目录
 WORKDIR /app
 
-# 可通过构建参数覆盖 Maven 镜像源（主/备）
-ARG MAVEN_REPO_PRIMARY=https://maven.aliyun.com/repository/public
-ARG MAVEN_REPO_FALLBACK=https://mirrors.cloud.tencent.com/nexus/repository/maven-public/
-ENV MAVEN_REPO_PRIMARY=${MAVEN_REPO_PRIMARY}
-ENV MAVEN_REPO_FALLBACK=${MAVEN_REPO_FALLBACK}
-
 # 配置 Gradle 全局镜像源（含插件与依赖）
 RUN mkdir -p /root/.gradle/init.d && \
     cat > /root/.gradle/init.d/mirrors.gradle <<'EOF'
-def primary = System.getenv("MAVEN_REPO_PRIMARY") ?: "https://maven.aliyun.com/repository/public"
-def fallback = System.getenv("MAVEN_REPO_FALLBACK") ?: "https://mirrors.cloud.tencent.com/nexus/repository/maven-public/"
+def primary = "https://maven.aliyun.com/repository/public"
+def fallback = "https://mirrors.cloud.tencent.com/nexus/repository/maven-public/"
 
 settingsEvaluated { settings ->
     settings.pluginManagement {
@@ -113,11 +107,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # 暴露端口
 EXPOSE 8888
 
-# JVM参数优化
-ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
-
-# 应用参数
-ENV SPRING_PROFILES_ACTIVE=docker
 ENV SERVER_PORT=8888
 
 # 启动应用

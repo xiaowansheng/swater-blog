@@ -11,13 +11,12 @@ services:
     container_name: blog-mysql-dev
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "${DB_PORT:-3306}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-change_me_root_password}
       MYSQL_DATABASE: ${DB_NAME:-blog}
       MYSQL_USER: ${DB_USER:-blog}
       MYSQL_PASSWORD: ${DB_PASSWORD:-change_me_db_password}
-      TZ: Asia/Shanghai
     volumes:
       - mysql_dev_data:/var/lib/mysql
     command: >
@@ -41,7 +40,7 @@ services:
     container_name: blog-redis-dev
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "${REDIS_PUBLISHED_PORT:-6379}:6379"
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     volumes:
@@ -76,7 +75,7 @@ services:
     container_name: blog-rabbitmq-dev
     restart: unless-stopped
     ports:
-      - "5672:5672"    # AMQP端口
+      - "${RABBITMQ_PORT:-5672}:5672"    # AMQP端口
       - "15672:15672"  # 管理界面端口
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
@@ -102,9 +101,9 @@ services:
     container_name: blog-service-dev
     restart: unless-stopped
     ports:
-      - "8888:8888"
+      - "${SERVER_PORT:-8888}:${SERVER_PORT:-8888}"
+    command: ["--spring.profiles.active=dev"]
     environment:
-      SPRING_PROFILES_ACTIVE: dev
       DB_HOST: mysql
       DB_PORT: 3306
       DB_NAME: ${DB_NAME:-blog}
@@ -119,21 +118,6 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-change_me_rabbitmq_password}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
-      MAIL_HOST: ${MAIL_HOST:-smtp.qq.com}
-      MAIL_PORT: ${MAIL_PORT:-587}
-      MAIL_USERNAME: ${MAIL_USERNAME:-}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Swater Blog Dev}
-      AMAP_KEY: ${AMAP_KEY:-}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-}
-      AUTH_EMAIL_SESSION_SECRET: ${AUTH_EMAIL_SESSION_SECRET:-}
-      REVALIDATE_URL: ${REVALIDATE_URL:-http://host.docker.internal:3001}
-      REVALIDATE_TOKEN: ${REVALIDATE_TOKEN:-}
-      BLOG_BOOTSTRAP_ADMIN_USERNAME: ${BLOG_BOOTSTRAP_ADMIN_USERNAME:-admin}
-      BLOG_BOOTSTRAP_ADMIN_PASSWORD: ${BLOG_BOOTSTRAP_ADMIN_PASSWORD:-}
-      BLOG_BOOTSTRAP_ADMIN_EMAIL: ${BLOG_BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
-      FILE_STORAGE_LOCAL_PATH: ${FILE_STORAGE_LOCAL_PATH:-/app/uploads}
-      FILE_STORAGE_LOCAL_URL_PREFIX: ${FILE_STORAGE_LOCAL_URL_PREFIX:-/uploads}
       SERVER_PORT: ${SERVER_PORT:-8888}
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -150,7 +134,7 @@ services:
     networks:
       - blog-dev-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8081/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:$${SERVER_PORT:-8888}/actuator/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

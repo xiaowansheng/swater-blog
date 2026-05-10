@@ -1,4 +1,3 @@
-ARG RABBITMQ_VER=3-management-alpine
-FROM rabbitmq:${RABBITMQ_VER}
+FROM rabbitmq:3-management-alpine
 
 COPY rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
