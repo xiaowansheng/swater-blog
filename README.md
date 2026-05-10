@@ -80,12 +80,41 @@ COMPOSE_PROFILES=https docker compose up -d
 # COMPOSE_PROFILES=https
 
 # 3. 等待服务启动完成，访问应用
-# 博客前端: http://localhost:3000
+# 博客前端: http://localhost
 # 管理后台: http://localhost:3001
+# 后端健康: http://localhost:8888/actuator/health
 # API文档: http://localhost:8888/swagger-ui.html
 ```
 
 如果仓库位于 WSL 文件系统，比如 `/home/...`，或 Windows 侧看到的是 `\\wsl.localhost\Ubuntu-24.04\...`，请在 WSL 终端里执行这里的 `docker compose` 命令。不要从 Windows 侧直接对这个 WSL 路径运行 `docker-compose.exe`，否则 `schema.sql` 这类文件绑定挂载会报 `includes invalid characters for a local volume name`。
+
+本机没有域名时，不需要改 hosts。完整 Docker 模式下建议这样访问：
+
+- 前台访问 `http://localhost`，它会经过外层 Nginx，`/api` 和 `/uploads` 会被代理到后端和上传目录
+- 管理后台访问 `http://localhost:3001`，管理后台容器内置 Nginx 会把 `/api` 代理到 `blog-service:8888`
+- 不建议把 `http://localhost:3000` 或 `http://localhost:3002` 作为前台主入口，它们是 `blog-web` 容器直连端口，可能绕过外层 Nginx 的 `/api` 代理
+
+本地 `.env` 关键配置示例：
+
+```env
+COMPOSE_PROFILES=http
+BLOG_ADMIN_PUBLISHED_PORT=3001
+BLOG_WEB_PUBLISHED_PORT=3002
+
+VITE_API_BASE_URL=/api
+VITE_BLOG_URL=http://localhost
+
+BLOG_BOOTSTRAP_ADMIN_USERNAME=admin
+BLOG_BOOTSTRAP_ADMIN_PASSWORD=你的初始密码
+BLOG_BOOTSTRAP_ADMIN_EMAIL=admin@example.com
+
+NEXT_PUBLIC_API_BASE_URL=/
+SERVER_API_BASE_URL=http://blog-service:8888
+NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX=/uploads
+NEXT_PUBLIC_SITE_URL=http://localhost
+```
+
+首次空库启动会自动创建管理后台账号。`BLOG_BOOTSTRAP_ADMIN_PASSWORD` 没有默认值，必须在 `.env` 中显式设置；管理员用户已存在时不会重置密码。
 
 ### 方式二：本地开发
 

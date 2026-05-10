@@ -41,6 +41,8 @@ services:
     restart: unless-stopped
     ports:
       - "${REDIS_PUBLISHED_PORT:-6379}:6379"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     volumes:
       - redis_data:/data
     networks:
@@ -52,14 +54,14 @@ services:
     command: >
       sh -c "
         EXTRA_ARGS='--maxmemory 64mb --maxmemory-policy allkeys-lru';
-        if [ -n \"$REDIS_PASSWORD\" ]; then
-          redis-server --requirepass \"$REDIS_PASSWORD\" $$EXTRA_ARGS;
+        if [ -n \"$$REDIS_PASSWORD\" ]; then
+          redis-server --requirepass \"$$REDIS_PASSWORD\" $$EXTRA_ARGS;
         else
           redis-server $$EXTRA_ARGS;
         fi
       "
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "if [ -n \"$${REDIS_PASSWORD}\" ]; then redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep -q PONG; else redis-cli ping | grep -q PONG; fi"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -80,6 +82,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-change_me_rabbitmq_password}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-/}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
@@ -138,6 +141,7 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-change_me_rabbitmq_password}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
       # ES_URIS: ${ES_URIS:-http://elasticsearch:9200}  # 暂时禁用ES
       ES_USERNAME: ${ES_USERNAME:-}
       ES_PASSWORD: ${ES_PASSWORD:-}
@@ -148,6 +152,9 @@ services:
       AMAP_KEY: ${AMAP_KEY:-}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-}
       AUTH_EMAIL_SESSION_SECRET: ${AUTH_EMAIL_SESSION_SECRET:-}
+      BLOG_BOOTSTRAP_ADMIN_USERNAME: ${BLOG_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      BLOG_BOOTSTRAP_ADMIN_PASSWORD: ${BLOG_BOOTSTRAP_ADMIN_PASSWORD:-}
+      BLOG_BOOTSTRAP_ADMIN_EMAIL: ${BLOG_BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
       REVALIDATE_TOKEN: ${REVALIDATE_TOKEN:-}
       FILE_STORAGE_TYPE: ${FILE_STORAGE_TYPE:-local}
       FILE_STORAGE_LOCAL_PATH: ${FILE_STORAGE_LOCAL_PATH:-/app/uploads}
@@ -197,7 +204,8 @@ services:
     ports:
       - "${BLOG_ADMIN_PUBLISHED_PORT:-3001}:80"
     depends_on:
-      - blog-service
+      blog-service:
+        condition: service_healthy
     networks:
       - blog-network
 
@@ -225,7 +233,8 @@ services:
     ports:
       - "${BLOG_WEB_PUBLISHED_PORT:-3000}:3000"
     depends_on:
-      - blog-service
+      blog-service:
+        condition: service_healthy
     networks:
       - blog-network
 
@@ -272,7 +281,7 @@ services:
     environment:
       - DEFAULT_EMAIL=${ACME_EMAIL:-user@example.com}
       # 强制指定代理容器名，防止自动识别错误
-      - NGINX_PROXY_CONTAINER=nginx-proxy
+      - NGINX_PROXY_CONTAINER=${NGINX_PROXY_CONTAINER:-swater-nginx-proxy}
     networks:
       - blog-network
     restart: unless-stopped
@@ -290,16 +299,21 @@ services:
       - "80"
     environment:
       # 告诉 Proxy：所有的域名都转给我！
-      VIRTUAL_HOST: ${ALL_DOMAINS}
-      LETSENCRYPT_HOST: ${ALL_DOMAINS}
-      LETSENCRYPT_EMAIL: ${ACME_EMAIL}
+      VIRTUAL_HOST: ${ALL_DOMAINS:-admin.local,web.local}
+      LETSENCRYPT_HOST: ${ALL_DOMAINS:-admin.local,web.local}
+      LETSENCRYPT_EMAIL: ${ACME_EMAIL:-user@example.com}
+      NGINX_ADMIN_DOMAIN: ${NGINX_ADMIN_DOMAIN:-admin.local}
+      NGINX_WEB_DOMAIN: ${NGINX_WEB_DOMAIN:-web.local}
     restart: unless-stopped
     volumes:
       - blog_uploads:/var/www/uploads:ro
     depends_on:
-      - blog-service
-      - blog-admin
-      - blog-web
+      blog-service:
+        condition: service_healthy
+      blog-admin:
+        condition: service_healthy
+      blog-web:
+        condition: service_healthy
     networks:
       - blog-network
 
@@ -321,9 +335,12 @@ services:
     volumes:
       - blog_uploads:/var/www/uploads:ro
     depends_on:
-      - blog-service
-      - blog-admin
-      - blog-web
+      blog-service:
+        condition: service_healthy
+      blog-admin:
+        condition: service_healthy
+      blog-web:
+        condition: service_healthy
     networks:
       - blog-network
 

@@ -123,7 +123,7 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:admin}
     password: ${RABBITMQ_PASSWORD:change_me_rabbitmq_password}
-    virtual-host: /
+    virtual-host: ${RABBITMQ_VHOST:/}
     connection-timeout: 15000
     publisher-confirm-type: correlated
     publisher-returns: true
@@ -168,8 +168,8 @@ spring:
 file:
   storage:
     local:
-      path: /app/uploads
-      url-prefix: /uploads
+      path: ${FILE_STORAGE_LOCAL_PATH:/app/uploads}
+      url-prefix: ${FILE_STORAGE_LOCAL_URL_PREFIX:/uploads}
     oss:
       endpoint: ${OSS_ENDPOINT:}
       access-key-id: ${OSS_ACCESS_KEY_ID:}

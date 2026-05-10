@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 class DataInitializerTest {
 
     @Test
-    void run_throwsWhenBootstrapPasswordMissing() {
+    void run_throwsWhenAdminPasswordMissing() {
         UserMapper userMapper = mock(UserMapper.class);
         RoleMapper roleMapper = mock(RoleMapper.class);
         DataInitializer initializer = new DataInitializer(
@@ -33,7 +33,7 @@ class DataInitializerTest {
 
         assertThatIllegalStateException()
                 .isThrownBy(() -> initializer.run(mock(ApplicationArguments.class)))
-                .withMessageContaining("BLOG_DEV_BOOTSTRAP_ADMIN_PASSWORD");
+                .withMessageContaining("BLOG_BOOTSTRAP_ADMIN_PASSWORD");
 
         verify(roleMapper, never()).insert(any(Role.class));
         verify(userMapper, never()).insert(any(User.class));

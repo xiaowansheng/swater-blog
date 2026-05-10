@@ -9,19 +9,15 @@ import com.blog.shared.model.enums.DisabledFlag;
 import com.blog.shared.model.enums.EnableStatus;
 import com.blog.shared.util.PasswordUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 @Slf4j
 @Component
-@Profile("dev")
-@ConditionalOnProperty(name = "blog.dev-bootstrap.enabled", havingValue = "true")
 public class DataInitializer implements ApplicationRunner {
     private final UserMapper userMapper;
     private final RoleMapper roleMapper;
@@ -32,9 +28,9 @@ public class DataInitializer implements ApplicationRunner {
     public DataInitializer(
             UserMapper userMapper,
             RoleMapper roleMapper,
-            @Value("${blog.dev-bootstrap.admin.username:admin}") String adminUsername,
-            @Value("${blog.dev-bootstrap.admin.password:}") String adminPassword,
-            @Value("${blog.dev-bootstrap.admin.email:admin@example.com}") String adminEmail
+            @Value("${blog.bootstrap.admin.username:admin}") String adminUsername,
+            @Value("${blog.bootstrap.admin.password:}") String adminPassword,
+            @Value("${blog.bootstrap.admin.email:admin@example.com}") String adminEmail
     ) {
         this.userMapper = userMapper;
         this.roleMapper = roleMapper;
@@ -65,7 +61,7 @@ public class DataInitializer implements ApplicationRunner {
 
     private void validateBootstrapConfig() {
         if (!StringUtils.hasText(adminPassword)) {
-            throw new IllegalStateException("缺少开发管理员初始密码，请设置 BLOG_DEV_BOOTSTRAP_ADMIN_PASSWORD");
+            throw new IllegalStateException("缺少管理员初始密码，请设置 BLOG_BOOTSTRAP_ADMIN_PASSWORD");
         }
     }
 
@@ -100,7 +96,7 @@ public class DataInitializer implements ApplicationRunner {
             admin.setStatus(EnableStatus.ENABLED.getCode());
             admin.setDisabled(DisabledFlag.NO.getCode());
             userMapper.insert(admin);
-            log.info("初始化开发管理员账号成功，用户名: {}，用户ID: {}", adminUsername, admin.getId());
+            log.info("初始化管理员账号成功，用户名: {}，用户ID: {}", adminUsername, admin.getId());
         }
     }
 }

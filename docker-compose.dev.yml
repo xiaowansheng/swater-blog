@@ -55,21 +55,26 @@ services:
     command: >
       sh -c "
         EXTRA_ARGS='--maxmemory 64mb --maxmemory-policy allkeys-lru';
-        if [ -n \"$REDIS_PASSWORD\" ]; then
-          redis-server --requirepass \"$REDIS_PASSWORD\" $$EXTRA_ARGS;
+        if [ -n \"$$REDIS_PASSWORD\" ]; then
+          redis-server --requirepass \"$$REDIS_PASSWORD\" $$EXTRA_ARGS;
         else
           redis-server $$EXTRA_ARGS;
         fi
       "
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "if [ -n \"$${REDIS_PASSWORD}\" ]; then redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep -q PONG; else redis-cli ping | grep -q PONG; fi"]
       interval: 30s
       timeout: 10s
       retries: 3
 
   # RabbitMQ消息队列
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    build:
+      context: ./docker/rabbitmq
+      dockerfile: Dockerfile
+      args:
+        RABBITMQ_VER: ${RABBITMQ_VER:-3-management-alpine}
+    image: swater-rabbitmq:${RABBITMQ_VER:-3-management-alpine}
     container_name: blog-rabbitmq-dev
     restart: unless-stopped
     ports:
@@ -78,9 +83,9 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-change_me_rabbitmq_password}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-/}
     volumes:
-      - rabbitmq_dev_data:/var/lib/rabbitmqd
-      - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - rabbitmq_dev_data:/var/lib/rabbitmq
     networks:
       - blog-dev-network
     # 限制容器内存（宿主机保护）
@@ -115,6 +120,7 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-change_me_rabbitmq_password}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
       MAIL_HOST: ${MAIL_HOST:-smtp.qq.com}
       MAIL_PORT: ${MAIL_PORT:-587}
       MAIL_USERNAME: ${MAIL_USERNAME:-}
@@ -124,11 +130,12 @@ services:
       AUTH_EMAIL_SESSION_SECRET: ${AUTH_EMAIL_SESSION_SECRET:-}
       REVALIDATE_URL: ${REVALIDATE_URL:-http://host.docker.internal:3001}
       REVALIDATE_TOKEN: ${REVALIDATE_TOKEN:-}
-      BLOG_DEV_BOOTSTRAP_ENABLED: ${BLOG_DEV_BOOTSTRAP_ENABLED:-false}
-      BLOG_DEV_BOOTSTRAP_ADMIN_USERNAME: ${BLOG_DEV_BOOTSTRAP_ADMIN_USERNAME:-admin}
-      BLOG_DEV_BOOTSTRAP_ADMIN_PASSWORD: ${BLOG_DEV_BOOTSTRAP_ADMIN_PASSWORD:-}
-      BLOG_DEV_BOOTSTRAP_ADMIN_EMAIL: ${BLOG_DEV_BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
+      BLOG_BOOTSTRAP_ADMIN_USERNAME: ${BLOG_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      BLOG_BOOTSTRAP_ADMIN_PASSWORD: ${BLOG_BOOTSTRAP_ADMIN_PASSWORD:-}
+      BLOG_BOOTSTRAP_ADMIN_EMAIL: ${BLOG_BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
       FILE_STORAGE_TYPE: ${FILE_STORAGE_TYPE:-local}
+      FILE_STORAGE_LOCAL_PATH: ${FILE_STORAGE_LOCAL_PATH:-/app/uploads}
+      FILE_STORAGE_LOCAL_URL_PREFIX: ${FILE_STORAGE_LOCAL_URL_PREFIX:-/uploads}
       SERVER_PORT: ${SERVER_PORT:-8888}
       JAVA_OPTS: "-Xms512m -Xmx1024m -XX:+UseG1GC"
     extra_hosts:
