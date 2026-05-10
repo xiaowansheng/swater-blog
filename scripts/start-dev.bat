@@ -3,6 +3,14 @@ echo ========================================
 echo 启动博客系统开发环境
 echo ========================================
 
+if /i "%CD:~0,16%"=="\\wsl.localhost\" (
+    echo 错误: 当前目录位于 WSL 文件系统: %CD%
+    echo 请改为在 WSL 终端中进入该仓库后运行 docker compose 命令或 ./scripts/start-dev.sh
+    echo 不要从 Windows 侧对 \\wsl.localhost\... 路径直接启动 Compose，否则文件绑定挂载会失败
+    pause
+    exit /b 1
+)
+
 echo.
 echo 1. 检查 Docker 是否运行...
 docker --version >nul 2>&1
@@ -15,7 +23,14 @@ if errorlevel 1 (
 
 echo.
 echo 2. 启动基础服务 (MySQL, Redis, RabbitMQ)...
-docker-compose -f docker-compose.env.yml up -d mysql redis rabbitmq
+docker compose version >nul 2>&1
+if errorlevel 1 (
+    echo 错误: Docker Compose V2 不可用
+    echo 请确认 docker compose version 可以正常执行
+    pause
+    exit /b 1
+)
+docker compose -f docker-compose.env.yml up -d mysql redis rabbitmq
 
 echo.
 echo 3. 等待服务启动...
@@ -23,7 +38,7 @@ timeout /t 30 /nobreak
 
 echo.
 echo 4. 检查服务状态...
-docker-compose ps
+docker compose ps
 
 echo.
 echo 5. 启动后端服务...

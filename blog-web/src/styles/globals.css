@@ -42,6 +42,11 @@
   --motion-soft: 0.3;
   --motion-medium: 0.6;
   --motion-strong: 1;
+
+  /* ===== Font Fallbacks ===== */
+  --font-nunito: "Avenir Next", "Segoe UI", Arial, sans-serif;
+  --font-varela-round: "Trebuchet MS", "Arial Rounded MT Bold", "Segoe UI", sans-serif;
+  --font-noto-sans-sc: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans CJK SC", sans-serif;
 }
 
 .dark {

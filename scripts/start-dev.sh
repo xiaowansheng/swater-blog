@@ -4,12 +4,20 @@ echo "========================================"
 echo "启动博客系统开发环境"
 echo "========================================"
 
+COMPOSE_CMD=(docker compose)
+
 # 检查 Docker 是否运行
 echo ""
 echo "1. 检查 Docker 是否运行..."
 if ! command -v docker &> /dev/null; then
     echo "错误: Docker 未安装"
     echo "请先安装 Docker"
+    exit 1
+fi
+
+if ! "${COMPOSE_CMD[@]}" version &> /dev/null; then
+    echo "错误: Docker Compose V2 不可用"
+    echo "请确认可以执行: docker compose version"
     exit 1
 fi
 
@@ -22,7 +30,7 @@ fi
 # 启动基础服务
 echo ""
 echo "2. 启动基础服务 (MySQL, Redis, RabbitMQ)..."
-docker-compose -f docker-compose.env.yml up -d mysql redis rabbitmq
+"${COMPOSE_CMD[@]}" -f docker-compose.env.yml up -d mysql redis rabbitmq
 
 # 等待服务启动
 echo ""
@@ -32,7 +40,7 @@ sleep 30
 # 检查服务状态
 echo ""
 echo "4. 检查服务状态..."
-docker-compose ps
+"${COMPOSE_CMD[@]}" ps
 
 # 启动后端服务
 echo ""
@@ -78,7 +86,7 @@ echo ""
 echo "按 Ctrl+C 停止所有服务"
 
 # 等待用户中断
-trap 'echo "正在停止服务..."; docker-compose down; exit' INT
+trap 'echo "正在停止服务..."; docker compose down; exit' INT
 while true; do
     sleep 1
 done

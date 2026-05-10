@@ -13,7 +13,7 @@ Swater Blog 是一个基于 Spring Boot 3.x 的现代化博客系统，提供完
 
 - 🚀 **现代化技术栈**: Spring Boot 3.x + JDK 21 + React 18
 - 🔧 **高度可配置**: 支持多环境配置，灵活的存储策略
-- 📦 **容器化部署**: Docker + Docker Compose 一键部署
+- 📦 **容器化部署**: Docker + Docker Compose V2 一键部署
 - 🔍 **全文搜索**: Elasticsearch 支持（当前默认禁用）
 - 📊 **实时监控**: Prometheus + Grafana 监控体系
 - 🔐 **安全可靠**: 完善的认证授权和安全防护
@@ -54,7 +54,7 @@ swater-blog/
 - **富文本编辑**: MD Editor
 
 ### 运维技术
-- **容器化**: Docker + Docker Compose
+- **容器化**: Docker + Docker Compose V2
 - **监控**: Prometheus + Grafana + Micrometer
 - **构建工具**: Gradle (Kotlin DSL)
 - **CI/CD**: GitHub Actions
@@ -70,10 +70,10 @@ cd swater-blog
 
 # 2. 启动所有服务（ES 默认禁用）
 # 使用 HTTP（直连 nginx）
-COMPOSE_PROFILES=http docker-compose up -d
+COMPOSE_PROFILES=http docker compose up -d
 
 # 使用 HTTPS（nginx-proxy + ACME）
-COMPOSE_PROFILES=https docker-compose up -d
+COMPOSE_PROFILES=https docker compose up -d
 
 # 也可以在 .env 中设置（参考 .env.example）
 # COMPOSE_PROFILES=http
@@ -84,6 +84,8 @@ COMPOSE_PROFILES=https docker-compose up -d
 # 管理后台: http://localhost:3001
 # API文档: http://localhost:8888/swagger-ui.html
 ```
+
+如果仓库位于 WSL 文件系统，比如 `/home/...`，或 Windows 侧看到的是 `\\wsl.localhost\Ubuntu-24.04\...`，请在 WSL 终端里执行这里的 `docker compose` 命令。不要从 Windows 侧直接对这个 WSL 路径运行 `docker-compose.exe`，否则 `schema.sql` 这类文件绑定挂载会报 `includes invalid characters for a local volume name`。
 
 ### 方式二：本地开发
 
@@ -99,7 +101,7 @@ COMPOSE_PROFILES=https docker-compose up -d
 
 1. **启动基础依赖**
 ```bash
-docker-compose -f docker-compose.env.yml up -d mysql redis rabbitmq
+docker compose -f docker-compose.env.yml up -d mysql redis rabbitmq
 ```
 
 2. **启动后端服务**
@@ -148,7 +150,7 @@ scripts\\dev-setup.bat
 #### 开发容器（仅后端）
 ```bash
 # 启动基础服务 + 后端服务容器
-docker-compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml up -d
 ```
 
 ## 📚 文档导航

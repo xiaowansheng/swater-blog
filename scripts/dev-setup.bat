@@ -8,6 +8,14 @@ REM ========================================
 
 echo 🚀 开始搭建 Swater Blog 开发环境...
 
+if /i "%CD:~0,16%"=="\\wsl.localhost\" (
+    echo ❌ 当前目录位于 WSL 文件系统: %CD%
+    echo 请改为在 WSL 终端中进入该仓库后运行 docker compose 或 ./scripts/dev-setup.sh
+    echo 不要从 Windows 侧对 \\wsl.localhost\... 路径直接启动 Compose，否则文件绑定挂载会失败
+    pause
+    exit /b 1
+)
+
 REM 检查命令是否存在
 :check_command
 where %1 >nul 2>&1
@@ -25,7 +33,13 @@ call :check_command java
 call :check_command node
 call :check_command npm
 call :check_command docker
-call :check_command docker-compose
+docker compose version >nul 2>&1
+if errorlevel 1 (
+    echo ❌ Docker Compose V2 不可用，请确认 docker compose version 可以执行
+    exit /b 1
+) else (
+    echo ✅ Docker Compose V2 已安装
+)
 
 REM 检查 Java 版本
 echo ☕ 检查 Java 版本...
@@ -66,7 +80,7 @@ if not exist .env (
 
 REM 启动依赖服务
 echo 🐳 启动依赖服务 (MySQL, Redis, RabbitMQ)...
-docker-compose -f docker-compose.env.yml up -d mysql redis rabbitmq
+docker compose -f docker-compose.env.yml up -d mysql redis rabbitmq
 
 REM 等待服务启动
 echo ⏳ 等待服务启动完成...
@@ -74,7 +88,7 @@ timeout /t 30 /nobreak >nul
 
 REM 检查服务状态
 echo 🔍 检查服务状态...
-docker-compose ps
+docker compose ps
 
 REM 安装后端依赖并构建
 echo 🔧 构建后端服务...
@@ -98,9 +112,9 @@ if exist blog-web (
 echo 🎉 开发环境搭建完成！
 echo 📋 使用说明:
 echo   • 启动开发环境: scripts\start-dev.bat
-echo   • 停止基础服务: docker-compose -f docker-compose.env.yml down
-echo   • 查看服务状态: docker-compose -f docker-compose.env.yml ps
-echo   • 查看服务日志: docker-compose -f docker-compose.env.yml logs -f [service-name]
+echo   • 停止基础服务: docker compose -f docker-compose.env.yml down
+echo   • 查看服务状态: docker compose -f docker-compose.env.yml ps
+echo   • 查看服务日志: docker compose -f docker-compose.env.yml logs -f [service-name]
 echo.
 echo ⚠️  注意事项:
 echo   • 首次启动可能需要较长时间下载依赖

@@ -3,7 +3,6 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/lib/i18n/routing';
 import type { Metadata } from 'next';
-import { Nunito, Varela_Round, Noto_Sans_SC } from 'next/font/google';
 import '@/styles/globals.css';
 import { getSiteInfo, getServerConfig } from '@/lib/api/config.server';
 import { SiteConfigProvider } from '@/lib/context/SiteConfigContext';
@@ -42,23 +41,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-const nunito = Nunito({
-  variable: '--font-nunito',
-  subsets: ['latin'],
-});
-
-const varelaRound = Varela_Round({
-  variable: '--font-varela-round',
-  subsets: ['latin'],
-  weight: '400',
-});
-
-const notoSansSC = Noto_Sans_SC({
-  variable: '--font-noto-sans-sc',
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
-});
-
 export default async function LocaleLayout({
   children,
   params,
@@ -77,9 +59,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body
-        className={`${nunito.variable} ${varelaRound.variable} ${notoSansSC.variable} antialiased`}
-      >
+      <body className="antialiased">
         <NextIntlClientProvider messages={messages}>
           <SiteConfigProvider initialConfig={config}>
             <DecorationProvider>

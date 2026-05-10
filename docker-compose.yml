@@ -117,7 +117,7 @@ services:
   blog-service:
     build:
       context: ./blog-service
-      dockerfile: ${BLOG_SERVICE_DOCKERFILE:-Dockerfile}
+      dockerfile: Dockerfile
     container_name: swater-blog-service
     user: "0"
     restart: unless-stopped
@@ -179,7 +179,7 @@ services:
   blog-admin:
     build:
       context: ./blog-admin
-      dockerfile: ${BLOG_ADMIN_DOCKERFILE:-Dockerfile}
+      dockerfile: Dockerfile
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
         VITE_WS_BASE_URL: ${VITE_WS_BASE_URL:-}
@@ -205,7 +205,7 @@ services:
   blog-web:
     build:
       context: ./blog-web
-      dockerfile: ${BLOG_WEB_DOCKERFILE:-Dockerfile}
+      dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-/}
         NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX: ${NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX:-/uploads}

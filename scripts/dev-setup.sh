@@ -31,7 +31,13 @@ check_command "java"
 check_command "node"
 check_command "npm"
 check_command "docker"
-check_command "docker-compose"
+
+if ! docker compose version &> /dev/null; then
+    echo -e "${RED}❌ Docker Compose V2 不可用，请确认可以执行 docker compose version${NC}"
+    exit 1
+else
+    echo -e "${GREEN}✅ Docker Compose V2 已安装${NC}"
+fi
 
 # 检查 Java 版本
 echo -e "${BLUE}☕ 检查 Java 版本...${NC}"
@@ -64,7 +70,7 @@ fi
 
 # 启动依赖服务
 echo -e "${BLUE}🐳 启动依赖服务 (MySQL, Redis, RabbitMQ)...${NC}"
-docker-compose -f docker-compose.env.yml up -d mysql redis rabbitmq
+docker compose -f docker-compose.env.yml up -d mysql redis rabbitmq
 
 # 等待服务启动
 echo -e "${BLUE}⏳ 等待服务启动完成...${NC}"
@@ -72,7 +78,7 @@ sleep 30
 
 # 检查服务状态
 echo -e "${BLUE}🔍 检查服务状态...${NC}"
-docker-compose ps
+docker compose ps
 
 # 安装后端依赖并构建
 echo -e "${BLUE}🔧 构建后端服务...${NC}"
@@ -97,9 +103,9 @@ fi
 echo -e "${GREEN}🎉 开发环境搭建完成！${NC}"
 echo -e "${BLUE}📋 使用说明:${NC}"
 echo -e "  • 启动开发环境: ${GREEN}./scripts/start-dev.sh${NC}"
-echo -e "  • 停止基础服务: ${GREEN}docker-compose -f docker-compose.env.yml down${NC}"
-echo -e "  • 查看服务状态: ${GREEN}docker-compose -f docker-compose.env.yml ps${NC}"
-echo -e "  • 查看服务日志: ${GREEN}docker-compose -f docker-compose.env.yml logs -f [service-name]${NC}"
+echo -e "  • 停止基础服务: ${GREEN}docker compose -f docker-compose.env.yml down${NC}"
+echo -e "  • 查看服务状态: ${GREEN}docker compose -f docker-compose.env.yml ps${NC}"
+echo -e "  • 查看服务日志: ${GREEN}docker compose -f docker-compose.env.yml logs -f [service-name]${NC}"
 echo ""
 echo -e "${YELLOW}⚠️  注意事项:${NC}"
 echo -e "  • 首次启动可能需要较长时间下载依赖"

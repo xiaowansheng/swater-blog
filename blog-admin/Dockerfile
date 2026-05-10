@@ -62,7 +62,7 @@ ENV NODE_ENV=production \
     VITE_GITHUB_URL=${VITE_GITHUB_URL}
 
 # 构建应用
-RUN pnpm build --reporter=ndjson
+RUN pnpm --reporter=ndjson run build
 
 # 生产阶段
 FROM nginx:alpine

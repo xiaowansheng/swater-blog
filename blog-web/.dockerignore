@@ -15,7 +15,6 @@ pnpm-debug.log*
 /out
 /dist
 /coverage
-!/.next
 
 # Cache
 /.turbo

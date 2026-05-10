@@ -53,7 +53,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 \
     REVALIDATE_TOKEN=${REVALIDATE_TOKEN}
 
 # 构建 Next.js 应用
-RUN pnpm build --reporter=ndjson
+RUN pnpm exec next build --webpack
 
 # 生产阶段
 FROM node:20-alpine
