@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # ========================================
 # 多阶段构建 Dockerfile for Blog Web
 # 第一阶段：构建 Next.js 应用
@@ -13,24 +14,30 @@ LABEL description="Blog Web build stage"
 
 WORKDIR /app
 
-# 复制 package 文件
-COPY package.json pnpm-lock.yaml ./
+ENV PNPM_STORE_PATH=/pnpm/store
 
 # 安装 pnpm（输出更完整日志，主备切换）
-RUN npm config set registry https://registry.npmmirror.com \
+RUN --mount=type=cache,id=npm-cache,target=/root/.npm,sharing=locked \
+    npm config set registry https://registry.npmmirror.com \
     && (npm install -g pnpm@9 --loglevel verbose || (npm config set registry https://mirrors.cloud.tencent.com/npm && npm install -g pnpm@9 --loglevel verbose)) \
     && pnpm config set registry https://registry.npmmirror.com \
+    && pnpm config set store-dir ${PNPM_STORE_PATH} \
     && pnpm config set fetch-retries 5 \
     && pnpm config set fetch-timeout 600000
 
+# 复制 package 文件
+COPY package.json pnpm-lock.yaml ./
+
 # 安装依赖
-RUN pnpm install --frozen-lockfile --reporter=ndjson || (pnpm config set registry https://mirrors.cloud.tencent.com/npm && pnpm install --frozen-lockfile --reporter=ndjson)
+RUN --mount=type=cache,id=blog-web-pnpm-store,target=/pnpm/store,sharing=locked \
+    pnpm install --frozen-lockfile --prefer-offline --reporter=ndjson || (pnpm config set registry https://mirrors.cloud.tencent.com/npm && pnpm install --frozen-lockfile --prefer-offline --reporter=ndjson)
 
 # 复制源代码
 COPY . .
 
 # 构建 Next.js 应用
-RUN pnpm exec next build --webpack
+RUN --mount=type=cache,id=blog-web-next-cache,target=/app/.next/cache,sharing=locked \
+    pnpm exec next build --webpack
 
 # 生产阶段
 FROM node:20-alpine
@@ -63,6 +70,9 @@ USER nextjs
 
 # 暴露端口
 EXPOSE 3000
+
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \

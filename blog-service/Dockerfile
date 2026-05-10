@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # ========================================
 # 多阶段构建Dockerfile
 # 第一阶段：构建应用
@@ -13,6 +14,8 @@ LABEL description="Blog service build stage"
 
 # 设置工作目录
 WORKDIR /app
+
+ENV GRADLE_USER_HOME=/root/.gradle
 
 # 配置 Gradle 全局镜像源（含插件与依赖）
 RUN mkdir -p /root/.gradle/init.d && \
@@ -53,17 +56,26 @@ COPY build.gradle.kts settings.gradle.kts ./
 COPY gradle gradle
 COPY gradlew ./
 
-# Fix CRLF in gradlew inside Linux container
-RUN sed -i 's/\r$//' gradlew && chmod +x gradlew
+# Fix CRLF in gradlew inside Linux container, and use a smaller Gradle
+# distribution with a Docker-friendly download timeout.
+RUN sed -i 's/\r$//' gradlew \
+    && sed -i 's/\r$//' gradle/wrapper/gradle-wrapper.properties \
+    && sed -i 's/-all\.zip/-bin.zip/' gradle/wrapper/gradle-wrapper.properties \
+    && sed -i 's/^networkTimeout=.*/networkTimeout=600000/' gradle/wrapper/gradle-wrapper.properties \
+    && chmod +x gradlew
 
 # 下载依赖（利用Docker缓存，输出更完整日志）
-RUN ./gradlew dependencies --no-daemon --info --stacktrace
+RUN --mount=type=cache,id=blog-service-gradle-caches,target=/root/.gradle/caches,sharing=locked \
+    --mount=type=cache,id=blog-service-gradle-wrapper,target=/root/.gradle/wrapper,sharing=locked \
+    ./gradlew dependencies --no-daemon --no-watch-fs --info --stacktrace
 
 # 复制源代码
 COPY src src
 
 # 构建应用
-RUN ./gradlew bootJar --no-daemon --parallel --info --stacktrace
+RUN --mount=type=cache,id=blog-service-gradle-caches,target=/root/.gradle/caches,sharing=locked \
+    --mount=type=cache,id=blog-service-gradle-wrapper,target=/root/.gradle/wrapper,sharing=locked \
+    ./gradlew bootJar --no-daemon --no-watch-fs --parallel --info --stacktrace
 
 # 运行阶段
 FROM eclipse-temurin:21-jre-jammy

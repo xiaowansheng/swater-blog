@@ -14,7 +14,6 @@ pnpm-debug.log*
 /dist
 /build
 /coverage
-!/dist
 
 # Cache
 /.vite
