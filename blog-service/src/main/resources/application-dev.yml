@@ -151,11 +151,11 @@ spring:
 
   # 开发环境邮件配置
   mail:
-    host: ${MAIL_HOST:smtp.qq.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
-    from-name: ${MAIL_FROM_NAME:Swater Blog Dev}
+    host: smtp.qq.com
+    port: 587
+    username:
+    password:
+    from-name: Swater Blog Dev
     properties:
       mail:
         smtp:
@@ -186,8 +186,8 @@ spring:
 file:
   storage:
     local:
-      path: ${FILE_STORAGE_LOCAL_PATH:uploads}
-      url-prefix: ${FILE_STORAGE_LOCAL_URL_PREFIX:/uploads}
+      path: uploads
+      url-prefix: /uploads
     oss:
       endpoint:
       access-key-id:
@@ -218,8 +218,8 @@ log:
 
 # Next.js revalidate 配置（可选）
 revalidate:
-  url: ${REVALIDATE_URL:http://127.0.0.1:3001}
-  token: ${REVALIDATE_TOKEN:}
+  url: http://127.0.0.1:3001
+  token:
 
 # MyBatis Plus配置 - 开发环境
 mybatis-plus:
@@ -257,23 +257,23 @@ mybatis-plus:
 sa-token:
   token-name: Authorization
   token-prefix: Bearer
-  timeout: ${SA_TOKEN_TIMEOUT:2592000}
-  active-timeout: ${SA_TOKEN_ACTIVE_TIMEOUT:604800}
+  timeout: 2592000
+  active-timeout: 604800
   is-read-timeout: true
   is-concurrent: true
   is-share: true
   token-style: uuid
   is-log: true  # 开发时启用日志
-  jwt-secret-key: ${JWT_SECRET_KEY:}
+  jwt-secret-key:
 
 # 认证配置 - 开发环境
 auth:
   crypto:
-    nonce-ttl-seconds: ${AUTH_CRYPTO_NONCE_TTL_SECONDS:120}
-    nonce-max-size: ${AUTH_CRYPTO_NONCE_MAX_SIZE:10000}
-    nonce-cleanup-interval: ${AUTH_CRYPTO_NONCE_CLEANUP_INTERVAL:200}
+    nonce-ttl-seconds: 120
+    nonce-max-size: 10000
+    nonce-cleanup-interval: 200
   email-session:
-    secret: ${AUTH_EMAIL_SESSION_SECRET:}
+    secret:
     ttl-seconds: 2592000
     header-name: X-Verify-Token
 
