@@ -37,12 +37,12 @@ set +a
 ## Docker 启动（从项目根目录执行）
 
 ```bash
-docker-compose -f docker-compose.env.yml up -d mysql redis rabbitmq
+docker compose -f docker-compose.env.yml up -d mysql redis rabbitmq
 ```
 
 如果希望使用后端容器启动：
 ```bash
-docker-compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml up -d
 ```
 
 ## 端口

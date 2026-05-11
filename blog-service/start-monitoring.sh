@@ -18,7 +18,7 @@ fi
 
 echo ""
 echo "2. 启动监控服务..."
-docker-compose -f docker-compose-monitoring.yml up -d
+docker compose -f docker-compose-monitoring.yml up -d
 
 echo ""
 echo "3. 等待服务启动..."
@@ -26,7 +26,7 @@ sleep 30
 
 echo ""
 echo "4. 检查服务状态..."
-docker-compose -f docker-compose-monitoring.yml ps
+docker compose -f docker-compose-monitoring.yml ps
 
 echo ""
 echo "========================================"

@@ -86,7 +86,7 @@ COMPOSE_PROFILES=https docker compose up -d
 # API文档: http://localhost:8888/swagger-ui.html
 ```
 
-如果仓库位于 WSL 文件系统，比如 `/home/...`，或 Windows 侧看到的是 `\\wsl.localhost\Ubuntu-24.04\...`，请在 WSL 终端里执行这里的 `docker compose` 命令。不要从 Windows 侧直接对这个 WSL 路径运行 `docker-compose.exe`，否则 `schema.sql` 这类文件绑定挂载会报 `includes invalid characters for a local volume name`。
+如果仓库位于 WSL 文件系统，比如 `/home/...`，或 Windows 侧看到的是 `\\wsl.localhost\Ubuntu-24.04\...`，请在 WSL 终端里执行这里的 `docker compose` 命令。不要从 Windows 侧直接对这个 WSL 路径运行 `docker compose`，否则 `schema.sql` 这类文件绑定挂载会报 `includes invalid characters for a local volume name`。
 
 本机没有域名时，不需要改 hosts。完整 Docker 模式下建议这样访问：
 

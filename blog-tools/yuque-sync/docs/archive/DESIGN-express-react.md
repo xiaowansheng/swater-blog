@@ -1802,12 +1802,12 @@ fi
 mkdir -p data logs
 
 # 启动服务
-docker-compose up -d
+docker compose up -d
 
 echo "✅ Services started!"
 echo "📝 Frontend: http://localhost:8080"
 echo "🔧 Backend API: http://localhost:3000"
-echo "📊 Check logs: docker-compose logs -f"
+echo "📊 Check logs: docker compose logs -f"
 ```
 
 ## 8. 安全考虑
