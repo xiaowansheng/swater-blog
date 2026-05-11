@@ -76,7 +76,7 @@ services:
     restart: unless-stopped
     ports:
       - "${RABBITMQ_PORT:-5672}:5672"    # AMQP端口
-      - "15672:15672"  # 管理界面端口
+      - "${RABBITMQ_MANAGEMENT_PUBLISHED_PORT:-15672}:15672"  # 管理界面端口
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-change_me_rabbitmq_password}
@@ -101,7 +101,7 @@ services:
     container_name: blog-service-dev
     restart: unless-stopped
     ports:
-      - "${SERVER_PORT:-8888}:${SERVER_PORT:-8888}"
+      - "${BLOG_SERVICE_PUBLISHED_PORT:-8888}:${SERVER_PORT:-8888}"
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       DB_HOST: mysql
@@ -146,8 +146,8 @@ services:
   #   container_name: blog-elasticsearch-dev
   #   restart: unless-stopped
   #   ports:
-  #     - "9200:9200"
-  #     - "9300:9300"
+  #     - "${ELASTICSEARCH_HTTP_PUBLISHED_PORT:-9200}:9200"
+  #     - "${ELASTICSEARCH_TRANSPORT_PUBLISHED_PORT:-9300}:9300"
   #   environment:
   #     - discovery.type=single-node
   #     - xpack.security.enabled=false

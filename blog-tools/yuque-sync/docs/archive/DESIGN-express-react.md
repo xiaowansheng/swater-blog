@@ -1733,7 +1733,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "${BACKEND_PUBLISHED_PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=file:./data/yuque-sync.db
@@ -1752,7 +1752,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
+      - "${FRONTEND_PUBLISHED_PORT:-8080}:80"
     depends_on:
       - backend
     restart: unless-stopped
@@ -1761,7 +1761,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "${REDIS_PUBLISHED_PORT:-6379}:6379"
     volumes:
       - redis-data:/data
     restart: unless-stopped
@@ -1770,8 +1770,8 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"
-      - "443:443"
+      - "${NGINX_HTTP_PUBLISHED_PORT:-80}:80"
+      - "${NGINX_HTTPS_PUBLISHED_PORT:-443}:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/ssl:/etc/nginx/ssl

@@ -143,7 +143,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     ports:
-      - "9090:9090"
+      - "${PROMETHEUS_PUBLISHED_PORT:-9090}:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
@@ -156,7 +156,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3000:3000"
+      - "${GRAFANA_PUBLISHED_PORT:-3000}:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
