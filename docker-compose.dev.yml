@@ -102,8 +102,8 @@ services:
     restart: unless-stopped
     ports:
       - "${SERVER_PORT:-8888}:${SERVER_PORT:-8888}"
-    command: ["--spring.profiles.active=docker"]
     environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       DB_HOST: mysql
       DB_PORT: 3306
       DB_NAME: ${DB_NAME:-blog}
