@@ -219,7 +219,7 @@ log:
 # Next.js revalidate 配置（可选）
 revalidate:
   url: http://127.0.0.1:3001
-  token:
+  token: change-me
 
 # MyBatis Plus配置 - 开发环境
 mybatis-plus:

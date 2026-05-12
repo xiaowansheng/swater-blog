@@ -208,7 +208,7 @@ log:
 # Next.js revalidate 配置（可选）
 revalidate:
   url: http://blog-web:3000
-  token:
+  token: change-me
 
 # 跨域配置（供 WebCorsConfig 使用）
 app:
