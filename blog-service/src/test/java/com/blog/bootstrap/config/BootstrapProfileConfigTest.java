@@ -26,6 +26,16 @@ class BootstrapProfileConfigTest {
         assertThat(password).doesNotContain("${");
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"application-dev.yml", "application-docker.yml"})
+    void profileUsesAutoRabbitListenerAcknowledgement(String profileConfig) throws IOException {
+        PropertySourcesPropertyResolver resolver = resolverFor(profileConfig);
+
+        String acknowledgeMode = resolver.getProperty("spring.rabbitmq.listener.simple.acknowledge-mode");
+
+        assertThat(acknowledgeMode).isEqualTo("auto");
+    }
+
     private PropertySourcesPropertyResolver resolverFor(String profileConfig) throws IOException {
         YamlPropertySourceLoader loader = new YamlPropertySourceLoader();
         List<PropertySource<?>> sources = loader.load(profileConfig, new ClassPathResource(profileConfig));

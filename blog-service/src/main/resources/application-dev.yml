@@ -138,7 +138,7 @@ spring:
     publisher-returns: true
     listener:
       simple:
-        acknowledge-mode: manual
+        acknowledge-mode: auto
         concurrency: 1
         max-concurrency: 3
         prefetch: 1
