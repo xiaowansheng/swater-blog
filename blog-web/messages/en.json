@@ -8,6 +8,7 @@
     "search": "Search",
     "guestbook": "Messages",
     "friendLinks": "Friend Links",
+    "rss": "RSS Feed",
     "moments": "Moments",
     "pinned": "Pinned",
     "loading": "Loading...",
@@ -333,4 +334,3 @@
     "history": "Search History"
   }
 }
-

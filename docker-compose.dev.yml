@@ -119,6 +119,8 @@ services:
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-change_me_rabbitmq_password}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
       SERVER_PORT: ${SERVER_PORT:-8888}
+      BLOG_SITE_URL: ${BLOG_SITE_URL:-http://127.0.0.1:3001}
+      BLOG_RSS_DEFAULT_LOCALE: ${BLOG_RSS_DEFAULT_LOCALE:-zh}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:

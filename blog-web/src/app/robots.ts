@@ -6,10 +6,9 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: '/',
+      allow: ['/', '/rss.xml'],
       disallow: ['/api/'],
     },
     sitemap: `${baseUrl}/sitemap.xml`,
   };
 }
-

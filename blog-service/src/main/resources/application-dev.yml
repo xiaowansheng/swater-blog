@@ -7,6 +7,9 @@ server:
   port: ${SERVER_PORT:8888}
 
 blog:
+  site-url: ${BLOG_SITE_URL:http://127.0.0.1:3001}
+  rss:
+    default-locale: ${BLOG_RSS_DEFAULT_LOCALE:zh}
   bootstrap:
     admin:
       username: admin

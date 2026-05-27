@@ -17,6 +17,12 @@ export default async function Head() {
     <>
       {/* <link rel="icon" href="/favicon.ico" sizes="any" /> */}
       <link rel="icon" href={favicon} {...(faviconType ? { type: faviconType } : {})} />
+      <link
+        rel="alternate"
+        type="application/rss+xml"
+        title={`${site.name || 'Blog'} RSS Feed`}
+        href="/rss.xml"
+      />
     </>
   );
 }

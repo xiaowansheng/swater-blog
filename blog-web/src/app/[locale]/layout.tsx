@@ -38,6 +38,11 @@ export async function generateMetadata(): Promise<Metadata> {
         { url: favicon, ...(faviconType ? { type: faviconType } : {}) },
       ],
     },
+    alternates: {
+      types: {
+        'application/rss+xml': '/rss.xml',
+      },
+    },
   };
 }
 
@@ -134,4 +139,3 @@ export default async function LocaleLayout({
     </html>
   );
 }
-

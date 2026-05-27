@@ -63,6 +63,10 @@ export default async function Footer() {
                 {t('guestbook')}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
               </Link>
+              <a href="/rss.xml" className="text-sm font-medium text-muted-foreground hover:text-primary transition-all hover:scale-110 relative group">
+                {t('rss')}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full rounded-full"></span>
+              </a>
             </div>
 
             {/* Visit Statistics */}

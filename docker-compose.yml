@@ -140,6 +140,8 @@ services:
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-change_me_rabbitmq_password}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
       SERVER_PORT: ${SERVER_PORT:-8888}
+      BLOG_SITE_URL: ${BLOG_SITE_URL:-http://localhost}
+      BLOG_RSS_DEFAULT_LOCALE: ${BLOG_RSS_DEFAULT_LOCALE:-zh}
     volumes:
       - blog_logs:/app/logs
       - blog_uploads:/app/uploads
@@ -185,6 +187,9 @@ services:
     restart: unless-stopped
     ports:
       - "${BLOG_WEB_PUBLISHED_PORT:-3002}:3000"
+    environment:
+      SERVER_API_BASE_URL: ${SERVER_API_BASE_URL:-http://blog-service:8888}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost}
     depends_on:
       blog-service:
         condition: service_healthy
@@ -315,8 +320,5 @@ volumes:
 networks:
   blog-network:
     driver: bridge
-
-
-
 
 
