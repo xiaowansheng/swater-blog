@@ -313,7 +313,7 @@ export default function MomentItem({ moment }: MomentItemProps) {
         })()}
       </div>
 
-      {fullUrlImages.length > 0 && (
+      {previewOpen && fullUrlImages.length > 0 && (
         <ImagePreview
           images={fullUrlImages}
           open={previewOpen}
@@ -324,4 +324,3 @@ export default function MomentItem({ moment }: MomentItemProps) {
     </Card>
   );
 }
-

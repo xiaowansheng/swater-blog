@@ -19,8 +19,15 @@ export default function ImagePreview({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
   useEffect(() => {
-    setCurrentIndex(initialIndex);
-  }, [initialIndex, open]);
+    if (!open) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -39,7 +46,7 @@ export default function ImagePreview({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, images.length, onOpenChange]);
 
-  if (!open) return null;
+  if (!open || images.length === 0) return null;
 
   const handlePrev = () => {
     setCurrentIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
@@ -52,9 +59,14 @@ export default function ImagePreview({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+      role="dialog"
+      aria-modal="true"
+      aria-label="图片预览"
       onClick={() => onOpenChange(false)}
     >
       <button
+        type="button"
+        aria-label="关闭预览"
         className="absolute z-10 text-white transition-colors top-4 right-4 hover:text-gray-300"
         onClick={() => onOpenChange(false)}
       >
@@ -66,6 +78,8 @@ export default function ImagePreview({
       {images.length > 1 && (
         <>
           <button
+            type="button"
+            aria-label="上一张图片"
             className="absolute z-10 p-2 text-white transition-colors transform -translate-y-1/2 left-4 top-1/2 hover:text-gray-300"
             onClick={(e) => {
               e.stopPropagation();
@@ -78,6 +92,8 @@ export default function ImagePreview({
           </button>
 
           <button
+            type="button"
+            aria-label="下一张图片"
             className="absolute z-10 p-2 text-white transition-colors transform -translate-y-1/2 right-4 top-1/2 hover:text-gray-300"
             onClick={(e) => {
               e.stopPropagation();
@@ -112,4 +128,3 @@ export default function ImagePreview({
     </div>
   );
 }
-

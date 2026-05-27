@@ -48,13 +48,14 @@ export default function MomentImages({ images, alt }: MomentImagesProps) {
         ))}
       </div>
 
-      <ImagePreview
-        images={fullUrlImages}
-        open={previewOpen}
-        onOpenChange={setPreviewOpen}
-        initialIndex={previewIndex}
-      />
+      {previewOpen && (
+        <ImagePreview
+          images={fullUrlImages}
+          open={previewOpen}
+          onOpenChange={setPreviewOpen}
+          initialIndex={previewIndex}
+        />
+      )}
     </>
   );
 }
-
