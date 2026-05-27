@@ -22,6 +22,7 @@ import {
   CheckCircleOutlined,
   StopOutlined,
   ClockCircleOutlined,
+  ApartmentOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -425,6 +426,12 @@ const ArticleList: React.FC = () => {
             )}
           </div>
           <Space>
+            <Button
+              icon={<ApartmentOutlined />}
+              onClick={() => navigate('/article/tree')}
+            >
+              文章归类树
+            </Button>
             <Button
               icon={<ImportOutlined />}
               onClick={() => navigate('/article/import')}

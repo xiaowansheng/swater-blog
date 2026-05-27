@@ -21,6 +21,7 @@ import {
   InfoCircleOutlined,
   HomeOutlined,
   SmileOutlined,
+  ApartmentOutlined,
 } from '@ant-design/icons'
 import { useState } from 'react'
 import type { MenuProps } from 'antd'
@@ -43,6 +44,7 @@ const menuItems: MenuProps['items'] = [
     label: '内容管理',
     children: [
       { key: '/article', icon: <FileTextOutlined />, label: '文章管理' },
+      { key: '/article/tree', icon: <ApartmentOutlined />, label: '文章归类树' },
       { key: '/category', icon: <FolderOutlined />, label: '分类管理' },
       { key: '/tag', icon: <TagsOutlined />, label: '标签管理' },
       { key: '/talk', icon: <MessageOutlined />, label: '说说管理' },
@@ -109,6 +111,9 @@ const Sidebar: React.FC = () => {
 
   const getSelectedKeys = () => {
     const path = location.pathname
+    if (path.startsWith('/article/tree')) {
+      return ['/article/tree']
+    }
     if (path.startsWith('/article/')) {
       return ['/article']
     }

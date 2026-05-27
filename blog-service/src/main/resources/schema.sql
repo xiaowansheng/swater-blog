@@ -231,6 +231,40 @@ CREATE TABLE IF NOT EXISTS `article_tag` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文章对应标签表';
 
 
+-- 文章目录树节点表（独立于原分类）
+
+CREATE TABLE IF NOT EXISTS `article_directory_node` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '目录节点ID',
+  `name` VARCHAR(100) NOT NULL COMMENT '节点名称',
+  `description` VARCHAR(255) DEFAULT NULL COMMENT '节点描述',
+  `parent_id` BIGINT NOT NULL DEFAULT '0' COMMENT '父级节点ID，0表示根目录',
+  `sort` INT NOT NULL DEFAULT '0' COMMENT '同级排序',
+  `deleted` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否已删除',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_parent_id` (`parent_id`),
+  KEY `idx_sort` (`sort`),
+  KEY `idx_deleted` (`deleted`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文章目录树节点表';
+
+
+-- 文章目录树文章位置表（文章在目录树中的位置与排序）
+
+CREATE TABLE IF NOT EXISTS `article_directory_article` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '目录文章位置ID',
+  `article_id` BIGINT NOT NULL COMMENT '文章ID',
+  `node_id` BIGINT NOT NULL DEFAULT '0' COMMENT '所在目录节点ID，0表示根目录',
+  `sort` INT NOT NULL DEFAULT '0' COMMENT '同级排序',
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_article_id` (`article_id`),
+  KEY `idx_node_id` (`node_id`),
+  KEY `idx_sort` (`sort`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文章目录树文章位置表';
+
+
 -- 归档表
 
 CREATE TABLE IF NOT EXISTS `archive` (
@@ -746,5 +780,4 @@ CREATE TABLE IF NOT EXISTS `content_like_state` (
   KEY `idx_last_changed_at` (`last_changed_at`),
   KEY `idx_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='内容点赞状态';
-
 
