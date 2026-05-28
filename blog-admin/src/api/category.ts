@@ -3,7 +3,9 @@ import { Category } from '@/types'
 
 export interface CategoryDTO {
   name: string
-  description: string
+  description?: string
+  parentId?: number
+  sort?: number
 }
 
 export const getCategoryList = (): Promise<Category[]> => {

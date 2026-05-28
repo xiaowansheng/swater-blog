@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Button,
   Dropdown,
+  Empty,
   Form,
   Input,
   Modal,
@@ -18,6 +19,7 @@ import type { MenuProps } from 'antd'
 import {
   ApartmentOutlined,
   DeleteOutlined,
+  DownOutlined,
   EditOutlined,
   FileAddOutlined,
   FileTextOutlined,
@@ -26,7 +28,9 @@ import {
   FolderOutlined,
   PlusOutlined,
   ReloadOutlined,
+  SearchOutlined,
   SwapOutlined,
+  UpOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { getArticleList } from '@/api/article'
@@ -61,6 +65,7 @@ const ArticleDirectoryTree: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([])
   const [selectedKey, setSelectedKey] = useState<React.Key>()
+  const [searchText, setSearchText] = useState('')
 
   const [nodeModalOpen, setNodeModalOpen] = useState(false)
   const [editingNode, setEditingNode] = useState<ArticleDirectoryItem | null>(null)
@@ -73,9 +78,10 @@ const ArticleDirectoryTree: React.FC = () => {
 
   const [assignModalOpen, setAssignModalOpen] = useState(false)
   const [assignParentId, setAssignParentId] = useState<number>(0)
-  const [availableArticles, setAvailableArticles] = useState<Article[]>([])
-  const [articleLoading, setArticleLoading] = useState(false)
+  const [articleSearchLoading, setArticleSearchLoading] = useState(false)
+  const [articleOptions, setArticleOptions] = useState<Article[]>([])
   const [assignForm] = Form.useForm<{ articleId: number }>()
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => {
     loadTree()
@@ -105,6 +111,83 @@ const ArticleDirectoryTree: React.FC = () => {
     return map
   }, [rootItem])
 
+  const allNodeKeys = useMemo(() => {
+    const keys: React.Key[] = []
+    const walk = (nodes: DirectoryViewItem[]) => {
+      nodes.forEach((item) => {
+        if (item.type === 'NODE' || item.type === 'ROOT') {
+          keys.push(item.key)
+        }
+        if (item.children?.length) {
+          walk(item.children)
+        }
+      })
+    }
+    walk([rootItem])
+    return keys
+  }, [rootItem])
+
+  const totalCounts = useMemo(() => {
+    const counts = new Map<string, { articles: number; nodes: number }>()
+    const calc = (item: DirectoryViewItem): { articles: number; nodes: number } => {
+      let articles = 0
+      let nodes = 0
+      if (item.type === 'ARTICLE') articles = 1
+      if (item.type === 'NODE') nodes = 1
+      item.children?.forEach((child) => {
+        const c = calc(child)
+        articles += c.articles
+        nodes += c.nodes
+      })
+      counts.set(item.key, { articles, nodes })
+      return { articles, nodes }
+    }
+    calc(rootItem)
+    return counts
+  }, [rootItem])
+
+  const filteredKeys = useMemo(() => {
+    if (!searchText.trim()) return null
+    const keyword = searchText.trim().toLowerCase()
+    const matched = new Set<string>()
+    const ancestorOf = new Map<string, string | null>()
+
+    const indexAncestors = (item: DirectoryViewItem, parentKey: string | null) => {
+      ancestorOf.set(item.key, parentKey)
+      item.children?.forEach((child) => indexAncestors(child, item.key))
+    }
+    rootItem.children?.forEach((child) => indexAncestors(child, null))
+
+    itemByKey.forEach((item, key) => {
+      const haystack = (
+        (item.type === 'NODE' ? item.name : '') +
+        (item.title || '') +
+        (item.description || '')
+      ).toLowerCase()
+      if (haystack.includes(keyword)) {
+        matched.add(key)
+        let ancestor = ancestorOf.get(key)
+        while (ancestor) {
+          matched.add(ancestor)
+          ancestor = ancestorOf.get(ancestor)
+        }
+      }
+    })
+    return matched
+  }, [searchText, itemByKey, rootItem])
+
+  const expandedKeysWithSearch = useMemo(() => {
+    if (!filteredKeys) return expandedKeys
+    const keys = new Set<React.Key>()
+    filteredKeys.forEach((key) => {
+      const item = itemByKey.get(key)
+      if (item && (item.type === 'NODE' || item.type === 'ROOT')) {
+        keys.add(key)
+      }
+    })
+    return Array.from(keys)
+  }, [filteredKeys, expandedKeys, itemByKey])
+
   const loadTree = async () => {
     setLoading(true)
     try {
@@ -118,17 +201,24 @@ const ArticleDirectoryTree: React.FC = () => {
     }
   }
 
-  const loadAvailableArticles = async () => {
-    setArticleLoading(true)
-    try {
-      const result = await getArticleList({ page: 1, size: 1000 })
-      setAvailableArticles(result.records)
-    } catch (error) {
-      console.error('加载文章列表失败', error)
-    } finally {
-      setArticleLoading(false)
+  const searchArticles = useCallback((query: string) => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    if (!query.trim()) {
+      setArticleOptions([])
+      return
     }
-  }
+    searchTimerRef.current = setTimeout(async () => {
+      setArticleSearchLoading(true)
+      try {
+        const result = await getArticleList({ page: 1, size: 20, keyword: query })
+        setArticleOptions(result.records)
+      } catch {
+        console.error('搜索文章失败')
+      } finally {
+        setArticleSearchLoading(false)
+      }
+    }, 300)
+  }, [])
 
   const collectNodeKeys = (nodes: ArticleDirectoryItem[]): React.Key[] => {
     const keys: React.Key[] = []
@@ -203,8 +293,8 @@ const ArticleDirectoryTree: React.FC = () => {
   const openAssignArticle = (parentId = 0) => {
     setAssignParentId(parentId)
     assignForm.resetFields()
+    setArticleOptions([])
     setAssignModalOpen(true)
-    loadAvailableArticles()
   }
 
   const handleAssignArticle = async () => {
@@ -340,13 +430,34 @@ const ArticleDirectoryTree: React.FC = () => {
     ]
   }
 
+  const highlightText = (text: string, keyword: string) => {
+    if (!keyword.trim()) return text
+    const lowerText = text.toLowerCase()
+    const lowerKeyword = keyword.toLowerCase()
+    const idx = lowerText.indexOf(lowerKeyword)
+    if (idx === -1) return text
+    return (
+      <>
+        {text.slice(0, idx)}
+        <span style={{ backgroundColor: '#ffe58f', padding: '0 1px' }}>{text.slice(idx, idx + keyword.length)}</span>
+        {text.slice(idx + keyword.length)}
+      </>
+    )
+  }
+
   const renderTitle = (item: DirectoryViewItem) => {
+    const counts = totalCounts.get(item.key)
+    const keyword = searchText.trim()
+
     if (item.type === 'ROOT') {
       return (
         <Dropdown trigger={['contextMenu']} menu={{ items: getContextMenuItems(item) }}>
           <div className="flex items-center gap-2 pr-2 py-1 text-gray-800">
             <FolderOpenOutlined className="text-amber-500" />
             <span className="font-medium">根目录</span>
+            {counts && counts.articles > 0 && (
+              <span className="text-xs text-gray-400">{counts.articles} 篇文章</span>
+            )}
           </div>
         </Dropdown>
       )
@@ -366,11 +477,16 @@ const ArticleDirectoryTree: React.FC = () => {
             ) : (
               <FileTextOutlined className="text-blue-500" />
             )}
-            <Tooltip title={isNode ? item.name : item.title}>
-              <span className="truncate text-gray-800">{isNode ? item.name : item.title}</span>
+            <Tooltip title={isNode ? item.description || item.name : item.title}>
+              <span className="truncate text-gray-800">
+                {isNode ? highlightText(item.name || '', keyword) : highlightText(item.title || '', keyword)}
+              </span>
             </Tooltip>
             {!isNode && statusMeta && <Tag color={statusMeta.color}>{statusMeta.label}</Tag>}
             {!isNode && item.categoryName && <Tag color="cyan">{item.categoryName}</Tag>}
+            {isNode && counts && (
+              <span className="text-xs text-gray-400 shrink-0">{counts.articles} 篇</span>
+            )}
           </div>
           {!isNode && item.articleKey && (
             <span className="text-xs text-gray-400 shrink-0">Key: {item.articleKey}</span>
@@ -381,44 +497,83 @@ const ArticleDirectoryTree: React.FC = () => {
   }
 
   const buildTreeData = (nodes: DirectoryViewItem[]): DirectoryTreeDataNode[] => {
-    return nodes.map((item) => ({
-      key: item.key,
-      title: renderTitle(item),
-      item,
-      children: item.children?.length ? buildTreeData(item.children) : undefined,
-      isLeaf: item.type === 'ARTICLE',
-    }))
+    return nodes
+      .filter((item) => !filteredKeys || filteredKeys.has(item.key))
+      .map((item) => ({
+        key: item.key,
+        title: renderTitle(item),
+        item,
+        children: item.children?.length ? buildTreeData(item.children) : undefined,
+        isLeaf: item.type === 'ARTICLE',
+      }))
   }
 
-  const treeData = useMemo(() => buildTreeData([rootItem]), [rootItem])
+  const treeData = useMemo(() => buildTreeData([rootItem]), [rootItem, filteredKeys, totalCounts, searchText])
 
-  const handleAllowDrop: TreeProps['allowDrop'] = ({ dropNode, dropPosition }) => {
-    const target = itemByKey.get(String(dropNode.key))
-    if (!target) {
+  const isDescendant = useCallback((parentKey: string, possibleDescendantKey: string): boolean => {
+    const parent = itemByKey.get(parentKey)
+    if (!parent?.children?.length) return false
+    const walk = (nodes: DirectoryViewItem[]): boolean => {
+      for (const node of nodes) {
+        if (node.key === possibleDescendantKey) return true
+        if (node.children?.length && walk(node.children)) return true
+      }
       return false
     }
-    if (target.type === 'ROOT') {
-      return dropPosition === 0
-    }
-    return !(target.type === 'ARTICLE' && dropPosition === 0)
+    return walk(parent.children)
+  }, [itemByKey])
+
+  const handleAllowDrop: TreeProps['allowDrop'] = ({ dragNode, dropNode, dropPosition }) => {
+    if (searchText.trim()) return false
+    const dragItem = itemByKey.get(String(dragNode.key))
+    const target = itemByKey.get(String(dropNode.key))
+    if (!dragItem || !target || dragItem.key === target.key) return false
+    if (dragItem.type === 'ROOT') return false
+
+    // 不允许拖入自身后代节点
+    if (dragItem.type === 'NODE' && isDescendant(dragItem.key, target.key)) return false
+
+    // 根目录允许放入内部和间隙插入
+    if (target.type === 'ROOT') return true
+
+    // 文章不能作为容器（不能把东西放进文章内部）
+    if (target.type === 'ARTICLE' && dropPosition === 0) return false
+
+    // 其余都允许：放入节点内部、间隙前后插入
+    return true
   }
 
   const handleDrop: TreeProps['onDrop'] = async (info) => {
     const dragItem = itemByKey.get(String(info.dragNode.key))
     const targetItem = itemByKey.get(String(info.node.key))
-    if (!dragItem || !targetItem) {
-      return
-    }
-    if (dragItem.type === 'ROOT') {
+    if (!dragItem || !targetItem) return
+    if (dragItem.type === 'ROOT') return
+
+    // 前端校验：不允许父节点拖入子节点
+    if (dragItem.type === 'NODE' && isDescendant(dragItem.key, targetItem.key)) {
+      message.warning('不能将目录节点拖入其子节点')
       return
     }
 
     let position: 'INSIDE' | 'BEFORE' | 'AFTER'
     if (targetItem.type === 'ROOT') {
-      position = 'INSIDE'
+      if (info.dropToGap) {
+        // 拖到根目录间隙：插入到根级最前或最后
+        const rootChildren = rootItem.children || []
+        if (rootChildren.length === 0) {
+          position = 'INSIDE'
+        } else {
+          // dropPosition <= 0 表示最前面，否则最后面
+          position = info.dropPosition <= 0 ? 'BEFORE' : 'AFTER'
+        }
+      } else {
+        position = 'INSIDE'
+      }
     } else if (!info.dropToGap && targetItem.type === 'NODE') {
+      // 放入节点内部
       position = 'INSIDE'
     } else {
+      // 间隙插入：与目标同级，在其前面或后面
       const targetPosition = Number(String(info.node.pos).split('-').pop())
       const relativePosition = info.dropPosition - targetPosition
       position = relativePosition < 0 ? 'BEFORE' : 'AFTER'
@@ -439,6 +594,8 @@ const ArticleDirectoryTree: React.FC = () => {
     }
   }
 
+  const isTreeEmpty = !loading && items.length === 0
+
   return (
     <div className="fade-in">
       <div className="action-bar mb-4">
@@ -446,8 +603,37 @@ const ArticleDirectoryTree: React.FC = () => {
           <div className="flex items-center gap-2 text-gray-700">
             <ApartmentOutlined />
             <span className="font-medium">文章归类树</span>
+            {totalCounts.get('root') && (
+              <span className="text-xs text-gray-400">
+                {totalCounts.get('root')!.nodes} 个目录 / {totalCounts.get('root')!.articles} 篇文章
+              </span>
+            )}
           </div>
           <Space>
+            <Input.Search
+              placeholder="搜索文章或目录"
+              allowClear
+              style={{ width: 200 }}
+              prefix={<SearchOutlined />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+            <Tooltip title="展开全部">
+              <Button
+                icon={<DownOutlined />}
+                size="small"
+                disabled={!!searchText.trim()}
+                onClick={() => setExpandedKeys(allNodeKeys)}
+              />
+            </Tooltip>
+            <Tooltip title="折叠全部">
+              <Button
+                icon={<UpOutlined />}
+                size="small"
+                disabled={!!searchText.trim()}
+                onClick={() => setExpandedKeys(['root'])}
+              />
+            </Tooltip>
             <Button icon={<ReloadOutlined />} onClick={loadTree}>
               刷新
             </Button>
@@ -466,18 +652,39 @@ const ArticleDirectoryTree: React.FC = () => {
 
       <div className="table-container min-h-[520px]">
         <Spin spinning={loading}>
-          <Tree
-            blockNode
-            showLine
-            draggable={{ nodeDraggable: (node) => String(node.key) !== 'root' }}
-            allowDrop={handleAllowDrop}
-            treeData={treeData}
-            expandedKeys={expandedKeys}
-            selectedKeys={selectedKey ? [selectedKey] : []}
-            onExpand={(keys) => setExpandedKeys(keys)}
-            onSelect={(keys) => setSelectedKey(keys[0])}
-            onDrop={handleDrop}
-          />
+          {isTreeEmpty ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Empty
+                description={
+                  <span className="text-gray-400">
+                    暂无文章归类，点击「新建根节点」或「新建文章」开始
+                  </span>
+                }
+              >
+                <Space>
+                  <Button icon={<FolderAddOutlined />} onClick={() => openCreateNode(0)}>
+                    新建根节点
+                  </Button>
+                  <Button type="primary" icon={<FileAddOutlined />} onClick={() => openCreateArticle(0)}>
+                    新建文章
+                  </Button>
+                </Space>
+              </Empty>
+            </div>
+          ) : (
+            <Tree
+              blockNode
+              showLine
+              draggable={{ nodeDraggable: (node) => String(node.key) !== 'root' && !searchText.trim() }}
+              allowDrop={handleAllowDrop}
+              treeData={treeData}
+              expandedKeys={searchText.trim() ? expandedKeysWithSearch : expandedKeys}
+              selectedKeys={selectedKey ? [selectedKey] : []}
+              onExpand={(keys) => setExpandedKeys(keys)}
+              onSelect={(keys) => setSelectedKey(keys[0])}
+              onDrop={handleDrop}
+            />
+          )}
         </Spin>
       </div>
 
@@ -535,10 +742,12 @@ const ArticleDirectoryTree: React.FC = () => {
           >
             <Select
               showSearch
-              loading={articleLoading}
-              placeholder="选择文章"
-              optionFilterProp="label"
-              options={availableArticles.map((article) => ({
+              loading={articleSearchLoading}
+              placeholder="输入关键词搜索文章"
+              filterOption={false}
+              onSearch={searchArticles}
+              notFoundContent={articleSearchLoading ? '搜索中...' : '无匹配结果'}
+              options={articleOptions.map((article) => ({
                 value: article.id,
                 label: `[${article.id}] ${article.title}`,
               }))}
