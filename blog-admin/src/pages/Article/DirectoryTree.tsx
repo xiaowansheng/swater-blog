@@ -32,14 +32,14 @@ import { useNavigate } from 'react-router-dom'
 import { getArticleList } from '@/api/article'
 import {
   ArticleDirectoryItem,
-  ArticleDirectoryNodeDTO,
+  DirectoryNodeDTO,
   assignArticleToDirectory,
-  createArticleDirectoryNode,
+  createDirectoryNode,
   createDirectoryArticle,
-  deleteArticleDirectoryNode,
+  deleteDirectoryNode,
   getArticleDirectoryTree,
   moveArticleDirectoryItem,
-  updateArticleDirectoryNode,
+  updateDirectoryNode,
 } from '@/api/articleDirectory'
 import { ARTICLE_STATUS_MAP, Article } from '@/types'
 
@@ -65,7 +65,7 @@ const ArticleDirectoryTree: React.FC = () => {
   const [nodeModalOpen, setNodeModalOpen] = useState(false)
   const [editingNode, setEditingNode] = useState<ArticleDirectoryItem | null>(null)
   const [nodeParentId, setNodeParentId] = useState<number>(0)
-  const [nodeForm] = Form.useForm<ArticleDirectoryNodeDTO>()
+  const [nodeForm] = Form.useForm<DirectoryNodeDTO>()
 
   const [articleModalOpen, setArticleModalOpen] = useState(false)
   const [articleParentId, setArticleParentId] = useState<number>(0)
@@ -172,10 +172,10 @@ const ArticleDirectoryTree: React.FC = () => {
       parentId: editingNode ? nodeParentId : nodeParentId,
     }
     if (editingNode) {
-      await updateArticleDirectoryNode(editingNode.id, payload)
+      await updateDirectoryNode(editingNode.id, payload)
       message.success('节点已更新')
     } else {
-      await createArticleDirectoryNode(payload)
+      await createDirectoryNode(payload)
       message.success('节点已创建')
     }
     setNodeModalOpen(false)
@@ -226,7 +226,7 @@ const ArticleDirectoryTree: React.FC = () => {
       okType: 'danger',
       cancelText: '取消',
       onOk: async () => {
-        await deleteArticleDirectoryNode(node.id)
+        await deleteDirectoryNode(node.id)
         message.success('节点已删除')
         await loadTree()
       },

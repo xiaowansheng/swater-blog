@@ -233,7 +233,7 @@ CREATE TABLE IF NOT EXISTS `article_tag` (
 
 -- 文章目录树节点表（独立于原分类）
 
-CREATE TABLE IF NOT EXISTS `article_directory_node` (
+CREATE TABLE IF NOT EXISTS `directory_node` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '目录节点ID',
   `name` VARCHAR(100) NOT NULL COMMENT '节点名称',
   `description` VARCHAR(255) DEFAULT NULL COMMENT '节点描述',
@@ -251,7 +251,7 @@ CREATE TABLE IF NOT EXISTS `article_directory_node` (
 
 -- 文章目录树文章位置表（文章在目录树中的位置与排序）
 
-CREATE TABLE IF NOT EXISTS `article_directory_article` (
+CREATE TABLE IF NOT EXISTS `article_directory` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '目录文章位置ID',
   `article_id` BIGINT NOT NULL COMMENT '文章ID',
   `node_id` BIGINT NOT NULL DEFAULT '0' COMMENT '所在目录节点ID，0表示根目录',

@@ -8,8 +8,8 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("article_directory_node")
-public class ArticleDirectoryNode extends BaseEntity {
+@TableName("directory_node")
+public class DirectoryNode extends BaseEntity {
     private String name;
 
     private String description;

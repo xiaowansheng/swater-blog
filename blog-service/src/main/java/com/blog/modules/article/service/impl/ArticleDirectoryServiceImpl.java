@@ -1,17 +1,17 @@
 package com.blog.modules.article.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.blog.modules.article.mapper.ArticleDirectoryArticleMapper;
-import com.blog.modules.article.mapper.ArticleDirectoryNodeMapper;
+import com.blog.modules.article.mapper.ArticleDirectoryMapper;
+import com.blog.modules.article.mapper.DirectoryNodeMapper;
 import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.article.model.dto.ArticleDTO;
 import com.blog.modules.article.model.dto.ArticleDirectoryAssignArticleDTO;
 import com.blog.modules.article.model.dto.ArticleDirectoryCreateArticleDTO;
 import com.blog.modules.article.model.dto.ArticleDirectoryMoveDTO;
-import com.blog.modules.article.model.dto.ArticleDirectoryNodeDTO;
+import com.blog.modules.article.model.dto.DirectoryNodeDTO;
 import com.blog.modules.article.model.entity.Article;
-import com.blog.modules.article.model.entity.ArticleDirectoryArticle;
-import com.blog.modules.article.model.entity.ArticleDirectoryNode;
+import com.blog.modules.article.model.entity.ArticleDirectory;
+import com.blog.modules.article.model.entity.DirectoryNode;
 import com.blog.modules.article.model.enums.ArticleStatus;
 import com.blog.modules.article.model.vo.ArticleDirectoryItemVO;
 import com.blog.modules.article.service.ArticleCommandService;
@@ -44,10 +44,10 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
     private static final int SORT_STEP = 10;
 
     @Autowired
-    private ArticleDirectoryNodeMapper nodeMapper;
+    private DirectoryNodeMapper nodeMapper;
 
     @Autowired
-    private ArticleDirectoryArticleMapper directoryArticleMapper;
+    private ArticleDirectoryMapper directoryArticleMapper;
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -63,25 +63,25 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
     public List<ArticleDirectoryItemVO> tree() {
         ensureUnassignedArticlesAtRoot();
 
-        List<ArticleDirectoryNode> nodes = nodeMapper.selectList(new LambdaQueryWrapper<ArticleDirectoryNode>()
-                .orderByAsc(ArticleDirectoryNode::getParentId)
-                .orderByAsc(ArticleDirectoryNode::getSort)
-                .orderByAsc(ArticleDirectoryNode::getId));
-        List<ArticleDirectoryArticle> placements = directoryArticleMapper.selectList(new LambdaQueryWrapper<ArticleDirectoryArticle>()
-                .orderByAsc(ArticleDirectoryArticle::getNodeId)
-                .orderByAsc(ArticleDirectoryArticle::getSort)
-                .orderByAsc(ArticleDirectoryArticle::getId));
+        List<DirectoryNode> nodes = nodeMapper.selectList(new LambdaQueryWrapper<DirectoryNode>()
+                .orderByAsc(DirectoryNode::getParentId)
+                .orderByAsc(DirectoryNode::getSort)
+                .orderByAsc(DirectoryNode::getId));
+        List<ArticleDirectory> placements = directoryArticleMapper.selectList(new LambdaQueryWrapper<ArticleDirectory>()
+                .orderByAsc(ArticleDirectory::getNodeId)
+                .orderByAsc(ArticleDirectory::getSort)
+                .orderByAsc(ArticleDirectory::getId));
 
         Map<Long, Article> articleMap = loadArticleMap(placements);
         Map<Long, Category> categoryMap = loadCategoryMap(articleMap);
 
         Map<Long, ArticleDirectoryItemVO> nodeVoMap = new HashMap<>();
-        for (ArticleDirectoryNode node : nodes) {
+        for (DirectoryNode node : nodes) {
             nodeVoMap.put(node.getId(), toNodeVO(node));
         }
 
         List<ArticleDirectoryItemVO> roots = new ArrayList<>();
-        for (ArticleDirectoryNode node : nodes) {
+        for (DirectoryNode node : nodes) {
             ArticleDirectoryItemVO nodeVO = nodeVoMap.get(node.getId());
             Long parentId = normalizeParentId(node.getParentId());
             if (ROOT_ID.equals(parentId)) {
@@ -96,7 +96,7 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
             }
         }
 
-        for (ArticleDirectoryArticle placement : placements) {
+        for (ArticleDirectory placement : placements) {
             Article article = articleMap.get(placement.getArticleId());
             if (article == null) {
                 continue;
@@ -121,11 +121,11 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long createNode(ArticleDirectoryNodeDTO dto) {
+    public Long createNode(DirectoryNodeDTO dto) {
         Long parentId = normalizeParentId(dto.getParentId());
         assertParentExists(parentId);
 
-        ArticleDirectoryNode node = new ArticleDirectoryNode();
+        DirectoryNode node = new DirectoryNode();
         node.setName(dto.getName().trim());
         node.setDescription(dto.getDescription());
         node.setParentId(parentId);
@@ -136,8 +136,8 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateNode(Long id, ArticleDirectoryNodeDTO dto) {
-        ArticleDirectoryNode node = nodeMapper.selectById(id);
+    public void updateNode(Long id, DirectoryNodeDTO dto) {
+        DirectoryNode node = nodeMapper.selectById(id);
         if (node == null) {
             throw new BusinessException("目录节点不存在");
         }
@@ -166,14 +166,14 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteNode(Long id) {
-        ArticleDirectoryNode node = nodeMapper.selectById(id);
+        DirectoryNode node = nodeMapper.selectById(id);
         if (node == null) {
             throw new BusinessException("目录节点不存在");
         }
-        Long childNodeCount = nodeMapper.selectCount(new LambdaQueryWrapper<ArticleDirectoryNode>()
-                .eq(ArticleDirectoryNode::getParentId, id));
-        Long childArticleCount = directoryArticleMapper.selectCount(new LambdaQueryWrapper<ArticleDirectoryArticle>()
-                .eq(ArticleDirectoryArticle::getNodeId, id));
+        Long childNodeCount = nodeMapper.selectCount(new LambdaQueryWrapper<DirectoryNode>()
+                .eq(DirectoryNode::getParentId, id));
+        Long childArticleCount = directoryArticleMapper.selectCount(new LambdaQueryWrapper<ArticleDirectory>()
+                .eq(ArticleDirectory::getNodeId, id));
         if (childNodeCount > 0 || childArticleCount > 0) {
             throw new BusinessException("目录节点下还有子节点或文章，禁止删除");
         }
@@ -211,7 +211,7 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
         Long parentId = normalizeParentId(dto.getParentId());
         assertParentExists(parentId);
 
-        ArticleDirectoryArticle placement = ensureArticlePlacement(dto.getArticleId(), parentId);
+        ArticleDirectory placement = ensureArticlePlacement(dto.getArticleId(), parentId);
         Long oldParentId = normalizeParentId(placement.getNodeId());
         placement.setNodeId(parentId);
         placement.setSort(nextSort(parentId));
@@ -237,7 +237,7 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
         articleDTO.setIsTop(0);
 
         Long articleId = articleCommandService.create(articleDTO);
-        ArticleDirectoryArticle placement = new ArticleDirectoryArticle();
+        ArticleDirectory placement = new ArticleDirectory();
         placement.setArticleId(articleId);
         placement.setNodeId(parentId);
         placement.setSort(nextSort(parentId));
@@ -253,15 +253,15 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
             return;
         }
 
-        Set<Long> assignedArticleIds = directoryArticleMapper.selectList(new LambdaQueryWrapper<ArticleDirectoryArticle>())
+        Set<Long> assignedArticleIds = directoryArticleMapper.selectList(new LambdaQueryWrapper<ArticleDirectory>())
                 .stream()
-                .map(ArticleDirectoryArticle::getArticleId)
+                .map(ArticleDirectory::getArticleId)
                 .collect(Collectors.toSet());
         for (Article article : articles) {
             if (assignedArticleIds.contains(article.getId())) {
                 continue;
             }
-            ArticleDirectoryArticle placement = new ArticleDirectoryArticle();
+            ArticleDirectory placement = new ArticleDirectory();
             placement.setArticleId(article.getId());
             placement.setNodeId(ROOT_ID);
             placement.setSort(nextSort(ROOT_ID));
@@ -269,9 +269,9 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
         }
     }
 
-    private Map<Long, Article> loadArticleMap(List<ArticleDirectoryArticle> placements) {
+    private Map<Long, Article> loadArticleMap(List<ArticleDirectory> placements) {
         List<Long> articleIds = placements.stream()
-                .map(ArticleDirectoryArticle::getArticleId)
+                .map(ArticleDirectory::getArticleId)
                 .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toList());
@@ -295,7 +295,7 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
                 .collect(Collectors.toMap(Category::getId, category -> category));
     }
 
-    private ArticleDirectoryItemVO toNodeVO(ArticleDirectoryNode node) {
+    private ArticleDirectoryItemVO toNodeVO(DirectoryNode node) {
         ArticleDirectoryItemVO vo = new ArticleDirectoryItemVO();
         vo.setKey("node-" + node.getId());
         vo.setType(TYPE_NODE);
@@ -310,7 +310,7 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
     }
 
     private ArticleDirectoryItemVO toArticleVO(
-            ArticleDirectoryArticle placement,
+            ArticleDirectory placement,
             Article article,
             Category category
     ) {
@@ -355,7 +355,7 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
             if (!TYPE_NODE.equals(dto.getTargetType())) {
                 throw new BusinessException("只能将项目放入根目录或目录节点");
             }
-            ArticleDirectoryNode targetNode = nodeMapper.selectById(dto.getTargetId());
+            DirectoryNode targetNode = nodeMapper.selectById(dto.getTargetId());
             if (targetNode == null) {
                 throw new BusinessException("目标目录节点不存在");
             }
@@ -372,32 +372,32 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
 
     private ItemRef loadItemRef(String type, Long id) {
         if (TYPE_NODE.equals(type)) {
-            ArticleDirectoryNode node = nodeMapper.selectById(id);
+            DirectoryNode node = nodeMapper.selectById(id);
             if (node == null) {
                 throw new BusinessException("目录节点不存在");
             }
             return new ItemRef(TYPE_NODE, node.getId(), null, normalizeParentId(node.getParentId()));
         }
         if (TYPE_ARTICLE.equals(type)) {
-            ArticleDirectoryArticle placement = ensureArticlePlacement(id, ROOT_ID);
+            ArticleDirectory placement = ensureArticlePlacement(id, ROOT_ID);
             return new ItemRef(TYPE_ARTICLE, placement.getArticleId(), placement.getId(), normalizeParentId(placement.getNodeId()));
         }
         throw new BusinessException("不支持的目录项目类型");
     }
 
-    private ArticleDirectoryArticle ensureArticlePlacement(Long articleId, Long defaultParentId) {
+    private ArticleDirectory ensureArticlePlacement(Long articleId, Long defaultParentId) {
         Article article = articleMapper.selectById(articleId);
         if (article == null) {
             throw new BusinessException("文章不存在");
         }
-        ArticleDirectoryArticle placement = directoryArticleMapper.selectOne(new LambdaQueryWrapper<ArticleDirectoryArticle>()
-                .eq(ArticleDirectoryArticle::getArticleId, articleId)
+        ArticleDirectory placement = directoryArticleMapper.selectOne(new LambdaQueryWrapper<ArticleDirectory>()
+                .eq(ArticleDirectory::getArticleId, articleId)
                 .last("LIMIT 1"));
         if (placement != null) {
             return placement;
         }
 
-        ArticleDirectoryArticle created = new ArticleDirectoryArticle();
+        ArticleDirectory created = new ArticleDirectory();
         created.setArticleId(articleId);
         created.setNodeId(defaultParentId);
         created.setSort(nextSort(defaultParentId));
@@ -407,14 +407,14 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
 
     private void updateItemParent(ItemRef item, Long parentId) {
         if (TYPE_NODE.equals(item.type)) {
-            ArticleDirectoryNode node = new ArticleDirectoryNode();
+            DirectoryNode node = new DirectoryNode();
             node.setId(item.id);
             node.setParentId(parentId);
             nodeMapper.updateById(node);
             return;
         }
 
-        ArticleDirectoryArticle placement = new ArticleDirectoryArticle();
+        ArticleDirectory placement = new ArticleDirectory();
         placement.setId(item.relationId);
         placement.setNodeId(parentId);
         directoryArticleMapper.updateById(placement);
@@ -441,13 +441,13 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
         int sort = SORT_STEP;
         for (SortItem item : siblings) {
             if (TYPE_NODE.equals(item.type)) {
-                ArticleDirectoryNode node = new ArticleDirectoryNode();
+                DirectoryNode node = new DirectoryNode();
                 node.setId(item.id);
                 node.setParentId(parentId);
                 node.setSort(sort);
                 nodeMapper.updateById(node);
             } else {
-                ArticleDirectoryArticle placement = new ArticleDirectoryArticle();
+                ArticleDirectory placement = new ArticleDirectory();
                 placement.setId(item.relationId);
                 placement.setNodeId(parentId);
                 placement.setSort(sort);
@@ -460,11 +460,11 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
     private List<SortItem> listSiblingItems(Long parentId) {
         Long normalizedParentId = normalizeParentId(parentId);
         List<SortItem> items = new ArrayList<>();
-        nodeMapper.selectList(new LambdaQueryWrapper<ArticleDirectoryNode>()
-                        .eq(ArticleDirectoryNode::getParentId, normalizedParentId))
+        nodeMapper.selectList(new LambdaQueryWrapper<DirectoryNode>()
+                        .eq(DirectoryNode::getParentId, normalizedParentId))
                 .forEach(node -> items.add(new SortItem(TYPE_NODE, node.getId(), null, node.getSort())));
-        directoryArticleMapper.selectList(new LambdaQueryWrapper<ArticleDirectoryArticle>()
-                        .eq(ArticleDirectoryArticle::getNodeId, normalizedParentId))
+        directoryArticleMapper.selectList(new LambdaQueryWrapper<ArticleDirectory>()
+                        .eq(ArticleDirectory::getNodeId, normalizedParentId))
                 .forEach(placement -> items.add(new SortItem(TYPE_ARTICLE, placement.getArticleId(), placement.getId(), placement.getSort())));
         items.sort(Comparator
                 .comparing((SortItem item) -> item.sort == null ? 0 : item.sort)
@@ -500,7 +500,7 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
             if (nodeId.equals(currentParentId)) {
                 throw new BusinessException("不能将目录节点移动到自身或子节点下");
             }
-            ArticleDirectoryNode parent = nodeMapper.selectById(currentParentId);
+            DirectoryNode parent = nodeMapper.selectById(currentParentId);
             if (parent == null) {
                 return;
             }

@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ArticleDirectoryNodeDTO extends BaseDTO {
+public class DirectoryNodeDTO extends BaseDTO {
     @NotBlank(message = "节点名称不能为空")
     private String name;
 

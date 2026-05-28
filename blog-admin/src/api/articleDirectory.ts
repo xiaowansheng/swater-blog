@@ -25,7 +25,7 @@ export interface ArticleDirectoryItem {
   children?: ArticleDirectoryItem[]
 }
 
-export interface ArticleDirectoryNodeDTO {
+export interface DirectoryNodeDTO {
   name: string
   description?: string
   parentId?: number
@@ -44,15 +44,15 @@ export const getArticleDirectoryTree = (): Promise<ArticleDirectoryItem[]> => {
   return request.get('/admin/article-directory/tree')
 }
 
-export const createArticleDirectoryNode = (data: ArticleDirectoryNodeDTO): Promise<number> => {
+export const createDirectoryNode = (data: DirectoryNodeDTO): Promise<number> => {
   return request.post('/admin/article-directory/nodes', data)
 }
 
-export const updateArticleDirectoryNode = (id: number, data: ArticleDirectoryNodeDTO): Promise<void> => {
+export const updateDirectoryNode = (id: number, data: DirectoryNodeDTO): Promise<void> => {
   return request.put(`/admin/article-directory/nodes/${id}`, data)
 }
 
-export const deleteArticleDirectoryNode = (id: number): Promise<void> => {
+export const deleteDirectoryNode = (id: number): Promise<void> => {
   return request.delete(`/admin/article-directory/nodes/${id}`)
 }
 

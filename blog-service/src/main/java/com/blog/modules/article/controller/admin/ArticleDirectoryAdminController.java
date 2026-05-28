@@ -3,7 +3,7 @@ package com.blog.modules.article.controller.admin;
 import com.blog.modules.article.model.dto.ArticleDirectoryAssignArticleDTO;
 import com.blog.modules.article.model.dto.ArticleDirectoryCreateArticleDTO;
 import com.blog.modules.article.model.dto.ArticleDirectoryMoveDTO;
-import com.blog.modules.article.model.dto.ArticleDirectoryNodeDTO;
+import com.blog.modules.article.model.dto.DirectoryNodeDTO;
 import com.blog.modules.article.model.vo.ArticleDirectoryItemVO;
 import com.blog.modules.article.service.ArticleDirectoryService;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
@@ -39,14 +39,14 @@ public class ArticleDirectoryAdminController {
     @PostMapping("/nodes")
     @ApiOperation(name = "创建文章目录节点", type = ApiOperationType.CREATE,
             description = "创建文件夹式文章目录节点")
-    public Result<Long> createNode(@Valid @RequestBody ArticleDirectoryNodeDTO dto) {
+    public Result<Long> createNode(@Valid @RequestBody DirectoryNodeDTO dto) {
         return Result.success(articleDirectoryService.createNode(dto));
     }
 
     @PutMapping("/nodes/{id}")
     @ApiOperation(name = "更新文章目录节点", type = ApiOperationType.UPDATE,
             description = "更新文件夹式文章目录节点")
-    public Result<Void> updateNode(@PathVariable Long id, @Valid @RequestBody ArticleDirectoryNodeDTO dto) {
+    public Result<Void> updateNode(@PathVariable Long id, @Valid @RequestBody DirectoryNodeDTO dto) {
         articleDirectoryService.updateNode(id, dto);
         return Result.success();
     }

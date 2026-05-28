@@ -10,8 +10,8 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("article_directory_article")
-public class ArticleDirectoryArticle {
+@TableName("article_directory")
+public class ArticleDirectory {
     @TableId(type = IdType.AUTO)
     private Long id;
 
