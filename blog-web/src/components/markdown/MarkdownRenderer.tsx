@@ -31,7 +31,7 @@ export default function MarkdownRenderer({
     }
 
     const images = Array.from(
-      containerRef.current.querySelectorAll('img[data-markdown-preview="true"]')
+      containerRef.current.querySelectorAll<HTMLImageElement>('img[data-markdown-preview="true"]')
     );
     const sources = images
       .map((item) => item.getAttribute('src') || item.currentSrc)
@@ -96,7 +96,9 @@ export default function MarkdownRenderer({
       Vditor.preview(container, content, {
         // 跟随站点主题
         mode: currentTheme,
-        theme: currentTheme,
+        theme: {
+          current: currentTheme
+        },
         anchor: 1,
         markdown: {
           // 相对路径图片的基础 URL 前缀
