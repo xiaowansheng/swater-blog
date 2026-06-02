@@ -20,6 +20,7 @@
     "react-dom": "19.2.3",
     "react-hot-toast": "^2.6.0",
     "vditor": "^3.11.2",
+    "yet-another-react-lightbox": "^3.32.0",
     "zustand": "^5.0.9"
   },
   "devDependencies": {

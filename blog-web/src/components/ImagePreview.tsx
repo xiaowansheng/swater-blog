@@ -1,130 +1,134 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import Lightbox from 'yet-another-react-lightbox';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
+import Captions from 'yet-another-react-lightbox/plugins/captions';
+import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
+import 'yet-another-react-lightbox/styles.css';
+import 'yet-another-react-lightbox/plugins/captions.css';
+import 'yet-another-react-lightbox/plugins/thumbnails.css';
 
 interface ImagePreviewProps {
   images: string[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialIndex?: number;
+  /** 可选的图片说明，与 images 一一对应（alt 文本） */
+  alts?: string[];
 }
 
-export default function ImagePreview({ 
-  images, 
-  open, 
-  onOpenChange, 
-  initialIndex = 0 
+/**
+ * 文章图片预览组件
+ *
+ * 基于 yet-another-react-lightbox 封装，保持原有 props 接口不变。
+ * 内置：双指/滚轮缩放、双击放大、键盘 ←/→/Esc、缩略图条、图片说明。
+ */
+export default function ImagePreview({
+  images,
+  open,
+  onOpenChange,
+  initialIndex = 0,
+  alts,
 }: ImagePreviewProps) {
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const indexRef = useRef(initialIndex);
 
   useEffect(() => {
+    if (open) indexRef.current = initialIndex;
+  }, [open, initialIndex]);
+
+  // 将字符串数组转换为 lightbox slides
+  const slides = useMemo(() => {
+    return images.map((src, i) => ({
+      src,
+      alt: alts?.[i] || `图片 ${i + 1}`,
+      title: alts?.[i] || '',
+    }));
+  }, [images, alts]);
+
+  const handleClose = useCallback(() => onOpenChange(false), [onOpenChange]);
+
+  // 关闭时滚动解锁由库内部处理；这里只需同步状态
+  useEffect(() => {
     if (!open) return;
-
-    const originalOverflow = document.body.style.overflow;
+    const original = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-
     return () => {
-      document.body.style.overflow = originalOverflow;
+      document.body.style.overflow = original;
     };
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onOpenChange(false);
-      } else if (e.key === 'ArrowLeft') {
-        setCurrentIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
-      } else if (e.key === 'ArrowRight') {
-        setCurrentIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, images.length, onOpenChange]);
-
   if (!open || images.length === 0) return null;
 
-  const handlePrev = () => {
-    setCurrentIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
-  };
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
-      role="dialog"
-      aria-modal="true"
-      aria-label="图片预览"
-      onClick={() => onOpenChange(false)}
-    >
-      <button
-        type="button"
-        aria-label="关闭预览"
-        className="absolute z-10 text-white transition-colors top-4 right-4 hover:text-gray-300"
-        onClick={() => onOpenChange(false)}
-      >
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-
-      {images.length > 1 && (
-        <>
-          <button
-            type="button"
-            aria-label="上一张图片"
-            className="absolute z-10 p-2 text-white transition-colors transform -translate-y-1/2 left-4 top-1/2 hover:text-gray-300"
-            onClick={(e) => {
-              e.stopPropagation();
-              handlePrev();
-            }}
-          >
-            <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+    <Lightbox
+      open={open}
+      close={handleClose}
+      slides={slides}
+      index={Math.min(initialIndex, slides.length - 1)}
+      plugins={[Zoom, Captions, Thumbnails]}
+      carousel={{ finite: slides.length <= 1 }}
+      animation={{ fade: 220, swipe: 240, navigation: 240, zoom: 300 }}
+      render={{
+        // 隐藏顶部右上角"图片 n/总数"标签（用 captions 即可），避免视觉冗余
+        iconPrev: () => (
+          <span aria-hidden className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-black/40 text-white hover:bg-black/60 transition">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6" />
             </svg>
-          </button>
-
-          <button
-            type="button"
-            aria-label="下一张图片"
-            className="absolute z-10 p-2 text-white transition-colors transform -translate-y-1/2 right-4 top-1/2 hover:text-gray-300"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleNext();
-            }}
-          >
-            <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </span>
+        ),
+        iconNext: () => (
+          <span aria-hidden className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-black/40 text-white hover:bg-black/60 transition">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18l6-6-6-6" />
             </svg>
-          </button>
-        </>
-      )}
-
-      <div 
-        className="relative w-full h-full max-w-6xl max-h-[90vh] mx-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <Image
-          src={images[currentIndex]}
-          alt={`预览图片 ${currentIndex + 1}`}
-          fill
-          className="object-contain"
-          priority
-        />
-      </div>
-
-      {images.length > 1 && (
-        <div className="absolute text-white bottom-4">
-          {currentIndex + 1} / {images.length}
-        </div>
-      )}
-    </div>
+          </span>
+        ),
+        iconClose: () => (
+          <span aria-hidden className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-black/40 text-white hover:bg-black/60 transition">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </span>
+        ),
+      }}
+      zoom={{
+        maxZoomPixelRatio: 4,
+        zoomInMultiplier: 2,
+        doubleTapDelay: 300,
+        doubleClickMaxStops: 2,
+        keyboardMoveDistance: 60,
+        wheelZoomDistanceFactor: 120,
+        scrollToZoom: true,
+      }}
+      captions={{
+        showToggle: false,
+        descriptionMaxLines: 2,
+        descriptionTextAlign: 'center',
+      }}
+      thumbnails={{
+        position: 'bottom',
+        width: 64,
+        height: 48,
+        border: 2,
+        borderRadius: 6,
+        padding: 4,
+        gap: 6,
+        imageFit: 'cover',
+        showToggle: false,
+      }}
+      styles={{
+        container: { backgroundColor: 'rgba(0, 0, 0, 0.88)' },
+      }}
+      on={{
+        click: ({ index }) => {
+          indexRef.current = index;
+        },
+        view: ({ index }) => {
+          indexRef.current = index;
+        },
+      }}
+    />
   );
 }

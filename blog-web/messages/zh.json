@@ -332,5 +332,16 @@
     "results": "搜索结果",
     "noResults": "没有找到相关内容",
     "history": "搜索历史"
+  },
+  "markdown": {
+    "rendering": "正在渲染...",
+    "externalLink": {
+      "title": "即将访问外部链接",
+      "warning": "该链接会跳转到第三方网站，请注意保护个人隐私与账号安全。",
+      "hint": "点击「继续访问」将在新标签页中打开。",
+      "target": "目标地址",
+      "confirm": "继续访问",
+      "cancel": "取消"
+    }
   }
 }

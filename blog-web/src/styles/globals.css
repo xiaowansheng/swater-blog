@@ -689,6 +689,59 @@ button, a {
   outline-offset: 4px;
 }
 
+/* ===== 外链视觉提示 ===== */
+.vditor-reset .markdown-external-link::after {
+  content: '';
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-left: 0.2rem;
+  vertical-align: -0.05rem;
+  background-color: currentColor;
+  opacity: 0.6;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/><polyline points='15 3 21 3 21 9'/><line x1='10' y1='14' x2='21' y2='3'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/><polyline points='15 3 21 3 21 9'/><line x1='10' y1='14' x2='21' y2='3'/></svg>");
+}
+
+/* ===== 渲染中骨架占位 ===== */
+.markdown-rendering {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.5rem 0 1rem;
+  pointer-events: none;
+}
+
+.markdown-rendering__line {
+  height: 0.85rem;
+  border-radius: 0.4rem;
+  background: linear-gradient(
+    90deg,
+    var(--secondary) 0%,
+    color-mix(in srgb, var(--secondary) 60%, transparent) 50%,
+    var(--secondary) 100%
+  );
+  background-size: 200% 100%;
+  animation: markdown-rendering-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes markdown-rendering-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .markdown-rendering__line {
+    animation: none;
+  }
+}
+
 /* 分割线 */
 .vditor-reset hr {
   border: none;
@@ -859,4 +912,73 @@ aside.lg\:overflow-y-auto::-webkit-scrollbar {
 ::selection {
   background: rgba(96, 165, 250, 0.2);
   color: var(--primary);
+}
+
+/* ===== Yet Another React Lightbox 主题适配 =====
+ * 让 lightbox 控件与站点风格统一，并保证移动端按钮可点
+ */
+.yarl__container {
+  --yarl__color_backdrop: rgba(0, 0, 0, 0.88);
+  --yarl__color_button: rgba(0, 0, 0, 0.4);
+  --yarl__color_button_hover: rgba(0, 0, 0, 0.6);
+  --yarl__color_button_icon: #fff;
+  --yarl__navigation_max_width_mobile: 100%;
+}
+
+/* 标题/说明文字 */
+.yarl__captions_container {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent);
+  color: #fff;
+}
+
+.yarl__captions_title,
+.yarl__captions_description {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* 缩略图：当前选中态更突出 */
+.yarl__thumbnails_thumbnail {
+  opacity: 0.55;
+  transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.yarl__thumbnails_thumbnail:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+
+.yarl__thumbnails_thumbnail--active {
+  opacity: 1;
+  border-color: var(--primary, #60a5fa) !important;
+  box-shadow: 0 0 0 1px var(--primary, #60a5fa);
+}
+
+/* 按钮：让圆形 hover 更明显 */
+.yarl__button {
+  backdrop-filter: blur(4px);
+}
+
+/* 移动端：放大按钮区，避免误触 */
+@media (max-width: 640px) {
+  .yarl__button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .yarl__thumbnails_thumbnail {
+    width: 48px !important;
+    height: 36px !important;
+  }
+}
+
+/* 尊重 reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .yarl__slides,
+  .yarl__slide,
+  .yarl__toolbar,
+  .yarl__captions_container,
+  .yarl__thumbnails {
+    animation: none !important;
+    transition: none !important;
+  }
 }
