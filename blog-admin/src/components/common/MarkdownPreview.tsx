@@ -29,6 +29,10 @@ const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({ value, className }) =
         markdown: {
           linkBase: config.resourcePrefix,
         },
+        hljs: {
+          enable: true,
+          style: 'github',
+        },
         // transform: (html) => {
         //   // 匹配所有非 http(s) 开头的 img src 属性，使用 getFullUrl 处理路径
         //   return html.replace(/<img ([^>]*)src="(?!(http|https|data):\/?\/?([^"]*))([^"]+)"([^>]*)>/g, (_match, before, _p1, _p2, path, after) => {
@@ -46,4 +50,3 @@ const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({ value, className }) =
 }
 
 export default MarkdownPreview
-

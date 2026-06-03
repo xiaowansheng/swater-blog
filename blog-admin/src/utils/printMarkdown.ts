@@ -70,6 +70,10 @@ export const printMarkdownAsPdf = async (title: string, markdown: string): Promi
       current: 'light',
     },
     mode: 'light',
+    hljs: {
+      enable: true,
+      style: 'github',
+    },
   })
 
   // 等待渲染完成后再触发打印

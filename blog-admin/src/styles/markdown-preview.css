@@ -149,32 +149,6 @@
   border-top: 1px solid var(--md-border);
 }
 
-.vditor-reset.vditor-reset code {
-  padding: 0.2em 0.45em;
-  border-radius: 0.4rem;
-  background: var(--md-inline-code-bg);
-  color: var(--md-text);
-  font-size: 0.92em;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-
-.vditor-reset.vditor-reset pre {
-  margin: 1.25rem 0;
-  padding: 1rem 1.1rem;
-  overflow-x: auto;
-  border-radius: 0.9rem;
-  background: var(--md-code-block-bg);
-  color: var(--md-code-block-text);
-}
-
-.vditor-reset.vditor-reset pre code {
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
-  color: inherit;
-  font-size: 0.92rem;
-}
-
 .vditor-reset.vditor-reset table,
 .vditor-reset.vditor-reset img,
 .vditor-reset.vditor-reset .katex-display,
@@ -237,11 +211,6 @@
 
   .vditor-reset.vditor-reset h3 {
     font-size: 1.18rem;
-  }
-
-  .vditor-reset.vditor-reset pre {
-    padding: 0.9rem 1rem;
-    border-radius: 0.75rem;
   }
 
   .vditor-reset.vditor-reset th,
