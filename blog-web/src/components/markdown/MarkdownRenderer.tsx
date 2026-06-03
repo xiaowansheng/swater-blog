@@ -33,7 +33,7 @@ export default function MarkdownRenderer({
   const [previewIndex, setPreviewIndex] = useState(0);
   const [externalUrl, setExternalUrl] = useState<string>('');
 
-  const { theme } = useTheme();
+  const { theme, mounted } = useTheme();
   const currentTheme: 'light' | 'dark' = theme === 'dark' ? 'dark' : 'light';
 
   useEffect(() => {
@@ -184,6 +184,12 @@ export default function MarkdownRenderer({
     const renderingIndicator = renderingRef.current;
     if (!container) return;
 
+    if (!mounted) {
+      container.innerHTML = '';
+      if (renderingIndicator) renderingIndicator.hidden = true;
+      return;
+    }
+
     // 空内容直接清空，不进入 Vditor
     if (!content || !content.trim()) {
       container.innerHTML = '';
@@ -240,7 +246,7 @@ export default function MarkdownRenderer({
       if (container) container.innerHTML = '';
       if (renderingIndicator) renderingIndicator.hidden = true;
     };
-  }, [content, currentTheme, enhanceDom]);
+  }, [content, currentTheme, enhanceDom, mounted]);
 
   return (
     <>

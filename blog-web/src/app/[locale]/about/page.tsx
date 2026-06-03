@@ -25,9 +25,7 @@ export default async function AboutPage({
         {/* 作者信息卡片 + 关于内容 */}
         <AuthorCard author={author}>
           {aboutContent ? (
-            <div className="vditor-reset">
-              <MarkdownRenderer content={aboutContent} />
-            </div>
+            <MarkdownRenderer content={aboutContent} />
           ) : (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 flex items-center justify-center shadow-lg">
@@ -46,4 +44,3 @@ export default async function AboutPage({
     </>
   );
 }
-

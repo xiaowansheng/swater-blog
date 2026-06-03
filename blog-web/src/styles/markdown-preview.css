@@ -1,15 +1,14 @@
 .vditor-reset.vditor-reset {
-  --md-text: var(--foreground, var(--heading-color, #111827));
-  --md-body: var(--foreground, var(--text-color, #374151));
-  --md-muted: var(--muted, var(--text-color-secondary, #6b7280));
-  --md-link: var(--primary, var(--primary-color, #1677ff));
-  --md-border: var(--border, var(--border-color, #e5e7eb));
+  --md-text: var(--foreground, #111827);
+  --md-body: var(--foreground, #374151);
+  --md-muted: var(--muted, #6b7280);
+  --md-link: var(--primary, #1677ff);
+  --md-border: var(--border, #e5e7eb);
   --md-surface: var(--card, #ffffff);
-  --md-surface-soft: var(--secondary, var(--bg-color, #f3f4f6));
-  --md-blockquote-text: var(--secondary-foreground, var(--text-color, #374151));
+  --md-surface-soft: var(--secondary, #f3f4f6);
+  --md-blockquote-text: var(--secondary-foreground, #374151);
   --md-inline-code-bg: rgba(148, 163, 184, 0.16);
-  --md-code-block-bg: #111827;
-  --md-code-block-text: #f9fafb;
+  --md-inline-code-text: #0f172a;
   font-family: inherit;
   font-size: 1rem;
   line-height: 1.75;
@@ -20,6 +19,11 @@
   word-break: break-word;
   direction: ltr;
   text-align: left;
+}
+
+.dark .vditor-reset.vditor-reset {
+  --md-inline-code-bg: rgba(148, 163, 184, 0.2);
+  --md-inline-code-text: #f8fafc;
 }
 
 .vditor-reset.vditor-reset * {
@@ -149,30 +153,13 @@
   border-top: 1px solid var(--md-border);
 }
 
-.vditor-reset.vditor-reset code {
+.vditor-reset.vditor-reset code:not(.hljs):not(.highlight-chroma) {
   padding: 0.2em 0.45em;
   border-radius: 0.4rem;
   background: var(--md-inline-code-bg);
-  color: var(--md-text);
+  color: var(--md-inline-code-text);
   font-size: 0.92em;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-
-.vditor-reset.vditor-reset pre {
-  margin: 1.25rem 0;
-  padding: 1rem 1.1rem;
-  overflow-x: auto;
-  border-radius: 0.9rem;
-  background: var(--md-code-block-bg);
-  color: var(--md-code-block-text);
-}
-
-.vditor-reset.vditor-reset pre code {
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
-  color: inherit;
-  font-size: 0.92rem;
 }
 
 .vditor-reset.vditor-reset table,
@@ -221,6 +208,54 @@
   margin-right: 0.45rem;
 }
 
+.vditor-reset.vditor-reset .language-mermaid svg,
+.vditor-reset.vditor-reset .language-markmap svg,
+.vditor-reset.vditor-reset .language-flowchart svg,
+.vditor-reset.vditor-reset .language-graphviz svg {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.markdown-renderer .markdown-preview-image {
+  cursor: zoom-in;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.markdown-renderer .markdown-preview-image:hover {
+  opacity: 0.96;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px -16px rgba(15, 23, 42, 0.5);
+}
+
+.markdown-rendering {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.25rem 0;
+}
+
+.markdown-rendering__line {
+  height: 1rem;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--border, #e5e7eb) 70%, transparent) 0%,
+    color-mix(in srgb, var(--card, #ffffff) 70%, var(--primary, #1677ff) 30%) 50%,
+    color-mix(in srgb, var(--border, #e5e7eb) 70%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: markdown-rendering-shimmer 1.4s linear infinite;
+}
+
+@keyframes markdown-rendering-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 @media (max-width: 640px) {
   .vditor-reset.vditor-reset {
     font-size: 0.96rem;
@@ -237,11 +272,6 @@
 
   .vditor-reset.vditor-reset h3 {
     font-size: 1.18rem;
-  }
-
-  .vditor-reset.vditor-reset pre {
-    padding: 0.9rem 1rem;
-    border-radius: 0.75rem;
   }
 
   .vditor-reset.vditor-reset th,
