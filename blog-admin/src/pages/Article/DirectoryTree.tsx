@@ -7,11 +7,11 @@ import {
   Input,
   Modal,
   Select,
-  Space,
   Spin,
   Tag,
   Tooltip,
   Tree,
+  TreeSelect,
   message,
 } from 'antd'
 import type { DataNode, TreeProps } from 'antd/es/tree'
@@ -59,6 +59,44 @@ interface RootDirectoryItem extends Omit<ArticleDirectoryItem, 'type' | 'childre
 
 type DirectoryViewItem = ArticleDirectoryItem | RootDirectoryItem
 
+const customTreeStyles = `
+.custom-directory-tree.ant-tree {
+  background: transparent;
+}
+.custom-directory-tree .ant-tree-treenode {
+  padding: 5px 0 !important;
+  width: 100%;
+  align-items: center;
+}
+.custom-directory-tree .ant-tree-node-content-wrapper {
+  padding: 0 4px !important;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+.custom-directory-tree .ant-tree-node-content-wrapper:hover {
+  background-color: #f1f5f9 !important;
+}
+.custom-directory-tree .ant-tree-node-selected {
+  background-color: #e2e8f0 !important;
+}
+.custom-directory-tree .ant-tree-node-selected .text-slate-800 {
+  color: #0f172a !important;
+  font-weight: 600;
+}
+.custom-directory-tree .ant-tree-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+}
+.custom-directory-tree .ant-tree-indent-unit {
+  width: 24px;
+}
+`
+
 const ArticleDirectoryTree: React.FC = () => {
   const navigate = useNavigate()
   const [items, setItems] = useState<ArticleDirectoryItem[]>([])
@@ -69,18 +107,15 @@ const ArticleDirectoryTree: React.FC = () => {
 
   const [nodeModalOpen, setNodeModalOpen] = useState(false)
   const [editingNode, setEditingNode] = useState<ArticleDirectoryItem | null>(null)
-  const [nodeParentId, setNodeParentId] = useState<number>(0)
   const [nodeForm] = Form.useForm<DirectoryNodeDTO>()
 
   const [articleModalOpen, setArticleModalOpen] = useState(false)
-  const [articleParentId, setArticleParentId] = useState<number>(0)
-  const [articleForm] = Form.useForm<{ title: string }>()
+  const [articleForm] = Form.useForm<{ title: string; parentId: number }>()
 
   const [assignModalOpen, setAssignModalOpen] = useState(false)
-  const [assignParentId, setAssignParentId] = useState<number>(0)
   const [articleSearchLoading, setArticleSearchLoading] = useState(false)
   const [articleOptions, setArticleOptions] = useState<Article[]>([])
-  const [assignForm] = Form.useForm<{ articleId: number }>()
+  const [assignForm] = Form.useForm<{ articleId: number; parentId: number }>()
   const searchTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => {
@@ -176,6 +211,24 @@ const ArticleDirectoryTree: React.FC = () => {
     return matched
   }, [searchText, itemByKey, rootItem])
 
+  const searchResultsCount = useMemo(() => {
+    if (!searchText.trim()) return 0
+    const keyword = searchText.trim().toLowerCase()
+    let count = 0
+    itemByKey.forEach((item) => {
+      if (item.type === 'ROOT') return
+      const haystack = (
+        (item.type === 'NODE' ? item.name : '') +
+        (item.title || '') +
+        (item.description || '')
+      ).toLowerCase()
+      if (haystack.includes(keyword)) {
+        count++
+      }
+    })
+    return count
+  }, [searchText, itemByKey])
+
   const expandedKeysWithSearch = useMemo(() => {
     if (!filteredKeys) return expandedKeys
     const keys = new Set<React.Key>()
@@ -236,21 +289,84 @@ const ArticleDirectoryTree: React.FC = () => {
     return keys
   }
 
+  const isDescendant = useCallback((parentKey: string, possibleDescendantKey: string): boolean => {
+    const parent = itemByKey.get(parentKey)
+    if (!parent?.children?.length) return false
+    const walk = (nodes: DirectoryViewItem[]): boolean => {
+      for (const node of nodes) {
+        if (node.key === possibleDescendantKey) return true
+        if (node.children?.length && walk(node.children)) return true
+      }
+      return false
+    }
+    return walk(parent.children)
+  }, [itemByKey])
+
+  const parentNodeOptions = useMemo(() => {
+    const buildOptions = (nodes: DirectoryViewItem[]): any[] => {
+      return nodes
+        .filter((n) => n.type === 'NODE')
+        .map((n) => {
+          const isSelfOrDescendant = editingNode
+            ? (n.key === editingNode.key || isDescendant(editingNode.key, n.key))
+            : false
+          return {
+            title: n.name,
+            value: n.id,
+            key: n.key,
+            disabled: isSelfOrDescendant,
+            children: n.children?.length ? buildOptions(n.children) : undefined,
+          }
+        })
+    }
+    return [
+      {
+        title: '根目录',
+        value: 0,
+        key: 'root',
+        children: buildOptions(items),
+      },
+    ]
+  }, [items, editingNode, isDescendant])
+
+  const articleParentNodeOptions = useMemo(() => {
+    const buildOptions = (nodes: DirectoryViewItem[]): any[] => {
+      return nodes
+        .filter((n) => n.type === 'NODE')
+        .map((n) => ({
+          title: n.name,
+          value: n.id,
+          key: n.key,
+          children: n.children?.length ? buildOptions(n.children) : undefined,
+        }))
+    }
+    return [
+      {
+        title: '根目录',
+        value: 0,
+        key: 'root',
+        children: buildOptions(items),
+      },
+    ]
+  }, [items])
+
   const openCreateNode = (parentId = 0) => {
     setEditingNode(null)
-    setNodeParentId(parentId)
     nodeForm.resetFields()
+    nodeForm.setFieldsValue({
+      parentId,
+      name: '',
+      description: '',
+    })
     setNodeModalOpen(true)
   }
 
   const openEditNode = (node: ArticleDirectoryItem) => {
     setEditingNode(node)
-    setNodeParentId(node.parentId || 0)
     nodeForm.setFieldsValue({
       name: node.name || '',
       description: node.description,
       parentId: node.parentId || 0,
-      sort: node.sort,
     })
     setNodeModalOpen(true)
   }
@@ -258,8 +374,10 @@ const ArticleDirectoryTree: React.FC = () => {
   const handleSaveNode = async () => {
     const values = await nodeForm.validateFields()
     const payload = {
-      ...values,
-      parentId: editingNode ? nodeParentId : nodeParentId,
+      name: values.name,
+      description: values.description,
+      parentId: values.parentId,
+      sort: editingNode ? editingNode.sort : undefined,
     }
     if (editingNode) {
       await updateDirectoryNode(editingNode.id, payload)
@@ -273,8 +391,11 @@ const ArticleDirectoryTree: React.FC = () => {
   }
 
   const openCreateArticle = (parentId = 0) => {
-    setArticleParentId(parentId)
     articleForm.resetFields()
+    articleForm.setFieldsValue({
+      parentId,
+      title: '',
+    })
     setArticleModalOpen(true)
   }
 
@@ -282,7 +403,7 @@ const ArticleDirectoryTree: React.FC = () => {
     const values = await articleForm.validateFields()
     const articleId = await createDirectoryArticle({
       title: values.title,
-      parentId: articleParentId,
+      parentId: values.parentId,
     })
     message.success('文章已创建')
     setArticleModalOpen(false)
@@ -291,8 +412,11 @@ const ArticleDirectoryTree: React.FC = () => {
   }
 
   const openAssignArticle = (parentId = 0) => {
-    setAssignParentId(parentId)
     assignForm.resetFields()
+    assignForm.setFieldsValue({
+      parentId,
+      articleId: undefined,
+    })
     setArticleOptions([])
     setAssignModalOpen(true)
   }
@@ -301,7 +425,7 @@ const ArticleDirectoryTree: React.FC = () => {
     const values = await assignForm.validateFields()
     await assignArticleToDirectory({
       articleId: values.articleId,
-      parentId: assignParentId,
+      parentId: values.parentId,
     })
     message.success('文章已加入归类树')
     setAssignModalOpen(false)
@@ -439,7 +563,7 @@ const ArticleDirectoryTree: React.FC = () => {
     return (
       <>
         {text.slice(0, idx)}
-        <span style={{ backgroundColor: '#ffe58f', padding: '0 1px' }}>{text.slice(idx, idx + keyword.length)}</span>
+        <span className="bg-amber-100 text-amber-900 px-0.5 rounded font-medium">{text.slice(idx, idx + keyword.length)}</span>
         {text.slice(idx + keyword.length)}
       </>
     )
@@ -452,12 +576,55 @@ const ArticleDirectoryTree: React.FC = () => {
     if (item.type === 'ROOT') {
       return (
         <Dropdown trigger={['contextMenu']} menu={{ items: getContextMenuItems(item) }}>
-          <div className="flex items-center gap-2 pr-2 py-1 text-gray-800">
-            <FolderOpenOutlined className="text-amber-500" />
-            <span className="font-medium">根目录</span>
-            {counts && counts.articles > 0 && (
-              <span className="text-xs text-gray-400">{counts.articles} 篇文章</span>
-            )}
+          <div className="group flex items-center justify-between gap-3 w-full pr-2 py-1.5 pl-0.5 rounded transition-all duration-200">
+            <div className="flex items-center gap-2 min-w-0">
+              <FolderOpenOutlined className="text-amber-500 text-lg" />
+              <span className="font-semibold text-slate-800 text-sm">根目录</span>
+              {counts && counts.articles > 0 && (
+                <span className="px-1.5 py-0.5 text-xs text-slate-400 bg-slate-100 rounded-full font-normal">
+                  {counts.articles} 篇文章
+                </span>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0 ml-auto">
+              <Tooltip title="新建子节点" mouseEnterDelay={0.4}>
+                <Button
+                  type="text"
+                  size="small"
+                  className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-amber-600 hover:bg-slate-200"
+                  icon={<FolderAddOutlined className="text-sm" />}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    openCreateNode(0)
+                  }}
+                />
+              </Tooltip>
+              <Tooltip title="新建文章" mouseEnterDelay={0.4}>
+                <Button
+                  type="text"
+                  size="small"
+                  className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-blue-600 hover:bg-slate-200"
+                  icon={<FileAddOutlined className="text-sm" />}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    openCreateArticle(0)
+                  }}
+                />
+              </Tooltip>
+              <Tooltip title="添加已有文章" mouseEnterDelay={0.4}>
+                <Button
+                  type="text"
+                  size="small"
+                  className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-emerald-600 hover:bg-slate-200"
+                  icon={<PlusOutlined className="text-sm" />}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    openAssignArticle(0)
+                  }}
+                />
+              </Tooltip>
+            </div>
           </div>
         </Dropdown>
       )
@@ -470,27 +637,174 @@ const ArticleDirectoryTree: React.FC = () => {
 
     return (
       <Dropdown trigger={['contextMenu']} menu={{ items: getContextMenuItems(item) }}>
-        <div className="flex items-center justify-between gap-3 pr-2 py-1">
-          <div className="flex items-center gap-2 min-w-0">
+        <div className="group flex items-center justify-between gap-3 w-full pr-2 py-1.5 pl-0.5 rounded transition-all duration-200">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             {isNode ? (
-              item.children?.length ? <FolderOpenOutlined className="text-amber-500" /> : <FolderOutlined className="text-amber-500" />
+              item.children?.length ? (
+                <FolderOpenOutlined className="text-amber-500 text-lg" />
+              ) : (
+                <FolderOutlined className="text-amber-500 text-lg" />
+              )
             ) : (
-              <FileTextOutlined className="text-blue-500" />
+              <FileTextOutlined 
+                className={`text-lg ${
+                  item.status === 1 ? 'text-emerald-500' : 'text-blue-500'
+                }`} 
+              />
             )}
             <Tooltip title={isNode ? item.description || item.name : item.title}>
-              <span className="truncate text-gray-800">
+              <span className={`truncate text-slate-750 text-sm ${isNode ? 'font-medium text-slate-800' : ''}`}>
                 {isNode ? highlightText(item.name || '', keyword) : highlightText(item.title || '', keyword)}
               </span>
             </Tooltip>
-            {!isNode && statusMeta && <Tag color={statusMeta.color}>{statusMeta.label}</Tag>}
-            {!isNode && item.categoryName && <Tag color="cyan">{item.categoryName}</Tag>}
-            {isNode && counts && (
-              <span className="text-xs text-gray-400 shrink-0">{counts.articles} 篇</span>
+            {!isNode && statusMeta && (
+              <Tag color={statusMeta.color} className="m-0 border-0 rounded text-xs px-1.5 py-0.2">
+                {statusMeta.label}
+              </Tag>
+            )}
+            {!isNode && item.categoryName && (
+              <Tag color="cyan" className="m-0 border-0 rounded text-xs px-1.5 py-0.2">
+                {item.categoryName}
+              </Tag>
+            )}
+            {isNode && counts && counts.articles > 0 && (
+              <span className="px-1.5 py-0.2 text-[10px] text-slate-400 bg-slate-100 rounded-full shrink-0">
+                {counts.articles} 篇
+              </span>
             )}
           </div>
-          {!isNode && item.articleKey && (
-            <span className="text-xs text-gray-400 shrink-0">Key: {item.articleKey}</span>
-          )}
+          
+          <div className="flex items-center gap-4 shrink-0">
+            {!isNode && item.articleKey && (
+              <span className="text-[10px] font-mono text-slate-400 group-hover:hidden transition-all duration-155">
+                Key: {item.articleKey}
+              </span>
+            )}
+            
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-auto">
+              {isNode ? (
+                <>
+                  <Tooltip title="新建子节点" mouseEnterDelay={0.4}>
+                    <Button
+                      type="text"
+                      size="small"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-amber-600 hover:bg-slate-200"
+                      icon={<FolderAddOutlined className="text-xs" />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openCreateNode(item.id)
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="新建文章" mouseEnterDelay={0.4}>
+                    <Button
+                      type="text"
+                      size="small"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-blue-600 hover:bg-slate-200"
+                      icon={<FileAddOutlined className="text-xs" />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openCreateArticle(item.id)
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="添加已有文章" mouseEnterDelay={0.4}>
+                    <Button
+                      type="text"
+                      size="small"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-emerald-600 hover:bg-slate-200"
+                      icon={<PlusOutlined className="text-xs" />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openAssignArticle(item.id)
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="编辑目录" mouseEnterDelay={0.4}>
+                    <Button
+                      type="text"
+                      size="small"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-indigo-600 hover:bg-slate-200"
+                      icon={<EditOutlined className="text-xs" />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openEditNode(item as ArticleDirectoryItem)
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="移至根目录" mouseEnterDelay={0.4}>
+                    <Button
+                      type="text"
+                      size="small"
+                      disabled={!item.parentId}
+                      className={`flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-blue-600 hover:bg-slate-200 ${
+                        !item.parentId ? 'opacity-30 cursor-not-allowed' : ''
+                      }`}
+                      icon={<SwapOutlined className="text-xs" />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (item.parentId) moveToRoot(item as ArticleDirectoryItem)
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="删除目录" mouseEnterDelay={0.4}>
+                    <Button
+                      type="text"
+                      size="small"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                      icon={<DeleteOutlined className="text-xs" />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteNode(item as ArticleDirectoryItem)
+                      }}
+                    />
+                  </Tooltip>
+                </>
+              ) : (
+                <>
+                  <Tooltip title="编辑文章" mouseEnterDelay={0.4}>
+                    <Button
+                      type="text"
+                      size="small"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-blue-600 hover:bg-slate-200"
+                      icon={<EditOutlined className="text-xs" />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        navigate(`/article/edit/${item.articleId || item.id}`)
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="预览文章" mouseEnterDelay={0.4}>
+                    <Button
+                      type="text"
+                      size="small"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-emerald-600 hover:bg-slate-200"
+                      icon={<FileTextOutlined className="text-xs" />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        navigate(`/article/preview/${item.articleId || item.id}`)
+                      }}
+                    />
+                  </Tooltip>
+                  <Tooltip title="移出该目录 (移至根目录)" mouseEnterDelay={0.4}>
+                    <Button
+                      type="text"
+                      size="small"
+                      disabled={!item.parentId}
+                      className={`flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-amber-600 hover:bg-slate-200 ${
+                        !item.parentId ? 'opacity-30 cursor-not-allowed' : ''
+                      }`}
+                      icon={<SwapOutlined className="text-xs" />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (item.parentId) moveToRoot(item as ArticleDirectoryItem)
+                      }}
+                    />
+                  </Tooltip>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </Dropdown>
     )
@@ -510,19 +824,6 @@ const ArticleDirectoryTree: React.FC = () => {
 
   const treeData = useMemo(() => buildTreeData([rootItem]), [rootItem, filteredKeys, totalCounts, searchText])
 
-  const isDescendant = useCallback((parentKey: string, possibleDescendantKey: string): boolean => {
-    const parent = itemByKey.get(parentKey)
-    if (!parent?.children?.length) return false
-    const walk = (nodes: DirectoryViewItem[]): boolean => {
-      for (const node of nodes) {
-        if (node.key === possibleDescendantKey) return true
-        if (node.children?.length && walk(node.children)) return true
-      }
-      return false
-    }
-    return walk(parent.children)
-  }, [itemByKey])
-
   const handleAllowDrop: TreeProps['allowDrop'] = ({ dragNode, dropNode, dropPosition }) => {
     if (searchText.trim()) return false
     const dragItem = itemByKey.get(String(dragNode.key))
@@ -539,7 +840,7 @@ const ArticleDirectoryTree: React.FC = () => {
     // 文章不能作为容器（不能把东西放进文章内部）
     if (target.type === 'ARTICLE' && dropPosition === 0) return false
 
-    // 其余都允许：放入节点内部、间隙前后插入
+    // 其余都允许
     return true
   }
 
@@ -558,22 +859,18 @@ const ArticleDirectoryTree: React.FC = () => {
     let position: 'INSIDE' | 'BEFORE' | 'AFTER'
     if (targetItem.type === 'ROOT') {
       if (info.dropToGap) {
-        // 拖到根目录间隙：插入到根级最前或最后
         const rootChildren = rootItem.children || []
         if (rootChildren.length === 0) {
           position = 'INSIDE'
         } else {
-          // dropPosition <= 0 表示最前面，否则最后面
           position = info.dropPosition <= 0 ? 'BEFORE' : 'AFTER'
         }
       } else {
         position = 'INSIDE'
       }
     } else if (!info.dropToGap && targetItem.type === 'NODE') {
-      // 放入节点内部
       position = 'INSIDE'
     } else {
-      // 间隙插入：与目标同级，在其前面或后面
       const targetPosition = Number(String(info.node.pos).split('-').pop())
       const relativePosition = info.dropPosition - targetPosition
       position = relativePosition < 0 ? 'BEFORE' : 'AFTER'
@@ -594,106 +891,171 @@ const ArticleDirectoryTree: React.FC = () => {
     }
   }
 
+  const handleDoubleClick = (_event: React.MouseEvent, node: any) => {
+    const item = node.item as DirectoryViewItem
+    if (!item) return
+    if (item.type === 'ARTICLE') {
+      navigate(`/article/edit/${item.articleId || item.id}`)
+    } else if (item.type === 'NODE' || item.type === 'ROOT') {
+      const key = item.key
+      setExpandedKeys((prev) =>
+        prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+      )
+    }
+  }
+
   const isTreeEmpty = !loading && items.length === 0
 
   return (
-    <div className="fade-in">
-      <div className="action-bar mb-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-gray-700">
-            <ApartmentOutlined />
-            <span className="font-medium">文章归类树</span>
-            {totalCounts.get('root') && (
-              <span className="text-xs text-gray-400">
-                {totalCounts.get('root')!.nodes} 个目录 / {totalCounts.get('root')!.articles} 篇文章
-              </span>
-            )}
+    <div className="p-6 max-w-7xl mx-auto space-y-4 fade-in">
+      <style>{customTreeStyles}</style>
+      
+      {/* Header Panel */}
+      <div className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+            <ApartmentOutlined className="text-xl" />
           </div>
-          <Space>
-            <Input.Search
-              placeholder="搜索文章或目录"
-              allowClear
-              style={{ width: 200 }}
-              prefix={<SearchOutlined />}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+          <div>
+            <h1 className="text-lg font-bold text-slate-800 m-0">文章归类树</h1>
+            <div className="flex items-center gap-2 mt-0.5">
+              {totalCounts.get('root') && (
+                <span className="text-xs text-slate-400">
+                  共 {totalCounts.get('root')!.nodes} 个目录节点，{totalCounts.get('root')!.articles} 篇文章
+                </span>
+              )}
+              {searchText.trim() && (
+                <>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-xs font-medium text-blue-600 bg-blue-50/50 px-2 py-0.5 rounded">
+                    找到 {searchResultsCount} 个搜索结果
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        {/* Actions Bar */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            placeholder="搜索目录或文章标题..."
+            allowClear
+            style={{ width: 220 }}
+            prefix={<SearchOutlined className="text-slate-400" />}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="rounded-lg hover:border-blue-400 focus:border-blue-500"
+          />
+          <Tooltip title="展开全部">
+            <Button
+              icon={<DownOutlined />}
+              disabled={!!searchText.trim()}
+              onClick={() => setExpandedKeys(allNodeKeys)}
+              className="rounded-lg flex items-center justify-center"
             />
-            <Tooltip title="展开全部">
-              <Button
-                icon={<DownOutlined />}
-                size="small"
-                disabled={!!searchText.trim()}
-                onClick={() => setExpandedKeys(allNodeKeys)}
-              />
-            </Tooltip>
-            <Tooltip title="折叠全部">
-              <Button
-                icon={<UpOutlined />}
-                size="small"
-                disabled={!!searchText.trim()}
-                onClick={() => setExpandedKeys(['root'])}
-              />
-            </Tooltip>
-            <Button icon={<ReloadOutlined />} onClick={loadTree}>
-              刷新
-            </Button>
-            <Button icon={<FolderAddOutlined />} onClick={() => openCreateNode(0)}>
-              新建根节点
-            </Button>
-            <Button icon={<PlusOutlined />} onClick={() => openAssignArticle(0)}>
-              添加已有文章
-            </Button>
-            <Button type="primary" icon={<FileAddOutlined />} onClick={() => openCreateArticle(0)}>
-              新建文章
-            </Button>
-          </Space>
+          </Tooltip>
+          <Tooltip title="折叠全部">
+            <Button
+              icon={<UpOutlined />}
+              disabled={!!searchText.trim()}
+              onClick={() => setExpandedKeys(['root'])}
+              className="rounded-lg flex items-center justify-center"
+            />
+          </Tooltip>
+          <Button 
+            icon={<ReloadOutlined />} 
+            onClick={loadTree}
+            className="rounded-lg flex items-center justify-center hover:text-blue-600 hover:border-blue-400"
+          >
+            刷新
+          </Button>
+          <Button 
+            icon={<FolderAddOutlined />} 
+            onClick={() => openCreateNode(0)}
+            className="rounded-lg flex items-center justify-center hover:text-amber-600 hover:border-amber-400"
+          >
+            新建根节点
+          </Button>
+          <Button 
+            icon={<PlusOutlined />} 
+            onClick={() => openAssignArticle(0)}
+            className="rounded-lg flex items-center justify-center hover:text-emerald-600 hover:border-emerald-400"
+          >
+            添加文章到根
+          </Button>
+          <Button 
+            type="primary" 
+            icon={<FileAddOutlined />} 
+            onClick={() => openCreateArticle(0)}
+            className="rounded-lg flex items-center justify-center shadow-sm bg-blue-600 hover:bg-blue-500 border-none"
+          >
+            新建文章
+          </Button>
         </div>
       </div>
 
-      <div className="table-container min-h-[520px]">
+      {/* Tree content Panel */}
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6 min-h-[520px] transition-all duration-300">
         <Spin spinning={loading}>
           {isTreeEmpty ? (
             <div className="flex flex-col items-center justify-center py-20">
               <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
                 description={
-                  <span className="text-gray-400">
-                    暂无文章归类，点击「新建根节点」或「新建文章」开始
+                  <span className="text-slate-400 text-sm">
+                    当前暂无归类，您可以新建目录节点或直接添加文章。
                   </span>
                 }
               >
-                <Space>
-                  <Button icon={<FolderAddOutlined />} onClick={() => openCreateNode(0)}>
+                <div className="flex items-center justify-center gap-3 mt-4">
+                  <Button 
+                    icon={<FolderAddOutlined />} 
+                    onClick={() => openCreateNode(0)}
+                    className="rounded-lg"
+                  >
                     新建根节点
                   </Button>
-                  <Button type="primary" icon={<FileAddOutlined />} onClick={() => openCreateArticle(0)}>
+                  <Button 
+                    type="primary" 
+                    icon={<FileAddOutlined />} 
+                    onClick={() => openCreateArticle(0)}
+                    className="rounded-lg bg-blue-600 hover:bg-blue-500 border-none"
+                  >
                     新建文章
                   </Button>
-                </Space>
+                </div>
               </Empty>
             </div>
           ) : (
-            <Tree
-              blockNode
-              showLine
-              draggable={{ nodeDraggable: (node) => String(node.key) !== 'root' && !searchText.trim() }}
-              allowDrop={handleAllowDrop}
-              treeData={treeData}
-              expandedKeys={searchText.trim() ? expandedKeysWithSearch : expandedKeys}
-              selectedKeys={selectedKey ? [selectedKey] : []}
-              onExpand={(keys) => setExpandedKeys(keys)}
-              onSelect={(keys) => setSelectedKey(keys[0])}
-              onDrop={handleDrop}
-            />
+            <div className="max-w-4xl">
+              <Tree
+                blockNode
+                showLine={{ showLeafIcon: false }}
+                draggable={{ nodeDraggable: (node) => String(node.key) !== 'root' && !searchText.trim() }}
+                allowDrop={handleAllowDrop}
+                treeData={treeData}
+                expandedKeys={searchText.trim() ? expandedKeysWithSearch : expandedKeys}
+                selectedKeys={selectedKey ? [selectedKey] : []}
+                className="custom-directory-tree"
+                onExpand={(keys) => setExpandedKeys(keys)}
+                onSelect={(keys) => setSelectedKey(keys[0])}
+                onDoubleClick={handleDoubleClick}
+                onDrop={handleDrop}
+              />
+            </div>
           )}
         </Spin>
       </div>
 
+      {/* Node creation / editing modal */}
       <Modal
         title={editingNode ? '编辑节点' : '新建节点'}
         open={nodeModalOpen}
         onOk={handleSaveNode}
         onCancel={() => setNodeModalOpen(false)}
         destroyOnClose
+        className="form-modal"
       >
         <Form form={nodeForm} layout="vertical">
           <Form.Item
@@ -701,20 +1063,34 @@ const ArticleDirectoryTree: React.FC = () => {
             label="节点名称"
             rules={[{ required: true, message: '请输入节点名称' }]}
           >
-            <Input placeholder="节点名称" />
+            <Input placeholder="请输入节点名称，如：基础知识" maxLength={50} />
+          </Form.Item>
+          <Form.Item
+            name="parentId"
+            label="上级节点"
+            rules={[{ required: true, message: '请选择上级节点' }]}
+          >
+            <TreeSelect
+              treeData={parentNodeOptions}
+              placeholder="请选择上级节点"
+              treeDefaultExpandAll
+              className="w-full"
+            />
           </Form.Item>
           <Form.Item name="description" label="节点描述">
-            <Input.TextArea rows={3} placeholder="节点描述" />
+            <Input.TextArea rows={3} placeholder="请输入关于该分类的描述信息（可选）" maxLength={200} showCount />
           </Form.Item>
         </Form>
       </Modal>
 
+      {/* New article modal */}
       <Modal
         title="新建文章"
         open={articleModalOpen}
         onOk={handleCreateArticle}
         onCancel={() => setArticleModalOpen(false)}
         destroyOnClose
+        className="form-modal"
       >
         <Form form={articleForm} layout="vertical">
           <Form.Item
@@ -722,19 +1098,45 @@ const ArticleDirectoryTree: React.FC = () => {
             label="文章标题"
             rules={[{ required: true, message: '请输入文章标题' }]}
           >
-            <Input placeholder="文章标题" />
+            <Input placeholder="请输入文章标题" maxLength={100} />
+          </Form.Item>
+          <Form.Item
+            name="parentId"
+            label="归类目录"
+            rules={[{ required: true, message: '请选择归类目录' }]}
+          >
+            <TreeSelect
+              treeData={articleParentNodeOptions}
+              placeholder="请选择归类目录"
+              treeDefaultExpandAll
+              className="w-full"
+            />
           </Form.Item>
         </Form>
       </Modal>
 
+      {/* Assign existing article modal */}
       <Modal
         title="添加已有文章"
         open={assignModalOpen}
         onOk={handleAssignArticle}
         onCancel={() => setAssignModalOpen(false)}
         destroyOnClose
+        className="form-modal"
       >
         <Form form={assignForm} layout="vertical">
+          <Form.Item
+            name="parentId"
+            label="目标目录"
+            rules={[{ required: true, message: '请选择目标目录' }]}
+          >
+            <TreeSelect
+              treeData={articleParentNodeOptions}
+              placeholder="请选择目标目录"
+              treeDefaultExpandAll
+              className="w-full"
+            />
+          </Form.Item>
           <Form.Item
             name="articleId"
             label="选择文章"
@@ -743,7 +1145,7 @@ const ArticleDirectoryTree: React.FC = () => {
             <Select
               showSearch
               loading={articleSearchLoading}
-              placeholder="输入关键词搜索文章"
+              placeholder="输入关键词搜索并选择文章"
               filterOption={false}
               onSearch={searchArticles}
               notFoundContent={articleSearchLoading ? '搜索中...' : '无匹配结果'}
@@ -751,6 +1153,7 @@ const ArticleDirectoryTree: React.FC = () => {
                 value: article.id,
                 label: `[${article.id}] ${article.title}`,
               }))}
+              className="w-full"
             />
           </Form.Item>
         </Form>
