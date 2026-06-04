@@ -92,6 +92,9 @@ const customTreeStyles = `
   justify-content: center;
   width: 24px;
 }
+.custom-directory-tree .ant-tree-switcher-icon {
+  transform: none !important;
+}
 .custom-directory-tree .ant-tree-indent-unit {
   width: 24px;
 }
