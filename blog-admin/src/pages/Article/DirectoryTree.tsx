@@ -249,7 +249,7 @@ const ArticleDirectoryTree: React.FC = () => {
     try {
       const data = await getArticleDirectoryTree()
       setItems(data)
-      setExpandedKeys(['root', ...collectNodeKeys(data)])
+      setExpandedKeys(collectNodeKeys(data))
     } catch (error) {
       console.error('加载文章归类树失败', error)
     } finally {
@@ -582,7 +582,7 @@ const ArticleDirectoryTree: React.FC = () => {
           <div className="group flex items-center justify-between gap-3 w-full pr-2 py-1.5 pl-0.5 rounded transition-all duration-200">
             <div className="flex items-center gap-2 min-w-0">
               <FolderOpenOutlined className="text-amber-500 text-lg" />
-              <span className="font-semibold text-slate-800 text-sm">根目录</span>
+              <span className="font-semibold text-slate-800 text-base">根目录</span>
               {counts && counts.articles > 0 && (
                 <span className="px-1.5 py-0.5 text-xs text-slate-400 bg-slate-100 rounded-full font-normal">
                   {counts.articles} 篇文章
@@ -656,7 +656,7 @@ const ArticleDirectoryTree: React.FC = () => {
               />
             )}
             <Tooltip title={isNode ? item.description || item.name : item.title}>
-              <span className={`truncate text-slate-750 text-sm ${isNode ? 'font-medium text-slate-800' : ''}`}>
+              <span className={`truncate text-slate-750 text-base ${isNode ? 'font-medium text-slate-800' : ''}`}>
                 {isNode ? highlightText(item.name || '', keyword) : highlightText(item.title || '', keyword)}
               </span>
             </Tooltip>
@@ -825,7 +825,7 @@ const ArticleDirectoryTree: React.FC = () => {
       }))
   }
 
-  const treeData = useMemo(() => buildTreeData([rootItem]), [rootItem, filteredKeys, totalCounts, searchText])
+  const treeData = useMemo(() => buildTreeData(items), [items, filteredKeys, totalCounts, searchText])
 
   const handleAllowDrop: TreeProps['allowDrop'] = ({ dragNode, dropNode, dropPosition }) => {
     if (searchText.trim()) return false
@@ -894,13 +894,16 @@ const ArticleDirectoryTree: React.FC = () => {
     }
   }
 
-  const handleDoubleClick = (_event: React.MouseEvent, node: any) => {
-    const item = node.item as DirectoryViewItem
+  const handleSelect: TreeProps['onSelect'] = (_selectedKeys, info) => {
+    const key = info.node.key
+    setSelectedKey(key)
+
+    const item = (info.node as any).item as DirectoryViewItem
     if (!item) return
+
     if (item.type === 'ARTICLE') {
-      navigate(`/article/edit/${item.articleId || item.id}`)
+      navigate(`/article/preview/${item.articleId || item.id}`)
     } else if (item.type === 'NODE' || item.type === 'ROOT') {
-      const key = item.key
       setExpandedKeys((prev) =>
         prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
       )
@@ -962,7 +965,7 @@ const ArticleDirectoryTree: React.FC = () => {
             <Button
               icon={<UpOutlined />}
               disabled={!!searchText.trim()}
-              onClick={() => setExpandedKeys(['root'])}
+              onClick={() => setExpandedKeys([])}
               className="rounded-lg flex items-center justify-center"
             />
           </Tooltip>
@@ -1042,8 +1045,7 @@ const ArticleDirectoryTree: React.FC = () => {
                 selectedKeys={selectedKey ? [selectedKey] : []}
                 className="custom-directory-tree"
                 onExpand={(keys) => setExpandedKeys(keys)}
-                onSelect={(keys) => setSelectedKey(keys[0])}
-                onDoubleClick={handleDoubleClick}
+                onSelect={handleSelect}
                 onDrop={handleDrop}
               />
             </div>
