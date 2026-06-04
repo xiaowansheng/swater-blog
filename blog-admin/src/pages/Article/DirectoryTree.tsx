@@ -122,6 +122,7 @@ const ArticleDirectoryTree: React.FC = () => {
     loadTree()
   }, [])
 
+
   const rootItem = useMemo<RootDirectoryItem>(() => ({
     key: 'root',
     type: 'ROOT',
@@ -229,17 +230,19 @@ const ArticleDirectoryTree: React.FC = () => {
     return count
   }, [searchText, itemByKey])
 
-  const expandedKeysWithSearch = useMemo(() => {
-    if (!filteredKeys) return expandedKeys
-    const keys = new Set<React.Key>()
-    filteredKeys.forEach((key) => {
-      const item = itemByKey.get(key)
-      if (item && (item.type === 'NODE' || item.type === 'ROOT')) {
-        keys.add(key)
-      }
-    })
-    return Array.from(keys)
-  }, [filteredKeys, expandedKeys, itemByKey])
+  useEffect(() => {
+    if (filteredKeys) {
+      const keys = new Set<React.Key>()
+      filteredKeys.forEach((key) => {
+        const item = itemByKey.get(key)
+        if (item && (item.type === 'NODE' || item.type === 'ROOT')) {
+          keys.add(key)
+        }
+      })
+      setExpandedKeys(Array.from(keys))
+    }
+  }, [filteredKeys, itemByKey])
+
 
   const loadTree = async () => {
     setLoading(true)
@@ -1035,7 +1038,7 @@ const ArticleDirectoryTree: React.FC = () => {
                 draggable={{ nodeDraggable: (node) => String(node.key) !== 'root' && !searchText.trim() }}
                 allowDrop={handleAllowDrop}
                 treeData={treeData}
-                expandedKeys={searchText.trim() ? expandedKeysWithSearch : expandedKeys}
+                expandedKeys={expandedKeys}
                 selectedKeys={selectedKey ? [selectedKey] : []}
                 className="custom-directory-tree"
                 onExpand={(keys) => setExpandedKeys(keys)}
