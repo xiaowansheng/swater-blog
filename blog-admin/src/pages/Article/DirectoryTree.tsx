@@ -1038,6 +1038,19 @@ const ArticleDirectoryTree: React.FC = () => {
               <Tree
                 blockNode
                 showLine={{ showLeafIcon: false }}
+                switcherIcon={(props: any) => {
+                  if (props.isLeaf) return null
+                  return (
+                    <DownOutlined
+                      className="text-slate-400"
+                      style={{
+                        fontSize: 10,
+                        transform: props.expanded ? 'rotate(0deg)' : 'rotate(-90deg)',
+                        transition: 'transform 0.2s',
+                      }}
+                    />
+                  )
+                }}
                 draggable={{ nodeDraggable: (node) => String(node.key) !== 'root' && !searchText.trim() }}
                 allowDrop={handleAllowDrop}
                 treeData={treeData}
