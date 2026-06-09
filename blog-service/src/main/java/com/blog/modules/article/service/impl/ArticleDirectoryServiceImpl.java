@@ -101,7 +101,8 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
             if (article == null) {
                 continue;
             }
-            ArticleDirectoryItemVO articleVO = toArticleVO(placement, article, categoryMap.get(article.getCategoryId()));
+            Category category = article.getCategoryId() == null ? null : categoryMap.get(article.getCategoryId());
+            ArticleDirectoryItemVO articleVO = toArticleVO(placement, article, category);
             Long parentId = normalizeParentId(placement.getNodeId());
             if (ROOT_ID.equals(parentId)) {
                 roots.add(articleVO);
