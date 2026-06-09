@@ -195,7 +195,7 @@ const ArticleDirectoryTree: React.FC = () => {
       ancestorOf.set(item.key, parentKey)
       item.children?.forEach((child) => indexAncestors(child, item.key))
     }
-    rootItem.children?.forEach((child) => indexAncestors(child, null))
+    indexAncestors(rootItem, null)
 
     itemByKey.forEach((item, key) => {
       const haystack = (
@@ -252,7 +252,7 @@ const ArticleDirectoryTree: React.FC = () => {
     try {
       const data = await getArticleDirectoryTree()
       setItems(data)
-      setExpandedKeys(collectNodeKeys(data))
+      setExpandedKeys(['root', ...collectNodeKeys(data)])
     } catch (error) {
       console.error('加载文章归类树失败', error)
     } finally {
@@ -828,7 +828,7 @@ const ArticleDirectoryTree: React.FC = () => {
       }))
   }
 
-  const treeData = useMemo(() => buildTreeData(items), [items, filteredKeys, totalCounts, searchText])
+  const treeData = useMemo(() => buildTreeData([rootItem]), [rootItem, filteredKeys, totalCounts, searchText])
 
   const handleAllowDrop: TreeProps['allowDrop'] = ({ dragNode, dropNode, dropPosition }) => {
     if (searchText.trim()) return false
@@ -840,8 +840,8 @@ const ArticleDirectoryTree: React.FC = () => {
     // 不允许拖入自身后代节点
     if (dragItem.type === 'NODE' && isDescendant(dragItem.key, target.key)) return false
 
-    // 根目录允许放入内部和间隙插入
-    if (target.type === 'ROOT') return true
+    // 根目录只作为容器接收拖入，不允许在根目录自身前后插入。
+    if (target.type === 'ROOT') return dropPosition === 0
 
     // 文章不能作为容器（不能把东西放进文章内部）
     if (target.type === 'ARTICLE' && dropPosition === 0) return false
@@ -864,16 +864,7 @@ const ArticleDirectoryTree: React.FC = () => {
 
     let position: 'INSIDE' | 'BEFORE' | 'AFTER'
     if (targetItem.type === 'ROOT') {
-      if (info.dropToGap) {
-        const rootChildren = rootItem.children || []
-        if (rootChildren.length === 0) {
-          position = 'INSIDE'
-        } else {
-          position = info.dropPosition <= 0 ? 'BEFORE' : 'AFTER'
-        }
-      } else {
-        position = 'INSIDE'
-      }
+      position = 'INSIDE'
     } else if (!info.dropToGap && targetItem.type === 'NODE') {
       position = 'INSIDE'
     } else {
