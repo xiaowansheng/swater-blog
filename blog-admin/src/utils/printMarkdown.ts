@@ -1,5 +1,6 @@
 import Vditor from 'vditor'
 import 'vditor/dist/index.css'
+import { VDITOR_CDN } from '@/config/vditor'
 
 const escapeHtml = (input: string) => {
   return input
@@ -66,6 +67,7 @@ export const printMarkdownAsPdf = async (title: string, markdown: string): Promi
   // Vditor preview 渲染是异步的，给浏览器一次布局机会
   await new Promise((r) => setTimeout(r, 0))
   Vditor.preview(container as HTMLDivElement, markdown, {
+    cdn: VDITOR_CDN,
     theme: {
       current: 'light',
     },

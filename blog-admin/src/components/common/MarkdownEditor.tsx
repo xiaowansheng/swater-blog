@@ -5,6 +5,7 @@ import { uploadFile, uploadExternalImage, uploadExternalWebpage, isExternalImage
 import { toRelativeUrl } from '@/utils/format'
 import { message } from 'antd'
 import config from '@/config'
+import { VDITOR_CDN } from '@/config/vditor'
 
 interface MarkdownEditorProps {
   value?: string
@@ -35,6 +36,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     if (!editorRef.current) return
 
     const vditor = new Vditor(editorRef.current, {
+      cdn: VDITOR_CDN,
       height,
       placeholder,
       value,

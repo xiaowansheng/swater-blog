@@ -4,6 +4,7 @@ import 'vditor/dist/index.css'
 import '@/styles/markdown-preview.css'
 // import { getFullUrl } from '@/utils/format'
 import config from '@/config'
+import { VDITOR_CDN } from '@/config/vditor'
 
 interface MarkdownPreviewProps {
   value: string
@@ -24,6 +25,7 @@ const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({ value, className }) =
 
     const timer = setTimeout(() => {
       Vditor.preview(container, value, {
+        cdn: VDITOR_CDN,
         theme: { current: 'light' },
         mode: 'light',
         markdown: {

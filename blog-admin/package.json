@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/sync-vditor-assets.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/sync-vditor-assets.mjs",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "sync:vditor-assets": "node scripts/sync-vditor-assets.mjs",
+    "pretest:vditor-assets": "node scripts/sync-vditor-assets.mjs",
+    "test:vditor-assets": "node scripts/check-vditor-assets.mjs"
   },
   "dependencies": {
     "@ant-design/icons": "^5.2.6",
