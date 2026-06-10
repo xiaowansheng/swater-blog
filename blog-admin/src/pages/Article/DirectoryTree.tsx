@@ -64,27 +64,58 @@ const customTreeStyles = `
   background: transparent;
 }
 .custom-directory-tree .ant-tree-treenode {
-  padding: 5px 0 !important;
+  padding: 3px 0 !important;
   width: 100%;
   align-items: center;
+  position: relative;
+}
+.custom-directory-tree .ant-tree-treenode::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e2e8f0 10%, #e2e8f0 90%, transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.custom-directory-tree .ant-tree-treenode:hover::before {
+  opacity: 0;
 }
 .custom-directory-tree .ant-tree-node-content-wrapper {
-  padding: 0 4px !important;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  padding: 4px 6px !important;
+  border-radius: 10px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   flex: 1;
 }
 .custom-directory-tree .ant-tree-node-content-wrapper:hover {
-  background-color: #f1f5f9 !important;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 .custom-directory-tree .ant-tree-node-selected {
-  background-color: #e2e8f0 !important;
+  background: linear-gradient(135deg, #eff6ff, #e0f2fe) !important;
+  box-shadow: 0 1px 4px rgba(59, 130, 246, 0.08);
 }
-.custom-directory-tree .ant-tree-node-selected .text-slate-800 {
-  color: #0f172a !important;
+.custom-directory-tree .ant-tree-node-selected .dir-node-name {
+  color: #1e40af !important;
   font-weight: 600;
+}
+.custom-directory-tree .ant-tree-node-selected .dir-icon-wrap {
+  background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+.custom-directory-tree .ant-tree-node-selected .dir-icon-wrap .anticon {
+  color: #fff !important;
+}
+.custom-directory-tree .ant-tree-node-selected .article-icon-wrap {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+}
+.custom-directory-tree .ant-tree-node-selected .article-icon-wrap .anticon {
+  color: #fff !important;
 }
 .custom-directory-tree .ant-tree-switcher {
   display: flex;
@@ -97,6 +128,13 @@ const customTreeStyles = `
 }
 .custom-directory-tree .ant-tree-indent-unit {
   width: 24px;
+}
+.custom-directory-tree .ant-tree-list-holder-inner {
+  gap: 2px;
+}
+/* Tree line styling */
+.custom-directory-tree .ant-tree-switcher-line-icon {
+  color: #cbd5e1;
 }
 `
 
@@ -582,23 +620,25 @@ const ArticleDirectoryTree: React.FC = () => {
     if (item.type === 'ROOT') {
       return (
         <Dropdown trigger={['contextMenu']} menu={{ items: getContextMenuItems(item) }}>
-          <div className="group flex items-center justify-between gap-3 w-full pr-2 py-1.5 pl-0.5 rounded transition-all duration-200">
-            <div className="flex items-center gap-2 min-w-0">
-              <FolderOpenOutlined className="text-amber-500 text-lg" />
-              <span className="font-semibold text-slate-800 text-base">根目录</span>
+          <div className="group flex items-center justify-between gap-3 w-full pr-2 py-2 pl-1 rounded-lg transition-all duration-200">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="dir-icon-wrap w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm">
+                <FolderOpenOutlined className="text-white text-base" />
+              </div>
+              <span className="font-bold text-slate-800 text-base tracking-tight">根目录</span>
               {counts && counts.articles > 0 && (
-                <span className="px-1.5 py-0.5 text-xs text-slate-400 bg-slate-100 rounded-full font-normal">
+                <span className="px-2 py-0.5 text-[11px] text-slate-500 bg-slate-100/80 rounded-full font-medium border border-slate-200/60">
                   {counts.articles} 篇文章
                 </span>
               )}
             </div>
-            
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0 ml-auto">
+
+            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0 ml-auto">
               <Tooltip title="新建子节点" mouseEnterDelay={0.4}>
                 <Button
                   type="text"
                   size="small"
-                  className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-amber-600 hover:bg-slate-200"
+                  className="flex items-center justify-center p-1 h-7 w-7 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg"
                   icon={<FolderAddOutlined className="text-sm" />}
                   onClick={(e) => {
                     e.stopPropagation()
@@ -610,7 +650,7 @@ const ArticleDirectoryTree: React.FC = () => {
                 <Button
                   type="text"
                   size="small"
-                  className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-blue-600 hover:bg-slate-200"
+                  className="flex items-center justify-center p-1 h-7 w-7 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                   icon={<FileAddOutlined className="text-sm" />}
                   onClick={(e) => {
                     e.stopPropagation()
@@ -622,7 +662,7 @@ const ArticleDirectoryTree: React.FC = () => {
                 <Button
                   type="text"
                   size="small"
-                  className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-emerald-600 hover:bg-slate-200"
+                  className="flex items-center justify-center p-1 h-7 w-7 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"
                   icon={<PlusOutlined className="text-sm" />}
                   onClick={(e) => {
                     e.stopPropagation()
@@ -643,58 +683,68 @@ const ArticleDirectoryTree: React.FC = () => {
 
     return (
       <Dropdown trigger={['contextMenu']} menu={{ items: getContextMenuItems(item) }}>
-        <div className="group flex items-center justify-between gap-3 w-full pr-2 py-1.5 pl-0.5 rounded transition-all duration-200">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="group flex items-center justify-between gap-3 w-full pr-2 py-1 pl-0.5 rounded-lg transition-all duration-200">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             {isNode ? (
-              item.children?.length ? (
-                <FolderOpenOutlined className="text-amber-500 text-lg" />
-              ) : (
-                <FolderOutlined className="text-amber-500 text-lg" />
-              )
+              <div className={`dir-icon-wrap w-7 h-7 rounded-lg flex items-center justify-center shadow-sm ${
+                item.children?.length
+                  ? 'bg-gradient-to-br from-amber-400 to-orange-500'
+                  : 'bg-gradient-to-br from-amber-300 to-amber-500'
+              }`}>
+                {item.children?.length ? (
+                  <FolderOpenOutlined className="text-white text-sm" />
+                ) : (
+                  <FolderOutlined className="text-white text-sm" />
+                )}
+              </div>
             ) : (
-              <FileTextOutlined 
-                className={`text-lg ${
-                  item.status === 1 ? 'text-emerald-500' : 'text-blue-500'
-                }`} 
-              />
+              <div className={`article-icon-wrap w-7 h-7 rounded-lg flex items-center justify-center shadow-sm ${
+                item.status === 1
+                  ? 'bg-gradient-to-br from-emerald-400 to-teal-500'
+                  : 'bg-gradient-to-br from-blue-400 to-indigo-500'
+              }`}>
+                <FileTextOutlined className="text-white text-sm" />
+              </div>
             )}
             <Tooltip title={isNode ? item.description || item.name : item.title}>
-              <span className={`truncate text-slate-750 text-base ${isNode ? 'font-medium text-slate-800' : ''}`}>
+              <span className={`dir-node-name truncate text-sm ${
+                isNode ? 'font-semibold text-slate-800' : 'text-slate-600'
+              }`}>
                 {isNode ? highlightText(item.name || '', keyword) : highlightText(item.title || '', keyword)}
               </span>
             </Tooltip>
             {!isNode && statusMeta && (
-              <Tag color={statusMeta.color} className="m-0 border-0 rounded text-xs px-1.5 py-0.2">
+              <Tag color={statusMeta.color} className="m-0 border-0 rounded-full text-[11px] px-2 py-0 leading-5 font-medium">
                 {statusMeta.label}
               </Tag>
             )}
             {!isNode && item.categoryName && (
-              <Tag color="cyan" className="m-0 border-0 rounded text-xs px-1.5 py-0.2">
+              <Tag color="cyan" className="m-0 border-0 rounded-full text-[11px] px-2 py-0 leading-5 font-medium">
                 {item.categoryName}
               </Tag>
             )}
             {isNode && counts && counts.articles > 0 && (
-              <span className="px-1.5 py-0.2 text-[10px] text-slate-400 bg-slate-100 rounded-full shrink-0">
-                {counts.articles} 篇
+              <span className="px-2 py-0.5 text-[10px] text-slate-500 bg-slate-100/80 rounded-full shrink-0 font-medium border border-slate-200/60 leading-4">
+                {counts.articles}
               </span>
             )}
           </div>
-          
-          <div className="flex items-center gap-4 shrink-0">
+
+          <div className="flex items-center gap-3 shrink-0">
             {!isNode && item.articleKey && (
-              <span className="text-[10px] font-mono text-slate-400 group-hover:hidden transition-all duration-155">
-                Key: {item.articleKey}
+              <span className="text-[10px] font-mono text-slate-300 group-hover:hidden transition-all duration-150 tracking-tight">
+                {item.articleKey}
               </span>
             )}
-            
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-auto">
+
+            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-auto">
               {isNode ? (
                 <>
                   <Tooltip title="新建子节点" mouseEnterDelay={0.4}>
                     <Button
                       type="text"
                       size="small"
-                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-amber-600 hover:bg-slate-200"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg"
                       icon={<FolderAddOutlined className="text-xs" />}
                       onClick={(e) => {
                         e.stopPropagation()
@@ -706,7 +756,7 @@ const ArticleDirectoryTree: React.FC = () => {
                     <Button
                       type="text"
                       size="small"
-                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-blue-600 hover:bg-slate-200"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                       icon={<FileAddOutlined className="text-xs" />}
                       onClick={(e) => {
                         e.stopPropagation()
@@ -718,7 +768,7 @@ const ArticleDirectoryTree: React.FC = () => {
                     <Button
                       type="text"
                       size="small"
-                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-emerald-600 hover:bg-slate-200"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"
                       icon={<PlusOutlined className="text-xs" />}
                       onClick={(e) => {
                         e.stopPropagation()
@@ -730,7 +780,7 @@ const ArticleDirectoryTree: React.FC = () => {
                     <Button
                       type="text"
                       size="small"
-                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-indigo-600 hover:bg-slate-200"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
                       icon={<EditOutlined className="text-xs" />}
                       onClick={(e) => {
                         e.stopPropagation()
@@ -743,7 +793,7 @@ const ArticleDirectoryTree: React.FC = () => {
                       type="text"
                       size="small"
                       disabled={!item.parentId}
-                      className={`flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-blue-600 hover:bg-slate-200 ${
+                      className={`flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg ${
                         !item.parentId ? 'opacity-30 cursor-not-allowed' : ''
                       }`}
                       icon={<SwapOutlined className="text-xs" />}
@@ -757,7 +807,7 @@ const ArticleDirectoryTree: React.FC = () => {
                     <Button
                       type="text"
                       size="small"
-                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
                       icon={<DeleteOutlined className="text-xs" />}
                       onClick={(e) => {
                         e.stopPropagation()
@@ -772,7 +822,7 @@ const ArticleDirectoryTree: React.FC = () => {
                     <Button
                       type="text"
                       size="small"
-                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-blue-600 hover:bg-slate-200"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                       icon={<EditOutlined className="text-xs" />}
                       onClick={(e) => {
                         e.stopPropagation()
@@ -784,7 +834,7 @@ const ArticleDirectoryTree: React.FC = () => {
                     <Button
                       type="text"
                       size="small"
-                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-emerald-600 hover:bg-slate-200"
+                      className="flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"
                       icon={<FileTextOutlined className="text-xs" />}
                       onClick={(e) => {
                         e.stopPropagation()
@@ -797,7 +847,7 @@ const ArticleDirectoryTree: React.FC = () => {
                       type="text"
                       size="small"
                       disabled={!item.parentId}
-                      className={`flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-amber-600 hover:bg-slate-200 ${
+                      className={`flex items-center justify-center p-1 h-6 w-6 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg ${
                         !item.parentId ? 'opacity-30 cursor-not-allowed' : ''
                       }`}
                       icon={<SwapOutlined className="text-xs" />}
@@ -907,35 +957,37 @@ const ArticleDirectoryTree: React.FC = () => {
   const isTreeEmpty = !loading && items.length === 0
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-4 fade-in">
+    <div className="p-6 max-w-7xl mx-auto space-y-5 fade-in">
       <style>{customTreeStyles}</style>
-      
+
       {/* Header Panel */}
-      <div className="bg-white rounded-xl p-5 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-            <ApartmentOutlined className="text-xl" />
+      <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-200">
+            <ApartmentOutlined className="text-xl text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-slate-800 m-0">文章归类树</h1>
+            <h1 className="text-lg font-bold text-slate-800 m-0 tracking-tight">文章归类树</h1>
             <div className="flex items-center gap-2 mt-0.5">
               {totalCounts.get('root') && (
                 <span className="text-xs text-slate-400">
-                  共 {totalCounts.get('root')!.nodes} 个目录节点，{totalCounts.get('root')!.articles} 篇文章
+                  共 <span className="text-slate-600 font-medium">{totalCounts.get('root')!.nodes}</span> 个目录节点，
+                  <span className="text-slate-600 font-medium">{totalCounts.get('root')!.articles}</span> 篇文章
                 </span>
               )}
               {searchText.trim() && (
                 <>
-                  <span className="text-slate-300">•</span>
-                  <span className="text-xs font-medium text-blue-600 bg-blue-50/50 px-2 py-0.5 rounded">
-                    找到 {searchResultsCount} 个搜索结果
+                  <span className="text-slate-200">|</span>
+                  <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                    {searchResultsCount} 个结果
                   </span>
                 </>
               )}
             </div>
           </div>
         </div>
-        
+
         {/* Actions Bar */}
         <div className="flex flex-wrap items-center gap-2">
           <Input
@@ -963,32 +1015,33 @@ const ArticleDirectoryTree: React.FC = () => {
               className="rounded-lg flex items-center justify-center"
             />
           </Tooltip>
-          <Button 
-            icon={<ReloadOutlined />} 
+          <div className="w-px h-5 bg-slate-200 mx-0.5" />
+          <Button
+            icon={<ReloadOutlined />}
             onClick={loadTree}
             className="rounded-lg flex items-center justify-center hover:text-blue-600 hover:border-blue-400"
           >
             刷新
           </Button>
-          <Button 
-            icon={<FolderAddOutlined />} 
+          <Button
+            icon={<FolderAddOutlined />}
             onClick={() => openCreateNode(0)}
             className="rounded-lg flex items-center justify-center hover:text-amber-600 hover:border-amber-400"
           >
             新建根节点
           </Button>
-          <Button 
-            icon={<PlusOutlined />} 
+          <Button
+            icon={<PlusOutlined />}
             onClick={() => openAssignArticle(0)}
             className="rounded-lg flex items-center justify-center hover:text-emerald-600 hover:border-emerald-400"
           >
             添加文章到根
           </Button>
-          <Button 
-            type="primary" 
-            icon={<FileAddOutlined />} 
+          <Button
+            type="primary"
+            icon={<FileAddOutlined />}
             onClick={() => openCreateArticle(0)}
-            className="rounded-lg flex items-center justify-center shadow-sm bg-blue-600 hover:bg-blue-500 border-none"
+            className="rounded-lg flex items-center justify-center shadow-sm shadow-blue-200 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 border-none"
           >
             新建文章
           </Button>
@@ -996,7 +1049,7 @@ const ArticleDirectoryTree: React.FC = () => {
       </div>
 
       {/* Tree content Panel */}
-      <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6 min-h-[520px] transition-all duration-300">
+      <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6 min-h-[520px] transition-all duration-300">
         <Spin spinning={loading}>
           {isTreeEmpty ? (
             <div className="flex flex-col items-center justify-center py-20">
@@ -1036,11 +1089,11 @@ const ArticleDirectoryTree: React.FC = () => {
                   if (props.isLeaf) return null
                   return (
                     <DownOutlined
-                      className="text-slate-400"
+                      className="text-slate-400 hover:text-slate-600 transition-colors"
                       style={{
                         fontSize: 10,
                         transform: props.expanded ? 'rotate(0deg)' : 'rotate(-90deg)',
-                        transition: 'transform 0.2s',
+                        transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
                       }}
                     />
                   )
