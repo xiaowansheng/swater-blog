@@ -16,6 +16,7 @@ const ArticleImport = lazy(() => import('@/pages/Article/Import'))
 const ArticleExport = lazy(() => import('@/pages/Article/Export'))
 const ArticleDirectoryTree = lazy(() => import('@/pages/Article/DirectoryTree'))
 const ArticlePreview = lazy(() => import('@/pages/Article/Preview'))
+const ArticleStatistics = lazy(() => import('@/pages/Article/Statistics'))
 const Category = lazy(() => import('@/pages/Category'))
 const Tag = lazy(() => import('@/pages/Tag'))
 const Comment = lazy(() => import('@/pages/Comment'))
@@ -49,6 +50,7 @@ const routeConfig = [
   { path: '/article/import', component: ArticleImport, title: '导入文档', keepAlive: false },
   { path: '/article/export', component: ArticleExport, title: '导出文档', keepAlive: false },
   { path: '/article/preview/:id', component: ArticlePreview, title: '预览文章', keepAlive: true },
+  { path: '/article/tree/statistics', component: ArticleStatistics, title: '归类可视化', keepAlive: true },
   { path: '/article/edit/:id', component: ArticleEdit, title: '编辑文章', keepAlive: true },
   { path: '/article/create', component: ArticleEdit, title: '创建文章', keepAlive: true },
   { path: '/category', component: Category, title: '分类管理', keepAlive: true },
@@ -144,6 +146,7 @@ const Router: React.FC = () => {
           <Route path="article/import" element={<Suspense fallback={<PageLoading />}><ArticleImport /></Suspense>} />
           <Route path="article/export" element={<Suspense fallback={<PageLoading />}><ArticleExport /></Suspense>} />
           <Route path="article/preview/:id" element={<Suspense fallback={<PageLoading />}><ArticlePreview /></Suspense>} />
+          <Route path="article/tree/statistics" element={<Suspense fallback={<PageLoading />}><ArticleStatistics /></Suspense>} />
           <Route path="article/edit/:id" element={<Suspense fallback={<PageLoading />}><ArticleEdit /></Suspense>} />
           <Route path="article/create" element={<Suspense fallback={<PageLoading />}><ArticleEdit /></Suspense>} />
           <Route path="category" element={<Suspense fallback={<PageLoading />}><Category /></Suspense>} />

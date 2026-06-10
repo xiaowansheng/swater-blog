@@ -18,6 +18,7 @@ import type { DataNode, TreeProps } from 'antd/es/tree'
 import type { MenuProps } from 'antd'
 import {
   ApartmentOutlined,
+  BarChartOutlined,
   DeleteOutlined,
   DownOutlined,
   EditOutlined,
@@ -1022,6 +1023,16 @@ const ArticleDirectoryTree: React.FC = () => {
             className="rounded-lg flex items-center justify-center hover:text-blue-600 hover:border-blue-400"
           >
             刷新
+          </Button>
+          <div className="w-px h-5 bg-slate-200 mx-0.5" />
+          <Button
+            type="primary"
+            ghost
+            icon={<BarChartOutlined />}
+            onClick={() => navigate('/article/tree/statistics')}
+            className="rounded-lg flex items-center justify-center"
+          >
+            归类可视化
           </Button>
           <Button
             icon={<FolderAddOutlined />}
