@@ -61,8 +61,6 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<ArticleDirectoryItemVO> tree() {
-        ensureUnassignedArticlesAtRoot();
-
         List<DirectoryNode> nodes = nodeMapper.selectList(new LambdaQueryWrapper<DirectoryNode>()
                 .orderByAsc(DirectoryNode::getParentId)
                 .orderByAsc(DirectoryNode::getSort)
@@ -279,7 +277,12 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
         if (articleIds.isEmpty()) {
             return Map.of();
         }
-        return articleMapper.selectBatchIds(articleIds).stream()
+        return articleMapper.selectList(new LambdaQueryWrapper<Article>()
+                        .select(Article::getId, Article::getTitle, Article::getStatus,
+                                Article::getArticleKey, Article::getCategoryId,
+                                Article::getCreateTime)
+                        .in(Article::getId, articleIds))
+                .stream()
                 .collect(Collectors.toMap(Article::getId, article -> article));
     }
 

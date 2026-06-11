@@ -91,6 +91,11 @@ const customTreeStyles = `
   display: flex;
   align-items: center;
   flex: 1;
+  min-width: 0;
+}
+.custom-directory-tree .ant-tree-node-content-wrapper > * {
+  flex: 1;
+  min-width: 0;
 }
 .custom-directory-tree .ant-tree-node-content-wrapper:hover {
   background: linear-gradient(135deg, #f8fafc, #f1f5f9) !important;
@@ -136,6 +141,17 @@ const customTreeStyles = `
 /* Tree line styling */
 .custom-directory-tree .ant-tree-switcher-line-icon {
   color: #cbd5e1;
+}
+
+/* Operation buttons show on hover style */
+.custom-directory-tree .tree-node-operations {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.custom-directory-tree .ant-tree-treenode:hover .tree-node-operations {
+  opacity: 1;
+  pointer-events: auto;
 }
 `
 
@@ -636,7 +652,7 @@ const ArticleDirectoryTree: React.FC = () => {
               )}
             </div>
 
-            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0 ml-auto">
+            <div className="tree-node-operations flex items-center gap-0.5 shrink-0 ml-auto">
               <Tooltip title="新建子节点" mouseEnterDelay={0.4}>
                 <Button
                   type="text"
@@ -726,6 +742,11 @@ const ArticleDirectoryTree: React.FC = () => {
                 {item.categoryName}
               </Tag>
             )}
+            {!isNode && item.articleKey && (
+              <span className="text-[11px] font-mono text-slate-400 bg-slate-100/60 px-1.5 py-0.5 rounded leading-4">
+                {item.articleKey}
+              </span>
+            )}
             {isNode && counts && counts.articles > 0 && (
               <span className="px-2 py-0.5 text-[10px] text-slate-500 bg-slate-100/80 rounded-full shrink-0 font-medium border border-slate-200/60 leading-4">
                 {counts.articles}
@@ -733,15 +754,8 @@ const ArticleDirectoryTree: React.FC = () => {
             )}
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            {!isNode && item.articleKey && (
-              <span className="text-[10px] font-mono text-slate-300 group-hover:hidden transition-all duration-150 tracking-tight">
-                {item.articleKey}
-              </span>
-            )}
-
-            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-auto">
-              {isNode ? (
+          <div className="tree-node-operations flex items-center gap-0.5 ml-auto shrink-0">
+            {isNode ? (
                 <>
                   <Tooltip title="新建子节点" mouseEnterDelay={0.4}>
                     <Button
@@ -862,7 +876,6 @@ const ArticleDirectoryTree: React.FC = () => {
                   </Tooltip>
                 </>
               )}
-            </div>
           </div>
         </div>
       </Dropdown>
