@@ -116,7 +116,12 @@ public class UserServiceImpl implements UserService {
         if (dto.getDisabled() == null) {
             user.setDisabled(DisabledFlag.NO.getCode());
         }
-        if (dto.getRoleKey() == null) {
+        if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+            RoleVO role = roleService.getById(dto.getRoleIds().get(0));
+            if (role != null) {
+                user.setRoleKey(role.getRoleKey());
+            }
+        } else if (dto.getRoleKey() == null) {
             user.setRoleKey("user");
         }
 
@@ -162,7 +167,14 @@ public class UserServiceImpl implements UserService {
         user.setSignature(dto.getSignature());
         user.setWebsite(dto.getWebsite());
         user.setIntroduction(dto.getIntroduction());
-        user.setRoleKey(dto.getRoleKey());
+        if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+            RoleVO role = roleService.getById(dto.getRoleIds().get(0));
+            if (role != null) {
+                user.setRoleKey(role.getRoleKey());
+            }
+        } else {
+            user.setRoleKey(dto.getRoleKey());
+        }
         user.setStatus(dto.getStatus());
         user.setDisabled(dto.getDisabled());
 
