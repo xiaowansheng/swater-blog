@@ -437,9 +437,11 @@ const ArticleDirectoryTree: React.FC = () => {
 
   const openCreateArticle = (parentId = 0) => {
     articleForm.resetFields()
+    const now = new Date()
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`
     articleForm.setFieldsValue({
       parentId,
-      title: '',
+      title: `${dateStr} `,
     })
     setArticleModalOpen(true)
   }
@@ -962,102 +964,119 @@ const ArticleDirectoryTree: React.FC = () => {
       <style>{customTreeStyles}</style>
 
       {/* Header Panel */}
-      <div className="bg-white rounded-2xl p-5 border border-slate-200/60 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
-        <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-200">
-            <ApartmentOutlined className="text-xl text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-slate-800 m-0 tracking-tight">文章归类树</h1>
-            <div className="flex items-center gap-2 mt-0.5">
-              {totalCounts.get('root') && (
-                <span className="text-xs text-slate-400">
-                  共 <span className="text-slate-600 font-medium">{totalCounts.get('root')!.nodes}</span> 个目录节点，
-                  <span className="text-slate-600 font-medium">{totalCounts.get('root')!.articles}</span> 篇文章
-                </span>
-              )}
-              {searchText.trim() && (
-                <>
-                  <span className="text-slate-200">|</span>
-                  <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-                    {searchResultsCount} 个结果
-                  </span>
-                </>
-              )}
+
+        {/* Title Row */}
+        <div className="px-5 pt-5 pb-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-200/60 shrink-0">
+              <ApartmentOutlined className="text-lg text-white" />
             </div>
+            <div>
+              <h1 className="text-lg font-bold text-slate-800 m-0 tracking-tight leading-none">文章归类树</h1>
+              <div className="flex items-center gap-2 mt-1">
+                {totalCounts.get('root') && (
+                  <span className="text-xs text-slate-400">
+                    <span className="text-slate-600 font-semibold">{totalCounts.get('root')!.nodes}</span> 个目录节点
+                    <span className="mx-1 text-slate-300">·</span>
+                    <span className="text-slate-600 font-semibold">{totalCounts.get('root')!.articles}</span> 篇文章
+                  </span>
+                )}
+                {searchText.trim() && (
+                  <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                    找到 {searchResultsCount} 个结果
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: primary actions */}
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={loadTree}
+              size="small"
+              className="rounded-lg text-slate-500 hover:text-blue-600 hover:border-blue-400"
+            >
+              刷新
+            </Button>
+            <Button
+              icon={<BarChartOutlined />}
+              size="small"
+              onClick={() => navigate('/article/tree/mindmap')}
+              className="rounded-lg text-indigo-600 border-indigo-300 bg-indigo-50 hover:bg-indigo-100 hover:border-indigo-400"
+            >
+              归类可视化
+            </Button>
+            <div className="w-px h-4 bg-slate-200" />
+            <Button
+              icon={<FolderAddOutlined />}
+              size="small"
+              onClick={() => openCreateNode(0)}
+              className="rounded-lg text-amber-600 border-amber-300 bg-amber-50 hover:bg-amber-100 hover:border-amber-400"
+            >
+              新建节点
+            </Button>
+            <Button
+              icon={<PlusOutlined />}
+              size="small"
+              onClick={() => openAssignArticle(0)}
+              className="rounded-lg text-emerald-600 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-400"
+            >
+              添加文章
+            </Button>
+            <Button
+              type="primary"
+              icon={<FileAddOutlined />}
+              size="small"
+              onClick={() => openCreateArticle(0)}
+              className="rounded-lg border-none shadow-sm shadow-blue-200"
+              style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}
+            >
+              新建文章
+            </Button>
           </div>
         </div>
 
-        {/* Actions Bar */}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Search + Tree Controls Row */}
+        <div className="px-5 pb-4 border-t border-slate-100 pt-3 flex items-center gap-2">
           <Input
             placeholder="搜索目录或文章标题..."
             allowClear
-            style={{ width: 220 }}
+            style={{ width: 260 }}
             prefix={<SearchOutlined className="text-slate-400" />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            className="rounded-lg hover:border-blue-400 focus:border-blue-500"
+            className="rounded-lg hover:border-blue-400"
+            size="small"
           />
+          <div className="w-px h-4 bg-slate-200 mx-0.5" />
           <Tooltip title="展开全部">
             <Button
               icon={<DownOutlined />}
+              size="small"
               disabled={!!searchText.trim()}
               onClick={() => setExpandedKeys(allNodeKeys)}
-              className="rounded-lg flex items-center justify-center"
+              className="rounded-lg"
             />
           </Tooltip>
           <Tooltip title="折叠全部">
             <Button
               icon={<UpOutlined />}
+              size="small"
               disabled={!!searchText.trim()}
               onClick={() => setExpandedKeys([])}
-              className="rounded-lg flex items-center justify-center"
+              className="rounded-lg"
             />
           </Tooltip>
-          <div className="w-px h-5 bg-slate-200 mx-0.5" />
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={loadTree}
-            className="rounded-lg flex items-center justify-center hover:text-blue-600 hover:border-blue-400"
-          >
-            刷新
-          </Button>
-          <div className="w-px h-5 bg-slate-200 mx-0.5" />
-          <Button
-            type="primary"
-            ghost
-            icon={<BarChartOutlined />}
-            onClick={() => navigate('/article/tree/mindmap')}
-            className="rounded-lg flex items-center justify-center"
-          >
-            归类可视化
-          </Button>
-          <Button
-            icon={<FolderAddOutlined />}
-            onClick={() => openCreateNode(0)}
-            className="rounded-lg flex items-center justify-center hover:text-amber-600 hover:border-amber-400"
-          >
-            新建根节点
-          </Button>
-          <Button
-            icon={<PlusOutlined />}
-            onClick={() => openAssignArticle(0)}
-            className="rounded-lg flex items-center justify-center hover:text-emerald-600 hover:border-emerald-400"
-          >
-            添加文章到根
-          </Button>
-          <Button
-            type="primary"
-            icon={<FileAddOutlined />}
-            onClick={() => openCreateArticle(0)}
-            className="rounded-lg flex items-center justify-center shadow-sm shadow-blue-200 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 border-none"
-          >
-            新建文章
-          </Button>
+          {searchText.trim() && (
+            <span className="text-xs text-slate-400 ml-1">搜索时展开/折叠不可用</span>
+          )}
         </div>
       </div>
+
 
       {/* Tree content Panel */}
       <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6 min-h-[520px] transition-all duration-300">
