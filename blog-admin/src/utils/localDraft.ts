@@ -161,7 +161,7 @@ function updateDraftList(articleId: number | undefined, articleKey?: string): vo
   
   try {
     const listData = localStorage.getItem(DRAFT_LIST_KEY)
-    let keys: string[] = listData ? JSON.parse(listData) : []
+    const keys: string[] = listData ? JSON.parse(listData) : []
     
     if (!keys.includes(key)) {
       keys.push(key)

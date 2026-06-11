@@ -1029,7 +1029,7 @@ const ArticleDirectoryTree: React.FC = () => {
             type="primary"
             ghost
             icon={<BarChartOutlined />}
-            onClick={() => navigate('/article/tree/statistics')}
+            onClick={() => navigate('/article/tree/mindmap')}
             className="rounded-lg flex items-center justify-center"
           >
             归类可视化

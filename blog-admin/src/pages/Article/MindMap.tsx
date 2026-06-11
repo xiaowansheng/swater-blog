@@ -11,14 +11,17 @@ import {
   ReadOutlined,
   GoldOutlined,
   EditOutlined,
+  DeleteOutlined,
+  ExportOutlined,
 } from '@ant-design/icons'
-import { Button, message } from 'antd'
+import { Button, message, Modal } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
 import ReactECharts from 'echarts-for-react'
 import {
   getArticleDirectoryTree,
   ArticleDirectoryItem,
   moveArticleDirectoryItem,
+  deleteDirectoryNode,
 } from '@/api/articleDirectory'
 
 const NODE_GRADIENTS = [
@@ -40,15 +43,6 @@ const countArticles = (items: ArticleDirectoryItem[]): number => {
   return count
 }
 
-const countNodes = (items: ArticleDirectoryItem[]): number => {
-  let count = 0
-  for (const item of items) {
-    if (item.type === 'NODE') count++
-    if (item.children?.length) count += countNodes(item.children)
-  }
-  return count
-}
-
 const getMaxDepth = (items: ArticleDirectoryItem[], depth = 0): number => {
   let max = depth
   for (const item of items) {
@@ -64,7 +58,7 @@ const buildEChartsTreeData = (items: ArticleDirectoryItem[], depth = 0): any[] =
     const isNode = item.type === 'NODE'
     const label = isNode ? item.name || '未命名' : item.title || '未命名'
     const subCount = isNode && item.children ? countArticles(item.children) : 0
-    const truncated = label.length > 14 ? `${label.slice(0, 12)}…` : label
+    const truncated = label.length > 20 ? `${label.slice(0, 18)}…` : label
 
     const colorIdx = depth % NODE_GRADIENTS.length
 
@@ -108,17 +102,34 @@ const StatisticsPage: React.FC = () => {
   const navigate = useNavigate()
   const [treeItems, setTreeItems] = useState<ArticleDirectoryItem[]>([])
   const chartRef = useRef<ReactECharts>(null)
-  const lastHoveredArticle = useRef<{ articleId: number; parentId: number } | null>(null)
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; articleId: number; parentId: number } | null>(null)
 
-  const handleChartClick = useCallback((params: any) => {
-    setContextMenu(null)
-    const data = params.data
-    if (!data) return
-    if (data._type === 'ARTICLE') {
-      navigate(`/article/preview/${data._articleId || data._id}`)
+  const [contextMenu, setContextMenu] = useState<{
+    x: number
+    y: number
+    type: 'NODE' | 'ARTICLE'
+    id: number
+    articleId?: number
+    parentId?: number
+    name?: string
+  } | null>(null)
+
+  const [loading, setLoading] = useState(true)
+
+  const loadData = useCallback(async () => {
+    setLoading(true)
+    try {
+      const data = await getArticleDirectoryTree()
+      setTreeItems(data)
+    } catch (error) {
+      console.error('加载归类树失败', error)
+    } finally {
+      setLoading(false)
     }
-  }, [navigate])
+  }, [])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   const handleMoveToRoot = useCallback(async (articleId: number) => {
     try {
@@ -133,25 +144,27 @@ const StatisticsPage: React.FC = () => {
     } catch {
       message.error('移动失败')
     }
-  }, [])
+  }, [loadData])
 
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const data = await getArticleDirectoryTree()
-      setTreeItems(data)
-    } catch (error) {
-      console.error('加载归类树失败', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const handleDeleteNode = useCallback(async (nodeId: number, name?: string) => {
+    Modal.confirm({
+      title: '删除节点',
+      content: `确定删除节点「${name || '未命名'}」吗？只有空节点可以删除。`,
+      okText: '删除',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          await deleteDirectoryNode(nodeId)
+          message.success('节点已删除')
+          setContextMenu(null)
+          loadData()
+        } catch {
+          message.error('删除失败')
+        }
+      },
+    })
+  }, [loadData])
 
   const totalNodes = useMemo(() => {
     let nodes = 0
@@ -192,7 +205,7 @@ const StatisticsPage: React.FC = () => {
     children: buildEChartsTreeData(treeItems),
   }), [treeItems, totalNodes])
 
-  const mindMapOption = {
+  const mindMapOption = useMemo(() => ({
     tooltip: {
       trigger: 'item' as const,
       backgroundColor: 'rgba(255,255,255,0.98)',
@@ -222,10 +235,7 @@ const StatisticsPage: React.FC = () => {
           if (data._status !== undefined) {
             html += `<div style="color:#64748b">状态：${data._status === 1 ? '已发布' : '草稿'}</div>`
           }
-          html += `<div style="margin-top:8px;padding-top:6px;border-top:1px solid #f1f5f9;display:flex;gap:6px">
-            <span style="font-size:11px;color:#6366f1;cursor:pointer" data-action="edit" data-id="${data._articleId || data._id}">✏️ 编辑</span>
-            <span style="font-size:11px;color:#059669;cursor:pointer" data-action="preview" data-id="${data._articleId || data._id}">👁 预览</span>
-          </div>`
+          html += `<div style="margin-top:6px;padding-top:4px;border-top:1px solid #f1f5f9;font-size:11px;color:#94a3b8">右键可查看更多操作</div>`
         }
         html += '</div>'
         return html
@@ -235,11 +245,12 @@ const StatisticsPage: React.FC = () => {
       {
         type: 'tree',
         data: [mindMapData],
-        top: '6%',
-        left: '12%',
-        bottom: '6%',
-        right: '16%',
-        layout: 'radial',
+        top: '4%',
+        left: '6%',
+        bottom: '4%',
+        right: '18%',
+        layout: 'orthogonal',
+        orient: 'LR',
         symbol: (_value: number, params: any) => {
           const data = params.data || {}
           if (data._type === 'ROOT') return 'roundRect'
@@ -250,29 +261,36 @@ const StatisticsPage: React.FC = () => {
           const depth = data.depth || 0
           if (data._type === 'ROOT') return [72, 36]
           if (data._type === 'NODE') return Math.max(22, 40 - depth * 4)
-          return Math.max(12, 24 - depth * 2)
+          return Math.max(16, 28 - depth * 2)
         },
         expandAndCollapse: true,
         initialTreeDepth: 3,
         roam: true,
         label: {
-          position: 'radial',
-          offset: [0, 12],
-          fontSize: 11,
-          fontWeight: 500,
-          color: '#475569',
-          textShadowBlur: 4,
-          textShadowColor: 'rgba(255,255,255,0.95)',
+          position: 'right',
+          offset: [8, 0],
+          fontSize: 13,
+          fontWeight: 600,
+          color: '#0f172a',
+          backgroundColor: 'rgba(255,255,255,0.92)',
+          padding: [4, 10, 4, 10],
+          borderRadius: 6,
+          shadowBlur: 8,
+          shadowColor: 'rgba(0,0,0,0.06)',
           formatter: (params: any) => {
             return params.name
           },
         },
         leaves: {
           label: {
-            position: 'radial',
-            offset: [0, 8],
-            fontSize: 10,
-            color: '#64748b',
+            position: 'right',
+            offset: [6, 0],
+            fontSize: 12,
+            fontWeight: 600,
+            color: '#1e293b',
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            padding: [3, 8, 3, 8],
+            borderRadius: 6,
           },
         },
         lineStyle: {
@@ -295,48 +313,60 @@ const StatisticsPage: React.FC = () => {
         animationEasing: 'cubicOut',
       },
     ],
-  }
+  }), [mindMapData])
 
-  useEffect(() => {
-    const chart = chartRef.current?.getEchartsInstance()
-    if (!chart) return
-
-    chart.on('click', handleChartClick)
-
-    // Track hovered article nodes for right-click context menu
-    chart.on('mouseover', (params: any) => {
+  // ECharts event handlers passed via onEvents prop (guaranteed to fire after chart renders)
+  const chartEvents = useMemo(() => ({
+    click: (params: any) => {
       const data = params.data
-      if (data?._type === 'ARTICLE') {
-        lastHoveredArticle.current = {
+      if (!data) return
+      if (data._type === 'ARTICLE') {
+        setContextMenu(null)
+        navigate(`/article/preview/${data._articleId || data._id}`)
+      }
+    },
+    contextmenu: (params: any) => {
+      const nativeEvent = params.event?.event as MouseEvent | undefined
+      if (nativeEvent) {
+        nativeEvent.preventDefault()
+        nativeEvent.stopPropagation()
+      }
+      const data = params.data
+      if (data?._type && data._type !== 'ROOT') {
+        setContextMenu({
+          x: nativeEvent?.clientX ?? 0,
+          y: nativeEvent?.clientY ?? 0,
+          type: data._type,
+          id: data._id,
           articleId: data._articleId || data._id,
           parentId: data._parentId || 0,
-        }
-      } else {
-        lastHoveredArticle.current = null
-      }
-    })
-    chart.on('mouseout', () => {
-      lastHoveredArticle.current = null
-    })
-
-    // Prevent default browser context menu on the chart
-    const dom = chart.getDom()
-    const onCtx = (e: MouseEvent) => {
-      e.preventDefault()
-      const info = lastHoveredArticle.current
-      if (info) {
-        setContextMenu({ x: e.clientX, y: e.clientY, ...info })
+          name: data._label || data._fullLabel || params.name,
+        })
       } else {
         setContextMenu(null)
       }
-    }
-    dom.addEventListener('contextmenu', onCtx)
+    },
+  }), [navigate])
 
-    return () => {
-      chart.off('click', handleChartClick)
-      dom.removeEventListener('contextmenu', onCtx)
+  // When chart is ready, disable the default browser context menu on the canvas
+  const handleChartReady = useCallback((chart: any) => {
+    const dom = chart.getDom() as HTMLElement
+    dom.addEventListener('contextmenu', (e) => e.preventDefault())
+  }, [])
+
+  // Close menu when user clicks anywhere outside
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      // Only close if the menu is open and the click is NOT on a menu button
+      // (menu buttons handle their own onClick which also calls setContextMenu(null))
+      const target = e.target as HTMLElement
+      if (!target.closest('[data-context-menu]')) {
+        setContextMenu(null)
+      }
     }
-  }, [mindMapOption, handleChartClick])
+    document.addEventListener('mousedown', handleGlobalClick)
+    return () => document.removeEventListener('mousedown', handleGlobalClick)
+  }, [])
 
   if (loading) {
     return (
@@ -463,36 +493,162 @@ const StatisticsPage: React.FC = () => {
             <span className="text-[11px] text-slate-400 ml-1">拖拽平移 / 滚轮缩放 / 单击文章预览 / 右键更多操作</span>
           </div>
         </div>
-        <div className="p-2" onClick={() => setContextMenu(null)}>
-          <ReactECharts ref={chartRef} option={mindMapOption} style={{ height: 560 }} notMerge lazyUpdate />
+        <div className="p-2">
+          <ReactECharts
+            ref={chartRef}
+            option={mindMapOption}
+            style={{ height: 560 }}
+            notMerge
+            lazyUpdate
+            onEvents={chartEvents}
+            onChartReady={handleChartReady}
+          />
           {contextMenu && (
             <div
-              className="fixed z-50 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 min-w-[160px]"
-              style={{ left: contextMenu.x, top: contextMenu.y }}
+              data-context-menu
+              onMouseDown={(e) => e.stopPropagation()}
+              style={{
+                position: 'fixed',
+                left: contextMenu.x,
+                top: contextMenu.y,
+                zIndex: 9999,
+                minWidth: 210,
+                background: 'rgba(255,255,255,0.97)',
+                borderRadius: 14,
+                boxShadow: '0 8px 32px rgba(99,102,241,0.13), 0 2px 8px rgba(0,0,0,0.10)',
+                border: '1px solid rgba(226,232,240,0.8)',
+                overflow: 'hidden',
+                backdropFilter: 'blur(12px)',
+                animation: 'ctxMenuIn 0.13s cubic-bezier(0.22,1,0.36,1)',
+              }}
             >
-              <button
-                className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                onClick={() => { navigate(`/article/edit/${contextMenu.articleId}`); setContextMenu(null) }}
-              >
-                ✏️ 编辑文章
-              </button>
-              <button
-                className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
-                onClick={() => { navigate(`/article/preview/${contextMenu.articleId}`); setContextMenu(null) }}
-              >
-                👁 预览文章
-              </button>
-              {contextMenu.parentId > 0 && (
-                <>
-                  <div className="h-px bg-slate-100 my-1" />
+              <style>{`
+                @keyframes ctxMenuIn {
+                  from { opacity: 0; transform: scale(0.93) translateY(-6px); }
+                  to   { opacity: 1; transform: scale(1)    translateY(0); }
+                }
+                .ctx-item {
+                  display: flex; align-items: center; gap: 10px;
+                  width: 100%; text-align: left;
+                  padding: 9px 16px;
+                  font-size: 13px; font-weight: 500;
+                  color: #374151;
+                  background: transparent;
+                  border: none; cursor: pointer;
+                  transition: background 0.15s, color 0.15s, padding-left 0.15s;
+                  position: relative;
+                }
+                .ctx-item:hover { padding-left: 20px; }
+                .ctx-item.blue:hover   { background: #eff6ff; color: #2563eb; }
+                .ctx-item.green:hover  { background: #f0fdf4; color: #059669; }
+                .ctx-item.amber:hover  { background: #fffbeb; color: #d97706; }
+                .ctx-item.red:hover    { background: #fef2f2; color: #dc2626; }
+                .ctx-item.indigo:hover { background: #eef2ff; color: #4f46e5; }
+                .ctx-icon-badge {
+                  width: 26px; height: 26px; border-radius: 7px;
+                  display: flex; align-items: center; justify-content: center;
+                  flex-shrink: 0; font-size: 12px;
+                }
+              `}</style>
+
+              {/* Header */}
+              <div style={{
+                padding: '10px 16px 9px',
+                background: contextMenu.type === 'NODE'
+                  ? 'linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%)'
+                  : 'linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%)',
+                borderBottom: '1px solid rgba(226,232,240,0.7)',
+                display: 'flex', alignItems: 'center', gap: 9,
+              }}>
+                <div
+                  className="ctx-icon-badge"
+                  style={{
+                    background: contextMenu.type === 'NODE'
+                      ? 'linear-gradient(135deg,#fbbf24,#f59e0b)'
+                      : 'linear-gradient(135deg,#60a5fa,#3b82f6)',
+                    boxShadow: contextMenu.type === 'NODE'
+                      ? '0 2px 6px rgba(245,158,11,0.35)'
+                      : '0 2px 6px rgba(59,130,246,0.35)',
+                    color: '#fff',
+                  }}
+                >
+                  {contextMenu.type === 'NODE' ? <FolderOpenOutlined /> : <FileTextOutlined />}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {contextMenu.name || (contextMenu.type === 'NODE' ? '目录节点' : '文章')}
+                  </div>
+                  <div style={{ fontSize: 10, color: contextMenu.type === 'NODE' ? '#d97706' : '#3b82f6', fontWeight: 500, marginTop: 1 }}>
+                    {contextMenu.type === 'NODE' ? '📁 目录节点' : '📄 文章'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Menu Items */}
+              <div style={{ padding: '4px 0' }}>
+                {contextMenu.type === 'ARTICLE' ? (
+                  <>
+                    <button
+                      className="ctx-item blue"
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={() => { navigate(`/article/edit/${contextMenu.articleId}`); setContextMenu(null) }}
+                    >
+                      <div className="ctx-icon-badge" style={{ background: '#eff6ff', color: '#2563eb' }}>
+                        <EditOutlined />
+                      </div>
+                      编辑文章
+                    </button>
+                    <button
+                      className="ctx-item green"
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={() => { navigate(`/article/preview/${contextMenu.articleId}`); setContextMenu(null) }}
+                    >
+                      <div className="ctx-icon-badge" style={{ background: '#f0fdf4', color: '#059669' }}>
+                        <FileTextOutlined />
+                      </div>
+                      预览文章
+                    </button>
+                    {(contextMenu.parentId ?? 0) > 0 && (
+                      <>
+                        <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,#e2e8f0,transparent)', margin: '4px 12px' }} />
+                        <button
+                          className="ctx-item amber"
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={() => { handleMoveToRoot(contextMenu.articleId!); setContextMenu(null) }}
+                        >
+                          <div className="ctx-icon-badge" style={{ background: '#fffbeb', color: '#d97706' }}>
+                            <ExportOutlined />
+                          </div>
+                          移至根目录
+                        </button>
+                      </>
+                    )}
+                  </>
+                ) : (
                   <button
-                    className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-600 transition-colors"
-                    onClick={() => { handleMoveToRoot(contextMenu.articleId); setContextMenu(null) }}
+                    className="ctx-item red"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={() => { handleDeleteNode(contextMenu.id, contextMenu.name); setContextMenu(null) }}
                   >
-                    ↗ 移至根目录
+                    <div className="ctx-icon-badge" style={{ background: '#fef2f2', color: '#dc2626' }}>
+                      <DeleteOutlined />
+                    </div>
+                    删除节点
                   </button>
-                </>
-              )}
+                )}
+              </div>
+
+              {/* Footer hint */}
+              <div style={{
+                padding: '6px 16px 8px',
+                borderTop: '1px solid rgba(226,232,240,0.6)',
+                fontSize: 10,
+                color: '#94a3b8',
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#cbd5e1', display: 'inline-block', flexShrink: 0 }} />
+                点击空白处关闭菜单
+              </div>
             </div>
           )}
         </div>

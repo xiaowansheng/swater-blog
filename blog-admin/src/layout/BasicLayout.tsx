@@ -50,6 +50,8 @@ const getBreadcrumbItems = (pathname: string) => {
     dashboard: '仪表盘',
     welcome: '欢迎页',
     profile: '个人资料',
+    tree: '文章归类树',
+    mindmap: '归类可视化',
   }
 
   // 构建面包屑路径
