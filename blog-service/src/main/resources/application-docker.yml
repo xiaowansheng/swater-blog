@@ -125,7 +125,15 @@ spring:
         shutdown-timeout: 100ms
     elasticsearch:
       repositories:
-        enabled: false
+        enabled: ${ELASTICSEARCH_REPOSITORIES_ENABLED:false}
+
+  # Elasticsearch 配置（默认不连接，启用 ES 时设 ELASTICSEARCH_HOST=http://elasticsearch:9200）
+  elasticsearch:
+    uris: ${ELASTICSEARCH_HOST:http://elasticsearch:9200}
+    connection-timeout: 5s
+    socket-timeout: 30s
+    username: ${ELASTICSEARCH_USERNAME:}
+    password: ${ELASTICSEARCH_PASSWORD:}
 
   # Docker环境RabbitMQ配置 - 使用环境变量
   rabbitmq:
@@ -350,7 +358,7 @@ management:
     redis:
       enabled: true
     elasticsearch:
-      enabled: false
+      enabled: ${ELASTICSEARCH_HEALTH_ENABLED:false}
     db:
       enabled: true
     rabbit:
@@ -483,7 +491,7 @@ plugin:
 
   # 搜索插件配置
   search:
-    active: database  # database/elasticsearch
+    active: ${PLUGIN_SEARCH_ACTIVE:database}  # database/elasticsearch
 
   # 位置服务插件配置
   location:

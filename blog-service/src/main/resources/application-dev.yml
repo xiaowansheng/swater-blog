@@ -128,6 +128,18 @@ spring:
           min-idle: 2
           max-wait: 3000ms
         shutdown-timeout: 100ms
+    # Elasticsearch 仓库扫描默认关闭，启用 ES 时通过 ELASTICSEARCH_REPOSITORIES_ENABLED=true 打开
+    elasticsearch:
+      repositories:
+        enabled: ${ELASTICSEARCH_REPOSITORIES_ENABLED:false}
+
+  # Elasticsearch 配置（默认不连接，启用 ES 时设 ELASTICSEARCH_HOST）
+  elasticsearch:
+    uris: ${ELASTICSEARCH_HOST:http://localhost:9200}
+    connection-timeout: 5s
+    socket-timeout: 30s
+    username: ${ELASTICSEARCH_USERNAME:}
+    password: ${ELASTICSEARCH_PASSWORD:}
   
   # 开发环境RabbitMQ配置
   rabbitmq:
@@ -341,6 +353,8 @@ management:
       enabled: true
     mail:
       enabled: false
+    elasticsearch:
+      enabled: ${ELASTICSEARCH_HEALTH_ENABLED:false}  # 启用 ES 时设 true
     diskspace:
       enabled: true
       threshold: 1GB
@@ -468,7 +482,7 @@ plugin:
 
   # 搜索插件配置
   search:
-    active: database  # database/elasticsearch
+    active: ${PLUGIN_SEARCH_ACTIVE:database}  # database/elasticsearch
 
   # 位置服务插件配置
   location:

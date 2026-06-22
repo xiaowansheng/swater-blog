@@ -92,26 +92,35 @@ services:
       timeout: 10s
       retries: 3
 
-  # Elasticsearch搜索引擎 - 暂时禁用
-  # elasticsearch:
-  #   image: elasticsearch:8.11.0
-  #   container_name: swater-elasticsearch
-  #   restart: unless-stopped
-  #   ports:
-  #     - "${ELASTICSEARCH_HTTP_PUBLISHED_PORT:-9200}:9200"
-  #   environment:
-  #     - discovery.type=single-node
-  #     - xpack.security.enabled=false
-  #     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-  #   volumes:
-  #     - elasticsearch_data:/usr/share/elasticsearch/data
-  #   networks:
-  #     - blog-network
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
+  # Elasticsearch搜索引擎（可选，通过 elasticsearch profile 启用）
+  # 启用方式：docker compose --profile elasticsearch up -d
+  # 应用侧需同时设置 PLUGIN_SEARCH_ACTIVE=elasticsearch 才会真正使用
+  elasticsearch:
+    build:
+      context: ./docker/elasticsearch
+      dockerfile: Dockerfile
+    image: swater-elasticsearch:8.11.0-ik
+    container_name: swater-elasticsearch
+    restart: unless-stopped
+    profiles:
+      - elasticsearch
+    ports:
+      - "${ELASTICSEARCH_HTTP_PUBLISHED_PORT:-9200}:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - blog-network
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # 后端服务
   blog-service:
@@ -142,6 +151,13 @@ services:
       SERVER_PORT: ${SERVER_PORT:-8888}
       BLOG_SITE_URL: ${BLOG_SITE_URL:-http://localhost}
       BLOG_RSS_DEFAULT_LOCALE: ${BLOG_RSS_DEFAULT_LOCALE:-zh}
+      # Elasticsearch 配置（默认走 database 搜索插件，启用 ES 时设 PLUGIN_SEARCH_ACTIVE=elasticsearch）
+      PLUGIN_SEARCH_ACTIVE: ${PLUGIN_SEARCH_ACTIVE:-database}
+      ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:-http://elasticsearch:9200}
+      ELASTICSEARCH_REPOSITORIES_ENABLED: ${ELASTICSEARCH_REPOSITORIES_ENABLED:-false}
+      ELASTICSEARCH_HEALTH_ENABLED: ${ELASTICSEARCH_HEALTH_ENABLED:-false}
+      ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME:-}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-}
     volumes:
       - blog_logs:/app/logs
       - blog_uploads:/app/uploads
@@ -152,8 +168,9 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      # elasticsearch:
-      #   condition: service_healthy  # 暂时禁用ES
+      elasticsearch:
+        condition: service_healthy
+        required: false  # profile 未激活时不阻塞启动
     networks:
       - blog-network
     healthcheck:
@@ -305,7 +322,7 @@ volumes:
   mysql_data:
   redis_data:
   rabbitmq_data:
-  # elasticsearch_data:  # 暂时禁用ES
+  elasticsearch_data:
   blog_logs:
   blog_uploads:
   # Nginx Proxy Volumes
