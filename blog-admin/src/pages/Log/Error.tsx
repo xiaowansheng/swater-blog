@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Table, Tag, Input, Button, Modal, Space, DatePicker, Select } from 'antd'
 import { SearchOutlined, ReloadOutlined, EyeOutlined } from '@ant-design/icons'
 import { getErrorLogList } from '@/api/log'
@@ -27,11 +27,7 @@ const LogErrorPage: React.FC = () => {
   const [detailVisible, setDetailVisible] = useState(false)
   const [selectedLog, setSelectedLog] = useState<LogError | null>(null)
 
-  useEffect(() => {
-    loadLogs()
-  }, [pagination.current, pagination.pageSize])
-
-  const loadLogs = async () => {
+  const loadLogs = useCallback(async () => {
     setLoading(true)
     try {
       const result = await getErrorLogList({
@@ -46,7 +42,11 @@ const LogErrorPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [pagination, filters])
+
+  useEffect(() => {
+    loadLogs()
+  }, [loadLogs])
 
   const handleSearch = () => {
     setPagination((prev) => ({ ...prev, current: 1 }))

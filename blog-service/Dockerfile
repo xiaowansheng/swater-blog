@@ -96,8 +96,8 @@ RUN groupadd -r blog && useradd -r -g blog blog
 # 创建应用目录
 WORKDIR /app
 
-# 创建日志目录
-RUN mkdir -p /app/logs && chown -R blog:blog /app
+# 创建日志目录与上传目录
+RUN mkdir -p /app/logs /app/uploads && chown -R blog:blog /app
 
 # 从构建阶段复制jar文件
 COPY --from=builder /app/build/libs/*.jar app.jar

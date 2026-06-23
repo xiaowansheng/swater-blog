@@ -468,7 +468,7 @@ const ArticleExport: React.FC = () => {
                   try {
                     await downloadExport(exportResult.taskId)
                     message.success('下载成功')
-                  } catch (e) {
+                  } catch {
                     message.error('下载失败，请重试')
                   }
                 }}

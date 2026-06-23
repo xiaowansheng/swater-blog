@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Card,
   Button,
@@ -40,7 +40,7 @@ const AlbumPage: React.FC = () => {
   })
 
 
-  const loadAlbums = async () => {
+  const loadAlbums = useCallback(async () => {
     setLoading(true)
     try {
       const result = await getAlbumList()
@@ -61,11 +61,11 @@ const AlbumPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
 
   useEffect(() => {
     loadAlbums()
-  }, [filters])
+  }, [loadAlbums])
 
   const handleCreate = () => {
     setEditingAlbum(null)
@@ -84,7 +84,7 @@ const AlbumPage: React.FC = () => {
       await deleteAlbum(id)
       message.success('删除成功')
       loadAlbums()
-    } catch (error) {
+    } catch {
       message.error('删除失败')
     }
   }

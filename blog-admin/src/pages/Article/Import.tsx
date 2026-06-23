@@ -391,7 +391,7 @@ const ArticleImport: React.FC = () => {
     try {
       await importSingleArticle(article, { ...savedConfig }, fileMap, validFiles)
       message.success('重试成功')
-    } catch (e) {
+    } catch {
       message.error('重试失败')
     }
   }

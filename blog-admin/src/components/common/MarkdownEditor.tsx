@@ -26,20 +26,41 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   const vditorInstance = useRef<Vditor | null>(null)
   const [isInit, setIsInit] = useState(false)
   const onSaveRef = useRef(onSave)
+  const onChangeRef = useRef(onChange)
+  const valueRef = useRef(value)
+  const heightRef = useRef(height)
+  const placeholderRef = useRef(placeholder)
 
   // 更新 onSave 引用
   useEffect(() => {
     onSaveRef.current = onSave
   }, [onSave])
 
+  // 更新 props 引用（避免 init effect 的 deps 变化导致编辑器重新初始化）
+  useEffect(() => {
+    onChangeRef.current = onChange
+  }, [onChange])
+
+  useEffect(() => {
+    valueRef.current = value
+  }, [value])
+
+  useEffect(() => {
+    heightRef.current = height
+  }, [height])
+
+  useEffect(() => {
+    placeholderRef.current = placeholder
+  }, [placeholder])
+
   useEffect(() => {
     if (!editorRef.current) return
 
     const vditor = new Vditor(editorRef.current, {
       cdn: VDITOR_CDN,
-      height,
-      placeholder,
-      value,
+      height: heightRef.current,
+      placeholder: placeholderRef.current,
+      value: valueRef.current,
       mode: 'ir', // 即时渲染模式，类似 Typora
       theme: 'classic',
       icon: 'ant',
@@ -87,7 +108,7 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         }
       },
       input: (val) => {
-        onChange?.(val)
+        onChangeRef.current?.(val)
       },
       after: () => {
         vditorInstance.current = vditor

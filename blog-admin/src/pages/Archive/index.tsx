@@ -31,25 +31,7 @@ const Archive: React.FC = () => {
   const [articlesLoading, setArticlesLoading] = useState(false)
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([])
 
-  useEffect(() => {
-    fetchArchives()
-  }, [])
-
-  const fetchArchives = async () => {
-    setLoading(true)
-    try {
-      const res = await archiveApi.getList()
-      const archives = res.data || []
-      groupArchivesByYear(archives)
-      buildTimeline(archives)
-    } catch (error) {
-      console.error('获取归档数据失败:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const groupArchivesByYear = (archives: ArchiveVO[]) => {
+  const groupArchivesByYear = useCallback((archives: ArchiveVO[]) => {
     const grouped: Record<number, GroupedArchive> = {}
 
     archives.forEach((archive) => {
@@ -78,9 +60,9 @@ const Archive: React.FC = () => {
     })
 
     setGroupedArchives(sortedGroups)
-  }
+  }, [])
 
-  const buildTimeline = (archives: ArchiveVO[]) => {
+  const buildTimeline = useCallback((archives: ArchiveVO[]) => {
     const items: TimelineItem[] = []
 
     archives
@@ -108,7 +90,25 @@ const Archive: React.FC = () => {
       })
 
     setTimelineItems(items)
-  }
+  }, [])
+
+  const fetchArchives = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await archiveApi.getList()
+      const archives = res.data || []
+      groupArchivesByYear(archives)
+      buildTimeline(archives)
+    } catch (error) {
+      console.error('获取归档数据失败:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [groupArchivesByYear, buildTimeline])
+
+  useEffect(() => {
+    fetchArchives()
+  }, [fetchArchives])
 
   const loadArticles = useCallback(async (year: number, month: number) => {
     setArticlesLoading(true)

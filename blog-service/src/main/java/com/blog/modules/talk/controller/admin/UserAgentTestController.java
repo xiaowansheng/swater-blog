@@ -16,7 +16,7 @@ import java.util.Map;
  * 用于验证设备和浏览器信息解析是否正常
  */
 @RestController
-@RequestMapping("/admin/test")
+@RequestMapping("/api/admin/test")
 @Tag(name = "测试接口", description = "用于测试User-Agent解析")
 public class UserAgentTestController {
 

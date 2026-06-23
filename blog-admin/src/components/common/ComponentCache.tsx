@@ -187,7 +187,7 @@ export const ComponentCache: React.FC<ComponentCacheProps> = ({ children }) => {
       }
       return null
     })
-  }, [renderKey])
+  }, [])
 
   return (
     <div 

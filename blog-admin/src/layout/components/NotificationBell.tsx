@@ -4,7 +4,7 @@ import { useNotificationStore } from '@/store/notification'
 import { useWebSocketStore } from '@/store/websocket'
 import { NotificationReadStatus } from '@/types/enums'
 import { formatDate } from '@/utils/format'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as notificationApi from '@/api/notification'
 import { notificationWebSocket } from '@/websocket/notification'
@@ -16,10 +16,6 @@ const NotificationBell: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [hasNew, setHasNew] = useState(false)
   const [, setTick] = useState(0) // 用于触发实时时间更新
-
-  useEffect(() => {
-    loadNotifications()
-  }, [])
 
   // 实时更新连接时长显示
   useEffect(() => {
@@ -39,7 +35,7 @@ const NotificationBell: React.FC = () => {
     }
   }, [unreadCount])
 
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     setLoading(true)
     try {
       const result = await notificationApi.getNotifications({ page: 1, size: 10 })
@@ -49,7 +45,11 @@ const NotificationBell: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [setNotifications])
+
+  useEffect(() => {
+    loadNotifications()
+  }, [loadNotifications])
 
   const handleMarkAsRead = async (id: number) => {
     try {

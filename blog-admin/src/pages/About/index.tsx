@@ -37,7 +37,7 @@ const AboutPage: React.FC = () => {
     try {
       await updateAbout({ content })
       message.success('保存成功')
-    } catch (error) {
+    } catch {
       message.error('保存失败')
     } finally {
       setSaving(false)

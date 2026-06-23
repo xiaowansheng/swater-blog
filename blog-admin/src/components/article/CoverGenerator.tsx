@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Modal, Input, Slider, Button, Space, ColorPicker, Radio, Divider, message, Checkbox } from 'antd'
 import { BgColorsOutlined, FontSizeOutlined, LineHeightOutlined, ColumnHeightOutlined, PictureOutlined } from '@ant-design/icons'
 
@@ -201,7 +201,7 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({
   }
 
   // 自动生成封面
-  const generateCover = () => {
+  const generateCover = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -334,7 +334,7 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({
     const lines = text.split('\n')
     const lineHeightPx = fontSize * lineHeight
     const totalHeight = lines.length * lineHeightPx
-    let startY = (canvas.height - totalHeight) / 2 + lineHeightPx / 2
+    const startY = (canvas.height - totalHeight) / 2 + lineHeightPx / 2
 
     // 绘制文字描边
     if (textStrokeStyle !== TextStrokeStyle.NONE) {
@@ -455,7 +455,7 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({
 
       ctx.globalAlpha = 1.0
     }
-  }
+  }, [template, useCustomColor, customBgColor, customTextColor, textureStyle, decorationStyle, textStrokeStyle, selectedFont, fontSize, textAlign, padding, lineHeight, text, shadowStyle, showBorder, showDecorBar, borderStyle, opacity])
 
   // 确认并保存
   const handleConfirm = () => {
@@ -478,7 +478,7 @@ const CoverGenerator: React.FC<CoverGeneratorProps> = ({
     if (visible) {
       generateCover()
     }
-  }, [visible, text, template, fontSize, lineHeight, textAlign, padding, customBgColor, customTextColor, useCustomColor, selectedFont, decorationStyle, shadowStyle, showBorder, showDecorBar, textStrokeStyle, borderStyle, textureStyle, opacity])
+  }, [visible, generateCover])
 
   return (
     <Modal

@@ -6,6 +6,7 @@
 
 spring:
   profiles:
+    # 激活的环境配置：dev（本地开发）| docker（容器部署）| prod（生产覆盖，application-prod.yml 需自行放置且已被 gitignore）
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
   jackson:
@@ -176,8 +177,6 @@ plugin:
     active: amap
   scheduler:
     active: spring
-  user-agent:
-    parser: yauaa
 
 springdoc:
   api-docs:

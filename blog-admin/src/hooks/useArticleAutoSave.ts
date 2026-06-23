@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { message } from 'antd'
 import { saveArticle, ArticleSaveDTO, ArticleSaveResult } from '@/api/article'
 import { saveLocalDraft, getLocalDraft, removeLocalDraft, LocalDraft } from '@/utils/localDraft'
@@ -60,7 +60,7 @@ const DEFAULT_OPTIONS: Required<AutoSaveOptions> = {
 }
 
 export function useArticleAutoSave(options: AutoSaveOptions = {}) {
-  const config = { ...DEFAULT_OPTIONS, ...options }
+  const config = useMemo(() => ({ ...DEFAULT_OPTIONS, ...options }), [options])
   
   // 保存状态
   const [saveState, setSaveState] = useState<SaveState>({
@@ -100,7 +100,7 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
       if (saveState.status === SaveStatus.OFFLINE) {
         setSaveState(prev => ({ ...prev, status: SaveStatus.IDLE }))
         // 网络恢复后，处理队列中的保存请求
-        processQueue()
+        onlineProcessQueueRef.current()
       }
     }
 
@@ -259,6 +259,13 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
       }
     }
   }, [config, ensureArticleKey])
+
+  const onlineProcessQueueRef = useRef(processQueue)
+
+  // Sync processQueue ref
+  useEffect(() => {
+    onlineProcessQueueRef.current = processQueue
+  }, [processQueue])
 
   // 添加到保存队列
   const addToQueue = useCallback((data: ArticleSaveDTO) => {

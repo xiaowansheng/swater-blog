@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Card, Space, Tag, Row, Col, Input, Select, Empty, Spin, message, Avatar, Tooltip } from 'antd'
 import {
@@ -37,12 +37,7 @@ const TalkPage: React.FC = () => {
   }>({})
   const [authorInfo, setAuthorInfo] = useState<AuthorInfo>({ name: '', avatar: '' })
 
-  useEffect(() => {
-    loadTalks()
-    loadAuthorConfig()
-  }, [pagination.current, pagination.pageSize])
-
-  const loadAuthorConfig = async () => {
+  const loadAuthorConfig = useCallback(async () => {
     try {
       const authorConfig = await getAuthorConfig()
       setAuthorInfo({
@@ -52,9 +47,9 @@ const TalkPage: React.FC = () => {
     } catch (error) {
       console.error('加载作者配置失败', error)
     }
-  }
+  }, [])
 
-  const loadTalks = async () => {
+  const loadTalks = useCallback(async () => {
     setLoading(true)
     try {
       const result = await getTalkList({
@@ -69,7 +64,12 @@ const TalkPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [pagination, filters])
+
+  useEffect(() => {
+    loadTalks()
+    loadAuthorConfig()
+  }, [loadTalks, loadAuthorConfig])
 
   const handleSearch = () => {
     setPagination({ ...pagination, current: 1 })
@@ -94,7 +94,7 @@ const TalkPage: React.FC = () => {
       await deleteTalk(id)
       message.success('删除成功')
       loadTalks()
-    } catch (error) {
+    } catch {
       message.error('删除失败')
     }
   }

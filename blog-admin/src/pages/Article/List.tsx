@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Table, Button, Space, Popconfirm, message, Input, Select, Tag,
   Dropdown, Modal, Tooltip,
@@ -58,24 +58,16 @@ const ArticleList: React.FC = () => {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [editingArticle, setEditingArticle] = useState<Article | null>(null)
 
-  useEffect(() => {
-    loadCategories()
-  }, [])
-
-  useEffect(() => {
-    loadArticles()
-  }, [pagination.current, pagination.pageSize])
-
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const data = await getCategoryList()
       setCategories(data)
     } catch (error) {
       console.error('加载分类失败', error)
     }
-  }
+  }, [])
 
-  const loadArticles = async () => {
+  const loadArticles = useCallback(async () => {
     setLoading(true)
     try {
       const result = await getArticleList({
@@ -90,7 +82,15 @@ const ArticleList: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [pagination, filters])
+
+  useEffect(() => {
+    loadCategories()
+  }, [loadCategories])
+
+  useEffect(() => {
+    loadArticles()
+  }, [loadArticles])
 
   const handleSearch = () => {
     setPagination((prev) => ({ ...prev, current: 1 }))
@@ -102,7 +102,7 @@ const ArticleList: React.FC = () => {
       await deleteArticle(id)
       message.success('删除成功')
       loadArticles()
-    } catch (error) {
+    } catch {
       message.error('删除失败')
     }
   }
@@ -113,7 +113,7 @@ const ArticleList: React.FC = () => {
       message.success('批量删除成功')
       setSelectedRowKeys([])
       loadArticles()
-    } catch (error) {
+    } catch {
       message.error('批量删除失败')
     }
   }
@@ -123,7 +123,7 @@ const ArticleList: React.FC = () => {
       await publishArticle(id)
       message.success('发布成功')
       loadArticles()
-    } catch (error) {
+    } catch {
       message.error('发布失败')
     }
   }
@@ -133,7 +133,7 @@ const ArticleList: React.FC = () => {
       await unpublishArticle(id)
       message.success('下架成功')
       loadArticles()
-    } catch (error) {
+    } catch {
       message.error('下架失败')
     }
   }

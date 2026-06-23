@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag as AntTag } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
 import { getTagList, createTag, updateTag, deleteTag } from '@/api/tag'
@@ -13,11 +13,7 @@ const TagPage: React.FC = () => {
   const [form] = Form.useForm()
   const [filterName, setFilterName] = useState('')
 
-  useEffect(() => {
-    loadTags()
-  }, [])
-
-  const loadTags = async () => {
+  const loadTags = useCallback(async () => {
     setLoading(true)
     try {
       const data = await getTagList()
@@ -35,7 +31,11 @@ const TagPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filterName])
+
+  useEffect(() => {
+    loadTags()
+  }, [loadTags])
 
   const handleCreate = () => {
     setEditingTag(null)
@@ -54,7 +54,7 @@ const TagPage: React.FC = () => {
       await deleteTag(id)
       message.success('删除成功')
       loadTags()
-    } catch (error) {
+    } catch {
       message.error('删除失败')
     }
   }

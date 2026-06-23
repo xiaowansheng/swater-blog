@@ -36,7 +36,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ talk, onEdit, onDelete, onRefre
       })
       message.success(talk.isTop === TopStatus.PINNED ? '已取消置顶' : '已置顶')
       onRefresh()
-    } catch (error) {
+    } catch {
       message.error('操作失败')
     }
   }
@@ -67,7 +67,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ talk, onEdit, onDelete, onRefre
       })
       message.success(successMsg)
       onRefresh()
-    } catch (error) {
+    } catch {
       message.error('操作失败')
     }
   }

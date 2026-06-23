@@ -20,6 +20,7 @@ import com.blog.modules.file.event.file.FileDeletedEvent;
 import com.blog.modules.file.event.file.FileUploadedEvent;
 import com.blog.plugin.components.storage.StoragePlugin;
 import com.blog.plugin.components.storage.StoragePluginFactory;
+import com.blog.infrastructure.config.FileUploadProperties;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.PageUtil;
@@ -44,6 +45,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 @Service
 public class FileServiceImpl implements FileService {
@@ -62,12 +64,19 @@ public class FileServiceImpl implements FileService {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
+    @Autowired
+    private FileUploadProperties fileUploadProperties;
+
     @Override
     @Transactional
     public FileVO upload(MultipartFile file, FileUploadDTO dto) {
         if (file == null || file.isEmpty()) {
             throw new BusinessException("文件不能为空");
         }
+
+        // 扩展名安全校验：先校验黑名单，再校验白名单
+        String originalFilename = file.getOriginalFilename();
+        validateFileExtension(originalFilename);
 
         try {
             StoragePlugin storagePlugin = storagePluginFactory.getActivePlugin();
@@ -227,6 +236,46 @@ public class FileServiceImpl implements FileService {
             return "audio";
         } else {
             return "other";
+        }
+    }
+
+    /**
+     * 校验上传文件扩展名：
+     * 1) 必须有扩展名；
+     * 2) 命中 blocked-extensions 直接拒绝；
+     * 3) 若 allowed-extensions 非空，则必须命中白名单。
+     * 大小写不敏感，扩展名不含前导点。
+     */
+    private void validateFileExtension(String filename) {
+        if (filename == null || filename.isBlank()) {
+            throw new BusinessException("文件名不能为空");
+        }
+        int dotIdx = filename.lastIndexOf('.');
+        if (dotIdx < 0 || dotIdx == filename.length() - 1) {
+            throw new BusinessException("文件缺少扩展名，拒绝上传");
+        }
+        String ext = filename.substring(dotIdx + 1).toLowerCase(Locale.ROOT);
+
+        List<String> blocked = fileUploadProperties.getBlockedExtensions();
+        if (blocked != null && !blocked.isEmpty()) {
+            Set<String> blockedSet = blocked.stream()
+                    .filter(Objects::nonNull)
+                    .map(s -> s.toLowerCase(Locale.ROOT))
+                    .collect(Collectors.toSet());
+            if (blockedSet.contains(ext)) {
+                throw new BusinessException("不支持的文件类型: ." + ext);
+            }
+        }
+
+        List<String> allowed = fileUploadProperties.getAllowedExtensions();
+        if (allowed != null && !allowed.isEmpty()) {
+            Set<String> allowedSet = allowed.stream()
+                    .filter(Objects::nonNull)
+                    .map(s -> s.toLowerCase(Locale.ROOT))
+                    .collect(Collectors.toSet());
+            if (!allowedSet.contains(ext)) {
+                throw new BusinessException("不支持的文件类型: ." + ext);
+            }
         }
     }
 

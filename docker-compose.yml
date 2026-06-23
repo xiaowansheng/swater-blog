@@ -6,7 +6,7 @@
 services:
   # MySQL数据库
   mysql:
-    image: mysql:8.0
+    image: mysql:8.0@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b
     container_name: swater-mysql
     restart: unless-stopped
     ports:
@@ -35,7 +35,7 @@ services:
 
   # Redis缓存
   redis:
-    image: redis:7-alpine
+    image: redis:7-alpine@sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99
     container_name: swater-redis
     restart: unless-stopped
     ports:
@@ -128,7 +128,6 @@ services:
       context: ./blog-service
       dockerfile: Dockerfile
     container_name: swater-blog-service
-    user: "0"
     restart: unless-stopped
     ports:
       - "${BLOG_SERVICE_PUBLISHED_PORT:-8888}:${SERVER_PORT:-8888}"
@@ -251,7 +250,7 @@ services:
 
   # ACME Companion - Automatic Let's Encrypt
   acme-companion:
-    image: nginxproxy/acme-companion:2.5
+    image: nginxproxy/acme-companion:2.5@sha256:308dd273fafec21ce5ea22e830adbf9248a9be18d1caff9f94be321ae9835015
     container_name: swater-nginx-proxy-acme
     depends_on:
       - nginx-proxy

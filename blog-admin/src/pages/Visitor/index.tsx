@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Table, Card, Row, Col, Statistic, Tag, DatePicker, Space, Tooltip, Input, Select, Button, Drawer, Descriptions, Divider, Empty, List } from 'antd'
 import {
   UserOutlined,
@@ -126,30 +126,15 @@ const VisitorPage: React.FC = () => {
     trafficSource: undefined,
   })
 
-  useEffect(() => {
-    loadVisitors()
-    loadStatistics()
-  }, [pagination.current, pagination.pageSize])
+  const page = pagination.current
+  const size = pagination.pageSize
 
-  useEffect(() => {
-    setPagination((prev) => ({ ...prev, current: 1 }))
-    loadVisitors()
-  }, [filters])
-
-  useEffect(() => {
-    loadStatistics()
-  }, [statRange])
-
-  useEffect(() => {
-    loadTrafficInsights()
-  }, [statRange, landingPageOrderBy, landingPageSource])
-
-  const loadVisitors = async () => {
+  const loadVisitors = useCallback(async () => {
     setLoading(true)
     try {
       const result = await getVisitorList({
-        page: pagination.current,
-        size: pagination.pageSize,
+        page,
+        size,
         country: filters.country || undefined,
         province: filters.province || undefined,
         city: filters.city || undefined,
@@ -165,9 +150,9 @@ const VisitorPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, size, filters])
 
-  const loadStatistics = async () => {
+  const loadStatistics = useCallback(async () => {
     setStatsLoading(true)
     try {
       const [startDate, endDate] = statRange
@@ -181,9 +166,9 @@ const VisitorPage: React.FC = () => {
     } finally {
     setStatsLoading(false)
     }
-  }
+  }, [statRange])
 
-  const loadTrafficInsights = async () => {
+  const loadTrafficInsights = useCallback(async () => {
     const { start, end } = buildStatsRange(statRange)
     setTrafficSourcesLoading(true)
     setLandingPagesLoading(true)
@@ -207,7 +192,25 @@ const VisitorPage: React.FC = () => {
       setTrafficSourcesLoading(false)
       setLandingPagesLoading(false)
     }
-  }
+  }, [statRange, landingPageOrderBy, landingPageSource])
+
+  useEffect(() => {
+    loadVisitors()
+    loadStatistics()
+  }, [loadVisitors, loadStatistics])
+
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, current: 1 }))
+    loadVisitors()
+  }, [loadVisitors])
+
+  useEffect(() => {
+    loadStatistics()
+  }, [loadStatistics])
+
+  useEffect(() => {
+    loadTrafficInsights()
+  }, [loadTrafficInsights])
 
   const loadSessionPages = async (visitorId: number, session: VisitorSessionTrace) => {
     const sessionKey = buildSessionKey(visitorId, session.sessionId)

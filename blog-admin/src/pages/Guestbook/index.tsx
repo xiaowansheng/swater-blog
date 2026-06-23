@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Table,
   Button,
@@ -88,11 +88,7 @@ const GuestbookPage: React.FC = () => {
   const [detailVisible, setDetailVisible] = useState(false)
   const [currentGuestbook, setCurrentGuestbook] = useState<Guestbook | null>(null)
 
-  useEffect(() => {
-    loadGuestbooks()
-  }, [pagination.current, pagination.pageSize])
-
-  const loadGuestbooks = async () => {
+  const loadGuestbooks = useCallback(async () => {
     setLoading(true)
     try {
       const result = await getGuestbookList({
@@ -122,14 +118,18 @@ const GuestbookPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [pagination, filters])
+
+  useEffect(() => {
+    loadGuestbooks()
+  }, [loadGuestbooks])
 
   const handleApprove = async (id: number) => {
     try {
       await approveGuestbook(id)
       message.success('审核通过')
       loadGuestbooks()
-    } catch (error) {
+    } catch {
       message.error('操作失败')
     }
   }
@@ -139,7 +139,7 @@ const GuestbookPage: React.FC = () => {
       await rejectGuestbook(id)
       message.success('已拒绝')
       loadGuestbooks()
-    } catch (error) {
+    } catch {
       message.error('操作失败')
     }
   }
@@ -149,7 +149,7 @@ const GuestbookPage: React.FC = () => {
       await deleteGuestbook(id)
       message.success('删除成功')
       loadGuestbooks()
-    } catch (error) {
+    } catch {
       message.error('删除失败')
     }
   }

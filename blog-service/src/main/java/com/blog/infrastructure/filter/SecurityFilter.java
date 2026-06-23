@@ -98,7 +98,7 @@ public class SecurityFilter implements Filter {
             }
             
             // 5. 添加安全响应头
-            addSecurityHeaders(httpResponse);
+            addSecurityHeaders(httpRequest, httpResponse);
             
             // 继续处理请求
             chain.doFilter(request, response);
@@ -352,28 +352,29 @@ public class SecurityFilter implements Filter {
     /**
      * 添加安全响应头
      */
-    private void addSecurityHeaders(HttpServletResponse response) {
-        // 防止XSS攻击
-        response.setHeader("X-XSS-Protection", "1; mode=block");
-        
+    private void addSecurityHeaders(HttpServletRequest request, HttpServletResponse response) {
         // 防止MIME类型嗅探
         response.setHeader("X-Content-Type-Options", "nosniff");
-        
+
         // 防止点击劫持
         response.setHeader("X-Frame-Options", "DENY");
-        
-        // 强制HTTPS（如果是HTTPS环境）
-        // response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-        
-        // 内容安全策略（根据需要调整）
-        response.setHeader("Content-Security-Policy", 
-            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'");
-        
+
+        // 强制HTTPS（HSTS）：仅在 HTTPS 请求时下发，避免把 HTTP 流量重定向到 HTTPS 导致中间人风险
+        if (request.isSecure()) {
+            response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+        }
+
+        // 内容安全策略
+        // script-src 不再允许 'unsafe-inline'，避免存储型 XSS 执行内联脚本；
+        // 若后续确需内联脚本，请改为 nonce 或 hash 机制。
+        response.setHeader("Content-Security-Policy",
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'");
+
         // 引用策略
         response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-        
+
         // 权限策略
-        response.setHeader("Permissions-Policy", 
+        response.setHeader("Permissions-Policy",
             "geolocation=(), microphone=(), camera=()");
     }
     

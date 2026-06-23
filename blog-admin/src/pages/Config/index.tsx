@@ -43,7 +43,7 @@
  * @author Claude Code
  * @since 2025-01-28
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   message,
   Form,
@@ -86,14 +86,14 @@ const ConfigPage: React.FC = () => {
   const [unsavedTabs, setUnsavedTabs] = useState<Set<string>>(new Set());
   const [originalValues, setOriginalValues] = useState<Record<string, any>>({});
 
-  const defaultPrivacyConfig = {
+  const defaultPrivacyConfig = useMemo(() => ({
     showIp: false,
     showLocation: true,
     showDevice: false,
     showBrowser: false,
-  };
+  }), []);
 
-  const normalizeBooleanValue = (value: any, defaultValue = false): boolean => {
+  const normalizeBooleanValue = useCallback((value: any, defaultValue = false): boolean => {
     if (value === null || value === undefined) return defaultValue;
     if (typeof value === "boolean") return value;
     if (typeof value === "number") return value === 1;
@@ -104,7 +104,7 @@ const ConfigPage: React.FC = () => {
       if (trimmed === "false" || trimmed === "0") return false;
     }
     return Boolean(value);
-  };
+  }, []);
 
   const [siteForm] = Form.useForm();
   const [authorForm] = Form.useForm();
@@ -115,10 +115,6 @@ const ConfigPage: React.FC = () => {
   const [componentForm] = Form.useForm();
   // const [uploadForm] = Form.useForm();
   // const [emailForm] = Form.useForm();
-
-  useEffect(() => {
-    loadAllConfigs();
-  }, []);
 
   // 标记标签页为未保存状态
   const markTabAsUnsaved = (tabKey: string) => {
@@ -152,7 +148,7 @@ const ConfigPage: React.FC = () => {
     }
   };
 
-  const loadAllConfigs = async () => {
+  const loadAllConfigs = useCallback(async () => {
     setLoading(true);
     try {
       /**
@@ -357,7 +353,11 @@ const ConfigPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [siteForm, authorForm, coverForm, privacyForm, commentForm, notifyForm, componentForm, normalizeBooleanValue, defaultPrivacyConfig]);
+
+  useEffect(() => {
+    loadAllConfigs();
+  }, [loadAllConfigs]);
 
   // 图片字段组件 - 根据业务需求选择合适的上传组件
   const ImageField = ({

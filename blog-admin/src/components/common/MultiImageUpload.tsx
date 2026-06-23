@@ -61,7 +61,7 @@ const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
         setFileList(newList);
       }
     }
-  }, [value]);
+  }, [value, fileList]);
 
   const handleCancel = () => setPreviewOpen(false);
 

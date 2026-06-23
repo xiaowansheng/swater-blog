@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# pre-commit hook: 对暂存文件运行轻量级检查
+# - 前端 (.ts/.tsx/.js/.jsx): eslint
+# - 通用: 阻止提交包含 console.log / debugger / TODO-FIXME 标记的关键文件
+# 完整 lint/test 由 CI 兜底；如需绕过：SKIP_HOOK=1 git commit ...
+set -euo pipefail
+
+if [[ "${SKIP_HOOK:-0}" == "1" ]]; then
+  echo "[pre-commit] SKIP_HOOK=1, skipping checks"
+  exit 0
+fi
+
+# 仅检查暂存（staged）且已存在的文件
+staged_files=$(git diff --cached --name-only --diff-filter=ACMR | grep -vE '^(docs/|\.github/|\.gitignore|LICENSE)' || true)
+
+if [[ -z "$staged_files" ]]; then
+  exit 0
+fi
+
+# ---- 前端 lint ----
+frontend_files=$(echo "$staged_files" | grep -E '\.(ts|tsx|js|jsx)$' || true)
+if [[ -n "$frontend_files" ]]; then
+  # 按前端项目分组运行 eslint
+  admin_files=$(echo "$frontend_files" | grep '^blog-admin/' || true)
+  web_files=$(echo "$frontend_files" | grep '^blog-web/' || true)
+  tools_files=$(echo "$frontend_files" | grep '^blog-tools/' || true)
+
+  if [[ -n "$admin_files" ]]; then
+    echo "[pre-commit] eslint blog-admin"
+    rel_files=$(echo "$admin_files" | sed 's|^blog-admin/||')
+    (cd blog-admin && npx eslint --no-warn-ignored $rel_files) || {
+      echo "[pre-commit] blog-admin eslint 失败，修复后重试；或 SKIP_HOOK=1 git commit ..."
+      exit 1
+    }
+  fi
+  if [[ -n "$web_files" ]]; then
+    echo "[pre-commit] eslint blog-web"
+    rel_files=$(echo "$web_files" | sed 's|^blog-web/||')
+    (cd blog-web && npx eslint --no-warn-ignored $rel_files) || {
+      echo "[pre-commit] blog-web eslint 失败，修复后重试；或 SKIP_HOOK=1 git commit ..."
+      exit 1
+    }
+  fi
+  if [[ -n "$tools_files" ]]; then
+    echo "[pre-commit] eslint blog-tools"
+    for pkg in db-migrate yuque-sync; do
+      pkg_files=$(echo "$tools_files" | grep "^blog-tools/$pkg/" || true)
+      [[ -z "$pkg_files" ]] && continue
+      (cd "blog-tools/$pkg" && npx eslint --no-warn-ignored $pkg_files) || {
+        echo "[pre-commit] blog-tools/$pkg eslint 失败，修复后重试；或 SKIP_HOOK=1 git commit ..."
+        exit 1
+      }
+    done
+  fi
+fi
+
+# ---- 简单 Java 静态检查（避免启动 Gradle）----
+java_files=$(echo "$staged_files" | grep '\.java$' || true)
+if [[ -n "$java_files" ]]; then
+  # 阻止误提交调试代码
+  offenders=$(echo "$java_files" | while read -r f; do
+    [[ -z "$f" || ! -f "$f" ]] && continue
+    if grep -nE 'System\.(out|err)\.print|TODO-FIXME|FIXME-REMOVE' "$f" 2>/dev/null; then
+      echo "$f"
+    fi
+  done)
+  if [[ -n "$offenders" ]]; then
+    echo "[pre-commit] 以下 Java 文件含调试代码（System.out/err 或 TODO-FIXME），请清理："
+    echo "$offenders"
+    echo "如确需提交，使用 SKIP_HOOK=1 git commit ..."
+    exit 1
+  fi
+fi
+
+exit 0

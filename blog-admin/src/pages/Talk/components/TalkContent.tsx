@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button } from 'antd'
+import { sanitizeHtml } from '@/utils/sanitize'
 
 interface TalkContentProps {
   content: string
@@ -36,7 +37,7 @@ const TalkContent: React.FC<TalkContentProps> = ({ content }) => {
           maxHeight: expanded ? 'none' : '300px',
           overflow: expanded ? 'visible' : 'hidden',
         }}
-        dangerouslySetInnerHTML={{ __html: content }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
       />
 
       {isOverflow && !expanded && (

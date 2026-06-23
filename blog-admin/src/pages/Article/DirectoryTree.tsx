@@ -176,11 +176,6 @@ const ArticleDirectoryTree: React.FC = () => {
   const [assignForm] = Form.useForm<{ articleId: number; parentId: number }>()
   const searchTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
-  useEffect(() => {
-    loadTree()
-  }, [])
-
-
   const rootItem = useMemo<RootDirectoryItem>(() => ({
     key: 'root',
     type: 'ROOT',
@@ -302,7 +297,23 @@ const ArticleDirectoryTree: React.FC = () => {
   }, [filteredKeys, itemByKey])
 
 
-  const loadTree = async () => {
+  const collectNodeKeys = useCallback((nodes: ArticleDirectoryItem[]): React.Key[] => {
+    const keys: React.Key[] = []
+    const walk = (list: ArticleDirectoryItem[]) => {
+      list.forEach((item) => {
+        if (item.type === 'NODE') {
+          keys.push(item.key)
+        }
+        if (item.children?.length) {
+          walk(item.children)
+        }
+      })
+    }
+    walk(nodes)
+    return keys
+  }, [])
+
+  const loadTree = useCallback(async () => {
     setLoading(true)
     try {
       const data = await getArticleDirectoryTree()
@@ -313,7 +324,11 @@ const ArticleDirectoryTree: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [collectNodeKeys])
+
+  useEffect(() => {
+    loadTree()
+  }, [loadTree])
 
   const searchArticles = useCallback((query: string) => {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
@@ -333,22 +348,6 @@ const ArticleDirectoryTree: React.FC = () => {
       }
     }, 300)
   }, [])
-
-  const collectNodeKeys = (nodes: ArticleDirectoryItem[]): React.Key[] => {
-    const keys: React.Key[] = []
-    const walk = (list: ArticleDirectoryItem[]) => {
-      list.forEach((item) => {
-        if (item.type === 'NODE') {
-          keys.push(item.key)
-        }
-        if (item.children?.length) {
-          walk(item.children)
-        }
-      })
-    }
-    walk(nodes)
-    return keys
-  }
 
   const isDescendant = useCallback((parentKey: string, possibleDescendantKey: string): boolean => {
     const parent = itemByKey.get(parentKey)
@@ -882,19 +881,23 @@ const ArticleDirectoryTree: React.FC = () => {
     )
   }
 
-  const buildTreeData = (nodes: DirectoryViewItem[]): DirectoryTreeDataNode[] => {
-    return nodes
-      .filter((item) => !filteredKeys || filteredKeys.has(item.key))
-      .map((item) => ({
-        key: item.key,
-        title: renderTitle(item),
-        item,
-        children: item.children?.length ? buildTreeData(item.children) : undefined,
-        isLeaf: item.type === 'ARTICLE',
-      }))
-  }
-
-  const treeData = useMemo(() => buildTreeData([rootItem]), [rootItem, filteredKeys, totalCounts, searchText])
+  const treeData = useMemo(() => {
+    const buildTreeData = (nodes: DirectoryViewItem[]): DirectoryTreeDataNode[] => {
+      return nodes
+        .filter((item) => !filteredKeys || filteredKeys.has(item.key))
+        .map((item) => ({
+          key: item.key,
+          title: renderTitle(item),
+          item,
+          children: item.children?.length ? buildTreeData(item.children) : undefined,
+          isLeaf: item.type === 'ARTICLE',
+        }))
+    }
+    return buildTreeData([rootItem])
+  // renderTitle 引用了组件内大量函数/状态，此处无法逐一列出；
+  // treeData 在 rootItem/filteredKeys/searchText/totalCounts 等变化时需要重建。
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rootItem, filteredKeys])
 
   const handleAllowDrop: TreeProps['allowDrop'] = ({ dragNode, dropNode, dropPosition }) => {
     if (searchText.trim()) return false

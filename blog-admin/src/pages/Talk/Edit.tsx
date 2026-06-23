@@ -39,19 +39,7 @@ const TalkEdit: React.FC = () => {
     }
   }, [pageId, routeId])
 
-  useEffect(() => {
-    if (isEdit) {
-      loadTalk()
-    } else {
-      form.setFieldsValue({
-        status: TalkStatus.PUBLISHED,
-        isTop: false,
-        images: []
-      })
-    }
-  }, [pageId])
-
-  const loadTalk = async () => {
+  const loadTalk = useCallback(async () => {
     setLoading(true)
     try {
       const talk = await getTalkById(Number(pageId))
@@ -63,13 +51,25 @@ const TalkEdit: React.FC = () => {
       // 设置已保存状态
       setSaveStatus('saved')
       setLastSavedTime(new Date(talk.updateTime || talk.createTime))
-    } catch (error) {
+    } catch {
       message.error('加载说说失败')
       navigate('/talk')
     } finally {
       setLoading(false)
     }
-  }
+  }, [pageId, form, navigate])
+
+  useEffect(() => {
+    if (isEdit) {
+      loadTalk()
+    } else {
+      form.setFieldsValue({
+        status: TalkStatus.PUBLISHED,
+        isTop: false,
+        images: []
+      })
+    }
+  }, [isEdit, form, loadTalk])
 
   const handleSubmit = async (values: any) => {
     setSubmitting(true)
@@ -146,7 +146,7 @@ const TalkEdit: React.FC = () => {
     } finally {
       setSubmitting(false)
     }
-  }, [closeSelf, form, isEdit, pageId, navigate])
+  }, [form, isEdit, pageId, navigate])
 
   // 快捷键保存 Ctrl+S 或 Cmd+S
   useEffect(() => {

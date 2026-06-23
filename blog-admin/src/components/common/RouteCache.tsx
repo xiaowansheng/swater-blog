@@ -124,7 +124,7 @@ export const RouteCache: React.FC<RouteCacheProps> = ({ children }) => {
         </div>
       )
     })
-  }, [renderKey])
+  }, [])
 
   return (
     <div style={{ height: '100%', width: '100%' }}>

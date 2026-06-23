@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Table,
   Button,
@@ -74,11 +74,7 @@ const CommentPage: React.FC = () => {
   const [detailVisible, setDetailVisible] = useState(false)
   const [currentComment, setCurrentComment] = useState<Comment | null>(null)
 
-  useEffect(() => {
-    loadComments()
-  }, [pagination.current, pagination.pageSize])
-
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     setLoading(true)
     try {
       const result = await getCommentList({
@@ -104,14 +100,18 @@ const CommentPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [pagination, filters])
+
+  useEffect(() => {
+    loadComments()
+  }, [loadComments])
 
   const handleApprove = async (id: number) => {
     try {
       await approveComment(id)
       message.success('审核通过')
       loadComments()
-    } catch (error) {
+    } catch {
       message.error('操作失败')
     }
   }
@@ -121,7 +121,7 @@ const CommentPage: React.FC = () => {
       await rejectComment(id)
       message.success('已拒绝')
       loadComments()
-    } catch (error) {
+    } catch {
       message.error('操作失败')
     }
   }
@@ -131,7 +131,7 @@ const CommentPage: React.FC = () => {
       await deleteComment(id)
       message.success('删除成功')
       loadComments()
-    } catch (error) {
+    } catch {
       message.error('删除失败')
     }
   }

@@ -47,10 +47,6 @@ const CategoryPage: React.FC = () => {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [form] = Form.useForm()
 
-  useEffect(() => {
-    loadCategories()
-  }, [])
-
   const flatList = useMemo(() => {
     const list: Category[] = []
     const walk = (nodes: Category[]) => {
@@ -110,20 +106,7 @@ const CategoryPage: React.FC = () => {
     return Array.from(keys)
   }, [filteredKeys, expandedKeys, flatList])
 
-  const loadCategories = async () => {
-    setLoading(true)
-    try {
-      const data = await getCategoryList()
-      setCategories(data)
-      setExpandedKeys(collectAllKeys(data))
-    } catch (error) {
-      console.error('加载分类失败', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const collectAllKeys = (nodes: Category[]): React.Key[] => {
+  const collectAllKeys = useCallback((nodes: Category[]): React.Key[] => {
     const keys: React.Key[] = []
     const walk = (list: Category[]) => {
       list.forEach((cat) => {
@@ -135,7 +118,24 @@ const CategoryPage: React.FC = () => {
     }
     walk(nodes)
     return keys
-  }
+  }, [])
+
+  const loadCategories = useCallback(async () => {
+    setLoading(true)
+    try {
+      const data = await getCategoryList()
+      setCategories(data)
+      setExpandedKeys(collectAllKeys(data))
+    } catch (error) {
+      console.error('加载分类失败', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [collectAllKeys])
+
+  useEffect(() => {
+    loadCategories()
+  }, [loadCategories])
 
   const openCreate = (parentId = 0) => {
     setEditingCategory(null)
@@ -272,17 +272,23 @@ const CategoryPage: React.FC = () => {
     )
   }
 
-  const buildTreeData = (nodes: Category[]): CategoryTreeDataNode[] => {
-    return nodes
-      .filter((cat) => !filteredKeys || filteredKeys.has(`cat-${cat.id}`))
-      .map((cat) => ({
-        key: `cat-${cat.id}`,
-        title: renderTitle(cat),
-        category: cat,
-        children: cat.children?.length ? buildTreeData(cat.children) : undefined,
-        isLeaf: !cat.children?.length,
-      }))
-  }
+  const treeData = useMemo(() => {
+    const buildTreeData = (nodes: Category[]): CategoryTreeDataNode[] => {
+      return nodes
+        .filter((cat) => !filteredKeys || filteredKeys.has(`cat-${cat.id}`))
+        .map((cat) => ({
+          key: `cat-${cat.id}`,
+          title: renderTitle(cat),
+          category: cat,
+          children: cat.children?.length ? buildTreeData(cat.children) : undefined,
+          isLeaf: !cat.children?.length,
+        }))
+    }
+    return buildTreeData(categories)
+  // renderTitle 引用 searchText/getContextMenuItems 等，无法逐一列出；
+  // categories/filteredKeys 变化时重建即可。
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categories, filteredKeys])
 
   const catByKey = useMemo(() => {
     const map = new Map<string, Category>()
@@ -382,8 +388,6 @@ const CategoryPage: React.FC = () => {
       console.error('移动分类失败', error)
     }
   }
-
-  const treeData = useMemo(() => buildTreeData(categories), [categories, filteredKeys, searchText])
 
   const parentOptions = useMemo(() => {
     return flatList.map((cat) => ({

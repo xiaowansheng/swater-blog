@@ -6,6 +6,7 @@ import com.blog.shared.annotation.RateLimit;
 import com.blog.shared.exception.BusinessException;
 import com.blog.infrastructure.security.RateLimitManager;
 import com.blog.shared.util.IpUtil;
+import cn.dev33.satoken.stp.StpUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -117,16 +118,20 @@ public class RateLimitAspect {
     }
     
     /**
-     * 获取用户ID（需要根据实际认证方式实现）
+     * 获取用户ID。基于 Sa-Token 的登录状态判断：
+     * - 已登录：返回 StpUtil 的 loginId
+     * - 未登录：返回 null（USER 维度会回退为 anonymous）
      */
     private String getUserId(HttpServletRequest request) {
-        // 这里需要根据你的认证方式来获取用户ID
-        // 例如从JWT token中解析，或从Session中获取
-        String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            // 解析JWT token获取用户ID
-            // return JwtUtil.getUserId(token.substring(7));
+        try {
+            if (!StpUtil.isLogin()) {
+                return null;
+            }
+            Object loginId = StpUtil.getLoginId();
+            return loginId == null ? null : loginId.toString();
+        } catch (Exception e) {
+            // 未登录或 token 无效时静默回退
+            return null;
         }
-        return null;
     }
 }

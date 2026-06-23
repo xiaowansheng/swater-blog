@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Modal, Tree, Input, Tag, Spin, message, Empty, Button } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { getApiList } from '@/api/api'
@@ -36,13 +36,7 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
   const [searchValue, setSearchValue] = useState('')
   const [methodFilter, setMethodFilter] = useState<string>('')
 
-  useEffect(() => {
-    if (visible && roleId) {
-      loadData()
-    }
-  }, [visible, roleId])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true)
     try {
       const [apiData, roleApiIds] = await Promise.all([
@@ -57,7 +51,13 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
     } finally {
       setLoading(false)
     }
-  }
+  }, [roleId])
+
+  useEffect(() => {
+    if (visible && roleId) {
+      loadData()
+    }
+  }, [visible, roleId, loadData])
 
   const handleSave = async () => {
     if (!roleId) return

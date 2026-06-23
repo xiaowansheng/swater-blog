@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Tooltip, Select } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, ApiOutlined, SearchOutlined } from '@ant-design/icons'
 import { getRoleList, createRole, updateRole, deleteRole } from '@/api/role'
@@ -25,7 +25,7 @@ const RolePage: React.FC = () => {
   })
 
 
-  const loadRoles = async () => {
+  const loadRoles = useCallback(async () => {
     setLoading(true)
     try {
       const data = await getRoleList()
@@ -50,11 +50,11 @@ const RolePage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
 
   useEffect(() => {
     loadRoles()
-  }, [filters])
+  }, [loadRoles])
 
   const handleCreate = () => {
     setEditingRole(null)
@@ -73,7 +73,7 @@ const RolePage: React.FC = () => {
       await deleteRole(id)
       message.success('删除成功')
       loadRoles()
-    } catch (error) {
+    } catch {
       message.error('删除失败')
     }
   }

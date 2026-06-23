@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, InputNumber, Tag, Tooltip, Select, Switch, TreeSelect, Empty } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, InfoCircleOutlined, CheckCircleOutlined, SearchOutlined } from '@ant-design/icons'
 import { getApiList, createApi, updateApi, deleteApi, refreshApi } from '@/api/api'
@@ -26,7 +26,7 @@ const ApiPage: React.FC = () => {
   })
 
 
-  const loadApis = async () => {
+  const loadApis = useCallback(async () => {
     setLoading(true)
     try {
       const data = await getApiList()
@@ -59,11 +59,11 @@ const ApiPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
 
   useEffect(() => {
     loadApis()
-  }, [filters])
+  }, [loadApis])
 
   const handleCreate = (parentId?: number) => {
     setEditingApi(null)
@@ -90,7 +90,7 @@ const ApiPage: React.FC = () => {
       await deleteApi(id)
       message.success('删除成功')
       loadApis()
-    } catch (error) {
+    } catch {
       message.error('删除失败')
     }
   }

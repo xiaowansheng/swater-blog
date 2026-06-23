@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Space, message, Tag, Popconfirm, Tooltip, Select, Empty } from 'antd'
 import {
   CheckOutlined,
@@ -29,11 +29,7 @@ const NotificationPage: React.FC = () => {
   const [filters, setFilters] = useState<{ isRead?: NotificationReadStatus }>({})
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([])
 
-  useEffect(() => {
-    loadNotifications()
-  }, [pagination.current, pagination.pageSize, filters])
-
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     setLoading(true)
     try {
       const result = await getNotifications({
@@ -49,7 +45,11 @@ const NotificationPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [pagination, filters, setStoreNotifications])
+
+  useEffect(() => {
+    loadNotifications()
+  }, [loadNotifications])
 
   const handleMarkAsRead = async (id: number) => {
     try {
@@ -59,7 +59,7 @@ const NotificationPage: React.FC = () => {
         prev.map((n) => (n.id === id ? { ...n, isRead: NotificationReadStatus.READ } : n))
       )
       message.success('已标记为已读')
-    } catch (error) {
+    } catch {
       message.error('操作失败')
     }
   }
@@ -70,7 +70,7 @@ const NotificationPage: React.FC = () => {
       markStoreAllAsRead()
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: NotificationReadStatus.READ })))
       message.success('已全部标记为已读')
-    } catch (error) {
+    } catch {
       message.error('操作失败')
     }
   }
@@ -80,7 +80,7 @@ const NotificationPage: React.FC = () => {
       await deleteNotification(id)
       message.success('删除成功')
       loadNotifications()
-    } catch (error) {
+    } catch {
       message.error('删除失败')
     }
   }
@@ -90,7 +90,7 @@ const NotificationPage: React.FC = () => {
       await retryNotification(id)
       message.success('已提交重发')
       loadNotifications()
-    } catch (error) {
+    } catch {
       message.error('重发失败')
     }
   }
@@ -105,7 +105,7 @@ const NotificationPage: React.FC = () => {
       message.success('已提交批量重发')
       setSelectedRowKeys([])
       loadNotifications()
-    } catch (error) {
+    } catch {
       message.error('批量重发失败')
     }
   }

@@ -10,6 +10,7 @@ import ContentLikeButton from '@/components/common/ContentLikeButton';
 import PageHeader from '@/components/layout/PageHeader';
 import { momentApi } from '@/lib/api/moment';
 import { formatDate } from '@/lib/utils/format';
+import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { getAuthorInfo, getServerConfig, getComponentConfig } from '@/lib/api/config.server';
 import type { MomentVO } from '@/types';
 
@@ -151,7 +152,7 @@ export default async function MomentDetailPage({
 
               <div
                 className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-primary prose-a:no-underline hover:prose-a:underline relative z-10"
-                dangerouslySetInnerHTML={{ __html: moment.content }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(moment.content) }}
               />
             </div>
 

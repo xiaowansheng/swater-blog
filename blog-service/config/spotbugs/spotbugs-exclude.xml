@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter xmlns="https://github.com/spotbugs/filter/3.0.0"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubusercontent.com/spotbugs/spotbugs/3.1.0/spotbugs/etc/findbugsfilter.xsd">
+
+    <!-- 排除生成的代码（如 MyBatis-Plus generator 输出） -->
+    <Match><Class name="~.*\._auto_generated\..*"/></Match>
+
+    <!-- 排除 Lombok 生成的方法 -->
+    <Match><Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/></Match>
+
+    <!-- 测试代码降低严格度 -->
+    <Match><Class name="~.*Test"/></Match>
+    <Match><Class name="~.*BaseTest"/></Match>
+
+    <!-- 排除 BO/DTO/VO 等 POJO（通常是数据载体） -->
+    <Match><Class name="~.*\.(dto|vo|bo|entity|model)\..*"/></Match>
+    <Match><Class name="~.*(DTO|VO|BO|Entity)$"/></Match>
+</FindBugsFilter>

@@ -8,6 +8,7 @@ import type { MomentVO } from '@/types';
 import { formatDate, getFullUrl } from '@/lib/utils/format';
 import ImagePreview from '@/components/ImagePreview';
 import { useSiteConfig } from '@/lib/context/SiteConfigContext';
+import { sanitizeHtml } from '@/lib/utils/sanitize';
 import { Card } from '@/components/ui/Card';
 import { UAList } from '@/components/common/UAIcon';
 
@@ -183,7 +184,7 @@ export default function MomentItem({ moment }: MomentItemProps) {
             WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 20px), transparent 100%)'
           } : {}}
           onClick={handleContentClick}
-          dangerouslySetInnerHTML={{ __html: moment.content }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(moment.content) }}
         />
 
         {/* 图片网格 */}

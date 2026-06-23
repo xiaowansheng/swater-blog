@@ -23,7 +23,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 /**
  * 日志切面 - 记录操作日志和异常日志
  *
@@ -37,6 +42,15 @@ import java.lang.reflect.Method;
 @Aspect
 @Component
 public class LogAspect {
+
+    /**
+     * 敏感字段名集合（小写匹配）：包含这些子串的字段值将被脱敏为 ******
+     */
+    private static final Set<String> SENSITIVE_FIELD_KEYWORDS = Set.of(
+            "password", "passwd", "pwd", "secret", "token", "credential", "apikeys"
+    );
+
+    private static final String MASKED_VALUE = "******";
 
     @Autowired
     private LogOperationService logOperationService;
@@ -248,9 +262,80 @@ public class LogAspect {
                 sanitized[i] = "[filtered:" + arg.getClass().getSimpleName() + "]";
                 continue;
             }
-            sanitized[i] = arg;
+            // 对包含敏感字段（password / token / secret 等）的 DTO 做深拷贝并脱敏，
+            // 防止密码、令牌等敏感值通过日志写入数据库。
+            sanitized[i] = maskSensitiveFields(arg);
         }
         return sanitized;
+    }
+
+    /**
+     * 通过反射拷贝入参对象，并将名称含敏感关键字的 String 字段值替换为 ******。
+     * 仅对普通 POJO/DTO 生效；对集合、数组、Map、原始包装类等不处理。
+     * 拷贝失败时回退为 "[unmaskable:<class>]" 占位，绝不返回原始对象。
+     */
+    private Object maskSensitiveFields(Object arg) {
+        Class<?> clazz = arg.getClass();
+        // 跳过基本类型、包装类型、String、集合等，避免误改原始值
+        if (clazz.isPrimitive()
+                || clazz.isArray()
+                || arg instanceof Number
+                || arg instanceof Boolean
+                || arg instanceof Character
+                || arg instanceof CharSequence
+                || arg instanceof java.util.Collection
+                || arg instanceof java.util.Map) {
+            return arg;
+        }
+
+        try {
+            Object copy;
+            try {
+                copy = clazz.getDeclaredConstructor().newInstance();
+            } catch (NoSuchMethodException e) {
+                // 没有无参构造，无法安全拷贝，返回占位以避免泄露原始敏感值
+                return "[unmaskable:" + clazz.getSimpleName() + "]";
+            }
+
+            Set<String> visited = new HashSet<>();
+            for (Class<?> c = clazz; c != null && c != Object.class; c = c.getSuperclass()) {
+                for (Field field : c.getDeclaredFields()) {
+                    int mod = field.getModifiers();
+                    if (Modifier.isStatic(mod) || Modifier.isTransient(mod)) {
+                        continue;
+                    }
+                    if (!field.getType().equals(String.class)) {
+                        // 非字符串字段不脱敏，仅尝试原样拷贝
+                        continue;
+                    }
+                    field.setAccessible(true);
+                    String value = (String) field.get(arg);
+                    if (value != null && isSensitiveFieldName(field.getName())) {
+                        field.set(copy, MASKED_VALUE);
+                    } else {
+                        field.set(copy, value);
+                    }
+                    visited.add(field.getName());
+                }
+            }
+            return copy;
+        } catch (Exception e) {
+            log.warn("脱敏拷贝失败 class={}: {}", clazz.getName(), e.getMessage());
+            return "[unmaskable:" + clazz.getSimpleName() + "]";
+        }
+    }
+
+    private boolean isSensitiveFieldName(String name) {
+        if (name == null || name.isEmpty()) {
+            return false;
+        }
+        String lower = name.toLowerCase(Locale.ROOT);
+        for (String keyword : SENSITIVE_FIELD_KEYWORDS) {
+            if (lower.contains(keyword)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -313,7 +398,8 @@ public class LogAspect {
         try {
             Object[] args = point.getArgs();
             if (args != null && args.length > 0) {
-                String params = JsonUtil.toJson(args);
+                Object[] safeArgs = sanitizeArgs(args);
+                String params = JsonUtil.toJson(safeArgs);
                 // 限制参数长度
                 if (params != null && params.length() > 2000) {
                     params = params.substring(0, 2000) + "...";

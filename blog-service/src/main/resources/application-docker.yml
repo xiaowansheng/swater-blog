@@ -266,9 +266,11 @@ springdoc:
 
 app:
   cors:
-    enabled: false
+    # Docker 部署默认通过 nginx 反代同源，无需 CORS；
+    # 若分离部署（admin/web 直连 blog-service），设置 APP_CORS_ENABLED=true 并配置 allowed-origins
+    enabled: ${APP_CORS_ENABLED:false}
     allowed-origins:
-      - https://blog.example.com
+      - ${APP_CORS_ALLOWED_ORIGIN:https://blog.example.com}
     allowed-methods:
       - GET
       - POST

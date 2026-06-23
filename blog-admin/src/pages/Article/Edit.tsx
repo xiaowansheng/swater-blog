@@ -193,53 +193,25 @@ const ArticleEdit: React.FC = () => {
     }
   }, [isPublishing, saveState.status])
 
-  useEffect(() => {
-    console.log('📝 ArticleEdit useEffect - 组件挂载/路径变化:', {
-      id: pageId,
-      pathname: location.pathname,
-      timestamp: new Date().toISOString()
-    })
-
-    loadCategories()
-    loadTags()
-    if (pageId) {
-      console.log('📝 编辑文章模式 - 加载文章数据:', pageId)
-      loadArticle()
-    } else {
-      console.log('📝 新建文章模式 - 启动自动保存')
-      // 新建文章时启动自动保存定时器
-      startAutoSaveTimer(getFormData)
-    }
-
-    return () => {
-      console.log('📝 ArticleEdit cleanup - 组件卸载:', {
-        id: pageId,
-        pathname: location.pathname,
-        timestamp: new Date().toISOString()
-      })
-      stopAutoSaveTimer()
-    }
-  }, [pageId])
-
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const data = await getCategoryList()
       setCategories(data)
     } catch (error) {
       console.error('加载分类失败', error)
     }
-  }
+  }, [])
 
-  const loadTags = async () => {
+  const loadTags = useCallback(async () => {
     try {
       const data = await getTagList()
       setTags(data)
     } catch (error) {
       console.error('加载标签失败', error)
     }
-  }
+  }, [])
 
-  const loadArticle = async () => {
+  const loadArticle = useCallback(async () => {
     try {
       const article = await getArticleById(Number(pageId))
       setArticleStatus(article.status)
@@ -266,7 +238,35 @@ const ArticleEdit: React.FC = () => {
     } catch (error) {
       console.error('加载文章失败', error)
     }
-  }
+  }, [pageId, form, initArticle, startAutoSaveTimer, getFormData])
+
+  useEffect(() => {
+    console.log('📝 ArticleEdit useEffect - 组件挂载/路径变化:', {
+      id: pageId,
+      pathname: location.pathname,
+      timestamp: new Date().toISOString()
+    })
+
+    loadCategories()
+    loadTags()
+    if (pageId) {
+      console.log('📝 编辑文章模式 - 加载文章数据:', pageId)
+      loadArticle()
+    } else {
+      console.log('📝 新建文章模式 - 启动自动保存')
+      // 新建文章时启动自动保存定时器
+      startAutoSaveTimer(getFormData)
+    }
+
+    return () => {
+      console.log('📝 ArticleEdit cleanup - 组件卸载:', {
+        id: pageId,
+        pathname: location.pathname,
+        timestamp: new Date().toISOString()
+      })
+      stopAutoSaveTimer()
+    }
+  }, [pageId, location.pathname, loadArticle, loadCategories, loadTags, startAutoSaveTimer, stopAutoSaveTimer, getFormData])
 
   // 处理内容变化，触发防抖自动保存
   const handleContentChange = useCallback((content: string) => {
@@ -343,7 +343,7 @@ const ArticleEdit: React.FC = () => {
       await form.validateFields(['title', 'content'])
       const formData = getFormData()
       save({ ...formData, status: ArticleStatus.DRAFT })
-    } catch (error) {
+    } catch {
       // 验证失败
     }
   }

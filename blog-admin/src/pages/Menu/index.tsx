@@ -51,7 +51,7 @@ const MenuPage: React.FC = () => {
       await deleteMenu(id)
       message.success('删除成功')
       loadMenus()
-    } catch (error) {
+    } catch {
       message.error('删除失败')
     }
   }

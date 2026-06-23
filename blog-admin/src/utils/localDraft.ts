@@ -1,10 +1,16 @@
 /**
  * 本地草稿存储工具
  * 用于在网络中断时保存文章草稿到本地存储
+ *
+ * 安全说明：localStorage 可被 XSS 读取，因此：
+ * 1) 草稿设置 7 天 TTL，过期自动清理，减少长期暴露窗口；
+ * 2) 不存储任何敏感字段（如作者 token / 密码等）；
+ * 3) 如需更高安全级别，应改为 IndexedDB + WebCrypto 加密。
  */
 
 const DRAFT_KEY_PREFIX = 'article_draft_'
 const DRAFT_LIST_KEY = 'article_draft_list'
+const DRAFT_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 天
 
 export interface LocalDraft {
   id?: number
@@ -43,20 +49,26 @@ export function saveLocalDraft(articleId: number | undefined, draft: Omit<LocalD
 }
 
 /**
- * 获取本地草稿
+ * 获取本地草稿。超过 TTL 的草稿视为过期，自动清理并返回 null。
  */
 export function getLocalDraft(articleId: number | undefined, articleKey?: string): LocalDraft | null {
   const key = getDraftKey(articleId, articleKey)
-  
+
   try {
     const data = localStorage.getItem(key)
     if (data) {
-      return JSON.parse(data) as LocalDraft
+      const draft = JSON.parse(data) as LocalDraft
+      // TTL 校验：过期草稿自动清理，避免长期残留可被 XSS 读取
+      if (typeof draft.savedAt === 'number' && Date.now() - draft.savedAt > DRAFT_TTL_MS) {
+        removeLocalDraft(articleId, articleKey)
+        return null
+      }
+      return draft
     }
   } catch (error) {
     console.error('读取本地草稿失败:', error)
   }
-  
+
   return null
 }
 
@@ -79,7 +91,8 @@ export function removeLocalDraft(articleId: number | undefined, articleKey?: str
  */
 export function getAllLocalDrafts(): Array<{ key: string; draft: LocalDraft }> {
   const drafts: Array<{ key: string; draft: LocalDraft }> = []
-  
+  const expiredKeys: string[] = []
+
   try {
     const listData = localStorage.getItem(DRAFT_LIST_KEY)
     if (listData) {
@@ -87,17 +100,26 @@ export function getAllLocalDrafts(): Array<{ key: string; draft: LocalDraft }> {
       for (const key of keys) {
         const draftData = localStorage.getItem(key)
         if (draftData) {
-          drafts.push({
-            key,
-            draft: JSON.parse(draftData) as LocalDraft,
-          })
+          const draft = JSON.parse(draftData) as LocalDraft
+          // 跳过并清理过期草稿
+          if (typeof draft.savedAt === 'number' && Date.now() - draft.savedAt > DRAFT_TTL_MS) {
+            expiredKeys.push(key)
+            localStorage.removeItem(key)
+            continue
+          }
+          drafts.push({ key, draft })
         }
+      }
+      // 同步清理过期 key 的索引
+      if (expiredKeys.length > 0) {
+        const remaining = keys.filter(k => !expiredKeys.includes(k))
+        localStorage.setItem(DRAFT_LIST_KEY, JSON.stringify(remaining))
       }
     }
   } catch (error) {
     console.error('获取本地草稿列表失败:', error)
   }
-  
+
   return drafts.sort((a, b) => b.draft.savedAt - a.draft.savedAt)
 }
 

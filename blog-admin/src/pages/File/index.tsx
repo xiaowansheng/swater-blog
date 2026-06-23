@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Space, Popconfirm, message, Upload, Tag, Input, Select, Tooltip, Card, Row, Col, Modal } from 'antd'
 import Image from '@/components/common/ImageWithPreview'
 import {
@@ -29,11 +29,7 @@ const FilePage: React.FC = () => {
   const [previewFile, setPreviewFile] = useState<FileMeta | null>(null)
   const [previewVisible, setPreviewVisible] = useState(false)
 
-  useEffect(() => {
-    loadFiles()
-  }, [pagination.current, pagination.pageSize])
-
-  const loadFiles = async () => {
+  const loadFiles = useCallback(async () => {
     setLoading(true)
     try {
       const result = await getFileList({
@@ -48,7 +44,11 @@ const FilePage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [pagination, filters])
+
+  useEffect(() => {
+    loadFiles()
+  }, [loadFiles])
 
   const handleUpload = async (options: any) => {
     const { file, onSuccess, onError } = options
@@ -71,7 +71,7 @@ const FilePage: React.FC = () => {
       await deleteFile(id)
       message.success('删除成功')
       loadFiles()
-    } catch (error) {
+    } catch {
       message.error('删除失败')
     }
   }

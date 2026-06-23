@@ -1,7 +1,21 @@
 name: CI
 
 on:
-  # Temporarily disabled auto CI; run manually from GitHub Actions when needed.
+  push:
+    branches: [main, master, develop]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
+  pull_request:
+    branches: [main, master, develop]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
+  # 仍保留手动触发，便于按需重跑
   workflow_dispatch:
 
 jobs:

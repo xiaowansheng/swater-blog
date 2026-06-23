@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Avatar, Tooltip, InputNumber, Select } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined, SearchOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons'
 import { getFriendLinkList, createFriendLink, updateFriendLink, deleteFriendLink, approveFriendLink, rejectFriendLink } from '@/api/friendLink'
@@ -37,7 +37,7 @@ const FriendLinkPage: React.FC = () => {
   })
 
 
-  const loadLinks = async () => {
+  const loadLinks = useCallback(async () => {
     setLoading(true)
     try {
       const data = await getFriendLinkList({
@@ -56,11 +56,11 @@ const FriendLinkPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
 
   useEffect(() => {
     loadLinks()
-  }, [filters])
+  }, [loadLinks])
 
   const handleCreate = () => {
     setEditingLink(null)
@@ -79,7 +79,7 @@ const FriendLinkPage: React.FC = () => {
       await deleteFriendLink(id)
       message.success('删除成功')
       loadLinks()
-    } catch (error) {
+    } catch {
       message.error('删除失败')
     }
   }
@@ -89,7 +89,7 @@ const FriendLinkPage: React.FC = () => {
       await approveFriendLink(id)
       message.success('审核通过')
       loadLinks()
-    } catch (error) {
+    } catch {
       message.error('操作失败')
     }
   }
@@ -99,7 +99,7 @@ const FriendLinkPage: React.FC = () => {
       await rejectFriendLink(id)
       message.success('已拒绝')
       loadLinks()
-    } catch (error) {
+    } catch {
       message.error('操作失败')
     }
   }

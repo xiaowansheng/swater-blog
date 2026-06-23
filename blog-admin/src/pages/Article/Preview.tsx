@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Card, Button, Space, message, Spin, Breadcrumb, Tag, Image, Descriptions, Divider, Modal } from 'antd'
 import { ArrowLeftOutlined, FilePdfOutlined, FileMarkdownOutlined, DownloadOutlined, EditOutlined } from '@ant-design/icons'
@@ -19,7 +19,7 @@ const ArticlePreview: React.FC = () => {
   const loadedIdRef = useRef<string | null>(null)
   const markdownContentRef = useRef<HTMLDivElement>(null)
 
-  const loadArticle = async () => {
+  const loadArticle = useCallback(async () => {
     if (!id) return
     setLoading(true)
     try {
@@ -32,7 +32,7 @@ const ArticlePreview: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
 
   useEffect(() => {
     if (!article || !article.id) return
@@ -53,8 +53,7 @@ const ArticlePreview: React.FC = () => {
       return
     }
     loadArticle()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id])
+  }, [id, article, loadArticle])
 
   const handleExportPdf = async () => {
     if (!article) return
@@ -122,7 +121,7 @@ const ArticlePreview: React.FC = () => {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
       message.success('导出 Markdown 成功')
-    } catch (error) {
+    } catch {
       message.error('导出 Markdown 失败')
     }
   }

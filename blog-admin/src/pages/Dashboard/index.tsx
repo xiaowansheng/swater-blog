@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Row, Col, Card, Spin, List, Avatar, Tag, Space, Typography, DatePicker, Radio, Table } from 'antd'
 import {
   FileTextOutlined,
@@ -74,15 +74,7 @@ const Dashboard: React.FC = () => {
   ])
   const [topPagesOrderBy, setTopPagesOrderBy] = useState<'pv' | 'uv' | 'sessions'>('pv')
 
-  useEffect(() => {
-    loadStatistics()
-  }, [range])
-
-  useEffect(() => {
-    loadTopPages()
-  }, [topPagesOrderBy, range])
-
-  const loadStatistics = async () => {
+  const loadStatistics = useCallback(async () => {
     setLoading(true)
     try {
       const start = range[0].startOf('day').format('YYYY-MM-DDTHH:mm:ss')
@@ -95,9 +87,9 @@ const Dashboard: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [range, topPagesOrderBy])
 
-  const loadTopPages = async () => {
+  const loadTopPages = useCallback(async () => {
     setTopPagesLoading(true)
     try {
       const start = range[0].startOf('day').format('YYYY-MM-DDTHH:mm:ss')
@@ -109,7 +101,15 @@ const Dashboard: React.FC = () => {
     } finally {
       setTopPagesLoading(false)
     }
-  }
+  }, [range, topPagesOrderBy])
+
+  useEffect(() => {
+    loadStatistics()
+  }, [loadStatistics])
+
+  useEffect(() => {
+    loadTopPages()
+  }, [loadTopPages])
 
   if (loading) {
     return (

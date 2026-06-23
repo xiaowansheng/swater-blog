@@ -4,6 +4,7 @@ import { Editor, Toolbar } from '@wangeditor/editor-for-react'
 import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
 import { uploadFile, uploadExternalImage, uploadExternalWebpage, isExternalImageUrl, isExternalWebUrl, extractUrls } from '@/api/file'
 import { getFullUrl } from '@/utils/format'
+import { sanitizeHtml } from '@/utils/sanitize'
 import { message } from 'antd'
 
 interface RichTextEditorProps {
@@ -73,9 +74,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       // 检查是否粘贴了HTML内容（包含图片）
       const html = clipboardData.getData('text/html')
       if (html) {
-        // 提取HTML中的所有img标签
+        // 提取HTML中的所有img标签；先用 DOMPurify 消毒，防止恶意脚本在解析阶段执行
         const tempDiv = document.createElement('div')
-        tempDiv.innerHTML = html
+        tempDiv.innerHTML = sanitizeHtml(html)
         const images = tempDiv.querySelectorAll('img')
 
         if (images.length > 0) {
@@ -248,8 +249,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
       const html = dataTransfer.getData('text/html')
       if (html) {
+        // 用 DOMPurify 消毒后再解析，防止恶意脚本执行
         const tempDiv = document.createElement('div')
-        tempDiv.innerHTML = html
+        tempDiv.innerHTML = sanitizeHtml(html)
         const images = tempDiv.querySelectorAll('img')
 
         if (images.length > 0) {

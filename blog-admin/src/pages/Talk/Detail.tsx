@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Card, Button, Tag, Space, Spin, Empty, Avatar, Divider } from 'antd'
 import { ArrowLeftOutlined, VerticalAlignTopOutlined, EnvironmentOutlined, MobileOutlined, GlobalOutlined } from '@ant-design/icons'
@@ -7,6 +7,7 @@ import { getAuthorConfig } from '@/api/config'
 import { Talk, TalkStatus, TALK_STATUS_MAP } from '@/types'
 import { TopStatus } from '@/types/enums'
 import { getFullUrl } from '@/utils/format'
+import { sanitizeHtml } from '@/utils/sanitize'
 import Image from '@/components/common/ImageWithPreview'
 
 interface AuthorInfo {
@@ -21,12 +22,7 @@ const TalkDetail: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [authorInfo, setAuthorInfo] = useState<AuthorInfo>({ name: '', avatar: '' })
 
-  useEffect(() => {
-    loadTalkDetail()
-    loadAuthorConfig()
-  }, [id])
-
-  const loadAuthorConfig = async () => {
+  const loadAuthorConfig = useCallback(async () => {
     try {
       const authorConfig = await getAuthorConfig()
       setAuthorInfo({
@@ -36,9 +32,9 @@ const TalkDetail: React.FC = () => {
     } catch (error) {
       console.error('加载作者配置失败', error)
     }
-  }
+  }, [])
 
-  const loadTalkDetail = async () => {
+  const loadTalkDetail = useCallback(async () => {
     if (!id) return
     setLoading(true)
     try {
@@ -49,7 +45,12 @@ const TalkDetail: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
+
+  useEffect(() => {
+    loadTalkDetail()
+    loadAuthorConfig()
+  }, [loadTalkDetail, loadAuthorConfig])
 
   const getStatusColor = (status: string) => {
     const s = TALK_STATUS_MAP[status as keyof typeof TALK_STATUS_MAP] || TALK_STATUS_MAP[TalkStatus.DRAFT]
@@ -107,7 +108,7 @@ const TalkDetail: React.FC = () => {
           {/* 内容区域 */}
           <div
             className="rich-text-content text-gray-700 mb-6"
-            dangerouslySetInnerHTML={{ __html: talk.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(talk.content) }}
           />
 
           {/* 图片展示 */}

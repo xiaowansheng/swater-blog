@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Table,
   Button,
@@ -50,29 +50,16 @@ const UserPage: React.FC = () => {
     status: undefined,
   })
 
-  useEffect(() => {
-    loadRoles()
-  }, [])
-
-  useEffect(() => {
-    loadUsers()
-  }, [pagination.current, pagination.pageSize])
-
-  useEffect(() => {
-    setPagination((prev) => ({ ...prev, current: 1 }))
-    loadUsers()
-  }, [filters])
-
-  const loadRoles = async () => {
+  const loadRoles = useCallback(async () => {
     try {
       const data = await getRoleList()
       setRoles(data)
     } catch (error) {
       console.error('加载角色失败', error)
     }
-  }
+  }, [])
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     setLoading(true)
     try {
       const result = await getUserList({
@@ -90,7 +77,20 @@ const UserPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [pagination, filters])
+
+  useEffect(() => {
+    loadRoles()
+  }, [loadRoles])
+
+  useEffect(() => {
+    loadUsers()
+  }, [loadUsers])
+
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, current: 1 }))
+    loadUsers()
+  }, [loadUsers])
 
   const handleCreate = () => {
     setEditingUser(null)
@@ -112,7 +112,7 @@ const UserPage: React.FC = () => {
       await deleteUser(id)
       message.success('删除成功')
       loadUsers()
-    } catch (error) {
+    } catch {
       message.error('删除失败')
     }
   }
@@ -148,7 +148,7 @@ const UserPage: React.FC = () => {
         message.success('密码重置成功')
         setPasswordModalVisible(false)
       }
-    } catch (error) {
+    } catch {
       message.error('密码重置失败')
     }
   }
