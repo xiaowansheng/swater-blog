@@ -23,6 +23,11 @@ uploads/
 **/.env.staging
 !**/.env.example
 
+# Spring Boot 生产环境配置（含密钥密码，必须 gitignore）
+**/application-prod.yml
+**/application-prod.yaml
+**/application-prod.properties
+
 # 日志文件
 logs/
 *.log

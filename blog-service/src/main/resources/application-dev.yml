@@ -1,6 +1,6 @@
 # ========================================
-# 开发环境Spring Boot配置
-# 针对本地开发优化，包含调试和热重载功能
+# 开发环境配置
+# 仅包含与 application.yml 不同的覆盖配置
 # ========================================
 
 server:
@@ -23,15 +23,14 @@ spring:
   mvc:
     servlet:
       path: /
+
   tomcat:
-    # 开发环境连接器配置
     threads:
       max: 50
       min-spare: 5
     connection-timeout: 20000
     max-connections: 200
     accept-count: 50
-    # 开发环境访问日志
     accesslog:
       enabled: true
       directory: logs
@@ -39,63 +38,27 @@ spring:
       file-date-format: .yyyy-MM-dd
       prefix: access_log
       suffix: .log
-  # Thymeleaf 模板配置
+
   thymeleaf:
-    prefix: classpath:templates/
-    suffix: .html
-    mode: HTML
-    encoding: UTF-8
-    cache: false  # 开发时禁用缓存
+    cache: false
 
-  # Jackson 日期格式化配置
-  jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: Asia/Shanghai
-    serialization:
-      write-dates-as-timestamps: false
-
-  # 配置多部分上传限制
   servlet:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
 
-  # 开发环境数据源配置
   datasource:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:blog}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${DB_USER:blog}
     password: ${DB_PASSWORD:change_me_db_password}
     driver-class-name: com.mysql.cj.jdbc.Driver
-
-    # 开发环境连接池配置
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
-      idle-timeout: 300000
-      max-lifetime: 1800000
-      connection-timeout: 30000
-      validation-timeout: 5000
-      leak-detection-threshold: 60000
-      connection-test-query: SELECT 1
-      auto-commit: true
 
-      # 开发环境连接参数
-      data-source-properties:
-        cachePrepStmts: true
-        prepStmtCacheSize: 250
-        prepStmtCacheSqlLimit: 2048
-        useServerPrepStmts: true
-        useLocalSessionState: true
-        rewriteBatchedStatements: true
-        cacheResultSetMetadata: true
-        cacheServerConfiguration: true
-        elideSetAutoCommits: true
-        maintainTimeStats: false
-
-  # JPA配置 - 开发环境
   jpa:
     hibernate:
-      ddl-auto: update  # 开发时自动更新表结构
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -103,17 +66,15 @@ spring:
         use_sql_comments: true
         dialect: org.hibernate.dialect.MySQL8Dialect
 
-  # SQL初始化
   sql:
     init:
-      mode: always  # 开发环境自动初始化表结构
+      mode: always
       schema-locations: classpath:schema.sql
       data-locations: classpath:data-dev.sql
-      continue-on-error: true  # 开发时忽略错误
+      continue-on-error: true
       separator: ";"
       encoding: utf-8
 
-  # 开发环境Redis配置
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -128,65 +89,32 @@ spring:
           min-idle: 2
           max-wait: 3000ms
         shutdown-timeout: 100ms
-    # Elasticsearch 仓库扫描默认关闭，启用 ES 时通过 ELASTICSEARCH_REPOSITORIES_ENABLED=true 打开
     elasticsearch:
       repositories:
         enabled: ${ELASTICSEARCH_REPOSITORIES_ENABLED:false}
 
-  # Elasticsearch 配置（默认不连接，启用 ES 时设 ELASTICSEARCH_HOST）
   elasticsearch:
     uris: ${ELASTICSEARCH_HOST:http://localhost:9200}
-    connection-timeout: 5s
-    socket-timeout: 30s
     username: ${ELASTICSEARCH_USERNAME:}
     password: ${ELASTICSEARCH_PASSWORD:}
-  
-  # 开发环境RabbitMQ配置
+
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:admin}
     password: ${RABBITMQ_PASSWORD:change_me_rabbitmq_password}
     virtual-host: ${RABBITMQ_VHOST:/}
-    connection-timeout: 15000
-    publisher-confirm-type: correlated
-    publisher-returns: true
     listener:
       simple:
         acknowledge-mode: auto
         concurrency: 1
         max-concurrency: 3
-        prefetch: 1
-        retry:
-          enabled: true
-          initial-interval: 1000
-          max-attempts: 3
-          max-interval: 10000
-          multiplier: 1.0
 
-  # 开发环境邮件配置
   mail:
-    host: smtp.qq.com
-    port: 587
-    username:
-    password:
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     from-name: Swater Blog Dev
-    properties:
-      mail:
-        smtp:
-          auth: true
-          socketFactory:
-            port: 465
-            class: javax.net.ssl.SSLSocketFactory
-            fallback: false
-          starttls:
-            enable: true
-            required: true
-          timeout: 25000
-          connection-timeout: 25000
-          write-timeout: 25000
 
-  # 开发工具配置
   devtools:
     restart:
       enabled: true
@@ -197,106 +125,26 @@ spring:
       port: 35729
     add-properties: true
 
-# 文件存储配置 - 开发环境
 file:
   storage:
     local:
       path: uploads
-      url-prefix: /uploads
-    oss:
-      endpoint:
-      access-key-id:
-      access-key-secret:
-      bucket-name:
-      domain:
-    qiniu:
-      access-key:
-      secret-key:
-      bucket:
-      domain:
 
-# 位置服务配置 - 开发环境
 location:
   amap:
-    key: your-amap-key
-    api-url: https://restapi.amap.com/v3/ip
-  baidu:
-    ak:
-    api-url: https://api.map.baidu.com/location/ip
-  ip2location:
-    db-path:
+    key: ${AMAP_KEY:your-amap-key}
 
-# 日志存储配置
-log:
-  storage:
-    type: mysql
-
-# Next.js revalidate 配置（可选）
 revalidate:
   url: http://127.0.0.1:3001
-  token: change-me
+  token: ${REVALIDATE_TOKEN:change-me}
 
-# MyBatis Plus配置 - 开发环境
 mybatis-plus:
-  mapper-locations: classpath*:mapper/**/*.xml
-  type-aliases-package: com.blog.model.entity
   configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 开发时显示SQL
-    cache-enabled: true
-    lazy-loading-enabled: true
-    aggressive-lazy-loading: false
-    multiple-result-sets-enabled: true
-    use-column-label: true
-    use-generated-keys: true
-    auto-mapping-behavior: partial
-    auto-mapping-unknown-column-behavior: warning
-    default-executor-type: reuse
-    default-statement-timeout: 25
-    default-fetch-size: 100
-    safe-row-bounds-enabled: false
-    local-cache-scope: session
-    jdbc-type-for-null: other
-    lazy-load-trigger-methods: equals,clone,hashCode,toString
-  global-config:
-    db-config:
-      id-type: auto
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-      select-strategy: not_empty
-      insert-strategy: not_null
-      update-strategy: not_null
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-# Sa-Token配置 - 开发环境
 sa-token:
-  token-name: Authorization
-  token-prefix: Bearer
-  timeout: 2592000
-  active-timeout: 604800
-  is-read-timeout: true
-  is-concurrent: true
-  is-share: true
-  token-style: uuid
-  is-log: true  # 开发时启用日志
-  jwt-secret-key:
+  is-log: true
 
-# 认证配置 - 开发环境
-auth:
-  crypto:
-    nonce-ttl-seconds: 120
-    nonce-max-size: 10000
-    nonce-cleanup-interval: 200
-  email-session:
-    secret:
-    ttl-seconds: 2592000
-    header-name: X-Verify-Token
-
-# API 资源配置 - 开发环境
-api-resource:
-  auto-refresh-on-startup: true
-
-# 日志配置 - 开发环境详细日志
 logging:
   level:
     root: INFO
@@ -313,14 +161,13 @@ logging:
     path: logs
     name: logs/application-dev.log
 
-# 监控配置 - 开发环境
 management:
   server:
-    port: 8081  # 监控服务独立端口（与应用主端口分离）
+    port: 8081
   endpoints:
     web:
       exposure:
-        include: '*'  # 开发时暴露所有端点
+        include: '*'
       base-path: /actuator
   endpoint:
     health:
@@ -331,7 +178,7 @@ management:
     prometheus:
       enabled: true
     shutdown:
-      enabled: true  # 开发时允许远程关闭
+      enabled: true
   metrics:
     export:
       prometheus:
@@ -354,20 +201,19 @@ management:
     mail:
       enabled: false
     elasticsearch:
-      enabled: ${ELASTICSEARCH_HEALTH_ENABLED:false}  # 启用 ES 时设 true
+      enabled: ${ELASTICSEARCH_HEALTH_ENABLED:false}
     diskspace:
       enabled: true
       threshold: 1GB
 
-# 安全配置 - 开发环境宽松配置
 security:
   rate-limit:
-    enabled: false  # 开发时禁用限流
+    enabled: false
     default-window: 60
-    default-limit: 2000  # 开发时较高限制
+    default-limit: 2000
     ip-per-second: 50
     ip-per-minute: 3000
-    message: "????????????"
+    message: "请求过于频繁，请稍后再试"
     whitelist:
       - /favicon.ico
       - /uploads/**
@@ -398,7 +244,7 @@ security:
     enabled: true
     sanitize-input: true
   file-upload:
-    max-size: 50MB  # 开发时较大
+    max-size: 50MB
     allowed-extensions:
       - jpg
       - jpeg
@@ -417,116 +263,42 @@ security:
       - jsp
       - php
   ip-blacklist:
-    enabled: false  # 开发时禁用
+    enabled: false
     ips: []
   data-masking:
-    enabled: false  # 开发时禁用脱敏，便于调试
+    enabled: false
 
-# SpringDoc OpenAPI配置 - 开发环境
 springdoc:
-  api-docs:
-    enabled: true
-    path: /v3/api-docs
   swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
-    tags-sorter: alpha
-    operations-sorter: alpha
-    display-request-duration: true
-    display-operation-id: true
     default-models-expand-depth: 2
     default-model-expand-depth: 2
-    doc-expansion: list  # 开发时展开所有接口
-    filter: true
-    show-extensions: true
-    show-common-extensions: true
-    try-it-out-enabled: true  # 开发时启用在线测试
-  group-configs:
-    - group: 'public'
-      display-name: '公开接口'
-      paths-to-match: '/api/public/**'
-    - group: 'admin'
-      display-name: '管理接口'
-      paths-to-match: '/api/admin/**'
-    - group: 'auth'
-      display-name: '认证接口'
-      paths-to-match: '/api/auth/**'
-    - group: 'monitoring'
-      display-name: '监控接口'
-      paths-to-match: '/api/monitoring/**'
-  show-actuator: true
-
-# 自定义健康检查配置
-health:
-  custom:
-    enabled: true
+    doc-expansion: list
 
 # ========================================
-# 插件配置 - 开发环境
+# 开发环境专用配置（dev profile only）
 # ========================================
-plugin:
-  # 存储插件配置
-  storage:
-    active: local  # local/oss/qiniu
-
-  # 消息队列插件配置
-  mq:
-    active: rabbitmq  # rabbitmq/memory
-
-  # 通知渠道插件配置
-  notification:
-    email:
-      active: email  # 邮件通知
-    websocket:
-      active: websocket  # WebSocket通知
-
-  # 搜索插件配置
-  search:
-    active: ${PLUGIN_SEARCH_ACTIVE:database}  # database/elasticsearch
-
-  # 位置服务插件配置
-  location:
-    active: amap  # amap/baidu/ip2location
-
-  # 定时任务插件配置
-  scheduler:
-    active: spring  # spring/quartz
-
-  # User-Agent 解析配置
-  user-agent:
-    parser: yauaa  # yauaa/uap-java
-
-# 开发环境专用配置
 dev:
-  # 热重载配置
   hot-reload:
     enabled: true
     watch-paths:
       - src/main/java
       - src/main/resources
-
-  # 调试配置
   debug:
     sql-log: true
     request-log: true
     response-log: true
     performance-log: true
-
-  # 模拟数据
   mock:
     enabled: true
     users: 100
     articles: 500
     comments: 1000
-
-  # 开发工具
   tools:
     h2-console: true
     swagger-ui: true
     actuator: true
     devtools: true
 
-# 跨域配置（供 WebCorsConfig 使用）
 app:
   cors:
     enabled: true

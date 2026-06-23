@@ -1,6 +1,6 @@
 # ========================================
-# Docker环境Spring Boot配置
-# 针对容器化部署优化
+# Docker 环境配置
+# 仅包含与 application.yml 不同的覆盖配置
 # ========================================
 
 server:
@@ -19,15 +19,14 @@ blog:
 spring:
   application:
     name: blog-docker
+
   tomcat:
-    # Docker环境连接器配置
     threads:
       max: 100
       min-spare: 10
     connection-timeout: 20000
     max-connections: 500
     accept-count: 100
-    # Docker环境访问日志
     accesslog:
       enabled: true
       directory: /app/logs
@@ -35,63 +34,27 @@ spring:
       file-date-format: .yyyy-MM-dd
       prefix: access_log
       suffix: .log
-  # Thymeleaf 模板配置
+
   thymeleaf:
-    prefix: classpath:templates/
-    suffix: .html
-    mode: HTML
-    encoding: UTF-8
-    cache: true  # 生产环境启用缓存
-  
-  # Jackson 日期格式化配置
-  jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: Asia/Shanghai
-    serialization:
-      write-dates-as-timestamps: false
-  
-  # 配置多部分上传限制
+    cache: true
+
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
 
-  # Docker环境数据源配置 - 使用环境变量
   datasource:
     url: jdbc:mysql://${DB_HOST:mysql}:${DB_PORT:3306}/${DB_NAME:blog}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${DB_USER:blog}
     password: ${DB_PASSWORD:change_me_db_password}
     driver-class-name: com.mysql.cj.jdbc.Driver
-
-    # Docker环境连接池配置
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
-      idle-timeout: 300000
-      max-lifetime: 1800000
-      connection-timeout: 30000
-      validation-timeout: 5000
-      leak-detection-threshold: 60000
-      connection-test-query: SELECT 1
-      auto-commit: true
 
-      # Docker环境连接参数
-      data-source-properties:
-        cachePrepStmts: true
-        prepStmtCacheSize: 250
-        prepStmtCacheSqlLimit: 2048
-        useServerPrepStmts: true
-        useLocalSessionState: true
-        rewriteBatchedStatements: true
-        cacheResultSetMetadata: true
-        cacheServerConfiguration: true
-        elideSetAutoCommits: true
-        maintainTimeStats: false
-
-  # JPA配置 - Docker环境
   jpa:
     hibernate:
-      ddl-auto: validate  # 生产环境不自动更新表结构
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
@@ -99,16 +62,14 @@ spring:
         use_sql_comments: false
         dialect: org.hibernate.dialect.MySQL8Dialect
 
-  # SQL初始化
   sql:
     init:
-      mode: always  # Docker环境自动执行表结构初始化
+      mode: always
       schema-locations: classpath:schema.sql
       continue-on-error: false
       separator: ";"
       encoding: utf-8
 
-  # Docker环境Redis配置 - 使用环境变量
   data:
     redis:
       host: ${REDIS_HOST:redis}
@@ -127,185 +88,53 @@ spring:
       repositories:
         enabled: ${ELASTICSEARCH_REPOSITORIES_ENABLED:false}
 
-  # Elasticsearch 配置（默认不连接，启用 ES 时设 ELASTICSEARCH_HOST=http://elasticsearch:9200）
   elasticsearch:
     uris: ${ELASTICSEARCH_HOST:http://elasticsearch:9200}
-    connection-timeout: 5s
-    socket-timeout: 30s
     username: ${ELASTICSEARCH_USERNAME:}
     password: ${ELASTICSEARCH_PASSWORD:}
 
-  # Docker环境RabbitMQ配置 - 使用环境变量
   rabbitmq:
     host: ${RABBITMQ_HOST:rabbitmq}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:admin}
     password: ${RABBITMQ_PASSWORD:change_me_rabbitmq_password}
     virtual-host: ${RABBITMQ_VHOST:/}
-    connection-timeout: 15000
-    publisher-confirm-type: correlated
-    publisher-returns: true
     listener:
       simple:
         acknowledge-mode: auto
         concurrency: 2
         max-concurrency: 5
-        prefetch: 1
-        retry:
-          enabled: true
-          initial-interval: 1000
-          max-attempts: 3
-          max-interval: 10000
-          multiplier: 1.0
 
-  # Docker环境邮件配置
   mail:
-    host: smtp.qq.com
-    port: 587
-    username:
-    password:
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     from-name: Swater Blog
     properties:
       mail:
         smtp:
-          auth: true
           ssl:
             enable: true
-          socketFactory:
-            port: 465
-            class: javax.net.ssl.SSLSocketFactory
-            fallback: false
-          starttls:
-            enable: true
-            required: true
-          timeout: 25000
-          connection-timeout: 25000
-          write-timeout: 25000
 
-# 文件存储配置 - Docker环境
 file:
   storage:
     local:
       path: /app/uploads
-      url-prefix: /uploads
-    oss:
-      endpoint:
-      access-key-id:
-      access-key-secret:
-      bucket-name:
-      domain:
-    qiniu:
-      access-key:
-      secret-key:
-      bucket:
-      domain:
 
-# 位置服务配置 - Docker环境
 location:
   amap:
-    key:
-    api-url: https://restapi.amap.com/v3/ip
-  baidu:
-    ak:
-    api-url: https://api.map.baidu.com/location/ip
-  ip2location:
-    db-path:
+    key: ${AMAP_KEY:}
 
-# 日志存储配置
-log:
-  storage:
-    type: mysql
-
-# Next.js revalidate 配置（可选）
 revalidate:
   url: http://blog-web:3000
-  token: change-me
+  token: ${REVALIDATE_TOKEN:change-me}
 
-# 跨域配置（供 WebCorsConfig 使用）
-app:
-  cors:
-    enabled: false
-    # 生产环境请设置明确域名，示例: https://blog.example.com
-    allowed-origins:
-      - https://blog.example.com
-    allowed-methods:
-      - GET
-      - POST
-      - PUT
-      - DELETE
-      - OPTIONS
-    allowed-headers:
-      - Authorization
-      - Content-Type
-      - X-Verify-Token
-      - X-Requested-With
-    exposed-headers:
-      - Content-Disposition
-      - Content-Type
-      - Content-Length
-    allow-credentials: true
-
-# MyBatis Plus配置 - Docker环境
 mybatis-plus:
-  mapper-locations: classpath*:mapper/**/*.xml
-  type-aliases-package: com.blog.model.entity
   configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl  # 生产环境不输出SQL
-    cache-enabled: true
-    lazy-loading-enabled: true
-    aggressive-lazy-loading: false
-    multiple-result-sets-enabled: true
-    use-column-label: true
-    use-generated-keys: true
-    auto-mapping-behavior: partial
-    auto-mapping-unknown-column-behavior: warning
-    default-executor-type: reuse
-    default-statement-timeout: 25
-    default-fetch-size: 100
-    safe-row-bounds-enabled: false
-    local-cache-scope: session
-    jdbc-type-for-null: other
-    lazy-load-trigger-methods: equals,clone,hashCode,toString
-  global-config:
-    db-config:
-      id-type: auto
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-      select-strategy: not_empty
-      insert-strategy: not_null
-      update-strategy: not_null
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
 
-# Sa-Token配置 - Docker环境
 sa-token:
-  token-name: Authorization
-  token-prefix: Bearer
-  timeout: 2592000
-  active-timeout: 604800
-  is-read-timeout: true
-  is-concurrent: true
-  is-share: true
-  token-style: uuid
-  is-log: false  # 生产环境关闭日志
-  jwt-secret-key:
+  is-log: false
 
-# 认证配置 - Docker环境
-auth:
-  crypto:
-    nonce-ttl-seconds: 120
-    nonce-max-size: 10000
-    nonce-cleanup-interval: 200
-  email-session:
-    secret:
-    ttl-seconds: 2592000
-    header-name: X-Verify-Token
-
-# API 资源配置 - Docker环境
-api-resource:
-  auto-refresh-on-startup: true
-
-# 日志配置 - Docker环境
 logging:
   level:
     root: INFO
@@ -325,7 +154,6 @@ logging:
     max-history: 30
     total-size-cap: 3GB
 
-# 监控配置 - Docker环境
 management:
   endpoints:
     web:
@@ -341,7 +169,7 @@ management:
     prometheus:
       enabled: true
     shutdown:
-      enabled: false  # 生产环境禁用远程关闭
+      enabled: false
   metrics:
     export:
       prometheus:
@@ -369,7 +197,6 @@ management:
       enabled: true
       threshold: 1GB
 
-# 安全配置 - Docker环境
 security:
   rate-limit:
     enabled: true
@@ -377,7 +204,7 @@ security:
     default-limit: 200
     ip-per-second: 20
     ip-per-minute: 1200
-    message: "????????????"
+    message: "请求过于频繁，请稍后再试"
     whitelist:
       - /favicon.ico
       - /uploads/**
@@ -431,76 +258,30 @@ security:
     enabled: true
     log-sensitive-data: false
 
-# SpringDoc OpenAPI配置 - Docker环境
 springdoc:
-  api-docs:
-    enabled: true
-    path: /v3/api-docs
   swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
-    tags-sorter: alpha
-    operations-sorter: alpha
-    display-request-duration: true
-    display-operation-id: true
     default-models-expand-depth: 1
     default-model-expand-depth: 1
     doc-expansion: none
-    filter: true
-    show-extensions: true
-    show-common-extensions: true
-    try-it-out-enabled: true
-  group-configs:
-    - group: 'public'
-      display-name: '公开接口'
-      paths-to-match: '/api/public/**'
-    - group: 'admin'
-      display-name: '管理接口'
-      paths-to-match: '/api/admin/**'
-    - group: 'auth'
-      display-name: '认证接口'
-      paths-to-match: '/api/auth/**'
-    - group: 'monitoring'
-      display-name: '监控接口'
-      paths-to-match: '/api/monitoring/**'
-  show-actuator: true
 
-# 自定义健康检查配置
-health:
-  custom:
-    enabled: true
-
-# ========================================
-# 插件配置 - Docker环境
-# ========================================
-plugin:
-  # 存储插件配置
-  storage:
-    active: local  # local/oss/qiniu
-
-  # 消息队列插件配置
-  mq:
-    active: rabbitmq  # rabbitmq/memory
-
-  # 通知渠道插件配置
-  notification:
-    email:
-      active: email  # 邮件通知
-    websocket:
-      active: websocket  # WebSocket通知
-
-  # 搜索插件配置
-  search:
-    active: ${PLUGIN_SEARCH_ACTIVE:database}  # database/elasticsearch
-
-  # 位置服务插件配置
-  location:
-    active: amap  # amap/baidu/ip2location
-
-  # 定时任务插件配置
-  scheduler:
-    active: spring  # spring/quartz
-
-  # User-Agent 解析配置
-  user-agent:
-    parser: yauaa  # yauaa/uap-java
+app:
+  cors:
+    enabled: false
+    allowed-origins:
+      - https://blog.example.com
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    allowed-headers:
+      - Authorization
+      - Content-Type
+      - X-Verify-Token
+      - X-Requested-With
+    exposed-headers:
+      - Content-Disposition
+      - Content-Type
+      - Content-Length
+    allow-credentials: true

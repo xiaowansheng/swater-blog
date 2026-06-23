@@ -1,9 +1,214 @@
 # ========================================
 # Spring Boot 主配置文件
-# 只包含环境激活配置，具体配置在各环境配置文件中
+# 包含所有环境共享的公共配置
+# 环境差异配置见 application-{profile}.yml
 # ========================================
 
 spring:
   profiles:
-    # 激活的环境配置：dev(开发) / docker(容器) / prod(生产)
     active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-dates-as-timestamps: false
+
+  thymeleaf:
+    prefix: classpath:templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+
+  datasource:
+    hikari:
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      validation-timeout: 5000
+      leak-detection-threshold: 60000
+      connection-test-query: SELECT 1
+      auto-commit: true
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+
+  elasticsearch:
+    connection-timeout: 5s
+    socket-timeout: 30s
+
+  rabbitmq:
+    connection-timeout: 15000
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    listener:
+      simple:
+        prefetch: 1
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          max-interval: 10000
+          multiplier: 1.0
+
+  mail:
+    host: smtp.qq.com
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+            fallback: false
+          starttls:
+            enable: true
+            required: true
+          timeout: 25000
+          connection-timeout: 25000
+          write-timeout: 25000
+
+file:
+  storage:
+    local:
+      url-prefix: /uploads
+    oss:
+      endpoint:
+      access-key-id: ${OSS_ACCESS_KEY_ID:}
+      access-key-secret: ${OSS_ACCESS_KEY_SECRET:}
+      bucket-name:
+      domain:
+    qiniu:
+      access-key: ${QINIU_ACCESS_KEY:}
+      secret-key: ${QINIU_SECRET_KEY:}
+      bucket:
+      domain:
+
+location:
+  amap:
+    api-url: https://restapi.amap.com/v3/ip
+  baidu:
+    ak:
+    api-url: https://api.map.baidu.com/location/ip
+  ip2location:
+    db-path:
+
+log:
+  storage:
+    type: mysql
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.blog.model.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+    lazy-loading-enabled: true
+    aggressive-lazy-loading: false
+    multiple-result-sets-enabled: true
+    use-column-label: true
+    use-generated-keys: true
+    auto-mapping-behavior: partial
+    auto-mapping-unknown-column-behavior: warning
+    default-executor-type: reuse
+    default-statement-timeout: 25
+    default-fetch-size: 100
+    safe-row-bounds-enabled: false
+    local-cache-scope: session
+    jdbc-type-for-null: other
+    lazy-load-trigger-methods: equals,clone,hashCode,toString
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      select-strategy: not_empty
+      insert-strategy: not_null
+      update-strategy: not_null
+
+sa-token:
+  token-name: Authorization
+  token-prefix: Bearer
+  timeout: 2592000
+  active-timeout: 604800
+  is-read-timeout: true
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+  jwt-secret-key: ${SA_TOKEN_JWT_SECRET_KEY:}
+
+auth:
+  crypto:
+    nonce-ttl-seconds: 120
+    nonce-max-size: 10000
+    nonce-cleanup-interval: 200
+  email-session:
+    secret: ${AUTH_EMAIL_SESSION_SECRET:}
+    ttl-seconds: 2592000
+    header-name: X-Verify-Token
+
+api-resource:
+  auto-refresh-on-startup: true
+
+plugin:
+  storage:
+    active: local
+  mq:
+    active: rabbitmq
+  notification:
+    email:
+      active: email
+    websocket:
+      active: websocket
+  search:
+    active: ${PLUGIN_SEARCH_ACTIVE:database}
+  location:
+    active: amap
+  scheduler:
+    active: spring
+  user-agent:
+    parser: yauaa
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    display-request-duration: true
+    display-operation-id: true
+    filter: true
+    show-extensions: true
+    show-common-extensions: true
+    try-it-out-enabled: true
+  group-configs:
+    - group: 'public'
+      display-name: '公开接口'
+      paths-to-match: '/api/public/**'
+    - group: 'admin'
+      display-name: '管理接口'
+      paths-to-match: '/api/admin/**'
+    - group: 'auth'
+      display-name: '认证接口'
+      paths-to-match: '/api/auth/**'
+    - group: 'monitoring'
+      display-name: '监控接口'
+      paths-to-match: '/api/monitoring/**'
+  show-actuator: true
+
+health:
+  custom:
+    enabled: true
