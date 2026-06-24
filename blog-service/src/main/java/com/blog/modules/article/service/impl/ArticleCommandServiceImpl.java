@@ -149,6 +149,8 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         
         if (dto.getStatus() != null && dto.getStatus().equals(ArticleStatus.PUBLISHED.getCode()) && article.getPublishedAt() == null) {
             article.setPublishedAt(LocalDateTime.now());
+        } else if (dto.getStatus() != null && dto.getStatus().equals(ArticleStatus.SCHEDULED.getCode()) && dto.getScheduledPublishAt() != null) {
+            article.setPublishedAt(dto.getScheduledPublishAt());
         }
         
         articleMapper.updateById(article);

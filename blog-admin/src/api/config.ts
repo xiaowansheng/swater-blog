@@ -64,6 +64,8 @@ export interface SocialConfig {
   bilibili: string
   twitter: string
   facebook: string
+  wechatQr: string
+  alipayQr: string
 }
 
 export interface PrivacyConfig {

@@ -11,6 +11,14 @@ import com.blog.modules.search.model.vo.SearchVO;
 public interface SearchPlugin extends Plugin {
     PageResult<SearchVO> search(String keyword, String type, Long page, Long size);
 
+    default PageResult<SearchVO> search(String keyword, String type, Long page, Long size, Long categoryId) {
+        return search(keyword, type, page, size);
+    }
+
+    default java.util.Map<String, Long> getFacetCounts(String keyword) {
+        return java.util.Collections.emptyMap();
+    }
+
     void indexDocument(String indexType, Long id, String document) throws Exception;
 
     void deleteDocument(String indexType, Long id) throws Exception;

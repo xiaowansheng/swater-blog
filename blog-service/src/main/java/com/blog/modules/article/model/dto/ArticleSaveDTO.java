@@ -4,6 +4,7 @@ package com.blog.modules.article.model.dto;
 
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 import java.util.List;
 /**
  * 文章保存DTO - 用于自动保存和手动保存
@@ -111,6 +112,11 @@ public class ArticleSaveDTO {
      * æ–‡ç« é”®ï¼Œç”¨äºŽå¼±é…ç½®åˆ›å»ºæ—¶é¿å…é‡å¤
      */
     private String articleKey;
+
+    /**
+     * 定时发布时间（用于定时发布状态）
+     */
+    private LocalDateTime scheduledPublishAt;
 
     /**
      * 是否为自动保存

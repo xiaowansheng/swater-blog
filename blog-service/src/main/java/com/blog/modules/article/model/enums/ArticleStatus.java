@@ -11,7 +11,8 @@ import lombok.Getter;
 public enum ArticleStatus {
     DRAFT(0, "草稿"),
     PUBLISHED(1, "已发布"),
-    PRIVATE(2, "私密");
+    PRIVATE(2, "私密"),
+    SCHEDULED(3, "定时发布");
 
     @EnumValue
     @JsonValue

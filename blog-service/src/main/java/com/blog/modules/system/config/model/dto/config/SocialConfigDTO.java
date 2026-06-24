@@ -18,4 +18,6 @@ public class SocialConfigDTO {
     private String bilibili;
     private String twitter;
     private String facebook;
+    private String wechatQr;
+    private String alipayQr;
 }

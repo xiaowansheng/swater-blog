@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Form, Input, Button, message, Switch, Card, Row, Col, Space, Breadcrumb, Modal, Radio } from 'antd'
+import { Form, Input, Button, message, Switch, Card, Row, Col, Space, Breadcrumb, Modal, Radio, DatePicker } from 'antd'
 import { useNavigate, useParams, Link, useLocation } from 'react-router-dom'
 import { ArrowLeftOutlined, SaveOutlined, SendOutlined, PlusOutlined } from '@ant-design/icons'
 import { getArticleById, ArticleSaveDTO } from '@/api/article'
@@ -103,7 +103,10 @@ const ArticleEdit: React.FC = () => {
   const articleStatusOptions = [
     { value: ArticleStatus.PUBLISHED, label: '公开发布' },
     { value: ArticleStatus.PRIVATE, label: '私密' },
+    { value: ArticleStatus.SCHEDULED, label: '定时发布' },
   ]
+
+  const [isScheduled, setIsScheduled] = useState(false)
 
   // 获取当前表单数据
   const getFormData = useCallback((): Omit<ArticleSaveDTO, 'autoSave' | 'clientVersion'> => {
@@ -150,6 +153,7 @@ const ArticleEdit: React.FC = () => {
       tagIds,
       tagNames,
       password: values.password || undefined,
+      scheduledPublishAt: values.scheduledPublishAt || undefined,
     }
   }, [form, pageId, saveState.articleId])
 
@@ -401,6 +405,9 @@ const ArticleEdit: React.FC = () => {
     if (Object.prototype.hasOwnProperty.call(changedValues, 'content')) {
       setCurrentContent(changedValues.content || '')
     }
+    if (Object.prototype.hasOwnProperty.call(changedValues, 'publishStatus')) {
+      setIsScheduled(changedValues.publishStatus === ArticleStatus.SCHEDULED)
+    }
   }
 
   const getStatusTag = () => {
@@ -597,6 +604,21 @@ const ArticleEdit: React.FC = () => {
                     placeholder="设置后读者需输入密码查看"
                     className="rounded-md"
                     maxLength={32}
+                  />
+                </Form.Item>
+
+                <Form.Item 
+                  name="scheduledPublishAt" 
+                  label="定时发布时间"
+                  help={isScheduled ? '到达指定时间后自动发布' : '选择定时发布状态后生效'}
+                >
+                  <DatePicker
+                    showTime={{ format: 'HH:mm' }}
+                    format="YYYY-MM-DD HH:mm"
+                    placeholder="选择发布时刻"
+                    disabled={!isScheduled}
+                    className="rounded-md w-full"
+                    disabledDate={(current) => current && current.isBefore(new Date(), 'day')}
                   />
                 </Form.Item>
 

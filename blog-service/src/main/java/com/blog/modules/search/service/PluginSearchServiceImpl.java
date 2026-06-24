@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.Map;
+
 @Primary
 @Service
 public class PluginSearchServiceImpl implements SearchService {
@@ -19,6 +22,11 @@ public class PluginSearchServiceImpl implements SearchService {
 
     @Override
     public PageResult<SearchVO> search(String keyword, String type, Long page, Long size) {
+        return search(keyword, type, page, size, null);
+    }
+
+    @Override
+    public PageResult<SearchVO> search(String keyword, String type, Long page, Long size, Long categoryId) {
         if (searchPluginFactory == null) {
             throw new BusinessException("未配置搜索插件工厂");
         }
@@ -27,9 +35,25 @@ public class PluginSearchServiceImpl implements SearchService {
             throw new BusinessException("没有可用的搜索插件");
         }
         try {
-            return plugin.search(keyword, type, page, size);
+            return plugin.search(keyword, type, page, size, categoryId);
         } catch (Exception e) {
             throw new BusinessException("搜索执行失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Map<String, Long> getFacetCounts(String keyword) {
+        if (searchPluginFactory == null) {
+            return Collections.emptyMap();
+        }
+        SearchPlugin plugin = searchPluginFactory.getActivePlugin();
+        if (plugin == null) {
+            return Collections.emptyMap();
+        }
+        try {
+            return plugin.getFacetCounts(keyword);
+        } catch (Exception e) {
+            return Collections.emptyMap();
         }
     }
 }

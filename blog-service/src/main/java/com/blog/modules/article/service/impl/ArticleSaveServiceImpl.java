@@ -143,6 +143,8 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
         
         if (article.getStatus().equals(ArticleStatus.PUBLISHED.getCode())) {
             article.setPublishedAt(LocalDateTime.now());
+        } else if (article.getStatus().equals(ArticleStatus.SCHEDULED.getCode()) && dto.getScheduledPublishAt() != null) {
+            article.setPublishedAt(dto.getScheduledPublishAt());
         }
 
         articleMapper.insert(article);
@@ -241,6 +243,8 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
                 article.setStatus(dto.getStatus());
                 if (dto.getStatus().equals(ArticleStatus.PUBLISHED.getCode()) && article.getPublishedAt() == null) {
                     article.setPublishedAt(LocalDateTime.now());
+                } else if (dto.getStatus().equals(ArticleStatus.SCHEDULED.getCode()) && dto.getScheduledPublishAt() != null) {
+                    article.setPublishedAt(dto.getScheduledPublishAt());
                 }
             }
             

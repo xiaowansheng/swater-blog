@@ -46,5 +46,7 @@ public class ArticleDTO extends com.blog.shared.model.dto.BaseDTO {
     private List<String> tagNames;
 
     private String password;
+
+    private java.time.LocalDateTime scheduledPublishAt;
 }
 

@@ -38,6 +38,8 @@ export interface ArticleSaveDTO {
   tagIds?: number[]
   tagNames?: string[]
   articleKey?: string
+  password?: string
+  scheduledPublishAt?: string
   autoSave?: boolean
   clientVersion?: number
 }

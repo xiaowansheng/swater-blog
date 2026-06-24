@@ -10,6 +10,7 @@ import ReadingProgress from '@/components/widgets/ReadingProgress';
 import RelatedPosts from '@/components/article/RelatedPosts';
 import ReadingHistoryTracker from '@/components/article/ReadingHistoryTracker';
 import GatedArticleContent from '@/components/article/GatedArticleContent';
+import DonationButton from '@/components/article/DonationButton';
 import { AnimeComment } from '@/components/anime-comment';
 import ContentTracker from '@/components/visitor/ContentTracker';
 import { articleApi } from '@/lib/api/article';
@@ -187,6 +188,8 @@ export default async function PostDetailPage({
                     initialLikeCount={article.likeCount || 0}
                   />
                   <ArticleCopyright article={article} author={author} />
+
+                  <DonationButton />
 
                   {/* 二次元评论组件 - 根据配置显示 */}
                   {componentConfig.articleCommentEnabled && (

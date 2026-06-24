@@ -46,10 +46,15 @@ public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
 
     @Override
     public PageResult<SearchVO> search(String keyword, String type, Long page, Long size) {
+        return search(keyword, type, page, size, null);
+    }
+
+    @Override
+    public PageResult<SearchVO> search(String keyword, String type, Long page, Long size, Long categoryId) {
         if (type == null || type.isEmpty() || "all".equals(type)) {
-            return searchAll(keyword, page, size);
+            return searchAll(keyword, page, size, categoryId);
         } else if ("post".equals(type)) {
-            return searchPosts(keyword, page, size);
+            return searchPosts(keyword, page, size, categoryId);
         } else if ("moment".equals(type)) {
             return searchMoments(keyword, page, size);
         } else if ("comment".equals(type)) {
@@ -58,8 +63,33 @@ public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
         return new PageResult<>(new ArrayList<>(), 0L, size, page);
     }
 
-    private PageResult<SearchVO> searchAll(String keyword, Long page, Long size) {
-        PageResult<SearchVO> postResults = searchPosts(keyword, page, size);
+    @Override
+    public Map<String, Long> getFacetCounts(String keyword) {
+        Map<String, Long> facets = new java.util.LinkedHashMap<>();
+        facets.put("post", articleMapper.selectCount(buildPostWrapper(keyword, null)));
+        LambdaQueryWrapper<Talk> talkWrapper = new LambdaQueryWrapper<>();
+        talkWrapper.like(Talk::getContent, keyword);
+        facets.put("moment", talkMapper.selectCount(talkWrapper));
+        facets.put("comment", commentMapper.selectCount(new LambdaQueryWrapper<Comment>()
+                .like(Comment::getContent, keyword)
+                .eq(Comment::getDeleted, 0)));
+        return facets;
+    }
+
+    private LambdaQueryWrapper<Article> buildPostWrapper(String keyword, Long categoryId) {
+        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
+        wrapper.and(w -> w.like(Article::getTitle, keyword)
+                .or().like(Article::getContent, keyword)
+                .or().like(Article::getExcerpt, keyword));
+        wrapper.eq(Article::getDeleted, 0);
+        if (categoryId != null) {
+            wrapper.eq(Article::getCategoryId, categoryId);
+        }
+        return wrapper;
+    }
+
+    private PageResult<SearchVO> searchAll(String keyword, Long page, Long size, Long categoryId) {
+        PageResult<SearchVO> postResults = searchPosts(keyword, page, size, categoryId);
         PageResult<SearchVO> momentResults = searchMoments(keyword, page, size);
         PageResult<SearchVO> commentResults = searchComments(keyword, page, size);
 
@@ -72,12 +102,8 @@ public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
         return new PageResult<>(allResults, total, size, page);
     }
 
-    private PageResult<SearchVO> searchPosts(String keyword, Long page, Long size) {
-        LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
-        wrapper.and(w -> w.like(Article::getTitle, keyword)
-                .or().like(Article::getContent, keyword)
-                .or().like(Article::getExcerpt, keyword));
-        wrapper.eq(Article::getDeleted, 0);
+    private PageResult<SearchVO> searchPosts(String keyword, Long page, Long size, Long categoryId) {
+        LambdaQueryWrapper<Article> wrapper = buildPostWrapper(keyword, categoryId);
         wrapper.orderByDesc(Article::getCreateTime);
 
         Page<Article> pageObj = new Page<>(page, size);
@@ -150,24 +176,15 @@ public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
                     // 根据评论目标类型查询对应的key
                     if (comment.getTargetType() != null) {
                         String targetType = comment.getTargetType().toLowerCase();
-                        System.out.println("评论 targetType: " + targetType + ", targetId: " + comment.getTargetId());
 
                         if (targetType.contains("article") || targetType.contains("post")) {
-                            // 评论的是文章，查询文章的articleKey
                             Article targetArticle = articleMapper.selectById(comment.getTargetId());
-                            System.out.println("查询文章: " + (targetArticle != null ? "找到" : "未找到"));
                             if (targetArticle != null) {
-                                System.out.println("文章 articleKey: " + targetArticle.getArticleKey());
-                                // 使用articleKey字段存储目标文章的key
                                 vo.setArticleKey(targetArticle.getArticleKey());
                             }
                         } else if (targetType.contains("moment") || targetType.contains("talk")) {
-                            // 评论的是说说，查询说说的talkKey
                             Talk targetTalk = talkMapper.selectById(comment.getTargetId());
-                            System.out.println("查询说说: " + (targetTalk != null ? "找到" : "未找到"));
                             if (targetTalk != null) {
-                                System.out.println("说说 talkKey: " + targetTalk.getTalkKey());
-                                // 使用articleKey字段存储目标说说的talkKey
                                 vo.setArticleKey(targetTalk.getTalkKey());
                             }
                         }

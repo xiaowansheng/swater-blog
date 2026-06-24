@@ -5,6 +5,7 @@ export enum ArticleStatus {
   DRAFT = 0,
   PUBLISHED = 1,
   PRIVATE = 2,
+  SCHEDULED = 3,
 }
 
 /**
