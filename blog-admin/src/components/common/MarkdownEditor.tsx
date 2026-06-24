@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import Vditor from 'vditor'
 import 'vditor/dist/index.css'
 import { uploadFile, uploadExternalImage, uploadExternalWebpage, isExternalImageUrl, isExternalWebUrl, extractUrls } from '@/api/file'
@@ -6,6 +6,8 @@ import { toRelativeUrl } from '@/utils/format'
 import { message } from 'antd'
 import config from '@/config'
 import { VDITOR_CDN } from '@/config/vditor'
+import { templates } from './MarkdownTemplates'
+import { compressImageIfNeeded } from '@/utils/imageCompress'
 
 interface MarkdownEditorProps {
   value?: string
@@ -93,12 +95,10 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         handler: async (files: File[]) => {
           if (files.length === 0) return null
           try {
-            const res = await uploadFile(files[0])
-            // 使用相对路径格式，预览时 linkBase 会处理前缀
-            // 使用 toRelativeUrl 规范化路径
+            const file = await compressImageIfNeeded(files[0])
+            const res = await uploadFile(file)
             const url = toRelativeUrl(res.url || res.storagePath)
             const name = res.originalName || files[0].name
-            // 插入图片到编辑器
             vditor.insertValue(`![${name}](${url})`)
           } catch (error) {
             console.error('上传图片失败:', error)
@@ -371,8 +371,27 @@ const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     }
   }, [isInit])
 
+  const insertTemplate = useCallback((md: string) => {
+    if (vditorInstance.current) {
+      vditorInstance.current.insertValue(md)
+    }
+  }, [])
+
   return (
     <div className="overflow-hidden w-full rounded-md border vditor-container">
+      <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 border-b overflow-x-auto">
+        {templates.slice(0, 8).map((t) => (
+          <button
+            key={t.key}
+            onClick={() => insertTemplate(t.template)}
+            className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors whitespace-nowrap"
+            title={t.description}
+          >
+            <span>{t.icon}</span>
+            <span className="hidden sm:inline">{t.label}</span>
+          </button>
+        ))}
+      </div>
       <div ref={editorRef} />
       <style dangerouslySetInnerHTML={{
         __html: `

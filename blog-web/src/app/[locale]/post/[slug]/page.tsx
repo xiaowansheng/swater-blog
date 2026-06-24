@@ -18,6 +18,7 @@ import { getAuthorInfo, getCoverConfig, getComponentConfig } from '@/lib/api/con
 import { generateArticleMetadata } from '@/lib/utils/seo';
 import { formatDate } from '@/lib/utils/format';
 import type { PostVO } from '@/types';
+import { ArticleStructuredData } from '@/components/seo/StructuredData';
 import { Card } from '@/components/ui/Card';
 
 export const revalidate = 3600;
@@ -56,6 +57,11 @@ export default async function PostDetailPage({
 
   return (
     <>
+      <ArticleStructuredData
+        article={article}
+        locale={locale}
+        url={`/${locale}/post/${article.articleKey || article.slug || article.id}`}
+      />
       <ContentTracker contentType="ARTICLE" contentId={article.id} />
       <ReadingHistoryTracker article={article} />
       <ReadingProgress />

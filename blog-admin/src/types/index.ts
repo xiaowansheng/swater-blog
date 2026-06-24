@@ -91,6 +91,7 @@ export interface Article {
   createTime: string
   updateTime?: string
   version?: number
+  password?: string
 }
 
 export interface ArticleStatistics {
