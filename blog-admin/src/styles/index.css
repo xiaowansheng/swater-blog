@@ -382,3 +382,19 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* 自定义分类树及详情样式 */
+.custom-category-tree .ant-tree-node-content-wrapper {
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  font-size: 15px !important;
+}
+
+.custom-category-tree .ant-tree-switcher {
+  line-height: 38px !important;
+}
+
+.custom-category-tree .ant-tree-treenode {
+  padding: 4px 0 !important;
+}
+

@@ -185,6 +185,9 @@ const CategoryPage: React.FC = () => {
       onOk: async () => {
         await deleteCategory(category.id)
         message.success('删除成功')
+        if (selectedKey === `cat-${category.id}`) {
+          setSelectedKey(undefined)
+        }
         await loadCategories()
       },
     })
@@ -244,26 +247,26 @@ const CategoryPage: React.FC = () => {
         <div className="flex items-center justify-between gap-3 pr-2 py-1 w-full">
           <div className="flex items-center gap-2 min-w-0">
             {hasChildren ? (
-              <FolderOpenOutlined className="text-amber-500" />
+              <FolderOpenOutlined className="text-amber-500 text-base" />
             ) : (
-              <TagOutlined className="text-blue-400" />
+              <TagOutlined className="text-blue-400 text-base" />
             )}
             <Tooltip title={category.description || category.name}>
-              <span className="truncate text-gray-800">
+              <span className="truncate text-gray-900 font-medium text-base">
                 {highlightText(category.name, keyword)}
               </span>
             </Tooltip>
             {category.description && (
-              <span className="text-xs text-gray-400 truncate max-w-[200px] hidden sm:inline">
+              <span className="text-xs sm:text-sm text-gray-400 truncate max-w-[250px] hidden sm:inline ml-1 font-normal">
                 {category.description}
               </span>
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {hasChildren && (
-              <span className="text-xs text-gray-400">{category.children!.length} 个子分类</span>
+              <span className="text-xs sm:text-sm text-gray-400">{category.children!.length} 个子分类</span>
             )}
-            <Tag color={(category.articleCount || 0) > 0 ? 'blue' : 'default'}>
+            <Tag color={(category.articleCount || 0) > 0 ? 'blue' : 'default'} style={{ fontSize: '12px', padding: '1px 8px' }}>
               {category.articleCount || 0} 篇
             </Tag>
           </div>
@@ -295,6 +298,11 @@ const CategoryPage: React.FC = () => {
     flatList.forEach((c) => map.set(`cat-${c.id}`, c))
     return map
   }, [flatList])
+
+  const selectedCategory = useMemo(() => {
+    if (!selectedKey) return null
+    return catByKey.get(String(selectedKey)) || null
+  }, [selectedKey, catByKey])
 
   const isDescendant = useCallback((parentId: number, possibleDescendantId: number): boolean => {
     const parent = flatList.find((c) => c.id === parentId)
@@ -409,10 +417,10 @@ const CategoryPage: React.FC = () => {
       <div className="search-bar">
         <div className="flex gap-4 items-center flex-wrap">
           <div className="flex items-center gap-2">
-            <TagOutlined className="text-blue-400" />
-            <span className="font-medium text-gray-700">分类管理</span>
+            <TagOutlined className="text-blue-400 text-lg" />
+            <span className="font-semibold text-gray-800 text-base">分类管理</span>
             {flatList.length > 0 && (
-              <span className="text-xs text-gray-400">
+              <span className="text-xs sm:text-sm text-gray-400">
                 {flatList.length} 个分类 / {totalCount} 篇文章
               </span>
             )}
@@ -450,33 +458,179 @@ const CategoryPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="table-container min-h-[400px]">
-        <Spin spinning={loading}>
-          {isTreeEmpty ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Empty
-                description={<span className="text-gray-400">暂无分类，点击「新建分类」开始</span>}
-              >
-                <Button type="primary" icon={<PlusOutlined />} onClick={() => openCreate(0)}>
-                  新建分类
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Side: Tree Card */}
+        <div className="lg:col-span-7 xl:col-span-8 bg-white rounded-lg p-5 border border-gray-100 shadow-sm min-h-[500px]">
+          <Spin spinning={loading}>
+            {isTreeEmpty ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <Empty
+                  description={<span className="text-gray-400 text-sm">暂无分类，点击「新建分类」开始</span>}
+                >
+                  <Button type="primary" icon={<PlusOutlined />} onClick={() => openCreate(0)}>
+                    新建分类
+                  </Button>
+                </Empty>
+              </div>
+            ) : (
+              <Tree
+                className="custom-category-tree"
+                blockNode
+                showLine
+                draggable={{ nodeDraggable: () => !searchText.trim() }}
+                allowDrop={handleAllowDrop}
+                onDrop={handleDrop}
+                treeData={treeData}
+                expandedKeys={searchText.trim() ? expandedKeysWithSearch : expandedKeys}
+                selectedKeys={selectedKey ? [selectedKey] : []}
+                onExpand={(keys) => setExpandedKeys(keys)}
+                onSelect={(keys) => setSelectedKey(keys[0])}
+              />
+            )}
+          </Spin>
+        </div>
+
+        {/* Right Side: Detail Card */}
+        <div className="lg:col-span-5 xl:col-span-4 bg-white rounded-lg p-6 border border-gray-100 shadow-sm sticky top-4 min-h-[400px]">
+          {selectedCategory ? (
+            <div className="flex flex-col h-full">
+              {/* Category Details Title */}
+              <div className="flex items-center justify-between pb-4 mb-5 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <TagOutlined className="text-blue-500 text-lg" />
+                  <span className="text-lg font-bold text-gray-800">分类详情</span>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="primary"
+                    ghost
+                    icon={<EditOutlined />}
+                    onClick={() => openEdit(selectedCategory)}
+                  >
+                    编辑
+                  </Button>
+                  <Button
+                    danger
+                    ghost
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleDelete(selectedCategory)}
+                  >
+                    删除
+                  </Button>
+                </div>
+              </div>
+
+              {/* Detail Content */}
+              <div className="space-y-6 flex-1">
+                {/* Name */}
+                <div>
+                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">分类名称</div>
+                  <div className="text-2xl sm:text-3xl font-extrabold text-slate-800 flex items-center gap-2 flex-wrap">
+                    {selectedCategory.name}
+                    <span className="text-xs font-normal text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
+                      ID: {selectedCategory.id}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Parent */}
+                <div>
+                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">父级分类</div>
+                  <div className="text-base sm:text-lg text-slate-700 font-semibold">
+                    {selectedCategory.parentId
+                      ? flatList.find(c => c.id === selectedCategory.parentId)?.name || `未知分类 (ID: ${selectedCategory.parentId})`
+                      : <span className="text-gray-400 italic font-normal">无 (顶级分类)</span>
+                    }
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">分类描述</div>
+                  {selectedCategory.description ? (
+                    <div className="text-base sm:text-lg text-slate-700 bg-slate-50 p-4 rounded-lg border border-slate-100 whitespace-pre-wrap leading-relaxed">
+                      {selectedCategory.description}
+                    </div>
+                  ) : (
+                    <div className="text-base text-gray-400 italic bg-gray-50 p-4 rounded-lg border border-dashed border-gray-200">
+                      暂无描述信息
+                    </div>
+                  )}
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100/50">
+                    <div className="text-xs text-blue-600 font-semibold mb-1">关联文章数</div>
+                    <div className="text-2xl font-bold text-blue-800">
+                      {selectedCategory.articleCount || 0} <span className="text-xs font-normal text-blue-500">篇</span>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-amber-50/50 p-4 rounded-lg border border-amber-100/50">
+                    <div className="text-xs text-amber-600 font-semibold mb-1">子分类数</div>
+                    <div className="text-2xl font-bold text-amber-800">
+                      {selectedCategory.children?.length || 0} <span className="text-xs font-normal text-amber-500">个</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Child List if exists */}
+                {selectedCategory.children && selectedCategory.children.length > 0 && (
+                  <div>
+                    <div className="text-xs text-gray-400 uppercase tracking-wider mb-2">子分类列表 (点击可切换)</div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedCategory.children.map((child) => (
+                        <Tag
+                          key={child.id}
+                          color="blue"
+                          className="cursor-pointer hover:opacity-80 transition-opacity py-0.5 px-2.5 text-sm font-medium"
+                          onClick={() => setSelectedKey(`cat-${child.id}`)}
+                        >
+                          {child.name} ({child.articleCount || 0})
+                        </Tag>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Sort & Create Time */}
+                <div className="grid grid-cols-2 gap-4 text-sm border-t border-gray-100 pt-4">
+                  <div>
+                    <span className="text-gray-400">排序值：</span>
+                    <span className="font-semibold text-gray-700">{selectedCategory.sort ?? '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">创建时间：</span>
+                    <span className="font-medium text-gray-600">
+                      {selectedCategory.createTime ? selectedCategory.createTime.split('T')[0] : '-'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Quick Action */}
+              <div className="border-t border-gray-100 pt-4 mt-6">
+                <Button
+                  type="dashed"
+                  block
+                  icon={<FolderAddOutlined />}
+                  onClick={() => openCreate(selectedCategory.id)}
+                >
+                  在该分类下新建子分类
                 </Button>
-              </Empty>
+              </div>
             </div>
           ) : (
-            <Tree
-              blockNode
-              showLine
-              draggable={{ nodeDraggable: () => !searchText.trim() }}
-              allowDrop={handleAllowDrop}
-              onDrop={handleDrop}
-              treeData={treeData}
-              expandedKeys={searchText.trim() ? expandedKeysWithSearch : expandedKeys}
-              selectedKeys={selectedKey ? [selectedKey] : []}
-              onExpand={(keys) => setExpandedKeys(keys)}
-              onSelect={(keys) => setSelectedKey(keys[0])}
-            />
+            <div className="flex flex-col items-center justify-center h-full py-16 text-center text-gray-400">
+              <TagOutlined className="text-5xl text-gray-200 mb-4" />
+              <div className="text-base font-semibold text-gray-500 mb-1">查看分类详情</div>
+              <div className="text-xs text-gray-400 max-w-[220px]">
+                请在左侧分类树中选择一个分类，以查看其详细属性、文章数量、子分类以及执行操作。
+              </div>
+            </div>
           )}
-        </Spin>
+        </div>
       </div>
 
       <Modal

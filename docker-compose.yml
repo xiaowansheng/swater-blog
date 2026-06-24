@@ -150,6 +150,10 @@ services:
       SERVER_PORT: ${SERVER_PORT:-8888}
       BLOG_SITE_URL: ${BLOG_SITE_URL:-http://localhost}
       BLOG_RSS_DEFAULT_LOCALE: ${BLOG_RSS_DEFAULT_LOCALE:-zh}
+      # 初始管理员账号（dev profile 必填；docker profile 默认值见 application-docker.yml，可在此覆盖）
+      BLOG_ADMIN_USERNAME: ${BLOG_ADMIN_USERNAME:-}
+      BLOG_ADMIN_PASSWORD: ${BLOG_ADMIN_PASSWORD:-}
+      BLOG_ADMIN_EMAIL: ${BLOG_ADMIN_EMAIL:-}
       # Elasticsearch 配置（默认走 database 搜索插件，启用 ES 时设 PLUGIN_SEARCH_ACTIVE=elasticsearch）
       PLUGIN_SEARCH_ACTIVE: ${PLUGIN_SEARCH_ACTIVE:-database}
       ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:-http://elasticsearch:9200}

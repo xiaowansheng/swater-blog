@@ -40,6 +40,36 @@ class DataInitializerTest {
     }
 
     @Test
+    void run_throwsWhenAdminUsernameMissing() {
+        DataInitializer initializer = new DataInitializer(
+                mock(UserMapper.class),
+                mock(RoleMapper.class),
+                "",
+                "any-password",
+                "admin@example.com"
+        );
+
+        assertThatIllegalStateException()
+                .isThrownBy(() -> initializer.run(mock(ApplicationArguments.class)))
+                .withMessageContaining("blog.bootstrap.admin.username");
+    }
+
+    @Test
+    void run_throwsWhenAdminEmailMissing() {
+        DataInitializer initializer = new DataInitializer(
+                mock(UserMapper.class),
+                mock(RoleMapper.class),
+                "admin",
+                "any-password",
+                ""
+        );
+
+        assertThatIllegalStateException()
+                .isThrownBy(() -> initializer.run(mock(ApplicationArguments.class)))
+                .withMessageContaining("blog.bootstrap.admin.email");
+    }
+
+    @Test
     void run_createsConfiguredAdminWithHashedPassword() throws Exception {
         UserMapper userMapper = mock(UserMapper.class);
         RoleMapper roleMapper = mock(RoleMapper.class);

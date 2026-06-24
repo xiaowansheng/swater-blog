@@ -6,7 +6,8 @@
 # ========================================
 
 # 构建阶段
-FROM gradle:8.5-jdk21-jammy AS builder
+# 镜像固定为 digest，确保可复现构建（标签变动需重新校验并更新 digest）
+FROM gradle:8.5-jdk21-jammy@sha256:873def2b8a73d00f5616043ac9ff65576b055942701391ad66499f1a1f53f1b2 AS builder
 
 LABEL stage=builder
 LABEL maintainer="blog-team"
@@ -78,7 +79,7 @@ RUN --mount=type=cache,id=blog-service-gradle-caches,target=/root/.gradle/caches
     ./gradlew bootJar --no-daemon --no-watch-fs --parallel --info --stacktrace
 
 # 运行阶段
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:21-jre-jammy@sha256:199aebeb3adcde4910695cdebfe782ada38dadb6cc8013159b58d3724451befd
 
 LABEL maintainer="blog-team"
 LABEL version="1.0.0"

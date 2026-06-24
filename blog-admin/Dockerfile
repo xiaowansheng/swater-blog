@@ -6,7 +6,8 @@
 # ========================================
 
 # 构建阶段
-FROM node:20-alpine AS builder
+# 镜像固定为 digest，确保可复现构建（标签变动需重新校验并更新 digest）
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS builder
 
 LABEL stage=builder
 LABEL maintainer="blog-team"
@@ -39,7 +40,7 @@ COPY . .
 RUN pnpm --reporter=ndjson run build
 
 # 生产阶段
-FROM nginx:alpine
+FROM nginx:alpine@sha256:1a8724a52d432501548a8d8681bb1554c2d09778f8b9ed0882fc3442549980b7
 
 LABEL maintainer="blog-team"
 LABEL version="1.0.0"
@@ -48,8 +49,9 @@ LABEL description="Blog Admin production runtime"
 # 复制构建产物到 nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# 复制 nginx 配置
+# 复制 nginx 配置（主配置 + 安全头片段）
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY security-headers.conf /etc/nginx/security-headers.conf
 
 # 暴露端口
 EXPOSE 80

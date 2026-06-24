@@ -10,11 +10,13 @@ blog:
   site-url: ${BLOG_SITE_URL:http://127.0.0.1:3001}
   rss:
     default-locale: ${BLOG_RSS_DEFAULT_LOCALE:zh}
+  # 初始管理员账号：本地启动前必须通过环境变量提供，缺失则启动失败（fail-fast）
+  # export BLOG_ADMIN_USERNAME=admin BLOG_ADMIN_PASSWORD=xxx BLOG_ADMIN_EMAIL=a@b.com
   bootstrap:
     admin:
-      username: admin
-      password: admin
-      email: admin@example.com
+      username: ${BLOG_ADMIN_USERNAME:}
+      password: ${BLOG_ADMIN_PASSWORD:}
+      email: ${BLOG_ADMIN_EMAIL:}
 
 spring:
   application:

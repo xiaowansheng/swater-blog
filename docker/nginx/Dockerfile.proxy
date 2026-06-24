@@ -1,3 +1,4 @@
-FROM nginxproxy/nginx-proxy:1.6
+# 镜像固定为 digest，确保可复现构建（标签变动需重新校验并更新 digest）
+FROM nginxproxy/nginx-proxy:1.6@sha256:5dd14e68ea81f33692b810d096ac8ebe7aa789d75ce91e05f09d56d044ed8ee3
 
 COPY limits.conf /etc/nginx/conf.d/zz-limits.conf

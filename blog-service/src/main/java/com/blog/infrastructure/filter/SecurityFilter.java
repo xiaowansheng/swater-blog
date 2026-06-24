@@ -32,6 +32,14 @@ public class SecurityFilter implements Filter {
     @Autowired
     private ObjectMapper objectMapper;
 
+    /**
+     * CSRF（Referer/Origin 同源校验）开关。
+     * 默认关闭以保证本地开发与无头 API 调用开箱可用；
+     * 生产环境应在 application-docker.yml / application-prod.yml 中设为 true。
+     */
+    @org.springframework.beans.factory.annotation.Value("${security.csrf.enabled:false}")
+    private boolean csrfEnabled;
+
     // 需要跳过安全检查的路径（基础路径，不包含context-path）
     private static final String[] SKIP_PATHS_BASE = {
         "/actuator/", "/swagger-", "/v3/api-docs", "/favicon.ico", "/uploads/"
@@ -279,38 +287,103 @@ public class SecurityFilter implements Filter {
     }
     
     /**
-     * 验证Referer（简单的CSRF防护）
+     * 验证 Referer / Origin（CSRF 防护）。
+     *
+     * 校验规则（security.csrf.enabled=true 时生效）：
+     * 1. 仅对写请求（POST/PUT/DELETE/PATCH）校验；
+     * 2. 开发环境域名组合（见 isDevEnvironment）直接放行；
+     * 3. 已认证的写请求（携带 Authorization 或 JSON 请求体）必须携带同源 Referer/Origin，
+     *    否则视为 CSRF 拒绝——修复了历史上「无 Referer 一律放行」的绕过缺陷；
+     * 4. 未携带认证头的公开写请求（如公开评论表单）在无 Referer 时仍放行，避免误伤。
      */
     private boolean validateReferer(HttpServletRequest request) {
+        // 开关关闭时不做任何 CSRF 校验（本地开发/无头 API 默认）
+        if (!csrfEnabled) {
+            return true;
+        }
+
         String method = request.getMethod();
-        
-        // 只对POST、PUT、DELETE请求检查Referer
-        if (!"POST".equals(method) && !"PUT".equals(method) && !"DELETE".equals(method)) {
+
+        // 只对写请求校验
+        if (!"POST".equals(method) && !"PUT".equals(method) && !"DELETE".equals(method) && !"PATCH".equals(method)) {
             return true;
         }
-        
+
         String referer = request.getHeader("Referer");
+        String origin = request.getHeader("Origin");
         String host = request.getHeader("Host");
-        
-        // 如果没有Referer，允许通过（可能是API调用）
-        if (!StringUtils.hasText(referer)) {
+        boolean hasRefererOrOrigin = StringUtils.hasText(referer) || StringUtils.hasText(origin);
+
+        // 开发环境域名组合放行（仅当确实携带了 Referer/Origin 时才需要匹配）
+        if (hasRefererOrOrigin && isDevEnvironment(referer != null ? referer : origin, host)) {
             return true;
         }
-        
-        // 开发环境允许跨域访问
-        if (isDevEnvironment(referer, host)) {
-            return true;
+
+        // 已认证写请求（带 Authorization 或 JSON 请求体）必须有同源 Referer/Origin，
+        // 否则拒绝——这是 CSRF 防护的关键：浏览器发起的合法请求总会带上这两个头之一
+        if (isAuthenticatedWriteRequest(request) && !hasRefererOrOrigin) {
+            logger.warn("已认证写请求缺少 Referer/Origin，疑似 CSRF, Method: {}, URI: {}, Host: {}, IP: {}",
+                    method, request.getRequestURI(), host, IpUtil.getClientIp(request));
+            return false;
         }
-        
-        // 检查Referer是否来自同一域名
-        if (StringUtils.hasText(host) && !referer.contains(host)) {
-            logger.warn("检测到可能的CSRF攻击, Referer: {}, Host: {}, IP: {}", 
-                referer, host, IpUtil.getClientIp(request));
-            // 在生产环境中可以启用这个检查
-            // return false;
+
+        // 携带了 Referer/Origin 则必须同源
+        if (hasRefererOrOrigin && StringUtils.hasText(host)) {
+            String source = StringUtils.hasText(origin) ? origin : referer;
+            if (!isSameOrigin(source, host)) {
+                logger.warn("检测到跨站请求，疑似 CSRF, Source: {}, Host: {}, IP: {}",
+                        source, host, IpUtil.getClientIp(request));
+                return false;
+            }
         }
-        
+
         return true;
+    }
+
+    /**
+     * 判断是否为已认证的写请求（携带 Authorization 头，或 Content-Type 为 JSON）。
+     */
+    private boolean isAuthenticatedWriteRequest(HttpServletRequest request) {
+        if (StringUtils.hasText(request.getHeader("Authorization"))) {
+            return true;
+        }
+        String contentType = request.getContentType();
+        return contentType != null && contentType.toLowerCase().contains("application/json");
+    }
+
+    /**
+     * 判断 Referer/Origin 与目标 Host 是否同源。
+     * Origin/Referer 形如 "https://admin.example.com:443/path"，Host 形如 "admin.example.com" 或 "admin.example.com:443"。
+     */
+    private boolean isSameOrigin(String source, String host) {
+        // 提取 source 中的 host[:port] 部分
+        String sourceHost = source;
+        int schemeIdx = source.indexOf("://");
+        if (schemeIdx >= 0) {
+            sourceHost = source.substring(schemeIdx + 3);
+        }
+        int pathIdx = sourceHost.indexOf('/');
+        if (pathIdx >= 0) {
+            sourceHost = sourceHost.substring(0, pathIdx);
+        }
+        // 标准化默认端口：Host 可能不带端口，source 可能带默认端口（如 https + :443）
+        return host.equals(stripDefaultPort(sourceHost))
+                || sourceHost.equals(stripDefaultPort(host))
+                || host.equals(sourceHost);
+    }
+
+    /**
+     * 去掉默认端口（http→80，https→443）。
+     */
+    private String stripDefaultPort(String hostPort) {
+        if (hostPort == null) {
+            return hostPort;
+        }
+        if (hostPort.endsWith(":80") || hostPort.endsWith(":443")) {
+            int idx = hostPort.lastIndexOf(':');
+            return hostPort.substring(0, idx);
+        }
+        return hostPort;
     }
     
     /**

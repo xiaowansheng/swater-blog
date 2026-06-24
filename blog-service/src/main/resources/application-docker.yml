@@ -198,6 +198,9 @@ management:
       threshold: 1GB
 
 security:
+  # CSRF 同源校验：生产环境强制开启
+  csrf:
+    enabled: true
   rate-limit:
     enabled: true
     default-window: 60

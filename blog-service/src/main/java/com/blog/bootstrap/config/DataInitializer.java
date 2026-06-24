@@ -28,9 +28,9 @@ public class DataInitializer implements ApplicationRunner {
     public DataInitializer(
             UserMapper userMapper,
             RoleMapper roleMapper,
-            @Value("${blog.bootstrap.admin.username:admin}") String adminUsername,
+            @Value("${blog.bootstrap.admin.username:}") String adminUsername,
             @Value("${blog.bootstrap.admin.password:}") String adminPassword,
-            @Value("${blog.bootstrap.admin.email:admin@example.com}") String adminEmail
+            @Value("${blog.bootstrap.admin.email:}") String adminEmail
     ) {
         this.userMapper = userMapper;
         this.roleMapper = roleMapper;
@@ -60,8 +60,14 @@ public class DataInitializer implements ApplicationRunner {
     }
 
     private void validateBootstrapConfig() {
+        if (!StringUtils.hasText(adminUsername)) {
+            throw new IllegalStateException("缺少管理员初始用户名，请设置 blog.bootstrap.admin.username（环境变量 BLOG_ADMIN_USERNAME）");
+        }
         if (!StringUtils.hasText(adminPassword)) {
-            throw new IllegalStateException("缺少管理员初始密码，请设置 blog.bootstrap.admin.password");
+            throw new IllegalStateException("缺少管理员初始密码，请设置 blog.bootstrap.admin.password（环境变量 BLOG_ADMIN_PASSWORD）");
+        }
+        if (!StringUtils.hasText(adminEmail)) {
+            throw new IllegalStateException("缺少管理员初始邮箱，请设置 blog.bootstrap.admin.email（环境变量 BLOG_ADMIN_EMAIL）");
         }
     }
 

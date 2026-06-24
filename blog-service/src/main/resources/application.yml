@@ -211,3 +211,11 @@ springdoc:
 health:
   custom:
     enabled: true
+
+# 安全配置（各 profile 可覆盖）
+security:
+  csrf:
+    # CSRF（Referer/Origin 同源校验）总开关。
+    # 默认关闭：保证本地开发与无头 API 调用开箱可用。
+    # 生产环境（application-docker.yml / application-prod.yml）应设为 true。
+    enabled: false

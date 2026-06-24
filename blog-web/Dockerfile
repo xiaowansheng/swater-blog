@@ -6,7 +6,8 @@
 # ========================================
 
 # 构建阶段
-FROM node:20-alpine AS builder
+# 镜像固定为 digest，确保可复现构建（标签变动需重新校验并更新 digest）
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS builder
 
 LABEL stage=builder
 LABEL maintainer="blog-team"
@@ -40,7 +41,7 @@ RUN --mount=type=cache,id=blog-web-next-cache,target=/app/.next/cache,sharing=lo
     pnpm exec next build --webpack
 
 # 生产阶段
-FROM node:20-alpine
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
 
 LABEL maintainer="blog-team"
 LABEL version="1.0.0"

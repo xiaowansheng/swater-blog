@@ -14,6 +14,20 @@ export default defineConfig(({ mode }) => ({
         drop: ['console', 'debugger']
       }
     : undefined,
+  build: {
+    // 将重型独立库拆分为独立 chunk，避免单一 vendor 过大、改善首屏与缓存命中率
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'antd-vendor': ['antd', '@ant-design/icons'],
+          'echarts-vendor': ['echarts', 'echarts-for-react'],
+          'editor-vendor': ['vditor', '@wangeditor/editor', '@wangeditor/editor-for-react'],
+          'pdf-vendor': ['jspdf', 'html2canvas'],
+        }
+      }
+    }
+  },
   server: {
     port: 3000,
     proxy: {
