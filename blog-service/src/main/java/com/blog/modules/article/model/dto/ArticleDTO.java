@@ -44,5 +44,7 @@ public class ArticleDTO extends com.blog.shared.model.dto.BaseDTO {
     private List<Long> tagIds;
 
     private List<String> tagNames;
+
+    private String password;
 }
 

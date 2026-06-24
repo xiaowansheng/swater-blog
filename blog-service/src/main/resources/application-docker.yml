@@ -262,10 +262,14 @@ security:
     log-sensitive-data: false
 
 springdoc:
+  api-docs:
+    enabled: false
   swagger-ui:
+    enabled: false
     default-models-expand-depth: 1
     default-model-expand-depth: 1
     doc-expansion: none
+  show-actuator: false
 
 app:
   cors:

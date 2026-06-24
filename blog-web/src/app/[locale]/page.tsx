@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import Sidebar from '@/components/layout/Sidebar';
 import ArticleList from '@/components/article/ArticleList';
 import HeroSection from '@/components/home/HeroSection';
+import ContinueReading from '@/components/home/ContinueReading';
 import Pagination from '@/components/common/Pagination';
 import { articleApi } from '@/lib/api/article';
 import { categoryApi } from '@/lib/api/category';
@@ -61,6 +62,7 @@ export default async function HomePage({
       <main id="articles" className="container relative z-10 flex-1 px-3 sm:px-4 py-8 sm:py-12 md:py-16 mx-auto">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           <div className="flex-1 w-full" id="article-list">
+            <ContinueReading />
             {articleList.records.length > 0 ? (
               <>
                 <ArticleList articles={articleList.records} />

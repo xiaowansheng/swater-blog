@@ -64,5 +64,7 @@ public class Article extends com.blog.shared.model.entity.BaseEntity {
 
     @TableField("published_at")
     private LocalDateTime publishedAt;
+
+    private String password;
 }
 

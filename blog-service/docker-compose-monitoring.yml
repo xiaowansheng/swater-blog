@@ -1,10 +1,12 @@
 services:
   # Prometheus - 指标收集
   prometheus:
-    image: prom/prometheus:latest@sha256:a75c5a35bc21d7afe69551eefa3cb1e1fb1775fe759408007a66b54ec3de1f29
+    image: prom/prometheus:v2.55.0
     container_name: blog-prometheus
     ports:
       - "${PROMETHEUS_PUBLISHED_PORT:-9090}:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./monitoring/alert-rules.yml:/etc/prometheus/alert-rules.yml
@@ -23,7 +25,7 @@ services:
 
   # Grafana - 监控面板
   grafana:
-    image: grafana/grafana:latest@sha256:5dad0df181cb644a14e13617b913b261a54f7d4fd4510721dba420929f35bea2
+    image: grafana/grafana:11.3.0
     container_name: blog-grafana
     ports:
       - "${GRAFANA_PUBLISHED_PORT:-3000}:3000"
@@ -39,24 +41,37 @@ services:
 
   # AlertManager - 告警管理
   alertmanager:
-    image: prom/alertmanager:latest@sha256:af26fbe4dd1886ac0efd7bd55cd9027da262e105b137a376522b7c14c3626e4a
+    image: prom/alertmanager:v0.28.0
     container_name: blog-alertmanager
     ports:
       - "${ALERTMANAGER_PUBLISHED_PORT:-9093}:9093"
+    environment:
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com:587}
+      SMTP_FROM: ${SMTP_FROM:-blog-alerts@yourdomain.com}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      ALERT_EMAIL_TO: ${ALERT_EMAIL_TO:-admin@yourdomain.com}
+      ALERT_EMAIL_CRITICAL: ${ALERT_EMAIL_CRITICAL:-admin@yourdomain.com}
+      ALERT_EMAIL_WARNING: ${ALERT_EMAIL_WARNING:-admin@yourdomain.com}
     volumes:
-      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - ./monitoring/alertmanager.yml.template:/etc/alertmanager/alertmanager.yml.template:ro
       - alertmanager_data:/alertmanager
-    command:
-      - '--config.file=/etc/alertmanager/alertmanager.yml'
-      - '--storage.path=/alertmanager'
-      - '--web.external-url=${ALERTMANAGER_EXTERNAL_URL:-http://localhost:9093}'
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        envsubst < /etc/alertmanager/alertmanager.yml.template > /etc/alertmanager/alertmanager.yml
+        exec alertmanager \
+          --config.file=/etc/alertmanager/alertmanager.yml \
+          --storage.path=/alertmanager \
+          --web.external-url=${ALERTMANAGER_EXTERNAL_URL:-http://localhost:9093}
     networks:
       - monitoring
     restart: unless-stopped
 
   # Node Exporter - 系统指标
   node-exporter:
-    image: prom/node-exporter:latest@sha256:e9cff4fc67b1818f8c97adb115b9f12c9a54b533de86765d4a0effc01b357205
+    image: prom/node-exporter:v1.8.2
     container_name: blog-node-exporter
     ports:
       - "${NODE_EXPORTER_PUBLISHED_PORT:-9100}:9100"
@@ -75,12 +90,14 @@ services:
 
   # MySQL Exporter - MySQL指标
   mysql-exporter:
-    image: prom/mysqld-exporter:latest@sha256:eacb4b18e2ec1e0abdf2d64851b68526c964f6d9cb3e9458fb5d5f5062ea94c1
+    image: prom/mysqld-exporter:v0.16.0
     container_name: blog-mysql-exporter
     ports:
       - "${MYSQL_EXPORTER_PUBLISHED_PORT:-9104}:9104"
     environment:
-      - DATA_SOURCE_NAME=root:${DB_ROOT_PASSWORD:-change_me_root_password}@(mysql:3306)/${DB_NAME:-blog}
+      # 生产环境建议创建只读监控用户: CREATE USER 'monitor'@'%' IDENTIFIED BY 'xxx'; GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'monitor'@'%';
+      # 然后设置 MYSQL_EXPORTER_USER=monitor
+      - DATA_SOURCE_NAME=${MYSQL_EXPORTER_USER:-root}:${MYSQL_EXPORTER_PASSWORD:-${DB_ROOT_PASSWORD:-change_me_root_password}}@(mysql:3306)/${DB_NAME:-blog}
     networks:
       - monitoring
       - default
@@ -90,7 +107,7 @@ services:
 
   # Redis Exporter - Redis指标
   redis-exporter:
-    image: oliver006/redis_exporter:latest@sha256:2e9795be900db073e9475fdb9c5124db309b07a3e4e75a1770705cb03be1a1c8
+    image: oliver006/redis_exporter:v1.67.0
     container_name: blog-redis-exporter
     ports:
       - "${REDIS_EXPORTER_PUBLISHED_PORT:-9121}:9121"

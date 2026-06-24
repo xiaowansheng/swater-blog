@@ -23,7 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -130,6 +132,70 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
         return convertToListVO(articles);
     }
 
+    @Override
+    @Cacheable(value = "article:related", key = "#articleId + ':' + (#limit != null ? #limit : 6)")
+    public List<ArticleVO> getRelatedArticles(Long articleId, Integer limit) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null) {
+            return Collections.emptyList();
+        }
+        int effectiveLimit = limit != null ? limit : 6;
+        List<Article> related = articleMapper.selectRelatedArticles(
+                articleId,
+                article.getCategoryId(),
+                effectiveLimit * 2
+        );
+        List<Article> result = new ArrayList<>();
+        for (Article a : related) {
+            if (a.getPassword() != null && !a.getPassword().isEmpty()) {
+                continue;
+            }
+            result.add(a);
+            if (result.size() >= effectiveLimit) {
+                break;
+            }
+        }
+        return convertToListVO(result);
+    }
+
+    @Override
+    public boolean verifyPassword(Long articleId, String password) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null) {
+            return false;
+        }
+        if (!StringUtils.hasText(article.getPassword())) {
+            return true;
+        }
+        return article.getPassword().equals(password);
+    }
+
+    @Override
+    public ArticleVO getByIdWithContent(Long id) {
+        Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
+                .eq(Article::getId, id)
+                .eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode()));
+        if (article == null) {
+            return null;
+        }
+        ArticleVO vo = BeanUtil.copyProperties(article, ArticleVO.class);
+        if (article.getCategoryId() != null) {
+            Category category = categoryMapper.selectById(article.getCategoryId());
+            if (category != null) {
+                vo.setCategoryName(category.getName());
+                vo.setCategoryKey(category.getCategoryKey());
+            }
+        }
+        List<Long> tagIds = articleTagMapper.selectTagIdsByArticleId(article.getId());
+        if (tagIds != null && !tagIds.isEmpty()) {
+            List<Tag> tags = tagMapper.selectBatchIds(tagIds);
+            List<TagVO> tagVOs = BeanUtil.copyList(tags, TagVO.class);
+            vo.setTags(tagVOs);
+        }
+        vo.setHasPassword(StringUtils.hasText(article.getPassword()));
+        return vo;
+    }
+
     private List<ArticleVO> convertToListVO(List<Article> articles) {
         if (CollectionUtils.isEmpty(articles)) {
             return Collections.emptyList();
@@ -165,6 +231,7 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
                 vo.setCategoryKey(category.getCategoryKey());
             }
             vo.setTags(articleTagMap.get(article.getId()));
+            vo.setHasPassword(StringUtils.hasText(article.getPassword()));
             return vo;
         }).collect(Collectors.toList());
     }
@@ -183,6 +250,11 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
             List<Tag> tags = tagMapper.selectBatchIds(tagIds);
             List<TagVO> tagVOs = BeanUtil.copyList(tags, TagVO.class);
             vo.setTags(tagVOs);
+        }
+        boolean hasPassword = StringUtils.hasText(article.getPassword());
+        vo.setHasPassword(hasPassword);
+        if (hasPassword) {
+            vo.setContent(null);
         }
         return vo;
     }

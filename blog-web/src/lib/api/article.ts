@@ -56,6 +56,20 @@ export const articleApi = {
     );
   },
 
+  getRelated: (id: number, limit: number = 6) => {
+    return fetchServer<PostVO[]>(
+      `/api/public/post/${id}/related?limit=${limit}`,
+      { next: { tags: [`article:related:${id}`] } }
+    );
+  },
+
+  verifyPassword: (id: number, password: string) => {
+    return fetchClient<PostVO>(
+      `/api/public/post/${id}/verify-password?password=${encodeURIComponent(password)}`,
+      { method: 'POST' }
+    );
+  },
+
   client: {
     getList: (params: ArticleListParams = {}) => {
       const searchParams = new URLSearchParams();

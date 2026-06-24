@@ -1,4 +1,4 @@
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   code: number;
   message: string;
   data: T;
@@ -146,6 +146,7 @@ export interface PostVO {
   tags?: TagVO[];
   status: number;
   isTop: boolean;
+  hasPassword?: boolean;
   viewCount: number;
   likeCount: number;
   commentCount: number;

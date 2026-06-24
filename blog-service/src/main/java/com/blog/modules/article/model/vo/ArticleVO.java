@@ -68,5 +68,8 @@ public class ArticleVO extends com.blog.shared.model.vo.BaseVO {
      * 引用的文件列表
      */
     private List<FileVO> referencedFiles;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("hasPassword")
+    private Boolean hasPassword;
 }
 

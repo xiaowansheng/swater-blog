@@ -149,6 +149,7 @@ const ArticleEdit: React.FC = () => {
       isTop: values.isTop ? TopStatus.PINNED : TopStatus.NORMAL,
       tagIds,
       tagNames,
+      password: values.password || undefined,
     }
   }, [form, pageId, saveState.articleId])
 
@@ -226,6 +227,7 @@ const ArticleEdit: React.FC = () => {
         categoryId: article.categoryId,
         tagIds: article.tags?.map((t) => t.id) || [],
         summary: article.excerpt,
+        password: article.password || '',
       })
 
       contentRef.current = article.content
@@ -588,6 +590,14 @@ const ArticleEdit: React.FC = () => {
 
                 <Form.Item name="isTop" label="是否置顶" valuePropName="checked">
                   <Switch />
+                </Form.Item>
+
+                <Form.Item name="password" label="访问密码" help="留空则不加密">
+                  <Input.Password
+                    placeholder="设置后读者需输入密码查看"
+                    className="rounded-md"
+                    maxLength={32}
+                  />
                 </Form.Item>
 
                 <Form.Item name="summary" label="文章摘要">

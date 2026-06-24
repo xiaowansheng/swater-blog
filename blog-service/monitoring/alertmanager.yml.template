@@ -1,11 +1,8 @@
-# 此文件由 alertmanager.yml.template 通过 envsubst 自动生成
-# 请通过 .env 环境变量配置 SMTP 凭据，不要直接修改此文件
-# 参考 alertmanager.yml.template 查看完整模板
 global:
-  smtp_smarthost: 'smtp.gmail.com:587'
-  smtp_from: 'blog-alerts@yourdomain.com'
-  smtp_auth_username: 'your-email@gmail.com'
-  smtp_auth_password: 'your-app-password'
+  smtp_smarthost: '${SMTP_HOST:-smtp.gmail.com:587}'
+  smtp_from: '${SMTP_FROM:-blog-alerts@yourdomain.com}'
+  smtp_auth_username: '${SMTP_USERNAME:-your-email@gmail.com}'
+  smtp_auth_password: '${SMTP_PASSWORD:-your-app-password}'
 
 route:
   group_by: ['alertname', 'service']
@@ -26,7 +23,7 @@ route:
 receivers:
   - name: 'default-receiver'
     email_configs:
-      - to: 'admin@yourdomain.com'
+      - to: '${ALERT_EMAIL_TO:-admin@yourdomain.com}'
         subject: '[Blog监控] {{ .GroupLabels.alertname }}'
         body: |
           {{ range .Alerts }}
@@ -44,7 +41,7 @@ receivers:
 
   - name: 'critical-receiver'
     email_configs:
-      - to: 'admin@yourdomain.com,ops@yourdomain.com'
+      - to: '${ALERT_EMAIL_CRITICAL:-admin@yourdomain.com,ops@yourdomain.com}'
         subject: '[紧急告警] {{ .GroupLabels.alertname }}'
         body: |
           🚨 紧急告警 🚨
@@ -61,7 +58,7 @@ receivers:
 
   - name: 'warning-receiver'
     email_configs:
-      - to: 'admin@yourdomain.com'
+      - to: '${ALERT_EMAIL_WARNING:-admin@yourdomain.com}'
         subject: '[警告] {{ .GroupLabels.alertname }}'
         body: |
           ⚠️ 警告信息

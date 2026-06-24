@@ -221,5 +221,26 @@ public class ArticlePublicController {
         List<ArticleVO> articles = articlePublicService.getLatestArticles(limit);
         return Result.success(articles);
     }
+
+    @GetMapping("/{id}/related")
+    @ApiOperation(name = "获取相关文章推荐", type = ApiOperationType.QUERY, description = "基于标签共现和分类获取相关文章推荐")
+    public Result<List<ArticleVO>> getRelatedArticles(
+            @PathVariable Long id,
+            @RequestParam(required = false) Integer limit) {
+        List<ArticleVO> articles = articlePublicService.getRelatedArticles(id, limit);
+        return Result.success(articles);
+    }
+
+    @PostMapping("/{id}/verify-password")
+    @ApiOperation(name = "验证文章密码", type = ApiOperationType.QUERY, description = "验证密码获取文章内容")
+    public Result<ArticleVO> verifyPassword(
+            @PathVariable Long id,
+            @RequestParam String password) {
+        if (!articlePublicService.verifyPassword(id, password)) {
+            return Result.error(403, "密码错误");
+        }
+        ArticleVO vo = articlePublicService.getByIdWithContent(id);
+        return Result.success(vo);
+    }
 }
 

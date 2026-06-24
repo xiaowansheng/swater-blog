@@ -13,5 +13,11 @@ public interface ArticlePublicService {
     List<ArticleVO> getHotArticles(Integer limit);
 
     List<ArticleVO> getLatestArticles(Integer limit);
+
+    List<ArticleVO> getRelatedArticles(Long articleId, Integer limit);
+
+    boolean verifyPassword(Long articleId, String password);
+
+    ArticleVO getByIdWithContent(Long id);
 }
 

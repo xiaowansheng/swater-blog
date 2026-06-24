@@ -51,5 +51,28 @@
         GROUP BY YEAR(published_at), MONTH(published_at)
         ORDER BY year DESC, month DESC
     </select>
+
+    <select id="selectRelatedArticles" resultType="com.blog.modules.article.model.entity.Article">
+        SELECT DISTINCT a.* FROM article a
+        INNER JOIN article_tag at ON a.id = at.article_id
+        WHERE a.deleted = 0 AND a.status = 1 AND a.id != #{articleId}
+          AND at.tag_id IN (
+              SELECT tag_id FROM article_tag WHERE article_id = #{articleId}
+          )
+        UNION
+        SELECT a.* FROM article a
+        WHERE a.deleted = 0 AND a.status = 1 AND a.id != #{articleId}
+          AND a.category_id = #{categoryId}
+          AND a.id NOT IN (
+              SELECT DISTINCT a2.id FROM article a2
+              INNER JOIN article_tag at2 ON a2.id = at2.article_id
+              WHERE a2.deleted = 0 AND a2.status = 1 AND a2.id != #{articleId}
+                AND at2.tag_id IN (
+                    SELECT tag_id FROM article_tag WHERE article_id = #{articleId}
+                )
+          )
+        ORDER BY view_count DESC, like_count DESC, published_at DESC
+        LIMIT #{limit}
+    </select>
 </mapper>
 

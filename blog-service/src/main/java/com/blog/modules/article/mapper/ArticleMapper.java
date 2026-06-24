@@ -29,4 +29,6 @@ public interface ArticleMapper extends com.blog.shared.model.BaseMapper<Article>
 
     @Update("UPDATE article SET like_count = IF(like_count IS NULL OR like_count <= 0, 0, like_count - 1) WHERE id = #{id} AND deleted = 0")
     int decrementLikeCount(@Param("id") Long id);
+
+    List<Article> selectRelatedArticles(@Param("articleId") Long articleId, @Param("categoryId") Long categoryId, @Param("limit") Integer limit);
 }
