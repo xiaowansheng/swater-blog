@@ -114,6 +114,19 @@ export interface ComponentConfig {
   guestbookMessageEnabled: boolean
 }
 
+export interface WebhookItem {
+  id: string
+  name: string
+  url: string
+  secret: string
+  events: string[]
+  enabled: boolean
+}
+
+export interface WebhookConfig {
+  webhooks: WebhookItem[]
+}
+
 // API 方法
 export const getSiteConfig = (): Promise<SiteConfig> => request.get('/admin/site-config/site')
 export const updateSiteConfig = (data: SiteConfig): Promise<void> => request.put('/admin/site-config/site', data)
@@ -145,4 +158,8 @@ export const updateEmailConfig = (data: EmailConfig): Promise<void> => request.p
 // 组件配置
 export const getComponentConfig = (): Promise<ComponentConfig> => request.get('/admin/site-config/component')
 export const updateComponentConfig = (data: ComponentConfig): Promise<void> => request.put('/admin/site-config/component', data)
+
+// Webhook 配置
+export const getWebhookConfig = (): Promise<WebhookConfig> => request.get('/admin/site-config/webhook')
+export const updateWebhookConfig = (data: WebhookConfig): Promise<void> => request.put('/admin/site-config/webhook', data)
 

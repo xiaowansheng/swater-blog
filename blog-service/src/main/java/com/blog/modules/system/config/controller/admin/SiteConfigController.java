@@ -10,6 +10,7 @@ import com.blog.modules.system.config.model.dto.config.CoverConfigDTO;
 import com.blog.modules.system.config.model.dto.config.AuthorConfigDTO;
 import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
 import com.blog.modules.system.config.model.dto.config.ComponentConfigDTO;
+import com.blog.modules.system.config.model.dto.config.WebhookConfigDTO;
 import com.blog.shared.annotation.ApiOperation;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.shared.Result;
@@ -174,6 +175,21 @@ public class SiteConfigController {
     @ApiOperation(name = "更新邮件配置", type = ApiOperationType.UPDATE, description = "更新邮件设置配置")
     public Result<Void> updateEmailConfig(@RequestBody EmailConfigDTO config) {
         siteConfigService.updateEmailConfig(config);
+        return Result.success();
+    }
+
+    // ========== Webhook 配置 ==========
+
+    @GetMapping("/webhook")
+    @ApiOperation(name = "获取 Webhook 配置", type = ApiOperationType.QUERY, description = "获取 Webhook 配置列表")
+    public Result<WebhookConfigDTO> getWebhookConfig() {
+        return Result.success(siteConfigService.getWebhookConfig());
+    }
+
+    @PutMapping("/webhook")
+    @ApiOperation(name = "更新 Webhook 配置", type = ApiOperationType.UPDATE, description = "更新 Webhook 配置列表")
+    public Result<Void> updateWebhookConfig(@RequestBody WebhookConfigDTO config) {
+        siteConfigService.updateWebhookConfig(config);
         return Result.success();
     }
 }

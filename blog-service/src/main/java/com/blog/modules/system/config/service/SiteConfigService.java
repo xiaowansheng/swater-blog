@@ -10,6 +10,7 @@ import com.blog.modules.system.config.model.dto.config.CoverConfigDTO;
 import com.blog.modules.system.config.model.dto.config.AuthorConfigDTO;
 import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
 import com.blog.modules.system.config.model.dto.config.ComponentConfigDTO;
+import com.blog.modules.system.config.model.dto.config.WebhookConfigDTO;
 /**
  * 网站配置服务
  */
@@ -58,5 +59,9 @@ public interface SiteConfigService {
     void updateUploadConfig(UploadConfigDTO config);
     
     void updateEmailConfig(EmailConfigDTO config);
+
+    WebhookConfigDTO getWebhookConfig();
+
+    void updateWebhookConfig(WebhookConfigDTO config);
     
 }

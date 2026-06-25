@@ -11,6 +11,7 @@ import com.blog.modules.system.config.model.dto.config.CoverConfigDTO;
 import com.blog.modules.system.config.model.dto.config.AuthorConfigDTO;
 import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
 import com.blog.modules.system.config.model.dto.config.ComponentConfigDTO;
+import com.blog.modules.system.config.model.dto.config.WebhookConfigDTO;
 import com.blog.modules.system.config.model.vo.ConfigVO;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.EventUtil;
@@ -45,6 +46,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     private static final String KEY_UPLOAD = "upload";
     private static final String KEY_EMAIL = "email";
     private static final String KEY_COMPONENT = "component";
+    private static final String KEY_WEBHOOK = "webhook";
 
     // ========== 通用方法 ==========
     
@@ -270,6 +272,37 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Transactional
     public void updateEmailConfig(EmailConfigDTO config) {
         updateConfig(KEY_EMAIL, config);
+    }
+
+    @Override
+    @Cacheable(value = "configs", key = "'webhook'")
+    public WebhookConfigDTO getWebhookConfig() {
+        return getConfig(KEY_WEBHOOK, WebhookConfigDTO.class);
+    }
+
+    @Override
+    @Caching(evict = {
+        @CacheEvict(value = "configs", key = "'webhook'"),
+        @CacheEvict(value = "siteConfig", key = "'all'")
+    })
+    @Transactional
+    public void updateWebhookConfig(WebhookConfigDTO config) {
+        if (config != null && config.getWebhooks() != null) {
+            WebhookConfigDTO existing = getWebhookConfig();
+            if (existing != null && existing.getWebhooks() != null) {
+                for (WebhookConfigDTO.WebhookItem item : config.getWebhooks()) {
+                    if (item.getSecret() == null || item.getSecret().isEmpty()) {
+                        for (WebhookConfigDTO.WebhookItem oldItem : existing.getWebhooks()) {
+                            if (item.getId() != null && item.getId().equals(oldItem.getId())) {
+                                item.setSecret(oldItem.getSecret());
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        updateConfig(KEY_WEBHOOK, config);
     }
     
 }

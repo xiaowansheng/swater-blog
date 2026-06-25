@@ -68,6 +68,7 @@ import {
   AppstoreOutlined,
   ExclamationCircleOutlined,
   UndoOutlined,
+  ApiOutlined,
 } from "@ant-design/icons";
 import {
   ImageUpload,
@@ -76,6 +77,7 @@ import {
   SquareUpload
 } from "@/components/common/ImageUpload";
 import * as configApi from "@/api/config";
+import WebhookConfigTab from "@/components/config/WebhookConfig";
 
 const { TextArea } = Input;
 
@@ -1147,6 +1149,18 @@ const ConfigPage: React.FC = () => {
     //     </Form>
     //   ),
     // },
+    {
+      key: "webhook",
+      label: (
+        <span>
+          <ApiOutlined /> Webhook
+          <span style={{ color: "#ff4d4f", marginLeft: "8px", display: "inline-block", width: "12px" }}>
+            {unsavedTabs.has("webhook") ? "●" : ""}
+          </span>
+        </span>
+      ),
+      children: <WebhookConfigTab />,
+    },
   ];
 
   // 获取当前标签页对应的保存函数

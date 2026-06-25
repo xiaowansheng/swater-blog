@@ -219,3 +219,11 @@ security:
     # 默认关闭：保证本地开发与无头 API 调用开箱可用。
     # 生产环境（application-docker.yml / application-prod.yml）应设为 true。
     enabled: false
+
+blog:
+  webhook:
+    connect-timeout: 5000
+    read-timeout: 10000
+    max-retries: 3
+    retry-delay-ms: 2000
+    allowed-schemes: https
