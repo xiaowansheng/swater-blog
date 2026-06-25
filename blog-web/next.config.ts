@@ -36,12 +36,6 @@ function buildImageRemotePatterns(): { protocol: "http" | "https"; hostname: str
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  // isomorphic-dompurify 依赖 jsdom，而 jsdom@28 在打包进 server bundle 后，
-  // 其 style-rules.js 用 import.meta.url 解析 default-stylesheet.css 的路径会错位
-  // （指向 living/helpers/ 而非实际所在 browser/），导致服务端预渲染 / SSR 时
-  // readFileSync 抛 ENOENT。将这些纯 Node 库标记为外部包，运行时直接从
-  // node_modules require，避免被打进 server chunk。
-  serverExternalPackages: ["isomorphic-dompurify", "jsdom"],
   compiler: process.env.NODE_ENV === "production"
     ? {
         removeConsole: {

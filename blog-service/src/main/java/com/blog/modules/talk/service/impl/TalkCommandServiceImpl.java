@@ -62,6 +62,8 @@ public class TalkCommandServiceImpl implements TalkCommandService {
     @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public Long create(TalkDTO dto) {
         Talk talk = BeanUtil.copyProperties(dto, Talk.class);
+        // 富文本入库前清洗 XSS（白名单保留 class/style，编辑器代码高亮/对齐等不丢失）
+        talk.setContent(com.blog.shared.util.HtmlSanitizer.cleanRichText(dto.getContent()));
         talk.setTalkKey(KeyUtil.generateKey("talk"));
 
         Long userId = UserContext.getCurrentUserId();
@@ -150,7 +152,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
             throw new BusinessException("说说不存在");
         }
 
-        talk.setContent(dto.getContent());
+        talk.setContent(com.blog.shared.util.HtmlSanitizer.cleanRichText(dto.getContent()));
         talk.setStatus(dto.getStatus());
         talk.setIsTop(dto.getIsTop());
 
