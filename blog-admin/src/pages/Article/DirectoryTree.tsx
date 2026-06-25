@@ -383,7 +383,7 @@ const ArticleDirectoryTree: React.FC = () => {
       {
         title: '根目录',
         value: 0,
-        key: 'root',
+        key: 0,
         children: buildOptions(items),
       },
     ]
@@ -404,7 +404,7 @@ const ArticleDirectoryTree: React.FC = () => {
       {
         title: '根目录',
         value: 0,
-        key: 'root',
+        key: 0,
         children: buildOptions(items),
       },
     ]

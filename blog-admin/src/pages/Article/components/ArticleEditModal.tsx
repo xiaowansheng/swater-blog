@@ -166,7 +166,7 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
                 open={open}
                 onCancel={handleCancel}
                 width={720}
-                destroyOnClose
+                destroyOnHidden
                 footer={
                     <div className="flex justify-end gap-2 pt-3 border-t">
                         <Button onClick={handleCancel}>
