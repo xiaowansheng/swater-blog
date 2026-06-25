@@ -120,6 +120,10 @@ services:
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
       SERVER_PORT: ${SERVER_PORT:-8888}
       BLOG_SITE_URL: ${BLOG_SITE_URL:-http://127.0.0.1:3001}
+      # 开发环境关闭 CSRF 同源校验：dev 拓扑为 浏览器(3001) → vite proxy → 后端(8888)，
+      # proxy 转发的 Origin/Referer 与后端 Host 不匹配，会被生产 CSRF 策略误判为跨站攻击
+      # 而返回 400（如登录 POST /api/auth/login）。生产部署（docker-compose.yml）保持开启。
+      SECURITY_CSRF_ENABLED: ${SECURITY_CSRF_ENABLED:-false}
       BLOG_RSS_DEFAULT_LOCALE: ${BLOG_RSS_DEFAULT_LOCALE:-zh}
       # Elasticsearch 配置（默认走 database 搜索插件，启用 ES 时设 PLUGIN_SEARCH_ACTIVE=elasticsearch）
       PLUGIN_SEARCH_ACTIVE: ${PLUGIN_SEARCH_ACTIVE:-database}
