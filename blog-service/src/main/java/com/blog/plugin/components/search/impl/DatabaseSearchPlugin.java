@@ -163,7 +163,31 @@ public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
         Page<Comment> pageObj = new Page<>(page, size);
         Page<Comment> result = commentMapper.selectPage(pageObj, wrapper);
 
-        List<SearchVO> voList = result.getRecords().stream()
+        List<Comment> comments = result.getRecords();
+        // 批量预取目标对象，避免逐条 selectById 造成 N+1 查询
+        List<Long> articleTargetIds = new ArrayList<>();
+        List<Long> talkTargetIds = new ArrayList<>();
+        for (Comment comment : comments) {
+            if (comment.getTargetType() == null || comment.getTargetId() == null) {
+                continue;
+            }
+            String targetType = comment.getTargetType().toLowerCase();
+            if (targetType.contains("article") || targetType.contains("post")) {
+                articleTargetIds.add(comment.getTargetId());
+            } else if (targetType.contains("moment") || targetType.contains("talk")) {
+                talkTargetIds.add(comment.getTargetId());
+            }
+        }
+        Map<Long, String> articleKeyMap = articleTargetIds.isEmpty() ? java.util.Collections.emptyMap() :
+                articleMapper.selectBatchIds(articleTargetIds).stream()
+                        .filter(a -> a.getArticleKey() != null)
+                        .collect(Collectors.toMap(Article::getId, Article::getArticleKey));
+        Map<Long, String> talkKeyMap = talkTargetIds.isEmpty() ? java.util.Collections.emptyMap() :
+                talkMapper.selectBatchIds(talkTargetIds).stream()
+                        .filter(t -> t.getTalkKey() != null)
+                        .collect(Collectors.toMap(Talk::getId, Talk::getTalkKey));
+
+        List<SearchVO> voList = comments.stream()
                 .map(comment -> {
                     SearchVO vo = new SearchVO();
                     vo.setType("comment");
@@ -173,20 +197,14 @@ public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
                     vo.setTargetId(comment.getTargetId());
                     vo.setTargetType(comment.getTargetType());
 
-                    // 根据评论目标类型查询对应的key
+                    // 从批量预取的映射中查目标 key
                     if (comment.getTargetType() != null) {
                         String targetType = comment.getTargetType().toLowerCase();
 
                         if (targetType.contains("article") || targetType.contains("post")) {
-                            Article targetArticle = articleMapper.selectById(comment.getTargetId());
-                            if (targetArticle != null) {
-                                vo.setArticleKey(targetArticle.getArticleKey());
-                            }
+                            vo.setArticleKey(articleKeyMap.get(comment.getTargetId()));
                         } else if (targetType.contains("moment") || targetType.contains("talk")) {
-                            Talk targetTalk = talkMapper.selectById(comment.getTargetId());
-                            if (targetTalk != null) {
-                                vo.setArticleKey(targetTalk.getTalkKey());
-                            }
+                            vo.setArticleKey(talkKeyMap.get(comment.getTargetId()));
                         }
                     }
 

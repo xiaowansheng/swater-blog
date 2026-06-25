@@ -18,13 +18,17 @@ import com.blog.modules.article.model.vo.ArticleVO;
 import com.blog.modules.tag.model.vo.TagVO;
 import com.blog.modules.article.service.ArticlePublicService;
 import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.KeyUtil;
 import com.blog.shared.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,6 +38,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 @Service
 public class ArticlePublicServiceImpl implements ArticlePublicService {
+
+    /** 加密文章解锁 token 的 Redis key 前缀：article:pwd:{articleId}:{token} */
+    private static final String UNLOCK_TOKEN_PREFIX = "article:pwd:";
+
     @Autowired
     private ArticleMapper articleMapper;
 
@@ -45,6 +53,13 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
 
     @Autowired
     private ArticleTagMapper articleTagMapper;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
+    /** 解锁 token 有效期，默认 7 天 */
+    @Value("${blog.article.unlock-token-ttl-days:7}")
+    private long unlockTokenTtlDays;
 
     @Override
     @Cacheable(
@@ -164,10 +179,21 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
         if (article == null) {
             return false;
         }
-        if (!StringUtils.hasText(article.getPassword())) {
+        String stored = article.getPassword();
+        if (!StringUtils.hasText(stored)) {
             return true;
         }
-        return article.getPassword().equals(password);
+        // 兼容历史明文：BCrypt 哈希固定以 "$2" 开头，旧明文密码按常量时间比对
+        if (stored.startsWith("$2")) {
+            try {
+                return com.blog.shared.util.PasswordUtil.matches(password, stored);
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+        }
+        return java.security.MessageDigest.isEqual(
+                stored.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
 
     @Override
@@ -194,6 +220,45 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
         }
         vo.setHasPassword(StringUtils.hasText(article.getPassword()));
         return vo;
+    }
+
+    @Override
+    public String verifyAndIssueToken(Long articleId, String password) {
+        if (!verifyPassword(articleId, password)) {
+            return null;
+        }
+        // 密码正确：签发随机 token 并写入 Redis，绑定 articleId，避免存明文密码到客户端
+        String token = java.util.UUID.randomUUID().toString().replace("-", "");
+        String key = UNLOCK_TOKEN_PREFIX + articleId + ":" + token;
+        try {
+            redisTemplate.opsForValue().set(key, "1", Duration.ofDays(unlockTokenTtlDays));
+        } catch (Exception e) {
+            // Redis 不可用时降级：返回一次性 token 但不入缓存，后续无法凭 token 复用
+            // （前端此时已拿到本次正文，不影响本次访问）
+            org.slf4j.LoggerFactory.getLogger(getClass())
+                    .warn("签发文章解锁 token 失败（Redis 异常），仅本次有效: articleId={}", articleId, e);
+        }
+        return token;
+    }
+
+    @Override
+    public ArticleVO getByUnlockToken(Long articleId, String token) {
+        if (!StringUtils.hasText(token)) {
+            return null;
+        }
+        String key = UNLOCK_TOKEN_PREFIX + articleId + ":" + token;
+        boolean valid;
+        try {
+            Object val = redisTemplate.opsForValue().get(key);
+            valid = val != null;
+        } catch (Exception e) {
+            // Redis 异常时拒绝，避免密码门控被绕过
+            return null;
+        }
+        if (!valid) {
+            return null;
+        }
+        return getByIdWithContent(articleId);
     }
 
     private List<ArticleVO> convertToListVO(List<Article> articles) {

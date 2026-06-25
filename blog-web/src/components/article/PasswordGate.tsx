@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/Card';
+import { articleApi } from '@/lib/api/article';
 import type { PostVO } from '@/types';
 
 interface PasswordGateProps {
@@ -9,26 +10,31 @@ interface PasswordGateProps {
   onUnlock: (article: PostVO) => void;
 }
 
-const STORAGE_KEY_PREFIX = 'article_pwd_';
+/**
+ * 加密文章解锁 token 的 localStorage key 前缀。
+ * 仅存储后端签发的随机 token（带 TTL），不再保存明文密码，避免 XSS 泄露密码。
+ */
+const TOKEN_KEY_PREFIX = 'article_unlock_';
 
-function getStoredPassword(articleId: number): string | null {
+function getStoredToken(articleId: number): string | null {
   if (typeof window === 'undefined') return null;
   try {
-    return localStorage.getItem(`${STORAGE_KEY_PREFIX}${articleId}`);
+    return localStorage.getItem(`${TOKEN_KEY_PREFIX}${articleId}`);
   } catch {
     return null;
   }
 }
 
-function storePassword(articleId: number, password: string) {
+function storeToken(articleId: number, token: string) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(`${STORAGE_KEY_PREFIX}${articleId}`, password);
+    localStorage.setItem(`${TOKEN_KEY_PREFIX}${articleId}`, token);
   } catch { /* ignore */ }
 }
 
+/** 供 SSR 首屏判断是否已有解锁凭证（避免闪烁密码框）。 */
 export function isArticleUnlocked(articleId: number): boolean {
-  return getStoredPassword(articleId) !== null;
+  return getStoredToken(articleId) !== null;
 }
 
 export default function PasswordGate({ articleId, onUnlock }: PasswordGateProps) {
@@ -36,26 +42,35 @@ export default function PasswordGate({ articleId, onUnlock }: PasswordGateProps)
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // 凭已有 token 复用解锁；token 失效则清掉，回退到密码输入
+  const tryUnlockWithToken = useCallback(
+    async (token: string) => {
+      setLoading(true);
+      setError('');
+      try {
+        const article = await articleApi.getUnlockedContent(articleId, token);
+        onUnlock(article);
+      } catch {
+        // token 过期/无效，清除后让用户重新输入密码
+        try { localStorage.removeItem(`${TOKEN_KEY_PREFIX}${articleId}`); } catch { /* ignore */ }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [articleId, onUnlock]
+  );
+
   const verifyPassword = useCallback(
     async (pwd: string) => {
       setLoading(true);
       setError('');
-
       try {
-        const res = await fetch(
-          `/api/public/post/${articleId}/verify-password?password=${encodeURIComponent(pwd)}`,
-          { method: 'POST' }
-        );
-        const json = await res.json();
-
-        if (json.code === 200 && json.data) {
-          storePassword(articleId, pwd);
-          onUnlock(json.data);
-        } else {
-          setError(json.message || '密码错误');
-        }
-      } catch {
-        setError('验证失败，请稍后重试');
+        const { token, article } = await articleApi.verifyPassword(articleId, pwd);
+        storeToken(articleId, token);
+        onUnlock(article);
+      } catch (e: unknown) {
+        const msg = (e as { message?: string })?.message;
+        setError(msg || '密码错误');
       } finally {
         setLoading(false);
       }
@@ -64,11 +79,11 @@ export default function PasswordGate({ articleId, onUnlock }: PasswordGateProps)
   );
 
   useEffect(() => {
-    const stored = getStoredPassword(articleId);
-    if (stored) {
-      verifyPassword(stored);
+    const token = getStoredToken(articleId);
+    if (token) {
+      tryUnlockWithToken(token);
     }
-  }, [articleId, verifyPassword]);
+  }, [articleId, tryUnlockWithToken]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

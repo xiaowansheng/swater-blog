@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -80,6 +81,10 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
             }
             if (article.getStatus().equals(ArticleStatus.PUBLISHED.getCode())) {
                 article.setPublishedAt(LocalDateTime.now());
+            }
+            // 密码哈希存储：明文不落库（已在 PasswordUtil 内部对空值校验）
+            if (StringUtils.hasText(dto.getPassword())) {
+                article.setPassword(com.blog.shared.util.PasswordUtil.encode(dto.getPassword()));
             }
             
             articleMapper.insert(article);
@@ -146,6 +151,14 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         article.setNote(dto.getNote());
         article.setStatus(dto.getStatus());
         article.setIsTop(dto.getIsTop());
+
+        // 密码处理：admin 端编辑不回填密码，空值表示保持原密码不变，非空则重新哈希。
+        // 仅当显式传入非空明文时才覆盖；传入空串视为清空加密（与 create 行为对齐：不加密）。
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            article.setPassword(com.blog.shared.util.PasswordUtil.encode(dto.getPassword()));
+        } else if (dto.getPassword() != null && dto.getPassword().isEmpty()) {
+            article.setPassword(null);
+        }
         
         if (dto.getStatus() != null && dto.getStatus().equals(ArticleStatus.PUBLISHED.getCode()) && article.getPublishedAt() == null) {
             article.setPublishedAt(LocalDateTime.now());

@@ -6,7 +6,9 @@ import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.modules.article.model.vo.ArticleUnlockVO;
 import com.blog.modules.article.model.vo.ArticleVO;
+import com.blog.modules.article.model.dto.ArticlePasswordVerifyDTO;
 import com.blog.modules.article.service.ArticlePublicService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -232,14 +234,29 @@ public class ArticlePublicController {
     }
 
     @PostMapping("/{id}/verify-password")
-    @ApiOperation(name = "验证文章密码", type = ApiOperationType.QUERY, description = "验证密码获取文章内容")
-    public Result<ArticleVO> verifyPassword(
+    @ApiOperation(name = "验证文章密码", type = ApiOperationType.QUERY, description = "验证密码获取文章内容并签发解锁 token")
+    public Result<ArticleUnlockVO> verifyPassword(
             @PathVariable Long id,
-            @RequestParam String password) {
-        if (!articlePublicService.verifyPassword(id, password)) {
+            @jakarta.validation.Valid @RequestBody ArticlePasswordVerifyDTO body) {
+        String token = articlePublicService.verifyAndIssueToken(id, body.getPassword());
+        if (token == null) {
             return Result.error(403, "密码错误");
         }
-        ArticleVO vo = articlePublicService.getByIdWithContent(id);
+        ArticleUnlockVO result = new ArticleUnlockVO();
+        result.setToken(token);
+        result.setArticle(articlePublicService.getByIdWithContent(id));
+        return Result.success(result);
+    }
+
+    @GetMapping("/{id}/unlocked-content")
+    @ApiOperation(name = "凭解锁 token 获取文章正文", type = ApiOperationType.QUERY, description = "凭 verify-password 返回的 token 复用解锁，无需重复输入密码")
+    public Result<ArticleVO> getUnlockedContent(
+            @PathVariable Long id,
+            @RequestParam String token) {
+        ArticleVO vo = articlePublicService.getByUnlockToken(id, token);
+        if (vo == null) {
+            return Result.error(403, "解锁凭证无效或已过期");
+        }
         return Result.success(vo);
     }
 }

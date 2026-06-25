@@ -19,5 +19,16 @@ public interface ArticlePublicService {
     boolean verifyPassword(Long articleId, String password);
 
     ArticleVO getByIdWithContent(Long id);
+
+    /**
+     * 验证密码并签发一次性解锁 token（绑定 articleId，带 TTL，存 Redis）。
+     * @return token，密码错误时返回 null
+     */
+    String verifyAndIssueToken(Long articleId, String password);
+
+    /**
+     * 凭解锁 token 获取文章正文。token 失效或文章不需要密码时返回 null。
+     */
+    ArticleVO getByUnlockToken(Long articleId, String token);
 }
 

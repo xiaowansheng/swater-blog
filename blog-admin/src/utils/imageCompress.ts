@@ -1,6 +1,7 @@
 /**
  * 图片压缩工具 — blog-admin 端
- * 上传前对 JPEG/PNG 图片进行压缩并转为 WebP 格式
+ * 上传前对 JPEG 图片进行压缩并转为 WebP 格式；
+ * PNG / GIF / SVG / 小体积 WebP 保留原样（PNG 透明度、GIF 动图、矢量图无损需求）。
  */
 type CompressOptions = {
   quality?: number;

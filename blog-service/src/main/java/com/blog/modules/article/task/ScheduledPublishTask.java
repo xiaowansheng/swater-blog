@@ -1,6 +1,7 @@
 package com.blog.modules.article.task;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.blog.infrastructure.lock.RedisDistributedLock;
 import com.blog.modules.article.mapper.ArticleMapper;
 import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.article.model.enums.ArticleStatus;
@@ -11,13 +12,24 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Duration;
 import java.util.List;
 
+/**
+ * 定时发布调度。
+ *
+ * 多实例部署下，借助 Redis 分布式锁保证同一时刻只有一个实例执行扫描，
+ * 避免文章被重复发布（进而触发重复的 Webhook / 邮件通知）。
+ * 单实例或 Redis 不可用时，降级为「本实例执行」以保证功能可用。
+ */
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "blog.scheduler.publish.enabled", havingValue = "true", matchIfMissing = true)
 public class ScheduledPublishTask {
+
+    /** 批次级锁：60s 触发一次，持有 90s 足以覆盖单次扫描+发布。 */
+    private static final String LOCK_KEY = "blog:scheduler:publish:lock";
+    private static final Duration LOCK_LEASE = Duration.ofSeconds(90);
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -25,12 +37,20 @@ public class ScheduledPublishTask {
     @Autowired
     private ArticleCommandService articleCommandService;
 
+    @Autowired
+    private RedisDistributedLock distributedLock;
+
     @Scheduled(fixedDelay = 60000)
     public void publishScheduledArticles() {
+        // 抢占锁；获取不到说明已有其他实例在处理，直接跳过
+        String token = distributedLock.tryLock(LOCK_KEY, LOCK_LEASE);
+        if (token == null) {
+            return;
+        }
         try {
             List<Article> scheduled = articleMapper.selectList(new LambdaQueryWrapper<Article>()
                     .eq(Article::getStatus, ArticleStatus.SCHEDULED.getCode())
-                    .le(Article::getPublishedAt, LocalDateTime.now())
+                    .le(Article::getPublishedAt, java.time.LocalDateTime.now())
                     .eq(Article::getDeleted, 0));
             if (scheduled.isEmpty()) {
                 return;
@@ -45,6 +65,8 @@ public class ScheduledPublishTask {
             }
         } catch (Exception e) {
             log.error("检查定时发布文章失败", e);
+        } finally {
+            distributedLock.unlock(LOCK_KEY, token);
         }
     }
 }

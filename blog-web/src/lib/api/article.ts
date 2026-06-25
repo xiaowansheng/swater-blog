@@ -64,9 +64,24 @@ export const articleApi = {
   },
 
   verifyPassword: (id: number, password: string) => {
+    return fetchClient<{ token: string; article: PostVO }>(
+      `/api/public/post/${id}/verify-password`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+        // 密码错误属于预期内的业务结果，由组件内显示错误信息，不弹全局 toast
+        silent: true,
+      }
+    );
+  },
+
+  /** 凭解锁 token 复用获取加密文章正文（token 失效返回 403） */
+  getUnlockedContent: (id: number, token: string) => {
     return fetchClient<PostVO>(
-      `/api/public/post/${id}/verify-password?password=${encodeURIComponent(password)}`,
-      { method: 'POST' }
+      `/api/public/post/${id}/unlocked-content?token=${encodeURIComponent(token)}`,
+      // token 过期属正常情况，静默失败后回退到密码输入，不弹 toast
+      { silent: true }
     );
   },
 

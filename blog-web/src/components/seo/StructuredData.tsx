@@ -1,5 +1,13 @@
 import type { PostVO } from '@/types';
 
+/**
+ * 将对象序列化为 JSON-LD 字符串，并转义 `<` 防止 `</script>` 闭合 script 标签
+ * 导致注入。`>` 一并转义以保持对称。该转义不影响 JSON 解析。
+ */
+function toScriptJson(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, '\\u003c').replace(/>/g, '\\u003e');
+}
+
 interface StructuredDataProps {
   article: PostVO;
   locale: string;
@@ -67,11 +75,11 @@ export function ArticleStructuredData({ article, locale, url, siteName = 'Swater
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+        dangerouslySetInnerHTML={{ __html: toScriptJson(breadcrumb) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+        dangerouslySetInnerHTML={{ __html: toScriptJson(articleSchema) }}
       />
     </>
   );
@@ -109,11 +117,11 @@ export function HomePageStructuredData({ locale, siteName = 'Swater Blog', descr
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }}
+        dangerouslySetInnerHTML={{ __html: toScriptJson(website) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(person) }}
+        dangerouslySetInnerHTML={{ __html: toScriptJson(person) }}
       />
     </>
   );

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 /**
  * 安全过滤器
  * 用于检测和防护各种安全攻击
@@ -387,39 +388,53 @@ public class SecurityFilter implements Filter {
     }
     
     /**
-     * 检查是否为开发环境的合法请求
+     * 检查是否为开发环境的合法请求。
+     * 精确比对 Referer/Origin 的 host[:port] 与目标 Host，避免 `contains` 被构造
+     * （如 `evil.com?localhost:3000`）绕过。仅匹配本地开发端口组合。
      */
     private boolean isDevEnvironment(String referer, String host) {
         if (!StringUtils.hasText(referer) || !StringUtils.hasText(host)) {
             return false;
         }
-        
-        // 允许的开发环境域名组合
-        String[][] allowedDevCombinations = {
-            {"localhost:3000", "localhost:8888"},  // 前端开发服务器 -> 后端开发服务器
-            {"127.0.0.1:3000", "127.0.0.1:8888"}, // 本地IP访问
-            {"localhost:3000", "127.0.0.1:8888"},  // 混合访问
-            {"127.0.0.1:3000", "localhost:8888"},  // 混合访问
-            {"localhost:3001", "localhost:8888"},  // 前端开发服务器(3001端口) -> 后端开发服务器
-            {"127.0.0.1:3001", "127.0.0.1:8888"}, // 本地IP访问(3001端口)
-            {"localhost:3001", "127.0.0.1:8888"},  // 混合访问(3001端口)
-            {"127.0.0.1:3001", "localhost:8888"},  // 混合访问(3001端口)
-            {"localhost:3002", "localhost:8888"},  // 前端开发服务器(3002端口) -> 后端开发服务器
-            {"127.0.0.1:3002", "127.0.0.1:8888"}, // 本地IP访问(3002端口)
-            {"localhost:3002", "127.0.0.1:8888"},  // 混合访问(3002端口)
-            {"127.0.0.1:3002", "localhost:8888"}   // 混合访问(3002端口)
-        };
-        
-        for (String[] combination : allowedDevCombinations) {
-            String allowedRefererHost = combination[0];
-            String allowedTargetHost = combination[1];
-            
-            if (referer.contains(allowedRefererHost) && host.equals(allowedTargetHost)) {
-                return true;
-            }
+
+        // 提取 Referer/Origin 的 host[:port]，复用 isSameOrigin 的解析逻辑
+        String sourceHost = referer;
+        int schemeIdx = sourceHost.indexOf("://");
+        if (schemeIdx >= 0) {
+            sourceHost = sourceHost.substring(schemeIdx + 3);
         }
-        
-        return false;
+        int pathIdx = sourceHost.indexOf('/');
+        if (pathIdx >= 0) {
+            sourceHost = sourceHost.substring(0, pathIdx);
+        }
+        // 标准化默认端口后比对（localhost 与 127.0.0.1 视作等价）
+        String normalizedSource = normalizeDevHost(stripDefaultPort(sourceHost));
+        String normalizedTarget = normalizeDevHost(stripDefaultPort(host));
+        if (normalizedSource == null || normalizedTarget == null) {
+            return false;
+        }
+
+        // 允许的开发环境 host（去端口后）：前端 3000/3001/3002 -> 后端 8888
+        Set<String> allowedFront = Set.of("localhost:3000", "127.0.0.1:3000",
+                "localhost:3001", "127.0.0.1:3001",
+                "localhost:3002", "127.0.0.1:3002");
+        Set<String> allowedBack = Set.of("localhost:8888", "127.0.0.1:8888");
+
+        return allowedFront.contains(normalizedSource) && allowedBack.contains(normalizedTarget);
+    }
+
+    /**
+     * 开发环境 host 归一化：localhost ↔ 127.0.0.1 视作同一主机。
+     * 仅对本地地址生效，非本地地址原样返回。
+     */
+    private String normalizeDevHost(String hostPort) {
+        if (hostPort == null) {
+            return null;
+        }
+        if (hostPort.startsWith("localhost:")) {
+            return "127.0.0.1:" + hostPort.substring("localhost:".length());
+        }
+        return hostPort;
     }
     
     /**
