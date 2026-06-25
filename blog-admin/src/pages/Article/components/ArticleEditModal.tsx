@@ -47,7 +47,7 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
         }
     }, [open])
 
-    // 当 article 变化时设置表单值
+    // 当 article 变化时设置表单值；关闭时清空，避免下次打开闪现旧数据
     useEffect(() => {
         if (open && article) {
             form.setFieldsValue({
@@ -67,6 +67,9 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
                 originalUrl: article.originalUrl || '',
                 note: article.note || '',
             })
+        } else if (!open) {
+            // 关闭时清空，替代 destroyOnHidden 的销毁语义，避免 Form 卸载导致 useForm 未连接警告
+            form.resetFields()
         }
     }, [open, article, form])
 
@@ -166,7 +169,6 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
                 open={open}
                 onCancel={handleCancel}
                 width={720}
-                destroyOnHidden
                 footer={
                     <div className="flex justify-end gap-2 pt-3 border-t">
                         <Button onClick={handleCancel}>
