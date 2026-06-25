@@ -1,23 +1,20 @@
 package com.blog.bootstrap.config;
 
-
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.binder.MeterBinder;
-import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
-import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
-import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * 监控指标配置
+ * 监控指标配置。
  * <p>
- * 移除了已停更的 io.github.mweirauch:micrometer-jvm-extras，
- * 改用 Micrometer 内置的 JVM/进程绑定器，覆盖等价指标：
- * - JvmMemoryMetrics  → jvm.memory.* (堆/非堆内存)
- * - JvmThreadMetrics  → jvm.threads.* (线程数)
- * - ProcessorMetrics  → system.cpu.* / process.cpu.* (CPU)
+ * JVM/进程指标（jvm.memory.*、jvm.threads.*、system.cpu.*、process.cpu.* 等）由
+ * Spring Boot Actuator 的 {@code JvmMetricsAutoConfiguration} 等自动配置类默认注册，
+ * 无需在此重复声明——历史上手动注册的 JvmMemoryMetrics/JvmThreadMetrics/ProcessorMetrics
+ * 与自动配置的 bean 同名（jvmMemoryMetrics 等），在 docker profile 下触发
+ * BeanDefinitionOverrideException 导致启动失败。
+ * <p>
+ * 此处仅保留通用的 {@code metricsCommonTags}，为所有指标附加 application/version 标签。
  */
 @Configuration
 public class MetricsConfig {
@@ -28,20 +25,5 @@ public class MetricsConfig {
             "application", "blog-service",
             "version", "1.0.0"
         );
-    }
-
-    @Bean
-    public MeterBinder jvmMemoryMetrics() {
-        return new JvmMemoryMetrics();
-    }
-
-    @Bean
-    public MeterBinder jvmThreadMetrics() {
-        return new JvmThreadMetrics();
-    }
-
-    @Bean
-    public MeterBinder processorMetrics() {
-        return new ProcessorMetrics();
     }
 }
