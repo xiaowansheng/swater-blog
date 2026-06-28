@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Form, Input, Button, message, Switch, Card, Row, Col, Space, Breadcrumb, Modal, Radio, DatePicker } from 'antd'
-import { useNavigate, useParams, Link, useLocation } from 'react-router-dom'
+import { useNavigate, useParams, Link } from 'react-router-dom'
 import { ArrowLeftOutlined, SaveOutlined, SendOutlined, PlusOutlined } from '@ant-design/icons'
 import { getArticleById, ArticleSaveDTO } from '@/api/article'
 import { toRelativeUrl } from '@/utils/format'
@@ -22,7 +22,6 @@ import useArticleAutoSave from '@/hooks/useArticleAutoSave'
 const ArticleEdit: React.FC = () => {
   const navigate = useNavigate()
   const { id: routeId } = useParams()
-  const location = useLocation()
   const { setTabLabel, closeSelf } = usePageTab()
   const [pageId, setPageId] = useState<string | undefined>(routeId)
   const [form] = Form.useForm()
@@ -40,6 +39,9 @@ const ArticleEdit: React.FC = () => {
 
   // 用于跟踪内容变化
   const contentRef = useRef<string>('')
+
+  // 记录已加载过的 pageId，防止自动保存相关函数引用频繁变化导致数据加载死循环
+  const loadedPageIdRef = useRef<string | undefined>(undefined)
 
   // 自动保存Hook
   const {
@@ -246,33 +248,36 @@ const ArticleEdit: React.FC = () => {
     }
   }, [pageId, form, initArticle, startAutoSaveTimer, getFormData])
 
+  // 数据加载：仅在 pageId 变化时执行一次。
+  // 自动保存相关函数（getFormData/startAutoSaveTimer 等）引用会随 saveState 频繁变化，
+  // 不能作为本 effect 的依赖，否则会反复触发 loadCategories/loadTags 造成死循环。
+  // 用 ref 锁记录已加载的 pageId 防重入。
   useEffect(() => {
-    console.log('📝 ArticleEdit useEffect - 组件挂载/路径变化:', {
-      id: pageId,
-      pathname: location.pathname,
-      timestamp: new Date().toISOString()
-    })
+    if (loadedPageIdRef.current === pageId) {
+      return
+    }
+    loadedPageIdRef.current = pageId
+
+    console.log('📝 ArticleEdit 数据加载 - pageId:', pageId)
 
     loadCategories()
     loadTags()
     if (pageId) {
-      console.log('📝 编辑文章模式 - 加载文章数据:', pageId)
       loadArticle()
     } else {
-      console.log('📝 新建文章模式 - 启动自动保存')
-      // 新建文章时启动自动保存定时器
+      // 新建文章模式启动自动保存
       startAutoSaveTimer(getFormData)
     }
+    // 有意只依赖 pageId：数据加载语义为「每次切换文章加载一次」
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageId])
 
+  // 卸载时停止自动保存定时器（stopAutoSaveTimer 引用稳定，无需纳入数据加载 effect）
+  useEffect(() => {
     return () => {
-      console.log('📝 ArticleEdit cleanup - 组件卸载:', {
-        id: pageId,
-        pathname: location.pathname,
-        timestamp: new Date().toISOString()
-      })
       stopAutoSaveTimer()
     }
-  }, [pageId, location.pathname, loadArticle, loadCategories, loadTags, startAutoSaveTimer, stopAutoSaveTimer, getFormData])
+  }, [stopAutoSaveTimer])
 
   // 处理内容变化，触发防抖自动保存
   const handleContentChange = useCallback((content: string) => {
