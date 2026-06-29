@@ -23,6 +23,7 @@ import {
   StopOutlined,
   ClockCircleOutlined,
   ApartmentOutlined,
+  LockOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -31,6 +32,7 @@ import {
   deleteBatchArticle,
   publishArticle,
   unpublishArticle,
+  saveArticle,
 } from '@/api/article'
 import { getCategoryList } from '@/api/category'
 import ArticleEditModal from './components/ArticleEditModal'
@@ -67,12 +69,12 @@ const ArticleList: React.FC = () => {
     }
   }, [])
 
-  const loadArticles = useCallback(async () => {
+  const loadArticles = useCallback(async (page = pagination.current, size = pagination.pageSize) => {
     setLoading(true)
     try {
       const result = await getArticleList({
-        page: pagination.current,
-        size: pagination.pageSize,
+        page,
+        size,
         ...filters,
       })
       setArticles(result.records)
@@ -88,12 +90,34 @@ const ArticleList: React.FC = () => {
   }, [pagination, filters])
 
   useEffect(() => {
+    loadArticles()
+  }, [loadArticles])
+
+  useEffect(() => {
     loadCategories()
   }, [loadCategories])
 
-  useEffect(() => {
-    loadArticles()
-  }, [loadArticles])
+  const handleCreateArticle = async () => {
+    try {
+      setLoading(true)
+      const now = new Date()
+      const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
+      const title = `草稿_${dateStr}`
+      
+      const result = await saveArticle({
+        title,
+        content: '这是一个新文章',
+        status: ArticleStatus.DRAFT,
+      })
+      
+      message.success('已创建草稿')
+      navigate(`/article/edit/${result.id}`)
+    } catch (error) {
+      console.error('新建草稿失败', error)
+      message.error('新建文章失败')
+      setLoading(false)
+    }
+  }
 
   const handleSearch = () => {
     setPagination((prev) => ({ ...prev, current: 1 }))
@@ -243,6 +267,12 @@ const ArticleList: React.FC = () => {
               )}
             </div>
             <div className="flex items-center gap-2">
+              {record.password && (
+                <Tag color="purple" className="flex items-center gap-1" title="加密文章">
+                  <LockOutlined />
+                  加密
+                </Tag>
+              )}
               {record.isTop === TopStatus.PINNED && (
                 <Tag color="red" className="flex items-center gap-1">
                   <VerticalAlignTopOutlined />
@@ -450,7 +480,8 @@ const ArticleList: React.FC = () => {
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => navigate('/article/create')}
+              onClick={handleCreateArticle}
+              loading={loading}
             >
               新建文章
             </Button>
