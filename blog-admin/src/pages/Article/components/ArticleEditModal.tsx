@@ -198,6 +198,7 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
                     >
                         <ImageUpload
                             placeholder="点击或拖拽上传文章封面"
+                            width={280}
                         />
                     </Form.Item>
                     <Button
