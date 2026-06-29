@@ -76,7 +76,10 @@ const ArticleList: React.FC = () => {
         ...filters,
       })
       setArticles(result.records)
-      setPagination((prev) => ({ ...prev, total: result.total }))
+      // 仅在 total 实际变化时才产生新引用，避免触发依赖 pagination 的死循环
+      setPagination((prev) =>
+        prev.total === result.total ? prev : { ...prev, total: result.total }
+      )
     } catch (error) {
       console.error('加载文章失败', error)
     } finally {

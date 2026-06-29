@@ -41,7 +41,7 @@ const ArticleEdit: React.FC = () => {
   const contentRef = useRef<string>('')
 
   // 记录已加载过的 pageId，防止自动保存相关函数引用频繁变化导致数据加载死循环
-  const loadedPageIdRef = useRef<string | undefined>(undefined)
+  const loadedPageIdRef = useRef<string | undefined>('__UNINITIALIZED__' as any)
 
   // 自动保存Hook
   const {
