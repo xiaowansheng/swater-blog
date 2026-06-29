@@ -202,6 +202,7 @@ CREATE TABLE IF NOT EXISTS `article` (
   `comment_count` INT NOT NULL DEFAULT '0' COMMENT '评论数',
   `version` BIGINT NOT NULL DEFAULT '1' COMMENT '版本号（乐观锁）',
   `published_at` DATETIME DEFAULT NULL COMMENT '发布时间',
+  `password` VARCHAR(100) DEFAULT NULL COMMENT '加密访问密码（BCrypt 哈希）',
   `deleted` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '是否已删除',
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
@@ -215,6 +216,12 @@ CREATE TABLE IF NOT EXISTS `article` (
   KEY `idx_published_at` (`published_at`),
   KEY `idx_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='博客文章表';
+
+-- 历史库迁移：article 表曾遗漏 password 列（926a487f 引入实体字段但未同步 DDL）。
+-- CREATE TABLE IF NOT EXISTS 不会为已存在的表补列，故用 ALTER 补齐。
+-- 重复执行时报「Duplicate column」错误，dev profile 的 continue-on-error=true 会忽略；
+-- docker profile 已同步开启容忍。
+ALTER TABLE `article` ADD COLUMN `password` VARCHAR(100) DEFAULT NULL COMMENT '加密访问密码（BCrypt 哈希）' AFTER `published_at`;
 
 
 -- 文章标签关联表

@@ -66,7 +66,9 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
-      continue-on-error: false
+      # schema.sql 含幂等 ALTER TABLE 补列语句，首次执行成功后重复执行会报
+      # Duplicate column 错误，需容忍以保证镜像可重复启动。
+      continue-on-error: true
       separator: ";"
       encoding: utf-8
 
