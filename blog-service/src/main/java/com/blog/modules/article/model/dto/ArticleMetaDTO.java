@@ -87,4 +87,9 @@ public class ArticleMetaDTO {
      * 文章Key
      */
     private String articleKey;
+
+    /**
+     * 访问密码
+     */
+    private String password;
 }

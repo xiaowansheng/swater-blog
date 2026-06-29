@@ -73,7 +73,12 @@ export default function ArticleCard({ article, variant }: ArticleCardProps) {
           {/* 标题 */}
           <div className="mb-3">
             <LoadingLink href={`/post/${article.articleKey}`}>
-              <h2 className="text-xl sm:text-2xl font-bold font-title leading-tight text-center truncate group-relative">
+              <h2 className="text-xl sm:text-2xl font-bold font-title leading-tight text-center truncate group-relative flex items-center justify-center gap-2">
+                {article.hasPassword && (
+                  <svg className="w-5 h-5 text-primary/70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Encrypted">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                )}
                 <span className="relative inline-block">
                   <span className="bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent bg-[length:200%_auto] group-hover:animate-gradient transition-all duration-300">
                     {article.title}

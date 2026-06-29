@@ -267,7 +267,7 @@ const ArticleList: React.FC = () => {
               )}
             </div>
             <div className="flex items-center gap-2">
-              {record.password && (
+              {(record.password || record.hasPassword) && (
                 <Tag color="purple" className="flex items-center gap-1" title="加密文章">
                   <LockOutlined />
                   加密

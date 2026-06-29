@@ -127,4 +127,9 @@ public class ArticleSaveDTO {
      * 客户端版本号（用于乐观锁）
      */
     private Long clientVersion;
+
+    /**
+     * 访问密码
+     */
+    private String password;
 }

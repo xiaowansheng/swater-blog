@@ -147,6 +147,10 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
             article.setPublishedAt(dto.getScheduledPublishAt());
         }
 
+        if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
+            article.setPassword(com.blog.shared.util.PasswordUtil.encode(dto.getPassword()));
+        }
+
         articleMapper.insert(article);
 
         // 处理文件引用关系：验证前端提交的引用列表
@@ -248,6 +252,14 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
                 }
             }
             
+            // 密码处理：admin 端编辑不回填密码，空值表示保持原密码不变，非空则重新哈希。
+            // 仅当显式传入非空明文时才覆盖；传入空串视为清空加密（与 create 行为对齐：不加密）。
+            if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+                article.setPassword(com.blog.shared.util.PasswordUtil.encode(dto.getPassword()));
+            } else if (dto.getPassword() != null && dto.getPassword().isEmpty()) {
+                article.setPassword(null);
+            }
+
             if (dto.getIsTop() != null) {
                 article.setIsTop(dto.getIsTop());
             }

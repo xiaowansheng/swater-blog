@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card } from '@/components/ui/Card';
+import { getFullUrl } from '@/lib/utils/format';
 
 interface HistoryItem {
   id: number;
@@ -43,12 +44,16 @@ export function getReadingHistory(): HistoryItem[] {
 }
 
 export default function ContinueReading() {
-  const history = useMemo(() => loadHistory(), []);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [locale, setLocale] = useState('zh');
 
-  const locale = useMemo(() => {
-    if (typeof window === 'undefined') return 'zh';
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHistory(loadHistory());
     const pathLocale = window.location.pathname.split('/')[1];
-    return pathLocale && /^[a-z]{2}$/.test(pathLocale) ? pathLocale : 'zh';
+    if (pathLocale && /^[a-z]{2}$/.test(pathLocale)) {
+      setLocale(pathLocale);
+    }
   }, []);
 
   if (history.length === 0) return null;
@@ -76,7 +81,7 @@ export default function ContinueReading() {
                 {item.cover ? (
                   <div className="h-20 overflow-hidden relative">
                     <Image
-                      src={item.cover}
+                      src={getFullUrl(item.cover)}
                       alt={item.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"

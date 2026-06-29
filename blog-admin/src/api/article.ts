@@ -76,6 +76,7 @@ export interface ArticleMetaDTO {
   tagIds?: number[]
   tagNames?: string[]
   articleKey?: string
+  password?: string
 }
 
 export const updateArticleMeta = (id: number, data: ArticleMetaDTO): Promise<void> => {

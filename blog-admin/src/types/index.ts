@@ -92,6 +92,7 @@ export interface Article {
   updateTime?: string
   version?: number
   password?: string
+  hasPassword?: boolean
 }
 
 export interface ArticleStatistics {

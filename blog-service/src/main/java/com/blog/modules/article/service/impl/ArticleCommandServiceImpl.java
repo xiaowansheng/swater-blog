@@ -281,6 +281,12 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         if (dto.getIsTop() != null) article.setIsTop(dto.getIsTop());
         if (dto.getArticleKey() != null) article.setArticleKey(dto.getArticleKey());
 
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            article.setPassword(com.blog.shared.util.PasswordUtil.encode(dto.getPassword()));
+        } else if (dto.getPassword() != null && dto.getPassword().isEmpty()) {
+            article.setPassword(null);
+        }
+
         if (dto.getStatus() != null && dto.getStatus().equals(ArticleStatus.PUBLISHED.getCode()) && article.getPublishedAt() == null) {
             article.setPublishedAt(LocalDateTime.now());
         }
