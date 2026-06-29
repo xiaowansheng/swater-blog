@@ -61,6 +61,9 @@ public class ArticleDirectoryServiceImpl implements ArticleDirectoryService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<ArticleDirectoryItemVO> tree() {
+        // 先把没有任何归类记录的文章补到根(ROOT_ID=0)下，使其出现在树顶层
+        ensureUnassignedArticlesAtRoot();
+
         List<DirectoryNode> nodes = nodeMapper.selectList(new LambdaQueryWrapper<DirectoryNode>()
                 .orderByAsc(DirectoryNode::getParentId)
                 .orderByAsc(DirectoryNode::getSort)

@@ -49,17 +49,11 @@ import {
 import { ARTICLE_STATUS_MAP, Article } from '@/types'
 
 interface DirectoryTreeDataNode extends DataNode {
-  item: DirectoryViewItem
+  item: ArticleDirectoryItem
   children?: DirectoryTreeDataNode[]
 }
 
-interface RootDirectoryItem extends Omit<ArticleDirectoryItem, 'type' | 'children'> {
-  type: 'ROOT'
-  children: ArticleDirectoryItem[]
-}
-
-type DirectoryViewItem = ArticleDirectoryItem | RootDirectoryItem
-
+// 顶级节点直接作为树的顶层显示，根节点(id=0)隐式存在，不再用虚拟 ROOT 节点包裹。
 const customTreeStyles = `
 .custom-directory-tree.ant-tree {
   background: transparent;
@@ -176,19 +170,9 @@ const ArticleDirectoryTree: React.FC = () => {
   const [assignForm] = Form.useForm<{ articleId: number; parentId: number }>()
   const searchTimerRef = useRef<ReturnType<typeof setTimeout>>()
 
-  const rootItem = useMemo<RootDirectoryItem>(() => ({
-    key: 'root',
-    type: 'ROOT',
-    id: 0,
-    parentId: 0,
-    sort: 0,
-    name: '根目录',
-    children: items,
-  }), [items])
-
   const itemByKey = useMemo(() => {
-    const map = new Map<string, DirectoryViewItem>()
-    const walk = (nodes: DirectoryViewItem[]) => {
+    const map = new Map<string, ArticleDirectoryItem>()
+    const walk = (nodes: ArticleDirectoryItem[]) => {
       nodes.forEach((item) => {
         map.set(item.key, item)
         if (item.children?.length) {
@@ -196,15 +180,15 @@ const ArticleDirectoryTree: React.FC = () => {
         }
       })
     }
-    walk([rootItem])
+    walk(items)
     return map
-  }, [rootItem])
+  }, [items])
 
   const allNodeKeys = useMemo(() => {
     const keys: React.Key[] = []
-    const walk = (nodes: DirectoryViewItem[]) => {
+    const walk = (nodes: ArticleDirectoryItem[]) => {
       nodes.forEach((item) => {
-        if (item.type === 'NODE' || item.type === 'ROOT') {
+        if (item.type === 'NODE') {
           keys.push(item.key)
         }
         if (item.children?.length) {
@@ -212,13 +196,13 @@ const ArticleDirectoryTree: React.FC = () => {
         }
       })
     }
-    walk([rootItem])
+    walk(items)
     return keys
-  }, [rootItem])
+  }, [items])
 
   const totalCounts = useMemo(() => {
     const counts = new Map<string, { articles: number; nodes: number }>()
-    const calc = (item: DirectoryViewItem): { articles: number; nodes: number } => {
+    const calc = (item: ArticleDirectoryItem): { articles: number; nodes: number } => {
       let articles = 0
       let nodes = 0
       if (item.type === 'ARTICLE') articles = 1
@@ -231,9 +215,23 @@ const ArticleDirectoryTree: React.FC = () => {
       counts.set(item.key, { articles, nodes })
       return { articles, nodes }
     }
-    calc(rootItem)
+    items.forEach(calc)
     return counts
-  }, [rootItem])
+  }, [items])
+
+  const rootTotal = useMemo(() => {
+    let articles = 0
+    let nodes = 0
+    const calc = (list: ArticleDirectoryItem[]) => {
+      list.forEach((item) => {
+        if (item.type === 'ARTICLE') articles++
+        if (item.type === 'NODE') nodes++
+        if (item.children?.length) calc(item.children)
+      })
+    }
+    calc(items)
+    return { articles, nodes }
+  }, [items])
 
   const filteredKeys = useMemo(() => {
     if (!searchText.trim()) return null
@@ -241,11 +239,11 @@ const ArticleDirectoryTree: React.FC = () => {
     const matched = new Set<string>()
     const ancestorOf = new Map<string, string | null>()
 
-    const indexAncestors = (item: DirectoryViewItem, parentKey: string | null) => {
+    const indexAncestors = (item: ArticleDirectoryItem, parentKey: string | null) => {
       ancestorOf.set(item.key, parentKey)
       item.children?.forEach((child) => indexAncestors(child, item.key))
     }
-    indexAncestors(rootItem, null)
+    items.forEach(item => indexAncestors(item, null))
 
     itemByKey.forEach((item, key) => {
       const haystack = (
@@ -263,14 +261,13 @@ const ArticleDirectoryTree: React.FC = () => {
       }
     })
     return matched
-  }, [searchText, itemByKey, rootItem])
+  }, [searchText, itemByKey, items])
 
   const searchResultsCount = useMemo(() => {
     if (!searchText.trim()) return 0
     const keyword = searchText.trim().toLowerCase()
     let count = 0
     itemByKey.forEach((item) => {
-      if (item.type === 'ROOT') return
       const haystack = (
         (item.type === 'NODE' ? item.name : '') +
         (item.title || '') +
@@ -288,7 +285,7 @@ const ArticleDirectoryTree: React.FC = () => {
       const keys = new Set<React.Key>()
       filteredKeys.forEach((key) => {
         const item = itemByKey.get(key)
-        if (item && (item.type === 'NODE' || item.type === 'ROOT')) {
+        if (item && item.type === 'NODE') {
           keys.add(key)
         }
       })
@@ -318,7 +315,7 @@ const ArticleDirectoryTree: React.FC = () => {
     try {
       const data = await getArticleDirectoryTree()
       setItems(data)
-      setExpandedKeys(['root', ...collectNodeKeys(data)])
+      setExpandedKeys(collectNodeKeys(data))
     } catch (error) {
       console.error('加载文章归类树失败', error)
     } finally {
@@ -352,7 +349,7 @@ const ArticleDirectoryTree: React.FC = () => {
   const isDescendant = useCallback((parentKey: string, possibleDescendantKey: string): boolean => {
     const parent = itemByKey.get(parentKey)
     if (!parent?.children?.length) return false
-    const walk = (nodes: DirectoryViewItem[]): boolean => {
+    const walk = (nodes: ArticleDirectoryItem[]): boolean => {
       for (const node of nodes) {
         if (node.key === possibleDescendantKey) return true
         if (node.children?.length && walk(node.children)) return true
@@ -363,7 +360,7 @@ const ArticleDirectoryTree: React.FC = () => {
   }, [itemByKey])
 
   const parentNodeOptions = useMemo(() => {
-    const buildOptions = (nodes: DirectoryViewItem[]): any[] => {
+    const buildOptions = (nodes: ArticleDirectoryItem[]): any[] => {
       return nodes
         .filter((n) => n.type === 'NODE')
         .map((n) => {
@@ -390,7 +387,7 @@ const ArticleDirectoryTree: React.FC = () => {
   }, [items, editingNode, isDescendant])
 
   const articleParentNodeOptions = useMemo(() => {
-    const buildOptions = (nodes: DirectoryViewItem[]): any[] => {
+    const buildOptions = (nodes: ArticleDirectoryItem[]): any[] => {
       return nodes
         .filter((n) => n.type === 'NODE')
         .map((n) => ({
@@ -524,30 +521,7 @@ const ArticleDirectoryTree: React.FC = () => {
     return item.type === 'ARTICLE' ? item.articleId || item.id : item.id
   }
 
-  const getContextMenuItems = (item: DirectoryViewItem): MenuProps['items'] => {
-    if (item.type === 'ROOT') {
-      return [
-        {
-          key: 'create-root-node',
-          icon: <FolderAddOutlined />,
-          label: '新建根节点',
-          onClick: () => openCreateNode(0),
-        },
-        {
-          key: 'create-root-article',
-          icon: <FileAddOutlined />,
-          label: '新建文章',
-          onClick: () => openCreateArticle(0),
-        },
-        {
-          key: 'assign-root-article',
-          icon: <PlusOutlined />,
-          label: '添加已有文章',
-          onClick: () => openAssignArticle(0),
-        },
-      ]
-    }
-
+  const getContextMenuItems = (item: ArticleDirectoryItem): MenuProps['items'] => {
     if (item.type === 'NODE') {
       return [
         {
@@ -631,68 +605,9 @@ const ArticleDirectoryTree: React.FC = () => {
     )
   }
 
-  const renderTitle = (item: DirectoryViewItem) => {
+  const renderTitle = (item: ArticleDirectoryItem) => {
     const counts = totalCounts.get(item.key)
     const keyword = searchText.trim()
-
-    if (item.type === 'ROOT') {
-      return (
-        <Dropdown trigger={['contextMenu']} menu={{ items: getContextMenuItems(item) }}>
-          <div className="group flex items-center justify-between gap-3 w-full pr-2 py-2 pl-1 rounded-lg transition-all duration-200">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="dir-icon-wrap w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm">
-                <FolderOpenOutlined className="text-white text-base" />
-              </div>
-              <span className="font-bold text-slate-800 text-base tracking-tight">根目录</span>
-              {counts && counts.articles > 0 && (
-                <span className="px-2 py-0.5 text-[11px] text-slate-500 bg-slate-100/80 rounded-full font-medium border border-slate-200/60">
-                  {counts.articles} 篇文章
-                </span>
-              )}
-            </div>
-
-            <div className="tree-node-operations flex items-center gap-0.5 shrink-0 ml-auto">
-              <Tooltip title="新建子节点" mouseEnterDelay={0.4}>
-                <Button
-                  type="text"
-                  size="small"
-                  className="flex items-center justify-center p-1 h-7 w-7 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg"
-                  icon={<FolderAddOutlined className="text-sm" />}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    openCreateNode(0)
-                  }}
-                />
-              </Tooltip>
-              <Tooltip title="新建文章" mouseEnterDelay={0.4}>
-                <Button
-                  type="text"
-                  size="small"
-                  className="flex items-center justify-center p-1 h-7 w-7 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-                  icon={<FileAddOutlined className="text-sm" />}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    openCreateArticle(0)
-                  }}
-                />
-              </Tooltip>
-              <Tooltip title="添加已有文章" mouseEnterDelay={0.4}>
-                <Button
-                  type="text"
-                  size="small"
-                  className="flex items-center justify-center p-1 h-7 w-7 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"
-                  icon={<PlusOutlined className="text-sm" />}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    openAssignArticle(0)
-                  }}
-                />
-              </Tooltip>
-            </div>
-          </div>
-        </Dropdown>
-      )
-    }
 
     const isNode = item.type === 'NODE'
     const statusMeta = item.status !== undefined
@@ -882,7 +797,7 @@ const ArticleDirectoryTree: React.FC = () => {
   }
 
   const treeData = useMemo(() => {
-    const buildTreeData = (nodes: DirectoryViewItem[]): DirectoryTreeDataNode[] => {
+    const buildTreeData = (nodes: ArticleDirectoryItem[]): DirectoryTreeDataNode[] => {
       return nodes
         .filter((item) => !filteredKeys || filteredKeys.has(item.key))
         .map((item) => ({
@@ -893,24 +808,20 @@ const ArticleDirectoryTree: React.FC = () => {
           isLeaf: item.type === 'ARTICLE',
         }))
     }
-    return buildTreeData([rootItem])
+    return buildTreeData(items)
   // renderTitle 引用了组件内大量函数/状态，此处无法逐一列出；
-  // treeData 在 rootItem/filteredKeys/searchText/totalCounts 等变化时需要重建。
+  // treeData 在 items/filteredKeys/searchText/totalCounts 等变化时需要重建。
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rootItem, filteredKeys])
+  }, [items, filteredKeys])
 
   const handleAllowDrop: TreeProps['allowDrop'] = ({ dragNode, dropNode, dropPosition }) => {
     if (searchText.trim()) return false
     const dragItem = itemByKey.get(String(dragNode.key))
     const target = itemByKey.get(String(dropNode.key))
     if (!dragItem || !target || dragItem.key === target.key) return false
-    if (dragItem.type === 'ROOT') return false
 
     // 不允许拖入自身后代节点
     if (dragItem.type === 'NODE' && isDescendant(dragItem.key, target.key)) return false
-
-    // 根目录只作为容器接收拖入，不允许在根目录自身前后插入。
-    if (target.type === 'ROOT') return dropPosition === 0
 
     // 文章不能作为容器（不能把东西放进文章内部）
     if (target.type === 'ARTICLE' && dropPosition === 0) return false
@@ -923,7 +834,6 @@ const ArticleDirectoryTree: React.FC = () => {
     const dragItem = itemByKey.get(String(info.dragNode.key))
     const targetItem = itemByKey.get(String(info.node.key))
     if (!dragItem || !targetItem) return
-    if (dragItem.type === 'ROOT') return
 
     // 前端校验：不允许父节点拖入子节点
     if (dragItem.type === 'NODE' && isDescendant(dragItem.key, targetItem.key)) {
@@ -932,7 +842,13 @@ const ArticleDirectoryTree: React.FC = () => {
     }
 
     let position: 'INSIDE' | 'BEFORE' | 'AFTER'
-    if (targetItem.type === 'ROOT') {
+    let targetType: 'ROOT' | 'NODE' | 'ARTICLE' = targetItem.type
+    let targetId: number | undefined = getMoveItemId(targetItem)
+
+    // 新增"拖到树外层间隙(dropToGap 且目标为顶层)"识别为移到根
+    if (info.dropToGap && targetItem.parentId === 0) {
+      targetType = 'ROOT'
+      targetId = undefined
       position = 'INSIDE'
     } else if (!info.dropToGap && targetItem.type === 'NODE') {
       position = 'INSIDE'
@@ -946,8 +862,8 @@ const ArticleDirectoryTree: React.FC = () => {
       await moveArticleDirectoryItem({
         itemType: dragItem.type,
         itemId: getMoveItemId(dragItem),
-        targetType: targetItem.type,
-        targetId: targetItem.type === 'ROOT' ? undefined : getMoveItemId(targetItem),
+        targetType: targetType as any,
+        targetId,
         position,
       })
       message.success('排序已更新')
@@ -961,12 +877,12 @@ const ArticleDirectoryTree: React.FC = () => {
     const key = info.node.key
     setSelectedKey(key)
 
-    const item = (info.node as any).item as DirectoryViewItem
+    const item = (info.node as any).item as ArticleDirectoryItem
     if (!item) return
 
     if (item.type === 'ARTICLE') {
       navigate(`/article/preview/${item.articleId || item.id}`)
-    } else if (item.type === 'NODE' || item.type === 'ROOT') {
+    } else if (item.type === 'NODE') {
       setExpandedKeys((prev) =>
         prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
       )
@@ -992,11 +908,11 @@ const ArticleDirectoryTree: React.FC = () => {
             <div>
               <h1 className="text-lg font-bold text-slate-800 m-0 tracking-tight leading-none">文章归类树</h1>
               <div className="flex items-center gap-2 mt-1">
-                {totalCounts.get('root') && (
+                {rootTotal && (
                   <span className="text-xs text-slate-400">
-                    <span className="text-slate-600 font-semibold">{totalCounts.get('root')!.nodes}</span> 个目录节点
+                    <span className="text-slate-600 font-semibold">{rootTotal.nodes}</span> 个目录节点
                     <span className="mx-1 text-slate-300">·</span>
-                    <span className="text-slate-600 font-semibold">{totalCounts.get('root')!.articles}</span> 篇文章
+                    <span className="text-slate-600 font-semibold">{rootTotal.articles}</span> 篇文章
                   </span>
                 )}
                 {searchText.trim() && (
@@ -1144,7 +1060,7 @@ const ArticleDirectoryTree: React.FC = () => {
                     />
                   )
                 }}
-                draggable={{ nodeDraggable: (node) => String(node.key) !== 'root' && !searchText.trim() }}
+                draggable={{ nodeDraggable: () => !searchText.trim() }}
                 allowDrop={handleAllowDrop}
                 treeData={treeData}
                 expandedKeys={expandedKeys}
