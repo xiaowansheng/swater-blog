@@ -240,6 +240,7 @@ const ArticleEdit: React.FC = () => {
       setCurrentType((article.type as ArticleType) || ArticleType.ORIGINAL)
       setCurrentTitle(article.title || '')
       setCurrentContent(article.content || '')
+      setIsScheduled(article.status === ArticleStatus.SCHEDULED)
 
       // 加载完成后启动自动保存定时器
       startAutoSaveTimer(getFormData)
@@ -600,20 +601,22 @@ const ArticleEdit: React.FC = () => {
                   <Radio.Group options={articleStatusOptions} optionType="button" buttonStyle="solid" />
                 </Form.Item>
 
-                <Form.Item 
-                  name="scheduledPublishAt" 
-                  label="定时发布时间"
-                  help={isScheduled ? '到达指定时间后自动发布' : '选择定时发布状态后生效'}
-                >
-                  <DatePicker
-                    showTime={{ format: 'HH:mm' }}
-                    format="YYYY-MM-DD HH:mm"
-                    placeholder="选择发布时刻"
-                    disabled={!isScheduled}
-                    className="rounded-md w-full"
-                    disabledDate={(current) => current && current.isBefore(new Date(), 'day')}
-                  />
-                </Form.Item>
+                {isScheduled && (
+                  <Form.Item 
+                    name="scheduledPublishAt" 
+                    label="定时发布时间"
+                    help="到达指定时间后自动发布"
+                    rules={[{ required: true, message: '请选择定时发布时间' }]}
+                  >
+                    <DatePicker
+                      showTime={{ format: 'HH:mm' }}
+                      format="YYYY-MM-DD HH:mm"
+                      placeholder="选择发布时刻"
+                      className="rounded-md w-full"
+                      disabledDate={(current) => current && current.isBefore(new Date(), 'day')}
+                    />
+                  </Form.Item>
+                )}
 
                 <Form.Item name="isTop" label="是否置顶" valuePropName="checked">
                   <Switch />
