@@ -600,18 +600,6 @@ const ArticleEdit: React.FC = () => {
                   <Radio.Group options={articleStatusOptions} optionType="button" buttonStyle="solid" />
                 </Form.Item>
 
-                <Form.Item name="isTop" label="是否置顶" valuePropName="checked">
-                  <Switch />
-                </Form.Item>
-
-                <Form.Item name="password" label="访问密码" help="留空则不加密">
-                  <Input.Password
-                    placeholder="设置后读者需输入密码查看"
-                    className="rounded-md"
-                    maxLength={32}
-                  />
-                </Form.Item>
-
                 <Form.Item 
                   name="scheduledPublishAt" 
                   label="定时发布时间"
@@ -624,6 +612,18 @@ const ArticleEdit: React.FC = () => {
                     disabled={!isScheduled}
                     className="rounded-md w-full"
                     disabledDate={(current) => current && current.isBefore(new Date(), 'day')}
+                  />
+                </Form.Item>
+
+                <Form.Item name="isTop" label="是否置顶" valuePropName="checked">
+                  <Switch />
+                </Form.Item>
+
+                <Form.Item name="password" label="访问密码" help="留空则不加密">
+                  <Input.Password
+                    placeholder="设置后读者需输入密码查看"
+                    className="rounded-md"
+                    maxLength={32}
                   />
                 </Form.Item>
 
