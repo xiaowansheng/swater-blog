@@ -269,6 +269,13 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
 
   // 添加到保存队列
   const addToQueue = useCallback((data: ArticleSaveDTO) => {
+    // 后端 ArticleSaveDTO 对 title/content 有 @NotBlank 校验，空值会直接 400。
+    // 自动保存（尤其内容变化触发的防抖保存）在用户清空标题/内容时会携带空串，
+    // 这里统一拦截，避免无意义的失败请求。定时保存已有同样判断，此处覆盖手动/防抖两条路径。
+    if (!data.title || !data.title.trim() || !data.content || !data.content.trim()) {
+      return
+    }
+
     const normalized: ArticleSaveDTO = {
       ...data,
       id: latestArticleIdRef.current ?? data.id,
