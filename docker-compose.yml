@@ -85,7 +85,7 @@ services:
     networks:
       - blog-network
     # 限制容器内存（宿主机保护）
-    mem_limit: 320m
+    mem_limit: 512m
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 30s

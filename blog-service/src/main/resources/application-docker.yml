@@ -246,6 +246,9 @@ security:
       - jpeg
       - png
       - gif
+      - webp
+      - svg
+      - ico
       - pdf
       - doc
       - docx
