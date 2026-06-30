@@ -1,5 +1,12 @@
 import type { ApiResponse } from '@/types';
-import { getMockResponse, createMockResponse } from './mock';
+import { getMockResponse } from './mock';
+
+export class ApiError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
 import toast from 'react-hot-toast';
 import { getVerifyToken, VERIFY_TOKEN_HEADER } from '../auth/emailSession';
 
@@ -42,7 +49,7 @@ export async function fetchClient<T>(
       if (!options?.silent) {
         toast.error(errorMessage);
       }
-      throw new Error(errorMessage);
+      throw new ApiError(errorMessage);
     }
 
     const result: ApiResponse<T> = await response.json();
@@ -52,20 +59,27 @@ export async function fetchClient<T>(
       if (!options?.silent) {
         toast.error(errorMessage);
       }
-      throw new Error(errorMessage);
+      throw new ApiError(errorMessage);
     }
 
     return result.data;
   } catch (error) {
-    // 如果是网络错误或其他未处理的错误
-    if (error instanceof Error && !error.message.includes('HTTP error!') && !error.message.includes('Request failed')) {
-      const errorMessage = '服务请求失败';
-      // if (!options?.silent) {
-      //   toast.error(errorMessage);
-      // }
-      throw new Error(errorMessage);
+    // 如果是我们自己抛出的业务错误，直接向外抛出，不要拦截或篡改
+    if (error instanceof ApiError) {
+      throw error;
     }
+    
+    // fetch 抛出的网络错误通常是 TypeError (如 CORS、断网)
+    // 或者是 JSON 解析错误等
+    if (error instanceof TypeError) {
+      throw new Error('网络请求失败，请检查您的网络或服务器状态');
+    }
+    
+    // 对于其他未知错误，统一提示
+    if (error instanceof Error) {
+      throw new Error('服务请求失败');
+    }
+    
     throw error;
   }
 }
-
