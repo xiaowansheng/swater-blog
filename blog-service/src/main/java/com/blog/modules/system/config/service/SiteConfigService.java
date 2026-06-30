@@ -6,6 +6,7 @@ import com.blog.modules.system.config.model.dto.config.NotifyConfigDTO;
 import com.blog.modules.system.config.model.dto.config.CommentConfigDTO;
 import com.blog.modules.system.config.model.dto.config.PrivacyConfigDTO;
 import com.blog.modules.system.config.model.dto.config.SocialConfigDTO;
+import com.blog.modules.system.config.model.dto.config.RewardConfigDTO;
 import com.blog.modules.system.config.model.dto.config.CoverConfigDTO;
 import com.blog.modules.system.config.model.dto.config.AuthorConfigDTO;
 import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
@@ -25,6 +26,7 @@ public interface SiteConfigService {
     CoverConfigDTO getCoverConfig();
     
     SocialConfigDTO getSocialConfig();
+    RewardConfigDTO getRewardConfig();
     
     PrivacyConfigDTO getPrivacyConfig();
     
@@ -47,6 +49,7 @@ public interface SiteConfigService {
     void updateCoverConfig(CoverConfigDTO config);
     
     void updateSocialConfig(SocialConfigDTO config);
+    void updateRewardConfig(RewardConfigDTO config);
     
     void updatePrivacyConfig(PrivacyConfigDTO config);
     

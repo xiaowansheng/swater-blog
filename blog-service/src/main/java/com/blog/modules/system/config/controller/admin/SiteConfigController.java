@@ -6,6 +6,7 @@ import com.blog.modules.system.config.model.dto.config.NotifyConfigDTO;
 import com.blog.modules.system.config.model.dto.config.CommentConfigDTO;
 import com.blog.modules.system.config.model.dto.config.PrivacyConfigDTO;
 import com.blog.modules.system.config.model.dto.config.SocialConfigDTO;
+import com.blog.modules.system.config.model.dto.config.RewardConfigDTO;
 import com.blog.modules.system.config.model.dto.config.CoverConfigDTO;
 import com.blog.modules.system.config.model.dto.config.AuthorConfigDTO;
 import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
@@ -85,6 +86,21 @@ public class SiteConfigController {
     @ApiOperation(name = "更新社交配置", type = ApiOperationType.UPDATE, description = "更新社交链接配置")
     public Result<Void> updateSocialConfig(@RequestBody SocialConfigDTO config) {
         siteConfigService.updateSocialConfig(config);
+        return Result.success();
+    }
+
+    // ========== 赞赏配置 ==========
+
+    @GetMapping("/reward")
+    @ApiOperation(name = "获取赞赏配置", type = ApiOperationType.QUERY, description = "获取赞赏配置")
+    public Result<RewardConfigDTO> getRewardConfig() {
+        return Result.success(siteConfigService.getRewardConfig());
+    }
+
+    @PutMapping("/reward")
+    @ApiOperation(name = "更新赞赏配置", type = ApiOperationType.UPDATE, description = "更新赞赏配置")
+    public Result<Void> updateRewardConfig(@RequestBody RewardConfigDTO config) {
+        siteConfigService.updateRewardConfig(config);
         return Result.success();
     }
 

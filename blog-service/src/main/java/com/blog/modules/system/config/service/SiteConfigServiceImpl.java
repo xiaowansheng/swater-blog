@@ -7,6 +7,7 @@ import com.blog.modules.system.config.model.dto.config.NotifyConfigDTO;
 import com.blog.modules.system.config.model.dto.config.CommentConfigDTO;
 import com.blog.modules.system.config.model.dto.config.PrivacyConfigDTO;
 import com.blog.modules.system.config.model.dto.config.SocialConfigDTO;
+import com.blog.modules.system.config.model.dto.config.RewardConfigDTO;
 import com.blog.modules.system.config.model.dto.config.CoverConfigDTO;
 import com.blog.modules.system.config.model.dto.config.AuthorConfigDTO;
 import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
@@ -40,6 +41,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     private static final String KEY_AUTHOR = "author";
     private static final String KEY_COVER = "cover";
     private static final String KEY_SOCIAL = "social";
+    private static final String KEY_REWARD = "reward";
     private static final String KEY_PRIVACY = "privacy";
     private static final String KEY_COMMENT = "comment";
     private static final String KEY_NOTIFY = "notify";
@@ -127,6 +129,11 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     public SocialConfigDTO getSocialConfig() {
         return getConfig(KEY_SOCIAL, SocialConfigDTO.class);
     }
+    
+    @Override
+    public RewardConfigDTO getRewardConfig() {
+        return getConfig(KEY_REWARD, RewardConfigDTO.class);
+    }
 
     @Override
     @Cacheable(value = "configs", key = "'privacy'", unless = "#result == null")
@@ -212,6 +219,15 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Transactional
     public void updateSocialConfig(SocialConfigDTO config) {
         updateConfig(KEY_SOCIAL, config);
+    }
+    
+    @Override
+    @Caching(evict = {
+        @CacheEvict(value = "siteConfig", key = "'all'")
+    })
+    @Transactional
+    public void updateRewardConfig(RewardConfigDTO config) {
+        updateConfig(KEY_REWARD, config);
     }
     
     @Override

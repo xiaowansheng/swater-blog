@@ -95,8 +95,17 @@ export interface SocialConfig {
   bilibili?: string;
   twitter?: string;
   facebook?: string;
-  wechatQr?: string;
-  alipayQr?: string;
+}
+
+export interface PaymentMethodConfig {
+  enabled?: boolean;
+  qr?: string;
+}
+
+export interface RewardConfig {
+  rewardEnabled?: boolean;
+  wechat?: PaymentMethodConfig;
+  alipay?: PaymentMethodConfig;
 }
 
 export interface PrivacyConfig {
@@ -125,6 +134,7 @@ export interface PublicConfigVO {
   author: AuthorInfo;
   cover: CoverConfig;
   social: SocialConfig;
+  reward: RewardConfig;
   privacy: PrivacyConfig;
   comment: CommentConfig;
   component?: ComponentConfig;

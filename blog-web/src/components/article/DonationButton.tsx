@@ -5,13 +5,16 @@ import Image from 'next/image';
 import { useSiteConfig } from '@/lib/context/SiteConfigContext';
 
 export default function DonationButton() {
-  const { social } = useSiteConfig();
-  const { wechatQr, alipayQr } = social;
+  const { reward } = useSiteConfig();
+  const { rewardEnabled, wechat, alipay } = reward || {};
+
+  const hasWechat = wechat?.enabled !== false && !!wechat?.qr;
+  const hasAlipay = alipay?.enabled !== false && !!alipay?.qr;
 
   const [visible, setVisible] = useState(false);
-  const [tab, setTab] = useState<'wechat' | 'alipay'>('wechat');
+  const [tab, setTab] = useState<'wechat' | 'alipay'>(hasWechat ? 'wechat' : 'alipay');
 
-  if (!wechatQr && !alipayQr) return null;
+  if (rewardEnabled === false || (!hasWechat && !hasAlipay)) return null;
 
   return (
     <>
@@ -55,7 +58,7 @@ export default function DonationButton() {
             </p>
 
             <div className="flex gap-2 mb-4">
-              {wechatQr && (
+              {hasWechat && (
                 <button
                   onClick={() => setTab('wechat')}
                   className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -70,7 +73,7 @@ export default function DonationButton() {
                   微信
                 </button>
               )}
-              {alipayQr && (
+              {hasAlipay && (
                 <button
                   onClick={() => setTab('alipay')}
                   className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -88,10 +91,10 @@ export default function DonationButton() {
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 flex items-center justify-center min-h-[200px]">
-              {tab === 'wechat' && wechatQr ? (
-                <Image src={wechatQr} alt="微信赞赏码" width={180} height={180} className="max-w-[180px] rounded-lg" unoptimized />
-              ) : tab === 'alipay' && alipayQr ? (
-                <Image src={alipayQr} alt="支付宝收款码" width={180} height={180} className="max-w-[180px] rounded-lg" unoptimized />
+              {tab === 'wechat' && hasWechat && wechat?.qr ? (
+                <Image src={wechat!.qr!} alt="微信赞赏码" width={180} height={180} className="max-w-[180px] rounded-lg" unoptimized />
+              ) : tab === 'alipay' && hasAlipay && alipay?.qr ? (
+                <Image src={alipay!.qr!} alt="支付宝收款码" width={180} height={180} className="max-w-[180px] rounded-lg" unoptimized />
               ) : (
                 <p className="text-sm text-muted-foreground">暂未配置收款码</p>
               )}

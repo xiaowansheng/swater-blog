@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import type { PublicConfigVO, SiteInfo, AuthorInfo, CoverConfig, SocialConfig, PrivacyConfig, CommentConfig } from '@/types';
+import type { PublicConfigVO, SiteInfo, AuthorInfo, CoverConfig, SocialConfig, RewardConfig, PrivacyConfig, CommentConfig } from '@/types';
 import { getPublicConfig } from '@/lib/api/config';
 
 // 默认配置
@@ -41,6 +41,12 @@ const defaultCoverConfig: CoverConfig = {
 
 const defaultSocialConfig: SocialConfig = {};
 
+const defaultRewardConfig: RewardConfig = {
+  rewardEnabled: true,
+  wechat: { enabled: true },
+  alipay: { enabled: true }
+};
+
 const defaultPrivacyConfig: PrivacyConfig = {
   showIp: false,
   showLocation: true,
@@ -58,6 +64,7 @@ interface SiteConfigContextType {
   author: AuthorInfo;
   cover: CoverConfig;
   social: SocialConfig;
+  reward: RewardConfig;
   privacy: PrivacyConfig;
   comment: CommentConfig;
   loading: boolean;
@@ -70,6 +77,7 @@ const SiteConfigContext = createContext<SiteConfigContextType>({
   author: defaultAuthorInfo,
   cover: defaultCoverConfig,
   social: defaultSocialConfig,
+  reward: defaultRewardConfig,
   privacy: defaultPrivacyConfig,
   comment: defaultCommentConfig,
   loading: true,
@@ -88,6 +96,7 @@ export function SiteConfigProvider({
   const [author, setAuthor] = useState<AuthorInfo>(initialConfig?.author || defaultAuthorInfo);
   const [cover, setCover] = useState<CoverConfig>(initialConfig?.cover || defaultCoverConfig);
   const [social, setSocial] = useState<SocialConfig>(initialConfig?.social || defaultSocialConfig);
+  const [reward, setReward] = useState<RewardConfig>(initialConfig?.reward || defaultRewardConfig);
   const [privacy, setPrivacy] = useState<PrivacyConfig>(initialConfig?.privacy || defaultPrivacyConfig);
   const [comment, setComment] = useState<CommentConfig>(initialConfig?.comment || defaultCommentConfig);
   const [loading, setLoading] = useState(!initialConfig);
@@ -102,6 +111,7 @@ export function SiteConfigProvider({
       setAuthor(config.author || defaultAuthorInfo);
       setCover(config.cover || defaultCoverConfig);
       setSocial(config.social || defaultSocialConfig);
+      setReward(config.reward || defaultRewardConfig);
       setPrivacy(config.privacy || defaultPrivacyConfig);
       setComment(config.comment || defaultCommentConfig);
     } catch (err) {
@@ -125,6 +135,7 @@ export function SiteConfigProvider({
         author,
         cover,
         social,
+        reward,
         privacy,
         comment,
         loading,

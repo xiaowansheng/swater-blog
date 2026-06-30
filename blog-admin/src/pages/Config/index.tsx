@@ -69,6 +69,7 @@ import {
   ExclamationCircleOutlined,
   UndoOutlined,
   ApiOutlined,
+  HeartOutlined,
 } from "@ant-design/icons";
 import {
   ImageUpload,
@@ -115,6 +116,7 @@ const ConfigPage: React.FC = () => {
   const [commentForm] = Form.useForm();
   const [notifyForm] = Form.useForm();
   const [componentForm] = Form.useForm();
+  const [rewardForm] = Form.useForm();
   // const [uploadForm] = Form.useForm();
   // const [emailForm] = Form.useForm();
 
@@ -212,6 +214,7 @@ const ConfigPage: React.FC = () => {
         comment,
         notify,
         component,
+        reward,
         // upload,
         // email,
       ] = await Promise.all([
@@ -226,12 +229,14 @@ const ConfigPage: React.FC = () => {
           talkCommentEnabled: true,
           guestbookMessageEnabled: true
         })),
+        configApi.getRewardConfig(),
         // configApi.getUploadConfig(),
         // configApi.getEmailConfig(),
       ]);
 
       // 处理配置数据：将null和undefined转换为合适的默认值
       const processConfig = (config: any) => {
+        if (!config) return {};
         return Object.keys(config).reduce((acc, key) => {
           const value = config[key];
           if (value === null || value === undefined) {
@@ -309,6 +314,15 @@ const ConfigPage: React.FC = () => {
         }
       );
 
+      const normalizedReward = processConfig(reward);
+      normalizedReward.rewardEnabled = normalizeBooleanValue(reward?.rewardEnabled, true);
+      
+      normalizedReward.wechat = processConfig(reward?.wechat);
+      normalizedReward.wechat.enabled = normalizeBooleanValue(reward?.wechat?.enabled, true);
+      
+      normalizedReward.alipay = processConfig(reward?.alipay);
+      normalizedReward.alipay.enabled = normalizeBooleanValue(reward?.alipay?.enabled, true);
+
       const normalizedAuthor = processConfig(author);
       normalizedAuthor.contactMethods = normalizeNestedVisibility(
         normalizedAuthor.contactMethods,
@@ -336,6 +350,7 @@ const ConfigPage: React.FC = () => {
       commentForm.setFieldsValue(normalizedComment);
       notifyForm.setFieldsValue(normalizedNotify);
       componentForm.setFieldsValue(normalizedComponent);
+      rewardForm.setFieldsValue(normalizedReward);
       
       // 保存原始值用于撤销
       setOriginalValues({
@@ -346,6 +361,7 @@ const ConfigPage: React.FC = () => {
         comment: normalizedComment,
         notify: normalizedNotify,
         component: normalizedComponent,
+        reward: normalizedReward,
       });
       // uploadForm.setFieldsValue(upload);
       // emailForm.setFieldsValue(email);
@@ -355,7 +371,7 @@ const ConfigPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [siteForm, authorForm, coverForm, privacyForm, commentForm, notifyForm, componentForm, normalizeBooleanValue, defaultPrivacyConfig]);
+  }, [siteForm, authorForm, coverForm, privacyForm, commentForm, notifyForm, componentForm, rewardForm, normalizeBooleanValue, defaultPrivacyConfig]);
 
   useEffect(() => {
     loadAllConfigs();
@@ -530,6 +546,7 @@ const ConfigPage: React.FC = () => {
       comment: commentForm,
       notify: notifyForm,
       component: componentForm,
+      reward: rewardForm,
     };
     
     const currentForm = formMap[activeTab];
@@ -1059,6 +1076,50 @@ const ConfigPage: React.FC = () => {
         </Form>
       ),
     },
+    {
+      key: "reward",
+      label: (
+        <span>
+          <HeartOutlined /> 赞赏配置
+          <span style={{ color: "#ff4d4f", marginLeft: "8px", display: "inline-block", width: "12px" }}>
+            {unsavedTabs.has("reward") ? "●" : ""}
+          </span>
+        </span>
+      ),
+      children: (
+        <Form 
+          form={rewardForm} 
+          layout="vertical" 
+          className="config-form"
+          onValuesChange={() => markTabAsUnsaved("reward")}
+        >
+          <Form.Item
+            name="rewardEnabled"
+            label="启用打赏功能"
+            valuePropName="checked"
+            tooltip="是否在文章底部显示打赏按钮"
+          >
+            <Switch />
+          </Form.Item>
+          <Form.Item
+            name={["wechat", "enabled"]}
+            label="启用微信打赏"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+          <ImageField name={["wechat", "qr"]} label="微信赞赏码" type="cover" />
+          <Form.Item
+            name={["alipay", "enabled"]}
+            label="启用支付宝打赏"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+          <ImageField name={["alipay", "qr"]} label="支付宝收款码" type="cover" />
+        </Form>
+      ),
+    },
     // {
     //   key: "upload",
     //   label: (
@@ -1173,6 +1234,7 @@ const ConfigPage: React.FC = () => {
       comment: () => handleSave("comment", commentForm, configApi.updateCommentConfig),
       notify: () => handleSave("notify", notifyForm, configApi.updateNotifyConfig),
       component: () => handleSave("component", componentForm, configApi.updateComponentConfig),
+      reward: () => handleSave("reward", rewardForm, configApi.updateRewardConfig),
     };
     return handlers[activeTab];
   };

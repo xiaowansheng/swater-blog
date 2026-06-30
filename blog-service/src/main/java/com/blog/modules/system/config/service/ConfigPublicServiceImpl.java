@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.modules.system.config.mapper.SysConfigMapper;
 import com.blog.modules.system.config.model.dto.config.AuthorConfigDTO;
 import com.blog.modules.system.config.model.dto.config.CommentConfigDTO;
+import com.blog.modules.system.config.model.dto.config.RewardConfigDTO;
 import com.blog.modules.system.config.model.entity.SysConfig;
 import com.blog.modules.system.config.model.vo.ConfigVO;
 import com.blog.shared.util.BeanUtil;
@@ -53,6 +54,12 @@ public class ConfigPublicServiceImpl implements ConfigPublicService {
 
         // 社交链接 - 全部公开
         result.put("social", siteConfigService.getSocialConfig());
+
+        // 赞赏配置 - 过滤未启用的打赏方式
+        RewardConfigDTO reward = siteConfigService.getRewardConfig();
+        if (reward != null) {
+            result.put("reward", reward.toPublicView());
+        }
 
         // 隐私配置 - 全部公开（前台需要知道显示什么）
         result.put("privacy", siteConfigService.getPrivacyConfig());

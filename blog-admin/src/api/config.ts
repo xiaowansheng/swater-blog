@@ -64,8 +64,17 @@ export interface SocialConfig {
   bilibili: string
   twitter: string
   facebook: string
-  wechatQr: string
-  alipayQr: string
+}
+
+export interface PaymentMethodConfig {
+  enabled: boolean
+  qr: string
+}
+
+export interface RewardConfig {
+  rewardEnabled: boolean
+  wechat: PaymentMethodConfig
+  alipay: PaymentMethodConfig
 }
 
 export interface PrivacyConfig {
@@ -139,6 +148,9 @@ export const updateCoverConfig = (data: CoverConfig): Promise<void> => request.p
 
 export const getSocialConfig = (): Promise<SocialConfig> => request.get('/admin/site-config/social')
 export const updateSocialConfig = (data: SocialConfig): Promise<void> => request.put('/admin/site-config/social', data)
+
+export const getRewardConfig = (): Promise<RewardConfig> => request.get('/admin/site-config/reward')
+export const updateRewardConfig = (data: RewardConfig): Promise<void> => request.put('/admin/site-config/reward', data)
 
 export const getPrivacyConfig = (): Promise<PrivacyConfig> => request.get('/admin/site-config/privacy')
 export const updatePrivacyConfig = (data: PrivacyConfig): Promise<void> => request.put('/admin/site-config/privacy', data)
