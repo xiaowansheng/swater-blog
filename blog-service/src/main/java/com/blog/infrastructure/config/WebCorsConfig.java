@@ -43,13 +43,14 @@ public class WebCorsConfig {
         if (properties.getAllowedOrigins() != null && !properties.getAllowedOrigins().isEmpty()) {
             config.setAllowedOrigins(properties.getAllowedOrigins());
         } else {
-            // 默认允许所有本地开发端口
-            config.addAllowedOrigin("http://localhost:3000");
-            config.addAllowedOrigin("http://localhost:3001");
-            config.addAllowedOrigin("http://127.0.0.1:3000");
-            config.addAllowedOrigin("http://127.0.0.1:3001");
-            config.addAllowedOrigin("http://127.0.0.1:8888");
-            config.addAllowedOrigin("http://localhost:8888");
+            // 如果为空，初始化一个空列表避免后续添加失败（但 Spring CorsConfiguration 会自己处理）
+        }
+        
+        // 如果是被强制启用的（原本没启用），或者包含了开发特征，强制加入本地开发白名单
+        if (!properties.isEnabled()) {
+            config.addAllowedOriginPattern("http://localhost:*");
+            config.addAllowedOriginPattern("http://127.0.0.1:*");
+            config.addAllowedOriginPattern("http://192.168.*:*");
         }
         
         if (properties.getAllowedMethods() != null && !properties.getAllowedMethods().isEmpty()) {
