@@ -296,7 +296,11 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
                 vo.setCategoryKey(category.getCategoryKey());
             }
             vo.setTags(articleTagMap.get(article.getId()));
-            vo.setHasPassword(StringUtils.hasText(article.getPassword()));
+            boolean hasPassword = StringUtils.hasText(article.getPassword());
+            vo.setHasPassword(hasPassword);
+            if (hasPassword) {
+                vo.setContent(null);
+            }
             return vo;
         }).collect(Collectors.toList());
     }

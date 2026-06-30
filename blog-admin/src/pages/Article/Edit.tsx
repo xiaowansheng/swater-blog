@@ -154,7 +154,7 @@ const ArticleEdit: React.FC = () => {
       isTop: values.isTop ? TopStatus.PINNED : TopStatus.NORMAL,
       tagIds,
       tagNames,
-      password: values.password || undefined,
+      password: values.password !== undefined ? values.password : undefined,
       scheduledPublishAt: values.scheduledPublishAt || undefined,
     }
   }, [form, pageId, saveState.articleId])
@@ -233,7 +233,7 @@ const ArticleEdit: React.FC = () => {
         categoryId: article.categoryId,
         tagIds: article.tags?.map((t) => t.id) || [],
         summary: article.excerpt,
-        password: article.password || '',
+        password: undefined,
       })
 
       contentRef.current = article.content
@@ -622,9 +622,9 @@ const ArticleEdit: React.FC = () => {
                   <Switch />
                 </Form.Item>
 
-                <Form.Item name="password" label="访问密码" help="留空则不加密">
+                <Form.Item name="password" label="访问密码" help={saveState.articleId ? "已设置密码的加密文章如果输入框留空则保持原密码，如需清除密码请输入后删除" : "留空则不加密"}>
                   <Input.Password
-                    placeholder="设置后读者需输入密码查看"
+                    placeholder="设置后读者需输入密码查看，留空保持原状态"
                     className="rounded-md"
                     maxLength={32}
                   />

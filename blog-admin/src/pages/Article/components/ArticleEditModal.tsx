@@ -56,13 +56,13 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
                 slug: article.slug || '',
                 excerpt: article.excerpt || '',
                 cover: article.cover || '',
+                password: article.password || null,
                 categoryId: article.categoryId,
                 categoryName: article.categoryName,
                 tagIds: article.tags?.map(t => t.id) || [],
                 type: article.type || ArticleType.ORIGINAL,
                 status: article.status,
                 isTop: article.isTop === TopStatus.PINNED,
-                password: article.password || '',
                 originalAuthor: article.originalAuthor || '',
                 originalTitle: article.originalTitle || '',
                 originalUrl: article.originalUrl || '',
@@ -117,7 +117,7 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
                 note: values.note || undefined,
                 status: values.status,
                 isTop: values.isTop ? TopStatus.PINNED : TopStatus.NORMAL,
-                password: values.password || undefined,
+                password: values.password !== undefined ? values.password : undefined,
                 tagIds: values.tagIds?.filter((id: number | string) => typeof id === 'number') || [],
                 tagNames: values.tagIds?.filter((id: number | string) => typeof id === 'string') || [],
                 articleKey: values.articleKey || undefined,
@@ -294,10 +294,10 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
                         <Form.Item
                             label="访问密码"
                             name="password"
-                            help="留空则不加密"
+                            help={article?.hasPassword ? "已设置密码。如需修改请直接输入，如需清除密码请输入后清空" : "留空则不加密"}
                         >
                             <Input.Password
-                                placeholder="设置后读者需输入密码查看"
+                                placeholder={article?.hasPassword ? "****** (留空保持原密码)" : "设置后读者需输入密码查看"}
                                 maxLength={32}
                             />
                         </Form.Item>
