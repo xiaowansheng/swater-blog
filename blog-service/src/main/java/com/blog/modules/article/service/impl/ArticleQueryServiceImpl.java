@@ -240,6 +240,8 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         }
         vo.setReferencedFiles(referencedFiles);
 
+        vo.setHasPassword(org.springframework.util.StringUtils.hasText(article.getPassword()));
+
         return vo;
     }
 
@@ -268,6 +270,8 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
             referencedFiles = fileService.listByReference("ARTICLE", article.getId());
         }
         vo.setReferencedFiles(referencedFiles);
+
+        vo.setHasPassword(org.springframework.util.StringUtils.hasText(article.getPassword()));
 
         return vo;
     }
