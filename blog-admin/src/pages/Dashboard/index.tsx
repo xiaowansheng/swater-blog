@@ -213,9 +213,9 @@ const Dashboard: React.FC = () => {
 
       {/* 数据区 */}
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
           <Title level={4} className="mb-0">数据</Title>
-          <Space>
+          <div className="w-full sm:w-auto">
             <RangePicker
               value={range}
               allowClear={false}
@@ -223,8 +223,9 @@ const Dashboard: React.FC = () => {
                 if (!next || !next[0] || !next[1]) return
                 setRange([next[0], next[1]])
               }}
+              className="w-full"
             />
-          </Space>
+          </div>
         </div>
 
         <Row gutter={[16, 16]} className="mb-4">
@@ -347,6 +348,7 @@ const Dashboard: React.FC = () => {
                 size="small"
                 loading={topPagesLoading}
                 dataSource={topPages}
+                scroll={{ x: 'max-content' }}
                 columns={[
                   {
                     title: '页面',

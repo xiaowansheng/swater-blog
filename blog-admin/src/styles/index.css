@@ -214,7 +214,7 @@ body {
 }
 
 .login-card {
-  @apply w-full max-w-md bg-white/80 backdrop-blur-md rounded-2xl p-10 relative z-10;
+  @apply w-[calc(100%-32px)] max-w-md bg-white/80 backdrop-blur-md rounded-2xl p-6 sm:p-10 relative z-10 mx-4;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
@@ -250,15 +250,100 @@ body {
 /* 响应式调整 */
 @media (max-width: 768px) {
   .page-container {
-    @apply p-4;
+    padding: 16px !important;
+    min-height: calc(100vh - 96px) !important; /* Header 56px + Tabs 40px */
   }
   
   .stat-card {
-    @apply p-4;
+    padding: 16px !important;
   }
   
   .stat-card .stat-value {
-    @apply text-2xl;
+    font-size: 24px !important;
+  }
+  
+  /* 表格容器响应式滚动 */
+  .table-container {
+    overflow-x: auto;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table-container .ant-table {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  /* 搜索栏表单项在移动端占满整行 */
+  .search-bar > div {
+    display: flex;
+    flex-direction: column;
+    gap: 12px !important;
+  }
+
+  .search-bar > div > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* 操作栏在移动端垂直堆叠 */
+  .action-bar > div {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px;
+  }
+
+  .action-bar .ant-space {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 8px !important;
+  }
+
+  .action-bar .ant-space-item {
+    flex: 1 1 auto;
+    min-width: calc(50% - 4px); /* 两列堆叠 */
+  }
+
+  .action-bar .ant-space-item > button {
+    width: 100% !important;
+  }
+}
+
+/* 针对极窄屏幕（比如小于 480px 的手机）的精细化样式优化 */
+@media (max-width: 480px) {
+  .action-bar .ant-space-item {
+    min-width: 100%; /* 单列堆叠 */
+  }
+}
+
+/* 仪表盘卡片在移动端的布局优化 */
+@media (max-width: 640px) {
+  .chart-card .ant-card-head {
+    flex-direction: column;
+    align-items: flex-start !important;
+    height: auto !important;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  
+  .chart-card .ant-card-extra {
+    margin-left: 0 !important;
+    margin-top: 8px;
+    width: 100%;
+  }
+  
+  .chart-card .ant-card-extra .ant-radio-group {
+    display: flex;
+    width: 100%;
+  }
+
+  .chart-card .ant-card-extra .ant-radio-button-wrapper {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    padding: 0 8px;
   }
 }
 

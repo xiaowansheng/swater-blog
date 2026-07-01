@@ -1,4 +1,4 @@
-import { Layout, Menu } from 'antd'
+import { Layout, Menu, Drawer } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   DashboardOutlined,
@@ -23,7 +23,6 @@ import {
   SmileOutlined,
   ApartmentOutlined,
 } from '@ant-design/icons'
-import { useState } from 'react'
 import type { MenuProps } from 'antd'
 
 const { Sider } = Layout
@@ -99,14 +98,30 @@ const menuItems: MenuProps['items'] = [
   },
 ]
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  collapsed: boolean
+  setCollapsed: (collapsed: boolean) => void
+  isMobile: boolean
+  drawerVisible: boolean
+  setDrawerVisible: (visible: boolean) => void
+}
+
+const Sidebar: React.FC<SidebarProps> = ({
+  collapsed,
+  setCollapsed,
+  isMobile,
+  drawerVisible,
+  setDrawerVisible,
+}) => {
   const navigate = useNavigate()
   const location = useLocation()
-  const [collapsed, setCollapsed] = useState(false)
 
   const handleMenuClick = ({ key }: { key: string }) => {
     if (!key.startsWith('/')) return
     navigate(key)
+    if (isMobile) {
+      setDrawerVisible(false)
+    }
   }
 
   const getSelectedKeys = () => {
@@ -143,6 +158,78 @@ const Sidebar: React.FC = () => {
     return []
   }
 
+  const renderContent = (isDrawer = false) => (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div
+        style={{
+          height: 64,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderBottom: '1px solid #374151',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              background: 'linear-gradient(to right, #3b82f6, #9333ea)',
+              borderRadius: 8,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <span style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>B</span>
+          </div>
+          {(!collapsed || isDrawer) && (
+            <span style={{ color: 'white', fontSize: 18, fontWeight: 600 }}>
+              Blog Admin
+            </span>
+          )}
+        </div>
+      </div>
+      <div
+        style={{
+          flex: 1,
+          overflow: 'hidden',
+        }}
+      >
+        <Menu
+          theme="dark"
+          mode="inline"
+          selectedKeys={getSelectedKeys()}
+          defaultOpenKeys={(collapsed && !isDrawer) ? [] : getOpenKeys()}
+          items={menuItems}
+          onClick={handleMenuClick}
+          style={{
+            borderRight: 0,
+            height: '100%',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+          }}
+        />
+      </div>
+    </div>
+  )
+
+  if (isMobile) {
+    return (
+      <Drawer
+        placement="left"
+        closable={false}
+        onClose={() => setDrawerVisible(false)}
+        open={drawerVisible}
+        width={220}
+        styles={{ body: { padding: 0, background: '#001529' } }}
+      >
+        {renderContent(true)}
+      </Drawer>
+    )
+  }
+
   return (
     <Sider
       collapsible
@@ -156,60 +243,7 @@ const Sidebar: React.FC = () => {
         left: 0,
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <div
-          style={{
-            height: 64,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderBottom: '1px solid #374151',
-            flexShrink: 0,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                background: 'linear-gradient(to right, #3b82f6, #9333ea)',
-                borderRadius: 8,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <span style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>B</span>
-            </div>
-            {!collapsed && (
-              <span style={{ color: 'white', fontSize: 18, fontWeight: 600 }}>
-                Blog Admin
-              </span>
-            )}
-          </div>
-        </div>
-        <div
-          style={{
-            flex: 1,
-            overflow: 'hidden',
-          }}
-        >
-          <Menu
-            theme="dark"
-            mode="inline"
-            selectedKeys={getSelectedKeys()}
-            defaultOpenKeys={collapsed ? [] : getOpenKeys()}
-            items={menuItems}
-            onClick={handleMenuClick}
-            style={{
-              borderRight: 0,
-              height: '100%',
-              overflowY: 'auto',
-              overflowX: 'hidden',
-            }}
-          />
-        </div>
-      </div>
+      {renderContent(false)}
     </Sider>
   )
 }

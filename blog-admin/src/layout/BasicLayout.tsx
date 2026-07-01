@@ -93,6 +93,22 @@ const BasicLayout: React.FC = () => {
   const outlet = useOutlet()
   const { drop, refresh } = useAliveController()
   const [refreshSeeds, setRefreshSeeds] = useState<Record<string, number>>({})
+  const [collapsed, setCollapsed] = useState(false)
+  const [drawerVisible, setDrawerVisible] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024
+      setIsMobile(mobile)
+      if (!mobile) {
+        setDrawerVisible(false)
+      }
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const bumpRefreshSeed = useCallback((key: string) => {
     setRefreshSeeds((prev) => ({
@@ -143,10 +159,22 @@ const BasicLayout: React.FC = () => {
   const isWelcome = location.pathname === '/welcome'
 
   return (
-    <Layout className="h-screen">
-      <Sidebar />
-      <Layout className="flex flex-col">
-        <Header />
+    <Layout className="h-screen overflow-hidden">
+      <Sidebar
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        isMobile={isMobile}
+        drawerVisible={drawerVisible}
+        setDrawerVisible={setDrawerVisible}
+      />
+      <Layout className="flex flex-col h-full overflow-hidden">
+        <Header
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          isMobile={isMobile}
+          drawerVisible={drawerVisible}
+          setDrawerVisible={setDrawerVisible}
+        />
         <Tabs />
         <Content
           className="overflow-auto flex-1 bg-gray-50"
@@ -157,8 +185,8 @@ const BasicLayout: React.FC = () => {
               <Suspense fallback={<PageLoading />}>{outlet}</Suspense>
             </KeepAlive>
           ) : (
-            <div className="page-container">
-              <div className="mb-4">
+            <div className="page-container animate-fade-in">
+              <div className="mb-4 hidden sm:block">
                 <Breadcrumb items={getBreadcrumbItems(location.pathname)} />
               </div>
               <KeepAlive name={location.pathname} when={shouldCache} key={keepAliveKey}>
