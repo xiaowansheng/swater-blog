@@ -49,7 +49,8 @@ const nextConfig: NextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     // 恢复内置图片优化（历史上 unoptimized:true 关闭了全部优化）
     remotePatterns: buildImageRemotePatterns(),
-    // @ts-expect-error: This is an undocumented/newer property in Next.js
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     dangerouslyAllowLocalIP: process.env.NODE_ENV !== 'production',
   },
 };

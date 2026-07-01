@@ -193,9 +193,10 @@ export default async function PostDetailPage({
                     contentId={article.id}
                     initialLikeCount={article.likeCount || 0}
                   />
+                  <DonationButton />
                   <ArticleCopyright article={article} author={author} />
 
-                  <DonationButton />
+
 
                   {/* 二次元评论组件 - 根据配置显示 */}
                   {componentConfig.articleCommentEnabled && (

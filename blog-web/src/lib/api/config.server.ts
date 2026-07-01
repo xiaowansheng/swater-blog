@@ -51,6 +51,9 @@ const defaultConfig: PublicConfigVO = {
     talkCommentEnabled: true,
     guestbookMessageEnabled: true,
   },
+  reward: {
+    rewardEnabled: true,
+  },
 };
 
 /**
