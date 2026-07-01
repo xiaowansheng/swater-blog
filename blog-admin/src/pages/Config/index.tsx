@@ -384,7 +384,7 @@ const ConfigPage: React.FC = () => {
     label,
   }: {
     type?: "cover" | "avatar" | "icon" | "logo";
-    name: string;
+    name: any;
     label: string;
   }) => {
     if (type === "avatar") {

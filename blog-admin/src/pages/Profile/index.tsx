@@ -10,7 +10,7 @@ import {
   SaveOutlined,
   LockOutlined,
 } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "@/store/auth";
 import { AvatarUpload } from "@/components/common/ImageUpload";
 import { getFullUrl } from "@/utils/format";
@@ -32,6 +32,8 @@ interface ProfileFormData {
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
   const { user, getCurrentUser } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -39,6 +41,20 @@ const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("view");
   const [profileForm] = Form.useForm();
   const [passwordForm] = Form.useForm();
+
+  // 同步 URL 中的 tab 参数到 activeTab 状态
+  useEffect(() => {
+    if (tabParam) {
+      setActiveTab(tabParam);
+    } else {
+      setActiveTab("view");
+    }
+  }, [tabParam]);
+
+  const handleTabChange = (key: string) => {
+    setActiveTab(key);
+    setSearchParams({ tab: key });
+  };
 
   useEffect(() => {
     if (user) {
@@ -379,7 +395,7 @@ const ProfilePage: React.FC = () => {
       <Card className="chart-card">
         <Tabs
           activeKey={activeTab}
-          onChange={setActiveTab}
+          onChange={handleTabChange}
           items={tabItems}
           className="profile-tabs"
         />

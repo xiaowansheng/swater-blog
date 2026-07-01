@@ -26,8 +26,8 @@ export const formatFileSize = (bytes: number): string => {
  * @param path 相对路径或绝对路径
  * @returns 完整 URL
  */
-export const getFullUrl = (path: string | undefined): string => {
-  if (!path) return ''
+export const getFullUrl = (path: any): string => {
+  if (typeof path !== 'string' || !path) return ''
   
   // 如果是完整 URL 或 base64，直接返回
   if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:') || path.startsWith('//')) {
@@ -59,8 +59,8 @@ export const getFullUrl = (path: string | undefined): string => {
  * 用于统一入库格式
  * @param path 原始路径
  */
-export const toRelativeUrl = (path: string): string => {
-  if (!path) return ''
+export const toRelativeUrl = (path: any): string => {
+  if (typeof path !== 'string' || !path) return ''
   
   // 如果是完整 URL，不处理
   if (/^(http:|https:|data:|\/\/)/i.test(path)) {

@@ -2,7 +2,6 @@ import { Layout, Dropdown, Avatar, Button, Tooltip } from 'antd'
 import {
   UserOutlined,
   LogoutOutlined,
-  SettingOutlined,
   FullscreenOutlined,
   FullscreenExitOutlined,
   GithubOutlined,
@@ -50,12 +49,6 @@ const Header: React.FC = () => {
       icon: <UserOutlined />,
       label: '个人中心',
       onClick: () => navigate('/profile'),
-    },
-    {
-      key: 'settings',
-      icon: <SettingOutlined />,
-      label: '账户设置',
-      onClick: () => navigate('/profile?tab=edit'),
     },
     {
       type: 'divider',
