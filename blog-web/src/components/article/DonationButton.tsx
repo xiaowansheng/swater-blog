@@ -93,11 +93,11 @@ export default function DonationButton() {
               )}
             </div>
 
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 flex items-center justify-center min-h-[200px]">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 flex items-center justify-center w-full aspect-square max-w-[240px] mx-auto">
               {tab === 'wechat' && hasWechat && wechat?.qr ? (
-                <Image src={getFullUrl(wechat.qr)} alt="微信赞赏码" width={180} height={180} className="max-w-[180px] rounded-lg" unoptimized />
+                <Image src={getFullUrl(wechat.qr)} alt="微信赞赏码" width={240} height={240} className="w-full h-full object-contain rounded-lg" unoptimized />
               ) : tab === 'alipay' && hasAlipay && alipay?.qr ? (
-                <Image src={getFullUrl(alipay.qr)} alt="支付宝收款码" width={180} height={180} className="max-w-[180px] rounded-lg" unoptimized />
+                <Image src={getFullUrl(alipay.qr)} alt="支付宝收款码" width={240} height={240} className="w-full h-full object-contain rounded-lg" unoptimized />
               ) : (
                 <p className="text-sm text-muted-foreground">{t('donationNoQr')}</p>
               )}
