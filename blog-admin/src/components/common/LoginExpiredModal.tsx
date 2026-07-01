@@ -38,6 +38,7 @@ const LoginExpiredModal: React.FC<LoginExpiredModalProps> = ({ open, onClose }) 
       centered
       width={400}
       maskClosable={false}
+      zIndex={2000}
     >
       <div className="py-4">
         <p className="text-gray-600 mb-6">
