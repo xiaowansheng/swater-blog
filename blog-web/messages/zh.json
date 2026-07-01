@@ -325,7 +325,12 @@
     "copyrightNotice": "本文由 {author} 撰写，采用",
     "license": "知识共享署名 4.0 国际许可协议",
     "articleLink": "文章链接",
-    "lastUpdated": "最后更新"
+    "lastUpdated": "最后更新",
+    "donation": "赞赏支持",
+    "donationDesc": "如果文章对你有帮助，欢迎赞赏支持 ~",
+    "donationWechat": "微信",
+    "donationAlipay": "支付宝",
+    "donationNoQr": "暂未配置收款码"
   },
   "search": {
     "placeholder": "搜索文章、标签...",

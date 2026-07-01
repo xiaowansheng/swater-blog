@@ -325,7 +325,12 @@
     "copyrightNotice": "Written by {author}, licensed under",
     "license": "CC BY 4.0 International License",
     "articleLink": "Article Link",
-    "lastUpdated": "Last updated"
+    "lastUpdated": "Last updated",
+    "donation": "Support Author",
+    "donationDesc": "If you find this article helpful, feel free to support the author ~",
+    "donationWechat": "WeChat",
+    "donationAlipay": "Alipay",
+    "donationNoQr": "QR code not configured yet"
   },
   "search": {
     "placeholder": "Search articles, tags...",
