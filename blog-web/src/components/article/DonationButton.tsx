@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useSiteConfig } from '@/lib/context/SiteConfigContext';
+import { getFullUrl } from '@/lib/utils/format';
 
 export default function DonationButton() {
   const { reward } = useSiteConfig();
@@ -92,9 +93,9 @@ export default function DonationButton() {
 
             <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 flex items-center justify-center min-h-[200px]">
               {tab === 'wechat' && hasWechat && wechat?.qr ? (
-                <Image src={wechat!.qr!} alt="微信赞赏码" width={180} height={180} className="max-w-[180px] rounded-lg" unoptimized />
+                <Image src={getFullUrl(wechat.qr)} alt="微信赞赏码" width={180} height={180} className="max-w-[180px] rounded-lg" unoptimized />
               ) : tab === 'alipay' && hasAlipay && alipay?.qr ? (
-                <Image src={alipay!.qr!} alt="支付宝收款码" width={180} height={180} className="max-w-[180px] rounded-lg" unoptimized />
+                <Image src={getFullUrl(alipay.qr)} alt="支付宝收款码" width={180} height={180} className="max-w-[180px] rounded-lg" unoptimized />
               ) : (
                 <p className="text-sm text-muted-foreground">暂未配置收款码</p>
               )}
