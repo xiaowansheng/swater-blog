@@ -49,6 +49,13 @@ const Lockscreen: React.FC = () => {
       maskClosable={false}
       width={400}
       className="lockscreen-modal"
+      styles={{
+        mask: {
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        }
+      }}
     >
       <div className="text-center py-8">
         <div className="mb-6">
