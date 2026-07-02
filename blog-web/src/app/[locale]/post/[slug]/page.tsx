@@ -250,3 +250,26 @@ async function fetchArticleData(slug: string) {
     return null;
   }
 }
+
+export async function generateStaticParams() {
+  try {
+    // 预先静态化前50篇文章以提高秒开速度
+    const articleList = await articleApi.getList({ page: 1, size: 50 });
+    const locales = ['zh', 'en'];
+
+    const paths = [];
+    for (const post of articleList.records) {
+      const slug = post.articleKey || post.slug || post.id.toString();
+      for (const locale of locales) {
+        paths.push({
+          locale,
+          slug,
+        });
+      }
+    }
+    return paths;
+  } catch (error) {
+    console.error('Failed to generate static params for posts:', error);
+    return [];
+  }
+}

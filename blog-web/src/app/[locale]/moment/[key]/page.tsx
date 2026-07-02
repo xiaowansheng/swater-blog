@@ -251,3 +251,26 @@ export default async function MomentDetailPage({
     </>
   );
 }
+
+export async function generateStaticParams() {
+  try {
+    // 预先静态化前50条说说以提高秒开速度
+    const momentList = await momentApi.getList(1, 50);
+    const locales = ['zh', 'en'];
+
+    const paths = [];
+    for (const moment of momentList.records) {
+      const key = moment.talkKey || moment.id.toString();
+      for (const locale of locales) {
+        paths.push({
+          locale,
+          key,
+        });
+      }
+    }
+    return paths;
+  } catch (error) {
+    console.error('Failed to generate static params for moments:', error);
+    return [];
+  }
+}

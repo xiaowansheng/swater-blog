@@ -8,28 +8,26 @@ import { getMusicConfig } from '@/lib/api/music';
 import { musicConfig as defaultMusicConfig } from '@/lib/constants/music';
 
 export default function AnimeMusicPlayer() {
-  const {
-    playlist,
-    currentSong,
-    currentIndex,
-    isPlaying,
-    currentTime,
-    volume,
-    isMuted,
-    isPlayerOpen,
-    isPlaylistOpen,
-    playMode,
-    playSong,
-    playNext,
-    playPrevious,
-    togglePlay,
-    setCurrentTime,
-    setVolume,
-    toggleMute,
-    togglePlayer,
-    setPlayMode,
-    seekTo,
-  } = useMusicStore();
+  const playlist = useMusicStore((s) => s.playlist);
+  const currentSong = useMusicStore((s) => s.currentSong);
+  const currentIndex = useMusicStore((s) => s.currentIndex);
+  const isPlaying = useMusicStore((s) => s.isPlaying);
+  const volume = useMusicStore((s) => s.volume);
+  const isMuted = useMusicStore((s) => s.isMuted);
+  const isPlayerOpen = useMusicStore((s) => s.isPlayerOpen);
+  const isPlaylistOpen = useMusicStore((s) => s.isPlaylistOpen);
+  const playMode = useMusicStore((s) => s.playMode);
+
+  const playSong = useMusicStore((s) => s.playSong);
+  const playNext = useMusicStore((s) => s.playNext);
+  const playPrevious = useMusicStore((s) => s.playPrevious);
+  const togglePlay = useMusicStore((s) => s.togglePlay);
+  const setCurrentTime = useMusicStore((s) => s.setCurrentTime);
+  const setVolume = useMusicStore((s) => s.setVolume);
+  const toggleMute = useMusicStore((s) => s.toggleMute);
+  const togglePlayer = useMusicStore((s) => s.togglePlayer);
+  const setPlayMode = useMusicStore((s) => s.setPlayMode);
+  const seekTo = useMusicStore((s) => s.seekTo);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -123,16 +121,7 @@ export default function AnimeMusicPlayer() {
     audio.volume = isMuted ? 0 : volume;
   }, [volume, isMuted]);
 
-  // 跳转到指定时间
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !currentSong) return;
-
-    const diff = Math.abs(audio.currentTime - currentTime);
-    if (diff > 0.5 && !isDragging) {
-      audio.currentTime = currentTime;
-    }
-  }, [currentTime, isDragging]);
+  // 跳转到指定时间逻辑已移动至 ProgressControl 组件
 
   // 禁止/恢复页面滚动
   useEffect(() => {
@@ -286,39 +275,13 @@ export default function AnimeMusicPlayer() {
                   </div>
 
                   {/* 进度条 */}
-                  <div className="mb-4">
-                    <div className="relative h-1.5 bg-white/20 rounded-full overflow-hidden cursor-pointer group">
-                      <motion.div
-                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{
-                          width: `${audioRef.current ? (currentTime / audioRef.current.duration) * 100 : 0}%`,
-                        }}
-                      />
-                      <input
-                        type="range"
-                        min={0}
-                        max={audioRef.current?.duration || 100}
-                        value={currentTime}
-                        onChange={(e) => {
-                          const time = parseFloat(e.target.value);
-                          seekTo(time);
-                          if (audioRef.current) {
-                            audioRef.current.currentTime = time;
-                          }
-                        }}
-                        onMouseDown={() => setIsDragging(true)}
-                        onMouseUp={() => setIsDragging(false)}
-                        onTouchStart={() => setIsDragging(true)}
-                        onTouchEnd={() => setIsDragging(false)}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      />
-                    </div>
-                    <div className="flex justify-between text-xs text-white/60 mt-1">
-                      <span>{formatTime(currentTime)}</span>
-                      <span>{formatTime(audioRef.current?.duration || 0)}</span>
-                    </div>
-                  </div>
+                  <ProgressControl
+                    audioRef={audioRef}
+                    isDragging={isDragging}
+                    setIsDragging={setIsDragging}
+                    seekTo={seekTo}
+                    currentSong={currentSong}
+                  />
 
                   {/* 控制按钮 */}
                   <div className="flex items-center justify-between mb-4">
@@ -556,5 +519,93 @@ export default function AnimeMusicPlayer() {
         </AnimatePresence>
       </AnimatePresence>
     </>
+  );
+}
+
+interface ProgressControlProps {
+  audioRef: React.RefObject<HTMLAudioElement | null>;
+  isDragging: boolean;
+  setIsDragging: (val: boolean) => void;
+  seekTo: (time: number) => void;
+  currentSong: Song | null;
+}
+
+function ProgressControl({ audioRef, isDragging, setIsDragging, seekTo, currentSong }: ProgressControlProps) {
+  const currentTime = useMusicStore((s) => s.currentTime);
+  const [duration, setDuration] = useState(0);
+
+  // 监听并同步音频的 duration
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const updateDuration = () => {
+      setDuration(audio.duration || 0);
+    };
+
+    // 如果音频已经加载好 metadata
+    if (audio.duration) {
+      setDuration(audio.duration);
+    }
+
+    audio.addEventListener('durationchange', updateDuration);
+    audio.addEventListener('loadedmetadata', updateDuration);
+
+    return () => {
+      audio.removeEventListener('durationchange', updateDuration);
+      audio.removeEventListener('loadedmetadata', updateDuration);
+    };
+  }, [audioRef, currentSong]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentSong) return;
+
+    const diff = Math.abs(audio.currentTime - currentTime);
+    if (diff > 0.5 && !isDragging) {
+      audio.currentTime = currentTime;
+    }
+  }, [currentTime, isDragging, currentSong, audioRef]);
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="mb-4">
+      <div className="relative h-1.5 bg-white/20 rounded-full overflow-hidden cursor-pointer group">
+        <motion.div
+          className="absolute inset-y-0 left-0 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full"
+          initial={{ width: 0 }}
+          animate={{
+            width: `${duration ? (currentTime / duration) * 100 : 0}%`,
+          }}
+        />
+        <input
+          type="range"
+          min={0}
+          max={duration || 100}
+          value={currentTime}
+          onChange={(e) => {
+            const time = parseFloat(e.target.value);
+            seekTo(time);
+            if (audioRef.current) {
+              audioRef.current.currentTime = time;
+            }
+          }}
+          onMouseDown={() => setIsDragging(true)}
+          onMouseUp={() => setIsDragging(false)}
+          onTouchStart={() => setIsDragging(true)}
+          onTouchEnd={() => setIsDragging(false)}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+      </div>
+      <div className="flex justify-between text-xs text-white/60 mt-1">
+        <span>{formatTime(currentTime)}</span>
+        <span>{formatTime(duration)}</span>
+      </div>
+    </div>
   );
 }
