@@ -19,6 +19,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hot-toast": "^2.6.0",
+    "sharp": "^0.35.3",
     "vditor": "^3.11.2",
     "yet-another-react-lightbox": "^3.32.0",
     "zustand": "^5.0.9"

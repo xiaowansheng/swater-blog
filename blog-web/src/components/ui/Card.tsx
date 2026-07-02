@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, HTMLMotionProps } from 'framer-motion';
+import { m, HTMLMotionProps } from 'framer-motion';
 import { ReactNode } from 'react';
 
 // If cn utility doesn't exist, I'll use a simple version or clsx directly.
@@ -34,7 +34,7 @@ export function Card({
     "hover:-translate-y-2 hover:shadow-[0_20px_40px_-12px_var(--color-hover-glow)] hover:border-primary/50" : "";
 
   return (
-    <motion.div
+    <m.div
       className={`${baseStyles} ${variants[variant]} ${hoverStyles} ${className}`}
       {...props}
     >
@@ -46,6 +46,6 @@ export function Card({
       )}
       
       {children}
-    </motion.div>
+    </m.div>
   );
 }
