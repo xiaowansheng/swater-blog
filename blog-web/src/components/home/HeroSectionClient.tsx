@@ -74,13 +74,21 @@ export default function HeroSectionClient({
 
   useEffect(() => {
     const headerOffset = 0;
-    const snapToHeroBottom = () => {
-      const hero = containerRef.current;
-      if (!hero || snappingRef.current) return;
+    const dimensionsRef = { top: 0, height: 0 };
 
-      const heroTop = hero.offsetTop;
-      const heroHeight = hero.offsetHeight;
-      const heroBottomTop = heroTop + heroHeight - headerOffset;
+    const updateDimensions = () => {
+      const hero = containerRef.current;
+      if (hero) {
+        dimensionsRef.top = hero.offsetTop;
+        dimensionsRef.height = hero.offsetHeight;
+      }
+    };
+
+    updateDimensions();
+
+    const snapToHeroBottom = () => {
+      if (snappingRef.current) return;
+      const heroBottomTop = dimensionsRef.top + dimensionsRef.height - headerOffset;
 
       snappingRef.current = true;
       window.scrollTo({
@@ -95,15 +103,18 @@ export default function HeroSectionClient({
     };
 
     const shouldSnapFromHero = () => {
-      const hero = containerRef.current;
-      if (!hero) return false;
+      const { top: heroTop, height: heroHeight } = dimensionsRef;
+      if (heroHeight === 0) return false;
 
-      const rect = hero.getBoundingClientRect();
-      const heroBottomTop = hero.offsetTop + hero.offsetHeight - headerOffset;
       const y = window.scrollY;
+      const windowHeight = window.innerHeight;
 
-      // 只要封面仍在视口内（且还没滚过封面底部），就允许吸附
-      const heroInViewport = rect.bottom > headerOffset && rect.top < window.innerHeight;
+      // 转换为等价的视口坐标计算，完全不读取 DOM
+      const rectTop = heroTop - y;
+      const rectBottom = heroTop + heroHeight - y;
+      const heroBottomTop = heroTop + heroHeight - headerOffset;
+
+      const heroInViewport = rectBottom > headerOffset && rectTop < windowHeight;
       const notPastHeroBottom = y < heroBottomTop - 2;
 
       return heroInViewport && notPastHeroBottom;
@@ -134,14 +145,22 @@ export default function HeroSectionClient({
       snapToHeroBottom();
     };
 
+    const handleResize = () => {
+      updateDimensions();
+    };
+
     window.addEventListener('wheel', onWheel, { passive: false });
     window.addEventListener('touchstart', onTouchStart, { passive: true });
     window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('resize', handleResize, { passive: true });
+    window.addEventListener('load', handleResize, { passive: true });
 
     return () => {
       window.removeEventListener('wheel', onWheel);
       window.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('load', handleResize);
     };
   }, []);
 

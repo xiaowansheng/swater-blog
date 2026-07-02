@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 export default function ReadingProgress() {
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const articleRef = useRef<HTMLElement | null>(null);
+  const dimensionsRef = useRef({ top: 0, height: 0 });
 
   useEffect(() => {
     // 查找文章内容元素
@@ -16,17 +17,35 @@ export default function ReadingProgress() {
 
       if (target) {
         articleRef.current = target as HTMLElement;
+        updateDimensions();
       }
+    };
+
+    const updateDimensions = () => {
+      const article = articleRef.current;
+      if (!article) {
+        dimensionsRef.current = { top: 0, height: 0 };
+        return;
+      }
+      const rect = article.getBoundingClientRect();
+      const scrollTop = window.scrollY;
+      dimensionsRef.current = {
+        top: rect.top + scrollTop,
+        height: article.offsetHeight
+      };
     };
 
     // 初始查找并使用 MutationObserver 监听 DOM 变化
     findArticleElement();
-    const observer = new MutationObserver(findArticleElement);
+    const observer = new MutationObserver(() => {
+      findArticleElement();
+      updateDimensions();
+    });
     observer.observe(document.body, { childList: true, subtree: true });
 
     const updateProgress = () => {
-      const article = articleRef.current;
-      if (!article) {
+      const { top: articleTop, height: articleHeight } = dimensionsRef.current;
+      if (articleHeight === 0) {
         setProgress(0);
         setIsVisible(false);
         return;
@@ -34,9 +53,7 @@ export default function ReadingProgress() {
 
       const windowHeight = window.innerHeight;
       const scrollTop = window.scrollY;
-      const rect = article.getBoundingClientRect();
-      const articleTop = rect.top + scrollTop;
-      const articleBottom = articleTop + article.offsetHeight;
+      const articleBottom = articleTop + articleHeight;
 
       const start = articleTop;
       const end = articleBottom - windowHeight;
@@ -66,11 +83,36 @@ export default function ReadingProgress() {
       setIsVisible(true);
     };
 
-    window.addEventListener('scroll', updateProgress);
+    // 监听 resize 事件以更新尺寸缓存
+    const handleResize = () => {
+      updateDimensions();
+      updateProgress();
+    };
+
+    // 使用 requestAnimationFrame 防抖节流滚动计算
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateProgress();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+    window.addEventListener('load', handleResize, { passive: true });
+
+    // 初始校准并计算进度
+    updateDimensions();
     updateProgress();
 
     return () => {
-      window.removeEventListener('scroll', updateProgress);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('load', handleResize);
       observer.disconnect();
     };
   }, []);
@@ -91,4 +133,3 @@ export default function ReadingProgress() {
     </div>
   );
 }
-
