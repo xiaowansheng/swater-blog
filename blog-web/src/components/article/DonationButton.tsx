@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useSiteConfig } from '@/lib/context/SiteConfigContext';
 import { getFullUrl } from '@/lib/utils/format';
@@ -16,6 +16,15 @@ export default function DonationButton() {
 
   const [visible, setVisible] = useState(false);
   const [tab, setTab] = useState<'wechat' | 'alipay'>(hasWechat ? 'wechat' : 'alipay');
+
+  useEffect(() => {
+    if (!visible) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [visible]);
 
   if (rewardEnabled === false || (!hasWechat && !hasAlipay)) return null;
 
@@ -37,7 +46,7 @@ export default function DonationButton() {
 
       {visible && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           onClick={() => setVisible(false)}
         >
           <div
