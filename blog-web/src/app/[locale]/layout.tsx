@@ -16,7 +16,7 @@ import TopProgressBar from '@/components/common/TopProgressBar';
 import FloatingToolbar from '@/components/widgets/FloatingToolbar';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { LazyMotion, domAnimation } from 'framer-motion';
+import FramerMotionProvider from '@/components/common/FramerMotionProvider';
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteInfo();
@@ -68,7 +68,7 @@ export default async function LocaleLayout({
       <body className="antialiased">
         <NextIntlClientProvider messages={messages}>
           <SiteConfigProvider initialConfig={config}>
-            <LazyMotion features={domAnimation}>
+            <FramerMotionProvider>
               <DecorationProvider>
                 <TopProgressBar />
               <PageLoadingWrapper>
@@ -135,7 +135,7 @@ export default async function LocaleLayout({
                 }}
               />
               </DecorationProvider>
-            </LazyMotion>
+            </FramerMotionProvider>
           </SiteConfigProvider>
         </NextIntlClientProvider>
       </body>
