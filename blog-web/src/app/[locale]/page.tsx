@@ -27,29 +27,36 @@ export default async function HomePage({
   let tags: TagVO[] = [];
   let hasArticleError = false;
 
-  try {
-    articleList = await articleApi.getList({ page: currentPage, size: PAGINATION_DEFAULT_SIZE });
-  } catch (error) {
-    console.warn('Failed to load articles (API server may not be running):', error);
+  const results = await Promise.allSettled([
+    articleApi.getList({ page: currentPage, size: PAGINATION_DEFAULT_SIZE }),
+    articleApi.getHot(5),
+    categoryApi.getList(),
+    tagApi.getList()
+  ]);
+
+  if (results[0].status === 'fulfilled') {
+    articleList = results[0].value;
+  } else {
+    console.error('Failed to load articles (API server may not be running):', results[0].reason);
     hasArticleError = true;
   }
 
-  try {
-    hotArticles = await articleApi.getHot(5);
-  } catch (error) {
-    console.warn('Failed to load hot articles:', error);
+  if (results[1].status === 'fulfilled') {
+    hotArticles = results[1].value;
+  } else {
+    console.error('Failed to load hot articles:', results[1].reason);
   }
 
-  try {
-    categories = await categoryApi.getList();
-  } catch (error) {
-    console.warn('Failed to load categories:', error);
+  if (results[2].status === 'fulfilled') {
+    categories = results[2].value;
+  } else {
+    console.error('Failed to load categories:', results[2].reason);
   }
 
-  try {
-    tags = await tagApi.getList();
-  } catch (error) {
-    console.warn('Failed to load tags:', error);
+  if (results[3].status === 'fulfilled') {
+    tags = results[3].value;
+  } else {
+    console.error('Failed to load tags:', results[3].reason);
   }
 
   return (

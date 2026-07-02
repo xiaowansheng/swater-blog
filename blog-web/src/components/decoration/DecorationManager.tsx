@@ -2,17 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { useDecoration } from '@/lib/context/DecorationContext';
-import SakuraRain from '@/components/decoration/SakuraRain';
-import CornerDecoration from '@/components/decoration/CornerDecoration';
-import AnimeMusicPlayer from '@/components/decoration/AnimeMusicPlayer';
-import ClickEffects from '@/components/decoration/ClickEffects';
-// Weather Components
-import Rain from '@/components/decoration/weather/Rain';
-import Snow from '@/components/decoration/weather/Snow';
-import Thunder from '@/components/decoration/weather/Thunder';
-import Leaves from '@/components/decoration/weather/Leaves';
-import CursorFollower from '@/components/ui/CursorFollower';
-// import Mascot from '@/components/decoration/Mascot';
+import dynamic from 'next/dynamic';
+
+const ClickEffects = dynamic(() => import('@/components/decoration/ClickEffects'), { ssr: false });
+const AnimeMusicPlayer = dynamic(() => import('@/components/decoration/AnimeMusicPlayer'), { ssr: false });
+const CornerDecoration = dynamic(() => import('@/components/decoration/CornerDecoration'), { ssr: false });
+const CursorFollower = dynamic(() => import('@/components/ui/CursorFollower'), { ssr: false });
+const SakuraRain = dynamic(() => import('@/components/decoration/SakuraRain'), { ssr: false });
+const Rain = dynamic(() => import('@/components/decoration/weather/Rain'), { ssr: false });
+const Snow = dynamic(() => import('@/components/decoration/weather/Snow'), { ssr: false });
+const Thunder = dynamic(() => import('@/components/decoration/weather/Thunder'), { ssr: false });
+const Leaves = dynamic(() => import('@/components/decoration/weather/Leaves'), { ssr: false });
 
 export default function DecorationManager() {
   const { level, weather } = useDecoration();

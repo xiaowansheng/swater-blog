@@ -15,28 +15,34 @@ export default async function ArchiveListPage() {
   const t = await getTranslations('common');
 
   let cover = DEFAULT_COVER_CONFIG;
-  try {
-    cover = await getCoverConfig();
-  } catch (error) {
-    console.error('Failed to load cover config:', error);
-  }
-
   let categories: CategoryVO[] = [];
   let tags: TagVO[] = [];
   let hasCategoriesError = false;
   let hasTagsError = false;
 
-  try {
-    categories = await categoryApi.getList();
-  } catch (error) {
-    console.error('Failed to load categories:', error);
+  const results = await Promise.allSettled([
+    getCoverConfig(),
+    categoryApi.getList(),
+    tagApi.getList()
+  ]);
+
+  if (results[0].status === 'fulfilled') {
+    cover = results[0].value;
+  } else {
+    console.error('Failed to load cover config:', results[0].reason);
+  }
+
+  if (results[1].status === 'fulfilled') {
+    categories = results[1].value;
+  } else {
+    console.error('Failed to load categories:', results[1].reason);
     hasCategoriesError = true;
   }
 
-  try {
-    tags = await tagApi.getList();
-  } catch (error) {
-    console.error('Failed to load tags:', error);
+  if (results[2].status === 'fulfilled') {
+    tags = results[2].value;
+  } else {
+    console.error('Failed to load tags:', results[2].reason);
     hasTagsError = true;
   }
 

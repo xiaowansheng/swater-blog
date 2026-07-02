@@ -8,7 +8,9 @@ import { useTranslations, useLocale } from 'next-intl';
 import MobileMenu from './MobileMenu';
 import { useDecoration } from '@/lib/context/DecorationContext';
 import MusicPlayerButton from '../decoration/MusicPlayerButton';
-import SearchModal from '../search/SearchModal';
+import dynamic from 'next/dynamic';
+
+const SearchModal = dynamic(() => import('../search/SearchModal'), { ssr: false });
 
 interface NavItem {
   href: string;

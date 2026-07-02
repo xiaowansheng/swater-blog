@@ -1,11 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Vditor from 'vditor';
 import 'vditor/dist/index.css';
-import ImagePreview from '@/components/ImagePreview';
 import ExternalLinkDialog from '@/components/markdown/ExternalLinkDialog';
 import { useTheme } from '@/lib/utils/theme';
+import dynamic from 'next/dynamic';
+
+const ImagePreview = dynamic(() => import('@/components/ImagePreview'), { ssr: false });
 
 interface MarkdownRendererProps {
   content: string;
@@ -200,42 +201,53 @@ export default function MarkdownRenderer({
     container.innerHTML = '';
     if (renderingIndicator) renderingIndicator.hidden = false;
 
-    Vditor.preview(container, content, {
-      mode: currentTheme,
-      theme: { current: currentTheme },
-      anchor: 1,
-      markdown: {
-        linkBase: process.env.NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX,
-      },
-      hljs: {
-        enable: true,
-        style: currentTheme === 'dark' ? 'atom-one-dark' : 'github',
-      },
-      math: {
-        inlineDigit: true,
-        engine: 'KaTeX',
-      },
-      speech: { enable: false },
-      after: () => {
+    const renderVditor = async () => {
+      try {
+        const Vditor = (await import('vditor')).default;
         if (disposed) return;
 
-        enhanceDom(container);
+        Vditor.preview(container, content, {
+          mode: currentTheme,
+          theme: { current: currentTheme },
+          anchor: 1,
+          markdown: {
+            linkBase: process.env.NEXT_PUBLIC_UPLOAD_RESOURCE_PREFIX,
+          },
+          hljs: {
+            enable: true,
+            style: currentTheme === 'dark' ? 'atom-one-dark' : 'github',
+          },
+          math: {
+            inlineDigit: true,
+            engine: 'KaTeX',
+          },
+          speech: { enable: false },
+          after: () => {
+            if (disposed) return;
 
-        if (container) {
-          const event = new CustomEvent('vditorRendered', { detail: { container } });
-          window.dispatchEvent(event);
-        }
+            enhanceDom(container);
 
-        // 渲染完成，先关掉 loading 再触发回调
-        if (renderingIndicator) renderingIndicator.hidden = true;
+            if (container) {
+              const event = new CustomEvent('vditorRendered', { detail: { container } });
+              window.dispatchEvent(event);
+            }
 
-        if (onRenderedRef.current) {
-          onRenderedTimerRef.current = window.setTimeout(() => {
-            onRenderedRef.current?.();
-          }, 50);
-        }
-      },
-    });
+            // 渲染完成，先关掉 loading 再触发回调
+            if (renderingIndicator) renderingIndicator.hidden = true;
+
+            if (onRenderedRef.current) {
+              onRenderedTimerRef.current = window.setTimeout(() => {
+                onRenderedRef.current?.();
+              }, 50);
+            }
+          },
+        });
+      } catch (error) {
+        console.error('Failed to load Vditor:', error);
+      }
+    };
+
+    renderVditor();
 
     return () => {
       disposed = true;
