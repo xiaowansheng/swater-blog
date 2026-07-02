@@ -24,21 +24,20 @@ export default function PageLoadingWrapper({
   children: React.ReactNode;
 }) {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
   const [pageReady, setPageReady] = useState(false);
 
   // 首次访问的加载逻辑
   useEffect(() => {
-    // 标记组件已挂载
-    setMounted(true);
 
     // 检查是否是首次访问
     const hasVisited = sessionStorage.getItem('hasVisited');
 
     if (hasVisited) {
       // 已经访问过，不显示首次加载动画
-      setIsInitialLoading(false);
-      setPageReady(true);
+      Promise.resolve().then(() => {
+        setIsInitialLoading(false);
+        setPageReady(true);
+      });
     } else {
       // 首次访问，监听页面真实加载完成
       const startTime = Date.now();
@@ -93,10 +92,6 @@ export default function PageLoadingWrapper({
     }
   }, []);
 
-  // 未挂载时不渲染任何内容
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <>
