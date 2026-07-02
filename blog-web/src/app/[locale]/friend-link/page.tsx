@@ -12,18 +12,24 @@ export default async function FriendLinkPage() {
   const t = await getTranslations('common');
 
   let cover = DEFAULT_COVER_CONFIG;
-  try {
-    cover = await getCoverConfig();
-  } catch (error) {
-    console.error('Failed to load cover config:', error);
-  }
-
   let friendLinks: FriendLinkVO[] = [];
   let hasError = false;
-  try {
-    friendLinks = await friendLinkApi.getList();
-  } catch (error) {
-    console.error('Failed to load friend links:', error);
+
+  const results = await Promise.allSettled([
+    getCoverConfig(),
+    friendLinkApi.getList(),
+  ]);
+
+  if (results[0].status === 'fulfilled') {
+    cover = results[0].value;
+  } else {
+    console.error('Failed to load cover config:', results[0].reason);
+  }
+
+  if (results[1].status === 'fulfilled') {
+    friendLinks = results[1].value;
+  } else {
+    console.error('Failed to load friend links:', results[1].reason);
     hasError = true;
   }
 

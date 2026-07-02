@@ -81,18 +81,25 @@ export default async function MomentDetailPage({
   const t = await getTranslations('common');
 
   let moment: MomentVO;
+  let author;
+  let config;
+  let componentConfig;
+
   try {
-    moment = await momentApi.getByKey(key);
+    const [momentResult, authorResult, configResult, componentConfigResult] = await Promise.all([
+      momentApi.getByKey(key),
+      getAuthorInfo(),
+      getServerConfig(),
+      getComponentConfig(),
+    ]);
+    moment = momentResult;
+    author = authorResult;
+    config = configResult;
+    componentConfig = componentConfigResult;
   } catch (error) {
-    console.error('Failed to load moment:', error);
+    console.error('Failed to load moment or configuration:', error);
     notFound();
   }
-
-  const [author, config, componentConfig] = await Promise.all([
-    getAuthorInfo(),
-    getServerConfig(),
-    getComponentConfig(),
-  ]);
   const { privacy } = config;
 
   return (

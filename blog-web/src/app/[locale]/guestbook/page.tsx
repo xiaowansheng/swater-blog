@@ -4,6 +4,7 @@ import GuestbookSection from '@/components/guestbook/GuestbookSection';
 import ComponentDisabledNotice from '@/components/common/ComponentDisabledNotice';
 import { guestbookApi } from '@/lib/api/guestbook';
 import { getCoverConfig, getComponentConfig } from '@/lib/api/config.server';
+import { DEFAULT_COVER_CONFIG } from '@/lib/constants';
 import type { GuestbookVO } from '@/types';
 
 
@@ -25,17 +26,21 @@ export default async function GuestbookPage({
   let guestbookTotal = 0;
   let hasGuestbookError = false;
 
-  const [cover, componentConfig] = await Promise.all([
+  const results = await Promise.allSettled([
     getCoverConfig(),
     getComponentConfig(),
+    guestbookApi.getList(currentPage, pageSize, sort)
   ]);
 
-  try {
-    const guestbook = await guestbookApi.getList(currentPage, pageSize, sort);
+  const cover = results[0].status === 'fulfilled' ? results[0].value : DEFAULT_COVER_CONFIG;
+  const componentConfig = results[1].status === 'fulfilled' ? results[1].value : { guestbookMessageEnabled: false };
+
+  if (results[2].status === 'fulfilled') {
+    const guestbook = results[2].value;
     guestbookRecords = guestbook.records || [];
     guestbookTotal = guestbook.total || 0;
-  } catch (err) {
-    console.error('Failed to load guestbook:', err);
+  } else {
+    console.error('Failed to load guestbook:', results[2].reason);
     hasGuestbookError = true;
   }
 

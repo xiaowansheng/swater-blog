@@ -30,18 +30,24 @@ export default async function MomentPage({
   const currentPage = parseInt(page, 10) || 1;
 
   let cover = DEFAULT_COVER_CONFIG;
-  try {
-    cover = await getCoverConfig();
-  } catch (error) {
-    console.error('Failed to load cover config:', error);
-  }
-
   let momentList: PageResult<MomentVO> = EMPTY_MOMENT_LIST;
   let hasError = false;
-  try {
-    momentList = await momentApi.getList(currentPage, PAGINATION_DEFAULT_SIZE);
-  } catch (error) {
-    console.error('Failed to load moments:', error);
+
+  const results = await Promise.allSettled([
+    getCoverConfig(),
+    momentApi.getList(currentPage, PAGINATION_DEFAULT_SIZE)
+  ]);
+
+  if (results[0].status === 'fulfilled') {
+    cover = results[0].value;
+  } else {
+    console.error('Failed to load cover config:', results[0].reason);
+  }
+
+  if (results[1].status === 'fulfilled') {
+    momentList = results[1].value;
+  } else {
+    console.error('Failed to load moments:', results[1].reason);
     hasError = true;
   }
 

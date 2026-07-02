@@ -34,18 +34,21 @@ export default async function CategoryPage({
   const currentPage = parseInt(page, 10) || 1;
 
   let cover = DEFAULT_COVER_CONFIG;
-  try {
-    cover = await getCoverConfig();
-  } catch (error) {
-    console.error('Failed to load cover config:', error);
-  }
-
   let category: CategoryVO | null = null;
   let articleList: PageResult<PostVO> = EMPTY_ARTICLE_LIST;
   let hasError = false;
 
   try {
-    category = await categoryApi.getByKey(key);
+    const [coverResult, categoryResult] = await Promise.all([
+      getCoverConfig().catch(err => {
+        console.error('Failed to load cover config:', err);
+        return DEFAULT_COVER_CONFIG;
+      }),
+      categoryApi.getByKey(key)
+    ]);
+    cover = coverResult;
+    category = categoryResult;
+
     articleList = await articleApi.getList({
       page: currentPage,
       size: PAGINATION_DEFAULT_SIZE,

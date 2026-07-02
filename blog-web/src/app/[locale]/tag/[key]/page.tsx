@@ -34,18 +34,21 @@ export default async function TagPage({
   const currentPage = parseInt(page, 10) || 1;
 
   let cover = DEFAULT_COVER_CONFIG;
-  try {
-    cover = await getCoverConfig();
-  } catch (error) {
-    console.error('Failed to load cover config:', error);
-  }
-
   let tag: TagVO | null = null;
   let articleList: PageResult<PostVO> = EMPTY_ARTICLE_LIST;
   let hasError = false;
 
   try {
-    tag = await tagApi.getByKey(key);
+    const [coverResult, tagResult] = await Promise.all([
+      getCoverConfig().catch(err => {
+        console.error('Failed to load cover config:', err);
+        return DEFAULT_COVER_CONFIG;
+      }),
+      tagApi.getByKey(key)
+    ]);
+    cover = coverResult;
+    tag = tagResult;
+
     articleList = await articleApi.getList({
       page: currentPage,
       size: PAGINATION_DEFAULT_SIZE,
