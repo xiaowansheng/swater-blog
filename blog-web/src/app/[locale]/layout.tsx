@@ -17,6 +17,7 @@ import FloatingToolbar from '@/components/widgets/FloatingToolbar';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import FramerMotionProvider from '@/components/common/FramerMotionProvider';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteInfo();
@@ -78,7 +79,9 @@ export default async function LocaleLayout({
                   <VisitorTracker />
                   <Header />
                   <div className="flex-1">
-                    {children}
+                    <ErrorBoundary>
+                      {children}
+                    </ErrorBoundary>
                   </div>
                   <Footer />
                 </div>
