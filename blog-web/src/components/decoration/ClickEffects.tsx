@@ -8,6 +8,7 @@ interface ClickEffect {
   x: number;
   y: number;
   word: string;
+  color: string;
 }
 
 const WORDS = ['❤', '✨', '🌸', '⭐', '🎵', '💫'];
@@ -22,6 +23,7 @@ export default function ClickEffects() {
         x: e.clientX,
         y: e.clientY,
         word: WORDS[Math.floor(Math.random() * WORDS.length)],
+        color: `hsl(${Math.random() * 360}, 70%, 70%)`,
       };
       
       setEffects(prev => [...prev, newEffect]);
@@ -52,7 +54,7 @@ export default function ClickEffects() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="absolute text-xl font-bold select-none text-primary pointer-events-none shadow-sm"
             style={{ 
-              color: `hsl(${Math.random() * 360}, 70%, 70%)` 
+              color: effect.color 
             }}
           >
             {effect.word}
