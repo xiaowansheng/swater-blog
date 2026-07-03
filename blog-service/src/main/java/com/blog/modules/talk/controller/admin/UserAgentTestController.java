@@ -3,6 +3,7 @@ package com.blog.modules.talk.controller.admin;
 import com.blog.shared.Result;
 import com.blog.shared.model.UserAgentInfo;
 import com.blog.shared.util.UserAgentUtil;
+import com.blog.shared.annotation.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +19,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/test")
 @Tag(name = "测试接口", description = "用于测试User-Agent解析")
+@ApiOperation(name = "设备测试模块", description = "用于测试设备和浏览器解析")
 public class UserAgentTestController {
 
     @GetMapping("/useragent")
     @Operation(summary = "获取当前请求的User-Agent信息")
+    @ApiOperation(name = "获取User-Agent解析", description = "解析当前请求的设备信息")
     public Result<Map<String, Object>> getUserAgentInfo(HttpServletRequest request) {
         String userAgent = request.getHeader("User-Agent");
 

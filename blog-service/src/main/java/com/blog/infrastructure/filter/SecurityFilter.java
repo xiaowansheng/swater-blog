@@ -243,6 +243,17 @@ public class SecurityFilter implements Filter {
             
             if (paramValues != null) {
                 for (String paramValue : paramValues) {
+                    // 对于搜索关键字，放宽 SQL 注入的纯单词过滤，防止误杀 legimate 技术名词
+                    if ("keyword".equals(paramName)) {
+                        // 仅检查 XSS 和明显的危险 SQL Payload（如 union select 等），跳过普通单字匹配
+                        if (sqlInjectionProtector.containsXss(paramValue) || containsObviousMaliciousContent(paramValue)) {
+                            logger.warn("检测到搜索参数安全攻击, Param: {}, Value: {}, IP: {}", 
+                                paramName, paramValue, IpUtil.getClientIp(request));
+                            return false;
+                        }
+                        continue;
+                    }
+
                     SqlInjectionProtector.ValidationResult result = 
                         sqlInjectionProtector.validateParameter(paramName, paramValue);
                     

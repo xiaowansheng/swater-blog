@@ -1,8 +1,7 @@
 package com.blog.ops.controller;
 
-
-
 import com.blog.shared.annotation.RateLimit;
+import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.Result;
 import com.blog.infrastructure.security.DataMaskingService;
 import com.blog.infrastructure.security.RateLimitManager;
@@ -14,12 +13,14 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+
 /**
  * 安全功能测试控制器
  * 用于测试各种安全功能
  */
 @RestController
 @RequestMapping("/api/security-test")
+@ApiOperation(name = "安全测试模块", description = "安全和限流相关测试接口", open = true)
 public class SecurityTestController {
 
     @Value("${spring.mvc.servlet.path:}")
@@ -45,6 +46,7 @@ public class SecurityTestController {
         limit = 5,
         message = "IP访问过于频繁"
     )
+    @ApiOperation(name = "测试IP限流", description = "测试IP限流限制", open = true)
     public Result<String> testIpRateLimit(HttpServletRequest request) {
         String ip = IpUtil.getClientIp(request);
         return Result.success("IP限流测试成功，您的IP: " + ip);
@@ -60,6 +62,7 @@ public class SecurityTestController {
         refillRate = 2.0,
         message = "令牌桶限流触发"
     )
+    @ApiOperation(name = "测试令牌桶限流", description = "测试令牌桶限流限制", open = true)
     public Result<String> testTokenBucketRateLimit() {
         return Result.success("令牌桶限流测试成功");
     }
@@ -68,6 +71,7 @@ public class SecurityTestController {
      * 测试数据脱敏
      */
     @PostMapping("/data-masking")
+    @ApiOperation(name = "测试数据脱敏", description = "测试敏感信息数据脱敏功能", open = true)
     public Result<Map<String, String>> testDataMasking(@RequestBody Map<String, String> data) {
         Map<String, String> maskedData = new HashMap<>();
         
@@ -94,6 +98,7 @@ public class SecurityTestController {
      * 测试SQL注入检测
      */
     @PostMapping("/sql-injection-check")
+    @ApiOperation(name = "测试SQL注入检测", description = "测试SQL注入与XSS检测算法", open = true)
     public Result<Map<String, Object>> testSqlInjectionCheck(@RequestParam String input) {
         Map<String, Object> result = new HashMap<>();
         
@@ -114,6 +119,7 @@ public class SecurityTestController {
      * 测试文件名安全检查
      */
     @PostMapping("/filename-check")
+    @ApiOperation(name = "测试文件名安全检查", description = "测试上传文件命名规范检查", open = true)
     public Result<Map<String, Object>> testFilenameCheck(@RequestParam String filename) {
         Map<String, Object> result = new HashMap<>();
         
@@ -130,6 +136,7 @@ public class SecurityTestController {
      * 测试限流状态查询
      */
     @GetMapping("/rate-limit/status")
+    @ApiOperation(name = "测试限流状态查询", description = "获取当前限流状态指标数据", open = true)
     public Result<Map<String, Object>> getRateLimitStatus(HttpServletRequest request) {
         String ip = IpUtil.getClientIp(request);
         
@@ -160,6 +167,7 @@ public class SecurityTestController {
      * 测试敏感信息检测
      */
     @PostMapping("/sensitive-info-check")
+    @ApiOperation(name = "测试敏感信息检测", description = "测试敏感文本匹配过滤", open = true)
     public Result<Map<String, Object>> testSensitiveInfoCheck(@RequestParam String text) {
         Map<String, Object> result = new HashMap<>();
         
