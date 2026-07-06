@@ -121,7 +121,7 @@ const Welcome: React.FC = () => {
     <div
       style={{
         position: 'relative',
-        minHeight: 'calc(100vh - 112px)',
+        minHeight: 'calc(100vh - 104px)',
         background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
       }}
     >
@@ -147,7 +147,7 @@ const Welcome: React.FC = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          minHeight: 'calc(100vh - 112px)',
+          minHeight: 'calc(100vh - 104px)',
           gap: 48,
         }}
       >

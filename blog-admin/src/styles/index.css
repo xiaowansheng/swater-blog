@@ -109,7 +109,7 @@ body {
 /* 页面容器 */
 .page-container {
   @apply p-6;
-  min-height: calc(100vh - 112px);
+  min-height: calc(100vh - 104px);
 }
 
 /* 搜索栏样式 */
@@ -251,7 +251,7 @@ body {
 @media (max-width: 768px) {
   .page-container {
     padding: 16px !important;
-    min-height: calc(100vh - 96px) !important; /* Header 56px + Tabs 40px */
+    min-height: calc(100vh - 104px) !important; /* Header 64px + Tabs 40px */
   }
   
   .stat-card {

@@ -78,7 +78,7 @@ const Header: React.FC<HeaderProps> = ({
   ]
 
   return (
-    <AntHeader className="bg-white flex items-center justify-between px-4 sm:px-6 border-b border-gray-100 h-14 select-none">
+    <AntHeader className="bg-white flex items-center justify-between px-4 sm:px-6 border-b border-gray-100 h-16 select-none">
       <div className="flex items-center gap-2 sm:gap-4">
         <Button
           type="text"

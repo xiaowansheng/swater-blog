@@ -20,6 +20,7 @@ import {
   UserOutlined,
   SyncOutlined,
   SearchOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons'
 import { getUserList, createUser, updateUser, deleteUser, resetPassword } from '@/api/user'
 import { getRoleList } from '@/api/role'
@@ -38,7 +39,18 @@ const UserPage: React.FC = () => {
   const [form] = Form.useForm()
   const [passwordForm] = Form.useForm()
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
-  const [filters, setFilters] = useState<{
+  const [searchForm, setSearchForm] = useState<{
+    username: string
+    email: string
+    roleId: number | undefined
+    status: EnableStatus | undefined
+  }>({
+    username: '',
+    email: '',
+    roleId: undefined,
+    status: undefined,
+  })
+  const [activeFilters, setActiveFilters] = useState<{
     username: string
     email: string
     roleId: number | undefined
@@ -65,10 +77,10 @@ const UserPage: React.FC = () => {
       const result = await getUserList({
         page: pagination.current,
         size: pagination.pageSize,
-        username: filters.username || undefined,
-        email: filters.email || undefined,
-        roleId: filters.roleId,
-        status: filters.status,
+        username: activeFilters.username || undefined,
+        email: activeFilters.email || undefined,
+        roleId: activeFilters.roleId,
+        status: activeFilters.status,
       })
       setUsers(result.records)
       setPagination((prev) => ({ ...prev, total: result.total }))
@@ -77,18 +89,25 @@ const UserPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }, [pagination, filters])
+  }, [pagination.current, pagination.pageSize, activeFilters])
+
+  const handleSearch = () => {
+    setPagination((prev) => ({ ...prev, current: 1 }))
+    setActiveFilters({ ...searchForm })
+  }
+
+  const handleReset = () => {
+    const empty = { username: '', email: '', roleId: undefined, status: undefined }
+    setSearchForm(empty)
+    setPagination((prev) => ({ ...prev, current: 1 }))
+    setActiveFilters(empty)
+  }
 
   useEffect(() => {
     loadRoles()
   }, [loadRoles])
 
   useEffect(() => {
-    loadUsers()
-  }, [loadUsers])
-
-  useEffect(() => {
-    setPagination((prev) => ({ ...prev, current: 1 }))
     loadUsers()
   }, [loadUsers])
 
@@ -249,22 +268,24 @@ const UserPage: React.FC = () => {
           <Input
             placeholder="用户名"
             prefix={<SearchOutlined className="text-gray-400" />}
-            value={filters.username}
-            onChange={(e) => setFilters({ ...filters, username: e.target.value })}
+            value={searchForm.username}
+            onChange={(e) => setSearchForm({ ...searchForm, username: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 160 }}
             allowClear
           />
           <Input
             placeholder="邮箱"
-            value={filters.email}
-            onChange={(e) => setFilters({ ...filters, email: e.target.value })}
+            value={searchForm.email}
+            onChange={(e) => setSearchForm({ ...searchForm, email: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 180 }}
             allowClear
           />
           <Select
             placeholder="角色"
-            value={filters.roleId}
-            onChange={(value) => setFilters({ ...filters, roleId: value })}
+            value={searchForm.roleId}
+            onChange={(value) => setSearchForm({ ...searchForm, roleId: value })}
             style={{ width: 140 }}
             allowClear
           >
@@ -276,14 +297,22 @@ const UserPage: React.FC = () => {
           </Select>
           <Select
             placeholder="状态"
-            value={filters.status}
-            onChange={(value) => setFilters({ ...filters, status: value })}
+            value={searchForm.status}
+            onChange={(value) => setSearchForm({ ...searchForm, status: value })}
             style={{ width: 100 }}
             allowClear
           >
             <Select.Option value={EnableStatus.ENABLED}>正常</Select.Option>
             <Select.Option value={EnableStatus.DISABLED}>禁用</Select.Option>
           </Select>
+          <Space>
+            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+              搜索
+            </Button>
+            <Button icon={<ReloadOutlined />} onClick={handleReset}>
+              重置
+            </Button>
+          </Space>
           <div className="flex-1" />
           <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
             新建用户
@@ -297,6 +326,7 @@ const UserPage: React.FC = () => {
           dataSource={users}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 'max-content' }}
           pagination={{
             current: pagination.current,
             pageSize: pagination.pageSize,

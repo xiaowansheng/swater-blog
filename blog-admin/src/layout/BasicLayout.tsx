@@ -110,6 +110,13 @@ const BasicLayout: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'))
+    }, 220)
+    return () => clearTimeout(timer)
+  }, [collapsed])
+
   const bumpRefreshSeed = useCallback((key: string) => {
     setRefreshSeeds((prev) => ({
       ...prev,

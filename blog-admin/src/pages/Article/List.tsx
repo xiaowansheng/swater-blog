@@ -24,6 +24,7 @@ import {
   ClockCircleOutlined,
   ApartmentOutlined,
   LockOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -46,7 +47,17 @@ const ArticleList: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
-  const [filters, setFilters] = useState<{
+  const [searchForm, setSearchForm] = useState<{
+    keyword: string
+    id: string
+    articleKey: string
+    status: number | undefined
+    categoryId: number | undefined
+    type: string | undefined
+    isTop: TopStatus | undefined
+  }>({ keyword: '', id: '', articleKey: '', status: undefined, categoryId: undefined, type: undefined, isTop: undefined })
+
+  const [activeFilters, setActiveFilters] = useState<{
     keyword: string
     id: string
     articleKey: string
@@ -75,7 +86,7 @@ const ArticleList: React.FC = () => {
       const result = await getArticleList({
         page,
         size,
-        ...filters,
+        ...activeFilters,
       })
       setArticles(result.records)
       // 仅在 total 实际变化时才产生新引用，避免触发依赖 pagination 的死循环
@@ -87,7 +98,19 @@ const ArticleList: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }, [pagination, filters])
+  }, [pagination.current, pagination.pageSize, activeFilters])
+
+  const handleSearch = () => {
+    setPagination((prev) => ({ ...prev, current: 1 }))
+    setActiveFilters({ ...searchForm })
+  }
+
+  const handleReset = () => {
+    const empty = { keyword: '', id: '', articleKey: '', status: undefined, categoryId: undefined, type: undefined, isTop: undefined }
+    setSearchForm(empty)
+    setPagination((prev) => ({ ...prev, current: 1 }))
+    setActiveFilters(empty)
+  }
 
   useEffect(() => {
     loadArticles()
@@ -117,11 +140,6 @@ const ArticleList: React.FC = () => {
       message.error('新建文章失败')
       setLoading(false)
     }
-  }
-
-  const handleSearch = () => {
-    setPagination((prev) => ({ ...prev, current: 1 }))
-    loadArticles()
   }
 
   const handleDelete = async (id: number) => {
@@ -371,32 +389,32 @@ const ArticleList: React.FC = () => {
           <Input
             placeholder="搜索文章标题"
             prefix={<SearchOutlined className="text-gray-400" />}
-            value={filters.keyword}
-            onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
+            value={searchForm.keyword}
+            onChange={(e) => setSearchForm({ ...searchForm, keyword: e.target.value })}
             style={{ width: 200 }}
             onPressEnter={handleSearch}
             allowClear
           />
           <Input
             placeholder="文章ID"
-            value={filters.id}
-            onChange={(e) => setFilters({ ...filters, id: e.target.value })}
+            value={searchForm.id}
+            onChange={(e) => setSearchForm({ ...searchForm, id: e.target.value })}
             style={{ width: 120 }}
             onPressEnter={handleSearch}
             allowClear
           />
           <Input
             placeholder="文章Key"
-            value={filters.articleKey}
-            onChange={(e) => setFilters({ ...filters, articleKey: e.target.value })}
+            value={searchForm.articleKey}
+            onChange={(e) => setSearchForm({ ...searchForm, articleKey: e.target.value })}
             style={{ width: 150 }}
             onPressEnter={handleSearch}
             allowClear
           />
           <Select
             placeholder="文章状态"
-            value={filters.status}
-            onChange={(value) => setFilters({ ...filters, status: value })}
+            value={searchForm.status}
+            onChange={(value) => setSearchForm({ ...searchForm, status: value })}
             style={{ width: 120 }}
             allowClear
           >
@@ -406,8 +424,8 @@ const ArticleList: React.FC = () => {
           </Select>
           <Select
             placeholder="文章类型"
-            value={filters.type}
-            onChange={(value) => setFilters({ ...filters, type: value })}
+            value={searchForm.type}
+            onChange={(value) => setSearchForm({ ...searchForm, type: value })}
             style={{ width: 120 }}
             allowClear
           >
@@ -418,8 +436,8 @@ const ArticleList: React.FC = () => {
           </Select>
           <Select
             placeholder="是否置顶"
-            value={filters.isTop}
-            onChange={(value) => setFilters({ ...filters, isTop: value })}
+            value={searchForm.isTop}
+            onChange={(value) => setSearchForm({ ...searchForm, isTop: value })}
             style={{ width: 120 }}
             allowClear
           >
@@ -428,8 +446,8 @@ const ArticleList: React.FC = () => {
           </Select>
           <Select
             placeholder="选择分类"
-            value={filters.categoryId}
-            onChange={(value) => setFilters({ ...filters, categoryId: value })}
+            value={searchForm.categoryId}
+            onChange={(value) => setSearchForm({ ...searchForm, categoryId: value })}
             style={{ width: 150 }}
             allowClear
           >
@@ -439,9 +457,14 @@ const ArticleList: React.FC = () => {
               </Select.Option>
             ))}
           </Select>
-          <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-            搜索
-          </Button>
+          <Space>
+            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+              搜索
+            </Button>
+            <Button icon={<ReloadOutlined />} onClick={handleReset}>
+              重置
+            </Button>
+          </Space>
         </div>
       </div>
 
@@ -496,6 +519,7 @@ const ArticleList: React.FC = () => {
           dataSource={articles}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 'max-content' }}
           rowSelection={{
             selectedRowKeys,
             onChange: setSelectedRowKeys,
