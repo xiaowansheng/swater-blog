@@ -304,15 +304,16 @@ public class LogAspect {
                     if (Modifier.isStatic(mod) || Modifier.isTransient(mod)) {
                         continue;
                     }
-                    if (!field.getType().equals(String.class)) {
-                        // 非字符串字段不脱敏，仅尝试原样拷贝
-                        continue;
-                    }
                     field.setAccessible(true);
-                    String value = (String) field.get(arg);
-                    if (value != null && isSensitiveFieldName(field.getName())) {
-                        field.set(copy, MASKED_VALUE);
+                    Object value = field.get(arg);
+                    if (field.getType().equals(String.class)) {
+                        if (value != null && isSensitiveFieldName(field.getName())) {
+                            field.set(copy, MASKED_VALUE);
+                        } else {
+                            field.set(copy, value);
+                        }
                     } else {
+                        // 非字符串字段不脱敏，直接原样拷贝
                         field.set(copy, value);
                     }
                     visited.add(field.getName());

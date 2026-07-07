@@ -47,6 +47,20 @@ public class ApiResourceCache {
     private final Map<Long, Set<Long>> apiRoleCache = new ConcurrentHashMap<>();
 
     /**
+     * 精确请求路径匹配到接口资源的二级有界 LRU 缓存，以规避每次调用频繁扫描资源列表带来的 AntPathMatcher 开销
+     * key = method + ":" + path, value = ApiResourceInfo
+     * 限制最大容量为 2000，防止因动态路由（文章ID/说说ID）请求量过大导致内存泄漏或 OOM
+     */
+    private final Map<String, ApiResourceInfo> pathLookupCache = Collections.synchronizedMap(
+            new LinkedHashMap<String, ApiResourceInfo>(256, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, ApiResourceInfo> eldest) {
+                    return size() > 2000;
+                }
+            }
+    );
+
+    /**
      * 缓存是否已初始化
      */
     private volatile boolean initialized = false;
@@ -67,12 +81,21 @@ public class ApiResourceCache {
     public ApiResourceInfo getApiResource(String path, String method) {
         ensureInitialized();
 
-        // 遍历所有接口资源，使用路径匹配查找
+        // 1. 尝试直接从二级缓存中进行 $O(1)$ 的精确匹配查找
+        String cacheKey = method.toLowerCase() + ":" + path;
+        ApiResourceInfo cachedInfo = pathLookupCache.get(cacheKey);
+        if (cachedInfo != null) {
+            return cachedInfo;
+        }
+
+        // 2. 二级缓存未命中，遍历所有接口资源进行 AntPathMatcher 匹配
         for (ApiResourceInfo info : resourceCache) {
             if (info.getPath() != null && info.getMethod() != null) {
                 // 使用 Ant 路径匹配器进行匹配
                 if (pathMatcher.match(info.getPath(), path) &&
                         info.getMethod().equalsIgnoreCase(method)) {
+                    // 将成功匹配的动态/静态路径放入二级缓存，供后续直接 O(1) 匹配
+                    pathLookupCache.put(cacheKey, info);
                     return info;
                 }
             }
@@ -102,6 +125,7 @@ public class ApiResourceCache {
         log.info("清除API接口资源缓存");
         resourceCache.clear();
         apiRoleCache.clear();
+        pathLookupCache.clear();
         initialized = false;
     }
 

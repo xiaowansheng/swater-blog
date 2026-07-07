@@ -30,6 +30,9 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
     @Autowired
     private ApiResourceCache apiResourceCache;
 
+    @Value("${spring.profiles.active:}")
+    private String activeProfile;
+
     private final String ADMIN_ROLE_KEY="admin";
 
     @Override
@@ -58,9 +61,13 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
         // 从缓存中获取接口信息
         ApiResourceCache.ApiResourceInfo apiInfo = apiResourceCache.getApiResource(path, method);
 
-        // 如果在接口列表里找不到对应的接口配置信息，则返回404
+        // 如果在接口列表里找不到对应的接口配置信息，则判断环境放行或返回404
         if (apiInfo == null) {
             log.warn("接口不存在: path={}, method={}", path, method);
+            if ("dev".equalsIgnoreCase(activeProfile)) {
+                log.info("[开发模式放行] 接口未在数据库注册，因处于开发模式，已直接放行至 Spring Dispatcher 匹配: path={}", path);
+                return true;
+            }
             throw new com.blog.shared.exception.BusinessException(404, "接口不存在");
         }
 
