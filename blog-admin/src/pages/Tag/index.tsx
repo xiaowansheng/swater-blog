@@ -18,20 +18,14 @@ const TagPage: React.FC = () => {
     try {
       const data = await getTagList()
       setAllTags(data)
-      if (filterName) {
-        const filtered = data.filter((tag: Tag) =>
-          tag.name.toLowerCase().includes(filterName.toLowerCase())
-        )
-        setTags(filtered)
-      } else {
-        setTags(data)
-      }
+      setTags(data)
+      setFilterName('')
     } catch (error) {
       console.error('加载标签失败', error)
     } finally {
       setLoading(false)
     }
-  }, [filterName])
+  }, [])
 
   useEffect(() => {
     loadTags()

@@ -27,8 +27,19 @@ const TalkPage: React.FC = () => {
   const navigate = useNavigate()
   const [talks, setTalks] = useState<Talk[]>([])
   const [loading, setLoading] = useState(false)
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
-  const [filters, setFilters] = useState<{
+  const [current, setCurrent] = useState(1)
+  const pageSize = 10
+  const [total, setTotal] = useState(0)
+
+  const [searchForm, setSearchForm] = useState<{
+    id?: number
+    talkKey?: string
+    keyword?: string
+    status?: string
+    isTop?: TopStatus
+  }>({})
+
+  const [activeFilters, setActiveFilters] = useState<{
     id?: number
     talkKey?: string
     keyword?: string
@@ -53,33 +64,34 @@ const TalkPage: React.FC = () => {
     setLoading(true)
     try {
       const result = await getTalkList({
-        page: pagination.current,
-        size: pagination.pageSize,
-        ...filters,
+        page: current,
+        size: pageSize,
+        ...activeFilters,
       })
       setTalks(result.records)
-      setPagination((prev) => ({ ...prev, total: result.total }))
+      setTotal(result.total)
     } catch (error) {
       console.error('加载说说失败', error)
     } finally {
       setLoading(false)
     }
-  }, [pagination, filters])
+  }, [current, pageSize, activeFilters])
+
+  const handleSearch = () => {
+    setCurrent(1)
+    setActiveFilters({ ...searchForm })
+  }
+
+  const handleReset = () => {
+    setSearchForm({})
+    setCurrent(1)
+    setActiveFilters({})
+  }
 
   useEffect(() => {
     loadTalks()
     loadAuthorConfig()
   }, [loadTalks, loadAuthorConfig])
-
-  const handleSearch = () => {
-    setPagination({ ...pagination, current: 1 })
-    loadTalks()
-  }
-
-  const handleReset = () => {
-    setFilters({})
-    setPagination({ ...pagination, current: 1 })
-  }
 
   const handleCreate = () => {
     navigate('/talk/create')
@@ -116,8 +128,8 @@ const TalkPage: React.FC = () => {
         <div className="flex flex-wrap items-center gap-4">
           <Select
             placeholder="发布状态"
-            value={filters.status}
-            onChange={(value) => setFilters({ ...filters, status: value })}
+            value={searchForm.status}
+            onChange={(value) => setSearchForm({ ...searchForm, status: value })}
             style={{ width: 120 }}
             allowClear
           >
@@ -127,23 +139,25 @@ const TalkPage: React.FC = () => {
           </Select>
           <Input
             placeholder="说说ID"
-            value={filters.id ?? ''}
-            onChange={(e) => setFilters({ ...filters, id: e.target.value ? Number(e.target.value) : undefined })}
+            value={searchForm.id ?? ''}
+            onChange={(e) => setSearchForm({ ...searchForm, id: e.target.value ? Number(e.target.value) : undefined })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             type="number"
             allowClear
           />
           <Input
             placeholder="说说Key"
-            value={filters.talkKey ?? ''}
-            onChange={(e) => setFilters({ ...filters, talkKey: e.target.value || undefined })}
+            value={searchForm.talkKey ?? ''}
+            onChange={(e) => setSearchForm({ ...searchForm, talkKey: e.target.value || undefined })}
+            onPressEnter={handleSearch}
             style={{ width: 160 }}
             allowClear
           />
           <Select
             placeholder="置顶状态"
-            value={filters.isTop}
-            onChange={(value) => setFilters({ ...filters, isTop: value })}
+            value={searchForm.isTop}
+            onChange={(value) => setSearchForm({ ...searchForm, isTop: value })}
             style={{ width: 120 }}
             allowClear
           >
@@ -153,8 +167,8 @@ const TalkPage: React.FC = () => {
           <Input
             placeholder="搜索说说内容"
             prefix={<SearchOutlined className="text-gray-400" />}
-            value={filters.keyword}
-            onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
+            value={searchForm.keyword || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, keyword: e.target.value })}
             style={{ width: 200 }}
             allowClear
             onPressEnter={handleSearch}
@@ -279,17 +293,17 @@ const TalkPage: React.FC = () => {
         {!loading && talks.length > 0 && (
           <div className="flex justify-center mt-6">
             <Button
-              disabled={pagination.current <= 1}
-              onClick={() => setPagination({ ...pagination, current: pagination.current - 1 })}
+              disabled={current <= 1}
+              onClick={() => setCurrent(current - 1)}
             >
               上一页
             </Button>
             <span className="mx-4 text-sm text-gray-500">
-              第 {pagination.current} 页 / 共 {Math.ceil(pagination.total / pagination.pageSize)} 页
+              第 {current} 页 / 共 {Math.ceil(total / pageSize)} 页
             </span>
             <Button
-              disabled={pagination.current >= Math.ceil(pagination.total / pagination.pageSize)}
-              onClick={() => setPagination({ ...pagination, current: pagination.current + 1 })}
+              disabled={current >= Math.ceil(total / pageSize)}
+              onClick={() => setCurrent(current + 1)}
             >
               下一页
             </Button>

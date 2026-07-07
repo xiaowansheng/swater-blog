@@ -28,6 +28,7 @@ import {
   CommentOutlined,
   FileImageOutlined,
   InfoCircleOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons'
 import { getCommentList, approveComment, rejectComment, deleteComment, setVisibleComment, setHiddenComment } from '@/api/comment'
 import { Comment } from '@/types'
@@ -43,8 +44,11 @@ const CommentPage: React.FC = () => {
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
-  const [filters, setFilters] = useState<{
+  const [current, setCurrent] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [total, setTotal] = useState(0)
+
+  const [searchForm, setSearchForm] = useState<{
     status: CommentStatus | undefined
     keyword: string
     id: number | undefined
@@ -71,6 +75,35 @@ const CommentPage: React.FC = () => {
     city: '',
     location: '',
   })
+
+  const [activeFilters, setActiveFilters] = useState<{
+    status: CommentStatus | undefined
+    keyword: string
+    id: number | undefined
+    parentId: number | undefined
+    rootId: number | undefined
+    targetType: string | undefined
+    targetId: number | undefined
+    isVisible: CommentVisibilityStatus | undefined
+    country: string
+    province: string
+    city: string
+    location: string
+  }>({
+    status: undefined,
+    keyword: '',
+    id: undefined,
+    parentId: undefined,
+    rootId: undefined,
+    targetType: undefined,
+    targetId: undefined,
+    isVisible: undefined,
+    country: '',
+    province: '',
+    city: '',
+    location: '',
+  })
+
   const [detailVisible, setDetailVisible] = useState(false)
   const [currentComment, setCurrentComment] = useState<Comment | null>(null)
 
@@ -78,29 +111,54 @@ const CommentPage: React.FC = () => {
     setLoading(true)
     try {
       const result = await getCommentList({
-        page: pagination.current,
-        size: pagination.pageSize,
-        status: filters.status,
-        targetId: filters.targetId,
-        id: filters.id,
-        parentId: filters.parentId,
-        rootId: filters.rootId,
-        targetType: filters.targetType,
-        isVisible: filters.isVisible,
-        keyword: filters.keyword,
-        country: filters.country,
-        province: filters.province,
-        city: filters.city,
-        location: filters.location,
+        page: current,
+        size: pageSize,
+        status: activeFilters.status,
+        targetId: activeFilters.targetId,
+        id: activeFilters.id,
+        parentId: activeFilters.parentId,
+        rootId: activeFilters.rootId,
+        targetType: activeFilters.targetType,
+        isVisible: activeFilters.isVisible,
+        keyword: activeFilters.keyword,
+        country: activeFilters.country,
+        province: activeFilters.province,
+        city: activeFilters.city,
+        location: activeFilters.location,
       })
       setComments(result.records)
-      setPagination((prev) => ({ ...prev, total: result.total }))
+      setTotal(result.total)
     } catch (error) {
       console.error('加载评论失败', error)
     } finally {
       setLoading(false)
     }
-  }, [pagination, filters])
+  }, [current, pageSize, activeFilters])
+
+  const handleSearch = () => {
+    setCurrent(1)
+    setActiveFilters({ ...searchForm })
+  }
+
+  const handleReset = () => {
+    const empty = {
+      status: undefined,
+      keyword: '',
+      id: undefined,
+      parentId: undefined,
+      rootId: undefined,
+      targetType: undefined,
+      targetId: undefined,
+      isVisible: undefined,
+      country: '',
+      province: '',
+      city: '',
+      location: '',
+    }
+    setSearchForm(empty)
+    setCurrent(1)
+    setActiveFilters(empty)
+  }
 
   useEffect(() => {
     loadComments()
@@ -406,8 +464,8 @@ const CommentPage: React.FC = () => {
         <div className="flex gap-4 items-center flex-wrap">
           <Select
             placeholder="评论状态"
-            value={filters.status}
-            onChange={(value) => setFilters({ ...filters, status: value })}
+            value={searchForm.status}
+            onChange={(value) => setSearchForm({ ...searchForm, status: value })}
             style={{ width: 120 }}
             allowClear
           >
@@ -417,8 +475,8 @@ const CommentPage: React.FC = () => {
           </Select>
           <Select
             placeholder="评论类型"
-            value={filters.targetType}
-            onChange={(value) => setFilters({ ...filters, targetType: value })}
+            value={searchForm.targetType}
+            onChange={(value) => setSearchForm({ ...searchForm, targetType: value })}
             style={{ width: 120 }}
             allowClear
           >
@@ -427,8 +485,8 @@ const CommentPage: React.FC = () => {
           </Select>
           <Select
             placeholder="可见状态"
-            value={filters.isVisible}
-            onChange={(value) => setFilters({ ...filters, isVisible: value })}
+            value={searchForm.isVisible}
+            onChange={(value) => setSearchForm({ ...searchForm, isVisible: value })}
             style={{ width: 120 }}
             allowClear
           >
@@ -438,74 +496,88 @@ const CommentPage: React.FC = () => {
           <Input
             placeholder="搜索评论内容"
             prefix={<SearchOutlined className="text-gray-400" />}
-            value={filters.keyword}
-            onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
+            value={searchForm.keyword}
+            onChange={(e) => setSearchForm({ ...searchForm, keyword: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 200 }}
             allowClear
           />
           <Input
             placeholder="评论ID"
-            value={filters.id || ''}
-            onChange={(e) => setFilters({ ...filters, id: e.target.value ? Number(e.target.value) : undefined })}
+            value={searchForm.id || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, id: e.target.value ? Number(e.target.value) : undefined })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             type="number"
             allowClear
           />
           <Input
             placeholder="目标ID"
-            value={filters.targetId || ''}
-            onChange={(e) => setFilters({ ...filters, targetId: e.target.value ? Number(e.target.value) : undefined })}
+            value={searchForm.targetId || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, targetId: e.target.value ? Number(e.target.value) : undefined })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             type="number"
             allowClear
           />
           <Input
             placeholder="父评论ID"
-            value={filters.parentId || ''}
-            onChange={(e) => setFilters({ ...filters, parentId: e.target.value ? Number(e.target.value) : undefined })}
+            value={searchForm.parentId || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, parentId: e.target.value ? Number(e.target.value) : undefined })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             type="number"
             allowClear
           />
           <Input
             placeholder="根评论ID"
-            value={filters.rootId || ''}
-            onChange={(e) => setFilters({ ...filters, rootId: e.target.value ? Number(e.target.value) : undefined })}
+            value={searchForm.rootId || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, rootId: e.target.value ? Number(e.target.value) : undefined })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             type="number"
             allowClear
           />
           <Input
             placeholder="国家"
-            value={filters.country}
-            onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+            value={searchForm.country}
+            onChange={(e) => setSearchForm({ ...searchForm, country: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             allowClear
           />
           <Input
             placeholder="省份"
-            value={filters.province}
-            onChange={(e) => setFilters({ ...filters, province: e.target.value })}
+            value={searchForm.province}
+            onChange={(e) => setSearchForm({ ...searchForm, province: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             allowClear
           />
           <Input
             placeholder="城市"
-            value={filters.city}
-            onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+            value={searchForm.city}
+            onChange={(e) => setSearchForm({ ...searchForm, city: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             allowClear
           />
           <Input
             placeholder="位置"
-            value={filters.location}
-            onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+            value={searchForm.location}
+            onChange={(e) => setSearchForm({ ...searchForm, location: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 140 }}
             allowClear
           />
-          <Button type="primary" icon={<SearchOutlined />} onClick={loadComments}>
-            搜索
-          </Button>
+          <Space>
+            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+              搜索
+            </Button>
+            <Button icon={<ReloadOutlined />} onClick={handleReset}>
+              重置
+            </Button>
+          </Space>
         </div>
       </div>
 
@@ -520,14 +592,16 @@ const CommentPage: React.FC = () => {
             onChange: setSelectedRowKeys,
           }}
           pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
+            current,
+            pageSize,
+            total,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条评论`,
-            onChange: (page, pageSize) =>
-              setPagination({ ...pagination, current: page, pageSize }),
+            showTotal: (t) => `共 ${t} 条评论`,
+            onChange: (page, size) => {
+              setCurrent(page)
+              setPageSize(size)
+            },
           }}
           scroll={{ x: 1500 }}
         />

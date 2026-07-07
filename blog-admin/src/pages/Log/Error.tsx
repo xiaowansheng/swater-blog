@@ -4,14 +4,32 @@ import { SearchOutlined, ReloadOutlined, EyeOutlined } from '@ant-design/icons'
 import { getErrorLogList } from '@/api/log'
 import { LogError } from '@/types'
 import { formatDate } from '@/utils/format'
+import dayjs from 'dayjs'
 
 const { RangePicker } = DatePicker
 
 const LogErrorPage: React.FC = () => {
   const [logs, setLogs] = useState<LogError[]>([])
   const [loading, setLoading] = useState(false)
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
-  const [filters, setFilters] = useState<{
+  const [current, setCurrent] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [total, setTotal] = useState(0)
+
+  const [searchForm, setSearchForm] = useState<{
+    keyword?: string
+    module?: string
+    requestMethod?: string
+    requestUri?: string
+    username?: string
+    userId?: number
+    ip?: string
+    errorName?: string
+    exceptionType?: string
+    startDate?: string
+    endDate?: string
+  }>({})
+
+  const [activeFilters, setActiveFilters] = useState<{
     keyword?: string
     module?: string
     requestMethod?: string
@@ -31,33 +49,33 @@ const LogErrorPage: React.FC = () => {
     setLoading(true)
     try {
       const result = await getErrorLogList({
-        page: pagination.current,
-        size: pagination.pageSize,
-        ...filters,
+        page: current,
+        size: pageSize,
+        ...activeFilters,
       })
       setLogs(result.records)
-      setPagination((prev) => ({ ...prev, total: result.total }))
+      setTotal(result.total)
     } catch (error) {
       console.error('加载日志失败', error)
     } finally {
       setLoading(false)
     }
-  }, [pagination, filters])
+  }, [current, pageSize, activeFilters])
+
+  const handleSearch = () => {
+    setCurrent(1)
+    setActiveFilters({ ...searchForm })
+  }
+
+  const handleReset = () => {
+    setSearchForm({})
+    setCurrent(1)
+    setActiveFilters({})
+  }
 
   useEffect(() => {
     loadLogs()
   }, [loadLogs])
-
-  const handleSearch = () => {
-    setPagination((prev) => ({ ...prev, current: 1 }))
-    loadLogs()
-  }
-
-  const handleReset = () => {
-    setFilters({})
-    setPagination((prev) => ({ ...prev, current: 1 }))
-    loadLogs()
-  }
 
   const showDetail = (log: LogError) => {
     setSelectedLog(log)
@@ -156,15 +174,16 @@ const LogErrorPage: React.FC = () => {
           <Input
             placeholder="搜索错误信息"
             prefix={<SearchOutlined className="text-gray-400" />}
-            value={filters.keyword}
-            onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
+            value={searchForm.keyword || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, keyword: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 240 }}
             allowClear
           />
           <Select
             placeholder="模块"
-            value={filters.module}
-            onChange={(value) => setFilters({ ...filters, module: value })}
+            value={searchForm.module}
+            onChange={(value) => setSearchForm({ ...searchForm, module: value })}
             style={{ width: 140 }}
             allowClear
           >
@@ -175,8 +194,8 @@ const LogErrorPage: React.FC = () => {
           </Select>
           <Select
             placeholder="请求方法"
-            value={filters.requestMethod}
-            onChange={(value) => setFilters({ ...filters, requestMethod: value })}
+            value={searchForm.requestMethod}
+            onChange={(value) => setSearchForm({ ...searchForm, requestMethod: value })}
             style={{ width: 120 }}
             allowClear
           >
@@ -187,53 +206,60 @@ const LogErrorPage: React.FC = () => {
           </Select>
           <Input
             placeholder="请求路径"
-            value={filters.requestUri}
-            onChange={(e) => setFilters({ ...filters, requestUri: e.target.value })}
+            value={searchForm.requestUri || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, requestUri: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 200 }}
             allowClear
           />
           <Input
             placeholder="错误名称"
-            value={filters.errorName}
-            onChange={(e) => setFilters({ ...filters, errorName: e.target.value })}
+            value={searchForm.errorName || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, errorName: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 180 }}
             allowClear
           />
           <Input
             placeholder="异常类型"
-            value={filters.exceptionType}
-            onChange={(e) => setFilters({ ...filters, exceptionType: e.target.value })}
+            value={searchForm.exceptionType || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, exceptionType: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 180 }}
             allowClear
           />
           <Input
             placeholder="操作人"
-            value={filters.username}
-            onChange={(e) => setFilters({ ...filters, username: e.target.value })}
+            value={searchForm.username || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, username: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 140 }}
             allowClear
           />
           <Input
             placeholder="用户ID"
-            value={filters.userId ?? ''}
-            onChange={(e) => setFilters({ ...filters, userId: e.target.value ? Number(e.target.value) : undefined })}
+            value={searchForm.userId ?? ''}
+            onChange={(e) => setSearchForm({ ...searchForm, userId: e.target.value ? Number(e.target.value) : undefined })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             type="number"
             allowClear
           />
           <Input
             placeholder="IP地址"
-            value={filters.ip}
-            onChange={(e) => setFilters({ ...filters, ip: e.target.value })}
+            value={searchForm.ip || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, ip: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 140 }}
             allowClear
           />
           <RangePicker
             showTime
+            value={searchForm.startDate && searchForm.endDate ? [dayjs(searchForm.startDate), dayjs(searchForm.endDate)] : undefined}
             onChange={(values) => {
               const startDate = values?.[0]?.toISOString()
               const endDate = values?.[1]?.toISOString()
-              setFilters((prev) => ({ ...prev, startDate, endDate }))
+              setSearchForm((prev) => ({ ...prev, startDate, endDate }))
             }}
           />
           <Space>
@@ -255,14 +281,16 @@ const LogErrorPage: React.FC = () => {
           loading={loading}
           scroll={{ x: 1200 }}
           pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
+            current,
+            pageSize,
+            total,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条记录`,
-            onChange: (page, pageSize) =>
-              setPagination({ ...pagination, current: page, pageSize }),
+            showTotal: (t) => `共 ${t} 条记录`,
+            onChange: (page, size) => {
+              setCurrent(page)
+              setPageSize(size)
+            },
           }}
         />
       </div>
