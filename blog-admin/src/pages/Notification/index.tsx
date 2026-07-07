@@ -25,7 +25,9 @@ const NotificationPage: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(false)
   const { setNotifications: setStoreNotifications, markAsRead: markStoreAsRead, markAllAsRead: markStoreAllAsRead } = useNotificationStore()
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
+  const [current, setCurrent] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [total, setTotal] = useState(0)
   const [filters, setFilters] = useState<{ isRead?: NotificationReadStatus }>({})
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([])
 
@@ -33,19 +35,19 @@ const NotificationPage: React.FC = () => {
     setLoading(true)
     try {
       const result = await getNotifications({
-        page: pagination.current,
-        size: pagination.pageSize,
+        page: current,
+        size: pageSize,
         ...filters,
       })
       setNotifications(result.records)
       setStoreNotifications(result.records)
-      setPagination((prev) => ({ ...prev, total: result.total }))
+      setTotal(result.total)
     } catch (error) {
       console.error('加载通知失败', error)
     } finally {
       setLoading(false)
     }
-  }, [pagination, filters, setStoreNotifications])
+  }, [current, pageSize, filters, setStoreNotifications])
 
   useEffect(() => {
     loadNotifications()
@@ -288,18 +290,21 @@ const NotificationPage: React.FC = () => {
           }}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 'max-content' }}
           locale={{
             emptyText: <Empty description="暂无通知" image={Empty.PRESENTED_IMAGE_SIMPLE} />,
           }}
           pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
+            current,
+            pageSize,
+            total,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条通知`,
-            onChange: (page, pageSize) =>
-              setPagination({ ...pagination, current: page, pageSize }),
+            showTotal: (t) => `共 ${t} 条通知`,
+            onChange: (page, size) => {
+              setCurrent(page)
+              setPageSize(size)
+            },
           }}
         />
       </div>

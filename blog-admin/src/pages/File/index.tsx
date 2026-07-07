@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Space, Popconfirm, message, Upload, Tag, Input, Select, Tooltip, Card, Row, Col, Modal } from 'antd'
+import { Table, Button, Space, Popconfirm, message, Upload, Tag, Input, Select, Tooltip, Card, Row, Col, Modal, Pagination } from 'antd'
 import Image from '@/components/common/ImageWithPreview'
 import {
   UploadOutlined,
@@ -14,6 +14,7 @@ import {
   VideoCameraOutlined,
   FileTextOutlined,
   DownloadOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons'
 import { getFileList, uploadFile, deleteFile } from '@/api/file'
 import { FileMeta } from '@/types'
@@ -23,9 +24,12 @@ const FilePage: React.FC = () => {
   const [files, setFiles] = useState<FileMeta[]>([])
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 })
+  const [current, setCurrent] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
+  const [total, setTotal] = useState(0)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
-  const [filters, setFilters] = useState<{ keyword?: string; fileType?: string }>({})
+  const [searchForm, setSearchForm] = useState<{ keyword?: string; fileType?: string }>({})
+  const [activeFilters, setActiveFilters] = useState<{ keyword?: string; fileType?: string }>({})
   const [previewFile, setPreviewFile] = useState<FileMeta | null>(null)
   const [previewVisible, setPreviewVisible] = useState(false)
 
@@ -33,18 +37,29 @@ const FilePage: React.FC = () => {
     setLoading(true)
     try {
       const result = await getFileList({
-        page: pagination.current,
-        size: pagination.pageSize,
-        ...filters,
+        page: current,
+        size: pageSize,
+        ...activeFilters,
       })
       setFiles(result.records)
-      setPagination((prev) => ({ ...prev, total: result.total }))
+      setTotal(result.total)
     } catch (error) {
       console.error('加载文件失败', error)
     } finally {
       setLoading(false)
     }
-  }, [pagination, filters])
+  }, [current, pageSize, activeFilters])
+
+  const handleSearch = () => {
+    setCurrent(1)
+    setActiveFilters({ ...searchForm })
+  }
+
+  const handleReset = () => {
+    setSearchForm({})
+    setCurrent(1)
+    setActiveFilters({})
+  }
 
   useEffect(() => {
     loadFiles()
@@ -302,8 +317,8 @@ const FilePage: React.FC = () => {
         <div className="flex flex-wrap items-center gap-4">
           <Select
             placeholder="文件类型"
-            value={filters.fileType}
-            onChange={(value) => setFilters({ ...filters, fileType: value })}
+            value={searchForm.fileType}
+            onChange={(value) => setSearchForm({ ...searchForm, fileType: value })}
             style={{ width: 140 }}
             allowClear
           >
@@ -314,14 +329,20 @@ const FilePage: React.FC = () => {
           <Input
             placeholder="搜索文件名"
             prefix={<SearchOutlined className="text-gray-400" />}
-            value={filters.keyword}
-            onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
+            value={searchForm.keyword || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, keyword: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 200 }}
             allowClear
           />
-          <Button type="primary" icon={<SearchOutlined />} onClick={loadFiles}>
-            搜索
-          </Button>
+          <Space>
+            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+              搜索
+            </Button>
+            <Button icon={<ReloadOutlined />} onClick={handleReset}>
+              重置
+            </Button>
+          </Space>
           <div className="flex-1" />
           <Space>
             <Button
@@ -350,81 +371,100 @@ const FilePage: React.FC = () => {
             dataSource={files}
             rowKey="id"
             loading={loading}
+            scroll={{ x: 'max-content' }}
             pagination={{
-              current: pagination.current,
-              pageSize: pagination.pageSize,
-              total: pagination.total,
+              current,
+              pageSize,
+              total,
               showSizeChanger: true,
               showQuickJumper: true,
-              showTotal: (total) => `共 ${total} 个文件`,
-              onChange: (page, pageSize) =>
-                setPagination({ ...pagination, current: page, pageSize }),
+              showTotal: (t) => `共 ${t} 个文件`,
+              onChange: (page, size) => {
+                setCurrent(page)
+                setPageSize(size)
+              },
             }}
           />
         </div>
       ) : (
-        <div className="bg-white rounded-lg p-4">
-          <Row gutter={[16, 16]}>
-            {files.map((file) => (
-              <Col xs={12} sm={8} md={6} lg={4} key={file.id}>
-                <Card
-                  hoverable
-                  cover={
-                    isImage(file.mimeType) ? (
-                      <div className="h-32 overflow-hidden">
-                        <Image
-                          src={getFullUrl(file.url)}
-                          alt={file.originalName}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-32 bg-gray-100 flex items-center justify-center text-4xl">
-                        {getFileIcon(file.mimeType)}
-                      </div>
-                    )
-                  }
-                  actions={[
-                    <DownloadOutlined key="download" onClick={() => handleDownload(file)} />,
-                    <CopyOutlined key="copy" onClick={() => handleCopyUrl(file.url)} />,
-                    <EyeOutlined key="view" onClick={() => handlePreview(file)} />,
-                    <Popconfirm
-                      key="delete"
-                      title="确定删除？"
-                      onConfirm={() => handleDelete(file.id)}
-                    >
-                      <DeleteOutlined className="text-red-500" />
-                    </Popconfirm>,
-                  ]}
-                >
-                  <Card.Meta
-                    title={
-                      <span className="text-sm truncate" title={file.originalName}>
-                        {file.originalName}
-                      </span>
-                    }
-                    description={
-                      <div className="flex flex-col gap-1">
-                        <span className="text-xs text-gray-400">
-                          {formatFileSize(file.fileSize)}
-                        </span>
-                        {file.filePath && (
-                          <span className="text-xs text-gray-400 truncate" title={file.filePath}>
-                            {file.filePath}
-                          </span>
-                        )}
-                        <div className="flex items-center gap-1">
-                          <Tag color={(file.refCount ?? 0) > 0 ? 'blue' : 'default'} className="text-xs">
-                            引用: {file.refCount || 0}
-                          </Tag>
+        <div className="space-y-4">
+          <div className="bg-white rounded-lg p-4">
+            <Row gutter={[16, 16]}>
+              {files.map((file) => (
+                <Col xs={12} sm={8} md={6} lg={4} key={file.id}>
+                  <Card
+                    hoverable
+                    cover={
+                      isImage(file.mimeType) ? (
+                        <div className="h-32 overflow-hidden">
+                          <Image
+                            src={getFullUrl(file.url)}
+                            alt={file.originalName}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                      </div>
+                      ) : (
+                        <div className="h-32 bg-gray-100 flex items-center justify-center text-4xl">
+                          {getFileIcon(file.mimeType)}
+                        </div>
+                      )
                     }
-                  />
-                </Card>
-              </Col>
-            ))}
-          </Row>
+                    actions={[
+                      <DownloadOutlined key="download" onClick={() => handleDownload(file)} />,
+                      <CopyOutlined key="copy" onClick={() => handleCopyUrl(file.url)} />,
+                      <EyeOutlined key="view" onClick={() => handlePreview(file)} />,
+                      <Popconfirm
+                        key="delete"
+                        title="确定删除？"
+                        onConfirm={() => handleDelete(file.id)}
+                      >
+                        <DeleteOutlined className="text-red-500" />
+                      </Popconfirm>,
+                    ]}
+                  >
+                    <Card.Meta
+                      title={
+                        <span className="text-sm truncate" title={file.originalName}>
+                          {file.originalName}
+                        </span>
+                      }
+                      description={
+                        <div className="flex flex-col gap-1">
+                          <span className="text-xs text-gray-400">
+                            {formatFileSize(file.fileSize)}
+                          </span>
+                          {file.filePath && (
+                            <span className="text-xs text-gray-400 truncate" title={file.filePath}>
+                              {file.filePath}
+                            </span>
+                          )}
+                          <div className="flex items-center gap-1">
+                            <Tag color={(file.refCount ?? 0) > 0 ? 'blue' : 'default'} className="text-xs">
+                              引用: {file.refCount || 0}
+                            </Tag>
+                          </div>
+                        </div>
+                      }
+                    />
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </div>
+          <div className="flex justify-end bg-white rounded-lg p-4">
+            <Pagination
+              current={current}
+              pageSize={pageSize}
+              total={total}
+              showSizeChanger
+              showQuickJumper
+              showTotal={(t) => `共 ${t} 个文件`}
+              onChange={(page, size) => {
+                setCurrent(page)
+                setPageSize(size)
+              }}
+            />
+          </div>
         </div>
       )}
 

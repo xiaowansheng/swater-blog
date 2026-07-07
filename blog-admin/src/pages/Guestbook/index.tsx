@@ -27,6 +27,7 @@ import {
   MobileOutlined,
   FileImageOutlined,
   InfoCircleOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons'
 import {
   getGuestbookList,
@@ -49,8 +50,11 @@ const GuestbookPage: React.FC = () => {
   const [guestbooks, setGuestbooks] = useState<Guestbook[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
-  const [filters, setFilters] = useState<{
+  const [current, setCurrent] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [total, setTotal] = useState(0)
+
+  const [searchForm, setSearchForm] = useState<{
     status: GuestbookReviewStatus | undefined
     keyword: string
     id: number | undefined
@@ -85,6 +89,43 @@ const GuestbookPage: React.FC = () => {
     browser: '',
     location: '',
   })
+
+  const [activeFilters, setActiveFilters] = useState<{
+    status: GuestbookReviewStatus | undefined
+    keyword: string
+    id: number | undefined
+    userId: number | undefined
+    nickname: string
+    email: string
+    qq: string
+    isVisible: GuestbookVisibilityStatus | undefined
+    country: string
+    province: string
+    city: string
+    type: string
+    ip: string
+    device: string
+    browser: string
+    location: string
+  }>({
+    status: undefined,
+    keyword: '',
+    id: undefined,
+    userId: undefined,
+    nickname: '',
+    email: '',
+    qq: '',
+    isVisible: undefined,
+    country: '',
+    province: '',
+    city: '',
+    type: '',
+    ip: '',
+    device: '',
+    browser: '',
+    location: '',
+  })
+
   const [detailVisible, setDetailVisible] = useState(false)
   const [currentGuestbook, setCurrentGuestbook] = useState<Guestbook | null>(null)
 
@@ -92,33 +133,62 @@ const GuestbookPage: React.FC = () => {
     setLoading(true)
     try {
       const result = await getGuestbookList({
-        page: pagination.current,
-        size: pagination.pageSize,
-        status: filters.status,
-        id: filters.id,
-        userId: filters.userId,
-        nickname: filters.nickname,
-        email: filters.email,
-        qq: filters.qq,
-        isVisible: filters.isVisible,
-        keyword: filters.keyword,
-        country: filters.country,
-        province: filters.province,
-        city: filters.city,
-        type: filters.type,
-        ip: filters.ip,
-        device: filters.device,
-        browser: filters.browser,
-        location: filters.location,
+        page: current,
+        size: pageSize,
+        status: activeFilters.status,
+        id: activeFilters.id,
+        userId: activeFilters.userId,
+        nickname: activeFilters.nickname,
+        email: activeFilters.email,
+        qq: activeFilters.qq,
+        isVisible: activeFilters.isVisible,
+        keyword: activeFilters.keyword,
+        country: activeFilters.country,
+        province: activeFilters.province,
+        city: activeFilters.city,
+        type: activeFilters.type,
+        ip: activeFilters.ip,
+        device: activeFilters.device,
+        browser: activeFilters.browser,
+        location: activeFilters.location,
       })
       setGuestbooks(result.records)
-      setPagination((prev) => ({ ...prev, total: result.total }))
+      setTotal(result.total)
     } catch (error) {
       console.error('加载留言失败', error)
     } finally {
       setLoading(false)
     }
-  }, [pagination, filters])
+  }, [current, pageSize, activeFilters])
+
+  const handleSearch = () => {
+    setCurrent(1)
+    setActiveFilters({ ...searchForm })
+  }
+
+  const handleReset = () => {
+    const empty = {
+      status: undefined,
+      keyword: '',
+      id: undefined,
+      userId: undefined,
+      nickname: '',
+      email: '',
+      qq: '',
+      isVisible: undefined,
+      country: '',
+      province: '',
+      city: '',
+      type: '',
+      ip: '',
+      device: '',
+      browser: '',
+      location: '',
+    }
+    setSearchForm(empty)
+    setCurrent(1)
+    setActiveFilters(empty)
+  }
 
   useEffect(() => {
     loadGuestbooks()
@@ -379,8 +449,8 @@ const GuestbookPage: React.FC = () => {
         <div className="flex gap-4 items-center flex-wrap">
           <Select
             placeholder="审核状态"
-            value={filters.status}
-            onChange={(value) => setFilters({ ...filters, status: value })}
+            value={searchForm.status}
+            onChange={(value) => setSearchForm({ ...searchForm, status: value })}
             style={{ width: 120 }}
             allowClear
           >
@@ -390,8 +460,8 @@ const GuestbookPage: React.FC = () => {
           </Select>
           <Select
             placeholder="可见状态"
-            value={filters.isVisible}
-            onChange={(value) => setFilters({ ...filters, isVisible: value })}
+            value={searchForm.isVisible}
+            onChange={(value) => setSearchForm({ ...searchForm, isVisible: value })}
             style={{ width: 120 }}
             allowClear
           >
@@ -401,107 +471,126 @@ const GuestbookPage: React.FC = () => {
           <Input
             placeholder="搜索留言内容"
             prefix={<SearchOutlined className="text-gray-400" />}
-            value={filters.keyword}
-            onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
+            value={searchForm.keyword}
+            onChange={(e) => setSearchForm({ ...searchForm, keyword: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 200 }}
             allowClear
           />
           <Input
             placeholder="昵称"
-            value={filters.nickname}
-            onChange={(e) => setFilters({ ...filters, nickname: e.target.value })}
+            value={searchForm.nickname}
+            onChange={(e) => setSearchForm({ ...searchForm, nickname: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 140 }}
             allowClear
           />
           <Input
             placeholder="邮箱"
-            value={filters.email}
-            onChange={(e) => setFilters({ ...filters, email: e.target.value })}
+            value={searchForm.email}
+            onChange={(e) => setSearchForm({ ...searchForm, email: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 180 }}
             allowClear
           />
           <Input
             placeholder="QQ号"
-            value={filters.qq}
-            onChange={(e) => setFilters({ ...filters, qq: e.target.value })}
+            value={searchForm.qq}
+            onChange={(e) => setSearchForm({ ...searchForm, qq: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             allowClear
           />
           <Input
             placeholder="留言ID"
-            value={filters.id || ''}
-            onChange={(e) => setFilters({ ...filters, id: e.target.value ? Number(e.target.value) : undefined })}
+            value={searchForm.id || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, id: e.target.value ? Number(e.target.value) : undefined })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             type="number"
             allowClear
           />
           <Input
             placeholder="用户ID"
-            value={filters.userId || ''}
-            onChange={(e) => setFilters({ ...filters, userId: e.target.value ? Number(e.target.value) : undefined })}
+            value={searchForm.userId || ''}
+            onChange={(e) => setSearchForm({ ...searchForm, userId: e.target.value ? Number(e.target.value) : undefined })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             type="number"
             allowClear
           />
           <Input
             placeholder="国家"
-            value={filters.country}
-            onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+            value={searchForm.country}
+            onChange={(e) => setSearchForm({ ...searchForm, country: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             allowClear
           />
           <Input
             placeholder="省份"
-            value={filters.province}
-            onChange={(e) => setFilters({ ...filters, province: e.target.value })}
+            value={searchForm.province}
+            onChange={(e) => setSearchForm({ ...searchForm, province: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             allowClear
           />
           <Input
             placeholder="城市"
-            value={filters.city}
-            onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+            value={searchForm.city}
+            onChange={(e) => setSearchForm({ ...searchForm, city: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             allowClear
           />
           <Input
             placeholder="留言类型"
-            value={filters.type}
-            onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+            value={searchForm.type}
+            onChange={(e) => setSearchForm({ ...searchForm, type: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             allowClear
           />
           <Input
             placeholder="IP"
-            value={filters.ip}
-            onChange={(e) => setFilters({ ...filters, ip: e.target.value })}
+            value={searchForm.ip}
+            onChange={(e) => setSearchForm({ ...searchForm, ip: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 140 }}
             allowClear
           />
           <Input
             placeholder="设备"
-            value={filters.device}
-            onChange={(e) => setFilters({ ...filters, device: e.target.value })}
+            value={searchForm.device}
+            onChange={(e) => setSearchForm({ ...searchForm, device: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 140 }}
             allowClear
           />
           <Input
             placeholder="浏览器"
-            value={filters.browser}
-            onChange={(e) => setFilters({ ...filters, browser: e.target.value })}
+            value={searchForm.browser}
+            onChange={(e) => setSearchForm({ ...searchForm, browser: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 140 }}
             allowClear
           />
           <Input
             placeholder="位置"
-            value={filters.location}
-            onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+            value={searchForm.location}
+            onChange={(e) => setSearchForm({ ...searchForm, location: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 160 }}
             allowClear
           />
-          <Button type="primary" icon={<SearchOutlined />} onClick={loadGuestbooks}>
-            搜索
-          </Button>
+          <Space>
+            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+              搜索
+            </Button>
+            <Button icon={<ReloadOutlined />} onClick={handleReset}>
+              重置
+            </Button>
+          </Space>
         </div>
       </div>
 
@@ -516,14 +605,16 @@ const GuestbookPage: React.FC = () => {
             onChange: setSelectedRowKeys,
           }}
           pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
+            current,
+            pageSize,
+            total,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条留言`,
-            onChange: (page, pageSize) =>
-              setPagination({ ...pagination, current: page, pageSize }),
+            showTotal: (t) => `共 ${t} 条留言`,
+            onChange: (page, size) => {
+              setCurrent(page)
+              setPageSize(size)
+            },
           }}
           scroll={{ x: 1500 }}
         />
