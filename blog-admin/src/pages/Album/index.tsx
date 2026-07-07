@@ -21,12 +21,14 @@ import {
   DeleteOutlined,
   PictureOutlined,
   SearchOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons'
 import { getAlbumList, createAlbum, updateAlbum, deleteAlbum } from '@/api/album'
 import { Album, AlbumStatus, ALBUM_STATUS_MAP } from '@/types'
 
 const AlbumPage: React.FC = () => {
   const [albums, setAlbums] = useState<Album[]>([])
+  const [allAlbums, setAllAlbums] = useState<Album[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [editingAlbum, setEditingAlbum] = useState<Album | null>(null)
@@ -39,33 +41,41 @@ const AlbumPage: React.FC = () => {
     status: undefined,
   })
 
-
   const loadAlbums = useCallback(async () => {
     setLoading(true)
     try {
       const result = await getAlbumList()
-      const allAlbumData = result.records || []
-
-      let filtered = allAlbumData
-      if (filters.name) {
-        filtered = filtered.filter((album: Album) =>
-          album.name.toLowerCase().includes(filters.name.toLowerCase())
-        )
-      }
-      if (filters.status) {
-        filtered = filtered.filter((album: Album) => album.status === filters.status)
-      }
-      setAlbums(filtered)
+      setAllAlbums(result.records || [])
     } catch (error) {
       console.error('加载相册失败', error)
     } finally {
       setLoading(false)
     }
-  }, [filters])
+  }, [])
+
+  const handleReset = () => {
+    setFilters({
+      name: '',
+      status: undefined,
+    })
+  }
 
   useEffect(() => {
     loadAlbums()
   }, [loadAlbums])
+
+  useEffect(() => {
+    let filtered = allAlbums
+    if (filters.name) {
+      filtered = filtered.filter((album: Album) =>
+        album.name.toLowerCase().includes(filters.name.toLowerCase())
+      )
+    }
+    if (filters.status) {
+      filtered = filtered.filter((album: Album) => album.status === filters.status)
+    }
+    setAlbums(filtered)
+  }, [filters, allAlbums])
 
   const handleCreate = () => {
     setEditingAlbum(null)
@@ -129,6 +139,9 @@ const AlbumPage: React.FC = () => {
             <Select.Option value={AlbumStatus.DRAFT}>草稿</Select.Option>
             <Select.Option value={AlbumStatus.PRIVATE}>私密</Select.Option>
           </Select>
+          <Button icon={<ReloadOutlined />} onClick={handleReset}>
+            重置
+          </Button>
           <div className="flex-1" />
           <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
             新建相册
