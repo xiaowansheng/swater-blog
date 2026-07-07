@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Tooltip, Select } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, ApiOutlined, SearchOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, ApiOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { getRoleList, createRole, updateRole, deleteRole } from '@/api/role'
 import { Role } from '@/types'
 import { EnableStatus } from '@/types/enums'
@@ -8,6 +8,7 @@ import ApiAuthModal from './ApiAuthModal'
 
 const RolePage: React.FC = () => {
   const [roles, setRoles] = useState<Role[]>([])
+  const [allRoles, setAllRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [apiAuthVisible, setApiAuthVisible] = useState(false)
@@ -24,37 +25,47 @@ const RolePage: React.FC = () => {
     status: undefined,
   })
 
-
   const loadRoles = useCallback(async () => {
     setLoading(true)
     try {
       const data = await getRoleList()
-
-      let filtered = data
-      if (filters.name) {
-        filtered = filtered.filter((role: Role) =>
-          role.name.toLowerCase().includes(filters.name.toLowerCase())
-        )
-      }
-      if (filters.roleKey) {
-        filtered = filtered.filter((role: Role) =>
-          role.roleKey.toLowerCase().includes(filters.roleKey.toLowerCase())
-        )
-      }
-      if (filters.status !== undefined) {
-        filtered = filtered.filter((role: Role) => role.status === filters.status)
-      }
-      setRoles(filtered)
+      setAllRoles(data)
     } catch (error) {
       console.error('加载角色失败', error)
     } finally {
       setLoading(false)
     }
-  }, [filters])
+  }, [])
+
+  const handleReset = () => {
+    setFilters({
+      name: '',
+      roleKey: '',
+      status: undefined,
+    })
+  }
 
   useEffect(() => {
     loadRoles()
   }, [loadRoles])
+
+  useEffect(() => {
+    let filtered = allRoles
+    if (filters.name) {
+      filtered = filtered.filter((role: Role) =>
+        role.name.toLowerCase().includes(filters.name.toLowerCase())
+      )
+    }
+    if (filters.roleKey) {
+      filtered = filtered.filter((role: Role) =>
+        role.roleKey.toLowerCase().includes(filters.roleKey.toLowerCase())
+      )
+    }
+    if (filters.status !== undefined) {
+      filtered = filtered.filter((role: Role) => role.status === filters.status)
+    }
+    setRoles(filtered)
+  }, [filters, allRoles])
 
   const handleCreate = () => {
     setEditingRole(null)
@@ -199,6 +210,9 @@ const RolePage: React.FC = () => {
             <Select.Option value={EnableStatus.ENABLED}>启用</Select.Option>
             <Select.Option value={EnableStatus.DISABLED}>禁用</Select.Option>
           </Select>
+          <Button icon={<ReloadOutlined />} onClick={handleReset}>
+            重置
+          </Button>
           <div className="flex-1" />
           <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
             新建角色
@@ -212,6 +226,7 @@ const RolePage: React.FC = () => {
           dataSource={roles}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 'max-content' }}
           pagination={false}
         />
       </div>
