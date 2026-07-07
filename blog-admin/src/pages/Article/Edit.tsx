@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Form, Input, Button, message, Switch, Card, Row, Col, Space, Breadcrumb, Modal, Radio, DatePicker } from 'antd'
+import dayjs from 'dayjs'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { ArrowLeftOutlined, SaveOutlined, SendOutlined, PlusOutlined } from '@ant-design/icons'
 import { getArticleById, ArticleSaveDTO } from '@/api/article'
@@ -155,7 +156,9 @@ const ArticleEdit: React.FC = () => {
       tagIds,
       tagNames,
       password: values.password !== undefined ? values.password : undefined,
-      scheduledPublishAt: values.scheduledPublishAt || undefined,
+      scheduledPublishAt: values.scheduledPublishAt && dayjs.isDayjs(values.scheduledPublishAt)
+        ? values.scheduledPublishAt.format('YYYY-MM-DD HH:mm:ss')
+        : (values.scheduledPublishAt || undefined),
     }
   }, [form, pageId, saveState.articleId])
 
@@ -234,6 +237,7 @@ const ArticleEdit: React.FC = () => {
         tagIds: article.tags?.map((t) => t.id) || [],
         summary: article.excerpt,
         password: undefined,
+        scheduledPublishAt: (article as any).scheduledPublishAt ? dayjs((article as any).scheduledPublishAt) : undefined,
       })
 
       contentRef.current = article.content
