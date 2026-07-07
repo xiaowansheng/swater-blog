@@ -61,10 +61,22 @@ public class TalkCommandServiceImpl implements TalkCommandService {
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = {"talk", "talk:list"}, allEntries = true)
     public Long create(TalkDTO dto) {
+        String talkKey = dto.getTalkKey();
+        if (talkKey == null || talkKey.trim().isEmpty()) {
+            talkKey = KeyUtil.generateKey("talk");
+        }
+
+        Talk existed = talkMapper.selectOne(new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Talk>()
+                .eq(Talk::getTalkKey, talkKey));
+        if (existed != null) {
+            log.info("说说已存在，命中创建幂等，talkKey: {}", talkKey);
+            return existed.getId();
+        }
+
         Talk talk = BeanUtil.copyProperties(dto, Talk.class);
         // 富文本入库前清洗 XSS（白名单保留 class/style，编辑器代码高亮/对齐等不丢失）
         talk.setContent(com.blog.shared.util.HtmlSanitizer.cleanRichText(dto.getContent()));
-        talk.setTalkKey(KeyUtil.generateKey("talk"));
+        talk.setTalkKey(talkKey);
 
         Long userId = UserContext.getCurrentUserId();
         talk.setAuthorId(userId);

@@ -24,5 +24,7 @@ public class TalkDTO extends com.blog.shared.model.dto.BaseDTO {
     private String status;
 
     private Integer isTop;
+
+    private String talkKey;
 }
 
