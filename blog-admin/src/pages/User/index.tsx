@@ -38,7 +38,9 @@ const UserPage: React.FC = () => {
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
   const [form] = Form.useForm()
   const [passwordForm] = Form.useForm()
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
+  const [current, setCurrent] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [total, setTotal] = useState(0)
   const [searchForm, setSearchForm] = useState<{
     username: string
     email: string
@@ -75,31 +77,31 @@ const UserPage: React.FC = () => {
     setLoading(true)
     try {
       const result = await getUserList({
-        page: pagination.current,
-        size: pagination.pageSize,
+        page: current,
+        size: pageSize,
         username: activeFilters.username || undefined,
         email: activeFilters.email || undefined,
         roleId: activeFilters.roleId,
         status: activeFilters.status,
       })
       setUsers(result.records)
-      setPagination((prev) => ({ ...prev, total: result.total }))
+      setTotal(result.total)
     } catch (error) {
       console.error('加载用户失败', error)
     } finally {
       setLoading(false)
     }
-  }, [pagination.current, pagination.pageSize, activeFilters])
+  }, [current, pageSize, activeFilters])
 
   const handleSearch = () => {
-    setPagination((prev) => ({ ...prev, current: 1 }))
+    setCurrent(1)
     setActiveFilters({ ...searchForm })
   }
 
   const handleReset = () => {
     const empty = { username: '', email: '', roleId: undefined, status: undefined }
     setSearchForm(empty)
-    setPagination((prev) => ({ ...prev, current: 1 }))
+    setCurrent(1)
     setActiveFilters(empty)
   }
 
@@ -328,14 +330,16 @@ const UserPage: React.FC = () => {
           loading={loading}
           scroll={{ x: 'max-content' }}
           pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
+            current,
+            pageSize,
+            total,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 个用户`,
-            onChange: (page, pageSize) =>
-              setPagination({ ...pagination, current: page, pageSize }),
+            showTotal: (t) => `共 ${t} 个用户`,
+            onChange: (page, size) => {
+              setCurrent(page)
+              setPageSize(size)
+            },
           }}
         />
       </div>

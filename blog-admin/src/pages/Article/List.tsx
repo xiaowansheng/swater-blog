@@ -46,7 +46,9 @@ const ArticleList: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
+  const [current, setCurrent] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [total, setTotal] = useState(0)
   const [searchForm, setSearchForm] = useState<{
     keyword: string
     id: string
@@ -80,7 +82,7 @@ const ArticleList: React.FC = () => {
     }
   }, [])
 
-  const loadArticles = useCallback(async (page = pagination.current, size = pagination.pageSize) => {
+  const loadArticles = useCallback(async (page = current, size = pageSize) => {
     setLoading(true)
     try {
       const result = await getArticleList({
@@ -89,26 +91,23 @@ const ArticleList: React.FC = () => {
         ...activeFilters,
       })
       setArticles(result.records)
-      // 仅在 total 实际变化时才产生新引用，避免触发依赖 pagination 的死循环
-      setPagination((prev) =>
-        prev.total === result.total ? prev : { ...prev, total: result.total }
-      )
+      setTotal(result.total)
     } catch (error) {
       console.error('加载文章失败', error)
     } finally {
       setLoading(false)
     }
-  }, [pagination.current, pagination.pageSize, activeFilters])
+  }, [current, pageSize, activeFilters])
 
   const handleSearch = () => {
-    setPagination((prev) => ({ ...prev, current: 1 }))
+    setCurrent(1)
     setActiveFilters({ ...searchForm })
   }
 
   const handleReset = () => {
     const empty = { keyword: '', id: '', articleKey: '', status: undefined, categoryId: undefined, type: undefined, isTop: undefined }
     setSearchForm(empty)
-    setPagination((prev) => ({ ...prev, current: 1 }))
+    setCurrent(1)
     setActiveFilters(empty)
   }
 
@@ -525,14 +524,16 @@ const ArticleList: React.FC = () => {
             onChange: setSelectedRowKeys,
           }}
           pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
+            current,
+            pageSize,
+            total,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 篇文章`,
-            onChange: (page, pageSize) =>
-              setPagination({ ...pagination, current: page, pageSize }),
+            showTotal: (t) => `共 ${t} 篇文章`,
+            onChange: (page, size) => {
+              setCurrent(page)
+              setPageSize(size)
+            },
           }}
         />
       </div>
