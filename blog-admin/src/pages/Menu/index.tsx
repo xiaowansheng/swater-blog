@@ -181,6 +181,7 @@ const MenuPage: React.FC = () => {
           pagination={false}
           childrenColumnName="children"
           defaultExpandAllRows
+          scroll={{ x: 'max-content' }}
         />
       </div>
 

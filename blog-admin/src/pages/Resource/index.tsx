@@ -7,6 +7,7 @@ import { ApiOpenStatus } from '@/types/enums'
 
 const ApiPage: React.FC = () => {
   const [apis, setApis] = useState<ApiVO[]>([])
+  const [allApis, setAllApis] = useState<ApiVO[]>([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [editingApi, setEditingApi] = useState<ApiVO | null>(null)
@@ -25,45 +26,56 @@ const ApiPage: React.FC = () => {
     isOpen: undefined,
   })
 
-
   const loadApis = useCallback(async () => {
     setLoading(true)
     try {
       const data = await getApiList()
-
-      const filterApi = (api: ApiVO) => {
-        if (filters.name && !api.name.toLowerCase().includes(filters.name.toLowerCase())) {
-          return false
-        }
-        if (filters.path && !api.path?.toLowerCase().includes(filters.path.toLowerCase())) {
-          return false
-        }
-        if (filters.method && api.method?.toUpperCase() !== filters.method.toUpperCase()) {
-          return false
-        }
-        if (filters.isOpen !== undefined && api.isOpen !== filters.isOpen) {
-          return false
-        }
-        return true
-      }
-
-      const filteredApis = data.filter(filterApi).map(api => ({
-        ...api,
-        children: api.children?.filter(filterApi)
-      }))
-
-      setApis(filteredApis)
+      setAllApis(data)
     } catch (error) {
       console.error('加载接口失败', error)
       message.error('加载接口失败')
     } finally {
       setLoading(false)
     }
-  }, [filters])
+  }, [])
+
+  const handleReset = () => {
+    setFilters({
+      name: '',
+      path: '',
+      method: undefined,
+      isOpen: undefined,
+    })
+  }
 
   useEffect(() => {
     loadApis()
   }, [loadApis])
+
+  useEffect(() => {
+    const filterApi = (api: ApiVO) => {
+      if (filters.name && !api.name.toLowerCase().includes(filters.name.toLowerCase())) {
+        return false
+      }
+      if (filters.path && !api.path?.toLowerCase().includes(filters.path.toLowerCase())) {
+        return false
+      }
+      if (filters.method && api.method?.toUpperCase() !== filters.method.toUpperCase()) {
+        return false
+      }
+      if (filters.isOpen !== undefined && api.isOpen !== filters.isOpen) {
+        return false
+      }
+      return true
+    }
+
+    const filteredApis = allApis.filter(filterApi).map(api => ({
+      ...api,
+      children: api.children?.filter(filterApi)
+    }))
+
+    setApis(filteredApis)
+  }, [filters, allApis])
 
   const handleCreate = (parentId?: number) => {
     setEditingApi(null)
@@ -279,6 +291,9 @@ const ApiPage: React.FC = () => {
             <Select.Option value={ApiOpenStatus.OPEN}>是</Select.Option>
             <Select.Option value={ApiOpenStatus.CLOSED}>否</Select.Option>
           </Select>
+          <Button icon={<ReloadOutlined />} onClick={handleReset}>
+            重置
+          </Button>
           <div className="flex-1" />
           <Space>
             <Tooltip title="自动扫描并同步系统接口到数据库（重要操作）">
@@ -308,6 +323,7 @@ const ApiPage: React.FC = () => {
           dataSource={apis}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 'max-content' }}
           pagination={false}
           childrenColumnName="children"
         />
