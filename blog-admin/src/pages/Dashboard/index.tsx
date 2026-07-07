@@ -87,7 +87,8 @@ const Dashboard: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }, [range, topPagesOrderBy])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [range])
 
   const loadTopPages = useCallback(async () => {
     setTopPagesLoading(true)
