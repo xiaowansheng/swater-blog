@@ -8,6 +8,8 @@ import {
   ApartmentOutlined,
   ChromeOutlined,
   LinkOutlined,
+  SearchOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons'
 import { getVisitorList, getVisitorSessionPages, getVisitorStatistics, getVisitorTrackingDetail } from '@/api/visitor'
 import { getStatisticsTopLandingPages, getStatisticsTrafficSources } from '@/api/statistics'
@@ -104,11 +106,14 @@ const VisitorPage: React.FC = () => {
   const [sessionPagesMap, setSessionPagesMap] = useState<Record<string, VisitorPageTrace[]>>({})
   const [trafficSources, setTrafficSources] = useState<TrafficSourceItem[]>([])
   const [topLandingPages, setTopLandingPages] = useState<LandingPageItem[]>([])
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
+  const [current, setCurrent] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [total, setTotal] = useState(0)
   const [statRange, setStatRange] = useState<[string | null, string | null]>([null, null])
   const [landingPageOrderBy, setLandingPageOrderBy] = useState<'sessions' | 'uv'>('sessions')
   const [landingPageSource, setLandingPageSource] = useState<'ALL' | 'DIRECT' | 'SEARCH' | 'REFERRAL' | 'UTM'>('ALL')
-  const [filters, setFilters] = useState<{
+
+  const [searchForm, setSearchForm] = useState<{
     country: string
     province: string
     city: string
@@ -126,31 +131,66 @@ const VisitorPage: React.FC = () => {
     trafficSource: undefined,
   })
 
-  const page = pagination.current
-  const size = pagination.pageSize
+  const [activeFilters, setActiveFilters] = useState<{
+    country: string
+    province: string
+    city: string
+    deviceType: string | undefined
+    osName: string
+    browserName: string
+    trafficSource: string | undefined
+  }>({
+    country: '',
+    province: '',
+    city: '',
+    deviceType: undefined,
+    osName: '',
+    browserName: '',
+    trafficSource: undefined,
+  })
 
   const loadVisitors = useCallback(async () => {
     setLoading(true)
     try {
       const result = await getVisitorList({
-        page,
-        size,
-        country: filters.country || undefined,
-        province: filters.province || undefined,
-        city: filters.city || undefined,
-        deviceType: filters.deviceType || undefined,
-        osName: filters.osName || undefined,
-        browserName: filters.browserName || undefined,
-        trafficSource: filters.trafficSource || undefined,
+        page: current,
+        size: pageSize,
+        country: activeFilters.country || undefined,
+        province: activeFilters.province || undefined,
+        city: activeFilters.city || undefined,
+        deviceType: activeFilters.deviceType || undefined,
+        osName: activeFilters.osName || undefined,
+        browserName: activeFilters.browserName || undefined,
+        trafficSource: activeFilters.trafficSource || undefined,
       })
       setVisitors(result.records)
-      setPagination((prev) => ({ ...prev, total: result.total }))
+      setTotal(result.total)
     } catch (error) {
       console.error('加载访客列表失败', error)
     } finally {
       setLoading(false)
     }
-  }, [page, size, filters])
+  }, [current, pageSize, activeFilters])
+
+  const handleSearch = () => {
+    setCurrent(1)
+    setActiveFilters({ ...searchForm })
+  }
+
+  const handleReset = () => {
+    const empty = {
+      country: '',
+      province: '',
+      city: '',
+      deviceType: undefined,
+      osName: '',
+      browserName: '',
+      trafficSource: undefined,
+    }
+    setSearchForm(empty)
+    setCurrent(1)
+    setActiveFilters(empty)
+  }
 
   const loadStatistics = useCallback(async () => {
     setStatsLoading(true)
@@ -195,12 +235,6 @@ const VisitorPage: React.FC = () => {
   }, [statRange, landingPageOrderBy, landingPageSource])
 
   useEffect(() => {
-    loadVisitors()
-    loadStatistics()
-  }, [loadVisitors, loadStatistics])
-
-  useEffect(() => {
-    setPagination((prev) => ({ ...prev, current: 1 }))
     loadVisitors()
   }, [loadVisitors])
 
@@ -546,29 +580,32 @@ const VisitorPage: React.FC = () => {
           <Space wrap>
             <Input
               placeholder="国家"
-              value={filters.country}
-              onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+              value={searchForm.country}
+              onChange={(e) => setSearchForm({ ...searchForm, country: e.target.value })}
+              onPressEnter={handleSearch}
               style={{ width: 100 }}
               allowClear
             />
             <Input
               placeholder="省份"
-              value={filters.province}
-              onChange={(e) => setFilters({ ...filters, province: e.target.value })}
+              value={searchForm.province}
+              onChange={(e) => setSearchForm({ ...searchForm, province: e.target.value })}
+              onPressEnter={handleSearch}
               style={{ width: 100 }}
               allowClear
             />
             <Input
               placeholder="城市"
-              value={filters.city}
-              onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+              value={searchForm.city}
+              onChange={(e) => setSearchForm({ ...searchForm, city: e.target.value })}
+              onPressEnter={handleSearch}
               style={{ width: 100 }}
               allowClear
             />
             <Select
               placeholder="设备类型"
-              value={filters.deviceType}
-              onChange={(value) => setFilters({ ...filters, deviceType: value })}
+              value={searchForm.deviceType}
+              onChange={(value) => setSearchForm({ ...searchForm, deviceType: value })}
               style={{ width: 120 }}
               allowClear
             >
@@ -578,22 +615,24 @@ const VisitorPage: React.FC = () => {
             </Select>
             <Input
               placeholder="操作系统"
-              value={filters.osName}
-              onChange={(e) => setFilters({ ...filters, osName: e.target.value })}
+              value={searchForm.osName}
+              onChange={(e) => setSearchForm({ ...searchForm, osName: e.target.value })}
+              onPressEnter={handleSearch}
               style={{ width: 120 }}
               allowClear
             />
             <Input
               placeholder="浏览器"
-              value={filters.browserName}
-              onChange={(e) => setFilters({ ...filters, browserName: e.target.value })}
+              value={searchForm.browserName}
+              onChange={(e) => setSearchForm({ ...searchForm, browserName: e.target.value })}
+              onPressEnter={handleSearch}
               style={{ width: 120 }}
               allowClear
             />
             <Select
               placeholder="来源"
-              value={filters.trafficSource}
-              onChange={(value) => setFilters({ ...filters, trafficSource: value })}
+              value={searchForm.trafficSource}
+              onChange={(value) => setSearchForm({ ...searchForm, trafficSource: value })}
               style={{ width: 120 }}
               allowClear
             >
@@ -602,6 +641,14 @@ const VisitorPage: React.FC = () => {
               <Select.Option value="REFERRAL">外部链接</Select.Option>
               <Select.Option value="UTM">UTM投放</Select.Option>
             </Select>
+            <Space>
+              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+                搜索
+              </Button>
+              <Button icon={<ReloadOutlined />} onClick={handleReset}>
+                重置
+              </Button>
+            </Space>
           </Space>
         }
       >
@@ -612,14 +659,16 @@ const VisitorPage: React.FC = () => {
           loading={loading}
           scroll={{ x: 1320 }}
           pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
+            current,
+            pageSize,
+            total,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 位访客`,
-            onChange: (page, pageSize) =>
-              setPagination({ ...pagination, current: page, pageSize }),
+            showTotal: (t) => `共 ${t} 位访客`,
+            onChange: (page, size) => {
+              setCurrent(page)
+              setPageSize(size)
+            },
           }}
         />
       </Card>

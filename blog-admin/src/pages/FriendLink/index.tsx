@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Avatar, Tooltip, InputNumber, Select } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined, SearchOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, LinkOutlined, SearchOutlined, CheckOutlined, CloseOutlined, ReloadOutlined } from '@ant-design/icons'
 import { getFriendLinkList, createFriendLink, updateFriendLink, deleteFriendLink, approveFriendLink, rejectFriendLink } from '@/api/friendLink'
 import { FriendLink } from '@/types'
 import {
@@ -16,7 +16,7 @@ const FriendLinkPage: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false)
   const [editingLink, setEditingLink] = useState<FriendLink | null>(null)
   const [form] = Form.useForm()
-  const [filters, setFilters] = useState<{
+  const [searchForm, setSearchForm] = useState<{
     id: number | undefined
     userId: number | undefined
     name: string
@@ -36,19 +36,38 @@ const FriendLinkPage: React.FC = () => {
     isVisible: undefined,
   })
 
+  const [activeFilters, setActiveFilters] = useState<{
+    id: number | undefined
+    userId: number | undefined
+    name: string
+    author: string
+    email: string
+    url: string
+    reviewStatus: FriendLinkReviewStatus | undefined
+    isVisible: FriendLinkVisibilityStatus | undefined
+  }>({
+    id: undefined,
+    userId: undefined,
+    name: '',
+    author: '',
+    email: '',
+    url: '',
+    reviewStatus: undefined,
+    isVisible: undefined,
+  })
 
   const loadLinks = useCallback(async () => {
     setLoading(true)
     try {
       const data = await getFriendLinkList({
-        id: filters.id,
-        userId: filters.userId,
-        name: filters.name,
-        author: filters.author,
-        email: filters.email,
-        url: filters.url,
-        reviewStatus: filters.reviewStatus,
-        isVisible: filters.isVisible,
+        id: activeFilters.id,
+        userId: activeFilters.userId,
+        name: activeFilters.name,
+        author: activeFilters.author,
+        email: activeFilters.email,
+        url: activeFilters.url,
+        reviewStatus: activeFilters.reviewStatus,
+        isVisible: activeFilters.isVisible,
       })
       setLinks(data)
     } catch (error) {
@@ -56,7 +75,26 @@ const FriendLinkPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }, [filters])
+  }, [activeFilters])
+
+  const handleSearch = () => {
+    setActiveFilters({ ...searchForm })
+  }
+
+  const handleReset = () => {
+    const empty = {
+      id: undefined,
+      userId: undefined,
+      name: '',
+      author: '',
+      email: '',
+      url: '',
+      reviewStatus: undefined,
+      isVisible: undefined,
+    }
+    setSearchForm(empty)
+    setActiveFilters(empty)
+  }
 
   useEffect(() => {
     loadLinks()
@@ -294,36 +332,40 @@ const FriendLinkPage: React.FC = () => {
           <Input
             placeholder="网站名称"
             prefix={<SearchOutlined className="text-gray-400" />}
-            value={filters.name}
-            onChange={(e) => setFilters({ ...filters, name: e.target.value })}
+            value={searchForm.name}
+            onChange={(e) => setSearchForm({ ...searchForm, name: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 180 }}
             allowClear
           />
           <Input
             placeholder="作者"
-            value={filters.author}
-            onChange={(e) => setFilters({ ...filters, author: e.target.value })}
+            value={searchForm.author}
+            onChange={(e) => setSearchForm({ ...searchForm, author: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 140 }}
             allowClear
           />
           <Input
             placeholder="邮箱"
-            value={filters.email}
-            onChange={(e) => setFilters({ ...filters, email: e.target.value })}
+            value={searchForm.email}
+            onChange={(e) => setSearchForm({ ...searchForm, email: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 180 }}
             allowClear
           />
           <Input
             placeholder="链接地址"
-            value={filters.url}
-            onChange={(e) => setFilters({ ...filters, url: e.target.value })}
+            value={searchForm.url}
+            onChange={(e) => setSearchForm({ ...searchForm, url: e.target.value })}
+            onPressEnter={handleSearch}
             style={{ width: 200 }}
             allowClear
           />
           <Select
             placeholder="状态"
-            value={filters.reviewStatus}
-            onChange={(value) => setFilters({ ...filters, reviewStatus: value })}
+            value={searchForm.reviewStatus}
+            onChange={(value) => setSearchForm({ ...searchForm, reviewStatus: value })}
             style={{ width: 120 }}
             allowClear
           >
@@ -333,8 +375,8 @@ const FriendLinkPage: React.FC = () => {
           </Select>
           <Select
             placeholder="可见状态"
-            value={filters.isVisible}
-            onChange={(value) => setFilters({ ...filters, isVisible: value })}
+            value={searchForm.isVisible}
+            onChange={(value) => setSearchForm({ ...searchForm, isVisible: value })}
             style={{ width: 120 }}
             allowClear
           >
@@ -343,20 +385,30 @@ const FriendLinkPage: React.FC = () => {
           </Select>
           <Input
             placeholder="友链ID"
-            value={filters.id ?? ''}
-            onChange={(e) => setFilters({ ...filters, id: e.target.value ? Number(e.target.value) : undefined })}
+            value={searchForm.id ?? ''}
+            onChange={(e) => setSearchForm({ ...searchForm, id: e.target.value ? Number(e.target.value) : undefined })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             type="number"
             allowClear
           />
           <Input
             placeholder="用户ID"
-            value={filters.userId ?? ''}
-            onChange={(e) => setFilters({ ...filters, userId: e.target.value ? Number(e.target.value) : undefined })}
+            value={searchForm.userId ?? ''}
+            onChange={(e) => setSearchForm({ ...searchForm, userId: e.target.value ? Number(e.target.value) : undefined })}
+            onPressEnter={handleSearch}
             style={{ width: 120 }}
             type="number"
             allowClear
           />
+          <Space>
+            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+              搜索
+            </Button>
+            <Button icon={<ReloadOutlined />} onClick={handleReset}>
+              重置
+            </Button>
+          </Space>
           <div className="flex-1" />
           <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
             新建友链
@@ -370,6 +422,7 @@ const FriendLinkPage: React.FC = () => {
           dataSource={links}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 'max-content' }}
           pagination={false}
         />
       </div>
