@@ -18,6 +18,8 @@ import com.blog.modules.user.model.entity.User;
 import com.blog.modules.file.model.vo.FileVO;
 import com.blog.modules.file.event.file.FileDeletedEvent;
 import com.blog.modules.file.event.file.FileUploadedEvent;
+import com.blog.modules.system.config.model.dto.config.UploadConfigDTO;
+import com.blog.modules.system.config.service.SiteConfigService;
 import com.blog.plugin.components.storage.StoragePlugin;
 import com.blog.plugin.components.storage.StoragePluginFactory;
 import com.blog.infrastructure.config.FileUploadProperties;
@@ -31,6 +33,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -40,6 +43,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -47,7 +51,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 @Service
+@Slf4j
 public class FileServiceImpl implements FileService {
     @Autowired
     private FileMetaMapper fileMetaMapper;
@@ -67,6 +73,9 @@ public class FileServiceImpl implements FileService {
     @Autowired
     private FileUploadProperties fileUploadProperties;
 
+    @Autowired
+    private SiteConfigService siteConfigService;
+
     @Override
     @Transactional
     public FileVO upload(MultipartFile file, FileUploadDTO dto) {
@@ -74,9 +83,27 @@ public class FileServiceImpl implements FileService {
             throw new BusinessException("文件不能为空");
         }
 
-        // 扩展名安全校验：先校验黑名单，再校验白名单
+        // 获取数据库中的上传配置并优先执行校验
+        var uploadConfig = siteConfigService.getUploadConfig();
         String originalFilename = file.getOriginalFilename();
-        validateFileExtension(originalFilename);
+
+        // 1. 校验文件大小
+        long maxSizeBytes;
+        if (uploadConfig != null && uploadConfig.getMaxSize() != null) {
+            maxSizeBytes = uploadConfig.getMaxSize();
+        } else {
+            maxSizeBytes = parseSize(fileUploadProperties.getMaxSize());
+        }
+
+        if (file.getSize() > maxSizeBytes) {
+            log.warn("文件大小超限，拒绝上传: filename={}, size={}, maxSize={}",
+                    originalFilename == null ? "unknown" : originalFilename,
+                    formatSize(file.getSize()), formatSize(maxSizeBytes));
+            throw new BusinessException("文件大小超出限制，最大允许: " + formatSize(maxSizeBytes));
+        }
+
+        // 2. 校验文件扩展名
+        validateFileExtension(originalFilename, uploadConfig);
 
         try {
             StoragePlugin storagePlugin = storagePluginFactory.getActivePlugin();
@@ -240,13 +267,13 @@ public class FileServiceImpl implements FileService {
     }
 
     /**
-     * 校验上传文件扩展名：
+     * 校验上传文件扩展名，校验顺序（任一失败即拒绝）：
      * 1) 必须有扩展名；
-     * 2) 命中 blocked-extensions 直接拒绝；
-     * 3) 若 allowed-extensions 非空，则必须命中白名单。
-     * 大小写不敏感，扩展名不含前导点。
+     * 2) 黑名单（properties blocked-extensions）永远生效，命中即拒绝；
+     * 3) 白名单：优先数据库 allowedTypes，为空则降级到 properties allowed-extensions。
+     *    注意：即使扩展名命中白名单，也必须先通过黑名单，防止运营配置误放危险类型。
      */
-    private void validateFileExtension(String filename) {
+    private void validateFileExtension(String filename, UploadConfigDTO uploadConfig) {
         if (filename == null || filename.isBlank()) {
             throw new BusinessException("文件名不能为空");
         }
@@ -256,6 +283,7 @@ public class FileServiceImpl implements FileService {
         }
         String ext = filename.substring(dotIdx + 1).toLowerCase(Locale.ROOT);
 
+        // 1) 黑名单永远生效：防止后台白名单配置误放开 exe/jsp/sh 等危险类型
         List<String> blocked = fileUploadProperties.getBlockedExtensions();
         if (blocked != null && !blocked.isEmpty()) {
             Set<String> blockedSet = blocked.stream()
@@ -263,20 +291,68 @@ public class FileServiceImpl implements FileService {
                     .map(s -> s.toLowerCase(Locale.ROOT))
                     .collect(Collectors.toSet());
             if (blockedSet.contains(ext)) {
+                log.warn("文件扩展名命中黑名单，拒绝上传: {}", filename);
                 throw new BusinessException("不支持的文件类型: ." + ext);
             }
         }
 
-        List<String> allowed = fileUploadProperties.getAllowedExtensions();
-        if (allowed != null && !allowed.isEmpty()) {
-            Set<String> allowedSet = allowed.stream()
-                    .filter(Objects::nonNull)
-                    .map(s -> s.toLowerCase(Locale.ROOT))
-                    .collect(Collectors.toSet());
+        // 2) 白名单：数据库 allowedTypes 优先，为空则降级到 properties allowed-extensions
+        Set<String> allowedSet = resolveAllowedSet(uploadConfig);
+        if (allowedSet != null && !allowedSet.isEmpty()) {
             if (!allowedSet.contains(ext)) {
+                log.warn("文件扩展名不在白名单内，拒绝上传: {}", filename);
                 throw new BusinessException("不支持的文件类型: ." + ext);
             }
         }
+    }
+
+    /**
+     * 解析生效的白名单：数据库 allowedTypes 非空则优先，否则降级到 properties allowed-extensions。
+     */
+    private Set<String> resolveAllowedSet(UploadConfigDTO uploadConfig) {
+        if (uploadConfig != null && uploadConfig.getAllowedTypes() != null && !uploadConfig.getAllowedTypes().isBlank()) {
+            return Arrays.stream(uploadConfig.getAllowedTypes().split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(s -> s.toLowerCase(Locale.ROOT))
+                    .collect(Collectors.toSet());
+        }
+        List<String> allowed = fileUploadProperties.getAllowedExtensions();
+        if (allowed == null || allowed.isEmpty()) {
+            return Set.of();
+        }
+        return allowed.stream()
+                .filter(Objects::nonNull)
+                .map(s -> s.toLowerCase(Locale.ROOT))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * 解析 Spring 风格尺寸字符串（如 "50MB"）为字节数。失败时回退到 50MB。
+     */
+    private long parseSize(String sizeStr) {
+        if (sizeStr == null || sizeStr.isBlank()) {
+            return DataSize.ofMegabytes(50).toBytes();
+        }
+        try {
+            return DataSize.parse(sizeStr.trim().toUpperCase(Locale.ROOT)).toBytes();
+        } catch (Exception e) {
+            log.warn("解析 maxSize 失败，回退默认 50MB: {}", sizeStr, e);
+            return DataSize.ofMegabytes(50).toBytes();
+        }
+    }
+
+    private String formatSize(long size) {
+        if (size >= 1024 * 1024 * 1024) {
+            return String.format("%.2f GB", (double) size / (1024 * 1024 * 1024));
+        }
+        if (size >= 1024 * 1024) {
+            return String.format("%.2f MB", (double) size / (1024 * 1024));
+        }
+        if (size >= 1024) {
+            return String.format("%.2f KB", (double) size / 1024);
+        }
+        return size + " B";
     }
 
 

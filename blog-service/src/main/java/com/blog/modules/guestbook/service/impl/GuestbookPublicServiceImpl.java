@@ -16,6 +16,7 @@ import com.blog.modules.user.model.entity.User;
 import com.blog.modules.guestbook.model.vo.GuestbookVO;
 import com.blog.modules.guestbook.service.GuestbookPublicService;
 import com.blog.modules.message.service.MessageVerificationService;
+import com.blog.modules.system.config.service.SiteConfigService;
 import com.blog.plugin.components.location.LocationInfo;
 import com.blog.shared.model.UserAgentInfo;
 import com.blog.shared.util.UserAgentUtil;
@@ -61,6 +62,9 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
     @Autowired
     private SensitiveWordHelper sensitiveWordHelper;
 
+    @Autowired
+    private SiteConfigService siteConfigService;
+
     @Override
     public PageResult<GuestbookVO> list(Long page, Long size, String sort) {
         String ownerEmail = getOwnerEmailFromRequest();
@@ -92,6 +96,12 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public GuestbookVO submit(GuestbookDTO dto) {
+        // 校验全局组件配置是否启用了留言板
+        var componentConfig = siteConfigService.getComponentConfig();
+        if (componentConfig == null || Boolean.FALSE.equals(componentConfig.getGuestbookMessageEnabled())) {
+            throw new BusinessException(400, "留言板功能已关闭");
+        }
+
         if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
             throw new BusinessException(400, "Email is required");
         }
@@ -107,14 +117,20 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
 
         Guestbook guestbook = BeanUtil.copyProperties(dto, Guestbook.class);
 
-        // 敏感词检测：如果包含敏感词则需要审核，否则自动通过
-        if (sensitiveWordHelper.contains(guestbook.getContent())) {
-            // 包含敏感词：需要审核，不可见
+        // 读取全局审核开关（复用评论配置 needApproval，作为统一的“UGC 内容需人工审核”开关）
+        var commentConfig = siteConfigService.getCommentConfig();
+        boolean globalNeedApproval = commentConfig != null && Boolean.TRUE.equals(commentConfig.getNeedApproval());
+        boolean hasSensitiveWord = sensitiveWordHelper.contains(guestbook.getContent());
+
+        if (globalNeedApproval || hasSensitiveWord) {
             guestbook.setReviewStatus(GuestbookReviewStatus.PENDING.getCode());
             guestbook.setIsVisible(GuestbookVisibilityStatus.HIDDEN.getCode());
-            log.info("留言包含敏感词，ID: {}, 需要人工审核", guestbook.getId());
+            if (hasSensitiveWord) {
+                log.info("留言包含敏感词，ID: {}, 需要人工审核", guestbook.getId());
+            } else {
+                log.info("系统开启了全局内容审核，留言 ID: {}, 需要人工审核", guestbook.getId());
+            }
         } else {
-            // 无敏感词：自动审核通过，可见
             guestbook.setReviewStatus(GuestbookReviewStatus.APPROVED.getCode());
             guestbook.setIsVisible(GuestbookVisibilityStatus.VISIBLE.getCode());
         }

@@ -36,6 +36,14 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Autowired(required = false)
     private RevalidateClient revalidateClient;
 
+    /**
+     * 敏感词助手：评论配置更新后需热加载自定义敏感词。
+     * 使用 @Lazy 打破 Helper -> SiteConfigService -> Helper 的循环依赖。
+     */
+    @org.springframework.context.annotation.Lazy
+    @Autowired(required = false)
+    private com.blog.shared.SensitiveWordHelper sensitiveWordHelper;
+
     // 配置key常量
     private static final String KEY_SITE = "site";
     private static final String KEY_AUTHOR = "author";
@@ -79,6 +87,48 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     private void revalidateSiteConfig() {
         if (revalidateClient != null) {
             revalidateClient.revalidateTags(RevalidateTags.SITE_CONFIG);
+        }
+    }
+
+    /**
+     * 校验上传配置：
+     * - maxSize 必须落在 [1KB, 1GB] 区间，防止被设成破坏性值（0 / 负数 / 极大值）
+     * - allowedTypes 非空时必须为合法的逗号分隔扩展名列表
+     */
+    private void validateUploadConfig(UploadConfigDTO config) {
+        if (config == null) {
+            throw new com.blog.shared.exception.BusinessException("上传配置不能为空");
+        }
+        long minSize = 1024L;                 // 1KB
+        long maxSizeLimit = 1024L * 1024 * 1024; // 1GB
+        Long maxSize = config.getMaxSize();
+        if (maxSize == null || maxSize < minSize || maxSize > maxSizeLimit) {
+            throw new com.blog.shared.exception.BusinessException(
+                    "上传大小限制必须在 1KB ~ 1GB 之间");
+        }
+        String allowedTypes = config.getAllowedTypes();
+        if (allowedTypes != null && !allowedTypes.isBlank()) {
+            for (String t : allowedTypes.split(",")) {
+                String s = t.trim();
+                if (s.isEmpty() || !s.matches("[A-Za-z0-9]+")) {
+                    throw new com.blog.shared.exception.BusinessException(
+                            "允许的文件类型格式非法: " + t);
+                }
+            }
+        }
+    }
+
+    /**
+     * 校验评论配置：maxLength 若设置必须落在 [1, 2000]，防止设成 0 / 负数 / 极大值。
+     */
+    private void validateCommentConfig(CommentConfigDTO config) {
+        if (config == null) {
+            throw new com.blog.shared.exception.BusinessException("评论配置不能为空");
+        }
+        Integer maxLength = config.getMaxLength();
+        if (maxLength != null && (maxLength < 1 || maxLength > 2000)) {
+            throw new com.blog.shared.exception.BusinessException(
+                    "评论最大长度限制必须在 1 ~ 2000 之间");
         }
     }
 
@@ -247,7 +297,14 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     })
     @Transactional
     public void updateCommentConfig(CommentConfigDTO config) {
+        validateCommentConfig(config);
         updateConfig(KEY_COMMENT, config);
+        // 评论配置更新后热加载自定义敏感词（在事务提交后执行）
+        EventUtil.publishEventAfterCommit(() -> {
+            if (sensitiveWordHelper != null) {
+                sensitiveWordHelper.reloadCustomWords();
+            }
+        });
     }
 
     @Override
@@ -277,6 +334,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     })
     @Transactional
     public void updateUploadConfig(UploadConfigDTO config) {
+        validateUploadConfig(config);
         updateConfig(KEY_UPLOAD, config);
     }
     

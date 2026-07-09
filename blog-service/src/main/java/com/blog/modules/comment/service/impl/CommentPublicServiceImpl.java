@@ -20,6 +20,9 @@ import com.blog.modules.file.service.FileService;
 import com.blog.modules.file.mapper.FileMetaMapper;
 import com.blog.modules.file.model.entity.FileMeta;
 import com.blog.modules.message.service.MessageVerificationService;
+import com.blog.modules.system.config.model.dto.config.CommentConfigDTO;
+import com.blog.modules.system.config.model.dto.config.ComponentConfigDTO;
+import com.blog.modules.system.config.service.SiteConfigService;
 import com.blog.modules.talk.mapper.TalkMapper;
 import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.user.mapper.UserMapper;
@@ -83,11 +86,44 @@ public class CommentPublicServiceImpl implements CommentPublicService {
     private SensitiveWordHelper sensitiveWordHelper;
 
     @Autowired
+    private SiteConfigService siteConfigService;
+
+    @Autowired
     private TransactionTemplate transactionTemplate;
 
     @Override
     public CommentVO create(CommentDTO dto) {
         validateCommentTarget(dto);
+
+        // 校验全局系统配置与组件配置（一次读取，贯穿整个创建流程）
+        CommentConfigDTO commentConfig = siteConfigService.getCommentConfig();
+        ComponentConfigDTO componentConfig = siteConfigService.getComponentConfig();
+
+        // enabled 为 null 时视为启用（避免运营未配置时误关全部评论）
+        if (commentConfig != null && Boolean.FALSE.equals(commentConfig.getEnabled())) {
+            log.info("评论功能已被全局关闭，拒绝创建");
+            throw new BusinessException(400, "评论功能已关闭");
+        }
+
+        if (componentConfig != null) {
+            if ("ARTICLE".equalsIgnoreCase(dto.getTargetType()) && Boolean.FALSE.equals(componentConfig.getArticleCommentEnabled())) {
+                throw new BusinessException(400, "文章评论功能已关闭");
+            }
+            if ("TALK".equalsIgnoreCase(dto.getTargetType()) && Boolean.FALSE.equals(componentConfig.getTalkCommentEnabled())) {
+                throw new BusinessException(400, "说说评论功能已关闭");
+            }
+        }
+
+        // allowAnonymous 为 null 时视为允许匿名（与历史行为保持一致）
+        if (commentConfig != null && Boolean.FALSE.equals(commentConfig.getAllowAnonymous()) && !StpUtil.isLogin()) {
+            throw new BusinessException(401, "不允许匿名评论，请先登录");
+        }
+
+        if (commentConfig != null && commentConfig.getMaxLength() != null && dto.getContent() != null) {
+            if (dto.getContent().length() > commentConfig.getMaxLength()) {
+                throw new BusinessException(400, "评论内容超出最大长度限制: " + commentConfig.getMaxLength());
+            }
+        }
 
         if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
             throw new BusinessException(400, "Email is required");
@@ -111,8 +147,9 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         dto.setBrowser(userAgentInfo.getBrowserDescription() != null ? userAgentInfo.getBrowserDescription() : userAgent);
 
         String ownerEmailForView = emailVerifiedBySession ? sessionEmail : dto.getEmail();
+        final CommentConfigDTO effectiveCommentConfig = commentConfig;
         return transactionTemplate.execute(status -> {
-            CommentVO vo = createAndPersist(dto, ownerEmailForView);
+            CommentVO vo = createAndPersist(dto, ownerEmailForView, effectiveCommentConfig);
             if (vo != null && vo.getId() != null) {
                 Long commentId = vo.getId();
                 EventUtil.publishEventAfterCommit(() -> {
@@ -247,7 +284,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         }
     }
 
-    private CommentVO createAndPersist(CommentDTO dto, String ownerEmailForView) {
+    private CommentVO createAndPersist(CommentDTO dto, String ownerEmailForView, CommentConfigDTO commentConfig) {
         Comment comment = BeanUtil.copyProperties(dto, Comment.class);
 
         if (StpUtil.isLogin()) {
@@ -280,14 +317,20 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             comment.setImages("[]");
         }
 
-        // 敏感词检测：如果包含敏感词则需要审核，否则自动通过
-        if (sensitiveWordHelper.contains(comment.getContent())) {
-            // 包含敏感词：需要审核，不可见
+        // 读取系统配置判定是否需要审核（使用上游已读取的配置，避免重复读缓存）
+        boolean needApproval = commentConfig != null && Boolean.TRUE.equals(commentConfig.getNeedApproval());
+        boolean hasSensitiveWord = sensitiveWordHelper.contains(comment.getContent());
+
+        if (needApproval || hasSensitiveWord) {
             comment.setStatus(CommentStatus.PENDING.getCode());
             comment.setIsVisible(CommentVisibilityStatus.HIDDEN.getCode());
-            log.info("评论包含敏感词，ID: {}, 需要人工审核", comment.getId());
+            if (hasSensitiveWord) {
+                log.info("评论包含敏感词，ID: {}, 需要人工审核", comment.getId());
+            } else {
+                log.info("系统开启了全局评论审核，评论 ID: {}, 需要人工审核", comment.getId());
+            }
         } else {
-            // 无敏感词：自动审核通过，可见
+            // 自动审核通过，可见
             comment.setStatus(CommentStatus.APPROVED.getCode());
             comment.setIsVisible(CommentVisibilityStatus.VISIBLE.getCode());
         }

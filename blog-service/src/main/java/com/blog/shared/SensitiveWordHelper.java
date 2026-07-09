@@ -1,31 +1,95 @@
 package com.blog.shared;
 
+import com.github.houbb.sensitive.word.api.IWordDeny;
 import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
 import com.github.houbb.sensitive.word.support.allow.WordAllows;
 import com.github.houbb.sensitive.word.support.deny.WordDenys;
+import com.blog.modules.system.config.model.dto.config.CommentConfigDTO;
+import com.blog.modules.system.config.service.SiteConfigService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * 敏感词处理助手类
  * 提供敏感词检测、查找、替换等核心功能
+ *
+ * 词库来源：
+ * 1) houbb sensitive-word 默认内置词库（wordDeny/wordAllow defaults）
+ * 2) 数据库 {@code comment.sensitiveWords} 配置的自定义敏感词（通过 SiteConfigService 读取）
+ *
+ * 当管理员更新评论配置后，可调用 {@link #reloadCustomWords()} 热加载自定义词，无需重启。
  */
 @Slf4j
 @Component
 public class SensitiveWordHelper {
 
-    private SensitiveWordBs sensitiveWordBs;
+    /**
+     * 数据库中读取的自定义敏感词；为不可变快照，供 reload 时整体替换。
+     */
+    private volatile List<String> customWords = Collections.emptyList();
+
+    private volatile SensitiveWordBs sensitiveWordBs;
+
+    @Autowired(required = false)
+    private SiteConfigService siteConfigService;
 
     @PostConstruct
     public void init() {
+        // 启动时加载一次数据库自定义敏感词（若配置服务尚未就绪则跳过，使用默认词库）
+        loadCustomWordsFromConfig();
+        rebuildBs();
+        log.info("SensitiveWordHelper 初始化完成，自定义敏感词数量: {}", customWords.size());
+    }
+
+    /**
+     * 从数据库评论配置中加载自定义敏感词（逗号或换行分隔）。
+     */
+    private void loadCustomWordsFromConfig() {
+        if (siteConfigService == null) {
+            return;
+        }
+        try {
+            CommentConfigDTO commentConfig = siteConfigService.getCommentConfig();
+            if (commentConfig == null || commentConfig.getSensitiveWords() == null
+                    || commentConfig.getSensitiveWords().isBlank()) {
+                customWords = Collections.emptyList();
+                return;
+            }
+            List<String> words = new ArrayList<>();
+            for (String w : commentConfig.getSensitiveWords().split("[,\\R]")) {
+                String trimmed = w.trim();
+                if (!trimmed.isEmpty()) {
+                    words.add(trimmed);
+                }
+            }
+            customWords = Collections.unmodifiableList(words);
+        } catch (Exception e) {
+            log.warn("加载自定义敏感词失败，使用空自定义词库: {}", e.getMessage());
+            customWords = Collections.emptyList();
+        }
+    }
+
+    /**
+     * 用默认词库 + 当前自定义词库重建底层 SensitiveWordBs。
+     */
+    private void rebuildBs() {
+        IWordDeny wordDeny;
+        if (customWords.isEmpty()) {
+            wordDeny = WordDenys.defaults();
+        } else {
+            // 链式合并：默认禁用词 + 自定义禁用词
+            wordDeny = WordDenys.chains(WordDenys.defaults(), new CustomWordDeny(customWords));
+        }
         this.sensitiveWordBs = SensitiveWordBs.newInstance()
-                .wordDeny(WordDenys.defaults())
+                .wordDeny(wordDeny)
                 .wordAllow(WordAllows.defaults())
                 // 各种忽略策略
                 .ignoreCase(true)
@@ -39,8 +103,16 @@ public class SensitiveWordHelper {
                 .enableEmailCheck(true)
                 .enableUrlCheck(true)
                 .init();
+    }
 
-        log.info("SensitiveWordHelper 初始化完成");
+    /**
+     * 重新加载数据库自定义敏感词并重建词库。供评论配置更新事件调用。
+     */
+    public synchronized void reloadCustomWords() {
+        int before = customWords.size();
+        loadCustomWordsFromConfig();
+        rebuildBs();
+        log.info("自定义敏感词已重新加载: {} -> {}", before, customWords.size());
     }
 
     /**
@@ -158,5 +230,21 @@ public class SensitiveWordHelper {
      */
     public int count(String content) {
         return findAll(content).size();
+    }
+
+    /**
+     * 自定义禁用词实现：把数据库配置的敏感词作为禁用词返回。
+     */
+    private static final class CustomWordDeny implements IWordDeny {
+        private final List<String> words;
+
+        CustomWordDeny(List<String> words) {
+            this.words = words;
+        }
+
+        @Override
+        public List<String> deny() {
+            return words;
+        }
     }
 }

@@ -8,9 +8,9 @@ import lombok.Data;
 @Data
 public class CommentConfigDTO {
     /**
-     * 是否启用评论
+     * 是否启用评论（未配置时默认启用）
      */
-    private Boolean enabled;
+    private Boolean enabled = Boolean.TRUE;
     
     /**
      * 是否需要审核
