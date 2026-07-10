@@ -13,6 +13,7 @@ import com.blog.modules.system.log.service.LogErrorService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.PageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -117,6 +118,7 @@ public class LogErrorServiceImpl implements LogErrorService {
     }
 
     @Override
+    @Async("eventTaskExecutor")
     @Transactional
     public void save(LogError logError) {
         if (logError != null) {

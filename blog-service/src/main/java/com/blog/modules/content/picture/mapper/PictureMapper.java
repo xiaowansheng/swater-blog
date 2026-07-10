@@ -13,5 +13,7 @@ public interface PictureMapper extends com.blog.shared.model.BaseMapper<Picture>
     List<Picture> selectByAlbumId(@Param("albumId") Long albumId);
 
     Integer countByAlbumId(@Param("albumId") Long albumId);
+
+    int deleteByAlbumId(@Param("albumId") Long albumId);
 }
 

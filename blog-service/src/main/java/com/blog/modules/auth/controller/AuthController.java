@@ -286,11 +286,14 @@ public class AuthController {
             )
         )
     )
+    @ApiDocumentation.RequireAuth
     @ApiDocumentation.StandardApiResponses
     public Result<LoginVO> refreshToken(
             @Parameter(description = "刷新令牌", required = true)
             @RequestParam String refreshToken) {
-        // 这里应该验证refreshToken，然后调用无参数的refreshToken方法
+        // 该接口现已纳入登录拦截（SaTokenConfig addPathPatterns），必须已登录才能续期 token。
+        // 注：refreshToken 参数当前未参与校验（项目未实现独立的 refresh token 机制），
+        // 续期逻辑与 /api/auth/refresh 一致，均基于当前会话的 Sa-Token。
         String newToken = authService.refreshToken();
         LoginVO loginVO = new LoginVO();
         loginVO.setToken(newToken);

@@ -120,8 +120,8 @@ public class ArticleAdminController {
     }
 
     @PostMapping("/{id}/unpublish")
-    @ApiOperation(name = "取消发布", type = ApiOperationType.CREATE,
-            description = "取消文章发布，使其变为草稿状态")
+    @ApiOperation(name = "取消发布", type = ApiOperationType.UPDATE,
+            description = "取消文章发布，使其变为私密状态（下线，仅管理员可见）")
     public Result<Void> unpublish(@PathVariable Long id) {
         articleCommandService.unpublish(id);
         return Result.success();

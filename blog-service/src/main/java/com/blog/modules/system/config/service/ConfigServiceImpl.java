@@ -93,7 +93,6 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     @Caching(
-        put = @CachePut(value = "configs", key = "'key:' + #configDTO.configKey"),
         evict = {
             @CacheEvict(value = "configs", allEntries = true),
             @CacheEvict(value = "configs", key = "'list:' + (#configDTO.groupName != null ? #configDTO.groupName : 'all')"),
@@ -140,7 +139,6 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     @Caching(
-        put = @CachePut(value = "configs", key = "'key:' + #key"),
         evict = {
             @CacheEvict(value = "configs", allEntries = true),
             @CacheEvict(value = "siteConfig", key = "'all'")

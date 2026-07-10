@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Row, Col, Card, Spin, List, Avatar, Tag, Space, Typography, DatePicker, Radio, Table } from 'antd'
+import { Row, Col, Card, Spin, List, Avatar, Tag, Space, Typography, DatePicker, Radio, Table, message } from 'antd'
 import {
   FileTextOutlined,
   FolderOpenOutlined,
@@ -84,6 +84,7 @@ const Dashboard: React.FC = () => {
       setTopPages(data.topPages || [])
     } catch (error) {
       console.error('加载统计数据失败', error)
+      message.error('加载统计数据失败，请稍后重试')
     } finally {
       setLoading(false)
     }

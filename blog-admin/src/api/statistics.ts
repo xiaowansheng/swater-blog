@@ -1,5 +1,5 @@
 import request from './request'
-import { ArticleStatistics, VisitorStatistics, DashboardStatistics, TrendData, ChartData, Article, PageResult, Talk, Category, Tag, Comment, StatisticsOverview, DailyTrendData, TopPageItem, TrafficSourceItem, LandingPageItem } from '@/types'
+import { ArticleStatistics, VisitorStatistics, DashboardStatistics, TrendData, Article, PageResult, Talk, Category, Tag, Comment, StatisticsOverview, DailyTrendData, TopPageItem, TrafficSourceItem, LandingPageItem } from '@/types'
 import dayjs from 'dayjs'
 
 export const getArticleStatistics = (): Promise<ArticleStatistics> => {
@@ -38,175 +38,105 @@ export const getDashboardStatistics = async (params?: {
   end?: string
   topPagesOrderBy?: 'pv' | 'uv' | 'sessions'
 }): Promise<DashboardStatistics> => {
-  try {
-    const end = params?.end ? dayjs(params.end) : dayjs().endOf('day')
-    const start = params?.start ? dayjs(params.start) : dayjs().subtract(29, 'day').startOf('day')
-    const startStr = start.format('YYYY-MM-DDTHH:mm:ss')
-    const endStr = end.format('YYYY-MM-DDTHH:mm:ss')
-    const topPagesOrderBy = params?.topPagesOrderBy || 'pv'
-    const dayKeys = generateDaysBetween(startStr, endStr)
+  const end = params?.end ? dayjs(params.end) : dayjs().endOf('day')
+  const start = params?.start ? dayjs(params.start) : dayjs().subtract(29, 'day').startOf('day')
+  const startStr = start.format('YYYY-MM-DDTHH:mm:ss')
+  const endStr = end.format('YYYY-MM-DDTHH:mm:ss')
+  const topPagesOrderBy = params?.topPagesOrderBy || 'pv'
+  const dayKeys = generateDaysBetween(startStr, endStr)
 
-    const [
-      articleStats,
-      categories,
-      tags,
-      articlesResp,
-      talksResp,
-      overview,
-      pvTrendResp,
-      uvTrendResp,
-      sessionsTrendResp,
-      newUvTrendResp,
-      articleReadsTrendResp,
-      talkReadsTrendResp,
-      articleLikesTrendResp,
-      talkLikesTrendResp,
-      articleCommentsTrendResp,
-      talkCommentsTrendResp,
-      topPages,
-    ] = await Promise.all([
-      getArticleStatistics(),
-      getCategoryList(),
-      getTagList(),
-      getArticleList({ page: 1, size: 200 }),
-      getTalkList({ page: 1, size: 200 }),
-      getStatisticsOverview({ start: startStr, end: endStr }),
-      getStatisticsTrendDaily({ metric: 'pv', start: startStr, end: endStr }),
-      getStatisticsTrendDaily({ metric: 'uv', start: startStr, end: endStr }),
-      getStatisticsTrendDaily({ metric: 'sessions', start: startStr, end: endStr }),
-      getStatisticsTrendDaily({ metric: 'newUv', start: startStr, end: endStr }),
-      getStatisticsTrendDaily({ metric: 'articleReads', start: startStr, end: endStr }),
-      getStatisticsTrendDaily({ metric: 'talkReads', start: startStr, end: endStr }),
-      getStatisticsTrendDaily({ metric: 'articleLikes', start: startStr, end: endStr }),
-      getStatisticsTrendDaily({ metric: 'talkLikes', start: startStr, end: endStr }),
-      getStatisticsTrendDaily({ metric: 'articleComments', start: startStr, end: endStr }),
-      getStatisticsTrendDaily({ metric: 'talkComments', start: startStr, end: endStr }),
-      getStatisticsTopPages({ start: startStr, end: endStr, limit: 10, orderBy: topPagesOrderBy }),
-    ])
+  // 用 allSettled 替代 all：单个子请求失败不应导致整个仪表盘返回全 0 假数据，
+  // 而是让成功的数据正常展示、失败的数据降级为空。
+  const [
+    articleStatsR, categoriesR, tagsR, articlesRespR, talksRespR, overviewR,
+    pvTrendR, uvTrendR, sessionsTrendR, newUvTrendR,
+    articleReadsTrendR, talkReadsTrendR, articleLikesTrendR, talkLikesTrendR,
+    articleCommentsTrendR, talkCommentsTrendR, topPagesR,
+  ] = await Promise.allSettled([
+    getArticleStatistics(),
+    getCategoryList(),
+    getTagList(),
+    // 仅拉取最近 5 篇用于"最近文章"卡片，不再拉 200 篇到前端排序（后端暂无 Top 文章聚合接口）
+    getArticleList({ page: 1, size: 5 }),
+    getTalkList({ page: 1, size: 1 }),
+    getStatisticsOverview({ start: startStr, end: endStr }),
+    getStatisticsTrendDaily({ metric: 'pv', start: startStr, end: endStr }),
+    getStatisticsTrendDaily({ metric: 'uv', start: startStr, end: endStr }),
+    getStatisticsTrendDaily({ metric: 'sessions', start: startStr, end: endStr }),
+    getStatisticsTrendDaily({ metric: 'newUv', start: startStr, end: endStr }),
+    getStatisticsTrendDaily({ metric: 'articleReads', start: startStr, end: endStr }),
+    getStatisticsTrendDaily({ metric: 'talkReads', start: startStr, end: endStr }),
+    getStatisticsTrendDaily({ metric: 'articleLikes', start: startStr, end: endStr }),
+    getStatisticsTrendDaily({ metric: 'talkLikes', start: startStr, end: endStr }),
+    getStatisticsTrendDaily({ metric: 'articleComments', start: startStr, end: endStr }),
+    getStatisticsTrendDaily({ metric: 'talkComments', start: startStr, end: endStr }),
+    getStatisticsTopPages({ start: startStr, end: endStr, limit: 10, orderBy: topPagesOrderBy }),
+  ])
 
-    const articles = articlesResp.records || []
-    const talks = talksResp.records || []
+  const articleStats = fulfilled(articleStatsR, {} as ArticleStatistics)
+  const categories = fulfilled(categoriesR, [])
+  const tags = fulfilled(tagsR, [])
+  const articlesResp = fulfilled(articlesRespR, {} as PageResult<Article>)
+  const talksResp = fulfilled(talksRespR, {} as PageResult<Talk>)
+  const overview = fulfilled(overviewR, {
+    uv: 0, newUv: 0, sessions: 0, pv: 0, pagesPerSession: 0,
+    articleReads: 0, talkReads: 0, totalReads: 0,
+    articleLikes: 0, talkLikes: 0, totalLikes: 0,
+    articleComments: 0, talkComments: 0, totalComments: 0,
+  })
 
-    const topViewedArticles: ChartData[] = [...articles]
-      .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
-      .slice(0, 10)
-      .map((a) => ({ name: a.title, value: a.viewCount || 0 }))
+  const articles = articlesResp.records || []
 
-    const topLikedArticles: ChartData[] = [...articles]
-      .sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0))
-      .slice(0, 10)
-      .map((a) => ({ name: a.title, value: a.likeCount || 0 }))
+  const pointsOf = (r: PromiseSettledResult<DailyTrendData>) => (r.status === 'fulfilled' ? r.value.points : []) || []
+  const pvTrend = fillTrend(pointsOf(pvTrendR), dayKeys)
+  const uvTrend = fillTrend(pointsOf(uvTrendR), dayKeys)
+  const sessionsTrend = fillTrend(pointsOf(sessionsTrendR), dayKeys)
+  const newUvTrend = fillTrend(pointsOf(newUvTrendR), dayKeys)
 
-    const recentMonthArticleTrend = buildMonthlyTrend(articles.map((a) => a.publishedAt || a.createTime))
-    const recentMonthTalkTrend = buildMonthlyTrend(talks.map((t) => t.createTime))
+  const articleReadsTrend = fillTrend(pointsOf(articleReadsTrendR), dayKeys)
+  const talkReadsTrend = fillTrend(pointsOf(talkReadsTrendR), dayKeys)
+  const articleLikesTrend = fillTrend(pointsOf(articleLikesTrendR), dayKeys)
+  const talkLikesTrend = fillTrend(pointsOf(talkLikesTrendR), dayKeys)
+  const articleCommentsTrend = fillTrend(pointsOf(articleCommentsTrendR), dayKeys)
+  const talkCommentsTrend = fillTrend(pointsOf(talkCommentsTrendR), dayKeys)
 
-    const pvTrend = fillTrend(pvTrendResp.points || [], dayKeys)
-    const uvTrend = fillTrend(uvTrendResp.points || [], dayKeys)
-    const sessionsTrend = fillTrend(sessionsTrendResp.points || [], dayKeys)
-    const newUvTrend = fillTrend(newUvTrendResp.points || [], dayKeys)
+  const totalReadsTrend = mergeTrendSum(articleReadsTrend, talkReadsTrend)
+  const totalLikesTrend = mergeTrendSum(articleLikesTrend, talkLikesTrend)
+  const totalCommentsTrend = mergeTrendSum(articleCommentsTrend, talkCommentsTrend)
 
-    const articleReadsTrend = fillTrend(articleReadsTrendResp.points || [], dayKeys)
-    const talkReadsTrend = fillTrend(talkReadsTrendResp.points || [], dayKeys)
-    const articleLikesTrend = fillTrend(articleLikesTrendResp.points || [], dayKeys)
-    const talkLikesTrend = fillTrend(talkLikesTrendResp.points || [], dayKeys)
-    const articleCommentsTrend = fillTrend(articleCommentsTrendResp.points || [], dayKeys)
-    const talkCommentsTrend = fillTrend(talkCommentsTrendResp.points || [], dayKeys)
-
-    const totalReadsTrend = mergeTrendSum(articleReadsTrend, talkReadsTrend)
-    const totalLikesTrend = mergeTrendSum(articleLikesTrend, talkLikesTrend)
-    const totalCommentsTrend = mergeTrendSum(articleCommentsTrend, talkCommentsTrend)
-
-    return {
-      articleCount: articleStats.totalCount,
-      categoryCount: categories.length,
-      tagCount: tags.length,
-      talkCount: talksResp.total || talks.length,
-      articleTrend: recentMonthArticleTrend,
-      talkTrend: recentMonthTalkTrend,
-      overview,
-      pvTrend,
-      uvTrend,
-      sessionsTrend,
-      newUvTrend,
-      totalReadsTrend,
-      totalLikesTrend,
-      totalCommentsTrend,
-      topPages: topPages || [],
-      topViewedArticles,
-      topLikedArticles,
-      categoryDistribution: [],
-      tagStatistics: [],
-      recentArticles: articles.slice(0, 5),
-      recentComments: [],
-    }
-  } catch (error) {
-    console.error('获取仪表盘数据失败', error)
-    return {
-      articleCount: 0,
-      categoryCount: 0,
-      tagCount: 0,
-      talkCount: 0,
-      articleTrend: [],
-      talkTrend: [],
-      overview: {
-        uv: 0,
-        newUv: 0,
-        sessions: 0,
-        pv: 0,
-        pagesPerSession: 0,
-        articleReads: 0,
-        talkReads: 0,
-        totalReads: 0,
-        articleLikes: 0,
-        talkLikes: 0,
-        totalLikes: 0,
-        articleComments: 0,
-        talkComments: 0,
-        totalComments: 0,
-      },
-      pvTrend: [],
-      uvTrend: [],
-      sessionsTrend: [],
-      newUvTrend: [],
-      totalReadsTrend: [],
-      totalLikesTrend: [],
-      totalCommentsTrend: [],
-      topPages: [],
-      topViewedArticles: [],
-      topLikedArticles: [],
-      categoryDistribution: [],
-      tagStatistics: [],
-      recentArticles: [],
-      recentComments: [],
-    }
+  return {
+    articleCount: articleStats.totalCount,
+    categoryCount: categories.length,
+    tagCount: tags.length,
+    talkCount: talksResp.total || (talksResp.records?.length ?? 0),
+    articleTrend: [],
+    talkTrend: [],
+    overview,
+    pvTrend,
+    uvTrend,
+    sessionsTrend,
+    newUvTrend,
+    totalReadsTrend,
+    totalLikesTrend,
+    totalCommentsTrend,
+    topPages: fulfilled(topPagesR, []),
+    // Top 文章按浏览/点赞排序需要后端聚合接口，暂返回空避免拉全量文章到前端
+    topViewedArticles: [],
+    topLikedArticles: [],
+    categoryDistribution: [],
+    tagStatistics: [],
+    recentArticles: articles.slice(0, 5),
+    recentComments: [],
   }
 }
 
-function buildMonthlyTrend(dates: (string | undefined)[]): TrendData[] {
-  const dayKeys = generateLastNDays(30)
-  const buckets: Record<string, number> = {}
-  dates
-    .filter(Boolean)
-    .map((d) => new Date(d as string))
-    .forEach((date) => {
-      const key = date.toISOString().split('T')[0]
-      if (dayKeys.includes(key)) {
-        buckets[key] = (buckets[key] || 0) + 1
-      }
-    })
-  return dayKeys.map((date) => ({ date, value: buckets[date] || 0 }))
-}
-
-function generateLastNDays(days: number): string[] {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const result: string[] = []
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(today)
-    d.setDate(today.getDate() - i)
-    result.push(d.toISOString().split('T')[0])
-  }
-  return result
+/**
+ * 从 Promise.allSettled 的 settled 结果中安全取值：fulfilled 返回真实值，rejected 返回 fallback 并记录错误。
+ */
+function fulfilled<T>(result: PromiseSettledResult<T>, fallback: T): T {
+  if (result.status === 'fulfilled') return result.value
+  console.error('仪表盘子请求失败', (result as PromiseRejectedResult).reason)
+  return fallback
 }
 
 function generateDaysBetween(start: string, end: string): string[] {

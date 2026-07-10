@@ -13,5 +13,10 @@
         WHERE album_id = #{albumId}
         AND deleted = 0
     </select>
+
+    <delete id="deleteByAlbumId">
+        DELETE FROM picture
+        WHERE album_id = #{albumId}
+    </delete>
 </mapper>
 

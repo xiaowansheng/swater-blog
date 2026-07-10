@@ -46,6 +46,8 @@ public class ArchivePublicServiceImpl implements ArchivePublicService {
         Page<Article> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<Article> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode());
+        // 排除加密文章，避免加密文章的正文/摘要暴露在归档列表
+        wrapper.and(w -> w.isNull(Article::getPassword).or().eq(Article::getPassword, ""));
         // 归档查询只按创建时间倒序，不考虑置顶
         wrapper.orderByDesc(Article::getCreateTime);
 

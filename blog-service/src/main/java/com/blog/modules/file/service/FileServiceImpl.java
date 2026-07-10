@@ -149,22 +149,48 @@ public class FileServiceImpl implements FileService {
     @Transactional
     public FileVO uploadByUrl(String url, FileUploadDTO dto) {
         if (!StringUtils.hasText(url)) {
-            throw new BusinessException("URL????????????");
+            throw new BusinessException("URL 不能为空");
+        }
+
+        // SSRF 防护：校验 scheme 白名单 + 解析所有 IP 拒绝内网/环回/链路本地等地址（防 DNS rebinding）
+        if (!com.blog.shared.util.UrlSafetyUtil.isUrlAllowed(url)) {
+            throw new BusinessException("目标地址不安全，禁止抓取（仅允许公网 http/https 地址）");
         }
 
         try {
             URL parsedUrl = new URL(url);
-            String protocol = parsedUrl.getProtocol();
-            if (!"http".equalsIgnoreCase(protocol) && !"https".equalsIgnoreCase(protocol)) {
-                throw new BusinessException("?????????HTTP/HTTPS URL");
+
+            // 预检允许的最大体积，用于在下载前拒绝超大文件，避免 OOM
+            long maxSizeBytes = resolveMaxSizeBytes();
+
+            // 关闭自动重定向：防止 302 跳转到内网地址绕过上面的 SSRF 校验
+            HttpResponse response = HttpRequest.get(url)
+                    .timeout(10000)
+                    .setFollowRedirects(false)
+                    .execute();
+            if (response.getStatus() >= 300) {
+                // 3xx 重定向一律拒绝（SSRF 防护）；4xx/5xx 为请求失败
+                throw new BusinessException("抓取目标地址失败，HTTP 状态码: " + response.getStatus());
             }
 
-            HttpResponse response = HttpRequest.get(url).timeout(10000).execute();
-            if (response.getStatus() >= 400) {
-                throw new BusinessException("??????????????????: " + response.getStatus());
+            // Content-Length 预检：响应头声明的大小超限则直接拒绝，避免 bodyBytes() 撑爆内存
+            String contentLengthHeader = response.header("Content-Length");
+            if (contentLengthHeader != null) {
+                try {
+                    long declaredLength = Long.parseLong(contentLengthHeader.trim());
+                    if (declaredLength > maxSizeBytes) {
+                        throw new BusinessException("远程文件大小超出限制，最大允许: " + formatSize(maxSizeBytes));
+                    }
+                } catch (NumberFormatException ignored) {
+                    // Content-Length 非法时交给下面的实际大小校验兜底
+                }
             }
 
             byte[] bytes = response.bodyBytes();
+            // 实际大小兜底校验：即使 Content-Length 缺失或伪造，下载后仍拒绝超限文件
+            if (bytes != null && bytes.length > maxSizeBytes) {
+                throw new BusinessException("远程文件大小超出限制，最大允许: " + formatSize(maxSizeBytes));
+            }
             String contentType = response.header("Content-Type");
             String fileName = buildFileName(parsedUrl, contentType);
 
@@ -173,8 +199,20 @@ public class FileServiceImpl implements FileService {
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            throw new BusinessException("??????????????????: " + e.getMessage());
+            throw new BusinessException("通过 URL 抓取文件失败: " + e.getMessage());
         }
+    }
+
+    /**
+     * 解析生效的最大文件大小（字节）：优先数据库 UploadConfig，降级到 properties。
+     * 与 {@link #upload} 中的校验逻辑保持一致。
+     */
+    private long resolveMaxSizeBytes() {
+        var uploadConfig = siteConfigService.getUploadConfig();
+        if (uploadConfig != null && uploadConfig.getMaxSize() != null) {
+            return uploadConfig.getMaxSize();
+        }
+        return parseSize(fileUploadProperties.getMaxSize());
     }
 
     @Override

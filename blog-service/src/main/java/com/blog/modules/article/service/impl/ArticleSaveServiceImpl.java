@@ -37,10 +37,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
+import com.blog.infrastructure.lock.RedisDistributedLock;
 /**
  * 文章保存服务实现
  */
@@ -71,10 +69,13 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
+    @Autowired
+    private RedisDistributedLock distributedLock;
+
     /**
-     * 文章保存锁，防止同一文章并发保存
+     * 文章保存分布式锁租约时长：覆盖一次保存操作的预期最长耗时（含自动保存）。
      */
-    private final ConcurrentHashMap<Long, LockHolder> articleLocks = new ConcurrentHashMap<>();
+    private static final java.time.Duration ARTICLE_SAVE_LOCK_LEASE = java.time.Duration.ofSeconds(30);
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -143,7 +144,8 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
         
         if (article.getStatus().equals(ArticleStatus.PUBLISHED.getCode())) {
             article.setPublishedAt(LocalDateTime.now());
-        } else if (article.getStatus().equals(ArticleStatus.SCHEDULED.getCode()) && dto.getScheduledPublishAt() != null) {
+        } else if (article.getStatus().equals(ArticleStatus.SCHEDULED.getCode())) {
+            validateScheduledPublishAt(dto.getScheduledPublishAt());
             article.setPublishedAt(dto.getScheduledPublishAt());
         }
 
@@ -187,16 +189,29 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
     }
 
     /**
+     * 校验定时发布时间：状态为 SCHEDULED 时，scheduledPublishAt 必须非空且在当前时刻之后。
+     */
+    private static void validateScheduledPublishAt(LocalDateTime scheduledPublishAt) {
+        if (scheduledPublishAt == null) {
+            throw new BusinessException("定时发布文章必须指定发布时间");
+        }
+        if (!scheduledPublishAt.isAfter(LocalDateTime.now())) {
+            throw new BusinessException("定时发布时间必须晚于当前时间");
+        }
+    }
+
+    /**
      * 更新文章
      */
     private ArticleSaveResultVO updateArticle(ArticleSaveDTO dto) {
         Long articleId = dto.getId();
-        
-        // 获取文章锁，防止并发更新
-        LockHolder lockHolder = acquireArticleLock(articleId);
-        ReentrantLock lock = lockHolder.lock;
-        
-        lock.lock();
+
+        // 获取分布式锁，防止同一文章跨实例并发更新（单机 ReentrantLock 在多实例下失效）
+        String lockKey = "blog:article:save:" + articleId;
+        String lockToken = distributedLock.tryLock(lockKey, ARTICLE_SAVE_LOCK_LEASE);
+        if (lockToken == null) {
+            throw new BusinessException("文章正在被其他会话编辑，请稍后重试");
+        }
         try {
             Article article = articleMapper.selectById(articleId);
             if (article == null) {
@@ -247,7 +262,8 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
                 article.setStatus(dto.getStatus());
                 if (dto.getStatus().equals(ArticleStatus.PUBLISHED.getCode()) && article.getPublishedAt() == null) {
                     article.setPublishedAt(LocalDateTime.now());
-                } else if (dto.getStatus().equals(ArticleStatus.SCHEDULED.getCode()) && dto.getScheduledPublishAt() != null) {
+                } else if (dto.getStatus().equals(ArticleStatus.SCHEDULED.getCode())) {
+                    validateScheduledPublishAt(dto.getScheduledPublishAt());
                     article.setPublishedAt(dto.getScheduledPublishAt());
                 }
             }
@@ -312,8 +328,7 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
                     .build();
                     
         } finally {
-            lock.unlock();
-            releaseArticleLock(articleId, lockHolder);
+            distributedLock.unlock(lockKey, lockToken);
         }
     }
 
@@ -331,26 +346,6 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
         if (article.getAuthorId() == null || !currentUserId.equals(article.getAuthorId())) {
             throw new BusinessException("无权修改他人文章");
         }
-    }
-
-    private LockHolder acquireArticleLock(Long articleId) {
-        return articleLocks.compute(articleId, (k, existing) -> {
-            LockHolder holder = existing != null ? existing : new LockHolder();
-            holder.refCount.incrementAndGet();
-            return holder;
-        });
-    }
-
-    private void releaseArticleLock(Long articleId, LockHolder lockHolder) {
-        int remaining = lockHolder.refCount.decrementAndGet();
-        if (remaining == 0) {
-            articleLocks.remove(articleId, lockHolder);
-        }
-    }
-
-    private static final class LockHolder {
-        private final ReentrantLock lock = new ReentrantLock();
-        private final AtomicInteger refCount = new AtomicInteger(0);
     }
 
     @Override

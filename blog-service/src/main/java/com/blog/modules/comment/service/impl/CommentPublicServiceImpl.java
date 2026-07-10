@@ -287,6 +287,16 @@ public class CommentPublicServiceImpl implements CommentPublicService {
     private CommentVO createAndPersist(CommentDTO dto, String ownerEmailForView, CommentConfigDTO commentConfig) {
         Comment comment = BeanUtil.copyProperties(dto, Comment.class);
 
+        // 安全：清空客户端可能伪造的地理/UA 字段，这些字段只能由服务端（CommentGeoEnrichmentListener 异步、
+        // 或 create 方法里覆盖 ip/device/browser）填充。DTO 暴露了这些字段但 copyProperties 会原样带入客户端值。
+        comment.setCountry(null);
+        comment.setProvince(null);
+        comment.setCity(null);
+        comment.setLatitude(null);
+        comment.setLongitude(null);
+        comment.setLocation(null);
+        comment.setIpLocation(null);
+
         if (StpUtil.isLogin()) {
             Long userId = StpUtil.getLoginIdAsLong();
             comment.setUserId(userId);

@@ -81,6 +81,9 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
             }
             if (article.getStatus().equals(ArticleStatus.PUBLISHED.getCode())) {
                 article.setPublishedAt(LocalDateTime.now());
+            } else if (article.getStatus().equals(ArticleStatus.SCHEDULED.getCode())) {
+                validateScheduledPublishAt(dto.getScheduledPublishAt());
+                article.setPublishedAt(dto.getScheduledPublishAt());
             }
             // 密码哈希存储：明文不落库（已在 PasswordUtil 内部对空值校验）
             if (StringUtils.hasText(dto.getPassword())) {
@@ -162,7 +165,8 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         
         if (dto.getStatus() != null && dto.getStatus().equals(ArticleStatus.PUBLISHED.getCode()) && article.getPublishedAt() == null) {
             article.setPublishedAt(LocalDateTime.now());
-        } else if (dto.getStatus() != null && dto.getStatus().equals(ArticleStatus.SCHEDULED.getCode()) && dto.getScheduledPublishAt() != null) {
+        } else if (dto.getStatus() != null && dto.getStatus().equals(ArticleStatus.SCHEDULED.getCode())) {
+            validateScheduledPublishAt(dto.getScheduledPublishAt());
             article.setPublishedAt(dto.getScheduledPublishAt());
         }
         
@@ -313,6 +317,20 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         }
 
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUpdatedEvent(this, article.getId(), article)));
+    }
+
+    /**
+     * 校验定时发布时间：状态为 SCHEDULED 时，scheduledPublishAt 必须非空且在当前时刻之后。
+     * 否则 ScheduledPublishTask（每 60s 扫描 publishedAt <= now）会立即发布，与"定时"语义相悖；
+     * 或当 scheduledPublishAt 为 null 时文章会处于"永不发布"的死状态。
+     */
+    private static void validateScheduledPublishAt(LocalDateTime scheduledPublishAt) {
+        if (scheduledPublishAt == null) {
+            throw new BusinessException("定时发布文章必须指定发布时间");
+        }
+        if (!scheduledPublishAt.isAfter(LocalDateTime.now())) {
+            throw new BusinessException("定时发布时间必须晚于当前时间");
+        }
     }
 
     private void saveArticleTags(Long articleId, List<Long> tagIds) {

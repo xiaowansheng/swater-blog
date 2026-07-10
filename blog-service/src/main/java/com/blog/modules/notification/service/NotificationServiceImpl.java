@@ -64,42 +64,46 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public PageResult<NotificationVO> list(Long userId, Long page, Long size, Integer isRead) {
+    public PageResult<NotificationVO> list(Long userId, boolean isAdmin, Long currentUserId, Long page, Long size, Integer isRead) {
         Page<SysNotification> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<SysNotification> wrapper = new LambdaQueryWrapper<>();
 
-        if (userId != null) {
-            wrapper.eq(SysNotification::getUserId, userId);
+        // 非 admin 强制只能查询自己的通知，忽略客户端传入的 userId，防止越权翻看他人通知
+        Long resolvedUserId = isAdmin ? userId : currentUserId;
+        if (resolvedUserId != null) {
+            wrapper.eq(SysNotification::getUserId, resolvedUserId);
         }
         if (isRead != null) {
             wrapper.eq(SysNotification::getIsRead, isRead);
         }
         wrapper.orderByDesc(SysNotification::getCreateTime);
-        
+
         Page<SysNotification> result = sysNotificationMapper.selectPage(pageParam, wrapper);
         List<NotificationVO> voList = result.getRecords().stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
-        
+
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
     }
 
     @Override
-    public NotificationVO getById(Long id) {
+    public NotificationVO getById(Long id, Long currentUserId, boolean isAdmin) {
         SysNotification notification = sysNotificationMapper.selectById(id);
         if (notification == null) {
             return null;
         }
+        checkOwnership(notification, currentUserId, isAdmin);
         return convertToVO(notification);
     }
 
     @Override
     @Transactional
-    public void markAsRead(Long id) {
+    public void markAsRead(Long id, Long currentUserId, boolean isAdmin) {
         SysNotification notification = sysNotificationMapper.selectById(id);
         if (notification == null) {
             return;
         }
+        checkOwnership(notification, currentUserId, isAdmin);
         notification.setIsRead(ReadStatus.READ.getCode());
         sysNotificationMapper.updateById(notification);
     }
@@ -116,11 +120,12 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public void delete(Long id) {
+    public void delete(Long id, Long currentUserId, boolean isAdmin) {
         SysNotification notification = sysNotificationMapper.selectById(id);
         if (notification == null) {
             return;
         }
+        checkOwnership(notification, currentUserId, isAdmin);
         sysNotificationMapper.deleteById(id);
     }
 
@@ -187,11 +192,12 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public void retryNotification(Long id) {
+    public void retryNotification(Long id, Long currentUserId, boolean isAdmin) {
         SysNotification notification = sysNotificationMapper.selectById(id);
         if (notification == null) {
             return;
         }
+        checkOwnership(notification, currentUserId, isAdmin);
         if (NotificationSendStatus.SENT.matches(notification.getStatus())) {
             return;
         }
@@ -205,7 +211,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public void retryNotifications(List<Long> ids) {
+    public void retryNotifications(List<Long> ids, Long currentUserId, boolean isAdmin) {
         if (ids == null || ids.isEmpty()) {
             return;
         }
@@ -221,6 +227,11 @@ public class NotificationServiceImpl implements NotificationService {
         List<SysNotification> notifications = sysNotificationMapper.selectBatchIds(validIds);
         for (SysNotification notification : notifications) {
             if (notification == null || NotificationSendStatus.SENT.matches(notification.getStatus())) {
+                continue;
+            }
+            // 非 admin 仅能重试自己的通知，越权条目跳过并记录日志
+            if (!isAdmin && (notification.getUserId() == null || !notification.getUserId().equals(currentUserId))) {
+                log.warn("用户 {} 无权重试他人通知 notificationId: {}, 跳过", currentUserId, notification.getId());
                 continue;
             }
             EventUtil.publishEventAfterCommit(() -> {
@@ -317,6 +328,19 @@ public class NotificationServiceImpl implements NotificationService {
             return true;
         }
         return sendCount < maxRetryCount;
+    }
+
+    /**
+     * 校验当前用户对通知的所有权。admin 放行；非 admin 必须是通知的归属人，否则抛 403。
+     * 用于修复通知模块的水平越权（IDOR）缺陷。
+     */
+    private void checkOwnership(SysNotification notification, Long currentUserId, boolean isAdmin) {
+        if (isAdmin) {
+            return;
+        }
+        if (notification.getUserId() == null || !notification.getUserId().equals(currentUserId)) {
+            throw new com.blog.shared.exception.BusinessException(403, "无权操作该通知");
+        }
     }
 
     private NotificationVO convertToVO(SysNotification notification) {

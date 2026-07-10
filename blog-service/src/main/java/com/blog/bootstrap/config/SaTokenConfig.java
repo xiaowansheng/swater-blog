@@ -92,8 +92,9 @@ public class SaTokenConfig implements WebMvcConfigurer {
                 .addPathPatterns(
                         "/api/admin/**",
                         "/api/auth/current",
-                        "/api/auth/userinfo",
-                        "/api/auth/refresh"
+                        "/api/auth/user-info",
+                        "/api/auth/refresh",
+                        "/api/auth/refresh-token"
                 )
                 .order(1); // 设置拦截器顺序，先执行
 

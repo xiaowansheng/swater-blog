@@ -16,9 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -44,7 +41,7 @@ public class WebhookService {
 
     @Async("eventTaskExecutor")
     public void send(String url, String secret, String event, Map<String, Object> payload) {
-        if (!isUrlAllowed(url)) {
+        if (!com.blog.shared.util.UrlSafetyUtil.isUrlAllowed(url, com.blog.shared.util.UrlSafetyUtil.parseSchemes(allowedSchemes))) {
             log.error("Webhook URL not allowed (scheme or host rejected): url={}", url);
             return;
         }
@@ -90,55 +87,6 @@ public class WebhookService {
             }
         }
         log.error("Webhook 最终失败: url={}, event={}", url, event);
-    }
-
-    /**
-     * SSRF 防护：校验 scheme 白名单，并拒绝解析到内网/环回/链路本地地址的目标主机。
-     * DNS 解析后逐一比对所有返回的 IP，防止 DNS rebinding 到内网。
-     */
-    private boolean isUrlAllowed(String url) {
-        URI uri;
-        try {
-            uri = URI.create(url);
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-        String scheme = uri.getScheme();
-        if (scheme == null) return false;
-        Set<String> allowed = Stream.of(allowedSchemes.split(","))
-                .map(String::trim)
-                .map(String::toLowerCase)
-                .collect(Collectors.toSet());
-        if (!allowed.contains(scheme.toLowerCase())) {
-            return false;
-        }
-
-        String host = uri.getHost();
-        if (host == null || host.isEmpty()) {
-            return false;
-        }
-
-        // 解析所有 IP 并逐一校验，任一落在内网段即拒绝
-        java.net.InetAddress[] addresses;
-        try {
-            addresses = java.net.InetAddress.getAllByName(host);
-        } catch (java.net.UnknownHostException e) {
-            return false;
-        }
-        for (java.net.InetAddress addr : addresses) {
-            if (isInternalAddress(addr)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean isInternalAddress(java.net.InetAddress addr) {
-        return addr.isAnyLocalAddress()      // 0.0.0.0
-                || addr.isLoopbackAddress()  // 127.0.0.0/8, ::1
-                || addr.isLinkLocalAddress() // 169.254.0.0/16, fe80::/10（含云元数据接口）
-                || addr.isSiteLocalAddress() // 10/8, 172.16/12, 192.168/16
-                || addr.isMulticastAddress();
     }
 
     private String buildBody(String event, Map<String, Object> payload) throws Exception {

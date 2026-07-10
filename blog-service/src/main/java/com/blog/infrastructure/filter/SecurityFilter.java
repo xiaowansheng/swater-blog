@@ -2,7 +2,6 @@ package com.blog.infrastructure.filter;
 
 
 
-import com.blog.infrastructure.security.SqlInjectionProtector;
 import com.blog.shared.util.IpUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -27,9 +26,6 @@ public class SecurityFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityFilter.class);
     
-    @Autowired
-    private SqlInjectionProtector sqlInjectionProtector;
-
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -158,15 +154,11 @@ public class SecurityFilter implements Filter {
                         return false;
                     }
                 } else {
-                    // 对于自定义请求头，进行完整的安全检查
-                    if (sqlInjectionProtector.containsSqlInjection(headerValue)) {
-                        logger.warn("检测到请求头SQL注入攻击, Header: {}, Value: {}, IP: {}", 
-                            headerName, headerValue, IpUtil.getClientIp(request));
-                        return false;
-                    }
-                    
-                    if (sqlInjectionProtector.containsXss(headerValue)) {
-                        logger.warn("检测到请求头XSS攻击, Header: {}, Value: {}, IP: {}", 
+                    // 对于自定义请求头，使用明显 payload 黑名单检查
+                    // 注：不再使用 SqlInjectionProtector 的单词级正则黑名单，它会误杀含 "update"/"delete" 等普通单词的合法输入，
+                    // 且只能检查 query/form 参数无法覆盖 JSON body；DAO 全部为参数化查询，本无 SQL 注入面。
+                    if (containsObviousMaliciousContent(headerValue)) {
+                        logger.warn("检测到请求头恶意内容, Header: {}, Value: {}, IP: {}",
                             headerName, headerValue, IpUtil.getClientIp(request));
                         return false;
                     }
@@ -236,36 +228,25 @@ public class SecurityFilter implements Filter {
      */
     private boolean validateParameters(HttpServletRequest request) {
         // 检查URL参数
+        // 注：仅校验 query/form 参数（Servlet 参数 API 无法解析 JSON body）。
+        // 不再使用 SqlInjectionProtector 的单词级正则黑名单——它会误杀含 "update"/"delete"/"system" 等普通单词的
+        // 合法文章标题/评论内容，且真实注入面已被 MyBatis-Plus 参数化查询覆盖。此处仅保留明显 payload 黑名单兜底。
         Enumeration<String> paramNames = request.getParameterNames();
         while (paramNames.hasMoreElements()) {
             String paramName = paramNames.nextElement();
             String[] paramValues = request.getParameterValues(paramName);
-            
+
             if (paramValues != null) {
                 for (String paramValue : paramValues) {
-                    // 对于搜索关键字，放宽 SQL 注入的纯单词过滤，防止误杀 legimate 技术名词
-                    if ("keyword".equals(paramName)) {
-                        // 仅检查 XSS 和明显的危险 SQL Payload（如 union select 等），跳过普通单字匹配
-                        if (sqlInjectionProtector.containsXss(paramValue) || containsObviousMaliciousContent(paramValue)) {
-                            logger.warn("检测到搜索参数安全攻击, Param: {}, Value: {}, IP: {}", 
-                                paramName, paramValue, IpUtil.getClientIp(request));
-                            return false;
-                        }
-                        continue;
-                    }
-
-                    SqlInjectionProtector.ValidationResult result = 
-                        sqlInjectionProtector.validateParameter(paramName, paramValue);
-                    
-                    if (!result.isValid()) {
-                        logger.warn("检测到参数安全攻击, Param: {}, Value: {}, IP: {}, Message: {}", 
-                            paramName, paramValue, IpUtil.getClientIp(request), result.getMessage());
+                    if (containsObviousMaliciousContent(paramValue)) {
+                        logger.warn("检测到参数恶意内容, Param: {}, Value: {}, IP: {}",
+                            paramName, paramValue, IpUtil.getClientIp(request));
                         return false;
                     }
                 }
             }
         }
-        
+
         return true;
     }
     

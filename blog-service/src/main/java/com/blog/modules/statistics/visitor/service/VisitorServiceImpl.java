@@ -80,7 +80,7 @@ public class VisitorServiceImpl implements VisitorService {
         VisitorStatisticsVO statistics = new VisitorStatisticsVO();
         LocalDateTime start = startDate != null ? startDate : LocalDateTime.of(1970, 1, 1, 0, 0);
         LocalDateTime end = endDate != null ? endDate : LocalDateTime.now();
-        
+
         LambdaQueryWrapper<Visitor> visitorWrapper = new LambdaQueryWrapper<>();
         if (startDate != null) {
             visitorWrapper.ge(Visitor::getFirstVisitTime, startDate);
@@ -92,48 +92,65 @@ public class VisitorServiceImpl implements VisitorService {
 
         statistics.setTotalPageViews(zeroIfNull(trackStatisticsMapper.countPv(start, end)));
         statistics.setUniqueVisitors(zeroIfNull(trackStatisticsMapper.countUv(start, end)));
-        
-        List<Visitor> visitors = visitorMapper.selectList(visitorWrapper);
-        Map<String, Long> byDate = new HashMap<>();
-        Map<String, Long> byCountry = new HashMap<>();
-        Map<String, Long> byCity = new HashMap<>();
-        Map<String, Long> byDevice = new HashMap<>();
-        Map<String, Long> byBrowser = new HashMap<>();
-        Map<String, Long> byOs = new HashMap<>();
-        
-        if (visitors != null && !visitors.isEmpty()) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            for (Visitor visitor : visitors) {
-                if (visitor.getFirstVisitTime() != null) {
-                    String date = visitor.getFirstVisitTime().format(formatter);
-                    byDate.put(date, byDate.getOrDefault(date, 0L) + 1);
-                }
-                if (visitor.getCountry() != null) {
-                    byCountry.put(visitor.getCountry(), byCountry.getOrDefault(visitor.getCountry(), 0L) + 1);
-                }
-                if (visitor.getCity() != null) {
-                    byCity.put(visitor.getCity(), byCity.getOrDefault(visitor.getCity(), 0L) + 1);
-                }
-                if (visitor.getDeviceType() != null) {
-                    byDevice.put(visitor.getDeviceType(), byDevice.getOrDefault(visitor.getDeviceType(), 0L) + 1);
-                }
-                if (visitor.getBrowserName() != null) {
-                    byBrowser.put(visitor.getBrowserName(), byBrowser.getOrDefault(visitor.getBrowserName(), 0L) + 1);
-                }
-                if (visitor.getOsName() != null) {
-                    byOs.put(visitor.getOsName(), byOs.getOrDefault(visitor.getOsName(), 0L) + 1);
-                }
-            }
-        }
-        
-        statistics.setVisitorsByDate(byDate);
-        statistics.setVisitorsByCountry(byCountry);
-        statistics.setVisitorsByCity(byCity);
-        statistics.setVisitorsByDevice(byDevice);
-        statistics.setVisitorsByBrowser(byBrowser);
-        statistics.setVisitorsByOs(byOs);
-        
+
+        // 各维度聚合下推到 SQL GROUP BY，避免把全表 visitor 拉进内存（大数据量会 OOM）。
+        // byDate 的 dim 来自 DATE(first_visit_time)，格式化为 yyyy-MM-dd 以兼容前端图表。
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        statistics.setVisitorsByDate(toMap(visitorMapper.countByDate(startDate, endDate), dim -> formatDateDim(dim, formatter)));
+        statistics.setVisitorsByCountry(toMap(visitorMapper.countByCountry(startDate, endDate), dim -> stringDim(dim)));
+        statistics.setVisitorsByCity(toMap(visitorMapper.countByCity(startDate, endDate), dim -> stringDim(dim)));
+        statistics.setVisitorsByDevice(toMap(visitorMapper.countByDeviceType(startDate, endDate), dim -> stringDim(dim)));
+        statistics.setVisitorsByBrowser(toMap(visitorMapper.countByBrowserName(startDate, endDate), dim -> stringDim(dim)));
+        statistics.setVisitorsByOs(toMap(visitorMapper.countByOsName(startDate, endDate), dim -> stringDim(dim)));
+
         return statistics;
+    }
+
+    /**
+     * 将 GROUP BY 聚合结果（dim/cnt 两列）组装成 维度值→计数 的 Map。
+     */
+    private Map<String, Long> toMap(List<Map<String, Object>> rows, java.util.function.Function<Object, String> keyFn) {
+        Map<String, Long> result = new HashMap<>();
+        if (rows == null || rows.isEmpty()) {
+            return result;
+        }
+        for (Map<String, Object> row : rows) {
+            Object dim = row.get("dim");
+            Object cnt = row.get("cnt");
+            if (dim == null) {
+                continue;
+            }
+            String key = keyFn.apply(dim);
+            if (key == null || key.isEmpty()) {
+                continue;
+            }
+            long count = cnt instanceof Number ? ((Number) cnt).longValue() : 0L;
+            result.merge(key, count, Long::sum);
+        }
+        return result;
+    }
+
+    /**
+     * 日期维度归一化：DATE() 可能返回 java.sql.Date / LocalDate / String，统一格式化为 yyyy-MM-dd。
+     */
+    private String formatDateDim(Object dim, DateTimeFormatter formatter) {
+        if (dim == null) {
+            return null;
+        }
+        if (dim instanceof java.time.LocalDate localDate) {
+            return localDate.format(formatter);
+        }
+        if (dim instanceof java.time.LocalDateTime localDateTime) {
+            return localDateTime.format(formatter);
+        }
+        if (dim instanceof java.sql.Date sqlDate) {
+            return sqlDate.toLocalDate().format(formatter);
+        }
+        return dim.toString();
+    }
+
+    private String stringDim(Object dim) {
+        return dim == null ? null : dim.toString();
     }
 
     @Override

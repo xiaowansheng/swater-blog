@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import 'vditor/dist/index.css';
 import ExternalLinkDialog from '@/components/markdown/ExternalLinkDialog';
 import { useTheme } from '@/lib/utils/theme';
+import { sanitizeDomContainer } from '@/lib/utils/sanitize';
 import dynamic from 'next/dynamic';
 
 const ImagePreview = dynamic(() => import('@/components/ImagePreview'), { ssr: false });
@@ -226,6 +227,11 @@ export default function MarkdownRenderer({
             if (disposed) return;
 
             enhanceDom(container);
+
+            // XSS 防护：Vditor 将 Markdown 渲染成 HTML 后，对产物 DOM 做一次清洗，
+            // 移除 <script>、on* 事件属性、javascript: 协议等危险内容。
+            // 文章正文是 Markdown，后端无法用 HTML 白名单清洗（会破坏代码块），防护点必须在渲染端。
+            sanitizeDomContainer(container);
 
             if (container) {
               const event = new CustomEvent('vditorRendered', { detail: { container } });

@@ -256,6 +256,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "user", key = "T(com.blog.bootstrap.context.UserContext).getCurrentUserId()")
     public void updateProfile(UpdateProfileDTO dto) {
         Long userId = UserContext.getCurrentUserId();
         User user = userMapper.selectById(userId);
@@ -307,6 +308,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "user", key = "T(com.blog.bootstrap.context.UserContext).getCurrentUserId()")
     public void updatePassword(UpdatePasswordDTO dto) {
         Long userId = UserContext.getCurrentUserId();
         User user = userMapper.selectById(userId);

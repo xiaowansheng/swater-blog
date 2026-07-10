@@ -1,6 +1,6 @@
 package com.blog.modules.notification.controller.admin;
 
-import cn.dev33.satoken.stp.StpUtil;
+import com.blog.bootstrap.context.UserContext;
 import com.blog.modules.notification.model.dto.NotificationDTO;
 import com.blog.modules.notification.model.vo.NotificationVO;
 import com.blog.modules.notification.service.NotificationService;
@@ -33,29 +33,31 @@ public class NotificationController {
             @RequestParam(defaultValue = "1") Long page,
             @RequestParam(defaultValue = "10") Long size,
             @RequestParam(required = false) Integer isRead) {
-        Long resolvedUserId = userId != null ? userId : StpUtil.getLoginIdAsLong();
-        PageResult<NotificationVO> result = notificationService.list(resolvedUserId, page, size, isRead);
+        // 非 admin 强制查询自己的通知，忽略客户端传入的 userId，防止越权翻看他人通知
+        Long currentUserId = UserContext.getCurrentUserId();
+        boolean isAdmin = UserContext.isAdmin();
+        PageResult<NotificationVO> result = notificationService.list(userId, isAdmin, currentUserId, page, size, isRead);
         return Result.success(result);
     }
 
     @GetMapping("/{id}")
     @ApiOperation(name = "获取通知详情", type = ApiOperationType.QUERY, description = "根据ID获取通知详情")
     public Result<NotificationVO> getById(@PathVariable Long id) {
-        NotificationVO vo = notificationService.getById(id);
+        NotificationVO vo = notificationService.getById(id, UserContext.getCurrentUserId(), UserContext.isAdmin());
         return Result.success(vo);
     }
 
     @PutMapping("/{id}/read")
     @ApiOperation(name = "标记通知为已读", type = ApiOperationType.UPDATE, description = "标记通知为已读")
     public Result<Void> markAsRead(@PathVariable Long id) {
-        notificationService.markAsRead(id);
+        notificationService.markAsRead(id, UserContext.getCurrentUserId(), UserContext.isAdmin());
         return Result.success();
     }
 
     @PutMapping("/read-all")
     @ApiOperation(name = "标记全部通知为已读", type = ApiOperationType.UPDATE, description = "标记当前用户的全部通知为已读")
     public Result<Void> markAllAsRead() {
-        Long userId = StpUtil.getLoginIdAsLong();
+        Long userId = UserContext.getCurrentUserId();
         notificationService.markAllAsRead(userId);
         return Result.success();
     }
@@ -63,21 +65,21 @@ public class NotificationController {
     @DeleteMapping("/{id}")
     @ApiOperation(name = "删除通知", type = ApiOperationType.DELETE, description = "删除通知")
     public Result<Void> delete(@PathVariable Long id) {
-        notificationService.delete(id);
+        notificationService.delete(id, UserContext.getCurrentUserId(), UserContext.isAdmin());
         return Result.success();
     }
 
     @PutMapping("/{id}/retry")
     @ApiOperation(name = "重试通知发送", type = ApiOperationType.UPDATE, description = "手动重试通知发送")
     public Result<Void> retry(@PathVariable Long id) {
-        notificationService.retryNotification(id);
+        notificationService.retryNotification(id, UserContext.getCurrentUserId(), UserContext.isAdmin());
         return Result.success();
     }
 
     @PutMapping("/retry")
     @ApiOperation(name = "批量重试通知发送", type = ApiOperationType.UPDATE, description = "批量重试通知发送")
     public Result<Void> retryBatch(@RequestBody java.util.List<Long> ids) {
-        notificationService.retryNotifications(ids);
+        notificationService.retryNotifications(ids, UserContext.getCurrentUserId(), UserContext.isAdmin());
         return Result.success();
     }
 }

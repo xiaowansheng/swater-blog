@@ -10,6 +10,7 @@ import com.blog.bootstrap.context.UserContext;
 import com.blog.shared.exception.BusinessException;
 import com.blog.modules.album.mapper.AlbumMapper;
 import com.blog.modules.content.picture.mapper.PictureMapper;
+import com.blog.modules.file.service.FileService;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.album.model.dto.AlbumDTO;
 import com.blog.modules.album.model.entity.Album;
@@ -36,6 +37,9 @@ public class AlbumServiceImpl implements AlbumService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private FileService fileService;
 
     @Override
     public PageResult<AlbumVO> list(Long page, Long size, Long userId, String status) {
@@ -105,6 +109,12 @@ public class AlbumServiceImpl implements AlbumService {
         if (album == null) {
             throw new BusinessException("相册不存在");
         }
+
+        // 级联清理：删除相册下的所有图片记录，并清理相册的文件引用关系，
+        // 避免产生孤儿图片和悬挂的文件引用（对齐文章删除时的 fileService.removeReferences 处理）
+        pictureMapper.deleteByAlbumId(id);
+        fileService.removeReferences("ALBUM", id);
+
         albumMapper.deleteById(id);
     }
 

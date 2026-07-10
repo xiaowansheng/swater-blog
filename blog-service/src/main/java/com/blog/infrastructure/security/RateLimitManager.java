@@ -96,14 +96,14 @@ public class RateLimitManager {
                 return new RateLimitResult(allowed, remaining, windowSeconds);
             }
         } catch (Exception e) {
-            // Redis异常时，使用降级策略：允许通过但记录日志
-            logger.warn("Redis限流执行异常，使用降级策略: {}", e.getMessage());
-            return new RateLimitResult(true, limit, windowSeconds);
+            // Redis异常时，采用 fail-close 策略：拒绝请求，避免限流失效后遭受暴力破解
+            logger.warn("Redis滑动窗口限流执行异常，拒绝请求（fail-close）: {}", e.getMessage());
+            return new RateLimitResult(false, 0, windowSeconds);
         }
-        
+
         return new RateLimitResult(false, 0, windowSeconds);
     }
-    
+
     /**
      * 令牌桶限流
      * @param key 限流键
@@ -126,11 +126,11 @@ public class RateLimitManager {
                 return new RateLimitResult(allowed, remaining, 60); // 1分钟窗口
             }
         } catch (Exception e) {
-            // Redis异常时，使用降级策略：允许通过但记录日志
-            logger.warn("Redis限流执行异常，使用降级策略: {}", e.getMessage());
-            return new RateLimitResult(true, capacity, 60);
+            // Redis异常时，采用 fail-close 策略：拒绝请求，避免限流失效后遭受暴力破解
+            logger.warn("Redis令牌桶限流执行异常，拒绝请求（fail-close）: {}", e.getMessage());
+            return new RateLimitResult(false, 0, 60);
         }
-        
+
         return new RateLimitResult(false, 0, 60);
     }
     
@@ -156,9 +156,9 @@ public class RateLimitManager {
             
             return new RateLimitResult(allowed, remaining, windowSeconds);
         } catch (Exception e) {
-            // Redis异常时，使用降级策略：允许通过但记录日志
-            logger.warn("Redis固定窗口限流执行异常，使用降级策略: {}", e.getMessage());
-            return new RateLimitResult(true, limit, windowSeconds);
+            // Redis异常时，采用 fail-close 策略：拒绝请求，避免限流失效后遭受暴力破解
+            logger.warn("Redis固定窗口限流执行异常，拒绝请求（fail-close）: {}", e.getMessage());
+            return new RateLimitResult(false, 0, windowSeconds);
         }
     }
     
