@@ -10,8 +10,6 @@ const request: AxiosInstance = axios.create({
   timeout: 30000,
 })
 
-let isShowingModal = false
-
 request.interceptors.request.use(
   (config) => {
     const token = getToken()
@@ -32,13 +30,9 @@ request.interceptors.response.use(
       return res.data
     }
     if (res.code === 401) {
-      if (!isShowingModal) {
-        isShowingModal = true
-        useAuthStore.getState().setLoginExpiredModalOpen(true)
-        // 重置状态，允许下次触发
-        setTimeout(() => {
-          isShowingModal = false
-        }, 1000)
+      const authStore = useAuthStore.getState()
+      if (!authStore.isLoginExpiredModalOpen) {
+        authStore.setLoginExpiredModalOpen(true)
       }
       return Promise.reject(new Error('未登录'))
     }
@@ -56,4 +50,3 @@ request.interceptors.response.use(
 )
 
 export default request
-

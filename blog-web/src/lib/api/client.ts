@@ -25,17 +25,22 @@ function normalizeApiUrl(base: string, path: string) {
 
 export async function fetchClient<T>(
   url: string,
-  options?: RequestInit & { silent?: boolean }
+  options?: RequestInit & { silent?: boolean; timeout?: number }
 ): Promise<T> {
   const mockData = getMockResponse<T>(url, options);
   if (mockData !== null) {
     return mockData;
   }
 
+  const timeout = options?.timeout ?? 10000;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
   try {
     const verifyToken = getVerifyToken();
     const response = await fetch(normalizeApiUrl(API_BASE_URL, url), {
       ...options,
+      signal: controller.signal,
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
@@ -68,18 +73,25 @@ export async function fetchClient<T>(
     if (error instanceof ApiError) {
       throw error;
     }
-    
+
+    // 请求超时（部分环境下 AbortError 不是 DOMException 实例，按 name 判断更稳妥）
+    if ((error as Error)?.name === 'AbortError') {
+      throw new Error('请求超时，请稍后重试');
+    }
+
     // fetch 抛出的网络错误通常是 TypeError (如 CORS、断网)
     // 或者是 JSON 解析错误等
     if (error instanceof TypeError) {
       throw new Error('网络请求失败，请检查您的网络或服务器状态');
     }
-    
+
     // 对于其他未知错误，统一提示
     if (error instanceof Error) {
       throw new Error('服务请求失败');
     }
-    
+
     throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
 }

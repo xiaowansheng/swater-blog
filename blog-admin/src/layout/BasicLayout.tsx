@@ -11,69 +11,74 @@ import { useAuthStore } from '@/store/auth'
 import { useTabsStore } from '@/store/tabs'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import { useAutoLock } from '@/hooks/useAutoLock'
+import { routeConfig, matchRoute } from '@/config/routes'
 
 const { Content } = Layout
+
+function buildSegmentTitleMap(): Map<string, string> {
+  const map = new Map<string, string>()
+  for (const { path, title } of routeConfig) {
+    const segments = path.replace(/^\//, '').split('/')
+    for (const seg of segments) {
+      if (!seg.startsWith(':') && !map.has(seg)) {
+        map.set(seg, title)
+      }
+    }
+  }
+  return map
+}
+
+const segmentTitleMap = buildSegmentTitleMap()
+
+const actionLabels: Record<string, string> = {
+  create: '新建',
+  edit: '编辑',
+  detail: '详情',
+  preview: '预览',
+  import: '导入',
+  export: '导出',
+  tree: '归类树',
+  mindmap: '归类可视化',
+}
+
+// 父级分段在没有独立路由时使用的标题（如 /log/operation、/log/error 共用的 log）
+const parentSegmentLabels: Record<string, string> = {
+  log: '日志管理',
+}
 
 // 根据路由生成面包屑
 const getBreadcrumbItems = (pathname: string) => {
   const pathSegments = pathname.split('/').filter(Boolean)
 
   if (pathSegments.length === 0) {
-    return []
+    return [{ title: <Link to="/">首页</Link> }]
   }
 
   const items = [{ title: <Link to="/">首页</Link> }]
 
-  // 路由映射表
-  const routeMap: Record<string, string> = {
-    article: '文章管理',
-    talk: '说说管理',
-    category: '分类管理',
-    tag: '标签管理',
-    comment: '评论管理',
-    user: '用户管理',
-    role: '角色管理',
-    menu: '菜单管理',
-    config: '系统配置',
-    file: '文件管理',
-    friendlink: '友链管理',
-    guestbook: '留言管理',
-    album: '相册管理',
-    archive: '归档管理',
-    log: '日志管理',
-    operation: '操作日志',
-    error: '错误日志',
-    notification: '通知管理',
-    visitor: '访客统计',
-    resource: '资源管理',
-    about: '关于页面',
-    dashboard: '仪表盘',
-    welcome: '欢迎页',
-    profile: '个人资料',
-    tree: '文章归类树',
-    mindmap: '归类可视化',
-  }
-
-  // 构建面包屑路径
   let currentPath = ''
   pathSegments.forEach((segment, index) => {
     currentPath += `/${segment}`
     const isLast = index === pathSegments.length - 1
 
-    if (segment === 'create' || segment === 'edit') {
-      items.push({ title: isLast ? <span>编辑</span> : <span>操作</span> })
-    } else if (segment === 'detail') {
-      items.push({ title: <span>详情</span> })
-    } else if (routeMap[segment]) {
+    if (actionLabels[segment]) {
       items.push({
-        title: isLast ? <span>{routeMap[segment]}</span> : <Link to={currentPath}>{routeMap[segment]}</Link>,
+        title: <span>{actionLabels[segment]}</span>,
       })
-    } else if (!isNaN(Number(segment))) {
-      // ID 参数，不显示
     } else {
-      items.push({
-        title: isLast ? <span>{segment}</span> : <Link to={currentPath}>{segment}</Link>,
-      })
+      const label = parentSegmentLabels[segment] ?? segmentTitleMap.get(segment)
+      if (label) {
+        const canLink = !isLast && matchRoute(currentPath)
+        items.push({
+          title: canLink ? <Link to={currentPath}>{label}</Link> : <span>{label}</span>,
+        })
+      } else if (!isNaN(Number(segment))) {
+        // ID 参数，不显示
+      } else {
+        items.push({
+          title: isLast ? <span>{segment}</span> : <Link to={currentPath}>{segment}</Link>,
+        })
+      }
     }
   })
 
