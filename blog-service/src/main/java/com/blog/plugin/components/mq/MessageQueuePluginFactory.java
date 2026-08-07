@@ -14,9 +14,7 @@ public class MessageQueuePluginFactory {
     private List<MessageQueuePlugin> messageQueuePlugins;
 
     public List<MessageQueuePlugin> getPlugins() {
-        return messageQueuePlugins.stream()
-                .filter(Plugin::isEnabled)
-                .collect(Collectors.toList());
+        return messageQueuePlugins;
     }
 
     public MessageQueuePlugin getActivePlugin() {

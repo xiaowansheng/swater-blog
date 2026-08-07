@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,8 @@ import java.util.Set;
 public class SecurityFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityFilter.class);
+
+    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
     
     @Autowired
     private ObjectMapper objectMapper;
@@ -39,7 +42,7 @@ public class SecurityFilter implements Filter {
 
     // 需要跳过安全检查的路径（基础路径，不包含context-path）
     private static final String[] SKIP_PATHS_BASE = {
-        "/actuator/", "/swagger-", "/v3/api-docs", "/favicon.ico", "/uploads/"
+        "/actuator/**", "/swagger-*/**", "/v3/api-docs/**", "/favicon.ico", "/uploads/**"
     };
     
     // 标准HTTP请求头（这些请求头通常包含安全的值）
@@ -102,33 +105,32 @@ public class SecurityFilter implements Filter {
                 return;
             }
             
-            // 5. 添加安全响应头
-            addSecurityHeaders(httpRequest, httpResponse);
-            
-            // 继续处理请求
-            chain.doFilter(request, response);
-            
         } catch (Exception e) {
-            logger.error("安全过滤器处理异常, IP: {}, URI: {}", clientIp, requestUri, e);
+            logger.error("安全检查处理异常, IP: {}, URI: {}", clientIp, requestUri, e);
             sendSecurityError(httpResponse, "请求处理异常");
+            return;
         }
+        
+        // 5. 添加安全响应头
+        addSecurityHeaders(httpRequest, httpResponse);
+        
+        // 继续处理请求（异常交由 Spring/容器异常处理机制，不在此吞没）
+        chain.doFilter(request, response);
     }
     
     /**
      * 检查是否需要跳过安全检查
+     * 使用 AntPathMatcher 精确匹配，避免 contains() 子串误匹配
      */
     private boolean shouldSkipSecurity(String requestUri, String requestContextPath) {
-        for (String skipPath : SKIP_PATHS_BASE) {
-            // 检查是否匹配基础路径（如 /uploads/）
-            if (requestUri.contains(skipPath)) {
+        // 去除 context-path 后再匹配，保证 SKIP_PATHS_BASE 与 context-path 无关
+        String path = requestUri;
+        if (StringUtils.hasText(requestContextPath) && path.startsWith(requestContextPath)) {
+            path = path.substring(requestContextPath.length());
+        }
+        for (String pattern : SKIP_PATHS_BASE) {
+            if (PATH_MATCHER.match(pattern, path)) {
                 return true;
-            }
-            // 检查是否匹配完整路径（如 /uploads/）
-            if (requestContextPath != null && !requestContextPath.isEmpty()) {
-                String fullPath = requestContextPath + skipPath;
-                if (requestUri.contains(fullPath)) {
-                    return true;
-                }
             }
         }
         return false;

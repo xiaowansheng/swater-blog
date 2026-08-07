@@ -14,9 +14,7 @@ public class StoragePluginFactory {
     private List<StoragePlugin> storagePlugins;
 
     public List<StoragePlugin> getPlugins() {
-        return storagePlugins.stream()
-                .filter(Plugin::isEnabled)
-                .collect(Collectors.toList());
+        return storagePlugins;
     }
 
     /**

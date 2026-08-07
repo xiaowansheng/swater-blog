@@ -33,9 +33,6 @@ import java.util.List;
 public class SaTokenConfig implements WebMvcConfigurer {
 
     @Autowired
-    private WebMvcConfig webMvcConfig;
-
-    @Autowired
     private UserMapper userMapper;
 
     @Autowired
