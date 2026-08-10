@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 /**
  * 增强限流管理器
@@ -38,7 +39,7 @@ public class RateLimitManager {
         
         if current < limit then
             -- 添加当前请求
-            redis.call('zadd', key, now, now)
+            redis.call('zadd', key, now, ARGV[4])
             redis.call('expire', key, window)
             return {1, limit - current - 1}
         else
@@ -88,7 +89,7 @@ public class RateLimitManager {
         try {
             java.util.List<Long> result = redisTemplate.execute(script, 
                 Collections.singletonList(key), 
-                windowSeconds, limit, System.currentTimeMillis());
+                windowSeconds, limit, System.currentTimeMillis(), UUID.randomUUID().toString());
             
             if (result != null && result.size() >= 2) {
                 boolean allowed = result.get(0) == 1L;

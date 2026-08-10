@@ -5,7 +5,7 @@ import Image, { ImageProps } from 'next/image';
 import { getFullUrl } from '@/lib/utils/format';
 import ImagePreview from '@/components/ImagePreview';
 
-interface ImageWithPreviewProps extends Omit<ImageProps, 'src'> {
+interface ImageWithPreviewProps extends Omit<ImageProps, 'src' | 'onClick'> {
   /**
    * 图片路径（可以是相对路径或绝对路径）
    */
@@ -14,6 +14,7 @@ interface ImageWithPreviewProps extends Omit<ImageProps, 'src'> {
    * 是否启用预览，默认为 true
    */
   previewEnabled?: boolean;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 /**
@@ -38,15 +39,15 @@ export default function ImageWithPreview({
       setIsPreviewOpen(true);
     }
     if (onClick) {
-      onClick(e as any);
+      onClick(e);
     }
   };
 
   if (!fullUrl) {
-    return <div className={`flex justify-center items-center text-gray-400 bg-gray-100 ${className}`} {...(restProps as any)}>无图片</div>;
+    return <div className={`flex justify-center items-center text-gray-400 bg-gray-100 ${className}`} {...restProps}>无图片</div>;
   }
 
-  const { className: imgClassName, ...otherRestProps } = restProps as any;
+  const otherRestProps = restProps;
 
   return (
     <>
@@ -58,7 +59,7 @@ export default function ImageWithPreview({
         <Image
           src={fullUrl}
           alt={alt}
-          className={`object-cover ${imgClassName || ''}`}
+          className="object-cover"
           {...otherRestProps}
         />
       </div>

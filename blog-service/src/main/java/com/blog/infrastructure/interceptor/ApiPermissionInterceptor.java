@@ -80,6 +80,10 @@ public class ApiPermissionInterceptor implements HandlerInterceptor {
         // 获取当前用户（在之前的拦截器中已经设置）
         UserVO currentUser = UserContext.getCurrentUser();
 
+        if (currentUser == null) {
+            throw new com.blog.shared.exception.BusinessException(401, "未登录，请先登录");
+        }
+
         // 非开放接口，需要验证用户权限
         // 获取接口授权的角色列表
         var authorizedRoleIds = apiResourceCache.getApiRoles(apiInfo.getId());

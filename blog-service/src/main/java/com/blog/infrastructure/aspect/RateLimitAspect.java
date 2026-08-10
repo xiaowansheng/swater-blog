@@ -5,7 +5,7 @@ package com.blog.infrastructure.aspect;
 import com.blog.shared.annotation.RateLimit;
 import com.blog.shared.exception.BusinessException;
 import com.blog.infrastructure.security.RateLimitManager;
-import com.blog.shared.util.IpUtil;
+import com.blog.shared.util.ClientIpResolver;
 import cn.dev33.satoken.stp.StpUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -25,6 +25,9 @@ public class RateLimitAspect {
     
     @Autowired
     private RateLimitManager rateLimitManager;
+
+    @Autowired
+    private ClientIpResolver clientIpResolver;
     
     @Around("@annotation(rateLimit)")
     public Object around(ProceedingJoinPoint point, RateLimit rateLimit) throws Throwable {
@@ -83,7 +86,7 @@ public class RateLimitAspect {
         // 根据维度生成键
         switch (rateLimit.dimension()) {
             case IP:
-                keyBuilder.append("ip:").append(IpUtil.getClientIp(request));
+                keyBuilder.append("ip:").append(clientIpResolver.resolve(request));
                 break;
             case USER:
                 // 从请求中获取用户ID（需要根据实际认证方式调整）

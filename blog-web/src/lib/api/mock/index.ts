@@ -13,7 +13,23 @@ const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
 interface MockHandler {
   pattern: RegExp;
-  handler: (url: string, options?: RequestInit) => any;
+  handler: (url: string, options?: RequestInit) => unknown;
+}
+
+interface MockComment {
+  id: number;
+  postId?: number;
+  momentId?: number;
+  parentId?: number;
+  nickname: string;
+  email?: string;
+  avatar?: string;
+  content: string;
+  status: number;
+  createTime: string;
+  children?: MockComment[];
+  replyToUser?: { nickname: string };
+  replyCount?: number;
 }
 
 const mockHandlers: MockHandler[] = [
@@ -89,13 +105,14 @@ const mockHandlers: MockHandler[] = [
       const targetType = params.get('targetType');
       const order = params.get('order');
 
-      const flatRecords = commentData.list.flatMap((c) => {
+      const comments = commentData.list as unknown as MockComment[];
+      const flatRecords: MockComment[] = comments.flatMap((c) => {
         const top = { ...c, replyCount: c.children?.length || 0 };
         const children = (c.children || []).map(child => ({
           ...child,
           replyToUser: { nickname: c.nickname },
         }));
-        delete (top as any).children;
+        Reflect.deleteProperty(top, 'children');
         return [top, ...children];
       });
 
@@ -105,20 +122,20 @@ const mockHandlers: MockHandler[] = [
         records = records.filter((c) => c.postId === parseInt(targetId));
       }
       if (targetId && targetType === 'TALK') {
-        records = records.filter((c: any) => c.momentId === parseInt(targetId));
+        records = records.filter((c) => c.momentId === parseInt(targetId));
       }
 
       if (parentIdParam !== null) {
         const parentId = parseInt(parentIdParam);
         if (parentId === 0) {
-          records = records.filter((c: any) => !c.parentId);
-          records.sort((a: any, b: any) => {
+          records = records.filter((c) => !c.parentId);
+          records.sort((a, b) => {
             const diff = new Date(a.createTime).getTime() - new Date(b.createTime).getTime();
             return order === 'asc' ? diff : -diff;
           });
         } else {
-          records = records.filter((c: any) => c.parentId === parentId);
-          records.sort((a: any, b: any) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime());
+          records = records.filter((c) => c.parentId === parentId);
+          records.sort((a, b) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime());
         }
       }
 

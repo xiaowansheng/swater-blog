@@ -10,6 +10,9 @@ export default function AnimeRouteLoading() {
   const { isLoading } = useSimpleRouteLoading();
   const [currentFrame, setCurrentFrame] = useState(0);
   const [hearts, setHearts] = useState<Array<{ id: number; x: number; y: number; delay: number; size: number }>>([]);
+  const [starDurations] = useState(() =>
+    Array.from({ length: 8 }, () => 3 + Math.random() * 2)
+  );
 
   // 超级可爱的动画帧序列
   const animationFrames = [
@@ -30,14 +33,17 @@ export default function AnimeRouteLoading() {
         delay: Math.random() * 3,
         size: 0.8 + Math.random() * 0.4,
       }));
-      setHearts(newHearts);
+      const heartsTimer = window.setTimeout(() => setHearts(newHearts), 0);
 
       // 动画帧切换
       const interval = setInterval(() => {
         setCurrentFrame((prev) => (prev + 1) % animationFrames.length);
       }, 800);
 
-      return () => clearInterval(interval);
+      return () => {
+        window.clearTimeout(heartsTimer);
+        clearInterval(interval);
+      };
     }
   }, [isLoading, animationFrames.length]);
 
@@ -117,7 +123,7 @@ export default function AnimeRouteLoading() {
                   opacity: [0, 1, 1, 0],
                 }}
                 transition={{
-                  duration: 3 + Math.random() * 2,
+                  duration: starDurations[i],
                   repeat: Infinity,
                   delay: i * 0.3,
                   ease: 'linear',

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 
 function getToken(req: NextRequest) {
-  return req.headers.get('x-revalidate-token') || req.nextUrl.searchParams.get('secret') || '';
+  return req.headers.get('x-revalidate-token') || '';
 }
 
 function getTags(req: NextRequest, body: unknown) {
@@ -24,7 +24,10 @@ function getTags(req: NextRequest, body: unknown) {
 export async function POST(req: NextRequest) {
   const token = getToken(req);
   const expected = process.env.REVALIDATE_TOKEN || '';
-  if (!expected || token !== expected) {
+  if (!expected) {
+    return NextResponse.json({ ok: false, message: 'Revalidation is not configured' }, { status: 503 });
+  }
+  if (token !== expected) {
     return NextResponse.json({ ok: false, message: 'Unauthorized' }, { status: 401 });
   }
 
@@ -47,21 +50,9 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true, revalidated: tags });
 }
 
-export async function GET(req: NextRequest) {
-  const token = getToken(req);
-  const expected = process.env.REVALIDATE_TOKEN || '';
-  if (!expected || token !== expected) {
-    return NextResponse.json({ ok: false, message: 'Unauthorized' }, { status: 401 });
-  }
-
-  const tags = getTags(req, null);
-  if (tags.length === 0) {
-    return NextResponse.json({ ok: false, message: 'Missing tag(s)' }, { status: 400 });
-  }
-
-  for (const tag of tags) {
-    revalidateTag(tag, 'default');
-  }
-
-  return NextResponse.json({ ok: true, revalidated: tags });
+export async function GET() {
+  return NextResponse.json(
+    { ok: false, message: 'Method Not Allowed' },
+    { status: 405, headers: { Allow: 'POST' } },
+  );
 }

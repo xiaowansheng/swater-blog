@@ -88,6 +88,7 @@ public class SaTokenConfig implements WebMvcConfigurer {
                 }))
                 .addPathPatterns(
                         "/api/admin/**",
+                        "/api/monitoring/**",
                         "/api/auth/current",
                         "/api/auth/user-info",
                         "/api/auth/refresh",

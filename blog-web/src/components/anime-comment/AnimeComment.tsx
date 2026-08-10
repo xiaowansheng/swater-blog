@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { AnimeCommentProps, AnimeCommentConfig, CommentFormData } from './types';
 import { DEFAULT_COMMENT_CONFIG } from './constants';
@@ -28,19 +28,19 @@ interface ReplyState {
 function useVisibilityChecker() {
   const { userInfo } = useUserInfo();
 
-  const isOwner = (comment: CommentVO) => {
+  const isOwner = useCallback((comment: CommentVO) => {
     if (comment.isOwner) return true;
     if (comment.email && userInfo.email && comment.email === userInfo.email) return true;
     if (comment.nickname && userInfo.nickname && comment.nickname === userInfo.nickname) return true;
     return false;
-  };
+  }, [userInfo.email, userInfo.nickname]);
 
-  const isVisible = (comment: CommentVO) => {
+  const isVisible = useCallback((comment: CommentVO) => {
     const status = comment.status;
     const published = status === CommentStatus.APPROVED;
     if (published) return true;
     return isOwner(comment);
-  };
+  }, [isOwner]);
 
   return { isOwner, isVisible };
 }
@@ -78,19 +78,20 @@ function AnimeCommentInner({
   }, [userConfig]);
 
   // 过滤并标记“自己”的评论
-  const normalize = (records: CommentVO[] = []) =>
+  const normalize = useCallback((records: CommentVO[] = []) => (
     records
       .filter(isVisible)
       .map((item) => ({
         ...item,
         isOwner: isOwner(item),
-      }));
+      }))
+  ), [isOwner, isVisible]);
 
   const scrollToCommentSection = () => {
     commentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const loadTopComments = async (page = 1, order: 'latest' | 'oldest' = topSortOrder) => {
+  const loadTopComments = useCallback(async (page = 1, order: 'latest' | 'oldest' = topSortOrder) => {
     if (!targetId) return;
     setLoadingTop(true);
     try {
@@ -112,7 +113,7 @@ function AnimeCommentInner({
     } finally {
       setLoadingTop(false);
     }
-  };
+  }, [normalize, targetId, targetType, topSortOrder]);
 
   const loadReplies = async (rootId: number, page = 1, append = false) => {
     setReplies((prev) => ({
@@ -163,10 +164,10 @@ function AnimeCommentInner({
   };
 
   useEffect(() => {
-    loadTopComments(1);
+    void loadTopComments(1);
     setReplies({});
     setActiveReplyFormId(null);
-  }, [postId, momentId, topSortOrder]);
+  }, [loadTopComments, momentId, postId]);
 
   // 处理评论提交（一级）
   const handleSubmit = async (data: CommentFormData) => {
@@ -184,7 +185,7 @@ function AnimeCommentInner({
       setTopPage(1);
       setReplies({});
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   };

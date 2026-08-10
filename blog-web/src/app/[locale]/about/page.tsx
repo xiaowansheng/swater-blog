@@ -6,11 +6,7 @@ import { getAboutContent, getCoverConfig, getAuthorInfo } from '@/lib/api/config
 
 export const revalidate = 3600;
 
-export default async function AboutPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function AboutPage() {
   const t = await getTranslations('common');
   const [aboutContent, cover, author] = await Promise.all([
     getAboutContent(),

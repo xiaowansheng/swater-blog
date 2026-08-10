@@ -218,10 +218,22 @@ CREATE TABLE IF NOT EXISTS `article` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='博客文章表';
 
 -- 历史库迁移：article 表曾遗漏 password 列（926a487f 引入实体字段但未同步 DDL）。
--- CREATE TABLE IF NOT EXISTS 不会为已存在的表补列，故用 ALTER 补齐。
--- 重复执行时报「Duplicate column」错误，dev profile 的 continue-on-error=true 会忽略；
--- docker profile 已同步开启容忍。
-ALTER TABLE `article` ADD COLUMN `password` VARCHAR(100) DEFAULT NULL COMMENT '加密访问密码（BCrypt 哈希）' AFTER `published_at`;
+-- 使用 information_schema 判断列是否存在，避免依赖全局 continue-on-error。
+SET @article_password_exists = (
+  SELECT COUNT(*)
+  FROM information_schema.columns
+  WHERE table_schema = DATABASE()
+    AND table_name = 'article'
+    AND column_name = 'password'
+);
+SET @article_password_sql = IF(
+  @article_password_exists = 0,
+  'ALTER TABLE article ADD COLUMN password VARCHAR(100) DEFAULT NULL COMMENT ''加密访问密码（BCrypt 哈希）'' AFTER published_at',
+  'SELECT 1'
+);
+PREPARE article_password_stmt FROM @article_password_sql;
+EXECUTE article_password_stmt;
+DEALLOCATE PREPARE article_password_stmt;
 
 
 -- 文章标签关联表

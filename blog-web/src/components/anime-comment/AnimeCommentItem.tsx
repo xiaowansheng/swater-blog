@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { formatDate } from '@/lib/utils/format';
 import { CommentStatus, CommentVisibilityStatus, type CommentVO, type PrivacyConfig } from '@/types';
 import { AnimeCommentConfig } from './types';
@@ -95,7 +96,6 @@ export default function AnimeCommentItem({
   const hasMoreReplies = replyState ? replyState.page < replyState.pages : false;
   const rootId = comment.rootId && comment.rootId > 0 ? comment.rootId : comment.id;
   const isDirectChild = !comment.parentId || comment.parentId === 0 || comment.parentId === rootId;
-  const parentId = comment.parentId ?? 0;
   const isHiddenByModeration = comment.isVisible === CommentVisibilityStatus.HIDDEN;
 
   return (
@@ -105,9 +105,12 @@ export default function AnimeCommentItem({
         <div className="flex items-center gap-3 mb-3">
           <div className="relative flex-shrink-0">
             <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 border-primary/30 shadow-md group-hover:scale-110 transition-transform duration-300">
-              <img
+              <Image
                 src={avatar}
                 alt={comment.nickname}
+                width={56}
+                height={56}
+                unoptimized
                 className="w-full h-full object-cover"
               />
             </div>
@@ -262,9 +265,12 @@ export default function AnimeCommentItem({
             >
               {/* 第一部分：头像和作者信息 */}
               <div className="flex items-center gap-3 mb-3">
-                <img
+                <Image
                   src={child.avatar || getRandomAnimeAvatar(child.nickname)}
                   alt={child.nickname}
+                  width={40}
+                  height={40}
+                  unoptimized
                   className="w-10 h-10 rounded-full border-2 border-primary/30"
                 />
                 <div className="flex flex-col gap-1">

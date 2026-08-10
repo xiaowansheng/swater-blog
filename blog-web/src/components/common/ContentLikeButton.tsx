@@ -6,6 +6,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { likeApi, type LikeContentType } from '@/lib/api/like';
 import { useTranslations } from 'next-intl';
 
+interface HeartParticle {
+  x: number;
+  y: number;
+  rotate: number;
+}
+
 function getOrCreateId(key: string, storage: Storage) {
   const existing = storage.getItem(key);
   if (existing) return existing;
@@ -30,6 +36,7 @@ export default function ContentLikeButton({
   const [likeCount, setLikeCount] = useState<number>(initialLikeCount || 0);
   const [dirty, setDirty] = useState(false);
   const [showHearts, setShowHearts] = useState(false);
+  const [heartParticles, setHeartParticles] = useState<HeartParticle[]>([]);
 
   const visitorUuid = useMemo(() => {
     if (typeof window === 'undefined') return null;
@@ -40,14 +47,17 @@ export default function ContentLikeButton({
 
   useEffect(() => {
     if (dirty) return;
-    setLikeCount(initialLikeCount || 0);
+    const timer = window.setTimeout(() => setLikeCount(initialLikeCount || 0), 0);
+    return () => window.clearTimeout(timer);
   }, [initialLikeCount, dirty]);
 
   useEffect(() => {
     if (!visitorUuid) return;
 
     const local = window.localStorage.getItem(localKey);
-    if (local === '1') setLiked(true);
+    const localLikeTimer = local === '1'
+      ? window.setTimeout(() => setLiked(true), 0)
+      : undefined;
 
     likeApi
       .status({ visitorUuid, contentType, contentId })
@@ -57,6 +67,10 @@ export default function ContentLikeButton({
         window.localStorage.setItem(localKey, res?.liked ? '1' : '0');
       })
       .catch(() => {});
+
+    return () => {
+      if (localLikeTimer !== undefined) window.clearTimeout(localLikeTimer);
+    };
   }, [visitorUuid, contentType, contentId, localKey, dirty]);
 
   async function setLike(nextLiked: boolean) {
@@ -80,6 +94,13 @@ export default function ContentLikeButton({
         window.localStorage.setItem('visitor_uuid', res.visitorUuid);
       }
       if (res?.liked) {
+        setHeartParticles(
+          Array.from({ length: 12 }, (_, i) => ({
+            x: Math.cos((i * 30 * Math.PI) / 180) * (50 + Math.random() * 30),
+            y: Math.sin((i * 30 * Math.PI) / 180) * (50 + Math.random() * 30),
+            rotate: Math.random() * 360,
+          }))
+        );
         setShowHearts(true);
         setTimeout(() => setShowHearts(false), 1000);
       }
@@ -168,7 +189,7 @@ export default function ContentLikeButton({
         <AnimatePresence>
           {showHearts && (
             <div className="absolute inset-0 pointer-events-none">
-              {[...Array(12)].map((_, i) => (
+              {heartParticles.map((particle, i) => (
                 <motion.div
                   key={i}
                   className="absolute w-4 h-4 text-pink-400"
@@ -176,10 +197,10 @@ export default function ContentLikeButton({
                   initial={{ scale: 0, x: 0, y: 0, opacity: 1, rotate: 0 }}
                   animate={{
                     scale: [0, 1, 0.5],
-                    x: Math.cos((i * 30 * Math.PI) / 180) * (50 + Math.random() * 30),
-                    y: Math.sin((i * 30 * Math.PI) / 180) * (50 + Math.random() * 30),
+                    x: particle.x,
+                    y: particle.y,
                     opacity: [1, 1, 0],
-                    rotate: Math.random() * 360,
+                    rotate: particle.rotate,
                   }}
                   transition={{ duration: 0.8, ease: 'easeOut' }}
                 >

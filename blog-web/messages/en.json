@@ -343,9 +343,9 @@
     "externalLink": {
       "title": "You are about to visit an external link",
       "warning": "This link will take you to a third-party site. Please protect your personal privacy and account security.",
-      "hint": "Click \"Continue\" to open in a new tab.",
+      "hint": "Confirm to open the target in a new tab, and check the domain first.",
       "target": "Target URL",
-      "confirm": "Continue",
+      "confirm": "Open link",
       "cancel": "Cancel"
     }
   }

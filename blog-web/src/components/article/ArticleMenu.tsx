@@ -47,10 +47,6 @@ export default function ArticleMenu({ article }: ArticleMenuProps) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleScrollToBottom = () => {
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-  };
-
   const handleScrollToComment = () => {
     const commentSection = document.getElementById('anime-comment');
     if (commentSection) {

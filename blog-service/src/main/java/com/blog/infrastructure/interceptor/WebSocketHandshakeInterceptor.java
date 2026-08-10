@@ -33,20 +33,21 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
                                     WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
         URI uri = request.getURI();
         String queryString = uri.getQuery();
-        log.debug("WebSocket 握手请求: {}", uri);
+        String path = uri.getPath();
+        log.debug("WebSocket 握手请求: path={}", path);
 
         try {
             // 1. 从 URL 参数中获取 Token
             String token = extractTokenFromQuery(queryString);
             if (token == null || token.isEmpty()) {
-                log.warn("WebSocket 连接被拒绝：未提供 Token, uri={}", uri);
+                log.warn("WebSocket 连接被拒绝：未提供 Token, path={}", path);
                 return false;
             }
 
             // 2. 使用 SaToken 验证 Token 并获取用户 ID
             Object loginId = StpUtil.getLoginIdByToken(token);
             if (loginId == null) {
-                log.warn("WebSocket 连接被拒绝：Token 无效或已过期, uri={}", uri);
+                log.warn("WebSocket 连接被拒绝：Token 无效或已过期, path={}", path);
                 return false;
             }
 
@@ -59,18 +60,18 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
             } else if (loginId instanceof String) {
                 userId = Long.parseLong((String) loginId);
             } else {
-                log.warn("WebSocket 连接被拒绝：无法解析用户ID, loginId={}, uri={}", loginId, uri);
+                log.warn("WebSocket 连接被拒绝：无法解析用户ID, loginId={}, path={}", loginId, path);
                 return false;
             }
 
             // 4. 将用户 ID 存入 WebSocket Session 属性中
             attributes.put("userId", userId);
 
-            log.info("WebSocket 连接验证通过: userId={}, uri={}", userId, uri);
+            log.info("WebSocket 连接验证通过: userId={}, path={}", userId, path);
             return true;
 
         } catch (Exception e) {
-            log.error("WebSocket 握手验证失败: uri={}, error={}", uri, e.getMessage(), e);
+            log.error("WebSocket 握手验证失败: path={}, error={}", path, e.getMessage(), e);
             return false;
         }
     }

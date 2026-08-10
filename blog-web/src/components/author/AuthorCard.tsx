@@ -2,6 +2,7 @@ import type { AuthorInfo } from '@/types';
 import { getFullUrl } from '@/lib/utils/format';
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { Card } from '@/components/ui/Card';
 
 interface AuthorCardProps {
@@ -206,9 +207,12 @@ export default function AuthorCard({ author, children }: AuthorCardProps) {
               {/* 头像容器 */}
               <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-2xl">
                 {avatar ? (
-                  <img
+                  <Image
                     src={getFullUrl(avatar)}
                     alt={name || t('authorAvatar')}
+                    width={128}
+                    height={128}
+                    unoptimized
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 ) : (

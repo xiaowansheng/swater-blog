@@ -6,9 +6,7 @@ import { useRouter, usePathname } from '@/lib/i18n/routing';
 import { useSearchParams } from 'next/navigation';
 import GuestbookList from './GuestbookList';
 import GuestbookForm from './GuestbookForm';
-import { guestbookApi } from '@/lib/api/guestbook';
 import type { GuestbookVO } from '@/types';
-import { Card } from '@/components/ui/Card';
 
 interface GuestbookSectionProps {
   initialMessages: GuestbookVO[];
@@ -30,13 +28,17 @@ export default function GuestbookSection({
   const t = useTranslations('common');
   const tGuestbook = useTranslations('guestbook');
   
-  const [isPendingNav, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [jumpPage, setJumpPage] = useState<string>('');
   const [isPageChanging, setIsPageChanging] = useState(false);
   
   // 当初始消息变化时同步更新（如翻页、排序改变）
   useEffect(() => {
-    setJumpPage(''); // 参数变化时清空跳转输入框
+    const timer = window.setTimeout(() => {
+      setJumpPage(''); // 参数变化时清空跳转输入框
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [initialMessages]);
 
   const searchParams = useSearchParams();

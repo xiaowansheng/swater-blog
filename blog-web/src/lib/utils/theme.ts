@@ -86,12 +86,13 @@ export function useTheme() {
 
     listeners.add(syncTheme);
     syncTheme(initializeTheme());
-    setMounted(true);
+    const mountedFrame = window.requestAnimationFrame(() => setMounted(true));
 
     window.addEventListener('storage', syncStoredTheme);
     mediaQuery.addEventListener('change', syncSystemTheme);
 
     return () => {
+      window.cancelAnimationFrame(mountedFrame);
       listeners.delete(syncTheme);
       window.removeEventListener('storage', syncStoredTheme);
       mediaQuery.removeEventListener('change', syncSystemTheme);

@@ -4,7 +4,7 @@ export const VERIFY_TOKEN_STORAGE_KEY = 'comment_verify_token';
 type JwtPayload = {
   email?: string;
   exp?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 function base64UrlDecode(input: string): string {
@@ -56,4 +56,3 @@ export function isVerifyTokenValidForEmail(token: string | null, email: string |
   }
   return true;
 }
-

@@ -125,6 +125,9 @@ RABBITMQ_MANAGEMENT_PUBLISHED_PORT=15672
 RABBITMQ_USER=admin
 RABBITMQ_PASSWORD=change_me_rabbitmq_password
 RABBITMQ_VHOST=/
+REVALIDATE_TOKEN=replace_with_a_long_random_value
+SECURITY_TRUSTED_PROXIES=
+SECURITY_WEBSOCKET_ALLOWED_ORIGIN_PATTERNS=http://localhost:*,http://127.0.0.1:*
 ```
 
 首次空库启动会自动创建管理后台账号。当前配置以 Spring profile YAML 为准：本机 `dev` profile 默认 `admin/admin`，Docker profile 默认 `admin/change_me_admin_password`；管理员用户已存在时不会重置密码。生产部署前应先调整对应 profile 的 `blog.bootstrap.admin.*` 配置，或先改成环境变量占位再注入。

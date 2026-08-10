@@ -59,38 +59,54 @@ interface TimeDifference {
 
 const ZERO_DIFF: TimeDifference = { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
+function parseCreateTime(createTime: string): number {
+  let normalizedCreateTime = createTime;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(createTime)) {
+    normalizedCreateTime = `${createTime}T00:00:00Z`;
+  } else if (!createTime.endsWith('Z') && !createTime.includes('+') && !createTime.includes('T00:00:00Z')) {
+    normalizedCreateTime = createTime.replace(' ', 'T') + 'Z';
+  }
+
+  const parsedTimestamp = new Date(normalizedCreateTime).getTime();
+  return Number.isFinite(parsedTimestamp) ? parsedTimestamp : 0;
+}
+
+function calculateTimeDifference(createdAt: number): TimeDifference {
+  if (!Number.isFinite(createdAt)) {
+    return ZERO_DIFF;
+  }
+
+  const diff = Date.now() - createdAt;
+  if (diff < 0) {
+    return ZERO_DIFF;
+  }
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+  return { days, hours, minutes, seconds };
+}
+
 export default function SiteRunningTime({ createTime }: SiteRunningTimeProps) {
   const t = useTranslations('common');
-  const [timeDiff, setTimeDiff] = useState<TimeDifference>(ZERO_DIFF);
-  const createdAtRef = useRef<number>(0);
+  const [timeDiff, setTimeDiff] = useState<TimeDifference>(() => (
+    calculateTimeDifference(parseCreateTime(createTime))
+  ));
+  const createdAtRef = useRef<number>(parseCreateTime(createTime));
 
   const calculateTimeDiff = useCallback(() => {
-    if (!Number.isFinite(createdAtRef.current)) {
-      return ZERO_DIFF;
-    }
-    const now = Date.now();
-    const diff = now - createdAtRef.current;
-    if (diff < 0) {
-      return ZERO_DIFF;
-    }
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    return { days, hours, minutes, seconds };
+    return calculateTimeDifference(createdAtRef.current);
   }, []);
 
   useEffect(() => {
-    let normalizedCreateTime = createTime;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(createTime)) {
-      normalizedCreateTime = `${createTime}T00:00:00Z`;
-    } else if (!createTime.endsWith('Z') && !createTime.includes('+') && !createTime.includes('T00:00:00Z')) {
-      normalizedCreateTime = createTime.replace(' ', 'T') + 'Z';
-    }
-    const parsedTimestamp = new Date(normalizedCreateTime).getTime();
-    createdAtRef.current = Number.isFinite(parsedTimestamp) ? parsedTimestamp : 0;
-    setTimeDiff(calculateTimeDiff());
+    const parsedTimestamp = parseCreateTime(createTime);
+    const timer = window.setTimeout(() => {
+      createdAtRef.current = parsedTimestamp;
+      setTimeDiff(calculateTimeDiff());
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [createTime, calculateTimeDiff]);
 
   useEffect(() => {

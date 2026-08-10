@@ -1,8 +1,9 @@
-const fs = require("fs");
-const path = require("path");
+async function main() {
+  const fs = await import("node:fs");
+  const path = await import("node:path");
 
-const root = path.resolve(__dirname, "..");
-const dist = path.join(root, "dist");
+  const root = path.resolve(process.cwd());
+  const dist = path.join(root, "dist");
 
 fs.rmSync(dist, { recursive: true, force: true });
 fs.mkdirSync(path.join(dist, ".next"), { recursive: true });
@@ -67,7 +68,7 @@ function materializeSymlinks(dir) {
       let real;
       try {
         real = fs.realpathSync(full);
-      } catch (err) {
+      } catch {
         // Broken symlink; remove and continue.
         fs.rmSync(full, { recursive: true, force: true });
         continue;
@@ -101,3 +102,9 @@ function hasSymlink(dir) {
 if (hasSymlink(path.join(dist, "node_modules"))) {
   console.warn("Warning: symlinks remain under dist/node_modules.");
 }
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

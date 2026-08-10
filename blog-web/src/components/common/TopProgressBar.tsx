@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { LOADING_CONFIG } from '@/lib/constants/loading';
@@ -17,19 +17,26 @@ export default function TopProgressBar() {
   const pathname = usePathname();
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [prevPathname, setPrevPathname] = useState<string | undefined>(undefined);
+  const previousPathnameRef = useRef(pathname);
 
   useEffect(() => {
-    // 路由开始变化
-    if (prevPathname && prevPathname !== pathname) {
+    const previousPathname = previousPathnameRef.current;
+    previousPathnameRef.current = pathname;
+
+    if (!previousPathname || previousPathname === pathname) return;
+
+    let interval: number | undefined;
+    let resetTimer: number | undefined;
+
+    // Schedule state changes after the route effect has committed.
+    const startFrame = window.requestAnimationFrame(() => {
       setIsLoading(true);
       setProgress(0);
 
-      // 模拟进度增长
-      const interval = setInterval(() => {
+      interval = window.setInterval(() => {
         setProgress((prev) => {
           if (prev >= LOADING_CONFIG.PROGRESS_MAX_BEFORE_COMPLETE) {
-            clearInterval(interval);
+            if (interval !== undefined) window.clearInterval(interval);
             return LOADING_CONFIG.PROGRESS_MAX_BEFORE_COMPLETE;
           }
           // 随机增长，越接近 90% 增长越慢
@@ -37,26 +44,23 @@ export default function TopProgressBar() {
           return Math.min(prev + increment, LOADING_CONFIG.PROGRESS_MAX_BEFORE_COMPLETE);
         });
       }, LOADING_CONFIG.PROGRESS_INTERVAL);
+    });
 
-      return () => clearInterval(interval);
-    }
-
-    setPrevPathname(pathname);
-  }, [pathname, prevPathname]);
-
-  useEffect(() => {
-    // 路由完成，快速完成进度条
-    if (isLoading && prevPathname && prevPathname !== pathname) {
+    const completeTimer = window.setTimeout(() => {
       setProgress(100);
-      
-      const timer = setTimeout(() => {
+      resetTimer = window.setTimeout(() => {
         setIsLoading(false);
         setProgress(0);
       }, 300);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [pathname, prevPathname, isLoading]);
+    }, 300);
+
+    return () => {
+      window.cancelAnimationFrame(startFrame);
+      if (interval !== undefined) window.clearInterval(interval);
+      window.clearTimeout(completeTimer);
+      if (resetTimer !== undefined) window.clearTimeout(resetTimer);
+    };
+  }, [pathname]);
 
   return (
     <AnimatePresence>

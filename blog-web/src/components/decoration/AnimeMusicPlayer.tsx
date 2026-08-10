@@ -69,7 +69,7 @@ export default function AnimeMusicPlayer() {
     };
 
     initPlaylist();
-  }, []);
+  }, [playlist.length]);
 
   // 音频播放控制
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function AnimeMusicPlayer() {
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
-  }, [playNext, isDragging]);
+  }, [isDragging, playNext, setCurrentTime]);
 
   // 更新音量
   useEffect(() => {

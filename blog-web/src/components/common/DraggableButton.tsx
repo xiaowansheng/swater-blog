@@ -63,21 +63,28 @@ export default function DraggableButton({
   useEffect(() => {
     const storageKey = `draggable-button-${className}`;
     const savedPosition = localStorage.getItem(storageKey);
+    let frame: number | null = null;
+
     if (savedPosition) {
       try {
         const parsed = JSON.parse(savedPosition) as Partial<StoredPositionV2 & Position>;
         if (typeof parsed?.x === 'number' && typeof parsed?.y === 'number') {
-          if (parsed.v === 2) {
-            setPositionSafe(clampToViewport({ x: parsed.x, y: parsed.y }));
-          } else {
-            // Legacy v1: `y` stored as bottom offset (windowHeight - clientY).
-            setPositionSafe(clampToViewport({ x: parsed.x, y: window.innerHeight - parsed.y }));
-          }
+          const storedPosition = parsed.v === 2
+            ? { x: parsed.x, y: parsed.y }
+            : { x: parsed.x, y: window.innerHeight - parsed.y };
+
+          frame = window.requestAnimationFrame(() => {
+            setPositionSafe(clampToViewport(storedPosition));
+          });
         }
       } catch (error) {
         console.warn('Failed to parse saved position:', error);
       }
     }
+
+    return () => {
+      if (frame !== null) window.cancelAnimationFrame(frame);
+    };
   }, [className, clampToViewport, setPositionSafe]);
 
   useEffect(() => {

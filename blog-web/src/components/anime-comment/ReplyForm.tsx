@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 import EmojiPicker from './EmojiPicker';
 import { commentApi } from '@/lib/api/comment';
 import { authApi } from '@/lib/api/auth';
@@ -10,6 +11,7 @@ import { clearVerifyToken, getVerifyToken, isVerifyTokenValidForEmail, saveVerif
 import { useUserInfo } from './UserInfoContext';
 import { Card } from '@/components/ui/Card';
 import { compressImageIfNeeded } from '@/lib/utils/imageCompress';
+import type { AnimeCommentConfig } from './types';
 
 interface ReplyFormProps {
   parentId: number;
@@ -17,7 +19,7 @@ interface ReplyFormProps {
   parentNickname: string;
   targetType: 'ARTICLE' | 'TALK';
   targetId: number;
-  config: any;
+  config: AnimeCommentConfig;
   onSubmitSuccess: (rootId: number) => void;
   onCancel: () => void;
 }
@@ -355,7 +357,14 @@ export default function ReplyForm({
             <div className="flex flex-wrap gap-3">
               {previewImages.map((url, idx) => (
                 <div key={url} className="relative">
-                  <img src={url} alt={`preview-${idx}`} className="w-20 h-20 object-cover rounded-xl border" />
+                  <Image
+                    src={url}
+                    alt={`preview-${idx}`}
+                    width={80}
+                    height={80}
+                    unoptimized
+                    className="w-20 h-20 object-cover rounded-xl border"
+                  />
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(idx)}

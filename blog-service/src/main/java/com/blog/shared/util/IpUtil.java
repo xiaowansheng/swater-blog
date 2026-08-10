@@ -4,6 +4,7 @@ package com.blog.shared.util;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Set;
 import java.util.regex.Pattern;
 /**
  * IP工具类
@@ -21,55 +22,31 @@ public class IpUtil {
      * 获取客户端真实IP地址
      */
     public static String getClientIp(HttpServletRequest request) {
+        return getClientIp(request, Set.of());
+    }
+
+    /**
+     * Gets the client IP and only accepts forwarding headers when the direct peer is trusted.
+     */
+    public static String getClientIp(HttpServletRequest request, Set<String> trustedProxies) {
         if (request == null) {
             return UNKNOWN;
         }
-        
-        String ip = null;
-        
-        // 1. 检查X-Forwarded-For头（代理服务器会设置）
-        ip = request.getHeader("X-Forwarded-For");
-        if (isValidIp(ip)) {
-            // X-Forwarded-For可能包含多个IP，取第一个
-            int index = ip.indexOf(',');
-            if (index != -1) {
-                ip = ip.substring(0, index);
+
+        String remoteIp = request.getRemoteAddr();
+        if (trustedProxies != null && isTrustedProxy(remoteIp, trustedProxies)) {
+            String realIp = request.getHeader("X-Real-IP");
+            if (isValidIp(realIp)) {
+                return realIp.trim();
             }
-            return ip.trim();
+
+            String forwardedIp = firstValidForwardedIp(request.getHeader("X-Forwarded-For"));
+            if (forwardedIp != null) {
+                return forwardedIp;
+            }
         }
-        
-        // 2. 检查X-Real-IP头（Nginx代理会设置）
-        ip = request.getHeader("X-Real-IP");
-        if (isValidIp(ip)) {
-            return ip;
-        }
-        
-        // 3. 检查Proxy-Client-IP头
-        ip = request.getHeader("Proxy-Client-IP");
-        if (isValidIp(ip)) {
-            return ip;
-        }
-        
-        // 4. 检查WL-Proxy-Client-IP头（WebLogic代理）
-        ip = request.getHeader("WL-Proxy-Client-IP");
-        if (isValidIp(ip)) {
-            return ip;
-        }
-        
-        // 5. 检查HTTP_CLIENT_IP头
-        ip = request.getHeader("HTTP_CLIENT_IP");
-        if (isValidIp(ip)) {
-            return ip;
-        }
-        
-        // 6. 检查HTTP_X_FORWARDED_FOR头
-        ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-        if (isValidIp(ip)) {
-            return ip;
-        }
-        
-        // 7. 最后使用getRemoteAddr()
-        ip = request.getRemoteAddr();
+
+        String ip = remoteIp;
         
         // 如果是本地回环地址，尝试获取本机真实IP
         if (LOCALHOST_IPV4.equals(ip) || LOCALHOST_IPV6.equals(ip)) {
@@ -82,6 +59,51 @@ public class IpUtil {
         }
         
         return ip;
+    }
+
+    private static String firstValidForwardedIp(String headerValue) {
+        if (headerValue == null) {
+            return null;
+        }
+        for (String candidate : headerValue.split(",")) {
+            String normalized = candidate.trim();
+            if (isValidIp(normalized)) {
+                return normalized;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isTrustedProxy(String remoteIp, Set<String> trustedProxies) {
+        if (!isValidIp(remoteIp)) {
+            return false;
+        }
+        for (String proxy : trustedProxies) {
+            if (proxy.equals(remoteIp)) {
+                return true;
+            }
+            if (proxy.contains("/") && isIpInCidr(remoteIp, proxy)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isIpInCidr(String ip, String cidr) {
+        String[] parts = cidr.split("/", 2);
+        if (parts.length != 2 || !isValidIp(parts[0])) {
+            return false;
+        }
+        try {
+            int prefixLength = Integer.parseInt(parts[1]);
+            if (prefixLength < 0 || prefixLength > 32) {
+                return false;
+            }
+            long mask = prefixLength == 0 ? 0 : (0xFFFFFFFFL << (32 - prefixLength)) & 0xFFFFFFFFL;
+            return (ipToLong(ip) & mask) == (ipToLong(parts[0]) & mask);
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
     
     /**

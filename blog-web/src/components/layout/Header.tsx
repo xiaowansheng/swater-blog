@@ -1,4 +1,3 @@
-import { Link } from '@/lib/i18n/routing';
 import { getTranslations } from 'next-intl/server';
 import { getSiteInfo } from '@/lib/api/config.server';
 import HeaderClient from './HeaderClient';

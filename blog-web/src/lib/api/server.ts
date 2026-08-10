@@ -30,8 +30,12 @@ type NextFetchOptions = {
   revalidate?: number;
 };
 
-export type FetchServerOptions = RequestInit & {
+const DEFAULT_SERVER_TIMEOUT = 15000;
+
+export type FetchServerOptions = Omit<RequestInit, 'signal'> & {
   next?: NextFetchOptions;
+  signal?: AbortSignal;
+  timeout?: number;
 };
 
 export async function fetchServer<T>(url: string, options?: FetchServerOptions): Promise<T> {
@@ -40,10 +44,36 @@ export async function fetchServer<T>(url: string, options?: FetchServerOptions):
     return mockData;
   }
 
+  const timeout = options?.timeout ?? DEFAULT_SERVER_TIMEOUT;
+  const controller = new AbortController();
+  const externalSignal = options?.signal;
+  let timedOut = false;
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  const abortFromExternalSignal = () => controller.abort();
+  if (externalSignal) {
+    if (externalSignal.aborted) {
+      controller.abort();
+    } else {
+      externalSignal.addEventListener('abort', abortFromExternalSignal, { once: true });
+    }
+  }
+  if (timeout > 0) {
+    timeoutId = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, timeout);
+  }
+
+  const requestOptions = { ...options };
+  delete requestOptions.signal;
+  delete requestOptions.timeout;
+
   try {
     const verifyToken = getVerifyToken();
     const response = await fetch(normalizeApiUrl(API_BASE_URL, url), {
-      ...options,
+      ...requestOptions,
+      signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
         ...(verifyToken ? { [VERIFY_TOKEN_HEADER]: verifyToken } : {}),
@@ -64,12 +94,20 @@ export async function fetchServer<T>(url: string, options?: FetchServerOptions):
 
     return result.data;
   } catch (error: unknown) {
+    if (timedOut) {
+      throw new Error('服务端请求超时，请稍后重试');
+    }
     const err = error as { code?: string; message?: string };
     if (err.code === 'ECONNREFUSED' || err.message?.includes('fetch failed')) {
       console.warn(`API server connection failed: ${normalizeApiUrl(API_BASE_URL, url)}`);
       throw error;
     }
     throw error;
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    externalSignal?.removeEventListener('abort', abortFromExternalSignal);
   }
 }
 

@@ -20,9 +20,10 @@ export function DecorationProvider({ children }: { children: React.ReactNode }) 
   // Load level from localStorage
   useEffect(() => {
     const savedLevel = localStorage.getItem('decoration-level') as DecorationLevel;
-    if (savedLevel && ['none', 'light', 'full'].includes(savedLevel)) {
-      setLevel(savedLevel);
-    }
+    if (!savedLevel || !['none', 'light', 'full'].includes(savedLevel)) return;
+
+    const timer = window.setTimeout(() => setLevel(savedLevel), 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   // Determine weather based on date and probability
@@ -46,7 +47,8 @@ export function DecorationProvider({ children }: { children: React.ReactNode }) 
     }
     // Spring (default Sakura) is covered by initialization
 
-    setWeather(newWeather);
+    const timer = window.setTimeout(() => setWeather(newWeather), 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const handleSetLevel = (newLevel: DecorationLevel) => {

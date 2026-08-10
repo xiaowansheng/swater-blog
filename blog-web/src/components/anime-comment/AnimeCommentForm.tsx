@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 import EmojiPicker from './EmojiPicker';
 import type { AnimeCommentConfig, CommentFormData } from './types';
 import { commentApi } from '@/lib/api/comment';
@@ -327,7 +328,14 @@ export default function AnimeCommentForm({ config, targetType, targetId, onSubmi
             <div className="flex flex-wrap gap-3">
               {previewImages.map((url, idx) => (
                 <div key={url} className="relative">
-                  <img src={url} alt={`preview-${idx}`} className="w-20 h-20 object-cover rounded-xl border" />
+                  <Image
+                    src={url}
+                    alt={`preview-${idx}`}
+                    width={80}
+                    height={80}
+                    unoptimized
+                    className="w-20 h-20 object-cover rounded-xl border"
+                  />
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(idx)}

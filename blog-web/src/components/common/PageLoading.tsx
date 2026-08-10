@@ -25,6 +25,7 @@ interface Star {
   y: number;
   delay: number;
   scale: number;
+  duration: number;
 }
 
 export default function PageLoading({
@@ -126,9 +127,6 @@ export default function PageLoading({
   const loadingScenes = getLoadingScenes(theme === 'dark');
 
   useEffect(() => {
-    // 标记组件已挂载
-    setMounted(true);
-
     // 生成樱花花瓣
     const generatedPetals = Array.from({ length: 20 }, (_, i) => ({
       id: i,
@@ -137,8 +135,6 @@ export default function PageLoading({
       duration: 4 + Math.random() * 3,
       size: 12 + Math.random() * 16,
     }));
-    setPetals(generatedPetals);
-
     // 生成星星
     const generatedStars = Array.from({ length: 25 }, (_, i) => ({
       id: i,
@@ -146,8 +142,13 @@ export default function PageLoading({
       y: Math.random() * 100,
       delay: Math.random() * 2,
       scale: 0.5 + Math.random() * 1,
+      duration: 3 + Math.random() * 2,
     }));
-    setStars(generatedStars);
+    const initializeTimer = window.setTimeout(() => {
+      setMounted(true);
+      setPetals(generatedPetals);
+      setStars(generatedStars);
+    }, 0);
 
     const startTime = Date.now();
 
@@ -186,6 +187,7 @@ export default function PageLoading({
       clearInterval(interval);
       clearInterval(sceneInterval);
       clearTimeout(timer);
+      clearTimeout(initializeTimer);
       if (finishTimer) {
         clearTimeout(finishTimer);
       }
@@ -282,7 +284,7 @@ export default function PageLoading({
                   rotate: [0, 180, 360],
                 }}
                 transition={{
-                  duration: 3 + Math.random() * 2,
+                  duration: star.duration,
                   delay: star.delay,
                   repeat: Infinity,
                   ease: 'easeInOut',

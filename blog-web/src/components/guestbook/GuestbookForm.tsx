@@ -83,7 +83,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
       const endTime = Date.now() + 60 * 1000; // 60秒后
       localStorage.setItem('emailCodeEndTime', endTime.toString());
       setCooldown(60);
-    } catch (err) {
+    } catch {
       // 全局拦截器已经处理了错误提示，这里不需要再设置错误
     } finally {
       setSendingCode(false);
@@ -146,7 +146,7 @@ export default function GuestbookForm({ onSuccess }: GuestbookFormProps) {
 
       toast.success(t('commentPublished'));
       onSuccess?.(message);
-    } catch (err) {
+    } catch {
       // 全局拦截器已经处理了错误提示，这里不需要再设置错误
     } finally {
       setSubmitting(false);

@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
+import { useMotionValue } from 'framer-motion';
 import { useEffect, useState, useCallback, useRef } from 'react';
 
 // Anime/Magic colors with Firework intensity
@@ -34,6 +34,7 @@ export default function CursorFollower({ level = 'full' }: { level?: 'light' | '
   
   const particleIdCounter = useRef(0);
   const requestRef = useRef<number>(0);
+  const animateRef = useRef<(time: number) => void>(() => undefined);
   const lastTimeRef = useRef<number>(0);
 
   // Physics Config
@@ -109,10 +110,11 @@ export default function CursorFollower({ level = 'full' }: { level?: 'light' | '
         .filter(p => p.life > 0);
     });
 
-    requestRef.current = requestAnimationFrame(animate);
+    requestRef.current = requestAnimationFrame((nextTime) => animateRef.current(nextTime));
   }, []);
 
   useEffect(() => {
+    animateRef.current = animate;
     requestRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(requestRef.current);
   }, [animate]);

@@ -73,7 +73,7 @@ spring:
       mode: always
       schema-locations: classpath:schema.sql
       data-locations: classpath:data-dev.sql
-      continue-on-error: true
+      continue-on-error: false
       separator: ";"
       encoding: utf-8
 
@@ -138,7 +138,7 @@ location:
 
 revalidate:
   url: http://127.0.0.1:3001
-  token: ${REVALIDATE_TOKEN:change-me}
+  token: ${REVALIDATE_TOKEN:}
 
 mybatis-plus:
   configuration:

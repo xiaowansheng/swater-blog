@@ -91,6 +91,8 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
             }
             
             articleMapper.insert(article);
+            blogMetrics.updateTotalArticles(articleMapper.selectCount(
+                    new LambdaQueryWrapper<Article>().eq(Article::getDeleted, 0)));
             
             // 处理标签
             java.util.Set<Long> allTagIds = new java.util.HashSet<>();
@@ -171,6 +173,11 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         }
         
         articleMapper.updateById(article);
+        blogMetrics.incrementArticleUpdated(
+                article.getCategoryId() != null ? String.valueOf(article.getCategoryId()) : "unknown",
+                article.getType());
+        blogMetrics.updateTotalArticles(articleMapper.selectCount(
+                new LambdaQueryWrapper<Article>().eq(Article::getDeleted, 0)));
         
         articleTagMapper.deleteByArticleId(id);
         
@@ -210,6 +217,9 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
 
         articleMapper.deleteById(id);
         articleTagMapper.deleteByArticleId(id);
+        blogMetrics.incrementArticleDeleted();
+        blogMetrics.updateTotalArticles(articleMapper.selectCount(
+                new LambdaQueryWrapper<Article>().eq(Article::getDeleted, 0)));
 
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleDeletedEvent(this, id)));
     }
@@ -236,6 +246,11 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
             article.setPublishedAt(LocalDateTime.now());
         }
         articleMapper.updateById(article);
+        blogMetrics.incrementArticleUpdated(
+                article.getCategoryId() != null ? String.valueOf(article.getCategoryId()) : "unknown",
+                article.getType());
+        blogMetrics.updateTotalArticles(articleMapper.selectCount(
+                new LambdaQueryWrapper<Article>().eq(Article::getDeleted, 0)));
         
         Article publishedArticle = articleMapper.selectById(id);
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticlePublishedEvent(this, id, publishedArticle)));
@@ -252,6 +267,11 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         // 下架时状态变为私密
         article.setStatus(ArticleStatus.PRIVATE.getCode());
         articleMapper.updateById(article);
+        blogMetrics.incrementArticleUpdated(
+                article.getCategoryId() != null ? String.valueOf(article.getCategoryId()) : "unknown",
+                article.getType());
+        blogMetrics.updateTotalArticles(articleMapper.selectCount(
+                new LambdaQueryWrapper<Article>().eq(Article::getDeleted, 0)));
         
         Article unpublishedArticle = articleMapper.selectById(id);
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUnpublishedEvent(this, id, unpublishedArticle)));
@@ -296,6 +316,11 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         }
 
         articleMapper.updateById(article);
+        blogMetrics.incrementArticleUpdated(
+                article.getCategoryId() != null ? String.valueOf(article.getCategoryId()) : "unknown",
+                article.getType());
+        blogMetrics.updateTotalArticles(articleMapper.selectCount(
+                new LambdaQueryWrapper<Article>().eq(Article::getDeleted, 0)));
 
         // 处理标签
         if (dto.getTagIds() != null || dto.getTagNames() != null) {

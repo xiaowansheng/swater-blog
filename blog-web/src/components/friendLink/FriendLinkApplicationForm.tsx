@@ -91,7 +91,7 @@ export default function FriendLinkApplicationForm({
       const endTime = Date.now() + 60 * 1000;
       localStorage.setItem('emailCodeEndTime', endTime.toString());
       setCooldown(60);
-    } catch (err) {
+    } catch {
     } finally {
       setSendingCode(false);
     }
@@ -168,8 +168,8 @@ export default function FriendLinkApplicationForm({
       setTimeout(() => {
         onSuccess?.();
       }, 2000);
-    } catch (err: any) {
-      setError(err.message || t('submitFailed'));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t('submitFailed'));
     } finally {
       setLoading(false);
     }

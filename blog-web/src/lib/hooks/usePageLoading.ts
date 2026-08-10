@@ -21,8 +21,12 @@ export function usePageLoading() {
       return () => clearTimeout(timer);
     } else {
       // 非首次加载，直接隐藏
-      setIsLoading(false);
-      setIsInitialLoad(false);
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+        setIsInitialLoad(false);
+      }, 0);
+
+      return () => clearTimeout(timer);
     }
   }, []);
 

@@ -8,12 +8,13 @@ import org.springframework.web.socket.*;
 import com.blog.shared.util.JsonUtil;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
 public class NotificationWebSocketHandler implements WebSocketHandler {
     
-    private final ConcurrentHashMap<Long, WebSocketSession> userSessions = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, Set<WebSocketSession>> userSessions = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Long> sessionIdToUserId = new ConcurrentHashMap<>();
     
     @Override
@@ -21,7 +22,7 @@ public class NotificationWebSocketHandler implements WebSocketHandler {
         String sessionId = session.getId();
         Long userId = extractUserId(session);
         if (userId != null) {
-            userSessions.put(userId, session);
+            userSessions.computeIfAbsent(userId, ignored -> ConcurrentHashMap.newKeySet()).add(session);
             sessionIdToUserId.put(sessionId, userId);
             log.info("WebSocket connection established: sessionId={}, userId={}", sessionId, userId);
             return;
@@ -56,7 +57,13 @@ public class NotificationWebSocketHandler implements WebSocketHandler {
         String sessionId = session.getId();
         Long userId = sessionIdToUserId.remove(sessionId);
         if (userId != null) {
-            userSessions.remove(userId);
+            Set<WebSocketSession> sessions = userSessions.get(userId);
+            if (sessions != null) {
+                sessions.removeIf(existing -> sessionId.equals(existing.getId()));
+                if (sessions.isEmpty()) {
+                    userSessions.remove(userId, sessions);
+                }
+            }
         }
         log.info("WebSocket connection closed: sessionId={}, userId={}, closeStatus={}", sessionId, userId, closeStatus);
     }
@@ -68,27 +75,34 @@ public class NotificationWebSocketHandler implements WebSocketHandler {
     
     public void sendToUser(Long userId, String message) {
         if (userId == null) return;
-        WebSocketSession session = userSessions.get(userId);
-        if (session == null) return;
-        try {
-            if (session.isOpen()) {
-                session.sendMessage(new TextMessage(message));
+        Set<WebSocketSession> sessions = userSessions.get(userId);
+        if (sessions == null) return;
+        for (WebSocketSession session : sessions) {
+            try {
+                if (session.isOpen()) {
+                    session.sendMessage(new TextMessage(message));
+                } else {
+                    sessions.remove(session);
+                }
+            } catch (Exception e) {
+                log.error("Failed to send notification to userId={}, sessionId={}: {}", userId, session.getId(), e.getMessage());
             }
-        } catch (Exception e) {
-            log.error("Failed to send notification to userId={}, sessionId={}: {}", userId, session.getId(), e.getMessage());
         }
     }
 
     public void broadcast(String message) {
-        userSessions.values().forEach(session -> {
+        userSessions.values().forEach(sessions -> sessions.removeIf(session -> {
             try {
                 if (session.isOpen()) {
                     session.sendMessage(new TextMessage(message));
+                    return false;
                 }
+                return true;
             } catch (Exception e) {
                 log.error("Failed to broadcast notification to session {}: {}", session.getId(), e.getMessage());
+                return false;
             }
-        });
+        }));
     }
 
     private Long extractUserId(WebSocketSession session) {

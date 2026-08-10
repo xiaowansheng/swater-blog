@@ -57,7 +57,7 @@ jobs:
         distribution: 'temurin'
     
     - name: Cache Gradle packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.gradle/caches
@@ -84,7 +84,7 @@ jobs:
         REDIS_PORT: 6379
     
     - name: Generate test report
-      uses: dorny/test-reporter@v1
+      uses: dorny/test-reporter@v2
       if: success() || failure()
       with:
         name: Backend Tests
@@ -92,9 +92,9 @@ jobs:
         reporter: java-junit
     
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       with:
-        file: blog-service/build/reports/jacoco/test/jacocoTestReport.xml
+        files: blog-service/build/reports/jacoco/test/jacocoTestReport.xml
         flags: backend
 
   check-frontend-admin:
@@ -105,7 +105,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Install pnpm
-      uses: pnpm/action-setup@v2
+      uses: pnpm/action-setup@v4
       with:
         version: 9
 
@@ -134,7 +134,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Install pnpm
-      uses: pnpm/action-setup@v2
+      uses: pnpm/action-setup@v4
       with:
         version: 9
     
@@ -152,7 +152,7 @@ jobs:
         pnpm run build
     
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: frontend-admin-dist
         path: blog-admin/dist/
@@ -165,7 +165,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Install pnpm
-      uses: pnpm/action-setup@v2
+      uses: pnpm/action-setup@v4
       with:
         version: 9
 
@@ -194,7 +194,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Install pnpm
-      uses: pnpm/action-setup@v2
+      uses: pnpm/action-setup@v4
       with:
         version: 9
 
@@ -225,7 +225,7 @@ jobs:
         distribution: 'temurin'
     
     - name: Cache Gradle packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.gradle/caches
@@ -241,7 +241,7 @@ jobs:
         ./gradlew clean build -x test
     
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: backend-jar
         path: blog-service/build/libs/*.jar
@@ -254,14 +254,17 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
+      uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # v0.28.0
       with:
         scan-type: 'fs'
         scan-ref: '.'
         format: 'sarif'
         output: 'trivy-results.sarif'
+        exit-code: '1'
+        severity: 'CRITICAL,HIGH'
+        ignore-unfixed: true
     
     - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: 'trivy-results.sarif'

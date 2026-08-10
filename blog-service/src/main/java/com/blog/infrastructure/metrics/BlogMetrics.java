@@ -83,6 +83,22 @@ public class BlogMetrics {
             .increment();
     }
 
+    public void incrementArticleUpdated(String category, String type) {
+        Counter.builder("blog.article.updated")
+            .description("文章更新总数")
+            .tag("category", category != null ? category : "unknown")
+            .tag("type", type != null ? type : "original")
+            .register(meterRegistry)
+            .increment();
+    }
+
+    public void incrementArticleDeleted() {
+        Counter.builder("blog.article.deleted")
+            .description("文章删除总数")
+            .register(meterRegistry)
+            .increment();
+    }
+
     /**
      * 记录文章浏览
      */

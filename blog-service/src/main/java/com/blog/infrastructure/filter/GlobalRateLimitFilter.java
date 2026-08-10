@@ -3,7 +3,7 @@ package com.blog.infrastructure.filter;
 
 import com.blog.infrastructure.security.RateLimitManager;
 import com.blog.shared.Result;
-import com.blog.shared.util.IpUtil;
+import com.blog.shared.util.ClientIpResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
@@ -38,6 +38,9 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ClientIpResolver clientIpResolver;
 
     @Autowired
     private Environment environment;
@@ -85,7 +88,7 @@ public class GlobalRateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
-        String ip = IpUtil.getClientIp(request);
+        String ip = clientIpResolver.resolve(request);
         log.debug("Rate limit check for IP: {} - {} {}", ip, request.getMethod(), request.getRequestURI());
 
         RateLimitManager.RateLimitResult secondResult = null;
