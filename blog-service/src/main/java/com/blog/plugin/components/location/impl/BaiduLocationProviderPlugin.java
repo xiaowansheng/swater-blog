@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.location.LocationInfo;
 import com.blog.plugin.components.location.LocationProviderPlugin;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "plugin.location.active", havingValue = "baidu", matchIfMissing = false)
-public class BaiduLocationProviderPlugin implements LocationProviderPlugin, Plugin {
+public class BaiduLocationProviderPlugin implements LocationProviderPlugin {
     
     @Value("${location.baidu.ak:}")
     private String ak;

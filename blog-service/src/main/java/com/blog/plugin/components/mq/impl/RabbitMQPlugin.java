@@ -1,7 +1,6 @@
 package com.blog.plugin.components.mq.impl;
 
 
-import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.mq.MessageQueuePlugin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 @Component
 @ConditionalOnProperty(name = "plugin.mq.active", havingValue = "rabbitmq", matchIfMissing = false)
-public class RabbitMQPlugin implements MessageQueuePlugin, Plugin {
+public class RabbitMQPlugin implements MessageQueuePlugin {
     
     @Autowired(required = false)
     private RabbitTemplate rabbitTemplate;
@@ -57,4 +56,3 @@ public class RabbitMQPlugin implements MessageQueuePlugin, Plugin {
         rabbitTemplate.convertAndSend(exchange, routingKey, message);
     }
 }
-

@@ -16,7 +16,6 @@ import com.blog.modules.category.model.entity.Category;
 import com.blog.modules.tag.model.entity.Tag;
 import com.blog.modules.user.model.entity.User;
 import com.blog.modules.search.model.vo.SearchVO;
-import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.search.SearchPlugin;
 import com.blog.infrastructure.repository.CommentDocumentRepository;
 import com.blog.infrastructure.repository.MomentDocumentRepository;
@@ -48,7 +47,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @ConditionalOnProperty(name = "plugin.search.active", havingValue = "elasticsearch")
-public class ElasticsearchSearchPlugin implements SearchPlugin, Plugin {
+public class ElasticsearchSearchPlugin implements SearchPlugin {
 
     @Autowired
     private ElasticsearchOperations elasticsearchOperations;

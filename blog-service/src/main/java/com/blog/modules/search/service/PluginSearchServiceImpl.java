@@ -30,10 +30,7 @@ public class PluginSearchServiceImpl implements SearchService {
         if (searchPluginFactory == null) {
             throw new BusinessException("未配置搜索插件工厂");
         }
-        SearchPlugin plugin = searchPluginFactory.getActivePlugin();
-        if (plugin == null) {
-            throw new BusinessException("没有可用的搜索插件");
-        }
+        SearchPlugin plugin = getActivePlugin();
         try {
             return plugin.search(keyword, type, page, size, categoryId);
         } catch (Exception e) {
@@ -46,14 +43,22 @@ public class PluginSearchServiceImpl implements SearchService {
         if (searchPluginFactory == null) {
             return Collections.emptyMap();
         }
-        SearchPlugin plugin = searchPluginFactory.getActivePlugin();
-        if (plugin == null) {
-            return Collections.emptyMap();
-        }
+        SearchPlugin plugin = getActivePlugin();
         try {
             return plugin.getFacetCounts(keyword);
         } catch (Exception e) {
             return Collections.emptyMap();
+        }
+    }
+
+    /**
+     * 获取启用的搜索插件，无可用插件时转换为业务异常（避免 IllegalStateException 直接穿透为 500）
+     */
+    private SearchPlugin getActivePlugin() {
+        try {
+            return searchPluginFactory.getActivePlugin();
+        } catch (IllegalStateException e) {
+            throw new BusinessException("没有可用的搜索插件: " + e.getMessage());
         }
     }
 }

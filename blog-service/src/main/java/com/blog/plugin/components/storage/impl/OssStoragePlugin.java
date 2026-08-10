@@ -5,7 +5,6 @@ package com.blog.plugin.components.storage.impl;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.PutObjectRequest;
-import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.storage.StoragePlugin;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
@@ -19,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 @Component
 @ConditionalOnProperty(name = "plugin.storage.active", havingValue = "oss", matchIfMissing = false)
-public class OssStoragePlugin implements StoragePlugin, Plugin {
+public class OssStoragePlugin implements StoragePlugin {
     
     @Value("${file.storage.oss.endpoint:}")
     private String endpoint;

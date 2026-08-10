@@ -1,7 +1,6 @@
 package com.blog.plugin.components.location.impl;
 
 
-import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.location.LocationInfo;
 import com.blog.plugin.components.location.LocationProviderPlugin;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 @Component
 @ConditionalOnProperty(name = "plugin.location.active", havingValue = "ip2location", matchIfMissing = false)
-public class Ip2LocationProviderPlugin implements LocationProviderPlugin, Plugin {
+public class Ip2LocationProviderPlugin implements LocationProviderPlugin {
     
     @Value("${location.ip2location.db-path:}")
     private String dbPath;

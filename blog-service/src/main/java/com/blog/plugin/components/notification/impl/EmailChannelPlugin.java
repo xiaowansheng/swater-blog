@@ -3,7 +3,6 @@ package com.blog.plugin.components.notification.impl;
 
 
 import com.blog.infrastructure.mail.EmailService;
-import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.notification.NotificationChannelPlugin;
 import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.user.model.entity.User;
@@ -15,7 +14,7 @@ import java.util.Map;
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "plugin.notification.email.active", havingValue = "email", matchIfMissing = false)
-public class EmailChannelPlugin implements NotificationChannelPlugin, Plugin {
+public class EmailChannelPlugin implements NotificationChannelPlugin {
 
     @Autowired
     private EmailService emailService;

@@ -5,7 +5,6 @@ package com.blog.plugin.components.storage.impl;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
-import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.storage.StoragePlugin;
 import com.qiniu.common.QiniuException;
 import com.qiniu.http.Response;
@@ -23,7 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 @Component
 @ConditionalOnProperty(name = "plugin.storage.active", havingValue = "qiniu", matchIfMissing = false)
-public class QiniuStoragePlugin implements StoragePlugin, Plugin {
+public class QiniuStoragePlugin implements StoragePlugin {
     
     @Value("${file.storage.qiniu.access-key:}")
     private String accessKey;

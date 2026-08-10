@@ -2,7 +2,6 @@ package com.blog.plugin.components.scheduler.impl;
 
 
 
-import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.scheduler.SchedulerPlugin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -15,7 +14,7 @@ import java.util.concurrent.ScheduledFuture;
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "plugin.scheduler.active", havingValue = "spring", matchIfMissing = false)
-public class SpringScheduledPlugin implements SchedulerPlugin, Plugin {
+public class SpringScheduledPlugin implements SchedulerPlugin {
     
     private final TaskScheduler taskScheduler;
     private final Map<String, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
@@ -92,4 +91,3 @@ public class SpringScheduledPlugin implements SchedulerPlugin, Plugin {
         log.warn("Spring Scheduled不支持恢复任务，任务 {} 需要重新创建", taskName);
     }
 }
-

@@ -2,7 +2,6 @@ package com.blog.plugin.components.scheduler.impl;
 
 
 
-import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.scheduler.SchedulerPlugin;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
@@ -13,7 +12,7 @@ import java.util.Properties;
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "plugin.scheduler.active", havingValue = "quartz", matchIfMissing = false)
-public class QuartzSchedulerPlugin implements SchedulerPlugin, Plugin {
+public class QuartzSchedulerPlugin implements SchedulerPlugin {
     
     private Scheduler scheduler;
     
@@ -146,4 +145,3 @@ public class QuartzSchedulerPlugin implements SchedulerPlugin, Plugin {
         }
     }
 }
-

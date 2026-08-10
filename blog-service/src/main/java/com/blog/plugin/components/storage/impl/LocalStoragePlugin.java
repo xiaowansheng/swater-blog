@@ -6,7 +6,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.blog.bootstrap.config.WebMvcConfig;
-import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.storage.StoragePlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 @Component
 @ConditionalOnProperty(name = "plugin.storage.active", havingValue = "local", matchIfMissing = false)
-public class LocalStoragePlugin implements StoragePlugin, Plugin {
+public class LocalStoragePlugin implements StoragePlugin {
 
     @Autowired
     private WebMvcConfig webMvcConfig;

@@ -1,6 +1,7 @@
 package com.blog.plugin.components.scheduler;
 
 
+import com.blog.plugin.core.AbstractSinglePluginFactory;
 import com.blog.plugin.core.Plugin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -8,26 +9,25 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class SchedulerPluginFactory {
+public class SchedulerPluginFactory extends AbstractSinglePluginFactory<SchedulerPlugin> {
 
     @Autowired
     private List<SchedulerPlugin> schedulerPlugins;
 
+    @Override
     public List<SchedulerPlugin> getPlugins() {
-        return schedulerPlugins;
+        return schedulerPlugins.stream()
+                .filter(Plugin::isEnabled)
+                .collect(Collectors.toList());
     }
 
-    public SchedulerPlugin getActivePlugin() {
-        List<SchedulerPlugin> plugins = getPlugins();
-        if (plugins.isEmpty()) {
-            throw new IllegalStateException("No active scheduler plugin found. Please configure plugin.scheduler.active property.");
-        }
-        if (plugins.size() > 1) {
-            throw new IllegalStateException("Multiple scheduler plugins are active: " +
-                    plugins.stream().map(Plugin::getName)
-                            .collect(Collectors.joining(", ")) +
-                    ". Only one should be active.");
-        }
-        return plugins.get(0);
+    @Override
+    protected String getPluginTypeName() {
+        return "scheduler";
+    }
+
+    @Override
+    protected String getConfigPropertyKey() {
+        return "plugin.scheduler.active";
     }
 }

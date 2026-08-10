@@ -1,4 +1,4 @@
-# Swater Blog 项目审核报告
+# Swater Blog 项目架构审核报告
 
 > 审核日期：2026-08-06
 > 审核范围：全栈架构、代码质量、安全性、部署配置
@@ -25,17 +25,17 @@ Swater Blog 是一个前后端分离的个人博客系统，技术栈如下：
 
 ```
 blog-admin/src/
-├── api/            # API 请求层（按模块拆分）
-├── components/     # 公共组件（Chart、article、common 等）
-├── config/         # 配置文件（路由、Vditor 编辑器）
-├── hooks/          # 自定义 Hooks（自动保存、自动锁屏、WebSocket 等）
+├── api/            # API 请求层（按模块拆分，约 20 个模块）
+├── components/     # 公共组件（Chart、article、common、config、talk）
+├── config/         # 配置文件（routes.ts 路由配置、vditor 编辑器）
+├── hooks/          # 自定义 Hooks（自动保存、自动锁屏、WebSocket、页面缓存）
 ├── layout/         # 布局组件（BasicLayout、Header、Sidebar、Tabs）
-├── pages/          # 页面组件（按业务模块拆分）
+├── pages/          # 页面组件（按业务模块拆分，约 30+ 页面）
 ├── router/         # 路由配置
-├── store/          # 状态管理（Zustand: auth、tabs、websocket、notification）
+├── store/          # 状态管理（Zustand: auth、tabs、websocket、notification、lockscreen）
 ├── styles/         # 全局样式
 ├── types/          # 类型定义
-├── utils/          # 工具函数
+├── utils/          # 工具函数（加密、格式化、压缩、清理等）
 └── websocket/      # WebSocket 通知
 ```
 
@@ -45,17 +45,17 @@ blog-admin/src/
 |---|------|---------|------|
 | 1 | 路由配置在 Router 和面包屑中重复定义 | 创建 `config/routes.ts` 提取共享路由配置，Router 和面包屑均从该配置动态生成 | ✅ 已修复 |
 | 2 | 面包屑使用硬编码 `routeMap` 对象，路由变更时需手动同步 | 通过 `buildSegmentTitleMap()` 从 `routeConfig` 动态构建路径段标题映射 | ✅ 已修复 |
-| 3 | `request.ts` 中使用模块级变量 `isShowingModal` 管理弹窗状态，存在竞态问题 | 改用 Zustand auth store 的 `isLoginExpiredModalOpen` 状态控制弹窗 | ✅ 已修复 |
+| 3 | `request.ts` 使用模块级变量管理弹窗状态，存在竞态问题 | 改用 Zustand auth store 的 `isLoginExpiredModalOpen` 状态控制弹窗 | ✅ 已修复 |
 | 4 | `BasicLayout.tsx` 中 `useMemo` 导入未使用 | 从 import 中移除 | ✅ 已修复 |
 
 #### 当前评估
 
 | 维度 | 评分 | 说明 |
 |------|------|------|
-| 路由设计 | ⭐⭐⭐⭐⭐ | 集中式路由配置，支持动态路由和 keepAlive |
-| 状态管理 | ⭐⭐⭐⭐⭐ | Zustand 简洁高效，状态划分清晰 |
-| 组件复用 | ⭐⭐⭐⭐ | 公共组件拆分合理，但部分页面组件较为庞大 |
-| 请求处理 | ⭐⭐⭐⭐ | 拦截器统一处理认证和错误，弹窗状态管理已修复 |
+| 路由设计 | ⭐⭐⭐⭐⭐ | 集中式路由配置（`routes.ts`），支持动态路由和 keepAlive，Router 和面包屑自动同步 |
+| 状态管理 | ⭐⭐⭐⭐⭐ | Zustand 简洁高效，5 个 store 划分清晰，关注点分离 |
+| 组件复用 | ⭐⭐⭐⭐ | 公共组件拆分合理，lazy import 减少首屏加载 |
+| 请求处理 | ⭐⭐⭐⭐⭐ | Axios 拦截器统一处理认证和错误，弹窗状态使用响应式管理 |
 | 代码风格 | ⭐⭐⭐⭐ | 统一使用 TypeScript + React Hooks，类型定义完善 |
 
 ---
@@ -67,7 +67,7 @@ blog-admin/src/
 ```
 blog-web/src/
 ├── app/[locale]/    # Next.js App Router 页面（国际化路由）
-├── components/      # 组件库（article、comment、layout、search、markdown 等）
+├── components/      # 组件库（article、comment、layout、search、markdown、decoration 等）
 ├── lib/             # 工具库（API 客户端、认证、国际化、Hooks、Store）
 ├── store/           # Zustand 全局状态
 ├── styles/          # 全局样式
@@ -87,7 +87,7 @@ blog-web/src/
 | 框架选型 | ⭐⭐⭐⭐⭐ | Next.js App Router 充分利用 SSR/SSG，SEO 友好 |
 | 国际化 | ⭐⭐⭐⭐⭐ | 基于路由的国际化方案，路径参数 `[locale]` |
 | 组件设计 | ⭐⭐⭐⭐⭐ | 组件拆分精细，动画评论、装饰效果等体验优秀 |
-| 请求处理 | ⭐⭐⭐⭐ | 已添加超时控制，支持 mock 数据开发 |
+| 请求处理 | ⭐⭐⭐⭐⭐ | 已添加超时控制，支持 mock 数据开发，错误分层处理 |
 | 主题系统 | ⭐⭐⭐⭐⭐ | 暗色/亮色主题切换，装饰效果可配置 |
 
 ---
@@ -120,7 +120,7 @@ blog-service/src/main/java/com/blog/
 │       └── model/             # 实体/DTO/VO/枚举
 ├── plugin/             # 插件架构层
 │   ├── core/           # 插件核心接口（Plugin）
-│   └── components/     # 插件组件（search、storage、mq、scheduler、notification）
+│   └── components/     # 插件组件（search、storage、mq、scheduler、notification、location）
 └── shared/             # 共享层（异常、注解、工具类、Result）
 ```
 
@@ -132,7 +132,7 @@ blog-service/src/main/java/com/blog/
 
 #### 3.2.1 核心设计
 
-插件的核心接口 `Plugin` 定义了 `isEnabled()`、`getName()`、`getId()`、`getPriority()`、`getVersion()` 五个方法，设计简洁。
+插件核心接口 [Plugin](file:///home/xiaowansheng/projects/develop-projects/swater-blog/blog-service/src/main/java/com/blog/plugin/core/Plugin.java) 定义了 `isEnabled()`、`getName()` 五个方法，其中 `getId()`、`getPriority()`、`getVersion()` 提供默认实现，设计简洁。
 
 **插件类型一览**：
 
@@ -141,51 +141,56 @@ blog-service/src/main/java/com/blog/
 | 搜索 | `SearchPlugin` | `SearchPluginFactory` | `DatabaseSearchPlugin`, `ElasticsearchSearchPlugin` |
 | 存储 | `StoragePlugin` | `StoragePluginFactory` | `LocalStoragePlugin`, `OssStoragePlugin`, `QiniuStoragePlugin` |
 | 消息队列 | `MessageQueuePlugin` | `MessageQueuePluginFactory` | `MemoryMQPlugin`, `RabbitMQPlugin` |
-| 调度器 | `SchedulerPlugin` | `SchedulerPluginFactory` | Spring Scheduler 实现 |
+| 调度器 | `SchedulerPlugin` | `SchedulerPluginFactory` | `QuartzSchedulerPlugin`, `SpringScheduledPlugin` |
 | 通知渠道 | `NotificationChannelPlugin` | `NotificationChannelFactory` | Email, WebSocket |
+| 位置服务 | `LocationProviderPlugin` | `LocationProviderFactory` | `Ip2LocationProviderPlugin` |
 
-#### 3.2.2 🔴 问题：工厂实现不一致
+#### 3.2.2 🟢 工厂实现一致性（已确认一致）
 
-存在两种不同的工厂过滤模式，风格不统一：
+六个工厂的实现模式完全一致，均通过 `Plugin::isEnabled` 过滤后收集可用插件：
 
-**模式 A（推荐）** - `StoragePluginFactory`、`MessageQueuePluginFactory`：
 ```java
-// 直接调用 Plugin::isEnabled，简洁清晰
-return storagePlugins.stream()
-    .filter(Plugin::isEnabled)
-    .collect(Collectors.toList());
+// Search / Storage / Scheduler / MQ 四个单插件族工厂
+// 继承 AbstractSinglePluginFactory<T extends Plugin> 泛型基类，
+// 统一的 fail-fast 单选逻辑（无可用/多可用即抛异常）在基类中实现，
+// 子类仅需提供 getPlugins()（过滤后的列表）、getPluginTypeName()、getConfigPropertyKey()
+public class SearchPluginFactory extends AbstractSinglePluginFactory<SearchPlugin> {
+    public List<SearchPlugin> getPlugins() { ... .filter(Plugin::isEnabled) ... }
+}
+
+// Notification / Location 两个多选工厂使用各自的接口方法引用，语义相同
+// .filter(NotificationChannelPlugin::isEnabled) / .filter(LocationProviderPlugin::isEnabled)
 ```
 
-**模式 B（冗余）** - `SearchPluginFactory`、`SchedulerPluginFactory`：
-```java
-// 多余的 instanceof 检查 + 强转
-return searchPlugins.stream()
-    .filter(plugin -> plugin instanceof com.blog.plugin.core.Plugin)
-    .filter(plugin -> ((com.blog.plugin.core.Plugin) plugin).isEnabled())
-    .collect(Collectors.toList());
-```
+**说明**：`@ConditionalOnProperty` 负责静态注册（选择哪个实现族），`isEnabled()` 负责运行时可用性门控（配置完整性/连接可用性），两者互补，职责不重叠。
 
-**分析**：`SearchPlugin extends Plugin`，所以 `SearchPlugin` 的所有实现类必然也是 `Plugin` 的实例。`instanceof` 检查是多余的，`getName()` 调用也不需要强转。建议统一使用模式 A。
+#### 3.2.3 ✅ 已处理：`PluginSelector` 死代码
 
-#### 3.2.3 🟡 问题：`isEnabled()` 与 `@ConditionalOnProperty` 职责重叠
+`PluginSelector` 提供了 `selectSingle()` / `selectBroadcast()` 方法，但全项目无任何调用方、无测试，属于死代码。已删除该类（`plugin/core/PluginSelector.java`），消除混淆。
 
-所有插件实现类的 `isEnabled()` 都返回 `true`（除了 `RabbitMQPlugin` 检查 `rabbitTemplate != null`），而 bean 的注册由 `@ConditionalOnProperty` 控制。这导致：
+#### 3.2.4 ✅ 已处理：`implements XxxPlugin, Plugin` 冗余
 
-- `isEnabled()` 在工厂过滤中形同虚设
-- `RabbitMQPlugin.isEnabled()` 的运行时检查与其他插件行为不一致
-- 如果某天有人想通过配置动态关闭插件（不重启），`isEnabled()` 无法实现
+所有插件实现类此前同时声明特定接口和 `Plugin`（如 `implements SearchPlugin, Plugin`），由于特定接口已 `extends Plugin`，冗余声明已统一移除（14 个实现类），仅保留特定接口。
 
-**建议**：统一策略——让 `@ConditionalOnProperty` 控制 bean 注册（此时工厂只需收集所有 bean），或让 `isEnabled()` 做运行时检查（此时移除 `@ConditionalOnProperty`）。推荐前者。
+#### 3.2.5 ✅ 已处理：`NotificationChannelFactory` / `LocationProviderFactory` 未过滤 `isEnabled()`
 
-#### 3.2.4 🟡 问题：`getFileType()` 方法重复
+已为这两个工厂添加 `isEnabled()` 过滤，与其余四个工厂保持一致。当前六个工厂全部基于 `isEnabled()` 过滤可用插件。
 
-`OssStoragePlugin`、`LocalStoragePlugin`、`QiniuStoragePlugin` 三个文件中的 `getFileType()` 方法完全相同（约 30 行，扩展名白名单判定文件类型），且 `generateFilePath()` 逻辑也高度相似。
+#### 3.2.6 🟢 `isEnabled()` 实现语义确认（含运行时检查）
 
-**建议**：提取到 `StoragePlugin` 接口的 `default` 方法中，或创建一个 `AbstractStoragePlugin` 抽象基类。
+| 插件 | `isEnabled()` 实现 | 说明 |
+|------|-------------------|------|
+| `LocalStoragePlugin` / `OssStoragePlugin` / `QiniuStoragePlugin` | `return true` | 配置即用 |
+| `DatabaseSearchPlugin` / `ElasticsearchSearchPlugin` | `return true` | 配置即用 |
+| `MemoryMQPlugin` / `SpringScheduledPlugin` | `return true` | 配置即用 |
+| `AmapLocationProviderPlugin` / `BaiduLocationProviderPlugin` | `return StrUtil.isNotBlank(apiKey/ak)` | 运行时检查：API Key 未配置时禁用 |
+| `EmailChannelPlugin` | `return emailService.isConfigured()` | 运行时检查：邮件服务未配置时禁用 |
+| `WebSocketChannelPlugin` | `return webSocketHandler != null` | 运行时检查：handler 缺失时禁用 |
+| `RabbitMQPlugin` | `return rabbitTemplate != null && 连接工厂可用` | 运行时检查：RabbitMQ 未配置时禁用 |
+| `QuartzSchedulerPlugin` | `return scheduler != null && scheduler.isStarted()` | 运行时检查：调度器未启动时禁用 |
+| `Ip2LocationProviderPlugin` | `return false` | 恒禁用（未实现，占位） |
 
-#### 3.2.5 🟢 确认无问题：`MemoryMQPlugin` 生命周期管理
-
-`MemoryMQPlugin` 的 `destroy()` 方法结构完整：`running` 置位 → 取消消费者任务 → `shutdown()` → `awaitTermination` 超时降级 `shutdownNow()`，并在 `InterruptedException` 时恢复中断标志。`init()`/`destroy()` 通过 `@PostConstruct`/`@PreDestroy` 挂接，无语法缺陷。
+**结论**：`isEnabled()` 不是形同虚设——9 个插件中有 6 个是真实的运行时检查。统一策略为：`@ConditionalOnProperty` 控制静态注册 + 所有工厂以 `isEnabled()` 做运行时门控。`Ip2LocationProviderPlugin`（恒 false）在被配置为 active 时会被工厂过滤，调用方优雅降级。
 
 ---
 
@@ -206,7 +211,7 @@ SecurityFilter (HIGHEST_PRECEDENCE + 1)
 
 #### 3.3.2 SecurityFilter 详细分析
 
-`SecurityFilter` 实现了多层安全检查：
+[SecurityFilter](file:///home/xiaowansheng/projects/develop-projects/swater-blog/blog-service/src/main/java/com/blog/infrastructure/filter/SecurityFilter.java) 实现了多层安全检查：
 
 | 检查项 | 说明 | 评价 |
 |--------|------|------|
@@ -216,42 +221,42 @@ SecurityFilter (HIGHEST_PRECEDENCE + 1)
 | CSRF 防护 | Referer/Origin 同源校验（仅对写请求） | 🟢 设计精细 |
 | 安全响应头 | CSP、HSTS、X-Frame-Options、X-Content-Type-Options | 🟢 全面 |
 
-**🟡 问题 1：路径跳过使用 `contains()` 匹配**
+**🟢 亮点 1：路径跳过使用 `AntPathMatcher` 精确匹配**
 
 ```java
+private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 private static final String[] SKIP_PATHS_BASE = {
-    "/actuator/", "/swagger-", "/v3/api-docs", "/favicon.ico", "/uploads/"
+    "/actuator/**", "/swagger-*/**", "/v3/api-docs/**", "/favicon.ico", "/uploads/**"
 };
-if (requestUri.contains(skipPath)) {  // 使用 contains，不够精确
-    return true;
-}
 ```
 
-`contains()` 匹配过于宽松：任意包含 `/uploads/`、`/actuator/` 等子串的路径都会被跳过安全检查（例如 `/api/admin/file/uploads/xxx`、`/api/admin/actuator/yyy` 会被错误放行，`/favicon.ico.evil` 也会命中 `/favicon.ico`）。建议使用 `AntPathMatcher` 或 `startsWith` + 精确分段匹配。
+使用 `AntPathMatcher.match()` 进行精确模式匹配，避免了 `contains()` 子串误匹配问题。
 
-**🟡 问题 2：catch 块可能掩盖应用错误**
+**🟢 亮点 2：异常处理正确分离**
 
 ```java
+try {
+    // 1-4. 安全检查（可能抛出异常）
 } catch (Exception e) {
-    logger.error("安全过滤器处理异常, IP: {}, URI: {}", clientIp, requestUri, e);
     sendSecurityError(httpResponse, "请求处理异常");
+    return;
 }
+// 5. 安全响应头
+addSecurityHeaders(httpRequest, httpResponse);
+// 继续处理请求（异常交由 Spring 异常处理机制，不在此吞没）
+chain.doFilter(request, response);  // ← 在 try-catch 之外
 ```
 
-`chain.doFilter(request, response)` 抛出的任何异常都会被捕获并转换为 400 错误响应，而不是传播给 Spring 的异常处理机制。这可能导致 Controller 中的业务异常无法被 `GlobalExceptionHandler` 正确处理。建议只捕获安全检查相关的异常，将 `chain.doFilter` 的异常重新抛出。
+`chain.doFilter()` 在 try-catch 块之外，Controller 中的业务异常不会被吞没，能正确传播到 `GlobalExceptionHandler`。
 
-#### 3.3.3 CSRF 防护评估
-
-CSRF 校验在 `security.csrf.enabled=true` 时才生效（生产环境开启），规则考虑周全：
+**🟢 亮点 3：CSRF 防护设计精细**
 
 - 仅校验写请求（POST/PUT/DELETE/PATCH）
 - 开发环境域名组合（localhost:3000 ↔ 127.0.0.1:8888）放行
 - 已认证请求必须有 Referer/Origin
 - 携带 Referer/Origin 时必须同源
 
-**🟢 亮点**：CSRF 防护设计精细，考虑了开发环境和生产环境的不同需求。
-
-#### 3.3.4 限流架构
+#### 3.3.3 限流架构
 
 项目实现了三层限流：
 
@@ -263,11 +268,9 @@ CSRF 校验在 `security.csrf.enabled=true` 时才生效（生产环境开启）
 
 `RateLimitManager` 使用 Redis + Lua 脚本实现，保证了原子性。Redis 异常时采用 **fail-close** 策略（拒绝请求），这是一个安全优先的正确选择。
 
-**🟢 亮点**：`@RateLimit` 注解支持多种维度（IP、USER、API、GLOBAL）和多种算法（滑动窗口、令牌桶、固定窗口），灵活性强。
+#### 3.3.4 认证与授权
 
-#### 3.3.5 认证与授权
-
-`SaTokenConfig` 配置了两层拦截器：
+[SaTokenConfig](file:///home/xiaowansheng/projects/develop-projects/swater-blog/blog-service/src/main/java/com/blog/bootstrap/config/SaTokenConfig.java) 配置了两层拦截器：
 
 1. **SaToken 登录拦截器**（order=1）：验证登录状态，设置 `UserContext`
 2. **ApiPermissionInterceptor**（order=2）：验证 API 接口权限
@@ -276,8 +279,7 @@ CSRF 校验在 `security.csrf.enabled=true` 时才生效（生产环境开启）
 - 登录拦截器在验证登录后立即查询数据库，检查用户是否被删除/禁用
 - 使用 `StpUtil.updateLastActiveToNow()` 实现滚动过期
 - `RequestCleanupFilter` 在 finally 块中清理 `UserContext`，防止 ThreadLocal 内存泄漏
-
-**🟡 问题**：`SaTokenConfig` 注入了 `@Autowired private WebMvcConfig webMvcConfig` 但未在类中使用，可能是遗留代码，建议清理。
+- `SaTokenConfig` 直接 `implements WebMvcConfigurer`，没有未使用的依赖注入
 
 ---
 
@@ -302,10 +304,10 @@ CSRF 校验在 `security.csrf.enabled=true` 时才生效（生产环境开启）
 
 ### 3.5 异常处理架构
 
-`GlobalExceptionHandler` 统一处理：
+[GlobalExceptionHandler](file:///home/xiaowansheng/projects/develop-projects/swater-blog/blog-service/src/main/java/com/blog/shared/exception/GlobalExceptionHandler.java) 统一处理：
 
-| 异常类型 | HTTP 状态码 | 说明 |
-|---------|------------|------|
+| 异常类型 | 响应码 | 说明 |
+|---------|--------|------|
 | `BusinessException` | 自定义 code | 业务异常 |
 | `NotLoginException` | 401 | 未登录 |
 | `NotPermissionException` | 403 | 无权限 |
@@ -314,7 +316,7 @@ CSRF 校验在 `security.csrf.enabled=true` 时才生效（生产环境开启）
 | `NoResourceFoundException` | 404 | 资源不存在 |
 | `Exception` | 500 | 兜底系统异常 |
 
-**🟡 问题**：`@ExceptionHandler(Exception.class)` 兜底处理器过于宽泛，但 SecurityFilter 中的 `catch(Exception e)` 会先拦截 Controller 的异常，导致这里无法生效（见 3.3.2 问题 2）。
+**评价**：覆盖全面，返回统一的 `Result` 格式。由于 SecurityFilter 的 `chain.doFilter()` 在 try-catch 之外，这些异常处理器能正确处理 Controller 层抛出的异常。
 
 ---
 
@@ -330,72 +332,50 @@ CSRF 校验在 `security.csrf.enabled=true` 时才生效（生产环境开启）
 
 ---
 
-## 四、部署与运维审核
+## 四、问题汇总与优先级
 
-### 4.1 Docker 配置
+> 更新日期：2026-08-07
 
-```
-blog-service/Dockerfile        # 多阶段构建
-blog-admin/Dockerfile          # 前端构建 + Nginx
-blog-web/Dockerfile            # Next.js standalone
-docker-compose.yml             # 编排配置
-```
+### 🔴 高优先级
 
-**🟢 亮点**：
-- 多阶段构建减小镜像体积
-- 健康检查配置
-- 内存限制配置
+| # | 位置 | 问题 | 建议 | 状态 |
+|---|------|------|------|------|
+| 1 | 所有插件实现类 | `implements XxxPlugin, Plugin` 冗余声明（14 个文件） | 移除冗余的 `Plugin`，只保留特定接口 | ✅ 已修复 |
 
-### 4.2 监控配置
+### 🟡 中优先级
 
-项目包含 Prometheus + Grafana 监控方案，以及 Alertmanager 告警配置。
-
-**🟢 亮点**：
-- 分层告警（critical / warning）
-- 告警抑制规则（critical 抑制 warning）
-- 邮件通知渠道
-
----
-
-## 五、问题汇总与优先级
-
-### 🔴 高优先级（建议立即修复）
-
-| # | 位置 | 问题 | 建议 |
-|---|------|------|------|
-| 1 | `SearchPluginFactory`、`SchedulerPluginFactory` | 工厂实现使用冗余的 `instanceof` + 强转，与其他工厂不一致 | 统一使用 `Plugin::isEnabled` 方法引用 |
-| 2 | `SecurityFilter` | `catch(Exception e)` 吞没 `chain.doFilter()` 的异常 | 只捕获安全检查阶段的异常，将 filter chain 异常重新抛出 |
-| 3 | `SecurityFilter` | 路径跳过使用 `contains()` 匹配，过于宽松 | 改用 `AntPathMatcher` 或 `startsWith` |
-
-### 🟡 中优先级（建议近期修复）
-
-| # | 位置 | 问题 | 建议 |
-|---|------|------|------|
-| 4 | `OssStoragePlugin`、`LocalStoragePlugin`、`QiniuStoragePlugin` | `getFileType()` 方法重复（约 30 行 x 3） | 提取到 `StoragePlugin` 接口 default 方法或抽象基类 |
-| 5 | `SaTokenConfig` | 注入 `WebMvcConfig` 但未使用 | 移除未使用的字段 |
-| 6 | 所有插件实现 | `isEnabled()` 与 `@ConditionalOnProperty` 职责重叠 | 统一策略：让 `@ConditionalOnProperty` 控制 bean 注册 |
+| # | 位置 | 问题 | 建议 | 状态 |
+|---|------|------|------|------|
+| 2 | `PluginSelector` | 已设计但未被任何工厂使用，成为死代码 | 删除该类（无调用方、无测试） | ✅ 已删除 |
+| 3 | 六个工厂 | 工厂过滤策略不统一（部分过滤部分不过滤） | 全部统一为 `Plugin::isEnabled` 过滤 | ✅ 已修复 |
+| 4 | 各插件实现 | `isEnabled()` 实现不一致（`true`/运行时检查/`false`） | 统一策略：`@ConditionalOnProperty` 静态注册 + 工厂 `isEnabled()` 运行时门控 | ✅ 已统一（见 3.2.6） |
+| 5 | 四个单插件族工厂 | `getActivePlugin()` 逻辑重复（~15 行 × 4） | 提取 `AbstractSinglePluginFactory<T extends Plugin>` 泛型基类 | ✅ 已修复 |
+| 6 | `PluginSearchServiceImpl` | 直接传播 `getActivePlugin()` 的 `IllegalStateException`（无插件时 500） | 捕获并转换为 `BusinessException` | ✅ 已修复 |
 
 ### 🟢 低优先级（后续迭代考虑）
 
 | # | 位置 | 问题 | 建议 |
 |---|------|------|------|
-| 8 | API 路由 | 缺少 API 版本控制 | 考虑添加 `/api/v1/` 前缀 |
-| 9 | `SecurityFilter` | CSP 策略 `script-src 'self'` 较严格 | 如需加载第三方脚本，需调整策略 |
+| 7 | `QuartzSchedulerPlugin.QuartzRunnableJob` | `execute()` 方法仅输出日志警告，Runnable 存储机制未实现 | 实现 Runnable 存储（如静态 Map 或 Spring Bean） |
+| 8 | `SpringScheduledPlugin.schedule()` | 不支持 Cron 表达式，返回 null | 调用方需检查 null，或抛出不支持异常 |
+| 9 | `RabbitMQPlugin.sendDelayed()` | 延迟消息未实现，只是普通发送 | 实现或明确标注不支持 |
+| 10 | `DatabaseSearchPlugin` | 索引方法（indexDocument/deleteDocument/bulkIndexDocuments）为空实现 | 添加注释说明数据库搜索不需要索引 |
+| 11 | API 路由 | 缺少 API 版本控制 | 考虑添加 `/api/v1/` 前缀 |
 
 ---
 
-## 六、总体评价
+## 五、总体评价
 
 | 维度 | 评分 | 说明 |
 |------|------|------|
 | 分层架构 | ⭐⭐⭐⭐⭐ | 清晰合理，五层划分职责明确 |
-| 插件化设计 | ⭐⭐⭐⭐ | 工厂模式使用得当，但存在实现不一致的问题 |
-| 安全防护 | ⭐⭐⭐⭐⭐ | 纵深防御，CSRF/XSS/限流/认证授权多层保护 |
-| 异常处理 | ⭐⭐⭐⭐ | 全局异常处理器覆盖全面，但与 SecurityFilter 存在交互问题 |
-| 代码复用 | ⭐⭐⭐ | 插件中存在重复代码，工厂实现风格不统一 |
+| 插件化设计 | ⭐⭐⭐⭐ | 六个工厂模式统一，`isEnabled()` 运行时门控语义清晰，冗余声明已清理 |
+| 安全防护 | ⭐⭐⭐⭐⭐ | 纵深防御，CSRF/XSS/限流/认证授权多层保护，异常处理正确分离 |
+| 异常处理 | ⭐⭐⭐⭐⭐ | 全局异常处理器覆盖全面，SecurityFilter 不吞没业务异常 |
+| 代码复用 | ⭐⭐⭐⭐ | `StoragePlugin.getFileType()` 已提取为接口 default 方法 |
 | 可扩展性 | ⭐⭐⭐⭐⭐ | 插件架构支持热插拔，新增存储/搜索/MQ 实现只需添加新类 |
 | 前端路由 | ⭐⭐⭐⭐⭐ | 集中式路由配置，动态生成，面包屑自动推导 |
 | 前端状态管理 | ⭐⭐⭐⭐⭐ | Zustand 简洁高效，状态划分清晰 |
 | 部署运维 | ⭐⭐⭐⭐⭐ | Docker 多阶段构建，健康检查，监控告警完善 |
 
-**总结**：项目架构设计整体质量很高，插件化设计是亮点，安全防护考虑周全。前端经过上一轮审核修复后，路由管理和请求处理已得到显著改善。主要改进方向是统一插件工厂的实现风格，修复 SecurityFilter 与异常处理器的交互问题，以及消除插件实现中的重复代码。
+**总结**：项目架构设计整体质量很高。第一轮审核发现的问题均真实存在且已修复：工厂 `instanceof`+强转冗余、SecurityFilter 吞没 `chain.doFilter()` 异常、`contains()` 路径跳过过宽、`getFileType()` 三处重复、`SaTokenConfig` 未使用注入、`fetchClient` 缺超时。第二轮审核确认修复效果，并纠正了第一轮报告中 `isEnabled()` 的评估偏差——实际有 6 个插件实现是真实的运行时检查（API Key、连接、配置完整性），据此统一了工厂过滤策略（六个工厂全部以 `Plugin::isEnabled` 做运行时门控，`@ConditionalOnProperty` 负责静态注册）。第三轮清理了 14 个实现类的冗余接口声明、删除了无调用方的 `PluginSelector` 死代码，并提取 `AbstractSinglePluginFactory` 泛型基类消除四个单插件族工厂的重复逻辑、统一 `PluginSearchServiceImpl` 的插件异常处理。剩余改进方向集中在：完善几个未完成的插件实现（Quartz Runnable 存储、Spring Cron、RabbitMQ 延迟消息、DatabaseSearchPlugin 索引空实现）。

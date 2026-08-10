@@ -2,7 +2,6 @@ package com.blog.plugin.components.mq.impl;
 
 
 
-import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.mq.MessageQueuePlugin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -15,7 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "plugin.mq.active", havingValue = "memory", matchIfMissing = false)
-public class MemoryMQPlugin implements MessageQueuePlugin, Plugin {
+public class MemoryMQPlugin implements MessageQueuePlugin {
     @Value("${plugin.mq.memory.queue-capacity:2000}")
     private int queueCapacity;
 
@@ -147,4 +146,3 @@ public class MemoryMQPlugin implements MessageQueuePlugin, Plugin {
         void onMessage(Object message) throws Exception;
     }
 }
-

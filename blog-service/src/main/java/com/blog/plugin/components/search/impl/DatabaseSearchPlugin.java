@@ -10,7 +10,6 @@ import com.blog.modules.article.model.entity.Article;
 import com.blog.modules.comment.model.entity.Comment;
 import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.search.model.vo.SearchVO;
-import com.blog.plugin.core.Plugin;
 import com.blog.plugin.components.search.SearchPlugin;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -23,7 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 @Component
 @ConditionalOnProperty(name = "plugin.search.active", havingValue = "database", matchIfMissing = false)
-public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
+public class DatabaseSearchPlugin implements SearchPlugin {
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -230,4 +229,3 @@ public class DatabaseSearchPlugin implements SearchPlugin, Plugin {
     public void bulkIndexDocuments(String indexType, List<Map<String, Object>> documents) throws Exception {
     }
 }
-
