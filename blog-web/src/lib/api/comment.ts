@@ -7,12 +7,12 @@ export interface CommentSubmitDTO {
   targetType?: 'ARTICLE' | 'TALK';
   parentId?: number;
   rootId?: number;
-  parentNickname?: string;
   nickname: string;
   email?: string;
   qq?: string;
   captcha?: string;
   content: string;
+  images?: string[];
 }
 
 export const commentApi = {
@@ -69,16 +69,6 @@ export const commentApi = {
     });
   },
 
-  toggleLike: (commentId: number) => {
-    return fetchClient<void>(`/api/public/comment/${commentId}/like`, {
-      method: 'POST',
-    });
-  },
-
-  getCaptcha: () => {
-    return fetchClient<{ image: string; key: string }>('/api/public/captcha');
-  },
-
   sendEmailCode: (email: string) => {
     return fetchClient<void>('/api/public/message/email-code', {
       method: 'POST',
@@ -86,4 +76,3 @@ export const commentApi = {
     });
   },
 };
-

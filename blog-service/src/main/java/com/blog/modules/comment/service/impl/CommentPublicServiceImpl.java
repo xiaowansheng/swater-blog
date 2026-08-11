@@ -255,10 +255,14 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             replyCountMap = counts;
         }
 
+        Map<Long, Long> targetAuthorMap = buildTargetAuthorMap(records);
+
+        Map<Long, Comment> parentCommentMap = buildParentCommentMap(records);
+
         List<CommentVO> voList = new ArrayList<>();
         for (Comment c : records) {
             boolean withCount = idsNeedingCount.contains(c.getId());
-            voList.add(convertToVO(c, ownerEmail, withCount, userMap, replyCountMap));
+            voList.add(convertToVO(c, ownerEmail, withCount, userMap, replyCountMap, targetAuthorMap, parentCommentMap));
         }
 
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
@@ -426,8 +430,58 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         return false;
     }
 
+    private Map<Long, Long> buildTargetAuthorMap(List<Comment> records) {
+        if (records == null || records.isEmpty()) return Map.of();
+
+        Map<String, List<Long>> typeToIds = new HashMap<>();
+        for (Comment c : records) {
+            if (c.getTargetType() != null && c.getTargetId() != null) {
+                typeToIds.computeIfAbsent(c.getTargetType(), k -> new ArrayList<>()).add(c.getTargetId());
+            }
+        }
+        if (typeToIds.isEmpty()) return Map.of();
+
+        Map<Long, Long> authorMap = new HashMap<>();
+        for (Map.Entry<String, List<Long>> entry : typeToIds.entrySet()) {
+            String type = entry.getKey();
+            List<Long> ids = entry.getValue().stream().distinct().collect(Collectors.toList());
+            if ("ARTICLE".equalsIgnoreCase(type)) {
+                List<Article> articles = articleMapper.selectBatchIds(ids);
+                for (Article article : articles) {
+                    if (article.getAuthorId() != null) {
+                        authorMap.put(article.getId(), article.getAuthorId());
+                    }
+                }
+            } else if ("TALK".equalsIgnoreCase(type)) {
+                List<Talk> talks = talkMapper.selectBatchIds(ids);
+                for (Talk talk : talks) {
+                    if (talk.getAuthorId() != null) {
+                        authorMap.put(talk.getId(), talk.getAuthorId());
+                    }
+                }
+            }
+        }
+        return authorMap;
+    }
+
+    private Map<Long, Comment> buildParentCommentMap(List<Comment> records) {
+        if (records == null || records.isEmpty()) return Map.of();
+
+        List<Long> parentIds = records.stream()
+                .map(Comment::getParentId)
+                .filter(id -> id != null && id > 0)
+                .distinct()
+                .collect(Collectors.toList());
+        if (parentIds.isEmpty()) return Map.of();
+
+        List<Comment> parents = commentMapper.selectBatchIds(parentIds);
+        return parents.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(Comment::getId, c -> c, (a, b) -> a));
+    }
+
     private CommentVO convertToVO(Comment comment, String ownerEmail, boolean withReplyCount) {
-        return convertToVO(comment, ownerEmail, withReplyCount, null, null);
+        return convertToVO(comment, ownerEmail, withReplyCount, null, null, null, null);
     }
 
     private CommentVO convertToVO(
@@ -435,7 +489,9 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             String ownerEmail,
             boolean withReplyCount,
             Map<Long, User> userMap,
-            Map<Long, Integer> replyCountMap
+            Map<Long, Integer> replyCountMap,
+            Map<Long, Long> targetAuthorMap,
+            Map<Long, Comment> parentCommentMap
     ) {
         CommentVO vo = BeanUtil.copyProperties(comment, CommentVO.class);
         if (comment.getUserId() != null) {
@@ -462,6 +518,21 @@ public class CommentPublicServiceImpl implements CommentPublicService {
                 && comment.getEmail() != null
                 && ownerEmail.equalsIgnoreCase(comment.getEmail());
         vo.setIsOwner(isOwner);
+
+        if (targetAuthorMap != null && comment.getUserId() != null && comment.getTargetId() != null) {
+            Long authorUserId = targetAuthorMap.get(comment.getTargetId());
+            vo.setIsAuthor(authorUserId != null && authorUserId.equals(comment.getUserId()));
+        }
+
+        if (parentCommentMap != null && comment.getParentId() != null && comment.getParentId() > 0) {
+            Comment parent = parentCommentMap.get(comment.getParentId());
+            if (parent != null) {
+                CommentVO.ReplyToUserVO replyToUser = new CommentVO.ReplyToUserVO();
+                replyToUser.setId(parent.getId());
+                replyToUser.setNickname(parent.getNickname());
+                vo.setReplyToUser(replyToUser);
+            }
+        }
 
         // 隐藏评论：非发布者仍返回记录，但内容/图片置空，前端用 isVisible=0 渲染“已被隐藏”提示
         if (!isOwner && CommentVisibilityStatus.HIDDEN.matches(comment.getIsVisible())) {
@@ -493,4 +564,3 @@ public class CommentPublicServiceImpl implements CommentPublicService {
         return EmailSessionTokenUtil.getEmail(token, emailSessionProperties);
     }
 }
-

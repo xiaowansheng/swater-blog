@@ -47,6 +47,10 @@ public class CommentVO extends com.blog.shared.model.vo.BaseVO {
 
     private Boolean isOwner;
 
+    private Boolean isAuthor;
+
+    private ReplyToUserVO replyToUser;
+
     private String ip;
 
     private String ipLocation;
@@ -92,5 +96,11 @@ public class CommentVO extends com.blog.shared.model.vo.BaseVO {
     @JsonProperty("authorAvatar")
     public String getAuthorAvatar() {
         return userAvatar;
+    }
+
+    @Data
+    public static class ReplyToUserVO {
+        private Long id;
+        private String nickname;
     }
 }

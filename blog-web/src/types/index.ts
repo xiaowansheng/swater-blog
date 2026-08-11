@@ -196,19 +196,18 @@ export enum CommentVisibilityStatus {
 
 export interface CommentVO {
   id: number;
-  postId?: number;
-  momentId?: number;
+  targetId?: number;
+  targetType?: string;
   parentId?: number;
   rootId?: number;
   nickname: string;
   email?: string;
-  avatar?: string;
+  userAvatar?: string;
+  images?: string[];
   content: string;
   status: CommentStatus;
   isVisible?: CommentVisibilityStatus;
-  statusText?: string;
   replyCount?: number;
-  likeCount?: number;
   isAuthor?: boolean;
   isOwner?: boolean;
   replyToUser?: {

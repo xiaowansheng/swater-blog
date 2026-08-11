@@ -88,7 +88,7 @@ export default function AnimeCommentItem({
   privacy,
 }: AnimeCommentItemProps) {
   const t = useTranslations('comment');
-  const avatar = comment.avatar || getRandomAnimeAvatar(comment.nickname);
+  const avatar = comment.userAvatar || getRandomAnimeAvatar(comment.nickname);
   const showReplyForm = activeReplyFormId === comment.id;
   const statusLabel = useMemo(() => getStatusLabel(comment.status, t), [comment.status, t]);
   const replies = replyState?.items || [];
@@ -266,7 +266,7 @@ export default function AnimeCommentItem({
               {/* 第一部分：头像和作者信息 */}
               <div className="flex items-center gap-3 mb-3">
                 <Image
-                  src={child.avatar || getRandomAnimeAvatar(child.nickname)}
+                  src={child.userAvatar || getRandomAnimeAvatar(child.nickname)}
                   alt={child.nickname}
                   width={40}
                   height={40}
