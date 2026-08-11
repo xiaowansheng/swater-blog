@@ -285,12 +285,15 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private void clearLoginFlagCookie() {
+        // secure 标志须与 setLoginFlagCookie 一致：HTTPS-only 部署下，浏览器只接受
+        // 带 secure 的删除请求，否则旧 Cookie 残留导致前端路由守卫误判仍为已登录。
         SaCookie cookie = new SaCookie()
                 .setName(LOGIN_FLAG_COOKIE)
                 .setValue(null)
                 .setMaxAge(0)
                 .setPath("/")
-                .setSameSite("Strict");
+                .setSameSite("Strict")
+                .setSecure(isSecureCookieEnabled());
         SaHolder.getResponse().addCookie(cookie);
     }
 
