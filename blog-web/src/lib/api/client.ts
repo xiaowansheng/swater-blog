@@ -9,19 +9,11 @@ export class ApiError extends Error {
 }
 import toast from 'react-hot-toast';
 import { getVerifyToken, VERIFY_TOKEN_HEADER } from '../auth/emailSession';
+import { normalizeApiUrl } from '@/lib/utils/apiUrl';
 
 const API_BASE_URL = typeof window !== 'undefined' 
   ? process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:8888' : '')
   : '';
-
-function normalizeApiUrl(base: string, path: string) {
-  const baseTrim = base.endsWith('/') ? base.slice(0, -1) : base;
-  const pathTrim = path.startsWith('/') ? path : `/${path}`;
-  if (baseTrim.endsWith('/api') && pathTrim.startsWith('/api/')) {
-    return baseTrim + pathTrim.slice(4);
-  }
-  return baseTrim + pathTrim;
-}
 
 export async function fetchClient<T>(
   url: string,

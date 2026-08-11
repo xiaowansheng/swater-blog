@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import type { ColumnsType } from 'antd/es/table'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, InputNumber, Tag, Tooltip, Switch } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { getMenuList, createMenu, updateMenu, deleteMenu } from '@/api/menu'
@@ -77,7 +78,7 @@ const MenuPage: React.FC = () => {
     }
   }
 
-  const columns = [
+  const columns: ColumnsType<Menu> = [
     {
       title: '菜单名称',
       dataIndex: 'name',
@@ -134,7 +135,7 @@ const MenuPage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 200,
-      render: (_: any, record: Menu) => (
+      render: (_, record) => (
         <Space>
           <Tooltip title="添加子菜单">
             <Button

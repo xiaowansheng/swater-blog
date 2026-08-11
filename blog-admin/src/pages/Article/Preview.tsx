@@ -60,8 +60,8 @@ const ArticlePreview: React.FC = () => {
     try {
       await printMarkdownAsPdf(article.title || 'article', article.content || '')
       message.success('正在打开打印对话框...')
-    } catch (error: any) {
-      message.error(error?.message || '打印失败')
+    } catch (error) {
+      message.error(error instanceof Error ? error.message || '打印失败' : '打印失败')
     }
   }
 
@@ -100,9 +100,9 @@ const ArticlePreview: React.FC = () => {
           message.loading({ content: '正在生成 PDF...', key: 'exportPdf', duration: 0 })
           await exportElementAsPdf(contentElement as HTMLElement, article.title || 'article')
           message.success({ content: 'PDF 导出成功', key: 'exportPdf', duration: 2 })
-        } catch (error: any) {
+        } catch (error) {
           console.error('导出 PDF 失败:', error)
-          message.error({ content: error?.message || '导出 PDF 失败', key: 'exportPdf', duration: 3 })
+          message.error({ content: error instanceof Error ? error.message || '导出 PDF 失败' : '导出 PDF 失败', key: 'exportPdf', duration: 3 })
         }
       },
     })

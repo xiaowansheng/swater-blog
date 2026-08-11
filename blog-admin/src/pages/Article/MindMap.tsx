@@ -16,13 +16,42 @@ import {
 } from '@ant-design/icons'
 import { Button, message, Modal } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
-import ReactECharts from 'echarts-for-react'
+import ReactECharts, { EChartsInstance } from 'echarts-for-react'
 import {
   getArticleDirectoryTree,
   ArticleDirectoryItem,
   moveArticleDirectoryItem,
   deleteDirectoryNode,
 } from '@/api/articleDirectory'
+
+interface MindMapTreeNodeData {
+  name?: string
+  _type?: 'ROOT' | 'NODE' | 'ARTICLE'
+  _label?: string
+  _fullLabel?: string
+  _id?: number
+  _articleId?: number
+  _articleKey?: string
+  _nodeKey?: string
+  _parentId?: number
+  _subCount?: number
+  _categoryName?: string
+  _status?: number
+  _createTime?: string
+  _updateTime?: string
+  _articleCount?: number
+  _depth?: number
+  depth?: number
+  value?: number
+  children?: MindMapTreeNodeData[]
+}
+
+interface MindMapCallbackParams {
+  name?: string
+  collapsed?: boolean
+  data?: MindMapTreeNodeData
+  event?: { event?: Event }
+}
 
 const NODE_GRADIENTS = [
   ['#fbbf24', '#f59e0b'],
@@ -53,7 +82,7 @@ const getMaxDepth = (items: ArticleDirectoryItem[], depth = 0): number => {
   return max
 }
 
-const buildEChartsTreeData = (items: ArticleDirectoryItem[], depth = 0): any[] => {
+const buildEChartsTreeData = (items: ArticleDirectoryItem[], depth = 0): MindMapTreeNodeData[] => {
   return items.map((item) => {
     const isNode = item.type === 'NODE'
     const label = isNode ? item.name || '未命名' : item.title || '未命名'
@@ -218,8 +247,8 @@ const StatisticsPage: React.FC = () => {
       padding: [12, 16],
       extraCssText: 'border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.08);',
       textStyle: { color: '#1e293b', fontSize: 13 },
-      formatter: (params: any) => {
-        const data = params.data || {}
+      formatter: (params: MindMapCallbackParams) => {
+        const data: MindMapTreeNodeData = params.data || {}
         const isNode = data._type === 'NODE'
         const isRoot = data._type === 'ROOT'
         let html = `<div style="line-height:1.8">
@@ -228,7 +257,7 @@ const StatisticsPage: React.FC = () => {
           html += `<div style="color:#6366f1;font-weight:500">🏠 根目录</div>`
         } else if (isNode) {
           html += `<div style="color:#f59e0b;font-weight:500">📁 目录节点</div>`
-          if (data._subCount > 0) {
+          if ((data._subCount ?? 0) > 0) {
             html += `<div style="color:#64748b">包含 <b>${data._subCount}</b> 篇文章</div>`
           }
         } else {
@@ -277,13 +306,13 @@ const StatisticsPage: React.FC = () => {
         right: '18%',
         layout: 'orthogonal',
         orient: 'LR',
-        symbol: (_value: number, params: any) => {
-          const data = params.data || {}
+        symbol: (_value: number, params: MindMapCallbackParams) => {
+          const data: MindMapTreeNodeData = params.data || {}
           if (data._type === 'ROOT') return 'roundRect'
           return data._type === 'NODE' ? 'roundRect' : 'circle'
         },
-        symbolSize: (_value: number, params: any) => {
-          const data = params.data || {}
+        symbolSize: (_value: number, params: MindMapCallbackParams) => {
+          const data: MindMapTreeNodeData = params.data || {}
           const depth = data.depth || 0
           if (data._type === 'ROOT') return [72, 36]
           if (data._type === 'NODE') return Math.max(22, 40 - depth * 4)
@@ -303,8 +332,8 @@ const StatisticsPage: React.FC = () => {
           borderRadius: 6,
           shadowBlur: 8,
           shadowColor: 'rgba(0,0,0,0.06)',
-          formatter: (params: any) => {
-            const data = params.data || {}
+          formatter: (params: MindMapCallbackParams) => {
+            const data: MindMapTreeNodeData = params.data || {}
             let text = `{name|${params.name}}`
             
             if (data._type === 'ROOT' || data._type === 'NODE') {
@@ -376,7 +405,7 @@ const StatisticsPage: React.FC = () => {
 
   // ECharts event handlers passed via onEvents prop (guaranteed to fire after chart renders)
   const chartEvents = useMemo(() => ({
-    click: (params: any) => {
+    click: (params: MindMapCallbackParams) => {
       const data = params.data
       if (!data) return
       if (data._type === 'ARTICLE') {
@@ -384,7 +413,7 @@ const StatisticsPage: React.FC = () => {
         navigate(`/article/preview/${data._articleId || data._id}`)
       }
     },
-    contextmenu: (params: any) => {
+    contextmenu: (params: MindMapCallbackParams) => {
       const nativeEvent = params.event?.event as MouseEvent | undefined
       if (nativeEvent) {
         nativeEvent.preventDefault()
@@ -396,7 +425,7 @@ const StatisticsPage: React.FC = () => {
           x: nativeEvent?.clientX ?? 0,
           y: nativeEvent?.clientY ?? 0,
           type: data._type,
-          id: data._id,
+          id: data._id!,
           articleId: data._articleId || data._id,
           parentId: data._parentId || 0,
           name: data._label || data._fullLabel || params.name,
@@ -408,7 +437,7 @@ const StatisticsPage: React.FC = () => {
   }), [navigate])
 
   // When chart is ready, disable the default browser context menu on the canvas
-  const handleChartReady = useCallback((chart: any) => {
+  const handleChartReady = useCallback((chart: EChartsInstance) => {
     const dom = chart.getDom() as HTMLElement
     dom.addEventListener('contextmenu', (e) => e.preventDefault())
   }, [])

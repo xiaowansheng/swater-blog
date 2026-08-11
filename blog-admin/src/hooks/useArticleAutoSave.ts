@@ -85,8 +85,8 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
 
   const ensureArticleKey = useCallback(() => {
     if (!articleKeyRef.current) {
-      const uuid = typeof crypto !== 'undefined' && (crypto as any).randomUUID
-        ? (crypto as any).randomUUID()
+      const uuid = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
         : `article_${Date.now()}_${Math.random().toString(16).slice(2)}`
       articleKeyRef.current = uuid
     }
@@ -218,11 +218,12 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
         
         config.onSaveSuccess(result)
       }
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message || '保存失败' : '保存失败'
       setSaveState(prev => ({
         ...prev,
         status: SaveStatus.ERROR,
-        errorMessage: error.message || '保存失败',
+        errorMessage,
       }))
       
       // 保存失败时保存到本地草稿
@@ -246,10 +247,10 @@ export function useArticleAutoSave(options: AutoSaveOptions = {}) {
       }
       
       if (!latestData.autoSave) {
-        message.error(error.message || '保存失败')
+        message.error(errorMessage)
       }
       
-      config.onSaveError(error)
+      config.onSaveError(error instanceof Error ? error : new Error(errorMessage))
     } finally {
       isSavingRef.current = false
       

@@ -13,6 +13,7 @@ import {
   Tag,
   Tooltip,
 } from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 import {
   PlusOutlined,
   EditOutlined,
@@ -180,12 +181,12 @@ const UserPage: React.FC = () => {
     </Tag>
   )
 
-  const columns = [
+  const columns: ColumnsType<User> = [
     {
       title: '用户信息',
       key: 'info',
       width: 250,
-      render: (_: any, record: User) => (
+      render: (_, record) => (
         <div className="flex items-center gap-3">
           <Avatar src={getFullUrl(record.avatar)} icon={<UserOutlined />} size={40} />
           <div>
@@ -234,7 +235,7 @@ const UserPage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 180,
-      render: (_: any, record: User) => (
+      render: (_, record) => (
         <Space>
           <Tooltip title="编辑">
             <Button

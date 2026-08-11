@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback } from 'react'
 import { useLocation } from 'react-router-dom'
 
 interface PageCacheData {
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface PageCacheEntry {
@@ -35,7 +35,7 @@ export const usePageCache = (cacheKey?: string) => {
   }, [key])
 
   // 设置缓存数据
-  const setCachedData = useCallback((dataKey: string, value: any) => {
+  const setCachedData = useCallback((dataKey: string, value: unknown) => {
     console.log('💾 设置缓存数据:', { key, dataKey, value })
     
     let cached = pageCache.get(key)

@@ -80,6 +80,9 @@ import {
   SquareUpload
 } from "@/components/common/ImageUpload";
 import * as configApi from "@/api/config";
+import type { FormInstance } from "antd";
+import type { NamePath } from "antd/es/form/interface";
+import { convertFromUTC, convertToUTC } from "@/utils/format";
 import WebhookConfigTab from "@/components/config/WebhookConfig";
 
 const { TextArea } = Input;
@@ -89,7 +92,7 @@ const ConfigPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("site");
   const [unsavedTabs, setUnsavedTabs] = useState<Set<string>>(new Set());
-  const [originalValues, setOriginalValues] = useState<Record<string, any>>({});
+  const [originalValues, setOriginalValues] = useState<Record<string, unknown>>({});
 
   const defaultPrivacyConfig = useMemo(() => ({
     showIp: false,
@@ -98,7 +101,7 @@ const ConfigPage: React.FC = () => {
     showBrowser: false,
   }), []);
 
-  const normalizeBooleanValue = useCallback((value: any, defaultValue = false): boolean => {
+  const normalizeBooleanValue = useCallback((value: unknown, defaultValue = false): boolean => {
     if (value === null || value === undefined) return defaultValue;
     if (typeof value === "boolean") return value;
     if (typeof value === "number") return value === 1;
@@ -157,57 +160,6 @@ const ConfigPage: React.FC = () => {
   const loadAllConfigs = useCallback(async () => {
     setLoading(true);
     try {
-      /**
-       * 将 UTC 时间字符串转换为本地时间格式（用于管理后台回显）
-       *
-       * ### 转换规则
-       * - 输入：UTC ISO 格式（如 "2025-01-24T16:00:00.000Z"）
-       * - 输出：本地时间格式（如 "2025-01-25 00:00:00"）
-       *
-       * ### 示例（北京时间 UTC+8）
-       * ```
-       * "2025-01-24T16:00:00.000Z" → "2025-01-25 00:00:00"
-       * ```
-       *
-       * ### 兼容性
-       * - 支持纯日期格式（如 "2025-01-25"）
-       * - 支持本地时间格式（如 "2025-01-25 00:00:00"）
-       * - 支持标准 UTC 格式（如 "2025-01-24T16:00:00.000Z"）
-       *
-       * @param utcStr - UTC 时间字符串或本地时间字符串
-       * @returns 本地时间格式字符串 "yyyy-MM-dd HH:mm:ss"
-       */
-      const convertFromUTC = (utcStr: string): string => {
-        if (!utcStr) return utcStr;
-
-        // 如果不是 UTC 格式（不带 Z），直接返回
-        if (!utcStr.endsWith('Z') && !utcStr.includes('+')) {
-          // 尝试解析为日期
-          const date = new Date(utcStr);
-          if (!isNaN(date.getTime())) {
-            // 纯日期格式或本地时间格式，转换为 yyyy-MM-dd HH:mm:ss 格式
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-          }
-          return utcStr;
-        }
-
-        // UTC 格式，转换为本地时间
-        const date = new Date(utcStr);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-      };
-
       const [
         site,
         author,
@@ -237,10 +189,11 @@ const ConfigPage: React.FC = () => {
       ]);
 
       // 处理配置数据：将null和undefined转换为合适的默认值
-      const processConfig = (config: any) => {
+      const processConfig = (config: unknown): Record<string, unknown> => {
         if (!config) return {};
-        return Object.keys(config).reduce((acc, key) => {
-          const value = config[key];
+        const source = config as Record<string, unknown>;
+        return Object.keys(source).reduce<Record<string, unknown>>((acc, key) => {
+          const value = source[key];
           if (value === null || value === undefined) {
             // 对于contactMethods和socialLinks，初始化为空对象
             if (key === 'contactMethods' || key === 'socialLinks') {
@@ -257,18 +210,21 @@ const ConfigPage: React.FC = () => {
             }
           }
           return acc;
-        }, {} as any);
+        }, {});
       };
 
-      const normalizePrivacyConfig = (config: any) => ({
-        showIp: normalizeBooleanValue(config?.showIp, defaultPrivacyConfig.showIp),
-        showLocation: normalizeBooleanValue(config?.showLocation, defaultPrivacyConfig.showLocation),
-        showDevice: normalizeBooleanValue(config?.showDevice, defaultPrivacyConfig.showDevice),
-        showBrowser: normalizeBooleanValue(config?.showBrowser, defaultPrivacyConfig.showBrowser),
-      });
+      const normalizePrivacyConfig = (config: unknown) => {
+        const source = (config ?? {}) as Record<string, unknown>;
+        return {
+          showIp: normalizeBooleanValue(source.showIp, defaultPrivacyConfig.showIp),
+          showLocation: normalizeBooleanValue(source.showLocation, defaultPrivacyConfig.showLocation),
+          showDevice: normalizeBooleanValue(source.showDevice, defaultPrivacyConfig.showDevice),
+          showBrowser: normalizeBooleanValue(source.showBrowser, defaultPrivacyConfig.showBrowser),
+        };
+      };
 
       const normalizeBooleanConfig = (
-        config: any,
+        config: unknown,
         keys: string[],
         defaults: Record<string, boolean> = {}
       ) => {
@@ -279,11 +235,11 @@ const ConfigPage: React.FC = () => {
         return processed;
       };
 
-      const normalizeNestedVisibility = (group: any, keys: string[]) => {
-        const source = group ?? {};
+      const normalizeNestedVisibility = (group: unknown, keys: string[]) => {
+        const source = (group ?? {}) as Record<string, unknown>;
         const normalized = { ...source };
         keys.forEach((key) => {
-          const item = source?.[key] ?? {};
+          const item = (source?.[key] ?? {}) as Record<string, unknown>;
           normalized[key] = {
             ...item,
             visible: normalizeBooleanValue(item?.visible, false),
@@ -319,11 +275,13 @@ const ConfigPage: React.FC = () => {
       const normalizedReward = processConfig(reward);
       normalizedReward.rewardEnabled = normalizeBooleanValue(reward?.rewardEnabled, true);
       
-      normalizedReward.wechat = processConfig(reward?.wechat);
-      normalizedReward.wechat.enabled = normalizeBooleanValue(reward?.wechat?.enabled, true);
+      const wechatConfig = processConfig(reward?.wechat);
+      (wechatConfig as { enabled?: boolean }).enabled = normalizeBooleanValue(reward?.wechat?.enabled, true);
+      normalizedReward.wechat = wechatConfig;
       
-      normalizedReward.alipay = processConfig(reward?.alipay);
-      normalizedReward.alipay.enabled = normalizeBooleanValue(reward?.alipay?.enabled, true);
+      const alipayConfig = processConfig(reward?.alipay);
+      (alipayConfig as { enabled?: boolean }).enabled = normalizeBooleanValue(reward?.alipay?.enabled, true);
+      normalizedReward.alipay = alipayConfig;
 
       const normalizedAuthor = processConfig(author);
       normalizedAuthor.contactMethods = normalizeNestedVisibility(
@@ -386,7 +344,7 @@ const ConfigPage: React.FC = () => {
     label,
   }: {
     type?: "cover" | "avatar" | "icon" | "logo";
-    name: any;
+    name: NamePath;
     label: string;
   }) => {
     if (type === "avatar") {
@@ -434,74 +392,18 @@ const ConfigPage: React.FC = () => {
     );
   };
 
-  /**
-   * 将本地时间字符串转换为 UTC ISO 格式（用于上传到数据库）
-   *
-   * ### 转换规则
-   * - 输入：本地时间格式（如 "2025-01-25" 或 "2025-01-25 00:00:00"）
-   * - 输出：UTC ISO 格式（如 "2025-01-24T16:00:00.000Z"）
-   *
-   * ### 示例（北京时间 UTC+8）
-   * ```
-   * "2025-01-25"           → "2025-01-24T16:00:00.000Z"
-   * "2025-01-25 00:00:00"  → "2025-01-24T16:00:00.000Z"
-   * ```
-   *
-   * ### 关键技术点
-   * 纯日期格式的解析行为：
-   * - `new Date("2025-01-25")` → 解析为 **UTC 时间** ❌
-   * - `new Date("2025-01-25T00:00:00")` → 解析为 **本地时间** ✅
-   *
-   * 因此需要将纯日期格式转换为 ISO 8601 格式（添加 T00:00:00），才能正确解析为本地时间。
-   *
-   * ### 支持的输入格式
-   * - 纯日期：`"2025-01-25"`
-   * - 带时间：`"2025-01-25 00:00:00"`
-   * - ISO格式：`"2025-01-25T00:00:00"`（已是 UTC）
-   *
-   * @param localTimeStr - 本地时间字符串
-   * @returns UTC ISO 格式字符串 "yyyy-MM-ddTHH:mm:ss.sssZ"
-   */
-  const convertToUTC = (localTimeStr: string): string => {
-    if (!localTimeStr) return localTimeStr;
-
-    // 如果已经是 UTC 格式（带 Z），直接返回
-    if (localTimeStr.endsWith('Z')) return localTimeStr;
-
-    // 关键修复：纯日期格式需要特殊处理
-    // new Date("2025-01-25") 会被解析为 UTC 时间，不是本地时间
-    // new Date("2025-01-25T00:00:00") 会被解析为本地时间 ✅
-    let inputToParse = localTimeStr;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(localTimeStr)) {
-      // 纯日期格式：添加时间部分 T00:00:00，使其被解析为本地时间
-      inputToParse = `${localTimeStr}T00:00:00`;
-    } else if (!localTimeStr.includes('T')) {
-      // 带空格的格式：2025-01-25 00:00:00 → 2025-01-25T00:00:00
-      inputToParse = localTimeStr.replace(' ', 'T');
-    }
-
-    // 解析为本地时间
-    const date = new Date(inputToParse);
-
-    // 检查是否是有效日期
-    if (isNaN(date.getTime())) return localTimeStr;
-
-    // 转换为 UTC ISO 字符串
-    return date.toISOString();
-  };
-
   // 保存配置
-  const handleSave = async (
+  const handleSave = async <T,>(
     type: string,
-    form: any,
-    updateFn: (data: any) => Promise<void>
+    form: FormInstance,
+    updateFn: (data: T) => Promise<void>
   ) => {
     setSaving(true);
     try {
       const values = await form.validateFields();
 
       // 处理表单数据：确保嵌套对象被正确初始化
-      const processedValues = Object.keys(values).reduce((acc, key) => {
+      const processedValues = Object.keys(values).reduce<Record<string, unknown>>((acc, key) => {
         const value = values[key];
         if (value === undefined || value === null) {
           // 对于contactMethods和socialLinks，初始化为空对象
@@ -519,9 +421,9 @@ const ConfigPage: React.FC = () => {
           }
         }
         return acc;
-      }, {} as any);
+      }, {});
 
-      await updateFn(processedValues);
+      await updateFn(processedValues as T);
       message.success("保存成功");
       clearTabUnsaved(type); // 保存成功后清除未保存标记
 
@@ -540,7 +442,7 @@ const ConfigPage: React.FC = () => {
 
   // 撤销修改
   const handleUndo = () => {
-    const formMap: Record<string, any> = {
+    const formMap: Record<string, FormInstance> = {
       site: siteForm,
       author: authorForm,
       cover: coverForm,

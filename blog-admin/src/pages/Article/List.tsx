@@ -4,6 +4,7 @@ import {
   Dropdown, Modal, Tooltip,
 } from 'antd'
 import type { MenuProps } from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 import Image from '@/components/common/ImageWithPreview'
 import {
   PlusOutlined,
@@ -255,12 +256,12 @@ const ArticleList: React.FC = () => {
     return items
   }
 
-  const columns = [
+  const columns: ColumnsType<Article> = [
     {
       title: '文章信息',
       key: 'info',
       width: 500,
-      render: (_: any, record: Article) => (
+      render: (_, record) => (
         <div className="flex items-center gap-3">
           {record.cover ? (
             <Image
@@ -365,7 +366,7 @@ const ArticleList: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 100,
-      render: (_: any, record: Article) => {
+      render: (_, record) => {
         return (
           <Dropdown
             menu={{ items: getDropdownItems(record) }}

@@ -126,8 +126,8 @@ const ArticleEditModal: React.FC<ArticleEditModalProps> = ({
             message.success('修改成功')
             form.resetFields()
             onSuccess()
-        } catch (error: any) {
-            if (error?.errorFields) return // 表单验证失败
+        } catch (error) {
+            if ((error as { errorFields?: unknown }).errorFields) return // 表单验证失败
             message.error('修改失败')
         } finally {
             setLoading(false)

@@ -994,3 +994,19 @@ export async function POST(req: NextRequest) {
 | WebSocket | ⭐⭐⭐⭐ | 单实例多连接问题已修复；多实例 Pub/Sub 仍是后续工作 |
 
 **第五轮结论**：高优先级安全问题和主要中优先级质量问题已完成代码修复，当前本地后端测试、前端 lint、类型检查和两个前端生产构建均通过。由于环境缺少 Docker Compose CLI、真实 MySQL 和后端静态参数服务，Revalidate、条件迁移、HTTP 权限链、Prometheus Targets 和端到端文章发布链路仍需在部署环境完成最终验收。
+
+---
+
+## 九、第六轮修复：Token 存储与前端类型安全（2026-08-10）
+
+| 原问题 | 修复内容 | 结果 |
+|---|---|---|
+| 登录 Token 存 localStorage（XSS 可读） | 启用 Sa-Token httpOnly Cookie（SameSite=Strict，Secure 由 `SA_TOKEN_COOKIE_SECURE` 控制）；后端登录时额外写入非 httpOnly 登录标记 Cookie（仅 0/1，供路由守卫同步判断）；前端移除 localStorage token、Authorization 头注入、下载/WebSocket 的显式 token 传递 | 后端测试、admin lint/tsc/build、web lint/tsc/build 通过；浏览器登录/刷新冒烟待部署验证 |
+| WebSocket URL 传 token | 前端 URL 不再携带 token（同源 Cookie 自动携带）；后端握手按 Cookie > Authorization 头 > Sec-WebSocket-Protocol > 旧 query 顺序提取 | 编译与全量测试通过 |
+| blog-admin `no-explicit-any: off` | 改为 `warn` 并清零全部 131 处显式 any（含 antd Tree/Upload/Table 回调、Config 保存函数泛型化、catch 类型守卫） | `pnpm run lint` 0 error / 0 warning |
+| auth store 空 catch | 增加 `console.warn` 记录获取当前用户失败原因 | 已实现 |
+| `normalizeApiUrl` 重复 | 提取到 `blog-web/src/lib/utils/apiUrl.ts`，client/server 复用 | lint、tsc、build 通过 |
+| `.env.example` 默认密码 | 确认项：`.gitignore` 已排除 `.env`，模板占位符保留 | 无需改动 |
+| 硬编码中文 / 版本碎片 / HTTP 客户端不统一 | 本轮不实施：blog-admin 国际化单独立项；blog-tools 为无共享代码的独立工具；fetch/axios 按场景保留 | 记录为后续工作 |
+
+**第六轮结论**：认证凭据已从 localStorage 迁移至 httpOnly Cookie，XSS 无法直接窃取 token；blog-admin 类型告警清零。Cookie 方案的登录、刷新、401 弹窗、WebSocket 通知和导出下载链路需在真实浏览器 + Compose 环境完成端到端验证后再视为生产就绪。

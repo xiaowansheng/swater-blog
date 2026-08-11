@@ -1,20 +1,13 @@
 import config from '@/config'
 
-const TOKEN_KEY = `${config.storagePrefix}token`
 const REMEMBER_ME_KEY = `${config.storagePrefix}remember_me`
 
-export const getToken = (): string | null => {
-  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY)
-}
+// 登录状态标记 Cookie 名称（后端 AuthServiceImpl 写入，仅存 0/1）。
+// 真实 token 在 httpOnly Cookie 中，前端 JS 无法读取。
+const LOGIN_FLAG_COOKIE = 'blog_admin_logged_in'
 
-export const setToken = (token: string): void => {
-  localStorage.setItem(TOKEN_KEY, token)
-  sessionStorage.removeItem(TOKEN_KEY)
-}
-
-export const removeToken = (): void => {
-  localStorage.removeItem(TOKEN_KEY)
-  sessionStorage.removeItem(TOKEN_KEY)
+export const isLoggedIn = (): boolean => {
+  return document.cookie.split(';').some((part) => part.trim().startsWith(`${LOGIN_FLAG_COOKIE}=`))
 }
 
 export const getRememberMe = (): boolean => {
@@ -24,4 +17,3 @@ export const getRememberMe = (): boolean => {
 export const setRememberMe = (remember: boolean): void => {
   localStorage.setItem(REMEMBER_ME_KEY, String(remember))
 }
-

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Space, Popconfirm, message, Upload, Tag, Input, Select, Tooltip, Card, Row, Col, Modal, Pagination } from 'antd'
+import type { UploadProps } from 'antd'
 import Image from '@/components/common/ImageWithPreview'
 import {
   UploadOutlined,
@@ -65,17 +66,17 @@ const FilePage: React.FC = () => {
     loadFiles()
   }, [loadFiles])
 
-  const handleUpload = async (options: any) => {
+  const handleUpload: UploadProps['customRequest'] = async (options) => {
     const { file, onSuccess, onError } = options
     setUploading(true)
     try {
-      await uploadFile(file)
+      await uploadFile(file as File)
       message.success('上传成功')
-      onSuccess?.()
+      onSuccess?.({})
       loadFiles()
     } catch (error) {
       message.error('上传失败')
-      onError?.(error)
+      onError?.(error as Error)
     } finally {
       setUploading(false)
     }
@@ -199,7 +200,7 @@ const FilePage: React.FC = () => {
       title: '文件',
       key: 'file',
       width: 300,
-      render: (_: any, record: FileMeta) => (
+      render: (_: unknown, record: FileMeta) => (
         <div className="flex items-center gap-3">
           {isImage(record.mimeType) ? (
             <Image
@@ -241,7 +242,7 @@ const FilePage: React.FC = () => {
       title: '尺寸',
       key: 'dimensions',
       width: 100,
-      render: (_: any, record: FileMeta) =>
+      render: (_: unknown, record: FileMeta) =>
         record.width && record.height ? `${record.width}×${record.height}` : '-',
     },
     {
@@ -275,7 +276,7 @@ const FilePage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 200,
-      render: (_: any, record: FileMeta) => (
+      render: (_: unknown, record: FileMeta) => (
         <Space>
           <Tooltip title="下载">
             <Button

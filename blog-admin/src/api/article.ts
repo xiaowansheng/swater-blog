@@ -174,10 +174,10 @@ export interface MarkdownImportPreview {
   assetFileCount: number
   articleCount: number
   categoryCount: number
-  fileStructure?: any
+  fileStructure?: unknown
   categories: MarkdownImportCategoryPreview[]
   articles: MarkdownImportArticlePreview[]
-  documents: any[]
+  documents: unknown[]
   warnings: string[]
 }
 
@@ -220,7 +220,7 @@ export interface MarkdownImportResult {
   importedAssetCount: number
   articles: MarkdownImportedArticle[]
   categories: MarkdownImportCreatedCategory[]
-  documents?: any[]
+  documents?: unknown[]
   warnings?: string[]
   errors: MarkdownImportError[]
   duration: number
@@ -259,7 +259,7 @@ export interface MarkdownImportError {
 export const previewMarkdownImport = (files: File[], basePath?: string): Promise<MarkdownImportPreview> => {
   const formData = new FormData()
   files.forEach(file => {
-    const path = (file as any).webkitRelativePath || file.name
+    const path = file.webkitRelativePath || file.name
     formData.append('files', file, path)
   })
   if (basePath) {
@@ -288,7 +288,7 @@ export const importMarkdownBatch = (files: File[], config?: MarkdownImportConfig
   const formData = new FormData()
   files.forEach(file => {
     // 优先使用相对路径（文件夹上传），否则使用文件名
-    const path = (file as any).webkitRelativePath || file.name
+    const path = file.webkitRelativePath || file.name
     formData.append('files', file, path)
   })
 
@@ -387,18 +387,13 @@ export const exportMarkdown = (config: MarkdownExportConfig): Promise<MarkdownEx
   return request.post('/admin/post/export-md', config)
 }
 
-// 下载导出文件（使用原始 axios 带认证下载，绕过响应拦截器）
+// 下载导出文件（使用原始 fetch 下载，绕过响应拦截器；认证凭据由同源 Cookie 携带）
 export const downloadExport = async (taskId: string): Promise<void> => {
-  const { getToken } = await import('@/utils/storage')
   const config = await import('@/config')
-  
-  const token = getToken()
-  
+
   const response = await fetch(`${config.default.apiBaseUrl}/admin/post/export-md/download/${taskId}`, {
     method: 'GET',
-    headers: {
-      'Authorization': token ? `Bearer ${token}` : '',
-    },
+    credentials: 'include',
   })
   
   if (!response.ok) {

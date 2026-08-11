@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import type { ColumnsType } from 'antd/es/table'
 import { Table, Button, Space, message, Tag, Popconfirm, Tooltip, Select, Empty } from 'antd'
 import {
   CheckOutlined,
@@ -165,7 +166,7 @@ const NotificationPage: React.FC = () => {
     return <Tag color={item.color}>{item.label}</Tag>
   }
 
-  const columns = [
+  const columns: ColumnsType<Notification> = [
     {
       title: '类型',
       dataIndex: 'type',
@@ -176,7 +177,7 @@ const NotificationPage: React.FC = () => {
     {
       title: '通知内容',
       key: 'content',
-      render: (_: any, record: Notification) => (
+      render: (_, record) => (
         <div className={`${record.isRead === NotificationReadStatus.UNREAD ? 'font-medium' : 'text-gray-500'}`}>
           <div className="flex items-center gap-2">
             {getTypeIcon(record.type)}
@@ -217,7 +218,7 @@ const NotificationPage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 150,
-      render: (_: any, record: Notification) => (
+      render: (_, record) => (
         <Space>
           {record.status === NotificationSendStatus.FAILED && (
             <Tooltip title="重发">

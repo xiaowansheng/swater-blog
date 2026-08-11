@@ -52,11 +52,14 @@ export const useTabsStore = create<TabsState>()(
 
     // 不允许修改 key
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { key: _ignoredKey, ...rest } = patch as any
+    const { key: _ignoredKey, ...rest } = patch
 
     const patchKeys = Object.keys(rest)
     if (patchKeys.length === 0) return
-    const isSame = patchKeys.every((k) => (current as any)[k] === (rest as any)[k])
+    const isSame = patchKeys.every((k) => {
+      const key = k as keyof Omit<Partial<TabItem>, 'key'>
+      return current[key] === rest[key]
+    })
     if (isSame) return
 
     set({

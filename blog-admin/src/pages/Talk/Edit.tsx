@@ -71,12 +71,14 @@ const TalkEdit: React.FC = () => {
     }
   }, [isEdit, form, loadTalk])
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: { content?: string; images?: string[]; isTop?: boolean }) => {
     setSubmitting(true)
     setSaveStatus('saving')
     try {
       const data = {
         ...values,
+        content: values.content ?? '',
+        images: values.images ?? [],
         isTop: values.isTop ? TopStatus.PINNED : TopStatus.NORMAL,
       }
 
@@ -133,8 +135,8 @@ const TalkEdit: React.FC = () => {
 
       setSaveStatus('saved')
       setLastSavedTime(new Date())
-    } catch (error: any) {
-      if (error?.errorFields) {
+    } catch (error) {
+      if ((error as { errorFields?: unknown }).errorFields) {
         message.warning('请填写必填项')
         setSaveStatus('idle')
       } else {

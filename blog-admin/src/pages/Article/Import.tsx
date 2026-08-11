@@ -31,12 +31,15 @@ import {
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import type { UploadFile, UploadProps } from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 import {
   previewMarkdownImport,
   importMarkdownBatch,
   MarkdownImportPreview,
   MarkdownImportResult,
   MarkdownImportConfig,
+  MarkdownImportArticlePreview,
+  MarkdownImportCategoryPreview,
 } from '@/api/article'
 import { uploadFile } from '@/api/file'
 import { generateCoverBlob, blobToFile } from '@/utils/coverGenerator'
@@ -61,7 +64,8 @@ const ArticleImport: React.FC = () => {
 
   // 导入状态追踪
   type FileImportStatus = 'pending' | 'generating_cover' | 'importing' | 'success' | 'failed'
-  const [importStatus, setImportStatus] = useState<Record<string, { status: FileImportStatus, message?: string, articleId?: number }>>({})
+  type FileImportStatusEntry = { status: FileImportStatus; message?: string; articleId?: number }
+  const [importStatus, setImportStatus] = useState<Record<string, FileImportStatusEntry>>({})
 
   // 步骤配置
   const steps = [
@@ -145,7 +149,7 @@ const ArticleImport: React.FC = () => {
     },
     // 自定义文件项渲染，显示相对路径
     itemRender: (originNode, file) => {
-      const relativePath = (file.originFileObj as any)?.webkitRelativePath || file.name
+      const relativePath = (file.originFileObj as File | undefined)?.webkitRelativePath || file.name
       return (
         <div title={relativePath}>
           {originNode}
@@ -202,9 +206,9 @@ const ArticleImport: React.FC = () => {
 
       setPreviewData(preview)
       setCurrentStep(2)
-    } catch (error: any) {
+    } catch (error) {
       console.error('预览失败:', error)
-      message.error(error.message || '预览失败，请检查文件格式')
+      message.error(error instanceof Error ? error.message || '预览失败，请检查文件格式' : '预览失败，请检查文件格式')
     } finally {
       setLoading(false)
     }
@@ -215,7 +219,7 @@ const ArticleImport: React.FC = () => {
     let mdFile = fileMap.get(filename)
     if (!mdFile) {
       mdFile = validFiles.find((f) => {
-        const path = (f as any).webkitRelativePath || f.name
+        const path = f.webkitRelativePath || f.name
         return path.endsWith(filename) || filename.endsWith(path)
       })
     }
@@ -224,7 +228,7 @@ const ArticleImport: React.FC = () => {
 
   // 单个文章导入逻辑
   const importSingleArticle = async (
-    article: any,
+    article: MarkdownImportArticlePreview,
     config: MarkdownImportConfig,
     fileMap: Map<string, File>,
     validFiles: File[],
@@ -312,7 +316,7 @@ const ArticleImport: React.FC = () => {
 
           const content = await mdFile.text()
           const refs = extractAssetRefs(content)
-          const mdPath = (mdFile as any).webkitRelativePath || mdFile.name
+          const mdPath = mdFile.webkitRelativePath || mdFile.name
 
           refs.forEach(ref => {
             if (ref.startsWith('http') || ref.startsWith('//') || ref.startsWith('data:')) return
@@ -362,14 +366,15 @@ const ArticleImport: React.FC = () => {
         setImportStatus((prev) => ({ ...prev, [filename]: { status: 'failed', message: msg } }))
         return result
       }
-    } catch (error: any) {
-      setImportStatus((prev) => ({ ...prev, [filename]: { status: 'failed', message: error.message } }))
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '导入失败'
+      setImportStatus((prev) => ({ ...prev, [filename]: { status: 'failed', message: errorMessage } }))
       throw error // Re-throw for caller to handle aggregation
     }
   }
 
   // 重试单个文章
-  const handleRetry = async (article: any) => {
+  const handleRetry = async (article: MarkdownImportArticlePreview) => {
     if (!savedConfig) {
       message.error('配置丢失')
       return
@@ -381,7 +386,7 @@ const ArticleImport: React.FC = () => {
     fileList.forEach((f) => {
       if (f.originFileObj instanceof File) {
         const file = f.originFileObj
-        const path = (file as any).webkitRelativePath || file.name
+        const path = file.webkitRelativePath || file.name
         fileMap.set(path, file)
         if (path !== file.name) fileMap.set(file.name, file)
         validFiles.push(file)
@@ -406,7 +411,7 @@ const ArticleImport: React.FC = () => {
     setImportProgress(0)
 
     // 初始化状态 (仅对未成功的)
-    const initialStatus: Record<string, any> = { ...importStatus }
+    const initialStatus: Record<string, FileImportStatusEntry> = { ...importStatus }
     previewData.articles.forEach((a) => {
       // 如果之前的状态不是成功，重置为 pending
       if (initialStatus[a.originalFilename]?.status !== 'success') {
@@ -422,7 +427,7 @@ const ArticleImport: React.FC = () => {
     fileList.forEach((f) => {
       if (f.originFileObj instanceof File) {
         const file = f.originFileObj
-        const path = (file as any).webkitRelativePath || file.name
+        const path = file.webkitRelativePath || file.name
         fileMap.set(path, file)
         if (path !== file.name) {
           fileMap.set(file.name, file)
@@ -557,7 +562,7 @@ const ArticleImport: React.FC = () => {
             try {
               const content = await mdFile.text()
               const refs = extractAssetRefs(content)
-              const mdPath = (mdFile as any).webkitRelativePath || mdFile.name
+              const mdPath = mdFile.webkitRelativePath || mdFile.name
 
               refs.forEach(ref => {
                 if (ref.startsWith('http') || ref.startsWith('//') || ref.startsWith('data:') || ref.includes(':')) return
@@ -576,7 +581,7 @@ const ArticleImport: React.FC = () => {
                 }
 
                 if (assetFile) {
-                  const assetKey = (assetFile as any).webkitRelativePath || assetFile.name
+                  const assetKey = assetFile.webkitRelativePath || assetFile.name
                   if (!processedAssets.has(assetKey)) {
                     processedAssets.add(assetKey)
                     batchAssets.push(assetFile)
@@ -611,13 +616,13 @@ const ArticleImport: React.FC = () => {
           return next
         })
 
-      } catch (error: any) {
+      } catch (error) {
         console.error('Batch Request Failed', error)
         setImportStatus(prev => {
           const next = { ...prev }
           batchArticles.forEach(a => {
             if (next[a.originalFilename]?.status === 'importing') {
-              next[a.originalFilename] = { status: 'failed', message: error.message || '请求失败' }
+              next[a.originalFilename] = { status: 'failed', message: error instanceof Error ? error.message || '请求失败' : '请求失败' }
             }
           })
           return next
@@ -637,7 +642,7 @@ const ArticleImport: React.FC = () => {
     // 统计目录信息
     const directories = new Set<string>()
     fileList.forEach((file) => {
-      const relativePath = (file.originFileObj as any)?.webkitRelativePath || ''
+      const relativePath = (file.originFileObj as File | undefined)?.webkitRelativePath || ''
       if (relativePath) {
         const parts = relativePath.split('/')
         if (parts.length > 1) {
@@ -882,7 +887,7 @@ const ArticleImport: React.FC = () => {
   const renderPreview = () => {
     if (!previewData) return null
 
-    const categoryColumns = [
+    const categoryColumns: ColumnsType<MarkdownImportCategoryPreview> = [
       { title: '分类名称', dataIndex: 'name', key: 'name' },
       { title: '分类 Key', dataIndex: 'categoryKey', key: 'categoryKey' },
       { title: '层级', dataIndex: 'level', key: 'level', render: (level: number) => `Level ${level}` },
@@ -890,7 +895,7 @@ const ArticleImport: React.FC = () => {
       {
         title: '状态',
         key: 'status',
-        render: (_: any, record: any) => (
+        render: (_, record) => (
           <Space>
             {record.exists && <Tag color="blue">已存在</Tag>}
             {record.willCreate && <Tag color="green">将创建</Tag>}
@@ -899,7 +904,7 @@ const ArticleImport: React.FC = () => {
       },
     ]
 
-    const articleColumns = [
+    const articleColumns: ColumnsType<MarkdownImportArticlePreview> = [
       { title: '文件名', dataIndex: 'originalFilename', key: 'originalFilename', width: 200 },
       { title: '标题', dataIndex: 'title', key: 'title', ellipsis: true },
       { title: '分类', dataIndex: 'category', key: 'category' },
@@ -937,14 +942,14 @@ const ArticleImport: React.FC = () => {
           { text: '失败', value: 'failed' },
           { text: '进行中', value: 'processing' },
         ],
-        onFilter: (value: any, record: any) => {
+        onFilter: (value, record) => {
           const s = importStatus[record.originalFilename]?.status || 'pending'
           if (value === 'processing') {
             return s === 'generating_cover' || s === 'importing'
           }
           return s === value
         },
-        render: (_: any, record: any) => {
+        render: (_, record) => {
           const status = importStatus[record.originalFilename]
           if (!status) return <Tag>等待中</Tag>
 
@@ -968,7 +973,7 @@ const ArticleImport: React.FC = () => {
         key: 'action',
         fixed: 'right' as const,
         width: 100,
-        render: (_: any, record: any) => {
+        render: (_, record) => {
           const status = importStatus[record.originalFilename]
           if (status?.status === 'failed') {
             return <Button type="link" size="small" onClick={() => handleRetry(record)}>重试</Button>

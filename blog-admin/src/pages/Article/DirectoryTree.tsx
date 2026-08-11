@@ -15,6 +15,7 @@ import {
   message,
 } from 'antd'
 import type { DataNode, TreeProps } from 'antd/es/tree'
+import type { AntTreeNodeProps } from 'antd/es/tree'
 import type { MenuProps } from 'antd'
 import {
   ApartmentOutlined,
@@ -51,6 +52,14 @@ import { ARTICLE_STATUS_MAP, Article } from '@/types'
 interface DirectoryTreeDataNode extends DataNode {
   item: ArticleDirectoryItem
   children?: DirectoryTreeDataNode[]
+}
+
+interface DirectorySelectOption {
+  title?: string
+  value: number
+  key: string
+  disabled?: boolean
+  children?: DirectorySelectOption[]
 }
 
 // 顶级节点直接作为树的顶层显示，根节点(id=0)隐式存在，不再用虚拟 ROOT 节点包裹。
@@ -360,7 +369,7 @@ const ArticleDirectoryTree: React.FC = () => {
   }, [itemByKey])
 
   const parentNodeOptions = useMemo(() => {
-    const buildOptions = (nodes: ArticleDirectoryItem[]): any[] => {
+    const buildOptions = (nodes: ArticleDirectoryItem[]): DirectorySelectOption[] => {
       return nodes
         .filter((n) => n.type === 'NODE')
         .map((n) => {
@@ -387,7 +396,7 @@ const ArticleDirectoryTree: React.FC = () => {
   }, [items, editingNode, isDescendant])
 
   const articleParentNodeOptions = useMemo(() => {
-    const buildOptions = (nodes: ArticleDirectoryItem[]): any[] => {
+    const buildOptions = (nodes: ArticleDirectoryItem[]): DirectorySelectOption[] => {
       return nodes
         .filter((n) => n.type === 'NODE')
         .map((n) => ({
@@ -862,7 +871,7 @@ const ArticleDirectoryTree: React.FC = () => {
       await moveArticleDirectoryItem({
         itemType: dragItem.type,
         itemId: getMoveItemId(dragItem),
-        targetType: targetType as any,
+        targetType,
         targetId,
         position,
       })
@@ -877,7 +886,7 @@ const ArticleDirectoryTree: React.FC = () => {
     const key = info.node.key
     setSelectedKey(key)
 
-    const item = (info.node as any).item as ArticleDirectoryItem
+    const item = (info.node as unknown as DirectoryTreeDataNode).item
     if (!item) return
 
     if (item.type === 'ARTICLE') {
@@ -1047,7 +1056,7 @@ const ArticleDirectoryTree: React.FC = () => {
               <Tree
                 blockNode
                 showLine={{ showLeafIcon: false }}
-                switcherIcon={(props: any) => {
+                switcherIcon={(props: AntTreeNodeProps) => {
                   if (props.isLeaf) return null
                   return (
                     <DownOutlined

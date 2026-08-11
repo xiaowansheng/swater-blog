@@ -2,6 +2,9 @@ package com.blog.modules.auth.service;
 
 
 
+import cn.dev33.satoken.SaManager;
+import cn.dev33.satoken.context.SaHolder;
+import cn.dev33.satoken.context.model.SaCookie;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.blog.bootstrap.context.UserContext;
@@ -36,6 +39,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class AuthServiceImpl implements AuthService {
+    private static final String LOGIN_FLAG_COOKIE = "blog_admin_logged_in";
+
     @Autowired
     private UserMapper userMapper;
 
@@ -96,11 +101,10 @@ public class AuthServiceImpl implements AuthService {
         long timeout = (dto.getRememberMe() != null && dto.getRememberMe()) ? 2592000 : 7200;
         StpUtil.login(user.getId(), timeout);
         String token = StpUtil.getTokenValue();
-        
+        setLoginFlagCookie(timeout);
+
         user.setLastLoginTime(LocalDateTime.now());
         userMapper.updateById(user);
-        
-
         
         UserVO userVO = convertToVO(user);
         
@@ -147,6 +151,7 @@ public class AuthServiceImpl implements AuthService {
         long timeout = (dto.getRememberMe() != null && dto.getRememberMe()) ? 2592000 : 7200;
         StpUtil.login(user.getId(), timeout);
         String token = StpUtil.getTokenValue();
+        setLoginFlagCookie(timeout);
 
         user.setLastLoginTime(LocalDateTime.now());
         userMapper.updateById(user);
@@ -230,6 +235,7 @@ public class AuthServiceImpl implements AuthService {
             userId = StpUtil.getLoginIdAsLong();
         }
         StpUtil.logout();
+        clearLoginFlagCookie();
         if (userId != null) {
             eventPublisher.publishEvent(new UserLoggedOutEvent(this, userId));
         }
@@ -260,6 +266,37 @@ public class AuthServiceImpl implements AuthService {
             }
         }
         return vo;
+    }
+
+    /**
+     * 登录状态标记 Cookie（非 httpOnly，仅存 0/1）。
+     * 真实 token 由 Sa-Token 写入 httpOnly Cookie（名称 = sa-token.token-name），
+     * 前端 JS 无法读取；此标记仅用于前端路由守卫同步判断登录态。
+     */
+    private void setLoginFlagCookie(long timeoutSeconds) {
+        SaCookie cookie = new SaCookie()
+                .setName(LOGIN_FLAG_COOKIE)
+                .setValue("1")
+                .setMaxAge((int) timeoutSeconds)
+                .setPath("/")
+                .setSameSite("Strict")
+                .setSecure(isSecureCookieEnabled());
+        SaHolder.getResponse().addCookie(cookie);
+    }
+
+    private void clearLoginFlagCookie() {
+        SaCookie cookie = new SaCookie()
+                .setName(LOGIN_FLAG_COOKIE)
+                .setValue(null)
+                .setMaxAge(0)
+                .setPath("/")
+                .setSameSite("Strict");
+        SaHolder.getResponse().addCookie(cookie);
+    }
+
+    private boolean isSecureCookieEnabled() {
+        Boolean secure = SaManager.getConfig().getCookie().getSecure();
+        return secure != null && secure;
     }
 
 }

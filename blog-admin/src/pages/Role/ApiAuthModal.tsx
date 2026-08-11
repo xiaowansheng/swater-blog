@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Modal, Tree, Input, Tag, Spin, message, Empty, Button } from 'antd'
+import type { TreeProps } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { getApiList } from '@/api/api'
 import { getRoleApiIds, assignApis } from '@/api/role'
@@ -14,8 +15,7 @@ interface ApiAuthModalProps {
 }
 
 interface DataNode {
-  title: React.ReactNode
-  key: string
+  key: React.Key
   isLeaf?: boolean
   children?: DataNode[]
   method?: string
@@ -66,16 +66,14 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
     try {
       // 过滤掉父节点（模块）的key，只保存实际API的key
       // 收集所有API节点的key（没有children属性的节点）
-      const getAllApiKeys = (nodes: any[]): string[] => {
+      const getAllApiKeys = (nodes: DataNode[]): string[] => {
         let keys: string[] = []
         nodes.forEach(node => {
           if (node.children && node.children.length > 0) {
             keys = keys.concat(getAllApiKeys(node.children))
           } else {
-            // 是叶子节点（API），有method和path属性
-            if (node.method && node.path) {
-              keys.push(node.key)
-            }
+            // buildTreeData 保证无 children 的节点即为 API 叶子节点
+            keys.push(String(node.key))
           }
         })
         return keys
@@ -191,20 +189,20 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
   }
 
   // 自定义处理选中逻辑
-  const handleCheck = (checkedKeysValue: any, info: any) => {
+  const handleCheck: TreeProps['onCheck'] = (checkedKeysValue, info) => {
     const { checked, node } = info
 
     // 如果选中的是父节点（模块），需要只选择当前过滤后可见的子节点
     if (node.children && node.children.length > 0) {
       // 获取该父节点下所有可见的API节点ID
-      const getVisibleApiKeys = (nodes: any[]): string[] => {
+      const getVisibleApiKeys = (nodes: DataNode[]): string[] => {
         let keys: string[] = []
         nodes.forEach(child => {
           if (child.children && child.children.length > 0) {
             keys = keys.concat(getVisibleApiKeys(child.children))
           } else {
             // 是叶子节点（API）
-            keys.push(child.key)
+            keys.push(String(child.key))
           }
         })
         return keys
@@ -225,10 +223,10 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
           })
         } else {
           // 移除该模块下所有的API节点（包括被过滤的）
-          const getAllApiKeysUnderParent = (parentId: string, allNodes: any[]): string[] => {
+          const getAllApiKeysUnderParent = (parentId: string, allNodes: DataNode[]): string[] => {
             let keys: string[] = []
             allNodes.forEach(n => {
-              if (n.key === parentId && n.children) {
+              if (String(n.key) === parentId && n.children) {
                 keys = keys.concat(getAllLeafKeys(n.children))
               } else if (n.children) {
                 keys = keys.concat(getAllApiKeysUnderParent(parentId, n.children))
@@ -237,13 +235,13 @@ const ApiAuthModal: React.FC<ApiAuthModalProps> = ({
             return keys
           }
 
-          const getAllLeafKeys = (nodes: any[]): string[] => {
+          const getAllLeafKeys = (nodes: DataNode[]): string[] => {
             let keys: string[] = []
             nodes.forEach(child => {
               if (child.children && child.children.length > 0) {
                 keys = keys.concat(getAllLeafKeys(child.children))
               } else {
-                keys.push(child.key)
+                keys.push(String(child.key))
               }
             })
             return keys

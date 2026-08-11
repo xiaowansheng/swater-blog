@@ -1,6 +1,7 @@
 import type { ApiResponse } from '@/types';
 import { getMockResponse } from './mock';
 import { getVerifyToken, VERIFY_TOKEN_HEADER } from '../auth/emailSession';
+import { normalizeApiUrl } from '@/lib/utils/apiUrl';
 
 const CLIENT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
   || (process.env.NODE_ENV === 'development' ? 'http://localhost:8888' : '/');
@@ -15,15 +16,6 @@ function resolveServerBaseUrl(base: string) {
 }
 
 const API_BASE_URL = resolveServerBaseUrl(SERVER_BASE_URL || CLIENT_BASE_URL);
-
-function normalizeApiUrl(base: string, path: string) {
-  const baseTrim = base.endsWith('/') ? base.slice(0, -1) : base;
-  const pathTrim = path.startsWith('/') ? path : `/${path}`;
-  if (baseTrim.endsWith('/api') && pathTrim.startsWith('/api/')) {
-    return baseTrim + pathTrim.slice(4);
-  }
-  return baseTrim + pathTrim;
-}
 
 type NextFetchOptions = {
   tags?: string[];

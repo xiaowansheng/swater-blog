@@ -103,9 +103,9 @@ const ArticleExport: React.FC = () => {
       const preview = await previewMarkdownExport(config)
       setPreviewData(preview)
       setCurrentStep(1)
-    } catch (error: any) {
+    } catch (error) {
       console.error('预览失败:', error)
-      message.error(error.message || '预览失败')
+      message.error(error instanceof Error ? error.message || '预览失败' : '预览失败')
     } finally {
       setLoading(false)
     }
@@ -158,9 +158,9 @@ const ArticleExport: React.FC = () => {
       } else {
         message.error('导出失败，请查看错误信息')
       }
-    } catch (error: any) {
+    } catch (error) {
       clearInterval(progressTimer)
-      message.error(error.message || '导出失败')
+      message.error(error instanceof Error ? error.message || '导出失败' : '导出失败')
     } finally {
       setLoading(false)
     }

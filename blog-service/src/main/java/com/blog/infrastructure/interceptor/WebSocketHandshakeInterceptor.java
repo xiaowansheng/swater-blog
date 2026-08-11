@@ -2,13 +2,17 @@ package com.blog.infrastructure.interceptor;
 
 
 
+import cn.dev33.satoken.SaManager;
 import cn.dev33.satoken.stp.StpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -37,8 +41,8 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
         log.debug("WebSocket 握手请求: path={}", path);
 
         try {
-            // 1. 从 URL 参数中获取 Token
-            String token = extractTokenFromQuery(queryString);
+            // 1. 按优先级提取 Token：httpOnly Cookie > Authorization 头 > Sec-WebSocket-Protocol > 旧版 URL 参数
+            String token = extractToken(request, queryString);
             if (token == null || token.isEmpty()) {
                 log.warn("WebSocket 连接被拒绝：未提供 Token, path={}", path);
                 return false;
@@ -82,6 +86,55 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
         if (exception != null) {
             log.error("WebSocket 握手后处理异常: {}", exception.getMessage());
         }
+    }
+
+    /**
+     * 提取握手携带的 Token，避免 Token 出现在 URL 和日志中。
+     * 优先级：httpOnly Cookie > Authorization 头 > Sec-WebSocket-Protocol > 旧版 URL 参数（兼容）。
+     */
+    private String extractToken(ServerHttpRequest request, String queryString) {
+        if (request instanceof ServletServerHttpRequest servletRequest) {
+            HttpServletRequest httpRequest = servletRequest.getServletRequest();
+
+            String cookieToken = extractTokenFromCookie(httpRequest);
+            if (cookieToken != null) {
+                return cookieToken;
+            }
+
+            String headerToken = httpRequest.getHeader("Authorization");
+            if (headerToken != null && !headerToken.isBlank()) {
+                return stripBearerPrefix(headerToken);
+            }
+        }
+
+        String protocolHeader = request.getHeaders().getFirst("Sec-WebSocket-Protocol");
+        if (protocolHeader != null && !protocolHeader.isBlank()) {
+            return stripBearerPrefix(protocolHeader);
+        }
+
+        return extractTokenFromQuery(queryString);
+    }
+
+    private String extractTokenFromCookie(HttpServletRequest httpRequest) {
+        String cookieName = SaManager.getConfig().getTokenName();
+        Cookie[] cookies = httpRequest.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            if (cookieName.equals(cookie.getName()) && cookie.getValue() != null && !cookie.getValue().isEmpty()) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    private String stripBearerPrefix(String token) {
+        String trimmed = token.trim();
+        if (trimmed.startsWith("Bearer ")) {
+            return trimmed.substring("Bearer ".length()).trim();
+        }
+        return trimmed;
     }
 
     /**

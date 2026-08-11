@@ -7,7 +7,7 @@ import {
   EyeOutlined,
   CloudUploadOutlined
 } from '@ant-design/icons';
-import type { RcFile } from 'antd/es/upload/interface';
+import type { RcFile, UploadProps } from 'antd/es/upload/interface';
 import { uploadFile } from '@/api/file';
 import { getFullUrl, toRelativeUrl } from '@/utils/format';
 
@@ -58,18 +58,18 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     return isImage && isLtSize;
   };
 
-  const handleUpload = async (options: any) => {
+  const handleUpload: NonNullable<UploadProps['customRequest']> = async (options) => {
     const { file, onSuccess, onError } = options;
     setLoading(true);
     try {
       const res = await uploadFile(file as File);
-      onSuccess(res);
+      onSuccess?.(res);
       // 使用 toRelativeUrl 统一转为 ./ 开头的相对路径
       const path = toRelativeUrl(res.url || res.storagePath);
       onChange?.(path);
       message.success('上传成功');
     } catch (error) {
-      onError(error);
+      onError?.(error as Error);
       message.error('上传失败');
     } finally {
       setLoading(false);

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import type { ColumnsType } from 'antd/es/table'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag, Tooltip, Select } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, ApiOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { getRoleList, createRole, updateRole, deleteRole } from '@/api/role'
@@ -121,7 +122,7 @@ const RolePage: React.FC = () => {
     </Tag>
   )
 
-  const columns = [
+  const columns: ColumnsType<Role> = [
     {
       title: '角色名称',
       dataIndex: 'name',
@@ -152,7 +153,7 @@ const RolePage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 200,
-      render: (_: any, record: Role) => (
+      render: (_, record) => (
         <Space>
           <Tooltip title="编辑">
             <Button

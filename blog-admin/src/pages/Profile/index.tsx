@@ -137,13 +137,13 @@ const ProfilePage: React.FC = () => {
         await logout();
         navigate('/login');
       }, 1500);
-    } catch (error: any) {
+    } catch (error) {
       console.error("修改密码失败", error);
-      if (error?.errorFields) {
+      if ((error as { errorFields?: unknown }).errorFields) {
         // 表单验证错误，不显示message
         return;
       }
-      message.error(error?.message || "修改密码失败");
+      message.error(error instanceof Error ? error.message || "修改密码失败" : "修改密码失败");
     } finally {
       setChangingPassword(false);
     }

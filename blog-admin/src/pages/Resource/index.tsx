@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import type { ColumnsType } from 'antd/es/table'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, InputNumber, Tag, Tooltip, Select, Switch, TreeSelect, Empty } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, InfoCircleOutlined, CheckCircleOutlined, SearchOutlined } from '@ant-design/icons'
 import { getApiList, createApi, updateApi, deleteApi, refreshApi } from '@/api/api'
@@ -170,7 +171,7 @@ const ApiPage: React.FC = () => {
     }
   }
 
-  const columns = [
+  const columns: ColumnsType<ApiVO> = [
     {
       title: '接口名称',
       dataIndex: 'name',
@@ -221,7 +222,7 @@ const ApiPage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 150,
-      render: (_: any, record: ApiVO) => (
+      render: (_, record) => (
         <Space>
           <Tooltip title="添加子接口">
             <Button

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import type { ColumnsType } from 'antd/es/table'
 import { Table, Button, Space, Popconfirm, message, Modal, Form, Input, Tag as AntTag } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
 import { getTagList, createTag, updateTag, deleteTag } from '@/api/tag'
@@ -70,7 +71,7 @@ const TagPage: React.FC = () => {
     }
   }
 
-  const columns = [
+  const columns: ColumnsType<Tag> = [
     {
       title: '标签名称',
       dataIndex: 'name',
@@ -99,7 +100,7 @@ const TagPage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 150,
-      render: (_: any, record: Tag) => (
+      render: (_, record) => (
         <Space>
           <Button
             type="text"

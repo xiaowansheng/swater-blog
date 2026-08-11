@@ -117,14 +117,14 @@ const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
     }
   };
 
-  const handleCustomRequest = async (options: any) => {
+  const handleCustomRequest: NonNullable<UploadProps['customRequest']> = async (options) => {
     const { file, onSuccess, onError } = options;
     try {
       const res = await uploadFile(file as File);
-      onSuccess(res);
+      onSuccess?.(res);
       message.success('上传成功');
     } catch (error) {
-      onError(error);
+      onError?.(error as ProgressEvent);
       message.error('上传失败');
     }
   };

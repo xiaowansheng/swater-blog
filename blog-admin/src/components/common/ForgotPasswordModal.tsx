@@ -46,15 +46,15 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = React.memo(({ op
       message.success('验证码已发送到您的邮箱')
       startCountdown()
       setCurrentStep(1)
-    } catch (error: any) {
-      message.error(error.message || '发送失败')
+    } catch (error) {
+      message.error(error instanceof Error ? error.message || '发送失败' : '发送失败')
     } finally {
       setLoading(false)
     }
   }
 
   // 重置密码
-  const handleResetPassword = async (values: any) => {
+  const handleResetPassword = async (values: { code: string; newPassword: string; confirmPassword?: string }) => {
     setLoading(true)
     try {
       await authApi.resetPassword({
@@ -68,8 +68,8 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = React.memo(({ op
       setEmail('')
       setCountdown(0)
       onClose()
-    } catch (error: any) {
-      message.error(error.message || '重置失败')
+    } catch (error) {
+      message.error(error instanceof Error ? error.message || '重置失败' : '重置失败')
     } finally {
       setLoading(false)
     }

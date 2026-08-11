@@ -32,6 +32,7 @@ import {
 } from '@ant-design/icons'
 import { getCommentList, approveComment, rejectComment, deleteComment, setVisibleComment, setHiddenComment } from '@/api/comment'
 import { Comment } from '@/types'
+import type { ColumnsType } from 'antd/es/table'
 import {
   COMMENT_STATUS_MAP,
   COMMENT_VISIBILITY_STATUS_MAP,
@@ -204,9 +205,10 @@ const CommentPage: React.FC = () => {
         message.success('已设置为可见')
       }
       loadComments()
-    } catch (error: any) {
+    } catch (error) {
       console.error('切换可见状态失败:', error)
-      message.error(error?.response?.data?.message || error?.message || '操作失败')
+      const apiError = error as { response?: { data?: { message?: string } } }
+      message.error(apiError.response?.data?.message || (error instanceof Error ? error.message : '') || '操作失败')
     }
   }
 
@@ -245,7 +247,7 @@ const CommentPage: React.FC = () => {
   const isVisibleComment = (comment: Comment) =>
     getVisibilityStatus(comment) === CommentVisibilityStatus.VISIBLE
 
-  const columns = [
+  const columns: ColumnsType<Comment> = [
     {
       title: 'ID',
       dataIndex: 'id',
@@ -259,7 +261,7 @@ const CommentPage: React.FC = () => {
       title: '评论者',
       key: 'author',
       width: 220,
-      render: (_: any, record: Comment) => (
+      render: (_, record) => (
         <div className="flex gap-2 items-center">
           <Avatar src={getFullUrl(record.authorAvatar)} icon={<UserOutlined />} size={40} />
           <div className="flex-1 min-w-0">
@@ -280,7 +282,7 @@ const CommentPage: React.FC = () => {
       title: '评论内容',
       key: 'content',
       width: 280,
-      render: (_: any, record: Comment) => (
+      render: (_, record) => (
         <div>
           <div className="truncate mb-1">{record.content}</div>
           <div className="flex gap-1 items-center flex-wrap">
@@ -308,7 +310,7 @@ const CommentPage: React.FC = () => {
       title: '评论目标',
       key: 'target',
       width: 250,
-      render: (_: any, record: Comment) => {
+      render: (_, record) => {
         const title = record.targetTitle || record.postTitle || '未知'
         const targetType = record.targetType || 'ARTICLE'
         const isTalk = targetType === 'TALK'
@@ -341,7 +343,7 @@ const CommentPage: React.FC = () => {
       title: '位置',
       key: 'location',
       width: 150,
-      render: (_: any, record: Comment) => (
+      render: (_, record) => (
         <div className="text-xs">
           {record.country || record.province || record.city ? (
             <div className="flex items-center gap-1" title={`${record.country || ''} ${record.province || ''} ${record.city || ''}`}>
@@ -367,7 +369,7 @@ const CommentPage: React.FC = () => {
       title: '设备',
       key: 'device',
       width: 120,
-      render: (_: any, record: Comment) => (
+      render: (_, record) => (
         <div className="text-xs">
           {record.device || record.browser ? (
             <div>
@@ -392,7 +394,7 @@ const CommentPage: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 120,
-      render: (_: any, record: Comment) => (
+      render: (_, record) => (
         <Space direction="vertical" size="small">
           {getStatusTag(getCommentStatus(record))}
           {getVisibilityTag(getVisibilityStatus(record))}
@@ -409,7 +411,7 @@ const CommentPage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 250,
-      render: (_: any, record: Comment) => (
+      render: (_, record) => (
         <Space size="small">
           <Tooltip title={isVisibleComment(record) ? '设置为隐藏' : '设置为可见'}>
             <Button

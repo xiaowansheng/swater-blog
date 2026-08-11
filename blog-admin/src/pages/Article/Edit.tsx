@@ -8,7 +8,7 @@ import { toRelativeUrl } from '@/utils/format'
 import { getCategoryList } from '@/api/category'
 import { getTagList } from '@/api/tag'
 import { uploadFile } from '@/api/file'
-import { Category, Tag, ArticleStatus, ArticleType } from '@/types'
+import { Category, Tag, Article, ArticleStatus, ArticleType } from '@/types'
 import { TopStatus } from '@/types/enums'
 import { usePageTab } from '@/hooks/usePageTab'
 import MarkdownEditor from '@/components/common/MarkdownEditor'
@@ -42,7 +42,7 @@ const ArticleEdit: React.FC = () => {
   const contentRef = useRef<string>('')
 
   // 记录已加载过的 pageId，防止自动保存相关函数引用频繁变化导致数据加载死循环
-  const loadedPageIdRef = useRef<string | undefined>('__UNINITIALIZED__' as any)
+  const loadedPageIdRef = useRef<string | undefined>('__UNINITIALIZED__')
 
   // 自动保存Hook
   const {
@@ -120,10 +120,10 @@ const ArticleEdit: React.FC = () => {
     const tagNames: string[] = []
 
     if (values.tagIds) {
-      values.tagIds.forEach((item: any) => {
+      values.tagIds.forEach((item: unknown) => {
         if (typeof item === 'number') {
           tagIds.push(item)
-        } else {
+        } else if (typeof item === 'string') {
           tagNames.push(item)
         }
       })
@@ -227,7 +227,7 @@ const ArticleEdit: React.FC = () => {
       setArticleStatus(article.status)
 
       // 初始化自动保存的文章ID和版本号
-      initArticle(article.id, (article as any).version || 1, (article as any).articleKey)
+      initArticle(article.id, article.version || 1, article.articleKey)
 
       form.setFieldsValue({
         ...article,
@@ -237,7 +237,7 @@ const ArticleEdit: React.FC = () => {
         tagIds: article.tags?.map((t) => t.id) || [],
         summary: article.excerpt,
         password: undefined,
-        scheduledPublishAt: (article as any).scheduledPublishAt ? dayjs((article as any).scheduledPublishAt) : undefined,
+        scheduledPublishAt: (article as Article & { scheduledPublishAt?: string }).scheduledPublishAt ? dayjs((article as Article & { scheduledPublishAt?: string }).scheduledPublishAt) : undefined,
       })
 
       contentRef.current = article.content
@@ -365,7 +365,7 @@ const ArticleEdit: React.FC = () => {
   }
 
   // 发布文章
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: { publishStatus?: number }) => {
     setLoading(true)
     setIsPublishing(true)
     const formData = getFormData()
@@ -405,15 +405,15 @@ const ArticleEdit: React.FC = () => {
     retry(formData)
   }
 
-  const handleValuesChange = (changedValues: Record<string, any>) => {
+  const handleValuesChange = (changedValues: Record<string, unknown>) => {
     if (Object.prototype.hasOwnProperty.call(changedValues, 'title')) {
-      setCurrentTitle(changedValues.title || '')
+      setCurrentTitle((changedValues.title as string) || '')
     }
     if (Object.prototype.hasOwnProperty.call(changedValues, 'type')) {
       setCurrentType((changedValues.type as ArticleType) ?? ArticleType.ORIGINAL)
     }
     if (Object.prototype.hasOwnProperty.call(changedValues, 'content')) {
-      setCurrentContent(changedValues.content || '')
+      setCurrentContent((changedValues.content as string) || '')
     }
     if (Object.prototype.hasOwnProperty.call(changedValues, 'publishStatus')) {
       setIsScheduled(changedValues.publishStatus === ArticleStatus.SCHEDULED)

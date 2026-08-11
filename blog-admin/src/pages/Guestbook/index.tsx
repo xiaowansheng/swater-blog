@@ -234,9 +234,10 @@ const GuestbookPage: React.FC = () => {
         message.success('已设置为可见')
       }
       loadGuestbooks()
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { response?: { data?: { message?: string } }; message?: string }
       console.error('切换可见状态失败:', error)
-      message.error(error?.response?.data?.message || error?.message || '操作失败')
+      message.error(err?.response?.data?.message || err?.message || '操作失败')
     }
   }
 
@@ -290,7 +291,7 @@ const GuestbookPage: React.FC = () => {
       title: '留言者',
       key: 'author',
       width: 220,
-      render: (_: any, record: Guestbook) => (
+      render: (_: unknown, record: Guestbook) => (
         <div className="flex gap-2 items-center">
           <Avatar src={getFullUrl(record.avatar)} icon={<UserOutlined />} size={40} />
           <div className="flex-1 min-w-0">
@@ -311,7 +312,7 @@ const GuestbookPage: React.FC = () => {
       title: '留言内容',
       key: 'content',
       width: 280,
-      render: (_: any, record: Guestbook) => (
+      render: (_: unknown, record: Guestbook) => (
         <div>
           <div className="truncate mb-1">{record.content}</div>
           {record.images && record.images.length > 0 && (
@@ -326,7 +327,7 @@ const GuestbookPage: React.FC = () => {
       title: '位置',
       key: 'location',
       width: 150,
-      render: (_: any, record: Guestbook) => (
+      render: (_: unknown, record: Guestbook) => (
         <div className="text-xs">
           {record.country || record.province || record.city ? (
             <div className="flex items-center gap-1" title={`${record.country || ''} ${record.province || ''} ${record.city || ''}`}>
@@ -352,7 +353,7 @@ const GuestbookPage: React.FC = () => {
       title: '设备',
       key: 'device',
       width: 120,
-      render: (_: any, record: Guestbook) => (
+      render: (_: unknown, record: Guestbook) => (
         <div className="text-xs">
           {record.device || record.browser ? (
             <div>
@@ -377,7 +378,7 @@ const GuestbookPage: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: 120,
-      render: (_: any, record: Guestbook) => (
+      render: (_: unknown, record: Guestbook) => (
         <Space direction="vertical" size="small">
           {getStatusTag(getReviewStatus(record))}
           {getVisibilityTag(getVisibilityStatus(record))}
@@ -394,7 +395,7 @@ const GuestbookPage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 250,
-      render: (_: any, record: Guestbook) => (
+      render: (_: unknown, record: Guestbook) => (
         <Space size="small">
           <Tooltip title={isVisibleGuestbook(record) ? '设置为隐藏' : '设置为可见'}>
             <Button

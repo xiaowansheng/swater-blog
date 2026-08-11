@@ -1,7 +1,7 @@
 import { useNotificationStore } from '@/store/notification'
 import { useWebSocketStore } from '@/store/websocket'
 import config from '@/config'
-import { getToken } from '@/utils/storage'
+import { isLoggedIn } from '@/utils/storage'
 import * as notificationApi from '@/api/notification'
 
 class NotificationWebSocket {
@@ -14,17 +14,17 @@ class NotificationWebSocket {
 
   connect() {
     const wsUrl = config.wsBaseUrl
-    const token = getToken()
     const { setStatus, setReconnectAttempts } = useWebSocketStore.getState()
 
-    if (!token) {
-      console.warn('未找到Token，无法建立 WebSocket 连接')
+    // Token 由同源 httpOnly Cookie 在握手时自动携带，不再出现在 URL 中
+    if (!isLoggedIn()) {
+      console.warn('未登录，无法建立 WebSocket 连接')
       setStatus('disconnected')
       return
     }
 
     const normalizedBase = wsUrl.endsWith('/ws') ? wsUrl.slice(0, -3) : wsUrl
-    const url = `${normalizedBase}/ws/notification?token=${encodeURIComponent(token)}`
+    const url = `${normalizedBase}/ws/notification`
 
     try {
       setStatus(this.reconnectAttempts > 0 ? 'reconnecting' : 'connecting')
@@ -76,7 +76,7 @@ class NotificationWebSocket {
     }
   }
 
-  private handleMessage(data: any) {
+  private handleMessage(data: { type?: string }) {
     if (data?.type === 'pong') return
 
     notificationApi

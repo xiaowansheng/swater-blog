@@ -147,6 +147,15 @@ sa-token:
   is-share: true
   token-style: uuid
   jwt-secret-key: ${SA_TOKEN_JWT_SECRET_KEY:}
+  # httpOnly Cookie 鉴权：token 不再暴露给前端 JS（XSS 无法读取）
+  is-read-cookie: true
+  is-write-cookie: true
+  cookie:
+    path: /
+    http-only: true
+    same-site: strict
+    # HTTPS 部署时设为 true（SA_TOKEN_COOKIE_SECURE=true），HTTP 内网部署保持 false
+    secure: ${SA_TOKEN_COOKIE_SECURE:false}
 
 auth:
   crypto:

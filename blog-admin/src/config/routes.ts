@@ -34,7 +34,7 @@ const Profile = lazy(() => import('@/pages/Profile'))
 
 export interface RouteConfigItem {
   path: string
-  component: React.LazyExoticComponent<React.ComponentType<any>>
+  component: React.LazyExoticComponent<React.ComponentType<object>>
   title: string
   keepAlive: boolean
 }

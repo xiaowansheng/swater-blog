@@ -1,6 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
 import { message } from 'antd'
-import { getToken } from '@/utils/storage'
 import { Result } from '@/types'
 import config from '@/config'
 import { useAuthStore } from '@/store/auth'
@@ -8,26 +7,16 @@ import { useAuthStore } from '@/store/auth'
 const request: AxiosInstance = axios.create({
   baseURL: config.apiBaseUrl,
   timeout: 30000,
+  withCredentials: true,
 })
-
-request.interceptors.request.use(
-  (config) => {
-    const token = getToken()
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
 
 request.interceptors.response.use(
   (response) => {
-    const res: Result<any> = response.data
+    const res: Result<unknown> = response.data
     if (res.code === 200) {
-      return res.data
+      // 拦截器将业务数据从 AxiosResponse 中解包返回，属于 axios 类型契约的固有妥协
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return res.data as any
     }
     if (res.code === 401) {
       const authStore = useAuthStore.getState()

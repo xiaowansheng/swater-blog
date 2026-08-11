@@ -46,7 +46,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     MENU_CONF: {
       uploadImage: {
         // 自定义上传逻辑
-        async customUpload(file: File, insertFn: any) {
+        async customUpload(file: File, insertFn: (url: string, alt: string, href: string) => void) {
           try {
             const res = await uploadFile(file)
             // 使用 getFullUrl 拼接完整路径，优先使用 url 字段，其次使用 storagePath

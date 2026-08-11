@@ -45,8 +45,8 @@ const Login: React.FC = () => {
         // 没有缓存的标签页，跳转到默认页面
         navigate('/welcome')
       }
-    } catch (error: any) {
-      message.error(error.message || '登录失败')
+    } catch (error) {
+      message.error(error instanceof Error ? error.message || '登录失败' : '登录失败')
     } finally {
       setLoading(false)
     }

@@ -1,4 +1,4 @@
-import { Component, ReactNode } from 'react'
+import { Component, ErrorInfo, ReactNode } from 'react'
 import { Result, Button } from 'antd'
 
 interface Props {
@@ -20,7 +20,7 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error }
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Error caught by boundary:', error, errorInfo)
   }
 

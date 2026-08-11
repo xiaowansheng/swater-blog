@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import type { ColumnsType } from 'antd/es/table'
 import { Table, Tag, Input, Select, Button, DatePicker, Space, Modal } from 'antd'
 import { SearchOutlined, ReloadOutlined, EyeOutlined } from '@ant-design/icons'
 import { getOperationLogList } from '@/api/log'
@@ -83,7 +84,7 @@ const LogOperationPage: React.FC = () => {
     setDetailVisible(true)
   }
 
-  const columns = [
+  const columns: ColumnsType<LogOperation> = [
     {
       title: '操作模块',
       dataIndex: 'module',
@@ -194,7 +195,7 @@ const LogOperationPage: React.FC = () => {
       width: 80,
       fixed: 'right' as const,
       align: 'center' as const,
-      render: (_: any, record: LogOperation) => (
+      render: (_, record) => (
         <div style={{ textAlign: 'center' }}>
           <Button
             type="link"

@@ -306,7 +306,7 @@ const VisitorPage: React.FC = () => {
       title: '地区/ISP',
       key: 'location',
       width: 200,
-      render: (_: any, record: Visitor) => (
+      render: (_: unknown, record: Visitor) => (
         <div>
           <div>{[record.country, record.province, record.city, record.district].filter(Boolean).join(' / ') || '-'}</div>
           <div className="text-xs text-gray-400">{record.isp || record.timezone || '-'}</div>
@@ -317,7 +317,7 @@ const VisitorPage: React.FC = () => {
       title: '设备',
       key: 'device',
       width: 180,
-      render: (_: any, record: Visitor) => (
+      render: (_: unknown, record: Visitor) => (
         <div>
           <div>{record.deviceType || '-'}</div>
           <div className="text-xs text-gray-400">
@@ -330,7 +330,7 @@ const VisitorPage: React.FC = () => {
       title: '操作系统',
       key: 'os',
       width: 160,
-      render: (_: any, record: Visitor) => (
+      render: (_: unknown, record: Visitor) => (
         <span>{[record.osName, record.osVersion].filter(Boolean).join(' ') || '-'}</span>
       ),
     },
@@ -338,7 +338,7 @@ const VisitorPage: React.FC = () => {
       title: '浏览器',
       key: 'browser',
       width: 160,
-      render: (_: any, record: Visitor) => (
+      render: (_: unknown, record: Visitor) => (
         <span>{[record.browserName, record.browserVersion].filter(Boolean).join(' ') || '-'}</span>
       ),
     },
@@ -346,7 +346,7 @@ const VisitorPage: React.FC = () => {
       title: '最近入口',
       key: 'trafficSource',
       width: 160,
-      render: (_: any, record: Visitor) => (
+      render: (_: unknown, record: Visitor) => (
         <Space size={4} direction="vertical">
           <Tag color={getTrafficSourceColor(record.trafficSource)} style={{ marginBottom: 0 }}>
             {record.trafficSource || 'UNKNOWN'}
@@ -388,7 +388,7 @@ const VisitorPage: React.FC = () => {
       key: 'tracking',
       width: 120,
       fixed: 'right' as const,
-      render: (_: any, record: Visitor) => (
+      render: (_: unknown, record: Visitor) => (
         <Button type="link" onClick={() => openTrackingDetail(record)}>
           查看明细
         </Button>
@@ -741,7 +741,7 @@ const VisitorPage: React.FC = () => {
                     title: '落地页',
                     key: 'landingPageUrl',
                     width: 220,
-                    render: (_: any, record: VisitorSessionTrace) => (
+                    render: (_: unknown, record: VisitorSessionTrace) => (
                       <Tooltip title={record.landingPageUrl || record.entryPageKey}>
                         <div className="max-w-[220px] truncate">
                           {getDisplayUrl(record.landingPageUrl, record.entryPageKey || '-')}
@@ -753,7 +753,7 @@ const VisitorPage: React.FC = () => {
                     title: '来源',
                     key: 'entryReferer',
                     width: 180,
-                    render: (_: any, record: VisitorSessionTrace) => (
+                    render: (_: unknown, record: VisitorSessionTrace) => (
                       <Tooltip title={record.entryReferer}>
                         <div className="max-w-[180px] truncate">
                           {getDisplayUrl(record.entryReferer)}
@@ -772,7 +772,7 @@ const VisitorPage: React.FC = () => {
                     title: '操作',
                     key: 'action',
                     width: 100,
-                    render: (_: any, record: VisitorSessionTrace) => (
+                    render: (_: unknown, record: VisitorSessionTrace) => (
                       <Button type={selectedSession?.sessionId === record.sessionId ? 'primary' : 'link'} onClick={() => loadSessionPages(currentVisitor.id, record)}>
                         查看路径
                       </Button>

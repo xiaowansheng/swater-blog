@@ -191,13 +191,13 @@ const FriendLinkPage: React.FC = () => {
       key: 'index',
       width: 60,
       align: 'center' as const,
-      render: (_: any, __: any, index: number) => index + 1,
+      render: (_: unknown, __: unknown, index: number) => index + 1,
     },
     {
       title: '友链信息',
       key: 'info',
       width: 300,
-      render: (_: any, record: FriendLink) => (
+      render: (_: unknown, record: FriendLink) => (
         <div className="flex items-center gap-3">
           <Avatar
             src={record.logo}
@@ -250,7 +250,7 @@ const FriendLinkPage: React.FC = () => {
       title: '操作',
       key: 'action',
       width: 180,
-      render: (_: any, record: FriendLink) => (
+      render: (_: unknown, record: FriendLink) => (
         <Space size="small">
           <Tooltip title="编辑">
             <Button

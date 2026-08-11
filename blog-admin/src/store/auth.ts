@@ -1,12 +1,11 @@
 import { create } from 'zustand'
 import { User } from '@/types'
 import * as authApi from '@/api/auth'
-import { getToken, setToken, removeToken } from '@/utils/storage'
+import { isLoggedIn } from '@/utils/storage'
 import { encryptPasswordRsaOaep } from '@/utils/crypto'
 
 interface AuthState {
   user: User | null
-  token: string | null
   isLoginModalOpen: boolean
   isLoginExpiredModalOpen: boolean
   setLoginModalOpen: (open: boolean) => void
@@ -21,7 +20,6 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
-  token: getToken(),
   isLoginModalOpen: false,
   isLoginExpiredModalOpen: false,
   setLoginModalOpen: (open: boolean) => set({ isLoginModalOpen: open }),
@@ -29,39 +27,36 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (username: string, password: string, rememberMe?: boolean) => {
     const { publicKey, nonce } = await authApi.getLoginNonce()
     const encryptedPassword = await encryptPasswordRsaOaep(publicKey, password)
-    const { token, user } = await authApi.login({ username, encryptedPassword, nonce, rememberMe })
-    setToken(token)
-    set({ token, user })
+    const { user } = await authApi.login({ username, encryptedPassword, nonce, rememberMe })
+    set({ user })
   },
   loginWithEmail: async (email: string, code: string, rememberMe?: boolean) => {
-    const { token, user } = await authApi.loginWithEmail({ email, code, rememberMe })
-    setToken(token)
-    set({ token, user })
+    const { user } = await authApi.loginWithEmail({ email, code, rememberMe })
+    set({ user })
   },
   logout: async () => {
     try {
       await authApi.logout()
     } finally {
-      removeToken()
-      set({ token: null, user: null })
+      set({ user: null })
     }
   },
   getCurrentUser: async () => {
     try {
       const user = await authApi.getCurrentUser()
       set({ user })
-    } catch {
-      // 如果获取当前用户失败，说明 token 已经失效或网络有问题
-      // 我们这里不强制登出，让 request.ts 的 401 拦截器处理
+    } catch (error) {
+      // 获取当前用户失败：token 已失效或网络异常，交给 request.ts 的 401 拦截器处理
+      console.warn('获取当前用户失败', error)
       set({ user: null })
     }
   },
   handleTokenExpired: () => {
-    // 清除用户信息但保留 token，让用户选择是否重新登录
+    // 清除用户信息但保留会话，让用户选择是否重新登录
     set({ user: null, isLoginExpiredModalOpen: true })
   },
   isAuthenticated: () => {
-    return !!get().token
+    // 同步判断：登录标记 Cookie（非 httpOnly，仅 0/1）；刷新后 user 由 BasicLayout 重新拉取
+    return !!get().user || isLoggedIn()
   },
 }))
-

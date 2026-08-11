@@ -19,7 +19,7 @@ const LoginModal: React.FC = () => {
   const [emailForm] = Form.useForm()
 
   // 密码登录
-  const handlePasswordLogin = async (values: any) => {
+  const handlePasswordLogin = async (values: { username: string; password: string }) => {
     setLoading(true)
     try {
       await login(values.username, values.password)
@@ -38,8 +38,8 @@ const LoginModal: React.FC = () => {
         // 清除缓存
         clearCachedTabs()
       }
-    } catch (error: any) {
-      message.error(error.message || '登录失败')
+    } catch (error) {
+      message.error(error instanceof Error ? error.message || '登录失败' : '登录失败')
     } finally {
       setLoading(false)
     }
@@ -58,8 +58,8 @@ const LoginModal: React.FC = () => {
       await authApi.sendEmailCode({ email, type: 'login' })
       message.success('验证码已发送到您的邮箱')
       startCountdown()
-    } catch (error: any) {
-      message.error(error.message || '发送失败')
+    } catch (error) {
+      message.error(error instanceof Error ? error.message || '发送失败' : '发送失败')
     } finally {
       setLoading(false)
     }
@@ -80,7 +80,7 @@ const LoginModal: React.FC = () => {
   }
 
   // 邮箱验证码登录
-  const handleEmailLogin = async (values: any) => {
+  const handleEmailLogin = async (values: { email: string; code: string }) => {
     setLoading(true)
     try {
       await loginWithEmail(values.email, values.code)
@@ -100,8 +100,8 @@ const LoginModal: React.FC = () => {
         // 清除缓存
         clearCachedTabs()
       }
-    } catch (error: any) {
-      message.error(error.message || '登录失败')
+    } catch (error) {
+      message.error(error instanceof Error ? error.message || '登录失败' : '登录失败')
     } finally {
       setLoading(false)
     }

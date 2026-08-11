@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import type { ColumnsType } from 'antd/es/table'
 import { Table, Tag, Input, Button, Modal, Space, DatePicker, Select } from 'antd'
 import { SearchOutlined, ReloadOutlined, EyeOutlined } from '@ant-design/icons'
 import { getErrorLogList } from '@/api/log'
@@ -82,7 +83,7 @@ const LogErrorPage: React.FC = () => {
     setDetailVisible(true)
   }
 
-  const columns = [
+  const columns: ColumnsType<LogError> = [
     {
       title: '请求方法',
       dataIndex: 'requestMethod',
@@ -153,7 +154,7 @@ const LogErrorPage: React.FC = () => {
       width: 80,
       fixed: 'right' as const,
       align: 'center' as const,
-      render: (_: any, record: LogError) => (
+      render: (_, record) => (
         <div style={{ textAlign: 'center' }}>
           <Button
             type="link"
