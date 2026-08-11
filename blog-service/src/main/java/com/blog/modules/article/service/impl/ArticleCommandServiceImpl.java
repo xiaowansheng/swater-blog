@@ -176,9 +176,8 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         blogMetrics.incrementArticleUpdated(
                 article.getCategoryId() != null ? String.valueOf(article.getCategoryId()) : "unknown",
                 article.getType());
-        blogMetrics.updateTotalArticles(articleMapper.selectCount(
-                new LambdaQueryWrapper<Article>().eq(Article::getDeleted, 0)));
-        
+        // update 不改变 deleted 计数，无需重算 totalArticles（曾为冗余全表 COUNT）
+
         articleTagMapper.deleteByArticleId(id);
         
         // 处理标签
@@ -249,9 +248,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         blogMetrics.incrementArticleUpdated(
                 article.getCategoryId() != null ? String.valueOf(article.getCategoryId()) : "unknown",
                 article.getType());
-        blogMetrics.updateTotalArticles(articleMapper.selectCount(
-                new LambdaQueryWrapper<Article>().eq(Article::getDeleted, 0)));
-        
+
         Article publishedArticle = articleMapper.selectById(id);
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticlePublishedEvent(this, id, publishedArticle)));
     }
@@ -270,9 +267,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         blogMetrics.incrementArticleUpdated(
                 article.getCategoryId() != null ? String.valueOf(article.getCategoryId()) : "unknown",
                 article.getType());
-        blogMetrics.updateTotalArticles(articleMapper.selectCount(
-                new LambdaQueryWrapper<Article>().eq(Article::getDeleted, 0)));
-        
+
         Article unpublishedArticle = articleMapper.selectById(id);
         publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUnpublishedEvent(this, id, unpublishedArticle)));
     }
@@ -319,8 +314,6 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         blogMetrics.incrementArticleUpdated(
                 article.getCategoryId() != null ? String.valueOf(article.getCategoryId()) : "unknown",
                 article.getType());
-        blogMetrics.updateTotalArticles(articleMapper.selectCount(
-                new LambdaQueryWrapper<Article>().eq(Article::getDeleted, 0)));
 
         // 处理标签
         if (dto.getTagIds() != null || dto.getTagNames() != null) {
