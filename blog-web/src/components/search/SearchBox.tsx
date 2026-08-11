@@ -5,6 +5,23 @@ import { useRouter } from '@/lib/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { useSimpleRouteLoading } from '@/lib/hooks/useSimpleRouteLoading';
 
+const SEARCH_HISTORY_KEY = 'swater_search_history';
+const MAX_HISTORY_COUNT = 10;
+
+function saveSearchHistory(keyword: string) {
+  if (typeof window === 'undefined' || !keyword.trim()) return;
+  try {
+    const raw = localStorage.getItem(SEARCH_HISTORY_KEY);
+    const history: string[] = raw ? JSON.parse(raw) : [];
+    const filtered = history.filter((k) => k !== keyword);
+    filtered.unshift(keyword);
+    if (filtered.length > MAX_HISTORY_COUNT) filtered.length = MAX_HISTORY_COUNT;
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(filtered));
+  } catch {
+    // ignore
+  }
+}
+
 export default function SearchBox() {
   const t = useTranslations('search');
   const router = useRouter();
@@ -14,6 +31,7 @@ export default function SearchBox() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (keyword.trim()) {
+      saveSearchHistory(keyword.trim());
       startLoading();
       router.push(`/search?keyword=${encodeURIComponent(keyword.trim())}`);
     }
@@ -43,4 +61,3 @@ export default function SearchBox() {
     </form>
   );
 }
-
