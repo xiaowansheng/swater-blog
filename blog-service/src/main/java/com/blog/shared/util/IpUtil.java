@@ -36,7 +36,7 @@ public class IpUtil {
         String remoteIp = request.getRemoteAddr();
         if (trustedProxies != null && isTrustedProxy(remoteIp, trustedProxies)) {
             String realIp = request.getHeader("X-Real-IP");
-            if (isValidIp(realIp)) {
+            if (isValidIpAddress(realIp)) {
                 return realIp.trim();
             }
 
@@ -47,7 +47,7 @@ public class IpUtil {
         }
 
         String ip = remoteIp;
-        
+
         // 如果是本地回环地址，尝试获取本机真实IP
         if (LOCALHOST_IPV4.equals(ip) || LOCALHOST_IPV6.equals(ip)) {
             try {
@@ -57,7 +57,7 @@ public class IpUtil {
                 // 忽略异常，使用原IP
             }
         }
-        
+
         return ip;
     }
 
@@ -67,15 +67,43 @@ public class IpUtil {
         }
         for (String candidate : headerValue.split(",")) {
             String normalized = candidate.trim();
-            if (isValidIp(normalized)) {
+            // 转发头可能携带 IPv6，用通用校验（isValidIp 仅认 IPv4）
+            if (isValidIpAddress(normalized)) {
                 return normalized;
             }
         }
         return null;
     }
 
+    /**
+     * IPv4/IPv6 通用地址合法性校验。
+     * <p>
+     * IPv4 走快速正则；IPv6 交由 {@link InetAddress} 解析。
+     * 注意：IPv6 有多种等价文本形式（如 {@code 2001:db8::9} 与全展开），不能用字符串
+     * 等值判定，故用「包含冒号且能被解析」作为 IPv6 判据。
+     */
+    private static boolean isValidIpAddress(String ip) {
+        if (ip == null || ip.isEmpty() || UNKNOWN.equalsIgnoreCase(ip)) {
+            return false;
+        }
+        if (IP_PATTERN.matcher(ip).matches()) {
+            return true;
+        }
+        // 仅对看起来像 IPv6（含冒号）的串做严格解析，避免对主机名触发 DNS
+        if (ip.indexOf(':') < 0) {
+            return false;
+        }
+        try {
+            InetAddress.getByName(ip);
+            return true;
+        } catch (UnknownHostException e) {
+            return false;
+        }
+    }
+
     private static boolean isTrustedProxy(String remoteIp, Set<String> trustedProxies) {
-        if (!isValidIp(remoteIp)) {
+        // 不复用 IPv4-only 的 isValidIp：IPv6 代理（如 ::1、fd00::/8）也须能匹配
+        if (remoteIp == null || remoteIp.isEmpty()) {
             return false;
         }
         for (String proxy : trustedProxies) {
@@ -89,21 +117,52 @@ public class IpUtil {
         return false;
     }
 
+    /**
+     * 判断 IP 是否落在 CIDR 网段内，兼容 IPv4 与 IPv6。
+     * 例：127.0.0.1 ∈ 127.0.0.0/8、::1 ∈ ::1/128、fd00::1 ∈ fd00::/8。
+     */
     private static boolean isIpInCidr(String ip, String cidr) {
         String[] parts = cidr.split("/", 2);
-        if (parts.length != 2 || !isValidIp(parts[0])) {
+        if (parts.length != 2) {
             return false;
         }
         try {
             int prefixLength = Integer.parseInt(parts[1]);
-            if (prefixLength < 0 || prefixLength > 32) {
+            byte[] ipBytes = InetAddress.getByName(ip).getAddress();
+            // 前缀长度上限 = 该地址族位数（IPv4=32，IPv6=128）
+            int maxPrefix = ipBytes.length * 8;
+            if (prefixLength < 0 || prefixLength > maxPrefix) {
                 return false;
             }
-            long mask = prefixLength == 0 ? 0 : (0xFFFFFFFFL << (32 - prefixLength)) & 0xFFFFFFFFL;
-            return (ipToLong(ip) & mask) == (ipToLong(parts[0]) & mask);
-        } catch (NumberFormatException e) {
+            byte[] cidrBytes = InetAddress.getByName(parts[0]).getAddress();
+            // IPv4 与 IPv6 不可混比（InetAddress 会把 IPv4 映射成 4 字节）
+            if (cidrBytes.length != ipBytes.length) {
+                return false;
+            }
+            return matchesPrefix(ipBytes, cidrBytes, prefixLength);
+        } catch (NumberFormatException | UnknownHostException e) {
             return false;
         }
+    }
+
+    /**
+     * 逐位比较前 prefixLength 个 bit 是否相同。
+     */
+    private static boolean matchesPrefix(byte[] ip, byte[] cidr, int prefixLength) {
+        int fullBytes = prefixLength / 8;
+        for (int i = 0; i < fullBytes; i++) {
+            if (ip[i] != cidr[i]) {
+                return false;
+            }
+        }
+        int leftoverBits = prefixLength % 8;
+        if (leftoverBits == 0) {
+            return true;
+        }
+        // 比较剩余的不足 8 位：用掩码清零低位再比
+        int mask = 0xFF << (8 - leftoverBits);
+        int idx = fullBytes;
+        return (ip[idx] & mask) == (cidr[idx] & mask);
     }
     
     /**
