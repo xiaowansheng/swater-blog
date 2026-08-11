@@ -94,6 +94,8 @@ COMPOSE_PROFILES=https docker compose up -d
 - 管理后台访问 `http://localhost:3001`，管理后台容器内置 Nginx 会把 `/api` 代理到 `blog-service:8888`
 - 不建议把 `http://localhost:3000` 或 `http://localhost:3002` 作为前台主入口，它们是 `blog-web` 容器直连端口，可能绕过外层 Nginx 的 `/api` 代理
 
+> **⚠️ Cookie 鉴权要求同域访问**：登录 Token 通过 httpOnly Cookie 传递（SameSite=Strict）。浏览器只在「前端页面与 `/api`、`/ws` 同 scheme+host+port」时才会携带该 Cookie，因此**必须经由 Nginx 反代**让前端与后端落到同一来源，切勿让浏览器直连 `blog-service:8888`。直连后端端口会导致登录后立即"未登录"、WebSocket 无法握手。HTTPS 部署时还需把 `SA_TOKEN_COOKIE_SECURE=true`，否则 Secure Cookie 在 HTTPS 下也不会写入。
+
 本地 `.env` 关键配置示例：
 
 ```env
