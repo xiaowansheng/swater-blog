@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from '@/lib/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,6 +14,57 @@ interface SearchModalProps {
 
 type SearchType = 'all' | 'post' | 'moment' | 'comment';
 
+const SEARCH_HISTORY_KEY = 'swater_search_history';
+const MAX_HISTORY_COUNT = 10;
+
+function getSearchHistory(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(SEARCH_HISTORY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((k) => typeof k === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveSearchHistory(keyword: string) {
+  if (typeof window === 'undefined' || !keyword.trim()) return;
+  const history = getSearchHistory().filter((k) => k !== keyword);
+  history.unshift(keyword);
+  if (history.length > MAX_HISTORY_COUNT) history.length = MAX_HISTORY_COUNT;
+  localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+}
+
+function removeSearchHistory(keyword: string) {
+  const history = getSearchHistory().filter((k) => k !== keyword);
+  localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+}
+
+function clearSearchHistory() {
+  localStorage.removeItem(SEARCH_HISTORY_KEY);
+}
+
+function buildResultUrl(result: SearchVO): string {
+  if (result.type === 'post') {
+    return `/post/${result.articleKey || result.id}`;
+  }
+  if (result.type === 'moment') {
+    return `/moment/${result.articleKey || result.id}`;
+  }
+  if (result.type === 'comment') {
+    const targetTypeLower = (result.targetType || '').toLowerCase();
+    if (targetTypeLower.includes('article') || targetTypeLower.includes('post')) {
+      return `/post/${result.articleKey || result.targetId}`;
+    }
+    if (targetTypeLower.includes('moment') || targetTypeLower.includes('talk')) {
+      return `/moment/${result.articleKey || result.targetId}`;
+    }
+  }
+  return '#';
+}
+
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const t = useTranslations('search');
   const router = useRouter();
@@ -23,8 +74,41 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [results, setResults] = useState<SearchVO[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
-  // 聚焦输入框
+  useEffect(() => {
+    if (isOpen) {
+      setSearchHistory(getSearchHistory());
+    }
+  }, [isOpen]);
+
+  const handleResultClick = useCallback((result: SearchVO) => {
+    const url = buildResultUrl(result);
+    if (url === '#') return;
+    saveSearchHistory(keyword.trim());
+    router.push(url);
+    onClose();
+    setKeyword('');
+    setResults([]);
+  }, [keyword, router, onClose]);
+
+  const handleHistoryClick = useCallback((term: string) => {
+    saveSearchHistory(term);
+    setKeyword(term);
+    setSearchType('all');
+    inputRef.current?.focus();
+  }, []);
+
+  const handleRemoveHistory = useCallback((term: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    removeSearchHistory(term);
+    setSearchHistory(getSearchHistory());
+  }, []);
+
+  const handleClearHistory = useCallback(() => {
+    clearSearchHistory();
+    setSearchHistory([]);
+  }, []);
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
@@ -60,33 +144,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
       } else if (e.key === 'Enter' && selectedIndex >= 0) {
         e.preventDefault();
-        const result = results[selectedIndex];
-
-        // 在前端生成URL
-        let url = '#';
-        if (result.type === 'post') {
-          url = `/post/${result.articleKey || result.id}`;
-        } else if (result.type === 'moment') {
-          url = `/moment/${result.articleKey || result.id}`;
-        } else if (result.type === 'comment') {
-          // 对于评论，后端已经在articleKey字段中返回了目标文章/说说的key
-          if (result.targetType === 'article' || result.targetType === 'post') {
-            url = `/post/${result.articleKey || result.targetId}`;
-          } else if (result.targetType === 'moment' || result.targetType === 'talk') {
-            url = `/moment/${result.articleKey || result.targetId}`;
-          }
-        }
-
-        router.push(url);
-        onClose();
-        setKeyword('');
-        setResults([]);
+        handleResultClick(results[selectedIndex]);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, results, selectedIndex, router, onClose]);
+  }, [isOpen, results, selectedIndex, handleResultClick]);
 
   // 搜索功能
   useEffect(() => {
@@ -247,13 +311,50 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               {/* 搜索结果 */}
               <div className="max-h-[45vh] sm:max-h-[50vh] overflow-y-auto">
                 {keyword.length < 2 ? (
-                  <div className="py-12 sm:py-16 text-center px-4">
-                    <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 mb-3 sm:mb-4">
-                      <svg className="w-7 h-7 sm:w-8 sm:h-8 text-primary/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-                    <p className="text-sm sm:text-base text-muted-foreground">输入至少 2 个字符开始搜索</p>
+                  <div className="py-4 px-3 sm:px-5">
+                    {/* Search History */}
+                    {searchHistory.length > 0 ? (
+                      <div>
+                        <div className="flex items-center justify-between mb-2.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-foreground">🕐</span>
+                            <h3 className="text-sm font-semibold text-foreground">{t('history')}</h3>
+                          </div>
+                          <button
+                            onClick={handleClearHistory}
+                            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            {t('clearHistory')}
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {searchHistory.map((term) => (
+                            <div key={term} className="group relative">
+                              <button
+                                onClick={() => handleHistoryClick(term)}
+                                className="px-3 py-1.5 text-xs sm:text-sm rounded-full bg-muted/30 hover:bg-primary/10 hover:text-primary border border-border/20 hover:border-primary/30 transition-all duration-200 pr-7"
+                              >
+                                {term}
+                              </button>
+                              <button
+                                onClick={(e) => handleRemoveHistory(term, e)}
+                                className="absolute right-1.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full opacity-60 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-muted-foreground/20 flex items-center justify-center transition-all"
+                                title="删除"
+                              >
+                                <svg className="w-2.5 h-2.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-8 text-center">
+                        <p className="text-xs text-muted-foreground/60">{t('noHistory')}</p>
+                        <p className="text-xs text-muted-foreground/50 mt-1.5">输入至少 2 个字符开始搜索</p>
+                      </div>
+                    )}
                   </div>
                 ) : loading ? (
                   <div className="py-12 sm:py-16 text-center px-4">
@@ -266,31 +367,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       找到 {results.length} 条结果
                     </div>
                     {results.map((result, index) => {
-                      // 在前端生成URL
-                      const getUrl = (result: SearchVO) => {
-                        if (result.type === 'post') {
-                          return `/post/${result.articleKey || result.id}`;
-                        } else if (result.type === 'moment') {
-                          return `/moment/${result.articleKey || result.id}`;
-                        } else if (result.type === 'comment') {
-                          // 对于评论，后端已经在articleKey字段中返回了目标文章/说说的key
-                          if (!result.targetType) {
-                            return '#';
-                          }
-
-                          const targetTypeLower = result.targetType.toLowerCase();
-
-                          if (targetTypeLower.includes('article') || targetTypeLower.includes('post')) {
-                            return `/post/${result.articleKey || result.targetId}`;
-                          } else if (targetTypeLower.includes('moment') || targetTypeLower.includes('talk')) {
-                            return `/moment/${result.articleKey || result.targetId}`;
-                          }
-                          return '#';
-                        }
-                        return '#';
-                      };
-
-                      const url = getUrl(result);
+                      const url = buildResultUrl(result);
 
                       return (
                         <motion.a
@@ -299,10 +376,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.05 }}
-                          onClick={() => {
-                            onClose();
-                            setKeyword('');
-                            setResults([]);
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleResultClick(result);
                           }}
                           className={`flex gap-2 sm:gap-3 items-start p-3 sm:p-4 mx-2 sm:mx-3 my-1 sm:my-1.5 rounded-xl transition-all duration-200 ${
                             index === selectedIndex
@@ -330,10 +406,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     {results.length >= 8 && (
                       <a
                         href={`/search?keyword=${encodeURIComponent(keyword)}&type=${searchType}`}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.preventDefault();
+                          saveSearchHistory(keyword.trim());
                           onClose();
                           setKeyword('');
                           setResults([]);
+                          router.push(`/search?keyword=${encodeURIComponent(keyword.trim())}&type=${searchType}`);
                         }}
                         className="block mx-2 sm:mx-3 my-2 p-2.5 sm:p-3 text-center text-xs sm:text-sm font-medium text-primary hover:underline rounded-xl hover:bg-accent/40 transition-colors"
                       >

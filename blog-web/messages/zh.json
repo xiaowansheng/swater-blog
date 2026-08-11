@@ -336,7 +336,9 @@
     "placeholder": "搜索文章、标签...",
     "results": "搜索结果",
     "noResults": "没有找到相关内容",
-    "history": "搜索历史"
+    "history": "搜索历史",
+    "clearHistory": "清空历史",
+    "noHistory": "暂无搜索记录"
   },
   "markdown": {
     "rendering": "正在渲染...",

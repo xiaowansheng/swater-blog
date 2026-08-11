@@ -336,7 +336,9 @@
     "placeholder": "Search articles, tags...",
     "results": "Search Results",
     "noResults": "No results found",
-    "history": "Search History"
+    "history": "Search History",
+    "clearHistory": "Clear History",
+    "noHistory": "No search history"
   },
   "markdown": {
     "rendering": "Rendering...",
