@@ -42,7 +42,17 @@ export async function fetchClient<T>(
     });
 
     if (!response.ok) {
-      const errorMessage = `HTTP error! status: ${response.status}`;
+      // 后端 GlobalExceptionHandler 把业务码映射为真实 HTTP 状态码，body 仍为标准 Result。
+      // 优先用后端 message；解析失败再退回通用提示。
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorBody = (await response.clone().json()) as ApiResponse<unknown>;
+        if (errorBody?.message) {
+          errorMessage = errorBody.message;
+        }
+      } catch {
+        // 非 JSON 响应，保留默认 message
+      }
       if (!options?.silent) {
         toast.error(errorMessage);
       }
