@@ -79,6 +79,22 @@ const mockHandlers: MockHandler[] = [
     },
   },
   {
+    pattern: /^\/api\/public\/post\/key\/(.+)/,
+    handler: (url) => {
+      const match = url.match(/\/api\/public\/post\/key\/(.+)/);
+      const key = match?.[1];
+      return articleData.list.find(p => p.slug === key || p.id.toString() === key) || articleData.list[0];
+    },
+  },
+  {
+    pattern: /^\/api\/public\/post\/(\d+)\/related/,
+    handler: (url) => {
+      const match = url.match(/\/api\/public\/post\/(\d+)\/related/);
+      const id = parseInt(match?.[1] || '0');
+      return articleData.list.filter(p => p.id !== id).slice(0, 6);
+    },
+  },
+  {
     pattern: /^\/api\/public\/post\/(\d+)/,
     handler: (url) => {
       const match = url.match(/\/api\/public\/post\/(\d+)/);
