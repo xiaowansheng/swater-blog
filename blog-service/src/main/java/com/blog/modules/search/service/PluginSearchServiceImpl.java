@@ -43,7 +43,13 @@ public class PluginSearchServiceImpl implements SearchService {
         if (searchPluginFactory == null) {
             return Collections.emptyMap();
         }
-        SearchPlugin plugin = getActivePlugin();
+        SearchPlugin plugin;
+        try {
+            plugin = getActivePlugin();
+        } catch (BusinessException e) {
+            // 无可用插件时 facet 静默为空（搜索主链路已由 search() 报业务异常）
+            return Collections.emptyMap();
+        }
         try {
             return plugin.getFacetCounts(keyword);
         } catch (Exception e) {

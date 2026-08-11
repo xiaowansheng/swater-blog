@@ -45,7 +45,9 @@ export async function fetchServer<T>(url: string, options?: FetchServerOptions):
   const abortFromExternalSignal = () => controller.abort();
   if (externalSignal) {
     if (externalSignal.aborted) {
+      // 调用方传入已 abort 的 signal：立即中止，不发起请求（与超时 abort 对称）
       controller.abort();
+      throw new Error('请求已被取消');
     } else {
       externalSignal.addEventListener('abort', abortFromExternalSignal, { once: true });
     }
@@ -88,6 +90,10 @@ export async function fetchServer<T>(url: string, options?: FetchServerOptions):
   } catch (error: unknown) {
     if (timedOut) {
       throw new Error('服务端请求超时，请稍后重试');
+    }
+    // 外部调用方主动取消（options.signal.abort）：归类为取消，而非网络错误
+    if (externalSignal?.aborted) {
+      throw new Error('请求已被取消');
     }
     const err = error as { code?: string; message?: string };
     if (err.code === 'ECONNREFUSED' || err.message?.includes('fetch failed')) {
