@@ -6,9 +6,13 @@ import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.exception.NotRoleException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -53,6 +57,35 @@ public class GlobalExceptionHandler {
     public Result<?> handleValidationException(Exception e) {
         log.error("参数校验异常: {}", e.getMessage());
         return Result.error(400, "参数校验失败");
+    }
+
+    // 以下为客户端请求错误（4xx），与系统异常区分，避免污染 error 监控
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Result<?> handleMissingParameter(MissingServletRequestParameterException e) {
+        log.warn("缺少请求参数: {}", e.getParameterName());
+        return Result.error(400, "缺少请求参数: " + e.getParameterName());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Result<?> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        log.warn("请求参数类型错误: {}", e.getName());
+        return Result.error(400, "请求参数类型错误: " + e.getName());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Result<?> handleMessageNotReadable(HttpMessageNotReadableException e) {
+        log.warn("请求体解析失败: {}", e.getMessage());
+        return Result.error(400, "请求体格式错误");
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public Result<?> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+        log.warn("请求方法不支持: {}", e.getMessage());
+        return Result.error(405, "请求方法不支持: " + e.getMethod());
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
