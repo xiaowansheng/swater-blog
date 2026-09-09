@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
@@ -40,6 +41,11 @@ export default defineConfig(({ mode }) => ({
         ws: true
       }
     }
+  },
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.{ts,tsx}'],
+    setupFiles: ['src/test/setup.ts'],
   }
 }))
 

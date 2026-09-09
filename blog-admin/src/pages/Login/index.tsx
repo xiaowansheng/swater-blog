@@ -2,22 +2,20 @@ import { Form, Input, Button, message, Checkbox } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth'
-import { useTabsStore } from '@/store/tabs'
 import { useLockscreenStore } from '@/store/lockscreen'
 import { useState } from 'react'
 import ForgotPasswordModal from '@/components/common/ForgotPasswordModal'
 import { getRememberMe, setRememberMe } from '@/utils/storage'
+import { restoreSessionTabs } from '@/utils/tabNavigation'
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
   const { login } = useAuthStore()
-  const { restoreTabs, clearCachedTabs, cachedTabs } = useTabsStore()
   const [loading, setLoading] = useState(false)
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
 
   const handleForgotPassword = (e: React.MouseEvent) => {
     e.preventDefault()
-    console.log('登录页面 - 忘记密码被点击')
     setForgotPasswordOpen(true)
   }
 
@@ -27,24 +25,13 @@ const Login: React.FC = () => {
       setRememberMe(values.remember)
       await login(values.username, values.password, values.remember)
       message.success('登录成功')
-      
+
       // 登录成功后，如果有锁屏状态，则重置
       useLockscreenStore.getState().resetLock()
-      
-      // 检查是否有缓存的标签页
-      if (cachedTabs.length > 0) {
-        console.log('发现缓存的标签页，准备恢复:', cachedTabs)
-        // 恢复标签页
-        restoreTabs()
-        // 跳转到第一个缓存的标签页
-        const firstTab = cachedTabs[0]
-        navigate(firstTab.path, { replace: true })
-        // 清除缓存
-        clearCachedTabs()
-      } else {
-        // 没有缓存的标签页，跳转到默认页面
-        navigate('/welcome')
-      }
+
+      // 恢复挂起前的标签页（如有），否则跳转到默认页
+      const restoredPath = restoreSessionTabs()
+      navigate(restoredPath ?? '/welcome')
     } catch (error) {
       message.error(error instanceof Error ? error.message || '登录失败' : '登录失败')
     } finally {

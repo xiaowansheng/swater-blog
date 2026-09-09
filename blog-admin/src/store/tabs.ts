@@ -1,11 +1,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { TabItem } from '@/types'
+import config from '@/config'
 
 interface TabsState {
   tabs: TabItem[]
   activeKey: string
-  cachedTabs: TabItem[] // 缓存的标签页
+  cachedTabs: TabItem[] // 登录过期等原因暂时挂起时缓存的标签页
+  cachedActiveKey: string // 缓存时的活跃标签
   addTab: (tab: TabItem) => void
   updateTab: (key: string, patch: Partial<TabItem>) => void
   updateTabLabel: (key: string, label: string) => void
@@ -16,9 +18,8 @@ interface TabsState {
   closeRightTabs: (key: string) => void
   closeAllTabs: () => void
   refreshTab: (key: string) => void
-  getCachedTabs: () => string[]
-  cacheTabs: () => void // 缓存当前标签页
-  restoreTabs: () => void // 恢复缓存的标签页
+  cacheTabs: () => void // 缓存当前标签页（含活跃标签）
+  restoreTabs: () => void // 恢复缓存的标签页（回到之前的活跃标签）
   clearCachedTabs: () => void // 清除缓存的标签页
 }
 
@@ -37,6 +38,7 @@ export const useTabsStore = create<TabsState>()(
       tabs: [WELCOME_TAB],
       activeKey: '/welcome',
       cachedTabs: [],
+      cachedActiveKey: '/welcome',
   addTab: (tab) => {
     const { tabs } = get()
     const exists = tabs.find((t) => t.key === tab.key)
@@ -164,35 +166,32 @@ export const useTabsStore = create<TabsState>()(
     const event = new CustomEvent('tab-refresh', { detail: { key } })
     window.dispatchEvent(event)
   },
-  getCachedTabs: () => {
-    const { tabs } = get()
-    return tabs.filter((t) => t.keepAlive).map((t) => t.key)
-  },
   cacheTabs: () => {
     const { tabs, activeKey } = get()
-    console.log('缓存标签页:', tabs, '当前活跃标签:', activeKey)
-    set({ cachedTabs: [...tabs] })
+    set({ cachedTabs: [...tabs], cachedActiveKey: activeKey })
   },
   restoreTabs: () => {
-    const { cachedTabs } = get()
-    console.log('恢复标签页:', cachedTabs)
+    const { cachedTabs, cachedActiveKey } = get()
     if (cachedTabs.length > 0) {
-      // 找到第一个标签作为默认活跃标签
-      const firstTab = cachedTabs[0]
-      set({ 
-        tabs: [...cachedTabs], 
-        activeKey: firstTab.key 
+      // 回到挂起前的活跃标签；它已被关闭时退回到第一个标签
+      const activeKey = cachedTabs.some((t) => t.key === cachedActiveKey)
+        ? cachedActiveKey
+        : cachedTabs[0].key
+      set({
+        tabs: [...cachedTabs],
+        activeKey,
       })
     }
   },
   clearCachedTabs: () => {
-    set({ cachedTabs: [] })
+    set({ cachedTabs: [], cachedActiveKey: '/welcome' })
   },
 }),
 {
-  name: 'tabs-storage',
-  partialize: (state) => ({ 
-    cachedTabs: state.cachedTabs 
+  name: `${config.storagePrefix}tabs`,
+  partialize: (state) => ({
+    cachedTabs: state.cachedTabs,
+    cachedActiveKey: state.cachedActiveKey,
   }),
 }
 ))

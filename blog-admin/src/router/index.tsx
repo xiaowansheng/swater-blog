@@ -5,7 +5,7 @@ import { Spin } from 'antd'
 import { useAuthStore } from '@/store/auth'
 import { useTabsStore } from '@/store/tabs'
 import BasicLayout from '@/layout/BasicLayout'
-import { routeConfig, matchRoute } from '@/config/routes'
+import { routeConfig, matchRoute, hasRouteAccess } from '@/config/routes'
 
 const Login = lazy(() => import('@/pages/Login'))
 const NotFound = lazy(() => import('@/pages/404'))
@@ -20,6 +20,7 @@ const PageLoading: React.FC = () => (
 // 路由守卫
 const RouteGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation()
+  const user = useAuthStore((s) => s.user)
   const { isAuthenticated } = useAuthStore()
   const { addTab } = useTabsStore()
 
@@ -34,7 +35,7 @@ const RouteGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     const route = matchRoute(location.pathname)
 
-    if (route) {
+    if (route && hasRouteAccess(route, user)) {
       const key = location.pathname
       addTab({
         key,
@@ -44,13 +45,19 @@ const RouteGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         keepAlive: route.keepAlive,
       })
     }
-  }, [location.pathname, isAuthenticated, addTab])
+  }, [location.pathname, user, isAuthenticated, addTab])
 
   if (!isAuthenticated() && location.pathname !== '/login') {
     return <Navigate to="/login" replace />
   }
 
   if (isAuthenticated() && location.pathname === '/login') {
+    return <Navigate to="/welcome" replace />
+  }
+
+  // 角色权限校验：用户信息已加载且无权访问时重定向回欢迎页
+  const currentRoute = matchRoute(location.pathname)
+  if (currentRoute && user && !hasRouteAccess(currentRoute, user)) {
     return <Navigate to="/welcome" replace />
   }
 

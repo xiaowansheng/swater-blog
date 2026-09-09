@@ -99,7 +99,6 @@ const ArticleExport: React.FC = () => {
         // 不传递 statuses，让后端根据 exportDrafts 判断
       }
 
-      console.log('导出配置:', config)
       const preview = await previewMarkdownExport(config)
       setPreviewData(preview)
       setCurrentStep(1)

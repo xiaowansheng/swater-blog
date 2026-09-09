@@ -2,14 +2,13 @@ import React, { useState } from 'react'
 import { Modal, Form, Input, Button, message, Tabs } from 'antd'
 import { UserOutlined, LockOutlined, MailOutlined, SafetyOutlined } from '@ant-design/icons'
 import { useAuthStore } from '@/store/auth'
-import { useTabsStore } from '@/store/tabs'
 import { useNavigate } from 'react-router-dom'
 import * as authApi from '@/api/auth'
+import { restoreSessionTabs } from '@/utils/tabNavigation'
 import ForgotPasswordModal from './ForgotPasswordModal'
 
 const LoginModal: React.FC = () => {
   const { isLoginModalOpen, setLoginModalOpen, login, loginWithEmail } = useAuthStore()
-  const { restoreTabs, clearCachedTabs, cachedTabs } = useTabsStore()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [loginType, setLoginType] = useState('password')
@@ -26,17 +25,11 @@ const LoginModal: React.FC = () => {
       message.success('登录成功')
       setLoginModalOpen(false)
       passwordForm.resetFields()
-      
-      // 检查是否有缓存的标签页
-      if (cachedTabs.length > 0) {
-        console.log('模态框登录 - 发现缓存的标签页，准备恢复:', cachedTabs)
-        // 恢复标签页
-        restoreTabs()
-        // 跳转到第一个缓存的标签页
-        const firstTab = cachedTabs[0]
-        navigate(firstTab.path, { replace: true })
-        // 清除缓存
-        clearCachedTabs()
+
+      // 恢复挂起前的标签页（如有），否则停留在当前页
+      const restoredPath = restoreSessionTabs()
+      if (restoredPath) {
+        navigate(restoredPath, { replace: true })
       }
     } catch (error) {
       message.error(error instanceof Error ? error.message || '登录失败' : '登录失败')
@@ -88,17 +81,11 @@ const LoginModal: React.FC = () => {
       setLoginModalOpen(false)
       emailForm.resetFields()
       setCountdown(0)
-      
-      // 检查是否有缓存的标签页
-      if (cachedTabs.length > 0) {
-        console.log('邮箱登录 - 发现缓存的标签页，准备恢复:', cachedTabs)
-        // 恢复标签页
-        restoreTabs()
-        // 跳转到第一个缓存的标签页
-        const firstTab = cachedTabs[0]
-        navigate(firstTab.path, { replace: true })
-        // 清除缓存
-        clearCachedTabs()
+
+      // 恢复挂起前的标签页（如有），否则停留在当前页
+      const restoredPath = restoreSessionTabs()
+      if (restoredPath) {
+        navigate(restoredPath, { replace: true })
       }
     } catch (error) {
       message.error(error instanceof Error ? error.message || '登录失败' : '登录失败')
@@ -115,10 +102,7 @@ const LoginModal: React.FC = () => {
   }
 
   const handleForgotPassword = () => {
-    console.log('handleForgotPassword 被调用')
-    console.log('当前 forgotPasswordOpen 状态:', forgotPasswordOpen)
     setForgotPasswordOpen(true)
-    console.log('已调用 setForgotPasswordOpen(true)')
   }
 
   const tabItems = [
@@ -170,7 +154,6 @@ const LoginModal: React.FC = () => {
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                console.log('按钮被点击了！')
                 handleForgotPassword()
               }}
               className="h-auto text-blue-500 hover:text-blue-600"

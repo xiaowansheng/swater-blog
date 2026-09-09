@@ -146,7 +146,6 @@ const ApiPage: React.FC = () => {
         setLoading(true)
         try {
           const result = await refreshApi()
-          console.log('刷新结果:', result)
           setRefreshResult(result)
           setRefreshResultVisible(true)
           message.success('接口刷新成功')

@@ -1,20 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Breadcrumb, Spin, Tooltip } from 'antd'
+import { Breadcrumb, Button, Modal, Spin, message } from 'antd'
 import {
   ApartmentOutlined,
-  FileTextOutlined,
-  FolderOutlined,
-  FolderOpenOutlined,
-  ReloadOutlined,
   ArrowLeftOutlined,
+  FolderOpenOutlined,
+  FolderOutlined,
+  GoldOutlined,
   NodeIndexOutlined,
   ReadOutlined,
-  GoldOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  ExportOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons'
-import { Button, message, Modal } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
 import ReactECharts, { EChartsInstance } from 'echarts-for-react'
 import {
@@ -23,128 +18,18 @@ import {
   moveArticleDirectoryItem,
   deleteDirectoryNode,
 } from '@/api/articleDirectory'
-
-interface MindMapTreeNodeData {
-  name?: string
-  _type?: 'ROOT' | 'NODE' | 'ARTICLE'
-  _label?: string
-  _fullLabel?: string
-  _id?: number
-  _articleId?: number
-  _articleKey?: string
-  _nodeKey?: string
-  _parentId?: number
-  _subCount?: number
-  _categoryName?: string
-  _status?: number
-  _createTime?: string
-  _updateTime?: string
-  _articleCount?: number
-  _depth?: number
-  depth?: number
-  value?: number
-  children?: MindMapTreeNodeData[]
-}
-
-interface MindMapCallbackParams {
-  name?: string
-  collapsed?: boolean
-  data?: MindMapTreeNodeData
-  event?: { event?: Event }
-}
-
-const NODE_GRADIENTS = [
-  ['#fbbf24', '#f59e0b'],
-  ['#fb923c', '#ea580c'],
-  ['#f87171', '#dc2626'],
-  ['#a78bfa', '#7c3aed'],
-  ['#34d399', '#059669'],
-]
-
-const ARTICLE_COLORS = ['#60a5fa', '#818cf8', '#a78bfa', '#c084fc', '#67e8f9']
-
-const countArticles = (items: ArticleDirectoryItem[]): number => {
-  let count = 0
-  for (const item of items) {
-    if (item.type === 'ARTICLE') count++
-    if (item.children?.length) count += countArticles(item.children)
-  }
-  return count
-}
-
-const getMaxDepth = (items: ArticleDirectoryItem[], depth = 0): number => {
-  let max = depth
-  for (const item of items) {
-    if (item.children?.length) {
-      max = Math.max(max, getMaxDepth(item.children, depth + 1))
-    }
-  }
-  return max
-}
-
-const buildEChartsTreeData = (items: ArticleDirectoryItem[], depth = 0): MindMapTreeNodeData[] => {
-  return items.map((item) => {
-    const isNode = item.type === 'NODE'
-    const label = isNode ? item.name || '未命名' : item.title || '未命名'
-    const subCount = isNode && item.children ? countArticles(item.children) : 0
-    const truncated = label.length > 20 ? `${label.slice(0, 18)}…` : label
-
-    const colorIdx = depth % NODE_GRADIENTS.length
-
-    return {
-      name: truncated,
-      _label: label,
-      _fullLabel: label,
-      _type: item.type,
-      _id: item.id,
-      _articleId: item.articleId,
-      _articleKey: item.articleKey,
-      _nodeKey: item.key,
-      _parentId: item.parentId,
-      _subCount: subCount,
-      _categoryName: item.categoryName,
-      _status: item.status,
-      _createTime: item.createTime,
-      _updateTime: item.updateTime,
-      _articleCount: item.type === 'ARTICLE' ? 1 : 0,
-      _depth: depth,
-      value: isNode ? subCount || 1 : 1,
-      itemStyle: {
-        color: isNode
-          ? {
-              type: 'linear',
-              x: 0, y: 0, x2: 1, y2: 1,
-              colorStops: [
-                { offset: 0, color: NODE_GRADIENTS[colorIdx][0] },
-                { offset: 1, color: NODE_GRADIENTS[colorIdx][1] },
-              ],
-            }
-          : ARTICLE_COLORS[depth % ARTICLE_COLORS.length],
-        shadowBlur: isNode ? 8 : 4,
-        shadowColor: isNode
-          ? `rgba(245, 158, 11, 0.2)`
-          : `rgba(96, 165, 250, 0.15)`,
-        shadowOffsetY: 2,
-      },
-      children: item.children?.length ? buildEChartsTreeData(item.children, depth + 1) : undefined,
-    }
-  })
-}
+import ContextMenu from './mindmap/ContextMenu'
+import type { MindMapContextMenuState } from './mindmap/ContextMenu'
+import { buildEChartsTreeData, getMaxDepth } from './mindmap/treeData'
+import type { MindMapCallbackParams, MindMapTreeNodeData } from './mindmap/treeData'
+import { renderTreeList } from './mindmap/treeList'
 
 const StatisticsPage: React.FC = () => {
   const navigate = useNavigate()
   const [treeItems, setTreeItems] = useState<ArticleDirectoryItem[]>([])
   const chartRef = useRef<ReactECharts>(null)
 
-  const [contextMenu, setContextMenu] = useState<{
-    x: number
-    y: number
-    type: 'NODE' | 'ARTICLE'
-    id: number
-    articleId?: number
-    parentId?: number
-    name?: string
-  } | null>(null)
+  const [contextMenu, setContextMenu] = useState<MindMapContextMenuState | null>(null)
 
   const [loading, setLoading] = useState(true)
 
@@ -262,7 +147,7 @@ const StatisticsPage: React.FC = () => {
           }
         } else {
           html += `<div style="color:#3b82f6;font-weight:500;margin-bottom:4px">📄 文章</div>`
-          
+
           html += `<div style="display:flex;gap:8px;font-size:12px;color:#64748b;margin-bottom:2px">`
           if (data._articleId || data._id) {
             html += `<span>ID: ${data._articleId || data._id}</span>`
@@ -278,7 +163,7 @@ const StatisticsPage: React.FC = () => {
           if (data._status !== undefined) {
             html += `<div style="color:#64748b;font-size:12px;margin-bottom:2px">状态：${data._status === 1 ? '已发布' : '草稿'}</div>`
           }
-          
+
           if (data._createTime || data._updateTime) {
             html += `<div style="margin-top:6px;padding-top:4px;border-top:1px dashed #e2e8f0;font-size:11px;color:#94a3b8">`
             if (data._createTime) {
@@ -335,7 +220,7 @@ const StatisticsPage: React.FC = () => {
           formatter: (params: MindMapCallbackParams) => {
             const data: MindMapTreeNodeData = params.data || {}
             let text = `{name|${params.name}}`
-            
+
             if (data._type === 'ROOT' || data._type === 'NODE') {
               const count = data._subCount || 0
               if (count > 0) {
@@ -592,152 +477,13 @@ const StatisticsPage: React.FC = () => {
             onChartReady={handleChartReady}
           />
           {contextMenu && (
-            <div
-              data-context-menu
-              onMouseDown={(e) => e.stopPropagation()}
-              style={{
-                position: 'fixed',
-                left: contextMenu.x,
-                top: contextMenu.y,
-                zIndex: 9999,
-                minWidth: 210,
-                background: 'rgba(255,255,255,0.97)',
-                borderRadius: 14,
-                boxShadow: '0 8px 32px rgba(99,102,241,0.13), 0 2px 8px rgba(0,0,0,0.10)',
-                border: '1px solid rgba(226,232,240,0.8)',
-                overflow: 'hidden',
-                backdropFilter: 'blur(12px)',
-                animation: 'ctxMenuIn 0.13s cubic-bezier(0.22,1,0.36,1)',
-              }}
-            >
-              <style>{`
-                @keyframes ctxMenuIn {
-                  from { opacity: 0; transform: scale(0.93) translateY(-6px); }
-                  to   { opacity: 1; transform: scale(1)    translateY(0); }
-                }
-                .ctx-item {
-                  display: flex; align-items: center; gap: 10px;
-                  width: 100%; text-align: left;
-                  padding: 9px 16px;
-                  font-size: 13px; font-weight: 500;
-                  color: #374151;
-                  background: transparent;
-                  border: none; cursor: pointer;
-                  transition: background 0.15s, color 0.15s, padding-left 0.15s;
-                  position: relative;
-                }
-                .ctx-item:hover { padding-left: 20px; }
-                .ctx-item.blue:hover   { background: #eff6ff; color: #2563eb; }
-                .ctx-item.green:hover  { background: #f0fdf4; color: #059669; }
-                .ctx-item.amber:hover  { background: #fffbeb; color: #d97706; }
-                .ctx-item.red:hover    { background: #fef2f2; color: #dc2626; }
-                .ctx-item.indigo:hover { background: #eef2ff; color: #4f46e5; }
-                .ctx-icon-badge {
-                  width: 26px; height: 26px; border-radius: 7px;
-                  display: flex; align-items: center; justify-content: center;
-                  flex-shrink: 0; font-size: 12px;
-                }
-              `}</style>
-
-              {/* Header */}
-              <div style={{
-                padding: '10px 16px 9px',
-                background: contextMenu.type === 'NODE'
-                  ? 'linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%)'
-                  : 'linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%)',
-                borderBottom: '1px solid rgba(226,232,240,0.7)',
-                display: 'flex', alignItems: 'center', gap: 9,
-              }}>
-                <div
-                  className="ctx-icon-badge"
-                  style={{
-                    background: contextMenu.type === 'NODE'
-                      ? 'linear-gradient(135deg,#fbbf24,#f59e0b)'
-                      : 'linear-gradient(135deg,#60a5fa,#3b82f6)',
-                    boxShadow: contextMenu.type === 'NODE'
-                      ? '0 2px 6px rgba(245,158,11,0.35)'
-                      : '0 2px 6px rgba(59,130,246,0.35)',
-                    color: '#fff',
-                  }}
-                >
-                  {contextMenu.type === 'NODE' ? <FolderOpenOutlined /> : <FileTextOutlined />}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {contextMenu.name || (contextMenu.type === 'NODE' ? '目录节点' : '文章')}
-                  </div>
-                  <div style={{ fontSize: 10, color: contextMenu.type === 'NODE' ? '#d97706' : '#3b82f6', fontWeight: 500, marginTop: 1 }}>
-                    {contextMenu.type === 'NODE' ? '📁 目录节点' : '📄 文章'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Menu Items */}
-              <div style={{ padding: '4px 0' }}>
-                {contextMenu.type === 'ARTICLE' ? (
-                  <>
-                    <button
-                      className="ctx-item blue"
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onClick={() => { navigate(`/article/edit/${contextMenu.articleId}`); setContextMenu(null) }}
-                    >
-                      <div className="ctx-icon-badge" style={{ background: '#eff6ff', color: '#2563eb' }}>
-                        <EditOutlined />
-                      </div>
-                      编辑文章
-                    </button>
-                    <button
-                      className="ctx-item green"
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onClick={() => { navigate(`/article/preview/${contextMenu.articleId}`); setContextMenu(null) }}
-                    >
-                      <div className="ctx-icon-badge" style={{ background: '#f0fdf4', color: '#059669' }}>
-                        <FileTextOutlined />
-                      </div>
-                      预览文章
-                    </button>
-                    {(contextMenu.parentId ?? 0) > 0 && (
-                      <>
-                        <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,#e2e8f0,transparent)', margin: '4px 12px' }} />
-                        <button
-                          className="ctx-item amber"
-                          onMouseDown={(e) => e.stopPropagation()}
-                          onClick={() => { handleMoveToRoot(contextMenu.articleId!); setContextMenu(null) }}
-                        >
-                          <div className="ctx-icon-badge" style={{ background: '#fffbeb', color: '#d97706' }}>
-                            <ExportOutlined />
-                          </div>
-                          移至根目录
-                        </button>
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <button
-                    className="ctx-item red"
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={() => { handleDeleteNode(contextMenu.id, contextMenu.name); setContextMenu(null) }}
-                  >
-                    <div className="ctx-icon-badge" style={{ background: '#fef2f2', color: '#dc2626' }}>
-                      <DeleteOutlined />
-                    </div>
-                    删除节点
-                  </button>
-                )}
-              </div>
-
-              {/* Footer hint */}
-              <div style={{
-                padding: '6px 16px 8px',
-                borderTop: '1px solid rgba(226,232,240,0.6)',
-                fontSize: 10,
-                color: '#94a3b8',
-                display: 'flex', alignItems: 'center', gap: 4,
-              }}>
-                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#cbd5e1', display: 'inline-block', flexShrink: 0 }} />
-                点击空白处关闭菜单
-              </div>
-            </div>
+            <ContextMenu
+              menu={contextMenu}
+              navigate={navigate}
+              onMoveToRoot={handleMoveToRoot}
+              onDeleteNode={handleDeleteNode}
+              onClose={() => setContextMenu(null)}
+            />
           )}
         </div>
       </div>
@@ -759,125 +505,6 @@ const StatisticsPage: React.FC = () => {
       )}
     </div>
   )
-}
-
-const renderTreeList = (items: ArticleDirectoryItem[], depth = 0, navigate?: ReturnType<typeof useNavigate>): React.ReactNode[] => {
-  const nodes: React.ReactNode[] = []
-  items.forEach((item) => {
-    const isNode = item.type === 'NODE'
-    const label = isNode ? item.name || '未命名' : item.title || '未命名'
-
-    nodes.push(
-      <div
-        key={item.key}
-        className={`group flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 ${
-          !isNode ? 'hover:bg-blue-50/60 cursor-pointer hover:shadow-sm' : 'hover:bg-slate-50'
-        }`}
-        style={{ paddingLeft: `${depth * 28 + 16}px` }}
-        {...(!isNode && navigate ? {
-          onClick: () => navigate(`/article/preview/${item.articleId || item.id}`),
-        } : {})}
-      >
-        {/* Left side: Icon + Title + Meta */}
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          {isNode ? (
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm shrink-0">
-              {item.children?.length ? (
-                <FolderOpenOutlined className="text-white text-[13px]" />
-              ) : (
-                <FolderOutlined className="text-white text-[13px]" />
-              )}
-            </div>
-          ) : (
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shadow-sm shrink-0 ${
-              item.status === 1
-                ? 'bg-gradient-to-br from-emerald-400 to-teal-500'
-                : 'bg-gradient-to-br from-blue-400 to-indigo-500'
-            }`}>
-              <FileTextOutlined className="text-white text-[13px]" />
-            </div>
-          )}
-          <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-2">
-              <span className={`text-[14px] truncate ${isNode ? 'font-bold text-slate-800' : 'font-medium text-slate-700'}`}>
-                {label}
-              </span>
-              {!isNode && item.categoryName && (
-                <span className="shrink-0 text-[10px] text-cyan-600 bg-cyan-50 px-1.5 py-0.5 rounded border border-cyan-100">
-                  {item.categoryName}
-                </span>
-              )}
-              {!isNode && item.status !== undefined && (
-                <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded border ${
-                  item.status === 1 ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-500 bg-slate-100 border-slate-200'
-                }`}>
-                  {item.status === 1 ? '已发布' : '草稿'}
-                </span>
-              )}
-            </div>
-            
-            {/* Sub-info row for extra details */}
-            <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-400 font-medium">
-              {!isNode && (
-                <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-1"><span className="text-slate-300">ID:</span>{item.articleId || item.id}</span>
-                  {item.articleKey && <span className="flex items-center gap-1"><span className="text-slate-300">Key:</span>{item.articleKey}</span>}
-                  {item.updateTime && <span className="flex items-center gap-1"><span className="text-slate-300">更新:</span>{item.updateTime.slice(0, 10)}</span>}
-                </div>
-              )}
-              {isNode && (
-                <span className="text-slate-400">Node Key: {item.key}</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Right side: Actions / Stats */}
-        <div className="flex items-center gap-3 shrink-0 ml-4">
-          {isNode && item.children && (
-            <Tooltip title={`包含 ${countArticles(item.children)} 篇文章`}>
-              <span className="text-[11px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full font-bold border border-indigo-100 opacity-80 group-hover:opacity-100 transition-opacity">
-                {countArticles(item.children)} 篇
-              </span>
-            </Tooltip>
-          )}
-          {!isNode && (
-            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-              <Tooltip title="编辑" mouseEnterDelay={0.4}>
-                <Button
-                  type="text"
-                  size="small"
-                  className="flex items-center justify-center p-0.5 h-7 w-7 text-slate-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg"
-                  icon={<EditOutlined className="text-[12px]" />}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    navigate?.(`/article/edit/${item.articleId || item.id}`)
-                  }}
-                />
-              </Tooltip>
-              <Tooltip title="预览" mouseEnterDelay={0.4}>
-                <Button
-                  type="text"
-                  size="small"
-                  className="flex items-center justify-center p-0.5 h-7 w-7 text-slate-400 hover:text-emerald-600 hover:bg-emerald-100 rounded-lg"
-                  icon={<FileTextOutlined className="text-[12px]" />}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    navigate?.(`/article/preview/${item.articleId || item.id}`)
-                  }}
-                />
-              </Tooltip>
-            </div>
-          )}
-        </div>
-      </div>
-    )
-
-    if (item.children?.length) {
-      nodes.push(...renderTreeList(item.children, depth + 1, navigate))
-    }
-  })
-  return nodes
 }
 
 export default StatisticsPage

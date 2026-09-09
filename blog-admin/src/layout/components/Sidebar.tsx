@@ -1,102 +1,54 @@
 import { Layout, Menu, Drawer } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
-import {
-  DashboardOutlined,
-  FileTextOutlined,
-  FolderOutlined,
-  TagsOutlined,
-  CommentOutlined,
-  MessageOutlined,
-  UserOutlined,
-  TeamOutlined,
-  MenuOutlined,
-  SettingOutlined,
-  FileOutlined,
-  EyeOutlined,
-  FileSearchOutlined,
-  LinkOutlined,
-  BellOutlined,
-  PictureOutlined,
-  BookOutlined,
-  InfoCircleOutlined,
-  HomeOutlined,
-  SmileOutlined,
-  ApartmentOutlined,
-} from '@ant-design/icons'
+import { useMemo, useState, useEffect } from 'react'
 import type { MenuProps } from 'antd'
+import { useAuthStore } from '@/store/auth'
+import {
+  routeConfig,
+  menuGroups,
+  hasRouteAccess,
+  resolveMenuKey,
+  resolveGroupKeys,
+} from '@/config/routes'
+import type { MenuGroupKey } from '@/config/routes'
 
 const { Sider } = Layout
 
-const menuItems: MenuProps['items'] = [
-  {
-    key: 'home',
-    icon: <HomeOutlined />,
-    label: '首页',
-    children: [
-      { key: '/welcome', icon: <SmileOutlined />, label: '欢迎页' },
-      { key: '/dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
-    ],
-  },
-  {
-    key: 'content',
-    icon: <FileTextOutlined />,
-    label: '内容管理',
-    children: [
-      { key: '/article', icon: <FileTextOutlined />, label: '文章管理' },
-      { key: '/article/tree', icon: <ApartmentOutlined />, label: '文章归类树' },
-      { key: '/category', icon: <FolderOutlined />, label: '分类管理' },
-      { key: '/tag', icon: <TagsOutlined />, label: '标签管理' },
-      { key: '/talk', icon: <MessageOutlined />, label: '说说管理' },
-    ],
-  },
-  {
-    key: 'interaction',
-    icon: <CommentOutlined />,
-    label: '互动管理',
-    children: [
-      { key: '/comment', icon: <CommentOutlined />, label: '评论管理' },
-      { key: '/guestbook', icon: <BookOutlined />, label: '留言管理' },
-      { key: '/friend-link', icon: <LinkOutlined />, label: '友链管理' },
-    ],
-  },
-  {
-    key: 'media',
-    icon: <PictureOutlined />,
-    label: '媒体管理',
-    children: [
-      { key: '/file', icon: <FileOutlined />, label: '文件管理' },
-      { key: '/album', icon: <PictureOutlined />, label: '相册管理' },
-    ],
-  },
-  {
-    key: 'system',
-    icon: <SettingOutlined />,
-    label: '系统管理',
-    children: [
-      { key: '/user', icon: <UserOutlined />, label: '用户管理' },
-      { key: '/role', icon: <TeamOutlined />, label: '角色管理' },
-      { key: '/menu', icon: <MenuOutlined />, label: '菜单管理' },
-      { key: '/resource', icon: <SettingOutlined />, label: '接口管理' },
-      { key: '/config', icon: <SettingOutlined />, label: '系统配置' },
-      { key: '/about', icon: <InfoCircleOutlined />, label: '关于页面' },
-    ],
-  },
-  {
-    key: 'monitor',
-    icon: <EyeOutlined />,
-    label: '监控管理',
-    children: [
-      { key: '/visitor', icon: <EyeOutlined />, label: '访客统计' },
-      { key: '/log/operation', icon: <FileSearchOutlined />, label: '操作日志' },
-      { key: '/log/error', icon: <FileSearchOutlined />, label: '异常日志' },
-    ],
-  },
-  {
-    key: '/notification',
-    icon: <BellOutlined />,
-    label: '通知管理',
-  },
-]
+type MenuItem = NonNullable<MenuProps['items']>[number]
+
+/**
+ * 由 routeConfig 派生侧边栏菜单：
+ * 带 icon 的路由即菜单项（group 决定分组，无 group 为顶级项），
+ * 并按当前用户角色过滤无权访问的页面。
+ */
+function buildMenuItems(user: ReturnType<typeof useAuthStore.getState>['user']): MenuItem[] {
+  const visible = routeConfig.filter((r) => r.icon && hasRouteAccess(r, user))
+
+  const groupItems = new Map<MenuGroupKey, MenuItem[]>()
+  const standaloneItems: MenuItem[] = []
+
+  for (const route of visible) {
+    const item: MenuItem = { key: route.path, icon: route.icon, label: route.title }
+    if (route.group) {
+      const list = groupItems.get(route.group) ?? []
+      list.push(item)
+      groupItems.set(route.group, list)
+    } else {
+      standaloneItems.push(item)
+    }
+  }
+
+  const items: MenuItem[] = menuGroups
+    .filter((g) => groupItems.has(g.key))
+    .map((g) => ({
+      key: g.key,
+      icon: g.icon,
+      label: g.label,
+      children: groupItems.get(g.key),
+    }))
+
+  return [...items, ...standaloneItems]
+}
 
 interface SidebarProps {
   collapsed: boolean
@@ -115,101 +67,57 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const navigate = useNavigate()
   const location = useLocation()
+  const user = useAuthStore((s) => s.user)
 
-  const handleMenuClick = ({ key }: { key: string }) => {
-    if (!key.startsWith('/')) return
-    navigate(key)
+  const menuItems = useMemo(() => buildMenuItems(user), [user])
+
+  // 导航时自动展开对应分组，同时保留用户手动展开/收起的状态
+  const [openKeys, setOpenKeys] = useState<MenuProps['openKeys']>(() =>
+    resolveGroupKeys(location.pathname),
+  )
+  useEffect(() => {
+    const keys = resolveGroupKeys(location.pathname)
+    if (keys.length === 0) return
+    setOpenKeys((prev) => Array.from(new Set([...(prev ?? []), ...keys])))
+  }, [location.pathname])
+
+  const selectedKeys = useMemo(() => {
+    const key = resolveMenuKey(location.pathname)
+    return key ? [key] : []
+  }, [location.pathname])
+
+  const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
+    if (!String(key).startsWith('/')) return
+    navigate(String(key))
     if (isMobile) {
       setDrawerVisible(false)
     }
   }
 
-  const getSelectedKeys = () => {
-    const path = location.pathname
-    if (path.startsWith('/article/tree')) {
-      return ['/article/tree']
-    }
-    if (path.startsWith('/article/')) {
-      return ['/article']
-    }
-    return [path]
-  }
-
-  const getOpenKeys = () => {
-    const path = location.pathname
-    if (['/welcome', '/dashboard'].some(p => path.startsWith(p))) {
-      return ['home']
-    }
-    if (['/article', '/category', '/tag', '/talk'].some(p => path.startsWith(p))) {
-      return ['content']
-    }
-    if (['/comment', '/guestbook', '/friend-link'].some(p => path.startsWith(p))) {
-      return ['interaction']
-    }
-    if (['/file', '/album'].some(p => path.startsWith(p))) {
-      return ['media']
-    }
-    if (['/user', '/role', '/menu', '/api', '/config', '/about'].some(p => path.startsWith(p))) {
-      return ['system']
-    }
-    if (['/visitor', '/log'].some(p => path.startsWith(p))) {
-      return ['monitor']
-    }
-    return []
-  }
-
   const renderContent = (isDrawer = false) => (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div
-        style={{
-          height: 64,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderBottom: '1px solid #374151',
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              background: 'linear-gradient(to right, #3b82f6, #9333ea)',
-              borderRadius: 8,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <span style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>B</span>
+    <div className="flex h-full flex-col">
+      <div className="flex h-16 shrink-0 items-center justify-center border-b border-gray-700">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
+            <span className="text-sm font-bold text-white">B</span>
           </div>
           {(!collapsed || isDrawer) && (
-            <span style={{ color: 'white', fontSize: 18, fontWeight: 600 }}>
-              Blog Admin
-            </span>
+            <span className="text-lg font-semibold text-white">Blog Admin</span>
           )}
         </div>
       </div>
-      <div
-        style={{
-          flex: 1,
-          overflow: 'hidden',
-        }}
-      >
+      <div className="flex-1 overflow-hidden">
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={getSelectedKeys()}
-          defaultOpenKeys={(collapsed && !isDrawer) ? [] : getOpenKeys()}
+          selectedKeys={selectedKeys}
+          // 折叠时 rc-menu 切换为 vertical 弹出模式，openKeys 必须交回内部管理，
+          // 受控传 [] 会导致悬停时弹出式子菜单无法打开
+          openKeys={(collapsed && !isDrawer) ? undefined : openKeys}
+          onOpenChange={(keys) => setOpenKeys(keys)}
           items={menuItems}
           onClick={handleMenuClick}
-          style={{
-            borderRight: 0,
-            height: '100%',
-            overflowY: 'auto',
-            overflowX: 'hidden',
-          }}
+          className="h-full overflow-y-auto overflow-x-hidden !border-r-0"
         />
       </div>
     </div>
@@ -236,12 +144,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       collapsed={collapsed}
       onCollapse={setCollapsed}
       width={220}
-      style={{
-        height: '100vh',
-        position: 'sticky',
-        top: 0,
-        left: 0,
-      }}
+      className="sticky left-0 top-0 h-screen"
     >
       {renderContent(false)}
     </Sider>

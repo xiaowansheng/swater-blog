@@ -4,7 +4,6 @@ import { ClockCircleOutlined, EyeOutlined, MessageOutlined, CalendarOutlined } f
 import { archiveApi } from '@/api/archive'
 import { ArchiveVO, Article } from '@/types'
 import { ArticleStatus } from '@/types/enums'
-import styles from './index.module.less'
 
 interface GroupedArchive {
   year: number
@@ -76,13 +75,15 @@ const Archive: React.FC = () => {
           year: archive.year,
           month: archive.month,
           content: (
-            <div className={styles.monthGroupHeader}>
-              <span className={styles.yearText}>{archive.year}年</span>
-              <span className={styles.monthText}>{archive.month}月</span>
+            // monthGroupHeader: display flex / align-items center / justify-content flex-end / gap 8px / flex-wrap wrap
+            <div className="flex items-center justify-end gap-2 flex-wrap">
+              <span className="text-[16px] font-semibold text-[#1890ff]">{archive.year}年</span>
+              <span className="text-[15px] font-medium text-[#333]">{archive.month}月</span>
+              {/* monthGroupBadge: 覆盖 .ant-badge-count 背景/字号/内边距/高度/行高/最小宽度，需用任意变体穿透 antd 子元素 */}
               <Badge
                 count={archive.postCount || 0}
                 showZero
-                className={styles.monthGroupBadge}
+                className="[&_.ant-badge-count]:bg-[#1890ff] [&_.ant-badge-count]:text-[12px] [&_.ant-badge-count]:px-2 [&_.ant-badge-count]:h-5 [&_.ant-badge-count]:leading-5 [&_.ant-badge-count]:min-w-[24px]"
               />
             </div>
           )
@@ -156,9 +157,9 @@ const Archive: React.FC = () => {
   const totalDraft = groupedArchives.reduce((sum, group) => sum + group.draftCount, 0)
 
   return (
-    <div className={styles.container}>
+    <div className="p-0">
       <Card title="归档时间轴" bordered={false} loading={loading}>
-        <Row gutter={16} className={styles.summaryRow}>
+        <Row gutter={16} className="mb-6">
           <Col span={6}>
             <Statistic title="总年数" value={groupedArchives.length} suffix="年" />
           </Col>
@@ -176,16 +177,21 @@ const Archive: React.FC = () => {
         {groupedArchives.length === 0 ? (
           <Empty description="暂无归档数据" />
         ) : (
-          <div className={styles.timelineContainer}>
-            <Timeline mode="left" className={styles.timeline}>
+          <div className="py-5">
+            {/* timeline: 通过任意变体覆盖 antd 时间轴 label/tail/head/content 的定位（等价于原 :global 嵌套选择器） */}
+            <Timeline
+              mode="left"
+              className="[&_.ant-timeline-item-label]:w-[180px] [&_.ant-timeline-item-label]:text-right [&_.ant-timeline-item-label]:pr-4 [&_.ant-timeline-item-tail]:left-[180px] [&_.ant-timeline-item-head]:left-[180px] [&_.ant-timeline-item-content]:left-[210px]"
+            >
               {timelineItems.map((item, index) =>
                 item.type === 'group' ? (
                   <Timeline.Item
                     key={`group-${index}`}
-                    dot={<ClockCircleOutlined className={styles.timelineIcon} />}
+                    dot={<ClockCircleOutlined className="text-[16px] text-[#1890ff]" />}
                     label={
+                      // monthLabel: cursor/padding/圆角/过渡/背景/边框 + hover 高亮右移；transition 用任意属性精确还原 all 0.3s（默认 ease）
                       <div
-                        className={styles.monthLabel}
+                        className="cursor-pointer px-3 py-2 rounded-md bg-[#fafafa] border border-[#e8e8e8] border-solid [transition:all_0.3s] hover:bg-[#e6f7ff] hover:border-[#1890ff] hover:translate-x-1"
                         onClick={() => item.year && item.month && handleMonthClick(item.year, item.month)}
                       >
                         {item.content}
@@ -193,33 +199,37 @@ const Archive: React.FC = () => {
                     }
                   >
                     {selectedMonth?.year === item.year && selectedMonth?.month === item.month && (
-                      <div className={styles.articlesList}>
+                      <div className="mt-4 bg-[#fafafa] p-4 rounded-lg border-solid border-l-[3px] border-l-[#1890ff]">
                         {articlesLoading ? (
-                          <div className={styles.loadingContainer}>
+                          <div className="flex justify-center items-center py-10">
                             <Spin size="large" />
                           </div>
                         ) : articles.length > 0 ? (
                           articles.map((article) => (
-                            <div key={article.id} className={styles.articleItem}>
-                              <div className={styles.articleHeader}>
-                                <h3 className={styles.articleTitle}>
+                            // articleItem: 卡片背景/边框/圆角/内边距/间距 + hover 边框高亮与阴影；preflight 关闭需显式 border-solid；last:mb-0 对应 &:last-child
+                            <div
+                              key={article.id}
+                              className="bg-white border border-[#e8e8e8] border-solid rounded-md p-4 mb-3 [transition:all_0.3s] last:mb-0 hover:border-[#1890ff] hover:shadow-[0_2px_8px_rgba(24,144,255,0.15)]"
+                            >
+                              <div className="flex justify-between items-start mb-3 gap-4">
+                                <h3 className="flex-1 m-0 text-[16px] font-semibold [&_a]:text-[#333] [&_a]:no-underline [&_a]:[transition:color_0.3s] [&_a:hover]:text-[#1890ff]">
                                   <a href={`/article/edit/${article.id}`} target="_blank" rel="noopener noreferrer">
                                     {article.title}
                                   </a>
                                 </h3>
-                                <div className={styles.articleMeta}>
-                                  <span className={styles.metaItem}>
+                                <div className="flex items-center gap-4 shrink-0">
+                                  <span className="flex items-center gap-1 text-[13px] text-[#666]">
                                     <EyeOutlined />
                                     {article.viewCount || 0}
                                   </span>
-                                  <span className={styles.metaItem}>
+                                  <span className="flex items-center gap-1 text-[13px] text-[#666]">
                                     <MessageOutlined />
                                     {article.commentCount || 0}
                                   </span>
                                 </div>
                               </div>
 
-                              <div className={styles.articleTags}>
+                              <div className="flex flex-wrap gap-2 mb-3">
                                 {article.categoryName && (
                                   <Tag color="blue">{article.categoryName}</Tag>
                                 )}
@@ -233,13 +243,13 @@ const Archive: React.FC = () => {
                                 </Tag>
                               </div>
 
-                              <div className={styles.articleDates}>
-                                <span className={styles.dateItem}>
+                              <div className="flex flex-wrap gap-4 mb-3 text-[13px] text-[#666]">
+                                <span className="flex items-center gap-1">
                                   <CalendarOutlined />
                                   发布: {formatDate(article.publishedAt || article.createTime)}
                                 </span>
                                 {article.updateTime && article.updateTime !== article.createTime && (
-                                  <span className={styles.dateItem}>
+                                  <span className="flex items-center gap-1">
                                     <CalendarOutlined />
                                     更新: {formatDate(article.updateTime)}
                                   </span>
@@ -247,7 +257,7 @@ const Archive: React.FC = () => {
                               </div>
 
                               {article.content && (
-                                <div className={styles.articleContent}>
+                                <div className="text-[#666] text-[14px] leading-[1.6] p-3 bg-[#f5f5f5] rounded border-solid border-l-[3px] border-l-[#d9d9d9]">
                                   {truncateText(stripHtml(article.content), 150)}
                                 </div>
                               )}

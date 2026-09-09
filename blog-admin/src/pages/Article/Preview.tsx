@@ -90,13 +90,6 @@ const ArticlePreview: React.FC = () => {
             throw new Error('未找到要导出的内容')
           }
 
-          console.log('找到内容元素:', {
-            element: contentElement,
-            innerHTML: contentElement.innerHTML?.substring(0, 200),
-            offsetWidth: (contentElement as HTMLElement).offsetWidth,
-            offsetHeight: (contentElement as HTMLElement).offsetHeight,
-          })
-
           message.loading({ content: '正在生成 PDF...', key: 'exportPdf', duration: 0 })
           await exportElementAsPdf(contentElement as HTMLElement, article.title || 'article')
           message.success({ content: 'PDF 导出成功', key: 'exportPdf', duration: 2 })

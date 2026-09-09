@@ -31,7 +31,6 @@ class NotificationWebSocket {
       this.ws = new WebSocket(url)
 
       this.ws.onopen = () => {
-        console.log('WebSocket 连接已建立')
         this.reconnectAttempts = 0
         setReconnectAttempts(0)
         setStatus('connected')
@@ -56,7 +55,6 @@ class NotificationWebSocket {
       }
 
       this.ws.onclose = (event) => {
-        console.log('WebSocket 连接已关闭', event.code, event.reason)
         this.stopHeartbeat()
         setStatus('disconnected')
 
@@ -118,7 +116,6 @@ class NotificationWebSocket {
     this.reconnectTimer = setTimeout(() => {
       this.reconnectAttempts++
       setReconnectAttempts(this.reconnectAttempts)
-      console.log(`WebSocket 重连尝试 ${this.reconnectAttempts}`)
       this.connect()
     }, this.reconnectDelay)
   }
@@ -138,7 +135,6 @@ class NotificationWebSocket {
     setStatus('connecting')
     useWebSocketStore.getState().setLastError(null)
 
-    console.log('手动重连 WebSocket')
     this.connect()
   }
 
