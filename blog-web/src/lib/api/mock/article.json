@@ -24,7 +24,8 @@
       "commentCount": 12,
       "publishedAt": "2024-01-15T10:00:00Z",
       "createTime": "2024-01-15T10:00:00Z",
-      "updateTime": "2024-01-15T10:00:00Z"
+      "updateTime": "2024-01-15T10:00:00Z",
+      "articleKey": "welcome-to-my-blog"
     },
     {
       "id": 2,
@@ -50,7 +51,8 @@
       "commentCount": 8,
       "publishedAt": "2024-01-20T14:30:00Z",
       "createTime": "2024-01-20T14:30:00Z",
-      "updateTime": "2024-01-20T14:30:00Z"
+      "updateTime": "2024-01-20T14:30:00Z",
+      "articleKey": "nextjs-16-features"
     },
     {
       "id": 3,
@@ -76,7 +78,8 @@
       "commentCount": 5,
       "publishedAt": "2024-02-01T09:15:00Z",
       "createTime": "2024-02-01T09:15:00Z",
-      "updateTime": "2024-02-01T09:15:00Z"
+      "updateTime": "2024-02-01T09:15:00Z",
+      "articleKey": "typescript-best-practices"
     },
     {
       "id": 4,
@@ -101,7 +104,8 @@
       "commentCount": 3,
       "publishedAt": "2024-02-15T16:20:00Z",
       "createTime": "2024-02-15T16:20:00Z",
-      "updateTime": "2024-02-15T16:20:00Z"
+      "updateTime": "2024-02-15T16:20:00Z",
+      "articleKey": "spring-story"
     },
     {
       "id": 5,
@@ -127,7 +131,8 @@
       "commentCount": 7,
       "publishedAt": "2024-02-20T11:00:00Z",
       "createTime": "2024-02-20T11:00:00Z",
-      "updateTime": "2024-02-20T11:00:00Z"
+      "updateTime": "2024-02-20T11:00:00Z",
+      "articleKey": "tailwind-css-experience"
     }
   ],
   "hot": [
@@ -136,21 +141,24 @@
       "title": "欢迎来到我的博客",
       "slug": "welcome-to-my-blog",
       "viewCount": 1234,
-      "likeCount": 56
+      "likeCount": 56,
+      "articleKey": "welcome-to-my-blog"
     },
     {
       "id": 2,
       "title": "Next.js 16 新特性解析",
       "slug": "nextjs-16-features",
       "viewCount": 856,
-      "likeCount": 42
+      "likeCount": 42,
+      "articleKey": "nextjs-16-features"
     },
     {
       "id": 5,
       "title": "Tailwind CSS 使用心得",
       "slug": "tailwind-css-experience",
       "viewCount": 789,
-      "likeCount": 45
+      "likeCount": 45,
+      "articleKey": "tailwind-css-experience"
     }
   ],
   "latest": [
@@ -158,18 +166,21 @@
       "id": 5,
       "title": "Tailwind CSS 使用心得",
       "slug": "tailwind-css-experience",
+      "articleKey": "tailwind-css-experience",
       "publishedAt": "2024-02-20T11:00:00Z"
     },
     {
       "id": 4,
       "title": "生活随笔：春天的故事",
       "slug": "spring-story",
+      "articleKey": "spring-story",
       "publishedAt": "2024-02-15T16:20:00Z"
     },
     {
       "id": 3,
       "title": "TypeScript 最佳实践",
       "slug": "typescript-best-practices",
+      "articleKey": "typescript-best-practices",
       "publishedAt": "2024-02-01T09:15:00Z"
     }
   ]

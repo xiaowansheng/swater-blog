@@ -75,7 +75,10 @@ const mockHandlers: MockHandler[] = [
     handler: (url) => {
       const match = url.match(/\/api\/public\/post\/slug\/(.+)/);
       const slug = match?.[1];
-      return articleData.list.find(p => p.slug === slug) || articleData.list[0];
+      const post = articleData.list.find(p => p.slug === slug || p.articleKey === slug);
+      // 不兜底：未命中时抛错，让页面走 notFound() 404 路径，与真实后端行为一致
+      if (!post) throw new Error(`Mock: post not found by slug: ${slug}`);
+      return post;
     },
   },
   {
@@ -83,7 +86,9 @@ const mockHandlers: MockHandler[] = [
     handler: (url) => {
       const match = url.match(/\/api\/public\/post\/key\/(.+)/);
       const key = match?.[1];
-      return articleData.list.find(p => p.slug === key || p.id.toString() === key) || articleData.list[0];
+      const post = articleData.list.find(p => p.articleKey === key || p.slug === key || p.id.toString() === key);
+      if (!post) throw new Error(`Mock: post not found by key: ${key}`);
+      return post;
     },
   },
   {
@@ -328,16 +333,16 @@ const mockHandlers: MockHandler[] = [
       const params = new URLSearchParams(url.split('?')[1] || '');
       const page = parseInt(params.get('page') || '1');
       const size = parseInt(params.get('size') || '10');
-      
+
       const records = articleData.list.filter(p => {
         const date = new Date(p.publishedAt || p.createTime);
         return date.getFullYear() === year && date.getMonth() + 1 === month;
       });
-      
+
       const total = records.length;
       const start = (page - 1) * size;
       const end = start + size;
-      
+
       return {
         records: records.slice(start, end),
         total,
@@ -347,7 +352,111 @@ const mockHandlers: MockHandler[] = [
       };
     },
   },
+  {
+    pattern: /^\/api\/public\/config$/,
+    handler: () => mockPublicConfig,
+  },
+  {
+    pattern: /^\/api\/public\/statistics\/total$/,
+    handler: () => ({ pv: 123456, uv: 23456 }),
+  },
+  {
+    pattern: /^\/api\/public\/about$/,
+    handler: () => ({
+      content:
+        '## 关于本站\n\n这是 mock 模式下的关于页面内容。配置 `NEXT_PUBLIC_USE_MOCK=true` 后无需后端即可预览全站。',
+    }),
+  },
+  {
+    pattern: /^\/api\/public\/track\/enter$/,
+    handler: (url, options) => {
+      if (options?.method !== 'POST') return null;
+      const body = JSON.parse(options.body as string);
+      const uuid = body.visitorUuid || `mock-visitor-${Math.random().toString(36).slice(2, 10)}`;
+      return {
+        visitorUuid: uuid,
+        sessionId: `mock-session-${Math.random().toString(36).slice(2, 10)}`,
+        newVisitor: !body.visitorUuid,
+        newSession: true,
+        pagePvCounted: true,
+        contentReadCounted: false,
+      };
+    },
+  },
+  {
+    pattern: /^\/api\/public\/like\/status/,
+    handler: () => ({ liked: false, likeCount: 0 }),
+  },
+  {
+    pattern: /^\/api\/public\/like$/,
+    handler: (url, options) => {
+      if (options?.method !== 'POST') return null;
+      const body = JSON.parse(options.body as string);
+      // 无状态 mock：不做跨请求计数，仅保证点赞/取消动作有正确结构的响应
+      return {
+        visitorUuid: body.visitorUuid || 'mock-visitor',
+        liked: body.action !== 'UNLIKE',
+        likeCount: body.action === 'UNLIKE' ? 0 : 1,
+      };
+    },
+  },
 ];
+
+// 站点公共配置的 mock 值，结构与 config.server.ts 的 defaultConfig（PublicConfigVO）一致
+const mockPublicConfig = {
+  site: {
+    name: 'Swater Blog',
+    description: '一个现代化的博客平台（Mock 模式）',
+    keywords: '博客,前端,技术分享',
+    logo: '/favicon.svg',
+    favicon: '/favicon.svg',
+    createTime: '2024-01-01',
+    icp: '',
+    police: '',
+    copyright: '© 2024 Swater',
+    notice: '当前为 Mock 演示模式，数据均为本地模拟。',
+  },
+  author: {
+    name: 'Swater',
+    avatar: 'http://localhost:8888/uploads/avatar.png',
+    signature: '代码即诗',
+    introduction: '一名喜欢折腾前端的开发者。',
+  },
+  cover: {
+    home: 'http://localhost:8888/uploads/cover-home.jpg',
+    article: 'http://localhost:8888/uploads/cover-article.jpg',
+    archive: 'http://localhost:8888/uploads/cover-archive.jpg',
+    category: 'http://localhost:8888/uploads/cover-category.jpg',
+    tag: 'http://localhost:8888/uploads/cover-tag.jpg',
+    talk: 'http://localhost:8888/uploads/cover-talk.jpg',
+    album: 'http://localhost:8888/uploads/cover-album.jpg',
+    link: 'http://localhost:8888/uploads/cover-link.jpg',
+    about: 'http://localhost:8888/uploads/cover-about.jpg',
+    message: 'http://localhost:8888/uploads/cover-message.jpg',
+    default: 'http://localhost:8888/uploads/cover-default.jpg',
+  },
+  social: {
+    github: 'https://github.com/example',
+  },
+  privacy: {
+    showIp: false,
+    showLocation: true,
+    showDevice: false,
+    showBrowser: false,
+  },
+  comment: {
+    allowAnonymous: false,
+    allowGuest: true,
+  },
+  component: {
+    articleCommentEnabled: true,
+    talkCommentEnabled: true,
+    guestbookMessageEnabled: true,
+  },
+  reward: {
+    rewardEnabled: true,
+  },
+};
 
 export function getMockResponse<T>(url: string, options?: RequestInit): T | null {
   if (!USE_MOCK) {
