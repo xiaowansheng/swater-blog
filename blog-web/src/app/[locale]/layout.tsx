@@ -34,6 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: site.name || 'Blog',
     description: site.description || 'A modern blog platform',
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
     icons: {
       icon: [
         { url: '/favicon.ico' },

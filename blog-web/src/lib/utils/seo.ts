@@ -39,16 +39,17 @@ export function generateArticleMetadata(
 export function generatePageMetadata(
   title: string,
   description: string,
+  path: string = '',
   locale: string = 'zh'
 ): Metadata {
   return {
     title: `${title} | Swater Blog`,
     description,
     alternates: {
-      canonical: `/${locale}`,
+      canonical: `/${locale}${path}`,
       languages: {
-        'zh': '/zh',
-        'en': '/en',
+        'zh': `/zh${path}`,
+        'en': `/en${path}`,
       },
     },
   };
