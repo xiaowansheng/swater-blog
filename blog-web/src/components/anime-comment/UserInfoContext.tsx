@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, ReactNode } from 'react';
-import { useUserInfoStore } from '@/store/userInfo';
+import { useUserInfoStore } from '@/lib/store/userInfo';
 
 interface UserInfoContextType {
   userInfo: {

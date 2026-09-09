@@ -7,7 +7,7 @@ import type { GuestbookVO } from '@/types';
 import toast from 'react-hot-toast';
 import { authApi } from '@/lib/api/auth';
 import { clearVerifyToken, getVerifyToken, isVerifyTokenValidForEmail, saveVerifyToken } from '@/lib/auth/emailSession';
-import { useUserInfoStore } from '@/store/userInfo';
+import { useUserInfoStore } from '@/lib/store/userInfo';
 
 interface GuestbookFormProps {
   onSuccess?: (message: GuestbookVO) => void;

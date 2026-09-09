@@ -8,6 +8,8 @@ import { DEFAULT_COVER_CONFIG } from '@/lib/constants';
 import type { GuestbookVO } from '@/types';
 
 
+// 留言为用户提交内容，发布后需对后续访客立即可见，且分页/排序走 searchParams，
+// 故不做 ISR 缓存（区别于文章/时刻等以 ISR 为主的列表页）
 export const dynamic = 'force-dynamic';
 
 export default async function GuestbookPage({

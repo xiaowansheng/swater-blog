@@ -1,19 +1,8 @@
 import { NextResponse } from 'next/server';
+import { normalizeApiUrl } from '@/lib/utils/apiUrl';
 
-const CLIENT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
-  || (process.env.NODE_ENV === 'development' ? 'http://localhost:8888' : '');
-const SERVER_BASE_URL = process.env.SERVER_API_BASE_URL
+const API_BASE_URL = process.env.SERVER_API_BASE_URL
   || (process.env.NODE_ENV === 'development' ? 'http://localhost:8888' : 'http://127.0.0.1:8888');
-const API_BASE_URL = SERVER_BASE_URL || CLIENT_BASE_URL;
-
-function normalizeApiUrl(base: string, path: string) {
-  const baseTrim = base.endsWith('/') ? base.slice(0, -1) : base;
-  const pathTrim = path.startsWith('/') ? path : `/${path}`;
-  if (baseTrim.endsWith('/api') && pathTrim.startsWith('/api/')) {
-    return baseTrim + pathTrim.slice(4);
-  }
-  return baseTrim + pathTrim;
-}
 
 export async function GET() {
   let response: Response;

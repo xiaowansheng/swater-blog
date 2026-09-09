@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { LOADING_CONFIG } from '@/lib/constants/loading';
-import { resetPageReady, getPageReadyState } from './usePageReady';
 
 export type LoadingScope = 'page' | 'query';
 
@@ -13,6 +12,14 @@ interface LoadingSnapshot {
 }
 
 type LoadingListener = (snapshot: LoadingSnapshot) => void;
+
+// PageReady 协议的模块级状态：目前没有调用方标记就绪，
+// checkReady 始终走 50ms 缓冲分支，保留状态是为将来页面数据加载后标记就绪
+let isPageReady = false;
+const resetPageReady = () => {
+  isPageReady = false;
+};
+const getPageReadyState = () => isPageReady;
 
 // 全局状态
 let globalLoadingState: LoadingSnapshot = { isLoading: false, scope: 'page' };

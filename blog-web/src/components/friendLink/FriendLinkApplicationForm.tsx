@@ -8,7 +8,7 @@ import { authApi } from '@/lib/api/auth';
 import type { FriendLinkApplicationDTO } from '@/types';
 import toast from 'react-hot-toast';
 import { clearVerifyToken, getVerifyToken, isVerifyTokenValidForEmail, saveVerifyToken } from '@/lib/auth/emailSession';
-import { useUserInfoStore } from '@/store/userInfo';
+import { useUserInfoStore } from '@/lib/store/userInfo';
 
 interface FriendLinkApplicationFormProps {
   onSuccess?: () => void;

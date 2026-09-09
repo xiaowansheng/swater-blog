@@ -1,6 +1,5 @@
 import type { ApiResponse } from '@/types';
 import { getMockResponse } from './mock';
-import { getVerifyToken, VERIFY_TOKEN_HEADER } from '../auth/emailSession';
 import { normalizeApiUrl } from '@/lib/utils/apiUrl';
 
 const CLIENT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
@@ -8,14 +7,7 @@ const CLIENT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 const SERVER_BASE_URL = process.env.SERVER_API_BASE_URL
   || (process.env.NODE_ENV === 'development' ? 'http://localhost:8888' : 'http://127.0.0.1:8888');
 
-function resolveServerBaseUrl(base: string) {
-  // Only rewrite relative base URLs when running on the server (SSR).
-  // In the browser, a relative base like "/api" must stay relative to
-  // avoid mixed-content and internal hostname leaks.
-  return base;
-}
-
-const API_BASE_URL = resolveServerBaseUrl(SERVER_BASE_URL || CLIENT_BASE_URL);
+const API_BASE_URL = SERVER_BASE_URL || CLIENT_BASE_URL;
 
 type NextFetchOptions = {
   tags?: string[];
@@ -64,13 +56,11 @@ export async function fetchServer<T>(url: string, options?: FetchServerOptions):
   delete requestOptions.timeout;
 
   try {
-    const verifyToken = getVerifyToken();
     const response = await fetch(normalizeApiUrl(API_BASE_URL, url), {
       ...requestOptions,
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
-        ...(verifyToken ? { [VERIFY_TOKEN_HEADER]: verifyToken } : {}),
         ...options?.headers,
       },
       ...(process.env.NODE_ENV === 'development' ? { cache: 'no-store' } : {}),
