@@ -1,17 +1,38 @@
-# IDE 配置
+# ===== IDE / 编辑器 =====
 .vscode/
 .idea/
 .claude/
+.zcode/
+*.iml
 
-# 系统文件
-nul
+# ===== 系统文件 =====
 .DS_Store
+Thumbs.db
+nul
 
-# 上传文件
+# ===== 依赖 =====
+node_modules/
+.pnpm-store/
+
+# ===== 构建产物 =====
+build/
+dist/
+out/
+target/
+.next/
+*.tsbuildinfo
+.vercel/
+
+# ===== 测试覆盖率与缓存 =====
+coverage/
+.cache/
+*.cache
+.eslintcache
+
+# ===== 上传文件 =====
 uploads/
-**/uploads/
 
-# 环境变量配置
+# ===== 环境变量配置 =====
 .env
 .env.local
 .env.prod
@@ -28,48 +49,31 @@ uploads/
 **/application-prod.yaml
 **/application-prod.properties
 
-# 日志文件
-logs/
-*.log
-**/*.log
-
-# 构建产物
-build/
-dist/
-target/
-out/
-
-# 依赖
-node_modules/
-.gradle/
-
-# 临时文件
-*.tmp
-*.temp
-*.swp
-*.swo
-*~
-
-# 备份文件
-*.bak
-*.backup
-
-# 密钥和证书
+# ===== 密钥和证书 =====
 *.key
 *.pem
 *.p12
 *.jks
 *.keystore
 
-# 数据库文件
+# ===== 日志与运行时文件 =====
+logs/
+*.log
+*.pid
+
+# ===== 数据库文件 =====
 *.db
 *.sqlite
 *.sqlite3
 
-# 缓存
-.cache/
-*.cache
-dist*
+# ===== 临时与备份文件 =====
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+*.bak
+*.backup
 
-
+# ===== 其他 =====
 .understand-anything
