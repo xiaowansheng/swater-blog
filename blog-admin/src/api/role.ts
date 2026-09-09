@@ -27,8 +27,9 @@ export const deleteRole = (id: number): Promise<void> => {
   return request.delete(`/admin/role/${id}`)
 }
 
+// 后端端点位于 MenuController 下：/admin/menu/role/{roleId}/menus
 export const assignMenus = (roleId: number, menuIds: number[]): Promise<void> => {
-  return request.post(`/admin/role/${roleId}/menus`, menuIds)
+  return request.post(`/admin/menu/role/${roleId}/menus`, menuIds)
 }
 
 export const assignApis = (roleId: number, apiIds: number[]): Promise<void> => {

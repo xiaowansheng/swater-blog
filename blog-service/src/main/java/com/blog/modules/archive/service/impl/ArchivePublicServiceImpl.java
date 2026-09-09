@@ -33,6 +33,9 @@ public class ArchivePublicServiceImpl implements ArchivePublicService {
     private ArticleMapper articleMapper;
 
     @Autowired
+    private ArchiveArticleConverter articleConverter;
+
+    @Autowired
     private CategoryMapper categoryMapper;
 
     @Autowired
@@ -52,46 +55,10 @@ public class ArchivePublicServiceImpl implements ArchivePublicService {
         wrapper.orderByDesc(Article::getCreateTime);
 
         Page<Article> result = articleMapper.selectPage(pageParam, wrapper);
-        List<ArticleVO> voList = convertToListVO(result.getRecords());
+        List<ArticleVO> voList = articleConverter.convertToListVO(result.getRecords());
 
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
     }
 
-    private List<ArticleVO> convertToListVO(List<Article> articles) {
-        if (CollectionUtils.isEmpty(articles)) {
-            return Collections.emptyList();
-        }
-        // 批量查询分类
-        List<Long> categoryIds = articles.stream().map(Article::getCategoryId).filter(Objects::nonNull).distinct().collect(Collectors.toList());
-        Map<Long, Category> categoryMap = categoryIds.isEmpty() ? new HashMap<>() :
-                categoryMapper.selectBatchIds(categoryIds).stream()
-                        .collect(Collectors.toMap(Category::getId, c -> c));
 
-        // 批量查询标签关系
-        List<Long> articleIds = articles.stream().map(Article::getId).collect(Collectors.toList());
-        List<ArticleTag> articleTags = articleTagMapper.selectByArticleIds(articleIds);
-
-        // 批量查询标签
-        List<Long> tagIds = articleTags.stream().map(ArticleTag::getTagId).filter(Objects::nonNull).distinct().collect(Collectors.toList());
-        Map<Long, TagVO> tagMap = tagIds.isEmpty() ? new HashMap<>() :
-                tagMapper.selectBatchIds(tagIds).stream()
-                        .map(tag -> BeanUtil.copyProperties(tag, TagVO.class))
-                        .collect(Collectors.toMap(TagVO::getId, tag -> tag));
-
-        // 组装标签到文章
-        Map<Long, List<TagVO>> articleTagMap = articleTags.stream()
-                .collect(Collectors.groupingBy(ArticleTag::getArticleId,
-                        Collectors.mapping(at -> tagMap.get(at.getTagId()), Collectors.toList())));
-
-        return articles.stream().map(article -> {
-            ArticleVO vo = BeanUtil.copyProperties(article, ArticleVO.class);
-            Category category = categoryMap.get(article.getCategoryId());
-            if (category != null) {
-                vo.setCategoryName(category.getName());
-                vo.setCategoryKey(category.getCategoryKey());
-            }
-            vo.setTags(articleTagMap.get(article.getId()));
-            return vo;
-        }).collect(Collectors.toList());
-    }
 }

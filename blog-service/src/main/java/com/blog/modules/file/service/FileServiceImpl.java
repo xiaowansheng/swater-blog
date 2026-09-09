@@ -30,6 +30,7 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -73,6 +74,8 @@ public class FileServiceImpl implements FileService {
     @Autowired
     private FileUploadProperties fileUploadProperties;
 
+    // @Lazy 切断 FileServiceImpl -> SiteConfigService -> ConfigService -> FileServiceImpl 的循环依赖
+    @Lazy
     @Autowired
     private SiteConfigService siteConfigService;
 

@@ -33,6 +33,4 @@ export const deleteMenu = (id: number): Promise<void> => {
   return request.delete(`/admin/menu/${id}`)
 }
 
-export const getMenuTree = (): Promise<Menu[]> => {
-  return request.get('/admin/menu/tree')
-}
+

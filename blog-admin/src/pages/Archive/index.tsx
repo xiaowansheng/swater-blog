@@ -96,8 +96,7 @@ const Archive: React.FC = () => {
   const fetchArchives = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await archiveApi.getList()
-      const archives = res.data || []
+      const archives = await archiveApi.getList()
       groupArchivesByYear(archives)
       buildTimeline(archives)
     } catch (error) {
@@ -115,7 +114,7 @@ const Archive: React.FC = () => {
     setArticlesLoading(true)
     try {
       const res = await archiveApi.getArticlesByYearMonth(year, month, 1, 100)
-      setArticles(res.data?.records || [])
+      setArticles(res.records || [])
     } catch (error) {
       console.error('获取文章列表失败:', error)
     } finally {

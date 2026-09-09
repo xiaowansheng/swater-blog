@@ -139,7 +139,8 @@ mybatis-plus:
 
 sa-token:
   token-name: Authorization
-  token-prefix: Bearer
+  # 注意：不可配置 token-prefix —— sa-token 中前缀与 is-read-cookie 互斥，
+  # 配置后 httpOnly Cookie 鉴权整体失效（管理端登录后所有请求 401）
   timeout: 2592000
   active-timeout: 604800
   is-read-timeout: true

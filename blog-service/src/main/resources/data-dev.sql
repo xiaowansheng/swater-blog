@@ -14,3 +14,6 @@
 -- INSERT IGNORE INTO `user` (`id`, `username`, `email`, `password`, `nickname`, `avatar`, `role_key`, `status`, `disabled`, `ip_address_signup`, `ip_source_signup`) VALUES
 -- (1, 'admin', 'admin@example.com', '$2b$10$3HkRsI1UZP8pJzwfAaBQ2OpaNGIcWv2G7.Bngh951AkvzV8M4YMri', '管理员', '/uploads/avatar/admin.jpg', 'admin', 1, 0, '127.0.0.1', '本地'),
 -- (2, 'test', 'tester@example.com', '$2b$10$3HkRsI1UZP8pJzwfAaBQ2OpaNGIcWv2G7.Bngh951AkvzV8M4YMri', '测试用户', '/uploads/avatar/test.jpg', 'test', 1, 0, '127.0.0.1', '本地');
+
+-- 占位语句：Spring sql init 不接受全注释脚本（空脚本启动时抛 IllegalArgumentException）
+SELECT 1;

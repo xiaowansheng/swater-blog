@@ -61,6 +61,4 @@ export const deletePicture = (id: number): Promise<void> => {
   return request.delete(`/admin/picture/${id}`)
 }
 
-export const deleteBatchPicture = (ids: number[]): Promise<void> => {
-  return request.delete('/admin/picture/batch', { data: ids })
-}
+

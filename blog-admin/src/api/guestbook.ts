@@ -42,10 +42,6 @@ export const deleteGuestbook = (id: number): Promise<void> => {
   return request.delete(`/admin/guestbook/${id}`)
 }
 
-export const deleteBatchGuestbook = (ids: number[]): Promise<void> => {
-  return request.delete('/admin/guestbook/batch', { data: ids })
-}
-
 export const setVisibleGuestbook = (id: number): Promise<void> => {
   return request.post(`/admin/guestbook/${id}/set-visible`)
 }

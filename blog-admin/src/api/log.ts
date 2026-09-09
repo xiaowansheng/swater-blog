@@ -60,10 +60,5 @@ export const deleteErrorLog = (id: number): Promise<void> => {
   return request.delete(`/admin/log/exception/${id}`)
 }
 
-export const clearOperationLogs = (): Promise<void> => {
-  return request.delete('/admin/log/operation/clear')
-}
 
-export const clearErrorLogs = (): Promise<void> => {
-  return request.delete('/admin/log/exception/clear')
-}
+

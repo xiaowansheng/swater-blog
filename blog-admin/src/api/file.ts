@@ -11,10 +11,6 @@ export const getFileList = (params: {
   return request.get('/admin/file/list', { params })
 }
 
-export const getFileById = (id: number): Promise<FileMeta> => {
-  return request.get(`/admin/file/${id}`)
-}
-
 export const uploadFile = async (file: File): Promise<FileMeta> => {
   const formData = new FormData()
   const processed = await compressImageIfNeeded(file)
@@ -34,10 +30,6 @@ export const uploadFileByUrl = (url: string): Promise<FileMeta> => {
 
 export const deleteFile = (id: number): Promise<void> => {
   return request.delete(`/admin/file/${id}`)
-}
-
-export const deleteBatchFile = (ids: number[]): Promise<void> => {
-  return request.delete('/admin/file/batch', { data: ids })
 }
 
 /**
