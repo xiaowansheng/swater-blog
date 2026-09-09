@@ -1010,3 +1010,66 @@ export async function POST(req: NextRequest) {
 | 硬编码中文 / 版本碎片 / HTTP 客户端不统一 | 本轮不实施：blog-admin 国际化单独立项；blog-tools 为无共享代码的独立工具；fetch/axios 按场景保留 | 记录为后续工作 |
 
 **第六轮结论**：认证凭据已从 localStorage 迁移至 httpOnly Cookie，XSS 无法直接窃取 token；blog-admin 类型告警清零。Cookie 方案的登录、刷新、401 弹窗、WebSocket 通知和导出下载链路需在真实浏览器 + Compose 环境完成端到端验证后再视为生产就绪。
+
+---
+
+## 十、第七轮：全项目安全复审与修复（2026-09-08）
+
+### 10.1 复审范围与方法
+
+- 三路并行复审：架构与设计 / 后端安全 / 前端与部署安全；全部高危发现在当前工作树逐条人工复核（含解析后的 compose 端口配置实测）。
+- 不重复统计前六轮已修复且复核在位的项（admin token httpOnly、限流可信代理、SSR 消毒白名单、next/image 白名单、容器非 root 等）。
+- 对代理复审报告中两处不实结论做了更正：docker profile 的 springdoc/swagger **实际已关闭**（application-docker.yml:269-277）；application-prod.yml 上传白名单**不含** svg。
+
+### 10.2 本轮新发现
+
+| 级别 | 问题 | 位置 |
+|---|---|---|
+| 高 | 公开评论/留言/说说接口原样返回访客完整邮箱、IP（含经纬度），未登录可分页爬取 | CommentVO:38,54 → CommentPublicServiceImpl convertToVO；GuestbookVO；TalkVO |
+| 高 | 邮箱验证码可爆破：失败不计数、消费端点无接口级限流，可冒充邮箱发 UGC / 骗取 30 天邮箱会话 | MessageVerificationServiceImpl.validateEmailCode；AuthController /email/verify 等 |
+| 高 | 组合链：MySQL/Redis(可免密)/RabbitMQ/ES(禁认证)/后端 8888 全部默认发布到 0.0.0.0 + 弱默认管理员口令且 README 披露 | docker-compose.yml 各 ports；application-docker.yml bootstrap |
+| 中 | actuator 暴露 metrics/prometheus 匿名可读（docker profile） | application-docker.yml management 段 |
+| 中 | /api/security-test/** 生产可匿名访问（限流探测、注入检测 oracle） | ops/controller/SecurityTestController |
+| 中 | 允许上传 svg 且 /uploads/ 响应无任何安全头 → 站点源下可执行脚本 | application-docker.yml 白名单；SecurityFilter skip 分支；nginx /uploads/ |
+| 中 | staged 的 uploads 挂载半成品：后端改挂 /data/nginx/data 而 nginx 仍读 blog_uploads 卷，照此部署上传全部 404 | docker-compose.yml:183 |
+| 中 | XSS 纵深：Vditor 先 innerHTML 后消毒（onerror 在 after 之前已可触发）；自研消毒器 startsWith 协议检查可被空白/实体混淆绕过 | MarkdownRenderer.tsx；lib/utils/sanitize.ts |
+| 中 | 密码保护文章：验证接口无限流；存量明文密码仅常量时间比对不升级 | ArticlePublicController:236；ArticlePublicServiceImpl.verifyPassword |
+| 中 | 邮件轰炸余量：发码端点无限流（仅每地址 60s 冷却） | MessagePublicController |
+| 低 | revalidate token 非常量时间比较；WebCorsConfig 禁用时反而注入 192.168.* 通配+凭据；主 nginx 无安全头/无 gzip；limits.conf 200m 与后端 10MB 脱节 | 各对应文件 |
+| 低 | git 历史曾提交真实口令（DB blog123456 等，02e02db5 已移除） | 建议：相关口令视为已泄露并轮换 |
+
+### 10.3 修复清单
+
+| 问题 | 修复 |
+|---|---|
+| PII 泄露 | 公开路径转换统一脱敏：`CommentPublicServiceImpl` / `GuestbookPublicServiceImpl` / `TalkPublicServiceImpl` 的 convertToVO 中 email/ip/latitude/longitude 置空（市级 ipLocation、device/browser 保留供前台展示）；前端 4 处 `showIp` 展示回退为 ipLocation（AnimeCommentItem×2、GuestbookItem、MomentItem、moment/[key]/page） |
+| 验证码爆破 | `MessageVerificationServiceImpl`：失败计数（Redis INCR，5 次作废验证码需重发，TTL 与验证码一致）；`@RateLimit` 补至 /api/auth/email/verify(5/5min)、email-code(5/10min)、评论(5/min)、留言(3/min)、友链申请(3/10min)、点赞(20/min) |
+| 端口暴露 | 三个 compose 改为 `<SVC>_HOST_BIND:-127.0.0.1>` + `<SVC>_PORT` 双变量模式（绑定地址与端口分离，.env 预设端口值不会绕过绑定）；`REDIS_PASSWORD` 主 compose 必填（:?）；nginx 80/443 保持对外；.env.example 文档化 |
+| uploads 挂载 | 回滚半成品改动为 `blog_uploads` 卷（/data/nginx/data 无任何脚本/文档支撑，且宿主机 bind 对非 root blog 用户有写权限坑）；如需宿主机目录方案需前后端挂载同步改 |
+| actuator | docker profile include 收窄 health,info（admin 监控走 BlogMetrics 内部注册表，不受影响）；健康检查去掉 8081 误探测 |
+| 测试控制器 | SecurityTestController 加 `@Profile("dev")` |
+| SVG/XSS 面 | docker 上传白名单移除 svg；SecurityFilter skip 路径仍下发全部安全响应头；nginx /uploads/ 加 nosniff + CSP `default-src 'none'; sandbox`，svg/html/xml 强制 `Content-Disposition: attachment`（兜底历史文件） |
+| 渲染时序 XSS | MarkdownRenderer 增加 Vditor `transform` 钩子在 innerHTML **之前**消毒（DOMParser 惰性文档不加载资源不执行脚本），after 中的 DOM 清洗保留为兜底；sanitize.ts 协议判断先剥离空白/控制字符（jav\tascript: 类绕过失效），data: 仅放行 base64 位图（禁 svg/html）；SSR 正则回退改为链接属性白名单 |
+| 密码文章 | verify-password 加 @RateLimit 5/min/IP；明文密码验证成功后自动升级 BCrypt（rehash-on-verify） |
+| 低危 | revalidate route 改 timingSafeEqual；WebCorsConfig 禁用时不再注册任何 CORS 规则；nginx http 层加 gzip + server_tokens off，站点 server 块加 X-Frame-Options/nosniff/Referrer-Policy/Permissions-Policy；limits.conf 200m→12m；README 移除默认口令明文披露 |
+
+### 10.4 记录不修（本轮评估后暂缓）
+
+- 邮箱枚举（未注册邮箱返回明确提示）：影响找回体验，建议后续统一模糊文案。
+- docker.sock 挂载进 nginx-proxy/acme 容器：nginxproxy 生态标准做法，需网络层/防火墙兜底。
+- `@wangeditor/editor` 已停止维护：替换成本高，建议后续评估移除路径。
+- localStorage 低敏数据（评论验证 JWT、锁屏自定义密码）：风险低。
+- AUTH_EMAIL_SESSION_SECRET 默认空：fail-fast 属预期行为，部署时必须注入。
+- 架构债（shared 包、千行文件拆分、补测试、API 版本化）：非安全项，另行排期。
+
+### 10.5 验证结果（2026-09-08；当前工作树）
+
+| 验证项 | 环境 | 结果 |
+|---|---|---|
+| `compileJava` + `compileTestJava` | Docker（与 Dockerfile 同镜像 gradle:8.5-jdk21@digest） | BUILD SUCCESSFUL |
+| `test` 全量（11 个测试类） | Docker + 临时 MySQL8/Redis7 容器 | 18 PASSED / 0 FAILED，BUILD SUCCESSFUL |
+| blog-web `tsc --noEmit` | 本机（补装 node_modules 缺失依赖后） | 0 错误 |
+| blog-web `eslint src` | 本机 | 0 error / 0 warning |
+| 三个 compose `config` 校验 | 本机（含本地 .env 端口覆盖场景） | 全部通过；7 个 published 端口解析后均 `host_ip: 127.0.0.1` |
+
+**第七轮结论**：本轮新发现的高危（PII 泄露、验证码爆破、端口/弱口令组合链）与中低危问题已全部修复并通过编译、全量测试、类型检查、lint 与 compose 解析验证。遗留待办：① 生产环境若曾使用 git 历史中出现的口令（blog123456/admin123/旧 JWT 密钥）请立即轮换；② 生产 .env 需确认 `SECURITY_TRUSTED_PROXIES` 与 `SA_TOKEN_COOKIE_SECURE=true`（HTTPS 时）；③ `AUTH_EMAIL_SESSION_SECRET` 为空会使邮箱验证链路 fail-fast，部署时必须注入；④ 架构债（shared 包、大文件拆分、测试覆盖）按第九/十轮记录另行排期。

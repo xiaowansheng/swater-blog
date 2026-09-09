@@ -8,6 +8,7 @@ import com.blog.modules.statistics.track.service.ContentLikeService;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.shared.Result;
 import com.blog.shared.annotation.ApiOperation;
+import com.blog.shared.annotation.RateLimit;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +26,13 @@ public class ContentLikePublicController {
     private ContentLikeService contentLikeService;
 
     @PostMapping
+    @RateLimit(
+        type = RateLimit.Type.SLIDING_WINDOW,
+        dimension = RateLimit.Dimension.IP,
+        window = 60,
+        limit = 20,  // 点赞/取消赞为切换操作，需容忍正常高频点击
+        message = "点赞操作过于频繁，请稍后再试"
+    )
     @ApiOperation(name = "点赞/取消赞", type = ApiOperationType.CREATE, description = "对文章/说说点赞或取消点赞")
     public Result<ContentLikeResultVO> action(@RequestBody ContentLikeActionDTO dto, HttpServletRequest request) {
         return Result.success(contentLikeService.action(dto, request));

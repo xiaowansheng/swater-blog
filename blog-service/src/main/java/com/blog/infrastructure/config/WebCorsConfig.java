@@ -26,33 +26,26 @@ public class WebCorsConfig {
     public FilterRegistrationBean<CorsFilter> corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        
+
         log.info("Configuring CorsFilter... Enabled: {}", properties.isEnabled());
-        
-        // 不论是否启用，对于本地开发环境，我们强制注入默认的 CORS 配置，
-        // 避免因为开发环境没有正确激活 dev profile 导致前台无法联调。
+
+        // 显式关闭时不注册任何 CORS 规则（同源部署走 nginx 反代即可）。
+        // 不再做"禁用时强制注入本地开发白名单"的兜底——那会向 192.168.* 等内网源放开带凭据的跨域。
         if (!properties.isEnabled()) {
-            log.warn("CORS properties are disabled! Forcing local development defaults to prevent CORS errors.");
+            return new FilterRegistrationBean<>();
         }
-        
+
         log.info("CORS Allowed Origins: {}", properties.getAllowedOrigins());
         log.info("CORS Allowed Methods: {}", properties.getAllowedMethods());
-        
+
         config.setAllowCredentials(properties.isAllowCredentials());
-        
+
         if (properties.getAllowedOrigins() != null && !properties.getAllowedOrigins().isEmpty()) {
             config.setAllowedOrigins(properties.getAllowedOrigins());
         } else {
             // 如果为空，初始化一个空列表避免后续添加失败（但 Spring CorsConfiguration 会自己处理）
         }
-        
-        // 如果是被强制启用的（原本没启用），或者包含了开发特征，强制加入本地开发白名单
-        if (!properties.isEnabled()) {
-            config.addAllowedOriginPattern("http://localhost:*");
-            config.addAllowedOriginPattern("http://127.0.0.1:*");
-            config.addAllowedOriginPattern("http://192.168.*:*");
-        }
-        
+
         if (properties.getAllowedMethods() != null && !properties.getAllowedMethods().isEmpty()) {
             List<String> methods = new java.util.ArrayList<>(properties.getAllowedMethods());
             if (!methods.contains("OPTIONS")) {

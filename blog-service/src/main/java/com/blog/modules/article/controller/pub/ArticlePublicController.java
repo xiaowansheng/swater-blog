@@ -3,6 +3,7 @@ package com.blog.modules.article.controller.pub;
 
 import com.blog.shared.annotation.ApiDocumentation;
 import com.blog.shared.annotation.ApiOperation;
+import com.blog.shared.annotation.RateLimit;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
@@ -234,6 +235,13 @@ public class ArticlePublicController {
     }
 
     @PostMapping("/{id}/verify-password")
+    @RateLimit(
+        type = RateLimit.Type.SLIDING_WINDOW,
+        dimension = RateLimit.Dimension.IP,
+        window = 60,
+        limit = 5,
+        message = "密码验证尝试过于频繁，请稍后再试"
+    )
     @ApiOperation(name = "验证文章密码", type = ApiOperationType.QUERY, description = "验证密码获取文章内容并签发解锁 token")
     public Result<ArticleUnlockVO> verifyPassword(
             @PathVariable Long id,

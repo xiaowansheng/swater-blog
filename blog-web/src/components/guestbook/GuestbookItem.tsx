@@ -47,7 +47,7 @@ export default function GuestbookItem({ message }: GuestbookItemProps) {
   const locationText = privacy.showLocation
     ? formatLocation(message.country, message.province, message.city, message.location, message.ipLocation)
     : '';
-  const ipText = privacy.showIp ? formatIp(message.ip) : '';
+  const ipText = privacy.showIp ? (formatIp(message.ip) || message.ipLocation || '') : '';
   const hasMeta = Boolean(locationText || ipText);
 
   const getStatusBadge = () => {

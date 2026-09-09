@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import 'vditor/dist/index.css';
 import ExternalLinkDialog from '@/components/markdown/ExternalLinkDialog';
 import { useTheme } from '@/lib/utils/theme';
-import { sanitizeDomContainer } from '@/lib/utils/sanitize';
+import { sanitizeDomContainer, sanitizeHtml } from '@/lib/utils/sanitize';
 import dynamic from 'next/dynamic';
 
 const ImagePreview = dynamic(() => import('@/components/ImagePreview'), { ssr: false });
@@ -223,14 +223,19 @@ export default function MarkdownRenderer({
             engine: 'KaTeX',
           },
           speech: { enable: false },
+          transform: (html: string) => {
+            // XSS 防护（渲染前）：Vditor 拿 Lute 的产物直接 innerHTML，若等 after 回调再清洗，
+            // HTML 里的 <img onerror> 等在插入 DOM 时就已执行。transform 在 innerHTML 之前调用，
+            // 借助 DOMParser 惰性文档（不加载资源、不执行脚本）先把危险内容剥掉。
+            // 文章正文是 Markdown，后端无法用 HTML 白名单清洗（会破坏代码块），防护点必须在渲染端。
+            return sanitizeHtml(html);
+          },
           after: () => {
             if (disposed) return;
 
             enhanceDom(container);
 
-            // XSS 防护：Vditor 将 Markdown 渲染成 HTML 后，对产物 DOM 做一次清洗，
-            // 移除 <script>、on* 事件属性、javascript: 协议等危险内容。
-            // 文章正文是 Markdown，后端无法用 HTML 白名单清洗（会破坏代码块），防护点必须在渲染端。
+            // XSS 防护（兜底）：渲染产物再清洗一遍，防 transform 后的子渲染器注入
             sanitizeDomContainer(container);
 
             if (container) {

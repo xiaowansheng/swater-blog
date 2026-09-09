@@ -27,6 +27,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 @Service
+@Slf4j
 public class ArticlePublicServiceImpl implements ArticlePublicService {
 
     /** 加密文章解锁 token 的 Redis key 前缀：article:pwd:{articleId}:{token} */
@@ -191,9 +193,25 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
                 return false;
             }
         }
-        return java.security.MessageDigest.isEqual(
+        boolean matches = java.security.MessageDigest.isEqual(
                 stored.getBytes(java.nio.charset.StandardCharsets.UTF_8),
                 password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        if (matches) {
+            // 验证成功后把历史明文密码升级为 BCrypt 存储，逐步消化存量明文
+            upgradeLegacyPasswordHash(article, password);
+        }
+        return matches;
+    }
+
+    private void upgradeLegacyPasswordHash(Article article, String password) {
+        try {
+            Article update = new Article();
+            update.setId(article.getId());
+            update.setPassword(com.blog.shared.util.PasswordUtil.encode(password));
+            articleMapper.updateById(update);
+        } catch (Exception e) {
+            log.warn("文章密码升级 BCrypt 失败, articleId={}", article.getId(), e);
+        }
     }
 
     @Override

@@ -21,9 +21,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Slf4j
 public class MessageVerificationServiceImpl implements MessageVerificationService {
     private static final String KEY_PREFIX = "message:email_code:";
+    private static final String FAIL_COUNT_PREFIX = "message:email_code_fail:";
     private static final int CODE_LENGTH = 6;
     private static final long CODE_TTL_SECONDS = 300;
     private static final long RESEND_COOLDOWN_SECONDS = 60;
+    private static final int MAX_VERIFY_ATTEMPTS = 5;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -87,10 +89,25 @@ public class MessageVerificationServiceImpl implements MessageVerificationServic
     public void validateEmailCode(String email, String code) {
         String key = buildKey(email);
         Object stored = redisTemplate.opsForValue().get(key);
-        if (stored == null || !stored.toString().equals(code)) {
+        if (stored == null) {
+            throw new BusinessException(400, "Invalid email verification code");
+        }
+        if (!stored.toString().equals(code)) {
+            // 失败计数防爆破：连续错误达上限后验证码作废，必须重新发送
+            String failKey = FAIL_COUNT_PREFIX + email.trim().toLowerCase();
+            Long fails = redisTemplate.opsForValue().increment(failKey);
+            if (fails != null && fails == 1L) {
+                redisTemplate.expire(failKey, CODE_TTL_SECONDS, TimeUnit.SECONDS);
+            }
+            if (fails != null && fails >= MAX_VERIFY_ATTEMPTS) {
+                redisTemplate.delete(key);
+                redisTemplate.delete(failKey);
+                throw new BusinessException(429, "Too many failed attempts, please request a new code");
+            }
             throw new BusinessException(400, "Invalid email verification code");
         }
         redisTemplate.delete(key);
+        redisTemplate.delete(FAIL_COUNT_PREFIX + email.trim().toLowerCase());
     }
 
     private String buildKey(String email) {

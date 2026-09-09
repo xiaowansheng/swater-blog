@@ -69,6 +69,10 @@ public class TalkPublicServiceImpl implements TalkPublicService {
 
     private TalkVO convertToVO(Talk talk) {
         TalkVO vo = BeanUtil.copyProperties(talk, TalkVO.class);
+        // 说说为博主所发，公开列表不暴露完整 IP/经纬度（IP 属地仍保留供前台展示）
+        vo.setIp(null);
+        vo.setLatitude(null);
+        vo.setLongitude(null);
         if (talk.getAuthorId() != null) {
             User user = userMapper.selectById(talk.getAuthorId());
             if (user != null) {

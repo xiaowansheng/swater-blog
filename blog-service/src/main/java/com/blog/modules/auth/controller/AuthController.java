@@ -302,6 +302,13 @@ public class AuthController {
     }
 
     @PostMapping("/email/verify")
+    @RateLimit(
+        type = RateLimit.Type.SLIDING_WINDOW,
+        dimension = RateLimit.Dimension.IP,
+        window = 300,  // 5分钟窗口
+        limit = 5,     // 验证码可爆破，必须限制尝试频率（服务端另有失败5次作废机制）
+        message = "验证尝试过于频繁，请5分钟后再试"
+    )
     @ApiOperation(name = "邮箱验证会话", type = ApiOperationType.OTHER, description = "校验邮箱验证码并签发会话凭证token")
     public Result<EmailVerifyVO> verifyEmail(@Valid @RequestBody EmailVerifyDTO dto) {
         return Result.success(authService.verifyEmail(dto));

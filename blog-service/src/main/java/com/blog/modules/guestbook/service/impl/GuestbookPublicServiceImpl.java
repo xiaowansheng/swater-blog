@@ -211,6 +211,11 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
 
     private GuestbookVO convertToVO(Guestbook guestbook, String ownerEmail) {
         GuestbookVO vo = BeanUtil.copyProperties(guestbook, GuestbookVO.class);
+        // 公开接口脱敏：完整邮箱/IP/经纬度仅管理端可见，前台只保留市级属地等粗粒度字段
+        vo.setEmail(null);
+        vo.setIp(null);
+        vo.setLatitude(null);
+        vo.setLongitude(null);
         if (guestbook.getUserId() != null) {
             User user = userMapper.selectById(guestbook.getUserId());
             if (user != null) {

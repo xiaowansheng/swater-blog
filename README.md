@@ -132,7 +132,7 @@ SECURITY_TRUSTED_PROXIES=
 SECURITY_WEBSOCKET_ALLOWED_ORIGIN_PATTERNS=http://localhost:*,http://127.0.0.1:*
 ```
 
-首次空库启动会自动创建管理后台账号。当前配置以 Spring profile YAML 为准：本机 `dev` profile 默认 `admin/admin`，Docker profile 默认 `admin/change_me_admin_password`；管理员用户已存在时不会重置密码。生产部署前应先调整对应 profile 的 `blog.bootstrap.admin.*` 配置，或先改成环境变量占位再注入。
+首次空库启动会自动创建管理后台账号，账号来自 `blog.bootstrap.admin.*` 配置（管理员已存在时不会重置密码）。生产部署**必须**通过环境变量 `BLOG_ADMIN_USERNAME` / `BLOG_ADMIN_PASSWORD` 注入强口令，不要依赖 profile YAML 中的默认值；本地开发环境的默认账号仅限本机使用，切勿用于公网。
 
 ### 方式二：本地开发
 

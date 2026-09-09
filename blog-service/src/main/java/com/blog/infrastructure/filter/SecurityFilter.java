@@ -74,8 +74,10 @@ public class SecurityFilter implements Filter {
             return;
         }
         
-        // 跳过特定路径
+        // 跳过特定路径的请求侧检查（静态资源/上传文件），但安全响应头仍要下发，
+        // 否则 /uploads/** 等路径的响应缺少 CSP/nosniff，会成为存储型 XSS 的载体
         if (shouldSkipSecurity(requestUri, httpRequest.getContextPath())) {
+            addSecurityHeaders(httpRequest, httpResponse);
             chain.doFilter(request, response);
             return;
         }

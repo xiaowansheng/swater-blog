@@ -2,6 +2,7 @@ package com.blog.modules.comment.controller.pub;
 
 
 import com.blog.shared.annotation.ApiOperation;
+import com.blog.shared.annotation.RateLimit;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.comment.model.dto.CommentDTO;
@@ -34,6 +35,13 @@ public class CommentPublicController {
     }
 
     @PostMapping
+    @RateLimit(
+        type = RateLimit.Type.SLIDING_WINDOW,
+        dimension = RateLimit.Dimension.IP,
+        window = 60,
+        limit = 5,
+        message = "评论过于频繁，请稍后再试"
+    )
     @ApiOperation(name = "创建评论", type = ApiOperationType.CREATE, description = "创建新的评论")
     public Result<CommentVO> create(@Valid @RequestBody CommentDTO dto) {
         CommentVO vo = commentPublicService.create(dto);

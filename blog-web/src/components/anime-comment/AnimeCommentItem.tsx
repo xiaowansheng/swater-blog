@@ -159,7 +159,7 @@ export default function AnimeCommentItem({
           const locationText = privacy.showLocation
             ? formatLocation(comment.country, comment.province, comment.city, comment.location, comment.ipLocation)
             : '';
-          const ipText = privacy.showIp ? formatIp(comment.ip) : '';
+          const ipText = privacy.showIp ? (formatIp(comment.ip) || comment.ipLocation || '') : '';
           const hasMeta = Boolean(locationText || ipText)
             || ((privacy.showDevice || privacy.showBrowser) && (comment.device || comment.browser));
 
@@ -313,7 +313,7 @@ export default function AnimeCommentItem({
                 const locationText = privacy.showLocation
                   ? formatLocation(child.country, child.province, child.city, child.location, child.ipLocation)
                   : '';
-                const ipText = privacy.showIp ? formatIp(child.ip) : '';
+                const ipText = privacy.showIp ? (formatIp(child.ip) || child.ipLocation || '') : '';
                 const hasMeta = Boolean(locationText || ipText)
                   || ((privacy.showDevice || privacy.showBrowser) && (child.device || child.browser));
 

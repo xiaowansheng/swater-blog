@@ -160,22 +160,23 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        # 生产仅暴露健康检查；metrics/prometheus 如需接入监控栈，在 docker 内网单独放开
+        include: health,info
       base-path: /actuator
   endpoint:
     health:
       show-details: when-authorized
       show-components: when-authorized
     metrics:
-      enabled: true
+      enabled: false
     prometheus:
-      enabled: true
+      enabled: false
     shutdown:
       enabled: false
   metrics:
     export:
       prometheus:
-        enabled: true
+        enabled: false
     distribution:
       percentiles-histogram:
         http.server.requests: true
@@ -247,7 +248,6 @@ security:
       - png
       - gif
       - webp
-      - svg
       - ico
       - pdf
       - doc

@@ -9,6 +9,7 @@ import com.blog.infrastructure.security.SqlInjectionProtector;
 import com.blog.shared.util.IpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -18,6 +19,8 @@ import java.util.Map;
  * 安全功能测试控制器
  * 用于测试各种安全功能
  */
+// 仅本地开发装配，生产环境不暴露限流/脱敏/注入检测的探测接口
+@Profile("dev")
 @RestController
 @RequestMapping("/api/security-test")
 @ApiOperation(name = "安全测试模块", description = "安全和限流相关测试接口", open = true)

@@ -4,6 +4,12 @@ server {
 
     client_max_body_size 20m;
 
+    # 基础安全响应头（/uploads/ 的 location 自带 add_header，不继承此处）
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+
     # WebSocket 反向代理
     location /ws/ {
         proxy_pass http://blog-service:8888;
@@ -56,11 +62,22 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # 静态资源
-    location /uploads/ {
-        alias /var/www/uploads/;
+    # 静态资源（可渲染文档类型强制下载，防同源 XSS）
+    location ~* ^/uploads/.+\.(svg|html?|xhtml|xml)$ {
+        root /var/www;
         access_log off;
         expires 30d;
+        add_header Content-Disposition "attachment" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Content-Security-Policy "default-src 'none'; sandbox" always;
+    }
+
+    location /uploads/ {
+        root /var/www;
+        access_log off;
+        expires 30d;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Content-Security-Policy "default-src 'none'; sandbox" always;
     }
 }
 
@@ -197,6 +214,12 @@ server {
 
     client_max_body_size 20m;
 
+    # 基础安全响应头（/uploads/ 的 location 自带 add_header，不继承此处）
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+
     # WebSocket 反向代理
     location /ws/ {
         proxy_pass http://blog-service:8888;
@@ -223,11 +246,22 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # 静态资源
-    location /uploads/ {
-        alias /var/www/uploads/;
+    # 静态资源（可渲染文档类型强制下载，防同源 XSS）
+    location ~* ^/uploads/.+\.(svg|html?|xhtml|xml)$ {
+        root /var/www;
         access_log off;
         expires 30d;
+        add_header Content-Disposition "attachment" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Content-Security-Policy "default-src 'none'; sandbox" always;
+    }
+
+    location /uploads/ {
+        root /var/www;
+        access_log off;
+        expires 30d;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Content-Security-Policy "default-src 'none'; sandbox" always;
     }
 
     # 博客前端（默认路由）

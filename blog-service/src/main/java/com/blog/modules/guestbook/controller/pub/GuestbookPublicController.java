@@ -1,6 +1,7 @@
 package com.blog.modules.guestbook.controller.pub;
 
 import com.blog.shared.annotation.ApiOperation;
+import com.blog.shared.annotation.RateLimit;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.guestbook.model.dto.GuestbookDTO;
@@ -29,6 +30,13 @@ public class GuestbookPublicController {
     }
 
     @PostMapping
+    @RateLimit(
+        type = RateLimit.Type.SLIDING_WINDOW,
+        dimension = RateLimit.Dimension.IP,
+        window = 60,
+        limit = 3,
+        message = "留言过于频繁，请稍后再试"
+    )
     @ApiOperation(name = "提交留言", type = ApiOperationType.CREATE, description = "提交新的留言")
     public Result<GuestbookVO> submit(@Valid @RequestBody GuestbookDTO dto) {
         GuestbookVO vo = guestbookPublicService.submit(dto);

@@ -21,6 +21,37 @@ const DANGEROUS_TAGS = new Set([
   'style',
 ]);
 
+/** 允许放行的 base64 位图 data URI（不含 svg，svg 可承载脚本） */
+const SAFE_DATA_IMAGE = /^data:image\/(png|gif|jpeg|jpg|webp|bmp|avif);base64,/;
+
+/**
+ * 判断 URL 属性值是否使用危险协议。
+ * DOMParser 已解码 HTML 实体，但浏览器寻址时还会忽略值中的空白与控制字符
+ * （如 "jav&#x09;ascript:" 解码后为 "jav\tascript:"），因此先剥离再判断前缀。
+ */
+function isDangerousUrl(value: string | null | undefined): boolean {
+  if (!value) return false;
+  const normalized = value.replace(/[\s\x00-\x20\x7f]+/g, '').toLowerCase();
+  if (!normalized) return false;
+  if (/^(javascript|vbscript|livescript|mocha):/.test(normalized)) return true;
+  if (normalized.startsWith('data:')) {
+    return !SAFE_DATA_IMAGE.test(normalized);
+  }
+  return false;
+}
+
+/**
+ * SSR 正则回退用的链接属性白名单：
+ * 无法完整解码实体，改为仅放行明确安全的值前缀（相对路径/锚点/http(s)/mailto/位图 data URI），
+ * 其余（含各种实体编码、空白混淆的危险协议）一律替换为 "#"。
+ */
+function isSafeUrlAttribute(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed) return true;
+  if (isDangerousUrl(trimmed)) return false;
+  return /^(https?:|mailto:|[/#]|data:image\/(png|gif|jpeg|jpg|webp|bmp|avif);base64,)/i.test(trimmed);
+}
+
 /**
  * 清洗一个已渲染的 DOM 容器：移除危险标签节点、on* 事件属性、危险协议。
  * 在 Vditor.preview 的 after 回调中调用。
@@ -51,14 +82,9 @@ export function sanitizeDomContainer(container: HTMLElement | null): void {
         el.removeAttribute(attr.name);
         continue;
       }
-      // href/src/action 等链接属性：禁止 javascript:/vbscript:/data: 协议
+      // href/src/action 等链接属性：禁止 javascript:/vbscript:/data: 等危险协议（含空白混淆变体）
       if (/^(href|src|action|formaction|xlink:href|data)$/i.test(attr.name)) {
-        const value = (attr.value || '').trim().toLowerCase();
-        if (
-          value.startsWith('javascript:') ||
-          value.startsWith('vbscript:') ||
-          value.startsWith('data:text/html')
-        ) {
+        if (isDangerousUrl(attr.value)) {
           el.removeAttribute(attr.name);
         }
       }
@@ -81,7 +107,7 @@ export function sanitizeHtml(html: string | undefined | null): string {
     return doc.body.innerHTML;
   }
 
-  // SSR 兜底：正则移除 <script>...</script>、on*= 属性、javascript: 协议
+  // SSR 兜底：正则移除 <script>...</script>、on*= 属性，链接属性走白名单
   // 注：后端 HtmlSanitizer 已对说说内容做过白名单清洗，此处仅做防御性二次处理
   return html
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
@@ -89,6 +115,12 @@ export function sanitizeHtml(html: string | undefined | null): string {
     .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
     .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
     .replace(/\son\w+\s*=\s*[^\s>]+/gi, '')
-    .replace(/(href|src|action)\s*=\s*"\s*javascript:[^"]*"/gi, '$1="#"')
-    .replace(/(href|src|action)\s*=\s*'\s*javascript:[^']*'/gi, "$1='#'");
+    .replace(
+      /\s(href|src|action|formaction|xlink:href)\s*=\s*(?:"([^"]*)"|'([^']*)')/gi,
+      (match: string, attr: string, dq?: string, sq?: string) => {
+        const value = dq !== undefined ? dq : (sq ?? '');
+        if (isSafeUrlAttribute(value)) return match;
+        return ` ${attr.toLowerCase()}="#"`;
+      },
+    );
 }

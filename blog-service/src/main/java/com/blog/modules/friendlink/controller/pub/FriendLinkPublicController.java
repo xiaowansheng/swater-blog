@@ -2,6 +2,7 @@ package com.blog.modules.friendlink.controller.pub;
 
 
 import com.blog.shared.annotation.ApiOperation;
+import com.blog.shared.annotation.RateLimit;
 import com.blog.shared.Result;
 import com.blog.modules.system.api.model.enums.ApiOperationType;
 import com.blog.modules.friendlink.model.dto.FriendLinkApplicationDTO;
@@ -32,6 +33,13 @@ public class FriendLinkPublicController {
     }
 
     @PostMapping("/apply")
+    @RateLimit(
+        type = RateLimit.Type.SLIDING_WINDOW,
+        dimension = RateLimit.Dimension.IP,
+        window = 600,  // 10分钟窗口
+        limit = 3,
+        message = "友链申请提交过于频繁，请稍后再试"
+    )
     @ApiOperation(name = "申请友情链接", type = ApiOperationType.CREATE, description = "前台访客提交友链申请")
     public Result<Long> apply(@Valid @RequestBody FriendLinkApplicationDTO dto) {
         Long id = friendLinkPublicService.apply(dto);

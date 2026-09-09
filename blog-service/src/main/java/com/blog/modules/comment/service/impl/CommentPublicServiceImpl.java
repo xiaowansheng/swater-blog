@@ -494,6 +494,11 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             Map<Long, Comment> parentCommentMap
     ) {
         CommentVO vo = BeanUtil.copyProperties(comment, CommentVO.class);
+        // 公开接口脱敏：完整邮箱/IP/经纬度仅管理端可见，前台只保留市级属地等粗粒度字段
+        vo.setEmail(null);
+        vo.setIp(null);
+        vo.setLatitude(null);
+        vo.setLongitude(null);
         if (comment.getUserId() != null) {
             User user = userMap != null
                     ? userMap.get(comment.getUserId())

@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
+import { timingSafeEqual } from 'crypto';
 
 function getToken(req: NextRequest) {
   return req.headers.get('x-revalidate-token') || '';
+}
+
+/** 常量时间比较，避免逐字节短路泄露 token 前缀 */
+function tokenMatches(provided: string, expected: string) {
+  const a = Buffer.from(provided, 'utf8');
+  const b = Buffer.from(expected, 'utf8');
+  if (a.length !== b.length) {
+    // 长度不同时仍做一次比较，保持耗时曲线平滑
+    timingSafeEqual(b, b);
+    return false;
+  }
+  return timingSafeEqual(a, b);
 }
 
 function getTags(req: NextRequest, body: unknown) {
@@ -27,7 +40,7 @@ export async function POST(req: NextRequest) {
   if (!expected) {
     return NextResponse.json({ ok: false, message: 'Revalidation is not configured' }, { status: 503 });
   }
-  if (token !== expected) {
+  if (!tokenMatches(token, expected)) {
     return NextResponse.json({ ok: false, message: 'Unauthorized' }, { status: 401 });
   }
 

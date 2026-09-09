@@ -273,7 +273,7 @@ export default function MomentItem({ moment }: MomentItemProps) {
           const locationText = privacy.showLocation
             ? formatLocation(moment.country, moment.province, moment.city, moment.location, moment.ipLocation)
             : '';
-          const ipText = privacy.showIp ? formatIp(moment.ip) : '';
+          const ipText = privacy.showIp ? (formatIp(moment.ip) || moment.ipLocation || '') : '';
           const hasMeta = Boolean(locationText || ipText)
             || ((privacy.showDevice || privacy.showBrowser) && (moment.device || moment.browser));
 

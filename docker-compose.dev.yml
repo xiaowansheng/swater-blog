@@ -11,7 +11,7 @@ services:
     container_name: blog-mysql-dev
     restart: unless-stopped
     ports:
-      - "${DB_PORT:-3306}:3306"
+      - "${DB_HOST_BIND:-127.0.0.1}:${DB_PORT:-3306}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-change_me_root_password}
       MYSQL_DATABASE: ${DB_NAME:-blog}
@@ -40,7 +40,7 @@ services:
     container_name: blog-redis-dev
     restart: unless-stopped
     ports:
-      - "${REDIS_PUBLISHED_PORT:-6379}:6379"
+      - "${REDIS_HOST_BIND:-127.0.0.1}:${REDIS_PUBLISHED_PORT:-6379}:6379"
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     volumes:
@@ -75,8 +75,8 @@ services:
     container_name: blog-rabbitmq-dev
     restart: unless-stopped
     ports:
-      - "${RABBITMQ_PORT:-5672}:5672"    # AMQP端口
-      - "${RABBITMQ_MANAGEMENT_PUBLISHED_PORT:-15672}:15672"  # 管理界面端口
+      - "${RABBITMQ_HOST_BIND:-127.0.0.1}:${RABBITMQ_PORT:-5672}:5672"    # AMQP端口
+      - "${RABBITMQ_HOST_BIND:-127.0.0.1}:${RABBITMQ_MANAGEMENT_PUBLISHED_PORT:-15672}:15672"  # 管理界面端口
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-change_me_rabbitmq_password}
@@ -101,7 +101,7 @@ services:
     container_name: blog-service-dev
     restart: unless-stopped
     ports:
-      - "${BLOG_SERVICE_PUBLISHED_PORT:-8888}:${SERVER_PORT:-8888}"
+      - "${BLOG_SERVICE_HOST_BIND:-127.0.0.1}:${BLOG_SERVICE_PUBLISHED_PORT:-8888}:${SERVER_PORT:-8888}"
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       DB_HOST: mysql
@@ -186,7 +186,7 @@ services:
     profiles:
       - elasticsearch
     ports:
-      - "${ELASTICSEARCH_HTTP_PUBLISHED_PORT:-9200}:9200"
+      - "${ELASTICSEARCH_HOST_BIND:-127.0.0.1}:${ELASTICSEARCH_HTTP_PUBLISHED_PORT:-9200}:9200"
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
