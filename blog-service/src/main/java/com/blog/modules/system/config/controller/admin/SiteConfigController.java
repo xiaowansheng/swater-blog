@@ -13,7 +13,7 @@ import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;
 import com.blog.modules.system.config.model.dto.config.ComponentConfigDTO;
 import com.blog.modules.system.config.model.dto.config.WebhookConfigDTO;
 import com.blog.shared.annotation.ApiOperation;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.shared.Result;
 import com.blog.modules.system.config.service.SiteConfigService;
 import org.springframework.beans.factory.annotation.Autowired;

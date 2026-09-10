@@ -23,6 +23,7 @@ import com.blog.modules.system.config.service.SiteConfigService;
 import com.blog.plugin.components.storage.StoragePlugin;
 import com.blog.plugin.components.storage.StoragePluginFactory;
 import com.blog.infrastructure.config.FileUploadProperties;
+import com.blog.modules.file.util.MagicNumberValidator;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.PageUtil;
@@ -79,8 +80,12 @@ public class FileServiceImpl implements FileService {
     @Autowired
     private SiteConfigService siteConfigService;
 
+    /**
+     * 注意：上传不能加 @Transactional —— hash 计算、远端 exists 检查与物理上传是慢速 IO，
+     * 事务包裹会长时间占用数据库连接。方法内各 DB 操作均为单语句自动提交；
+     * 引用计数自增使用 setSql 原子更新，无需事务保护。
+     */
     @Override
-    @Transactional
     public FileVO upload(MultipartFile file, FileUploadDTO dto) {
         if (file == null || file.isEmpty()) {
             throw new BusinessException("文件不能为空");
@@ -108,6 +113,16 @@ public class FileServiceImpl implements FileService {
         // 2. 校验文件扩展名
         validateFileExtension(originalFilename, uploadConfig);
 
+        // 3. 魔数校验：拦截改名为白名单类型的伪造文件（扩展名可被客户端伪造）
+        try (InputStream headerStream = file.getInputStream()) {
+            if (!MagicNumberValidator.matches(headerStream, originalFilename)) {
+                log.warn("文件头与扩展名不符，拒绝上传: filename={}", originalFilename);
+                throw new BusinessException("文件内容与声明的类型不符");
+            }
+        } catch (IOException e) {
+            throw new BusinessException("读取上传文件失败");
+        }
+
         try {
             StoragePlugin storagePlugin = storagePluginFactory.getActivePlugin();
             if (storagePlugin == null) {
@@ -128,9 +143,12 @@ public class FileServiceImpl implements FileService {
                 }
 
                 if (physicalFileExists) {
+                    // 原子自增引用计数，避免并发上传同指纹文件时丢失更新
+                    fileMetaMapper.update(null, new LambdaUpdateWrapper<FileMeta>()
+                            .eq(FileMeta::getId, existingFile.getId())
+                            .setSql("ref_count = COALESCE(ref_count, 0) + 1"));
+                    existingFile.setRefCount((existingFile.getRefCount() != null ? existingFile.getRefCount() : 0) + 1);
                     fileMeta = existingFile;
-                    fileMeta.setRefCount((fileMeta.getRefCount() != null ? fileMeta.getRefCount() : 0) + 1);
-                    fileMetaMapper.updateById(fileMeta);
                 } else {
                     // 如果数据库记录存在但物理文件不存在，清理旧记录并重新上传
                     fileMetaMapper.deleteById(existingFile.getId());
@@ -148,8 +166,10 @@ public class FileServiceImpl implements FileService {
         }
     }
 
+    /**
+     * 同 {@link #upload}：物理下载/抓取属慢速 IO，不纳入数据库事务。
+     */
     @Override
-    @Transactional
     public FileVO uploadByUrl(String url, FileUploadDTO dto) {
         if (!StringUtils.hasText(url)) {
             throw new BusinessException("URL 不能为空");
@@ -219,6 +239,14 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    public long countExpiredFiles() {
+        LocalDateTime expireTime = LocalDateTime.now().minusDays(7);
+        return fileMetaMapper.selectCount(new LambdaQueryWrapper<FileMeta>()
+                .eq(FileMeta::getRefCount, 0)
+                .lt(FileMeta::getUpdateTime, expireTime));
+    }
+
+    @Override
     public PageResult<FileVO> list(Long page, Long size, String type) {
         Page<FileMeta> pageParam = PageUtil.buildPage(page, size);
         LambdaQueryWrapper<FileMeta> wrapper = new LambdaQueryWrapper<>();
@@ -236,8 +264,11 @@ public class FileServiceImpl implements FileService {
         return new PageResult<>(voList, result.getTotal(), result.getSize(), result.getCurrent());
     }
 
+    /**
+     * 物理文件删除属外部 IO，不入数据库事务：
+     * 先删物理文件再删记录，若中途失败残留的孤儿记录由定时清理任务兜底。
+     */
     @Override
-    @Transactional
     public void delete(Long id) {
         FileMeta fileMeta = fileMetaMapper.selectById(id);
         if (fileMeta == null) {
@@ -518,7 +549,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void addReferences(List<Long> fileIds, String refType, Long refId) {
         if (fileIds == null || fileIds.isEmpty() || refType == null || refId == null) {
             return;
@@ -583,7 +614,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void removeReferences(String refType, Long refId) {
         if (refType == null || refId == null) {
             return;
@@ -661,7 +692,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateReferences(List<Long> oldFileIds, List<Long> newFileIds, String refType, Long refId) {
         if (refType == null || refId == null) {
             return;

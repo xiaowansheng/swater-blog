@@ -98,7 +98,7 @@ public class LogErrorServiceImpl implements LogErrorService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         LogError log = logErrorMapper.selectById(id);
         if (log == null) {
@@ -108,7 +108,7 @@ public class LogErrorServiceImpl implements LogErrorService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void cleanup(Integer retentionDays) {
         if (retentionDays == null || retentionDays <= 0) {
             retentionDays = 90;
@@ -119,7 +119,7 @@ public class LogErrorServiceImpl implements LogErrorService {
 
     @Override
     @Async("eventTaskExecutor")
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void save(LogError logError) {
         if (logError != null) {
             logErrorMapper.insert(logError);

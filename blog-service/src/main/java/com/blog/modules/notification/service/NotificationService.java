@@ -46,4 +46,9 @@ public interface NotificationService {
     void retryNotifications(java.util.List<Long> ids, Long currentUserId, boolean isAdmin);
 
     void retryFailedNotifications();
+
+    /**
+     * 消费 MQ 通知消息：更新状态并派发渠道（SMTP/WebSocket）。
+     */
+    void processNotificationMessage(com.blog.modules.notification.model.message.NotificationMessage message);
 }

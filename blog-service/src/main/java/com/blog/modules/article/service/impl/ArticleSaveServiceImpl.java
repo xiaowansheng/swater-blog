@@ -22,6 +22,7 @@ import com.blog.modules.file.service.FileService;
 import com.blog.modules.tag.service.TagService;
 import com.blog.bootstrap.context.UserContext;
 import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.KeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -79,7 +78,7 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
+    @CacheEvict(value = {"article:list", "article:hot", "article:latest", "article:related"}, allEntries = true)
     public ArticleSaveResultVO save(ArticleSaveDTO dto) {
         boolean isNew = dto.getId() == null;
         
@@ -172,7 +171,7 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
         saveArticleTags(article.getId(), dto.getTagIds(), dto.getTagNames());
 
         // 发布事件
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleCreatedEvent(this, article.getId(), article)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleCreatedEvent(this, article.getId(), article)));
 
         log.info("文章创建成功: id={}, title={}, autoSave={}", article.getId(), article.getTitle(), dto.getAutoSave());
 
@@ -311,7 +310,7 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
             Article updatedArticle = articleMapper.selectById(articleId);
             
             // 发布事件
-            publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUpdatedEvent(this, articleId, updatedArticle)));
+            EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUpdatedEvent(this, articleId, updatedArticle)));
 
             log.info("文章更新成功: id={}, title={}, autoSave={}, version={}", 
                     articleId, article.getTitle(), dto.getAutoSave(), updatedArticle.getVersion());
@@ -401,18 +400,6 @@ public class ArticleSaveServiceImpl implements ArticleSaveService {
     /**
      * 事务提交后发布事件
      */
-    private void publishEventAfterCommit(Runnable runnable) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    runnable.run();
-                }
-            });
-        } else {
-            runnable.run();
-        }
-    }
 
     /**
      * 检查文件是否在文章内容中使用

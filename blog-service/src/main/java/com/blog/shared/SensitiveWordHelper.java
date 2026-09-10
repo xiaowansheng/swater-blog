@@ -4,8 +4,6 @@ import com.github.houbb.sensitive.word.api.IWordDeny;
 import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
 import com.github.houbb.sensitive.word.support.allow.WordAllows;
 import com.github.houbb.sensitive.word.support.deny.WordDenys;
-import com.blog.modules.system.config.model.dto.config.CommentConfigDTO;
-import com.blog.modules.system.config.service.SiteConfigService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -13,7 +11,6 @@ import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,7 +20,8 @@ import java.util.List;
  *
  * 词库来源：
  * 1) houbb sensitive-word 默认内置词库（wordDeny/wordAllow defaults）
- * 2) 数据库 {@code comment.sensitiveWords} 配置的自定义敏感词（通过 SiteConfigService 读取）
+ * 2) 数据库配置的自定义敏感词（经 {@link SensitiveWordConfigProvider} SPI 注入，
+ *    shared 层不直接依赖业务模块）
  *
  * 当管理员更新评论配置后，可调用 {@link #reloadCustomWords()} 热加载自定义词，无需重启。
  */
@@ -39,38 +37,25 @@ public class SensitiveWordHelper {
     private volatile SensitiveWordBs sensitiveWordBs;
 
     @Autowired(required = false)
-    private SiteConfigService siteConfigService;
+    private SensitiveWordConfigProvider configProvider;
 
     @PostConstruct
     public void init() {
-        // 启动时加载一次数据库自定义敏感词（若配置服务尚未就绪则跳过，使用默认词库）
+        // 启动时加载一次数据库自定义敏感词（若配置提供者尚未就绪则跳过，使用默认词库）
         loadCustomWordsFromConfig();
         rebuildBs();
         log.info("SensitiveWordHelper 初始化完成，自定义敏感词数量: {}", customWords.size());
     }
 
     /**
-     * 从数据库评论配置中加载自定义敏感词（逗号或换行分隔）。
+     * 从配置提供者加载自定义敏感词。
      */
     private void loadCustomWordsFromConfig() {
-        if (siteConfigService == null) {
+        if (configProvider == null) {
             return;
         }
         try {
-            CommentConfigDTO commentConfig = siteConfigService.getCommentConfig();
-            if (commentConfig == null || commentConfig.getSensitiveWords() == null
-                    || commentConfig.getSensitiveWords().isBlank()) {
-                customWords = Collections.emptyList();
-                return;
-            }
-            List<String> words = new ArrayList<>();
-            for (String w : commentConfig.getSensitiveWords().split("[,\\R]")) {
-                String trimmed = w.trim();
-                if (!trimmed.isEmpty()) {
-                    words.add(trimmed);
-                }
-            }
-            customWords = Collections.unmodifiableList(words);
+            customWords = configProvider.loadCustomWords();
         } catch (Exception e) {
             log.warn("加载自定义敏感词失败，使用空自定义词库: {}", e.getMessage());
             customWords = Collections.emptyList();

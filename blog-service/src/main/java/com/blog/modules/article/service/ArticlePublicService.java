@@ -30,5 +30,14 @@ public interface ArticlePublicService {
      * 凭解锁 token 获取文章正文。token 失效或文章不需要密码时返回 null。
      */
     ArticleVO getByUnlockToken(Long articleId, String token);
-}
 
+    /**
+     * 批量获取文章统计（只读，不增加浏览数）；未发布/已删除的 id 不返回。
+     */
+    java.util.List<com.blog.modules.article.model.vo.ArticleStatsVO> getStatsByIds(java.util.List<Long> ids);
+
+    /**
+     * 获取单篇文章统计（只读），不存在返回 null。
+     */
+    com.blog.modules.article.model.vo.ArticleStatsVO getArticleStats(Long id);
+}

@@ -77,7 +77,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long create(ApiDTO dto) {
         // 生成或验证apiKey
         if (dto.getApiKey() == null || dto.getApiKey().isEmpty()) {
@@ -110,7 +110,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void update(Long id, ApiDTO dto) {
         SysApi api = sysApiMapper.selectById(id);
         if (api == null) {
@@ -134,7 +134,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         SysApi api = sysApiMapper.selectById(id);
         if (api == null) {
@@ -155,7 +155,7 @@ public class ApiResourceServiceImpl implements ApiResourceService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public ApiRefreshResultVO refresh() {
         long startTime = System.currentTimeMillis();
 

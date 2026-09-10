@@ -2,7 +2,7 @@ package com.blog.modules.system.api.controller.admin;
 
 
 import com.blog.shared.annotation.ApiOperation;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.shared.Result;
 import com.blog.modules.system.api.model.dto.ApiDTO;
 import com.blog.modules.system.api.model.vo.ApiRefreshResultVO;

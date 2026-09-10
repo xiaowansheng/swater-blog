@@ -4,7 +4,7 @@ import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.annotation.RateLimit;
 import com.blog.shared.Result;
 import com.blog.modules.message.model.dto.EmailCodeDTO;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.message.service.MessageVerificationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

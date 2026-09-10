@@ -65,7 +65,7 @@ public class FileCleanupTask {
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     protected void doCleanup() {
         log.info("开始执行文件清理任务...");
 

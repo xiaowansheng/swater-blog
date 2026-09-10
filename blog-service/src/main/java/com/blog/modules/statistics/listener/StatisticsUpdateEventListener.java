@@ -112,115 +112,83 @@ public class StatisticsUpdateEventListener {
 
     /**
      * 评论审核通过事件
-     * 当评论被审核通过时，如果也是可见的，则增加统计
+     * 按「前态 → 后态」迁移计算 delta：只有从未计数变为计数才 +1，
+     * 避免对已计数评论重复审核时重复累加。
      */
     @Async("eventTaskExecutor")
     @EventListener
     public void handleCommentApproved(com.blog.modules.comment.event.CommentApprovedEvent event) {
         try {
             com.blog.modules.comment.model.entity.Comment comment = event.getComment();
-            // 只有审核通过且可见的评论才增加统计
-            if (comment.getStatus() != null && comment.getStatus() == 1 &&
-                comment.getIsVisible() != null && comment.getIsVisible() == 1) {
-                if (comment.getTargetId() != null && "ARTICLE".equalsIgnoreCase(comment.getTargetType())) {
-                    articleMapper.update(
-                            null,
-                            new LambdaUpdateWrapper<Article>()
-                                    .eq(Article::getId, comment.getTargetId())
-                                    .eq(Article::getDeleted, 0)
-                                    .setSql("comment_count = COALESCE(comment_count, 0) + 1")
-                    );
-                    recordContentMetricEvent("COMMENT", "ARTICLE", comment.getTargetId(), 1);
-                    log.info("文章评论统计已增加，文章ID: {}, 评论ID: {}", comment.getTargetId(), event.getCommentId());
-                }
-                if (comment.getTargetId() != null && "TALK".equalsIgnoreCase(comment.getTargetType())) {
-                    talkMapper.update(
-                            null,
-                            new LambdaUpdateWrapper<Talk>()
-                                    .eq(Talk::getId, comment.getTargetId())
-                                    .eq(Talk::getDeleted, 0)
-                                    .setSql("comment_count = COALESCE(comment_count, 0) + 1")
-                    );
-                    recordContentMetricEvent("COMMENT", "TALK", comment.getTargetId(), 1);
-                    log.info("说说评论统计已增加，说说ID: {}, 评论ID: {}", comment.getTargetId(), event.getCommentId());
-                }
+            boolean countedBefore = event.isPreviouslyCounted();
+            boolean countedNow = isCounted(comment);
+            if (countedBefore == countedNow) {
+                return;
             }
+            int delta = countedNow ? 1 : -1;
+            applyCommentCountDelta(comment, delta, event.getCommentId());
         } catch (Exception e) {
             log.error("更新评论统计失败，评论ID: {}", event.getCommentId(), e);
         }
     }
 
     /**
-     *评论更新事件
-     * 当评论可见性变更时，更新统计
+     * 评论更新事件（可见性/审核状态变更）
+     * delta 由「前态是否计数 → 后态是否计数」的迁移决定：
+     * 计数→不计数 减 1，不计数→计数 加 1，其余不动。
+     * 事件侧携带变更前状态（previouslyCounted），仅凭最终状态无法正确推导。
      */
     @Async("eventTaskExecutor")
     @EventListener
     public void handleCommentUpdated(com.blog.modules.comment.event.CommentUpdatedEvent event) {
         try {
             com.blog.modules.comment.model.entity.Comment comment = event.getComment();
-            if (comment.getTargetId() == null) {
+            boolean countedBefore = event.isPreviouslyCounted();
+            boolean countedNow = isCounted(comment);
+            if (countedBefore == countedNow) {
                 return;
             }
-
-            Integer status = comment.getStatus();
-            Integer isVisible = comment.getIsVisible();
-            Integer delta = null;
-            if (CommentStatus.APPROVED.matches(status) && CommentVisibilityStatus.HIDDEN.matches(isVisible)) {
-                delta = -1;
-            } else if (CommentStatus.APPROVED.matches(status) && CommentVisibilityStatus.VISIBLE.matches(isVisible)) {
-                delta = 1;
-            }
-            if (delta == null) {
-                return;
-            }
-
-            if ("ARTICLE".equalsIgnoreCase(comment.getTargetType())) {
-                if (delta > 0) {
-                    articleMapper.update(
-                            null,
-                            new LambdaUpdateWrapper<Article>()
-                                    .eq(Article::getId, comment.getTargetId())
-                                    .eq(Article::getDeleted, 0)
-                                    .setSql("comment_count = COALESCE(comment_count, 0) + 1")
-                    );
-                } else {
-                    articleMapper.update(
-                            null,
-                            new LambdaUpdateWrapper<Article>()
-                                    .eq(Article::getId, comment.getTargetId())
-                                    .eq(Article::getDeleted, 0)
-                                    .setSql("comment_count = GREATEST(COALESCE(comment_count, 0) - 1, 0)")
-                    );
-                }
-                recordContentMetricEvent("COMMENT", "ARTICLE", comment.getTargetId(), delta);
-                log.info("文章评论统计已更新，文章ID: {}, 评论ID: {}, delta: {}", comment.getTargetId(), event.getCommentId(), delta);
-                return;
-            }
-
-            if ("TALK".equalsIgnoreCase(comment.getTargetType())) {
-                if (delta > 0) {
-                    talkMapper.update(
-                            null,
-                            new LambdaUpdateWrapper<Talk>()
-                                    .eq(Talk::getId, comment.getTargetId())
-                                    .eq(Talk::getDeleted, 0)
-                                    .setSql("comment_count = COALESCE(comment_count, 0) + 1")
-                    );
-                } else {
-                    talkMapper.update(
-                            null,
-                            new LambdaUpdateWrapper<Talk>()
-                                    .eq(Talk::getId, comment.getTargetId())
-                                    .eq(Talk::getDeleted, 0)
-                                    .setSql("comment_count = GREATEST(COALESCE(comment_count, 0) - 1, 0)")
-                    );
-                }
-                recordContentMetricEvent("COMMENT", "TALK", comment.getTargetId(), delta);
-                log.info("说说评论统计已更新，说说ID: {}, 评论ID: {}, delta: {}", comment.getTargetId(), event.getCommentId(), delta);
-            }
+            int delta = countedNow ? 1 : -1;
+            applyCommentCountDelta(comment, delta, event.getCommentId());
         } catch (Exception e) {
             log.error("更新评论统计失败，评论ID: {}", event.getCommentId(), e);
+        }
+    }
+
+    private boolean isCounted(com.blog.modules.comment.model.entity.Comment comment) {
+        return comment != null
+                && CommentStatus.APPROVED.matches(comment.getStatus())
+                && CommentVisibilityStatus.VISIBLE.matches(comment.getIsVisible())
+                && comment.getTargetId() != null;
+    }
+
+    private void applyCommentCountDelta(Comment comment, int delta, Long commentId) {
+        if (comment.getTargetId() == null) {
+            return;
+        }
+        String sql = delta > 0
+                ? "comment_count = COALESCE(comment_count, 0) + 1"
+                : "comment_count = GREATEST(COALESCE(comment_count, 0) - 1, 0)";
+        if ("ARTICLE".equalsIgnoreCase(comment.getTargetType())) {
+            articleMapper.update(
+                    null,
+                    new LambdaUpdateWrapper<Article>()
+                            .eq(Article::getId, comment.getTargetId())
+                            .eq(Article::getDeleted, 0)
+                            .setSql(sql)
+            );
+            recordContentMetricEvent("COMMENT", "ARTICLE", comment.getTargetId(), delta);
+            log.info("文章评论统计已更新，文章ID: {}, 评论ID: {}, delta: {}", comment.getTargetId(), commentId, delta);
+        } else if ("TALK".equalsIgnoreCase(comment.getTargetType())) {
+            talkMapper.update(
+                    null,
+                    new LambdaUpdateWrapper<Talk>()
+                            .eq(Talk::getId, comment.getTargetId())
+                            .eq(Talk::getDeleted, 0)
+                            .setSql(sql)
+            );
+            recordContentMetricEvent("COMMENT", "TALK", comment.getTargetId(), delta);
+            log.info("说说评论统计已更新，说说ID: {}, 评论ID: {}, delta: {}", comment.getTargetId(), commentId, delta);
         }
     }
 

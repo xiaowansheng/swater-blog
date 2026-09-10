@@ -13,6 +13,7 @@ import com.blog.modules.statistics.track.service.TrackService;
 import com.blog.modules.statistics.visitor.mapper.VisitorMapper;
 import com.blog.modules.statistics.visitor.model.entity.Visitor;
 import com.blog.shared.model.UserAgentInfo;
+import com.blog.shared.util.ClientIpResolver;
 import com.blog.shared.util.RequestUtil;
 import com.blog.shared.util.UserAgentUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,6 +35,9 @@ public class TrackServiceImpl implements TrackService {
     private VisitorMapper visitorMapper;
 
     @Autowired
+    private ClientIpResolver clientIpResolver;
+
+    @Autowired
     private TrackAsyncEnrichmentService trackAsyncEnrichmentService;
 
     @Autowired
@@ -53,7 +57,7 @@ public class TrackServiceImpl implements TrackService {
         TrackEnterDTO safeDto = dto != null ? dto : new TrackEnterDTO();
         LocalDateTime now = LocalDateTime.now();
 
-        String ip = RequestUtil.getClientIp(request);
+        String ip = clientIpResolver.resolve(request);
         String userAgent = RequestUtil.getUserAgent(request);
         boolean documentNavigation = safeDto.getDocumentNavigation() == null || safeDto.getDocumentNavigation();
         safeDto.setDocumentNavigation(documentNavigation);

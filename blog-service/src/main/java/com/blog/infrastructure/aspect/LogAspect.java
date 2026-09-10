@@ -6,7 +6,7 @@ import com.blog.shared.annotation.ApiOperation;
 import com.blog.bootstrap.context.UserContext;
 import com.blog.modules.system.log.model.entity.LogError;
 import com.blog.modules.system.log.model.entity.LogOperation;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.system.log.service.LogErrorService;
 import com.blog.modules.system.log.service.LogOperationService;
 import com.blog.shared.model.enums.OperationResultStatus;

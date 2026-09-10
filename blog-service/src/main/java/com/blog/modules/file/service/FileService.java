@@ -14,6 +14,11 @@ public interface FileService {
 
     PageResult<FileVO> list(Long page, Long size, String type);
 
+    /**
+     * 统计过期文件数量（引用数为 0 且超过 7 天，与定时清理任务口径一致）。
+     */
+    long countExpiredFiles();
+
     void delete(Long id);
 
     /**

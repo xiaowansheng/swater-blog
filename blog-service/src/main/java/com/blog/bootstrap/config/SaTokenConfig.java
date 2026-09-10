@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -80,6 +82,14 @@ public class SaTokenConfig implements WebMvcConfigurer {
                         UserVO userVO = convertToVO(user);
                         UserContext.setCurrentUser(userVO);
 
+                        // 监控端点第二道门槛：除 DB RBAC 外，在认证层强制要求 admin，
+                        // 防止普通登录用户访问 /api/monitoring/**（指标、慢查询模拟等）
+                        if (isMonitoringRequest() && !"admin".equalsIgnoreCase(user.getRoleKey())) {
+                            log.warn("非 admin 用户尝试访问监控端点: userId={}, role={}, path={}",
+                                    userId, user.getRoleKey(), currentRequestPath());
+                            throw new BusinessException(403, "无权访问监控端点");
+                        }
+
                         log.debug("用户上下文已设置: userId={}, role={}", userId, user.getRoleKey());
                     } catch (Exception e) {
                         log.error("设置用户上下文失败", e);
@@ -115,5 +125,27 @@ public class SaTokenConfig implements WebMvcConfigurer {
             }
         }
         return vo;
+    }
+
+    /**
+     * 当前请求是否命中监控路径（/api/monitoring/**）。
+     * 通过 RequestContextHolder 拿原始 request，扣除 contextPath/servletPath 后前缀匹配。
+     */
+    private boolean isMonitoringRequest() {
+        String path = currentRequestPath();
+        return path != null && path.startsWith("/api/monitoring/");
+    }
+
+    private String currentRequestPath() {
+        if (!(RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes)) {
+            return null;
+        }
+        jakarta.servlet.http.HttpServletRequest request = attributes.getRequest();
+        String uri = request.getRequestURI();
+        String prefix = request.getContextPath() == null ? "" : request.getContextPath();
+        if (!prefix.isEmpty() && servletPath != null && !servletPath.isEmpty()) {
+            prefix = prefix + servletPath;
+        }
+        return prefix.isEmpty() || !uri.startsWith(prefix) ? uri : uri.substring(prefix.length());
     }
 }

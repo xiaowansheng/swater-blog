@@ -17,7 +17,7 @@ import com.blog.modules.statistics.visitor.model.entity.Visitor;
 import com.blog.modules.talk.mapper.TalkMapper;
 import com.blog.modules.talk.model.entity.Talk;
 import com.blog.shared.exception.BusinessException;
-import com.blog.shared.util.RequestUtil;
+import com.blog.shared.util.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +36,9 @@ public class ContentLikeServiceImpl implements ContentLikeService {
     private VisitorMapper visitorMapper;
 
     @Autowired
+    private ClientIpResolver clientIpResolver;
+
+    @Autowired
     private ContentLikeStateMapper contentLikeStateMapper;
 
     @Autowired
@@ -48,12 +51,12 @@ public class ContentLikeServiceImpl implements ContentLikeService {
     private TalkMapper talkMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public ContentLikeResultVO action(ContentLikeActionDTO dto, HttpServletRequest request) {
         ContentLikeActionDTO safe = dto != null ? dto : new ContentLikeActionDTO();
         LocalDateTime now = LocalDateTime.now();
 
-        String ip = RequestUtil.getClientIp(request);
+        String ip = clientIpResolver.resolve(request);
         String visitorUuid = StringUtils.hasText(safe.getVisitorUuid()) ? safe.getVisitorUuid() : UUID.randomUUID().toString();
         Visitor visitor = resolveVisitor(visitorUuid, ip, now);
 

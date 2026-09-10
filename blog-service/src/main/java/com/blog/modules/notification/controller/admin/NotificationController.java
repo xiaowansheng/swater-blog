@@ -4,7 +4,7 @@ import com.blog.bootstrap.context.UserContext;
 import com.blog.modules.notification.model.dto.NotificationDTO;
 import com.blog.modules.notification.model.vo.NotificationVO;
 import com.blog.modules.notification.service.NotificationService;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.shared.annotation.ApiOperation;

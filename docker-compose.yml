@@ -23,8 +23,8 @@ services:
       --collation-server=utf8mb4_unicode_ci
       --default-time-zone='+08:00'
       --performance-schema=off
-      --innodb-buffer-pool-size=64M
-      --max-connections=20
+      --innodb-buffer-pool-size=256M
+      --max-connections=100
     networks:
       - blog-network
     healthcheck:
@@ -129,6 +129,8 @@ services:
       dockerfile: Dockerfile
     container_name: swater-blog-service
     restart: unless-stopped
+    # 应用容器内存上限；JVM 侧由 entrypoint 的 MaxRAMPercentage 感知容器限额
+    mem_limit: ${BLOG_SERVICE_MEM_LIMIT:-1g}
     ports:
       - "${BLOG_SERVICE_HOST_BIND:-127.0.0.1}:${BLOG_SERVICE_PUBLISHED_PORT:-8888}:${SERVER_PORT:-8888}"
     environment:
@@ -150,10 +152,10 @@ services:
       SERVER_PORT: ${SERVER_PORT:-8888}
       BLOG_SITE_URL: ${BLOG_SITE_URL:-http://localhost}
       BLOG_RSS_DEFAULT_LOCALE: ${BLOG_RSS_DEFAULT_LOCALE:-zh}
-      # 初始管理员账号（dev profile 必填；docker profile 默认值见 application-docker.yml，可在此覆盖）
-      BLOG_ADMIN_USERNAME: ${BLOG_ADMIN_USERNAME:-}
-      BLOG_ADMIN_PASSWORD: ${BLOG_ADMIN_PASSWORD:-}
-      BLOG_ADMIN_EMAIL: ${BLOG_ADMIN_EMAIL:-}
+      # 初始管理员账号（必填，dev/docker 均从环境变量注入；未设置时服务启动即失败）
+      BLOG_ADMIN_USERNAME: ${BLOG_ADMIN_USERNAME:?BLOG_ADMIN_USERNAME must be set}
+      BLOG_ADMIN_PASSWORD: ${BLOG_ADMIN_PASSWORD:?BLOG_ADMIN_PASSWORD must be set}
+      BLOG_ADMIN_EMAIL: ${BLOG_ADMIN_EMAIL:?BLOG_ADMIN_EMAIL must be set}
       # Elasticsearch 配置（默认走 database 搜索插件，启用 ES 时设 PLUGIN_SEARCH_ACTIVE=elasticsearch）
       PLUGIN_SEARCH_ACTIVE: ${PLUGIN_SEARCH_ACTIVE:-database}
       ELASTICSEARCH_HOST: ${ELASTICSEARCH_HOST:-http://elasticsearch:9200}

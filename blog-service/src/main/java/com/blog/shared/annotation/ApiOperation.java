@@ -2,7 +2,7 @@ package com.blog.shared.annotation;
 
 
 
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import java.lang.annotation.*;
 /**
  * 标注在控制器方法上的API操作注解。

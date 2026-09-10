@@ -236,7 +236,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         @CacheEvict(value = "configs", key = "'site'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateSiteConfig(SiteConfigDTO config) {
         updateConfig(KEY_SITE, config);
     }
@@ -246,7 +246,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         @CacheEvict(value = "configs", key = "'author'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateAuthorConfig(AuthorConfigDTO config) {
         updateConfig(KEY_AUTHOR, config);
     }
@@ -256,7 +256,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         @CacheEvict(value = "configs", key = "'cover'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateCoverConfig(CoverConfigDTO config) {
         updateConfig(KEY_COVER, config);
     }
@@ -266,7 +266,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         @CacheEvict(value = "configs", key = "'social'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateSocialConfig(SocialConfigDTO config) {
         updateConfig(KEY_SOCIAL, config);
     }
@@ -275,7 +275,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
     @Caching(evict = {
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateRewardConfig(RewardConfigDTO config) {
         updateConfig(KEY_REWARD, config);
     }
@@ -285,7 +285,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         @CacheEvict(value = "configs", key = "'privacy'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updatePrivacyConfig(PrivacyConfigDTO config) {
         updateConfig(KEY_PRIVACY, config);
     }
@@ -295,7 +295,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         @CacheEvict(value = "configs", key = "'comment'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateCommentConfig(CommentConfigDTO config) {
         validateCommentConfig(config);
         updateConfig(KEY_COMMENT, config);
@@ -312,7 +312,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         @CacheEvict(value = "configs", allEntries = true),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateComponentConfig(ComponentConfigDTO config) {
         updateConfig(KEY_COMPONENT, config);
     }
@@ -322,7 +322,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         @CacheEvict(value = "configs", key = "'notify'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateNotifyConfig(NotifyConfigDTO config) {
         updateConfig(KEY_NOTIFY, config);
     }
@@ -332,7 +332,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         @CacheEvict(value = "configs", key = "'upload'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateUploadConfig(UploadConfigDTO config) {
         validateUploadConfig(config);
         updateConfig(KEY_UPLOAD, config);
@@ -343,7 +343,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         @CacheEvict(value = "configs", key = "'email'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateEmailConfig(EmailConfigDTO config) {
         updateConfig(KEY_EMAIL, config);
     }
@@ -359,7 +359,7 @@ public class SiteConfigServiceImpl implements SiteConfigService {
         @CacheEvict(value = "configs", key = "'webhook'"),
         @CacheEvict(value = "siteConfig", key = "'all'")
     })
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateWebhookConfig(WebhookConfigDTO config) {
         if (config != null && config.getWebhooks() != null) {
             WebhookConfigDTO existing = getWebhookConfig();

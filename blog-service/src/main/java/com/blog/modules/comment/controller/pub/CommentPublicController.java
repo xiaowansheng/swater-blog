@@ -6,7 +6,7 @@ import com.blog.shared.annotation.RateLimit;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.comment.model.dto.CommentDTO;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.comment.model.vo.CommentVO;
 import com.blog.modules.comment.service.CommentPublicService;
 import jakarta.validation.Valid;

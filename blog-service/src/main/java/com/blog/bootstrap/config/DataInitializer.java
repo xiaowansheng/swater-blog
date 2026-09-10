@@ -40,7 +40,7 @@ public class DataInitializer implements ApplicationRunner {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void run(ApplicationArguments args) {
         if (adminExists()) {
             initAdminRole();

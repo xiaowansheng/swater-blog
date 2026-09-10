@@ -5,7 +5,7 @@ import com.blog.modules.statistics.track.model.dto.ContentLikeActionDTO;
 import com.blog.modules.statistics.track.model.vo.ContentLikeResultVO;
 import com.blog.modules.statistics.track.model.vo.ContentLikeStatusVO;
 import com.blog.modules.statistics.track.service.ContentLikeService;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.shared.Result;
 import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.annotation.RateLimit;

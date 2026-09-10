@@ -6,7 +6,7 @@ import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.article.model.dto.ArticleDTO;
 import com.blog.modules.article.model.dto.ArticleSaveDTO;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.article.model.dto.ArticleQueryDTO;
 import com.blog.modules.article.model.vo.ArticleVO;
 import com.blog.modules.article.model.vo.ArticleStatisticsVO;

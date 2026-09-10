@@ -5,7 +5,7 @@ import com.blog.shared.annotation.RateLimit;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.guestbook.model.dto.GuestbookDTO;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.guestbook.model.vo.GuestbookVO;
 import com.blog.modules.guestbook.service.GuestbookPublicService;
 import jakarta.validation.Valid;

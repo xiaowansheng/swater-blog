@@ -2,7 +2,7 @@ package com.blog.modules.statistics.visitor.controller.admin;
 
 
 import com.blog.shared.annotation.ApiOperation;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.statistics.visitor.model.vo.VisitorPageViewVO;

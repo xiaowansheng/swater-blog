@@ -1,4 +1,4 @@
-package com.blog.modules.system.api.model.enums;
+package com.blog.shared.model.enums;
 
 /**
  * 接口操作类型（供注解使用）

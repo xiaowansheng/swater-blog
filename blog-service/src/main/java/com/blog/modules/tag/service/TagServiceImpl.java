@@ -72,7 +72,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Caching(evict = {
             @CacheEvict(value = "tag:list", allEntries = true),
             @CacheEvict(value = "tag", allEntries = true)
@@ -89,7 +89,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Caching(evict = {
             @CacheEvict(value = "tag:list", allEntries = true),
             @CacheEvict(value = "tag", allEntries = true)
@@ -109,7 +109,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Caching(evict = {
             @CacheEvict(value = "tag:list", allEntries = true),
             @CacheEvict(value = "tag", allEntries = true)
@@ -131,7 +131,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Caching(evict = {
             @CacheEvict(value = "tag:list", allEntries = true),
             @CacheEvict(value = "tag", allEntries = true)

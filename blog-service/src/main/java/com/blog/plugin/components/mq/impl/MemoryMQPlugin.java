@@ -81,17 +81,6 @@ public class MemoryMQPlugin implements MessageQueuePlugin {
         }
     }
     
-    @Override
-    public void sendDelayed(String exchange, String routingKey, Object message, long delayMillis) throws Exception {
-        executorService.submit(() -> {
-            try {
-                Thread.sleep(delayMillis);
-                send(exchange, routingKey, message);
-            } catch (Exception e) {
-                log.error("延迟消息发送失败", e);
-            }
-        });
-    }
     
     public void addListener(String queue, MessageListener listener) {
         CopyOnWriteArrayList<MessageListener> queueListeners = listeners.computeIfAbsent(queue, k -> new CopyOnWriteArrayList<>());

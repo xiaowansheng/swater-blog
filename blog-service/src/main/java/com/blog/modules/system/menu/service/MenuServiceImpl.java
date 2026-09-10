@@ -55,7 +55,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long create(MenuDTO dto) {
         LambdaQueryWrapper<SysMenu> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysMenu::getPath, dto.getPath());
@@ -90,7 +90,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void update(Long id, MenuDTO dto) {
         SysMenu menu = sysMenuMapper.selectById(id);
         if (menu == null) {
@@ -115,7 +115,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         SysMenu menu = sysMenuMapper.selectById(id);
         if (menu == null) {
@@ -133,7 +133,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void assignMenus(Long roleId, List<Long> menuIds) {
         roleMenuMapper.deleteByRoleId(roleId);
         if (menuIds != null && !menuIds.isEmpty()) {

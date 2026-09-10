@@ -33,8 +33,10 @@ import com.blog.shared.exception.BusinessException;
 import com.blog.shared.model.UserAgentInfo;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
+import com.blog.shared.util.HtmlSanitizer;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
+import com.blog.shared.util.ClientIpResolver;
 import com.blog.shared.util.RequestUtil;
 import com.blog.shared.util.UserAgentUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,6 +59,9 @@ import java.util.stream.Collectors;
 public class CommentPublicServiceImpl implements CommentPublicService {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private ClientIpResolver clientIpResolver;
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -93,6 +98,8 @@ public class CommentPublicServiceImpl implements CommentPublicService {
 
     @Override
     public CommentVO create(CommentDTO dto) {
+        // 入库前剥离 HTML 标签：评论区为纯文本渲染，防止 XSS 载荷进入存储
+        dto.setContent(HtmlSanitizer.cleanPlainText(dto.getContent()));
         validateCommentTarget(dto);
 
         // 校验全局系统配置与组件配置（一次读取，贯穿整个创建流程）
@@ -138,7 +145,7 @@ public class CommentPublicServiceImpl implements CommentPublicService {
             messageVerificationService.validateEmailCode(dto.getEmail(), dto.getCaptcha());
         }
 
-        String ip = RequestUtil.getClientIp();
+        String ip = clientIpResolver.resolve();
         dto.setIp(ip);
 
         String userAgent = RequestUtil.getUserAgent();

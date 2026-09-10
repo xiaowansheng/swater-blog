@@ -96,7 +96,7 @@ public class LogOperationServiceImpl implements LogOperationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         LogOperation log = logOperationMapper.selectById(id);
         if (log == null) {
@@ -106,7 +106,7 @@ public class LogOperationServiceImpl implements LogOperationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void cleanup(Integer retentionDays) {
         if (retentionDays == null || retentionDays <= 0) {
             retentionDays = 90;
@@ -117,7 +117,7 @@ public class LogOperationServiceImpl implements LogOperationService {
 
     @Override
     @Async("eventTaskExecutor")
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void save(LogOperation logOperation) {
         if (logOperation != null) {
             logOperationMapper.insert(logOperation);

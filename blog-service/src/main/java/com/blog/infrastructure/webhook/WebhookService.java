@@ -39,7 +39,11 @@ public class WebhookService {
     @Value("${blog.webhook.allowed-schemes:https}")
     private String allowedSchemes;
 
-    @Async("eventTaskExecutor")
+    /**
+     * 在 webhook 专用线程池执行：HTTP 阻塞 + sleep 重试不占用业务事件池。
+     * 监听器（eventTaskExecutor）负责配置读取与事件扇出，此处专注慢速投递，两级池即隔离边界。
+     */
+    @Async("webhookTaskExecutor")
     public void send(String url, String secret, String event, Map<String, Object> payload) {
         if (!com.blog.shared.util.UrlSafetyUtil.isUrlAllowed(url, com.blog.shared.util.UrlSafetyUtil.parseSchemes(allowedSchemes))) {
             log.error("Webhook URL not allowed (scheme or host rejected): url={}", url);

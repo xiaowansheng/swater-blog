@@ -9,7 +9,7 @@ import com.blog.modules.auth.model.dto.EmailVerifyDTO;
 import com.blog.modules.auth.model.dto.LoginDTO;
 import com.blog.modules.auth.model.dto.SendCodeDTO;
 import com.blog.modules.auth.model.dto.ResetPasswordDTO;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.auth.model.vo.EmailVerifyVO;
 import com.blog.modules.auth.model.vo.LoginNonceVO;
 import com.blog.modules.auth.model.vo.LoginVO;

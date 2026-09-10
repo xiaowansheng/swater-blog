@@ -12,9 +12,11 @@ blog:
     default-locale: ${BLOG_RSS_DEFAULT_LOCALE:zh}
   bootstrap:
     admin:
-      username: admin
-      password: change_me_admin_password
-      email: admin@example.com
+      # 与 dev 一致走环境变量注入，未设置时 DataInitializer 启动即 fail-fast，
+      # 避免用可预测的默认口令初始化管理员（compose 已传 BLOG_ADMIN_*）
+      username: ${BLOG_ADMIN_USERNAME:}
+      password: ${BLOG_ADMIN_PASSWORD:}
+      email: ${BLOG_ADMIN_EMAIL:}
 
 spring:
   application:
@@ -49,7 +51,7 @@ spring:
     password: ${DB_PASSWORD:change_me_db_password}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      # Keep headroom below MySQL max-connections=20 for monitoring and admin sessions.
+      # Keep headroom below MySQL max-connections=100 for monitoring and admin sessions.
       maximum-pool-size: 10
       minimum-idle: 2
 
@@ -63,14 +65,11 @@ spring:
         use_sql_comments: false
         dialect: org.hibernate.dialect.MySQL8Dialect
 
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath:schema.sql
-      # schema.sql 内的补列迁移会先检查 information_schema，初始化错误必须暴露。
-      continue-on-error: false
-      separator: ";"
-      encoding: utf-8
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # 存量库（有表无 flyway history）首次启动自动打基线，跳过 V1；新库从零执行 V1
+    baseline-on-migrate: true
 
   data:
     redis:
@@ -160,23 +159,24 @@ management:
   endpoints:
     web:
       exposure:
-        # 生产仅暴露健康检查；metrics/prometheus 如需接入监控栈，在 docker 内网单独放开
-        include: health,info
+        # health/info/prometheus：供监控栈抓取（服务端口仅在 127.0.0.1/内网发布，
+        # prometheus 经容器网络直连容器端口，不经公网）
+        include: health,info,prometheus
       base-path: /actuator
   endpoint:
     health:
       show-details: when-authorized
       show-components: when-authorized
     metrics:
-      enabled: false
+      enabled: true
     prometheus:
-      enabled: false
+      enabled: true
     shutdown:
       enabled: false
   metrics:
     export:
       prometheus:
-        enabled: false
+        enabled: true
     distribution:
       percentiles-histogram:
         http.server.requests: true

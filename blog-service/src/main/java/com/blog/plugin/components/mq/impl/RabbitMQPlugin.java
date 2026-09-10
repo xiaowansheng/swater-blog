@@ -45,14 +45,4 @@ public class RabbitMQPlugin implements MessageQueuePlugin {
         rabbitTemplate.convertAndSend(queue, message);
     }
     
-    @Override
-    public void sendDelayed(String exchange, String routingKey, Object message, long delayMillis) throws Exception {
-        if (!isEnabled()) {
-            throw new IllegalStateException("RabbitMQ未配置");
-        }
-        
-        // RabbitMQ 延迟消息需要安装 rabbitmq-delayed-message-exchange 插件
-        // 这里先使用普通发送，延迟消息功能需要额外配置
-        rabbitTemplate.convertAndSend(exchange, routingKey, message);
-    }
 }

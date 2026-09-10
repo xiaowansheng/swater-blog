@@ -36,4 +36,20 @@ public final class HtmlSanitizer {
         }
         return Jsoup.clean(html, RICH_TEXT);
     }
+
+    /**
+     * 清洗纯文本输入（评论、留言等纯文本框 UGC）：移除全部 HTML 标签，仅保留文本内容。
+     * <p>与 {@link #cleanRichText} 不同，这里不走白名单转义，而是直接剥掉标签——
+     * 前端以纯文本插值渲染此类内容，保留实体会出现 "&amp;lt;" 之类的显示残留。
+     * 入库即剥离，避免 XSS 防线完全押在前端渲染方式上。</p>
+     *
+     * @param text 原始文本，null/空原样返回
+     * @return 不含任何 HTML 标签的文本
+     */
+    public static String cleanPlainText(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        return Jsoup.parse(text).text();
+    }
 }

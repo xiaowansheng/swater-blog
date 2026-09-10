@@ -121,24 +121,26 @@ public class MessageVerificationServiceImpl implements MessageVerificationServic
         return String.valueOf(code);
     }
 
-    public void processVerificationMessage(VerificationCodeMessage message) {
+    /**
+     * 消费验证码消息并发送邮件。
+     * 异常必须向外抛出：吞掉异常会让 yml 里的 spring.rabbitmq.listener.simple.retry
+     * 永远不生效，邮件发送失败会被静默丢弃；抛出后由容器重试，耗尽后进入死信队列。
+     */
+    @Override
+    public void processVerificationMessage(VerificationCodeMessage message) throws Exception {
         if (message == null) {
             log.warn("验证码消息为空，跳过处理");
             return;
         }
         if (!emailService.isConfigured()) {
-            log.warn("邮件服务未配置，跳过验证码邮件发送");
-            return;
+            log.warn("邮件服务未配置，验证码消息进入死信队列等待排查");
+            throw new IllegalStateException("Email service is not configured");
         }
-        try {
-            emailService.sendEmailWithTemplate(
-                    message.getEmail(),
-                    message.getSubject(),
-                    message.getTemplateName(),
-                    message.getVariables() == null ? new HashMap<>() : message.getVariables()
-            );
-        } catch (Exception e) {
-            log.error("Failed to send verification email", e);
-        }
+        emailService.sendEmailWithTemplate(
+                message.getEmail(),
+                message.getSubject(),
+                message.getTemplateName(),
+                message.getVariables() == null ? new HashMap<>() : message.getVariables()
+        );
     }
 }

@@ -7,7 +7,7 @@ import com.blog.modules.user.model.dto.AdminResetPasswordDTO;
 import com.blog.modules.user.model.dto.UpdatePasswordDTO;
 import com.blog.modules.user.model.dto.UpdateProfileDTO;
 import com.blog.modules.user.model.dto.UserDTO;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.user.model.vo.UserVO;
 import com.blog.modules.user.service.UserService;
 import jakarta.validation.Valid;

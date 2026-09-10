@@ -1,6 +1,6 @@
 package com.blog.plugin.components.notification.impl;
 
-import com.blog.infrastructure.websocket.NotificationWebSocketHandler;
+import com.blog.infrastructure.websocket.WebSocketNotificationPublisher;
 import com.blog.plugin.components.notification.NotificationChannelPlugin;
 import com.blog.shared.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +15,9 @@ import java.util.Map;
 @ConditionalOnProperty(name = "plugin.notification.websocket.active", havingValue = "websocket", matchIfMissing = false)
 public class WebSocketChannelPlugin implements NotificationChannelPlugin {
 
+    // 经发布器走 Redis pub/sub 扇出到全部实例，避免集群下仅持有会话的实例收到推送
     @Autowired
-    private NotificationWebSocketHandler webSocketHandler;
+    private WebSocketNotificationPublisher notificationPublisher;
 
     @Override
     public String getName() {
@@ -25,13 +26,13 @@ public class WebSocketChannelPlugin implements NotificationChannelPlugin {
 
     @Override
     public boolean isEnabled() {
-        return webSocketHandler != null;
+        return notificationPublisher != null;
     }
 
     @Override
     public void send(Long userId, String type, String title, String content) {
-        if (webSocketHandler == null) {
-            throw new IllegalStateException("WebSocketHandler not configured");
+        if (notificationPublisher == null) {
+            throw new IllegalStateException("WebSocketNotificationPublisher not configured");
         }
 
         Map<String, Object> notification = Map.of(
@@ -40,6 +41,6 @@ public class WebSocketChannelPlugin implements NotificationChannelPlugin {
                 "content", content
         );
 
-        webSocketHandler.sendToUser(userId, JsonUtil.toJson(notification));
+        notificationPublisher.sendToUser(userId, JsonUtil.toJson(notification));
     }
 }

@@ -3,7 +3,7 @@ package com.blog.modules.rss.controller.pub;
 
 
 import com.blog.shared.annotation.ApiOperation;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.article.model.vo.ArticleVO;
 import com.blog.modules.article.service.ArticlePublicService;
 import com.blog.modules.system.config.model.dto.config.SiteConfigDTO;

@@ -21,7 +21,7 @@ import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.KeyUtil;
-import com.blog.shared.util.RequestUtil;
+import com.blog.shared.util.ClientIpResolver;
 import com.blog.shared.util.UserAgentUtil;
 import com.blog.shared.model.UserAgentInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +43,9 @@ public class TalkCommandServiceImpl implements TalkCommandService {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private ClientIpResolver clientIpResolver;
 
     @Autowired
     private FileService fileService;
@@ -89,7 +92,7 @@ public class TalkCommandServiceImpl implements TalkCommandService {
         talk.setCommentCount(0);
 
         // 设置IP和位置信息
-        String ip = RequestUtil.getClientIp();
+        String ip = clientIpResolver.resolve();
         talk.setIp(ip);
         if (locationProviderFactory != null && ip != null) {
             try {

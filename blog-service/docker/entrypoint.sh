@@ -136,8 +136,8 @@ wait_for_dependencies() {
 
 # 设置JVM参数
 setup_jvm_options() {
-    # 基础JVM参数
-    local base_opts="-server -XX:+UseG1GC -XX:+UseContainerSupport"
+    # 基础JVM参数；MaxRAMPercentage 让未显式设置 Xmx 时按容器限额的比例取堆上限
+    local base_opts="-server -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=${JVM_MAX_RAM_PERCENTAGE:-75.0}"
     
     # 内存参数
     if [ -n "$JVM_XMS" ]; then
@@ -167,7 +167,8 @@ setup_jvm_options() {
         base_opts="$base_opts -Dcom.sun.management.jmxremote.port=$jmx_port"
         base_opts="$base_opts -Dcom.sun.management.jmxremote.authenticate=false"
         base_opts="$base_opts -Dcom.sun.management.jmxremote.ssl=false"
-        log_info "JMX监控已启用，端口: $jmx_port"
+        # 注意：当前 JMX 为无认证无加密模式，仅限内网/本机排查使用，严禁将 JMX 端口发布到公网
+        log_warn "JMX监控已启用（无认证模式，切勿暴露公网），端口: $jmx_port"
     fi
     
     # 合并用户自定义参数
@@ -241,8 +242,6 @@ cleanup() {
     exit 0
 }
 
-# 注册信号处理器
-trap cleanup SIGTERM SIGINT
 
 # 主函数
 main() {

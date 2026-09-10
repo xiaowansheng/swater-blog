@@ -2,7 +2,7 @@ package com.blog.modules.archive.controller.admin;
 
 
 import com.blog.shared.annotation.ApiOperation;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.article.model.vo.ArticleVO;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;

@@ -19,7 +19,6 @@ import com.blog.infrastructure.repository.PostDocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,7 +55,6 @@ public class SearchSyncServiceImpl implements SearchSyncService {
     private ArticleTagMapper articleTagMapper;
 
     @Override
-    @Transactional
     public void syncPost(Long articleId) {
         Article article = articleMapper.selectById(articleId);
         if (article == null) {
@@ -72,7 +70,6 @@ public class SearchSyncServiceImpl implements SearchSyncService {
     }
 
     @Override
-    @Transactional
     public void syncMoment(Long talkId) {
         Talk talk = talkMapper.selectById(talkId);
         if (talk == null) {
@@ -88,7 +85,6 @@ public class SearchSyncServiceImpl implements SearchSyncService {
     }
 
     @Override
-    @Transactional
     public void syncComment(Long commentId) {
         Comment comment = commentMapper.selectById(commentId);
         if (comment == null) {
@@ -104,25 +100,21 @@ public class SearchSyncServiceImpl implements SearchSyncService {
     }
 
     @Override
-    @Transactional
     public void deletePost(Long articleId) {
         postDocumentRepository.deleteById(articleId);
     }
 
     @Override
-    @Transactional
     public void deleteMoment(Long talkId) {
         momentDocumentRepository.deleteById(talkId);
     }
 
     @Override
-    @Transactional
     public void deleteComment(Long commentId) {
         commentDocumentRepository.deleteById(commentId);
     }
 
     @Override
-    @Transactional
     public void syncAllPosts() {
         List<Article> articles = articleMapper.selectList(
                 new LambdaQueryWrapper<Article>()
@@ -137,7 +129,6 @@ public class SearchSyncServiceImpl implements SearchSyncService {
     }
 
     @Override
-    @Transactional
     public void syncAllMoments() {
         List<Talk> talks = talkMapper.selectList(
                 new LambdaQueryWrapper<Talk>()
@@ -152,7 +143,6 @@ public class SearchSyncServiceImpl implements SearchSyncService {
     }
 
     @Override
-    @Transactional
     public void syncAllComments() {
         List<Comment> comments = commentMapper.selectList(
                 new LambdaQueryWrapper<Comment>()

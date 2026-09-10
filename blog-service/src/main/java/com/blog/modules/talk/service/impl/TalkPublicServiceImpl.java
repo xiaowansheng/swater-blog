@@ -10,6 +10,7 @@ import com.blog.modules.user.mapper.UserMapper;
 import com.blog.modules.talk.model.entity.Talk;
 import com.blog.modules.talk.model.enums.TalkStatus;
 import com.blog.modules.user.model.entity.User;
+import com.blog.modules.talk.model.vo.MomentStatsVO;
 import com.blog.modules.talk.model.vo.TalkVO;
 import com.blog.modules.talk.service.TalkPublicService;
 import com.blog.shared.util.BeanUtil;
@@ -87,6 +88,42 @@ public class TalkPublicServiceImpl implements TalkPublicService {
                 vo.setImages(List.of());
             }
         }
+        return vo;
+    }
+
+    @Override
+    public List<MomentStatsVO> getStatsByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+        List<Talk> talks = talkMapper.selectList(new LambdaQueryWrapper<Talk>()
+                .select(Talk::getId, Talk::getViewCount, Talk::getLikeCount, Talk::getCommentCount)
+                .in(Talk::getId, ids)
+                .eq(Talk::getDeleted, 0)
+                .eq(Talk::getStatus, TalkStatus.PUBLISHED.getCode()));
+        return talks.stream().map(this::toStatsVO).collect(Collectors.toList());
+    }
+
+    @Override
+    public MomentStatsVO getTalkStats(Long id) {
+        if (id == null || id <= 0) {
+            return null;
+        }
+        Talk talk = talkMapper.selectOne(new LambdaQueryWrapper<Talk>()
+                .select(Talk::getId, Talk::getViewCount, Talk::getLikeCount, Talk::getCommentCount)
+                .eq(Talk::getId, id)
+                .eq(Talk::getDeleted, 0)
+                .eq(Talk::getStatus, TalkStatus.PUBLISHED.getCode())
+                .last("LIMIT 1"));
+        return talk == null ? null : toStatsVO(talk);
+    }
+
+    private MomentStatsVO toStatsVO(Talk talk) {
+        MomentStatsVO vo = new MomentStatsVO();
+        vo.setId(talk.getId());
+        vo.setViewCount(talk.getViewCount() != null ? talk.getViewCount() : 0);
+        vo.setLikeCount(talk.getLikeCount() != null ? talk.getLikeCount() : 0);
+        vo.setCommentCount(talk.getCommentCount() != null ? talk.getCommentCount() : 0);
         return vo;
     }
 }

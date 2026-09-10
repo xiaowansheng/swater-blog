@@ -3,6 +3,7 @@ package com.blog.infrastructure.lock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
@@ -55,6 +56,23 @@ public class RedisDistributedLock {
         } catch (Exception e) {
             logger.warn("获取分布式锁异常，降级为获取失败: key={}, err={}", key, e.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * 探测 Redis 当前是否可用。
+     * tryLock 返回 null 有两种含义（锁被他人持有 / Redis 故障），
+     * 调用方需要区分「跳过本轮」还是「降级为本实例执行」时用它判断。
+     */
+    public boolean isAvailable() {
+        try {
+            Boolean ok = redisTemplate.execute((RedisCallback<Boolean>) connection -> {
+                connection.ping();
+                return true;
+            });
+            return Boolean.TRUE.equals(ok);
+        } catch (Exception e) {
+            return false;
         }
     }
 

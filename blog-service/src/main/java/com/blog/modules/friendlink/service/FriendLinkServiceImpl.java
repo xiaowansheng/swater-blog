@@ -82,7 +82,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long create(FriendLinkDTO dto) {
         FriendLink friendLink = BeanUtil.copyProperties(dto, FriendLink.class);
         if (friendLink.getIsVisible() == null) {
@@ -103,7 +103,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void update(Long id, FriendLinkDTO dto) {
         FriendLink friendLink = friendLinkMapper.selectById(id);
         if (friendLink == null) {
@@ -115,7 +115,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         FriendLink friendLink = friendLinkMapper.selectById(id);
         if (friendLink == null) {
@@ -126,7 +126,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void approve(Long id) {
         FriendLink friendLink = friendLinkMapper.selectById(id);
         if (friendLink == null) {
@@ -141,7 +141,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void reject(Long id) {
         FriendLink friendLink = friendLinkMapper.selectById(id);
         if (friendLink == null) {

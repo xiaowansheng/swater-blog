@@ -73,7 +73,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Caching(evict = {
             @CacheEvict(value = "category:list", allEntries = true),
             @CacheEvict(value = "category", allEntries = true)
@@ -96,7 +96,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Caching(evict = {
             @CacheEvict(value = "category:list", allEntries = true),
             @CacheEvict(value = "category", allEntries = true)
@@ -117,7 +117,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Caching(evict = {
             @CacheEvict(value = "category:list", allEntries = true),
             @CacheEvict(value = "category", allEntries = true)
@@ -140,7 +140,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Caching(evict = {
             @CacheEvict(value = "category:list", allEntries = true),
             @CacheEvict(value = "category", allEntries = true)

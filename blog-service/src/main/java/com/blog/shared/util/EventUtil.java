@@ -1,6 +1,6 @@
 package com.blog.shared.util;
 
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -12,12 +12,12 @@ public class EventUtil {
     /**
      * 在事务提交后执行指定的操作
      * 如果当前没有活跃的事务，则立即执行
-     * 
+     *
      * @param runnable 要执行的操作
      */
     public static void publishEventAfterCommit(Runnable runnable) {
         if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
                     runnable.run();

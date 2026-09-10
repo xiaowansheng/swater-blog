@@ -39,7 +39,7 @@ public class FriendLinkPublicServiceImpl implements FriendLinkPublicService {
     private EmailSessionProperties emailSessionProperties;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long apply(FriendLinkApplicationDTO dto) {
         // 验证邮箱
         if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
@@ -59,7 +59,7 @@ public class FriendLinkPublicServiceImpl implements FriendLinkPublicService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long apply(FriendLinkApplicationDTO dto, Long userId) {
         FriendLink friendLink = BeanUtil.copyProperties(dto, FriendLink.class);
 

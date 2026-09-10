@@ -66,7 +66,7 @@ public class PictureServiceImpl implements PictureService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long create(PictureDTO dto) {
         Album album = albumMapper.selectById(dto.getAlbumId());
         if (album == null) {
@@ -94,7 +94,7 @@ public class PictureServiceImpl implements PictureService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void update(Long id, PictureDTO dto) {
         Picture picture = pictureMapper.selectById(id);
         if (picture == null) {
@@ -113,7 +113,7 @@ public class PictureServiceImpl implements PictureService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         Picture picture = pictureMapper.selectById(id);
         if (picture == null) {
@@ -123,7 +123,7 @@ public class PictureServiceImpl implements PictureService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void moveToAlbum(Long id, Long albumId) {
         Picture picture = pictureMapper.selectById(id);
         if (picture == null) {

@@ -23,7 +23,7 @@ import org.springframework.http.ResponseEntity;
 public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Result<?>> handleBusinessException(BusinessException e) {
-        log.error("业务异常: {}", e.getMessage());
+        log.warn("业务异常: {}", e.getMessage());
         HttpStatus status = HttpStatus.resolve(e.getCode() == null ? 500 : e.getCode());
         if (status == null || !status.isError()) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotLoginException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public Result<?> handleNotLoginException(NotLoginException e) {
-        log.error("未登录异常: {}", e.getMessage());
+        log.warn("未登录异常: {}", e.getMessage());
         return Result.error(401, "未登录，请先登录");
     }
 

@@ -1,9 +1,9 @@
 package com.blog.infrastructure.mq.consumer;
 
 import com.blog.modules.message.model.message.VerificationCodeMessage;
-import com.blog.modules.message.service.impl.MessageVerificationServiceImpl;
+import com.blog.modules.message.service.MessageVerificationService;
 import com.blog.modules.notification.model.message.NotificationMessage;
-import com.blog.modules.notification.service.NotificationServiceImpl;
+import com.blog.modules.notification.service.NotificationService;
 import com.blog.plugin.components.mq.MessageQueuePlugin;
 import com.blog.plugin.components.mq.MessageQueuePluginFactory;
 import com.blog.plugin.components.mq.impl.MemoryMQPlugin;
@@ -19,13 +19,13 @@ import org.springframework.stereotype.Component;
 public class MemoryMqListenerRegistrar {
 
     private final MessageQueuePluginFactory mqPluginFactory;
-    private final NotificationServiceImpl notificationService;
-    private final MessageVerificationServiceImpl messageVerificationService;
+    private final NotificationService notificationService;
+    private final MessageVerificationService messageVerificationService;
 
     public MemoryMqListenerRegistrar(
             MessageQueuePluginFactory mqPluginFactory,
-            NotificationServiceImpl notificationService,
-            MessageVerificationServiceImpl messageVerificationService
+            NotificationService notificationService,
+            MessageVerificationService messageVerificationService
     ) {
         this.mqPluginFactory = mqPluginFactory;
         this.notificationService = notificationService;

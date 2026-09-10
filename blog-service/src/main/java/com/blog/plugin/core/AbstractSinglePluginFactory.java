@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 /**
  * 单插件族工厂抽象基类
  * <p>
- * 适用于同一插件族仅允许一个插件处于启用状态的场景（search、storage、mq、scheduler）。
+ * 适用于同一插件族仅允许一个插件处于启用状态的场景（search、storage、mq）。
  * 子类负责提供已过滤的插件列表与展示信息，{@link #getActivePlugin()} 提供统一的
  * fail-fast 单选逻辑：无可用插件或多插件同时启用时立即抛出异常。
  * </p>

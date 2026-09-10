@@ -3,7 +3,7 @@ package com.blog.modules.friendlink.controller.admin;
 
 
 import com.blog.shared.annotation.ApiOperation;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.shared.Result;
 import com.blog.modules.friendlink.model.dto.FriendLinkDTO;
 import com.blog.modules.friendlink.model.dto.FriendLinkQueryDTO;

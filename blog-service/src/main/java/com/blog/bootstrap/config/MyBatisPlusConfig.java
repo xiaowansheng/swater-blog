@@ -3,6 +3,7 @@ package com.blog.bootstrap.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,9 @@ public class MyBatisPlusConfig {
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        
+        // 防全表 update/delete：拦截未带 where 条件的更新/删除语句
+        interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
         
         // 添加乐观锁插件（用于文章版本控制）
         interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());

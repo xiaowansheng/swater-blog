@@ -3,7 +3,7 @@ package com.blog.modules.statistics.track.controller.pub;
 import com.blog.modules.statistics.track.mapper.TrackStatisticsMapper;
 import com.blog.shared.Result;
 import com.blog.shared.annotation.ApiOperation;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

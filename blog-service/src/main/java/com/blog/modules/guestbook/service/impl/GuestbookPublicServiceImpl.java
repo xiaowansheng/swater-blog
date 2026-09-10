@@ -25,8 +25,10 @@ import com.blog.plugin.components.location.LocationProviderPlugin;
 import com.blog.shared.SensitiveWordHelper;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.EventUtil;
+import com.blog.shared.util.HtmlSanitizer;
 import com.blog.shared.util.JsonUtil;
 import com.blog.shared.util.PageUtil;
+import com.blog.shared.util.ClientIpResolver;
 import com.blog.shared.util.RequestUtil;
 import com.blog.shared.exception.BusinessException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,6 +45,9 @@ import java.util.stream.Collectors;
 public class GuestbookPublicServiceImpl implements GuestbookPublicService {
     @Autowired
     private GuestbookMapper guestbookMapper;
+
+    @Autowired
+    private ClientIpResolver clientIpResolver;
 
     @Autowired
     private UserMapper userMapper;
@@ -116,6 +121,8 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
         }
 
         Guestbook guestbook = BeanUtil.copyProperties(dto, Guestbook.class);
+        // 入库前剥离 HTML 标签：留言为纯文本渲染，防止 XSS 载荷进入存储
+        guestbook.setContent(HtmlSanitizer.cleanPlainText(guestbook.getContent()));
 
         // 读取全局审核开关（复用评论配置 needApproval，作为统一的“UGC 内容需人工审核”开关）
         var commentConfig = siteConfigService.getCommentConfig();
@@ -141,7 +148,7 @@ public class GuestbookPublicServiceImpl implements GuestbookPublicService {
         }
 
         // 设置IP和位置信息
-        String ip = RequestUtil.getClientIp();
+        String ip = clientIpResolver.resolve();
         guestbook.setIp(ip);
         if (locationProviderFactory != null && ip != null) {
             try {

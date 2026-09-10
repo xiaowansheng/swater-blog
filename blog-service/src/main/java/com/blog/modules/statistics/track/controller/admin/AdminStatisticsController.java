@@ -7,7 +7,7 @@ import com.blog.modules.statistics.track.model.vo.AdminStatisticsLandingPageVO;
 import com.blog.modules.statistics.track.model.vo.AdminStatisticsTrafficSourceVO;
 import com.blog.modules.statistics.track.model.vo.AdminStatisticsTrendVO;
 import com.blog.modules.statistics.track.service.AdminStatisticsService;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.shared.Result;
 import com.blog.shared.annotation.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;

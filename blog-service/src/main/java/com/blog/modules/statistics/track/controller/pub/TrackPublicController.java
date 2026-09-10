@@ -4,7 +4,7 @@ package com.blog.modules.statistics.track.controller.pub;
 import com.blog.modules.statistics.track.model.dto.TrackEnterDTO;
 import com.blog.modules.statistics.track.model.vo.TrackEnterResultVO;
 import com.blog.modules.statistics.track.service.TrackService;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.shared.Result;
 import com.blog.shared.annotation.ApiOperation;
 import jakarta.servlet.http.HttpServletRequest;

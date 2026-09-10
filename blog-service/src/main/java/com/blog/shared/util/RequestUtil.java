@@ -13,36 +13,9 @@ public class RequestUtil {
         return null;
     }
 
-    public static String getClientIp(HttpServletRequest request) {
-        if (request == null) {
-            return null;
-        }
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
-        }
-        return ip;
-    }
-
-    public static String getClientIp() {
-        HttpServletRequest request = getRequest();
-        return getClientIp(request);
-    }
+    // 注意：此处不再提供 getClientIp。
+    // 基于 X-Forwarded-For 等转发头的旧实现可被客户端伪造，会影响点赞去重、访问统计与登录归因。
+    // 统一改用 {@link ClientIpResolver}（仅信任 security.forwarded-headers.trusted-proxies 配置的代理）。
 
     public static String getUserAgent(HttpServletRequest request) {
         if (request == null) {

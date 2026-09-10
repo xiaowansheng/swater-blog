@@ -6,7 +6,7 @@ import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.annotation.RateLimit;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.article.model.vo.ArticleUnlockVO;
 import com.blog.modules.article.model.vo.ArticleVO;
 import com.blog.modules.article.model.dto.ArticlePasswordVerifyDTO;

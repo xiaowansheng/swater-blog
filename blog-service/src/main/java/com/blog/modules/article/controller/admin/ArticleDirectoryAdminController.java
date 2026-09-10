@@ -6,7 +6,7 @@ import com.blog.modules.article.model.dto.ArticleDirectoryMoveDTO;
 import com.blog.modules.article.model.dto.DirectoryNodeDTO;
 import com.blog.modules.article.model.vo.ArticleDirectoryItemVO;
 import com.blog.modules.article.service.ArticleDirectoryService;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.shared.Result;
 import com.blog.shared.annotation.ApiOperation;
 import jakarta.validation.Valid;

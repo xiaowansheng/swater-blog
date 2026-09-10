@@ -240,6 +240,18 @@ jobs:
         chmod +x gradlew
         ./gradlew clean build -x test
     
+    - name: Archive static analysis reports
+      # checkstyle/pmd/spotbugs 当前不阻断构建（ignoreFailures），但报告必须可见才能被消费
+      uses: actions/upload-artifact@v4
+      if: success() || failure()
+      with:
+        name: static-analysis-reports
+        path: |
+          blog-service/build/reports/checkstyle/
+          blog-service/build/reports/pmd/
+          blog-service/build/reports/spotbugs/
+        if-no-files-found: ignore
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:

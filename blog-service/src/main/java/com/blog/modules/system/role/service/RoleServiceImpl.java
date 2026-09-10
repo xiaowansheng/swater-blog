@@ -67,7 +67,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long create(RoleDTO dto) {
         LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Role::getRoleKey, dto.getRoleKey());
@@ -93,7 +93,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void update(Long id, RoleDTO dto) {
         Role role = roleMapper.selectById(id);
         if (role == null) {
@@ -125,7 +125,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         Role role = roleMapper.selectById(id);
         if (role == null) {
@@ -136,7 +136,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void assignApis(Long id, List<Long> apiIds) {
         Role role = roleMapper.selectById(id);
         if (role == null) {

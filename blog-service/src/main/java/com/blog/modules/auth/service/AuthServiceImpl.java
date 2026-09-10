@@ -27,7 +27,7 @@ import com.blog.modules.auth.util.EmailSessionTokenUtil;
 import com.blog.modules.message.service.MessageVerificationService;
 import com.blog.shared.util.BeanUtil;
 import com.blog.shared.util.PasswordUtil;
-import com.blog.shared.util.RequestUtil;
+import com.blog.shared.util.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +43,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private ClientIpResolver clientIpResolver;
 
     @Autowired
     private com.blog.modules.system.role.service.RoleService roleService;
@@ -112,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
         loginVO.setToken(token);
         loginVO.setUser(userVO);
         
-        String ip = RequestUtil.getClientIp();
+        String ip = clientIpResolver.resolve();
         eventPublisher.publishEvent(new UserLoggedInEvent(this, user.getId(), ip != null ? ip : ""));
         
         return loginVO;
@@ -162,7 +165,7 @@ public class AuthServiceImpl implements AuthService {
         loginVO.setToken(token);
         loginVO.setUser(userVO);
 
-        String ip = RequestUtil.getClientIp();
+        String ip = clientIpResolver.resolve();
         eventPublisher.publishEvent(new UserLoggedInEvent(this, user.getId(), ip != null ? ip : ""));
 
         return loginVO;

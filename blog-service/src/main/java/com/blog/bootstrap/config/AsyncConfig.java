@@ -31,6 +31,15 @@ public class AsyncConfig implements AsyncConfigurer {
     @Value("${async.event.await-termination-seconds:60}")
     private int awaitTerminationSeconds;
 
+    @Value("${async.webhook.core-pool-size:2}")
+    private int webhookCorePoolSize;
+
+    @Value("${async.webhook.max-pool-size:4}")
+    private int webhookMaxPoolSize;
+
+    @Value("${async.webhook.queue-capacity:200}")
+    private int webhookQueueCapacity;
+
     @Bean(name = "eventTaskExecutor")
     public Executor eventTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -39,6 +48,24 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setQueueCapacity(queueCapacity);
         executor.setThreadNamePrefix("event-async-");
         // 回压策略：队列满时由调用线程执行，避免任务直接丢失
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(awaitTerminationSeconds);
+        executor.initialize();
+        return executor;
+    }
+
+    /**
+     * webhook 专用线程池：webhook 发送含 HTTP 阻塞 + 固定 sleep 重试（最长可达数十秒），
+     * 与业务事件隔离，避免慢 webhook 占满共享事件池、把反压传导到请求线程。
+     */
+    @Bean(name = "webhookTaskExecutor")
+    public Executor webhookTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(webhookCorePoolSize);
+        executor.setMaxPoolSize(webhookMaxPoolSize);
+        executor.setQueueCapacity(webhookQueueCapacity);
+        executor.setThreadNamePrefix("webhook-async-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(awaitTerminationSeconds);

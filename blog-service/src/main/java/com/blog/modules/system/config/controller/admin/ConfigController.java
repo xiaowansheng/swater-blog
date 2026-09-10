@@ -6,7 +6,7 @@ package com.blog.modules.system.config.controller.admin;
 
 import com.blog.modules.system.config.model.dto.ConfigDTO;
 import com.blog.shared.annotation.ApiOperation;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.shared.Result;
 import com.blog.modules.system.config.model.vo.ConfigVO;
 import com.blog.modules.system.config.service.ConfigService;

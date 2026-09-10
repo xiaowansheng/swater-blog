@@ -12,10 +12,10 @@ alerting:
           - alertmanager:9093
 
 scrape_configs:
-  # Blog服务监控
+  # Blog服务监控（经 blog-network 容器网络直连容器端口，不经宿主机回环）
   - job_name: 'blog-service'
     static_configs:
-      - targets: ['host.docker.internal:8888']
+      - targets: ['swater-blog-service:8888']
     metrics_path: '/actuator/prometheus'
     scrape_interval: 5s
     scrape_timeout: 5s

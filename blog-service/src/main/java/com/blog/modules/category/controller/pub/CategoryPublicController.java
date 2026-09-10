@@ -3,7 +3,7 @@ package com.blog.modules.category.controller.pub;
 
 import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.Result;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.category.model.vo.CategoryVO;
 import com.blog.modules.category.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -4,7 +4,7 @@ package com.blog.modules.album.controller.pub;
 import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.album.model.vo.AlbumVO;
 import com.blog.modules.album.service.AlbumPublicService;
 import org.springframework.beans.factory.annotation.Autowired;

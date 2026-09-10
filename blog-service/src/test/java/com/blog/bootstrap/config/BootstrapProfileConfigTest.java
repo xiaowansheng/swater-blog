@@ -17,18 +17,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BootstrapProfileConfigTest {
 
     /**
-     * 生产/容器 profile 必须在配置文件里给出非空、已解析的管理员密码，
-     * 避免容器环境因缺环境变量而无法启动管理员账号。
+     * 生产/容器 profile 与 dev 一致：管理员凭据全部走环境变量注入，
+     * 配置文件中不允许出现硬编码口令（无环境变量时解析为空，
+     * 由 DataInitializer.validateBootstrapConfig 在启动时 fail-fast）。
      */
     @ParameterizedTest
     @ValueSource(strings = {"application-docker.yml"})
     void profileProvidesBootstrapAdminPassword(String profileConfig) throws IOException {
         PropertySourcesPropertyResolver resolver = resolverFor(profileConfig);
 
-        String password = resolver.getProperty("blog.bootstrap.admin.password");
-
-        assertThat(password).isNotBlank();
-        assertThat(password).doesNotContain("${");
+        // 无环境变量时全部解析为空：证明配置文件未硬编码任何默认口令
+        assertThat(resolver.getProperty("blog.bootstrap.admin.username")).isBlank();
+        assertThat(resolver.getProperty("blog.bootstrap.admin.password")).isBlank();
+        assertThat(resolver.getProperty("blog.bootstrap.admin.email")).isBlank();
     }
 
     /**

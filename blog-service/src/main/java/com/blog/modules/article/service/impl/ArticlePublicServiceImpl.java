@@ -14,6 +14,7 @@ import com.blog.modules.article.model.entity.ArticleTag;
 import com.blog.modules.category.model.entity.Category;
 import com.blog.modules.tag.model.entity.Tag;
 import com.blog.modules.article.model.enums.ArticleStatus;
+import com.blog.modules.article.model.vo.ArticleStatsVO;
 import com.blog.modules.article.model.vo.ArticleVO;
 import com.blog.modules.tag.model.vo.TagVO;
 import com.blog.modules.article.service.ArticlePublicService;
@@ -345,5 +346,40 @@ public class ArticlePublicServiceImpl implements ArticlePublicService {
         }
         return vo;
     }
-}
 
+    @Override
+    public List<ArticleStatsVO> getStatsByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+        List<Article> articles = articleMapper.selectList(new LambdaQueryWrapper<Article>()
+                .select(Article::getId, Article::getViewCount, Article::getLikeCount, Article::getCommentCount)
+                .in(Article::getId, ids)
+                .eq(Article::getDeleted, 0)
+                .eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode()));
+        return articles.stream().map(this::toStatsVO).collect(Collectors.toList());
+    }
+
+    @Override
+    public ArticleStatsVO getArticleStats(Long id) {
+        if (id == null || id <= 0) {
+            return null;
+        }
+        Article article = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
+                .select(Article::getId, Article::getViewCount, Article::getLikeCount, Article::getCommentCount)
+                .eq(Article::getId, id)
+                .eq(Article::getDeleted, 0)
+                .eq(Article::getStatus, ArticleStatus.PUBLISHED.getCode())
+                .last("LIMIT 1"));
+        return article == null ? null : toStatsVO(article);
+    }
+
+    private ArticleStatsVO toStatsVO(Article article) {
+        ArticleStatsVO vo = new ArticleStatsVO();
+        vo.setId(article.getId());
+        vo.setViewCount(article.getViewCount() != null ? article.getViewCount() : 0);
+        vo.setLikeCount(article.getLikeCount() != null ? article.getLikeCount() : 0);
+        vo.setCommentCount(article.getCommentCount() != null ? article.getCommentCount() : 0);
+        return vo;
+    }
+}

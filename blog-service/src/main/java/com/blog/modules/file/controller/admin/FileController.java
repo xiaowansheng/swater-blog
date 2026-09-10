@@ -2,7 +2,8 @@ package com.blog.modules.file.controller.admin;
 
 
 import com.blog.shared.annotation.ApiOperation;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.annotation.RateLimit;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.shared.PageResult;
 import com.blog.shared.Result;
 import com.blog.modules.file.model.dto.FileUploadDTO;
@@ -25,6 +26,7 @@ public class FileController {
     private FileCleanupTask fileCleanupTask;
 
     @PostMapping("/upload")
+    @RateLimit(window = 60, limit = 30, message = "上传过于频繁，请稍后再试")
     @ApiOperation(name = "上传文件", type = ApiOperationType.CREATE, description = "上传文件")
     public Result<FileVO> upload(@RequestParam("file") MultipartFile file) {
         FileUploadDTO dto = new FileUploadDTO();
@@ -35,6 +37,7 @@ public class FileController {
     }
 
     @PostMapping("/upload-by-url")
+    @RateLimit(window = 60, limit = 10, message = "外链抓取过于频繁，请稍后再试")
     @ApiOperation(name = "上传外链文件", type = ApiOperationType.CREATE, description = "通过URL上传文件")
     public Result<FileVO> uploadByUrl(@RequestParam("url") String url) {
         FileUploadDTO dto = new FileUploadDTO();
@@ -55,6 +58,7 @@ public class FileController {
     }
 
     @DeleteMapping("/{id}")
+    @RateLimit(window = 60, limit = 60, message = "操作过于频繁，请稍后再试")
     @ApiOperation(name = "删除文件", type = ApiOperationType.DELETE, description = "删除文件")
     public Result<Void> delete(@PathVariable Long id) {
         fileService.delete(id);
@@ -78,10 +82,8 @@ public class FileController {
     }
 
     @GetMapping("/expired/count")
-    @ApiOperation(name = "查询过期文件数量", type = ApiOperationType.QUERY, description = "查询引用数为0且超过30天的文件数量")
+    @ApiOperation(name = "查询过期文件数量", type = ApiOperationType.QUERY, description = "查询引用数为0且超过7天的文件数量")
     public Result<Map<String, Object>> getExpiredFileCount() {
-        // 这里可以添加查询过期文件数量的逻辑
-        // 暂时返回统计信息
-        return Result.success(Map.of("message", "请查看日志获取详细信息"));
+        return Result.success(Map.of("count", fileService.countExpiredFiles()));
     }
 }

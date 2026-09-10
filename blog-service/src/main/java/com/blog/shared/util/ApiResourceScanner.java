@@ -3,7 +3,7 @@ package com.blog.shared.util;
 
 
 import com.blog.shared.annotation.ApiOperation;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import lombok.Data;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;

@@ -3,7 +3,7 @@ package com.blog.modules.system.menu.controller.admin;
 
 
 import com.blog.shared.annotation.ApiOperation;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.shared.Result;
 import com.blog.modules.system.menu.model.dto.MenuDTO;
 import com.blog.modules.system.menu.model.vo.MenuVO;

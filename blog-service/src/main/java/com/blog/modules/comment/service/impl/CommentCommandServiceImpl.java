@@ -34,12 +34,14 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         if (comment == null) {
             throw new BusinessException("评论不存在");
         }
+        boolean previouslyCounted = isCounted(comment);
         comment.setStatus(CommentStatus.APPROVED.getCode());
         comment.setIsVisible(CommentVisibilityStatus.VISIBLE.getCode());
         commentMapper.updateById(comment);
 
         Comment approvedComment = commentMapper.selectById(id);
-        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentApprovedEvent(this, id, approvedComment)));
+        EventUtil.publishEventAfterCommit(() ->
+                eventPublisher.publishEvent(new CommentApprovedEvent(this, id, approvedComment, previouslyCounted)));
     }
 
     @Override
@@ -49,12 +51,14 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         if (comment == null) {
             throw new BusinessException("评论不存在");
         }
+        boolean previouslyCounted = isCounted(comment);
         comment.setStatus(CommentStatus.REJECTED.getCode());
         comment.setIsVisible(CommentVisibilityStatus.HIDDEN.getCode());
         commentMapper.updateById(comment);
-        
+
         Comment updatedComment = commentMapper.selectById(id);
-        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
+        EventUtil.publishEventAfterCommit(() ->
+                eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment, previouslyCounted)));
     }
 
     @Override
@@ -80,11 +84,13 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         if (comment == null) {
             throw new BusinessException("评论不存在");
         }
+        boolean previouslyCounted = isCounted(comment);
         comment.setIsVisible(CommentVisibilityStatus.VISIBLE.getCode());
         commentMapper.updateById(comment);
 
         Comment updatedComment = commentMapper.selectById(id);
-        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
+        EventUtil.publishEventAfterCommit(() ->
+                eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment, previouslyCounted)));
     }
 
     @Override
@@ -94,11 +100,23 @@ public class CommentCommandServiceImpl implements CommentCommandService {
         if (comment == null) {
             throw new BusinessException("评论不存在");
         }
+        boolean previouslyCounted = isCounted(comment);
         comment.setIsVisible(CommentVisibilityStatus.HIDDEN.getCode());
         commentMapper.updateById(comment);
 
         Comment updatedComment = commentMapper.selectById(id);
-        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment)));
+        EventUtil.publishEventAfterCommit(() ->
+                eventPublisher.publishEvent(new CommentUpdatedEvent(this, id, updatedComment, previouslyCounted)));
+    }
+
+    /**
+     * 该评论当前是否已被计入内容统计（审核通过且可见）。
+     * 必须在实体变更【前】取值，作为事件的 previouslyCounted 传给统计监听器。
+     */
+    private boolean isCounted(Comment comment) {
+        return comment != null
+                && CommentStatus.APPROVED.matches(comment.getStatus())
+                && CommentVisibilityStatus.VISIBLE.matches(comment.getIsVisible());
     }
 }
 

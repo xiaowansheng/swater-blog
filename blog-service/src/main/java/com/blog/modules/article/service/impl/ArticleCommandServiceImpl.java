@@ -16,6 +16,7 @@ import com.blog.modules.category.service.CategoryService;
 import com.blog.modules.file.service.FileService;
 import com.blog.modules.tag.service.TagService;
 import com.blog.shared.util.BeanUtil;
+import com.blog.shared.util.EventUtil;
 import com.blog.shared.util.KeyUtil;
 import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +24,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -112,7 +111,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                 saveArticleTags(article.getId(), new java.util.ArrayList<>(allTagIds));
             }
             
-            publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleCreatedEvent(this, article.getId(), article)));
+            EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleCreatedEvent(this, article.getId(), article)));
             
             // 记录监控指标
             blogMetrics.incrementArticleCreated(
@@ -131,7 +130,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
+    @CacheEvict(value = {"article:list", "article:hot", "article:latest", "article:related"}, allEntries = true)
     public void update(Long id, ArticleDTO dto) {
         Article article = articleMapper.selectById(id);
         if (article == null) {
@@ -199,12 +198,12 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         }
         
         Article updatedArticle = articleMapper.selectById(id);
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUpdatedEvent(this, id, updatedArticle)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUpdatedEvent(this, id, updatedArticle)));
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
+    @CacheEvict(value = {"article:list", "article:hot", "article:latest", "article:related"}, allEntries = true)
     public void delete(Long id) {
         Article article = articleMapper.selectById(id);
         if (article == null) {
@@ -220,12 +219,12 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         blogMetrics.updateTotalArticles(articleMapper.selectCount(
                 new LambdaQueryWrapper<Article>().eq(Article::getDeleted, 0)));
 
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleDeletedEvent(this, id)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleDeletedEvent(this, id)));
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
+    @CacheEvict(value = {"article:list", "article:hot", "article:latest", "article:related"}, allEntries = true)
     public void deleteBatch(List<Long> ids) {
         for (Long id : ids) {
             delete(id);
@@ -234,7 +233,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
+    @CacheEvict(value = {"article:list", "article:hot", "article:latest", "article:related"}, allEntries = true)
     public void publish(Long id) {
         Article article = articleMapper.selectById(id);
         if (article == null) {
@@ -250,12 +249,12 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                 article.getType());
 
         Article publishedArticle = articleMapper.selectById(id);
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticlePublishedEvent(this, id, publishedArticle)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticlePublishedEvent(this, id, publishedArticle)));
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
+    @CacheEvict(value = {"article:list", "article:hot", "article:latest", "article:related"}, allEntries = true)
     public void unpublish(Long id) {
         Article article = articleMapper.selectById(id);
         if (article == null) {
@@ -269,12 +268,12 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                 article.getType());
 
         Article unpublishedArticle = articleMapper.selectById(id);
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUnpublishedEvent(this, id, unpublishedArticle)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUnpublishedEvent(this, id, unpublishedArticle)));
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {"article", "article:slug", "article:list", "article:hot", "article:latest"}, allEntries = true)
+    @CacheEvict(value = {"article:list", "article:hot", "article:latest", "article:related"}, allEntries = true)
     public void updateMeta(Long id, ArticleMetaDTO dto) {
         Article article = articleMapper.selectById(id);
         if (article == null) {
@@ -334,7 +333,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
             saveArticleTags(article.getId(), new java.util.ArrayList<>(allTagIds));
         }
 
-        publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUpdatedEvent(this, article.getId(), article)));
+        EventUtil.publishEventAfterCommit(() -> eventPublisher.publishEvent(new ArticleUpdatedEvent(this, article.getId(), article)));
     }
 
     /**
@@ -365,17 +364,5 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         }
     }
 
-    private void publishEventAfterCommit(Runnable runnable) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-                @Override
-                public void afterCommit() {
-                    runnable.run();
-                }
-            });
-        } else {
-            runnable.run();
-        }
-    }
 }
 

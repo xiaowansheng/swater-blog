@@ -1,11 +1,13 @@
 package com.blog.bootstrap.config;
 
 import com.blog.modules.notification.model.message.NotificationMessage;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.MessageConverter;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -18,7 +20,9 @@ class RabbitMQAutoConfigurationTest {
     @Test
     void rabbitTemplateAllowsProjectMessagesToRoundTrip() {
         RabbitMQAutoConfiguration configuration = new RabbitMQAutoConfiguration();
-        RabbitTemplate rabbitTemplate = configuration.rabbitTemplate(mock(ConnectionFactory.class));
+        // findAndRegisterModules 与 Spring Boot 自动装配一致（注册 JSR-310，支持 LocalDateTime）
+        MessageConverter converter = configuration.rabbitMessageConverter(new ObjectMapper().findAndRegisterModules());
+        RabbitTemplate rabbitTemplate = configuration.rabbitTemplate(mock(ConnectionFactory.class), converter);
 
         NotificationMessage payload = new NotificationMessage();
         payload.setNotificationId(1L);

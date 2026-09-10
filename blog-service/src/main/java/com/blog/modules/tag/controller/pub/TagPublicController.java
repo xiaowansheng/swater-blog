@@ -3,7 +3,7 @@ package com.blog.modules.tag.controller.pub;
 
 import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.Result;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.tag.model.vo.TagVO;
 import com.blog.modules.tag.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;

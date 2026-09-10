@@ -4,7 +4,7 @@ package com.blog.modules.system.config.controller.pub;
 
 import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.Result;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import com.blog.modules.system.config.service.ConfigPublicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

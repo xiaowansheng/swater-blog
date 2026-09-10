@@ -28,7 +28,6 @@ spring:
       connection-timeout: 30000
       validation-timeout: 5000
       leak-detection-threshold: 60000
-      connection-test-query: SELECT 1
       auto-commit: true
       data-source-properties:
         cachePrepStmts: true
@@ -185,15 +184,15 @@ plugin:
     active: ${PLUGIN_SEARCH_ACTIVE:database}
   location:
     active: amap
-  scheduler:
-    active: spring
 
 springdoc:
+  # 安全默认：基线关闭 API 文档，仅在 dev profile 开启（application-dev.yml），
+  # 防止生产环境匿名访问 swagger / api-docs（含 admin/monitoring 分组）
   api-docs:
-    enabled: true
+    enabled: false
     path: /v3/api-docs
   swagger-ui:
-    enabled: true
+    enabled: false
     path: /swagger-ui.html
     tags-sorter: alpha
     operations-sorter: alpha
@@ -216,7 +215,7 @@ springdoc:
     - group: 'monitoring'
       display-name: '监控接口'
       paths-to-match: '/api/monitoring/**'
-  show-actuator: true
+  show-actuator: false
 
 health:
   custom:

@@ -56,6 +56,9 @@ dependencies {
 
     // --- 数据库与 ORM (Spring Boot 3 专版) ---
     implementation("com.mysql:mysql-connector-j:9.3.0")
+    // --- 数据库版本化迁移（Flyway，接管的基线为 db/migration/V1__baseline.sql）---
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-mysql")
     implementation("com.baomidou:mybatis-plus-spring-boot3-starter")
     // --- MyBatis-Plus 分页解析扩展  ---
     implementation("com.baomidou:mybatis-plus-jsqlparser")

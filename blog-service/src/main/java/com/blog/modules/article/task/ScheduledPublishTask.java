@@ -42,9 +42,12 @@ public class ScheduledPublishTask {
 
     @Scheduled(fixedDelay = 60000)
     public void publishScheduledArticles() {
-        // 抢占锁；获取不到说明已有其他实例在处理，直接跳过
+        // 抢占锁；获取不到分两种情况：
+        // 1) 其他实例持有锁 → 跳过本轮；
+        // 2) Redis 不可用 → 降级为本实例执行（发布按状态幂等，重复扫描无害），保证定时发布不停摆
         String token = distributedLock.tryLock(LOCK_KEY, LOCK_LEASE);
-        if (token == null) {
+        if (token == null && distributedLock.isAvailable()) {
+            log.debug("定时发布任务未抢到分布式锁，跳过本次执行");
             return;
         }
         try {

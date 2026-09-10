@@ -46,7 +46,7 @@ public class NotificationServiceImpl implements NotificationService {
     private MQService mqService;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long create(NotificationDTO dto) {
         SysNotification notification = BeanUtil.copyProperties(dto, SysNotification.class);
         notification.setStatus(NotificationSendStatus.PENDING.getCode());
@@ -97,7 +97,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void markAsRead(Long id, Long currentUserId, boolean isAdmin) {
         SysNotification notification = sysNotificationMapper.selectById(id);
         if (notification == null) {
@@ -109,7 +109,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void markAllAsRead(Long userId) {
         LambdaUpdateWrapper<SysNotification> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(SysNotification::getUserId, userId)
@@ -119,7 +119,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id, Long currentUserId, boolean isAdmin) {
         SysNotification notification = sysNotificationMapper.selectById(id);
         if (notification == null) {
@@ -130,7 +130,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void sendNotification(Long userId, String type, String title, String content) {
         NotificationDTO dto = new NotificationDTO();
         dto.setUserId(userId);
@@ -158,7 +158,12 @@ public class NotificationServiceImpl implements NotificationService {
         });
     }
 
-    @Transactional
+    /**
+     * 消费 MQ 通知消息：更新状态 + 派发渠道。
+     * 注意：此处不能加 @Transactional —— dispatchChannels 里的 SMTP/WebSocket 是慢速外部 IO，
+     * 事务包裹会长时间占用数据库连接；方法内均为单行自动提交更新，无需跨语句事务。
+     */
+    @Override
     public void processNotificationMessage(NotificationMessage message) {
         if (message == null || message.getNotificationId() == null) {
             log.warn("通知消息为空或缺少ID，跳过处理");
@@ -191,7 +196,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void retryNotification(Long id, Long currentUserId, boolean isAdmin) {
         SysNotification notification = sysNotificationMapper.selectById(id);
         if (notification == null) {
@@ -210,7 +215,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void retryNotifications(List<Long> ids, Long currentUserId, boolean isAdmin) {
         if (ids == null || ids.isEmpty()) {
             return;
@@ -244,7 +249,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void retryFailedNotifications() {
         LocalDateTime now = LocalDateTime.now();
         LambdaQueryWrapper<SysNotification> wrapper = new LambdaQueryWrapper<>();

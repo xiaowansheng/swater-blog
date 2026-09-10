@@ -5,19 +5,22 @@ package com.blog.ops.controller;
 import com.blog.shared.annotation.ApiOperation;
 import com.blog.shared.Result;
 import com.blog.infrastructure.metrics.BlogMetrics;
-import com.blog.modules.system.api.model.enums.ApiOperationType;
+import com.blog.shared.model.enums.ApiOperationType;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 /**
  * 监控测试控制器
- * 用于测试监控指标收集
+ * 用于测试监控指标收集（仅 dev 装配：指标看板走 Prometheus 抓取 actuator，
+ * 这些注入测试端点不应存在于生产）
  */
 @RestController
 @RequestMapping("/api/monitoring")
+@Profile("dev")
 @ApiOperation(name = "监控模块", description = "监控测试接口", open = false)
 public class MonitoringController {
 
@@ -113,9 +116,11 @@ public class MonitoringController {
     @GetMapping("/test/slow-query")
     @ApiOperation(name = "测试慢查询", type = ApiOperationType.OTHER, description = "模拟慢查询测试")
     public Result<String> testSlowQuery(@RequestParam(defaultValue = "1000") int delayMs) {
+        // 上限保护：该端点会同步占用容器工作线程，不允许客户端传入任意大延迟
+        long capped = Math.min(delayMs, 5_000L);
         try {
-            Thread.sleep(delayMs);
-            return Result.success("慢查询测试完成，延迟: " + delayMs + "ms");
+            Thread.sleep(capped);
+            return Result.success("慢查询测试完成，延迟: " + capped + "ms");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return Result.error("测试被中断");

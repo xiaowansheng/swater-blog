@@ -73,7 +73,7 @@ public class AlbumServiceImpl implements AlbumService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long create(AlbumDTO dto) {
         Album album = BeanUtil.copyProperties(dto, Album.class);
         album.setAlbumKey(KeyUtil.generateKey("album"));
@@ -91,7 +91,7 @@ public class AlbumServiceImpl implements AlbumService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void update(Long id, AlbumDTO dto) {
         Album album = albumMapper.selectById(id);
         if (album == null) {
@@ -103,7 +103,7 @@ public class AlbumServiceImpl implements AlbumService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         Album album = albumMapper.selectById(id);
         if (album == null) {

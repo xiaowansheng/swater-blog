@@ -32,7 +32,7 @@ public class AboutServiceImpl implements AboutService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateAbout(AboutDTO dto) {
         com.blog.modules.system.config.model.vo.ConfigVO existingConfig = configService.getByKey(ABOUT_CONFIG_KEY);
 

@@ -1,12 +1,12 @@
 services:
   # Prometheus - 指标收集
+  # 依赖外部主栈网络（swater-blog_blog-network，可用 BLOG_NETWORK_NAME 覆盖），
+  # 直接抓取容器网络内的 swater-blog-service:8888/actuator/prometheus
   prometheus:
     image: prom/prometheus:v2.55.0
     container_name: blog-prometheus
     ports:
-      - "${PROMETHEUS_PUBLISHED_PORT:-9090}:9090"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "${PROMETHEUS_HOST_BIND:-127.0.0.1}:${PROMETHEUS_PUBLISHED_PORT:-9090}:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./monitoring/alert-rules.yml:/etc/prometheus/alert-rules.yml
@@ -17,10 +17,9 @@ services:
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--storage.tsdb.retention.time=30d'
-      - '--web.enable-lifecycle'
-      - '--web.enable-admin-api'
     networks:
       - monitoring
+      - blog-network
     restart: unless-stopped
 
   # Grafana - 监控面板
@@ -28,7 +27,11 @@ services:
     image: grafana/grafana:11.3.0
     container_name: blog-grafana
     ports:
-      - "${GRAFANA_PUBLISHED_PORT:-3000}:3000"
+      - "${GRAFANA_HOST_BIND:-127.0.0.1}:${GRAFANA_PUBLISHED_PORT:-3000}:3000"
+    environment:
+      # 必填：不设置时 Grafana 会使用默认 admin/admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD must be set}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
@@ -44,7 +47,7 @@ services:
     image: prom/alertmanager:v0.28.0
     container_name: blog-alertmanager
     ports:
-      - "${ALERTMANAGER_PUBLISHED_PORT:-9093}:9093"
+      - "${ALERTMANAGER_HOST_BIND:-127.0.0.1}:${ALERTMANAGER_PUBLISHED_PORT:-9093}:9093"
     environment:
       SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com:587}
       SMTP_FROM: ${SMTP_FROM:-blog-alerts@yourdomain.com}
@@ -74,7 +77,7 @@ services:
     image: prom/node-exporter:v1.8.2
     container_name: blog-node-exporter
     ports:
-      - "${NODE_EXPORTER_PUBLISHED_PORT:-9100}:9100"
+      - "${NODE_EXPORTER_HOST_BIND:-127.0.0.1}:${NODE_EXPORTER_PUBLISHED_PORT:-9100}:9100"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -88,73 +91,42 @@ services:
       - monitoring
     restart: unless-stopped
 
-  # MySQL Exporter - MySQL指标
+  # MySQL Exporter - MySQL指标（连主栈的 mysql）
   mysql-exporter:
     image: prom/mysqld-exporter:v0.16.0
     container_name: blog-mysql-exporter
     ports:
-      - "${MYSQL_EXPORTER_PUBLISHED_PORT:-9104}:9104"
+      - "${MYSQL_EXPORTER_HOST_BIND:-127.0.0.1}:${MYSQL_EXPORTER_PUBLISHED_PORT:-9104}:9104"
     environment:
       # 生产环境建议创建只读监控用户: CREATE USER 'monitor'@'%' IDENTIFIED BY 'xxx'; GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'monitor'@'%';
       # 然后设置 MYSQL_EXPORTER_USER=monitor
-      - DATA_SOURCE_NAME=${MYSQL_EXPORTER_USER:-root}:${MYSQL_EXPORTER_PASSWORD:-${DB_ROOT_PASSWORD:-change_me_root_password}}@(mysql:3306)/${DB_NAME:-blog}
+      - DATA_SOURCE_NAME=${MYSQL_EXPORTER_USER:-root}:${MYSQL_EXPORTER_PASSWORD:-${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD must be set}}@(mysql:3306)/${DB_NAME:-blog}
     networks:
-      - monitoring
-      - default
+      - blog-network
     restart: unless-stopped
-    depends_on:
-      - mysql
 
-  # Redis Exporter - Redis指标
+  # Redis Exporter - Redis指标（连主栈的 redis）
   redis-exporter:
     image: oliver006/redis_exporter:v1.67.0
     container_name: blog-redis-exporter
     ports:
-      - "${REDIS_EXPORTER_PUBLISHED_PORT:-9121}:9121"
+      - "${REDIS_EXPORTER_HOST_BIND:-127.0.0.1}:${REDIS_EXPORTER_PUBLISHED_PORT:-9121}:9121"
     environment:
       - REDIS_ADDR=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
     networks:
-      - monitoring
-      - default
-    restart: unless-stopped
-    depends_on:
-      - redis
-
-  # 为了演示，这里包含基础服务
-  mysql:
-    image: mysql:8.0@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b
-    container_name: blog-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-change_me_root_password}
-      MYSQL_DATABASE: ${DB_NAME:-blog}
-    volumes:
-      - mysql_data:/var/lib/mysql
-    ports:
-      - "${DB_PORT:-3306}:3306"
-    networks:
-      - default
-    restart: unless-stopped
-
-  redis:
-    image: redis:7-alpine@sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99
-    container_name: blog-redis
-    ports:
-      - "${REDIS_PUBLISHED_PORT:-6379}:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - default
+      - blog-network
     restart: unless-stopped
 
 volumes:
   prometheus_data:
   grafana_data:
   alertmanager_data:
-  mysql_data:
-  redis_data:
 
 networks:
   monitoring:
     driver: bridge
-  default:
-    driver: bridge
+  # 主栈（docker-compose.yml）创建的业务网络；exporters/prometheus 借此直连 mysql/redis/blog-service
+  blog-network:
+    name: ${BLOG_NETWORK_NAME:-swater-blog_blog-network}
+    external: true
